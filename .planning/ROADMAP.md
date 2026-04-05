@@ -1,14 +1,15 @@
 # Roadmap: Immo CI Platform
 
-**Milestone :** v1.0 — Plateforme complète Côte d'Ivoire
-**Core Value :** Un propriétaire publie, encaisse et gère ses locataires sans quitter la plateforme.
+**Milestone:** v1.0 — Plateforme complète Côte d'Ivoire
+**Core Value:** Un propriétaire publie, encaisse et gère ses locataires sans quitter la plateforme.
 
 ---
 
-## Phase 1 — Fondations & Infrastructure
+## Phase 1: Fondations & Infrastructure
 
-**Objectif :** Monorepo opérationnel, BDD complète, auth, design system, landing page.
-**Exigences couvertes :** FOND-01 à FOND-06, AUTH-01 à AUTH-06, BDD-01 à BDD-09, LAND-01 à LAND-03
+**Goal:** Monorepo opérationnel, BDD Supabase complète avec RLS, authentification (email + Google + OTP), design system Tailwind CI, et landing page déployable sur Vercel.
+
+**Exigences couvertes:** FOND-01 à FOND-06, AUTH-01 à AUTH-06, BDD-01 à BDD-09, LAND-01 à LAND-03
 
 ### Plans
 
@@ -20,19 +21,20 @@
 | 01-04 | Design System | Tailwind config CI (palette, typo, borderRadius), composants de base (Button, Card, Badge, Input) |
 | 01-05 | Landing Page | 10 sections, hero avec searchbar + CTA, Playfair Display + DM Sans, meta SEO |
 
-**Critères de succès :**
-- `npm run dev` lance web + mobile sans erreur
-- Auth email, Google et OTP fonctionnels
-- Toutes les migrations appliquées, RLS actif sur les 14 tables
-- Landing page déployable sur Vercel
-- Design system documenté et utilisable
+**Success Criteria:**
+1. `npm run dev` lance web + mobile sans erreur
+2. Auth email, Google et OTP fonctionnels localement
+3. Toutes les migrations appliquées, RLS actif sur les 14 tables
+4. Landing page déployable sur Vercel avec score Lighthouse > 85
+5. Design system documenté avec composants Button, Card, Badge, Input exportés
 
 ---
 
-## Phase 2 — Annonces, Médias & Messagerie
+## Phase 2: Annonces, Médias & Messagerie
 
-**Objectif :** CRUD biens complet, médias avancés (carousel, 360°), recherche, messagerie temps réel, favoris.
-**Exigences couvertes :** BIEN-01 à BIEN-08, MDIA-01 à MDIA-08, MSG-01 à MSG-05
+**Goal:** CRUD biens complet, médias avancés (carousel 4 types, vue 360° Pannellum), recherche full-text + carte, messagerie temps réel et favoris.
+
+**Exigences couvertes:** BIEN-01 à BIEN-08, MDIA-01 à MDIA-08, MSG-01 à MSG-05
 
 ### Plans
 
@@ -44,19 +46,20 @@
 | 02-04 | Recherche & Carte | Full-text search, filtres (commune, prix, type, équipements), vue carte Mapbox/Google Maps |
 | 02-05 | Messagerie & Social | Messagerie temps réel (Supabase Realtime), favoris, demandes de visite |
 
-**Critères de succès :**
-- Propriétaire peut publier un bien avec photos, vidéo et vue 360° en moins de 10 min
-- Carousel swipeable sur mobile avec filtres par type de média
-- Vue 360° interactive avec hotspots fonctionnelle sur mobile et desktop
-- Recherche retourne des résultats pertinents en < 500ms
-- Messages apparaissent en temps réel sans rechargement
+**Success Criteria:**
+1. Propriétaire publie un bien avec photos, vidéo et vue 360° en moins de 10 min
+2. Carousel swipeable sur mobile avec filtres par type de média fonctionnels
+3. Vue 360° interactive avec hotspots fonctionnelle sur mobile et desktop
+4. Recherche retourne des résultats pertinents en < 500ms
+5. Messages apparaissent en temps réel sans rechargement de page
 
 ---
 
-## Phase 3 — Paiements, Réservations, IA & Dashboard
+## Phase 3: Paiements, Réservations, IA & Dashboard
 
-**Objectif :** Paiements CinetPay, flow réservation, contrats OHADA, chatbot IA, scoring, dashboard analytics.
-**Exigences couvertes :** PAY-01 à PAY-06, RESA-01 à RESA-06, IA-01 à IA-04, DASH-01 à DASH-06
+**Goal:** Paiements CinetPay de bout en bout, flow réservation avec contrats OHADA, chatbot IA immobilier CI, scoring annonces, et dashboard analytics propriétaire.
+
+**Exigences couvertes:** PAY-01 à PAY-06, RESA-01 à RESA-06, IA-01 à IA-04, DASH-01 à DASH-06
 
 ### Plans
 
@@ -68,42 +71,44 @@
 | 03-04 | Chatbot & IA | Claude API chatbot CI (géographie Abidjan, prix FCFA, multi-turn), scoring annonces, génération desc |
 | 03-05 | Dashboard Analytics | KPI cards Tremor, Recharts (bar/gauge/donut/funnel), alertes prioritaires, calendrier encaissements |
 
-**Critères de succès :**
-- Paiement Wave complété de bout en bout (initier → webhook → confirmation)
-- Contrat PDF généré conforme OHADA, montants en FCFA lettres ET chiffres
-- Chatbot répond en français avec géographie et prix CI corrects
-- Score annonce calculé et affiché sur le dashboard propriétaire
-- Dashboard charge en < 2s avec données réelles
+**Success Criteria:**
+1. Paiement Wave complété de bout en bout (initier → webhook → confirmation BDD)
+2. Contrat PDF généré conforme OHADA, montants en FCFA lettres ET chiffres
+3. Chatbot répond en français avec géographie et prix CI corrects
+4. Score annonce calculé et affiché sur le dashboard propriétaire
+5. Dashboard charge en < 2s avec données réelles Supabase
 
 ---
 
-## Phase 4 — Gestion Locative, Avis & KYC
+## Phase 4: Gestion Locative, Avis & KYC
 
-**Objectif :** Automatisations n8n (quittances, relances), système d'avis bidirectionnel, KYC propriétaire.
-**Exigences couvertes :** LOC-01 à LOC-05, AVIS-01 à AVIS-03, KYC-01 à KYC-02
+**Goal:** Automatisations n8n (quittances mensuelles, relances J-3/J-1/J+1/J+7), système d'avis bidirectionnel et KYC propriétaire.
+
+**Exigences couvertes:** LOC-01 à LOC-05, AVIS-01 à AVIS-03, KYC-01 à KYC-02
 
 ### Plans
 
 | Plan | Titre | Description |
 |---|---|---|
 | 04-01 | Workflow Quittances | n8n : cron 1er du mois, génération quittance, Edge Function PDF, envoi WhatsApp + Email |
-| 04-02 | Workflow Relances | n8n : cron quotidien 08h, relances J-3/J-1/J+1/J+7, statut `en_retard`, notif propriétaire |
+| 04-02 | Workflow Relances | n8n : cron quotidien 08h, relances J-3/J-1/J+1/J+7, statut en_retard, notif propriétaire |
 | 04-03 | Système Avis | Avis bidirectionnel post-séjour, note moyenne, réponse propriétaire, affichage profil |
 | 04-04 | KYC & Notifications | Upload CNI + selfie, statuts KYC, centre de notifications unifié, badge alertes |
 
-**Critères de succès :**
-- Quittance générée et envoyée automatiquement le 1er du mois
-- Relances WhatsApp envoyées aux bons jalons (J-3, J-1, J+1, J+7)
-- Statut quittance passe à `en_retard` automatiquement à J+1
-- Locataire peut laisser un avis visible sur le profil propriétaire
-- Propriétaire vérifié KYC affiche un badge sur son profil
+**Success Criteria:**
+1. Quittance générée et envoyée automatiquement le 1er du mois (test en environnement staging)
+2. Relances WhatsApp envoyées aux bons jalons J-3, J-1, J+1, J+7
+3. Statut quittance passe à `en_retard` automatiquement à J+1
+4. Locataire peut laisser un avis visible sur le profil propriétaire
+5. Propriétaire vérifié KYC affiche un badge sur son profil public
 
 ---
 
-## Phase 5 — App Mobile, Tests & Déploiement
+## Phase 5: App Mobile, Tests & Déploiement
 
-**Objectif :** App Expo complète, notifications push, tests (Playwright + Detox), déploiement Vercel + stores.
-**Exigences couvertes :** MOB-01 à MOB-04
+**Goal:** App Expo complète avec navigation, écrans adaptés React Native, notifications push Firebase FCM, tests E2E Playwright + Detox, déploiement Vercel + App Store + Google Play.
+
+**Exigences couvertes:** MOB-01 à MOB-04
 
 ### Plans
 
@@ -114,11 +119,11 @@
 | 05-03 | Tests & Qualité | Playwright (web E2E), Detox (mobile), optimisation images WebP, Lighthouse > 90 |
 | 05-04 | Déploiement | Vercel (web), EAS Build (iOS + Android), soumission App Store + Google Play |
 
-**Critères de succès :**
-- App mobile installable sur iOS et Android depuis les stores
-- Notifications push reçues sur appareil réel
-- Lighthouse score > 90 sur la landing page
-- Tests Playwright couvrent les parcours critiques (auth, réservation, paiement)
+**Success Criteria:**
+1. App mobile installable sur iOS et Android (via TestFlight et Play Console)
+2. Notifications push reçues sur appareil réel depuis Firebase FCM
+3. Lighthouse score > 90 sur la landing page (mobile et desktop)
+4. Tests Playwright couvrent auth, réservation et paiement sans échec
 
 ---
 
@@ -126,13 +131,13 @@
 
 | Phase | Titre | Exigences | Statut |
 |---|---|---|---|
-| 1 | Fondations & Infrastructure | FOND + AUTH + BDD + LAND (24 req.) | En attente |
-| 2 | Annonces, Médias & Messagerie | BIEN + MDIA + MSG (21 req.) | En attente |
-| 3 | Paiements, Réservations, IA & Dashboard | PAY + RESA + IA + DASH (22 req.) | En attente |
-| 4 | Gestion Locative, Avis & KYC | LOC + AVIS + KYC (12 req.) | En attente |
-| 5 | App Mobile, Tests & Déploiement | MOB (4 req.) + infra | En attente |
+| Phase 1: Fondations & Infrastructure | FOND + AUTH + BDD + LAND | 24 req. | En attente |
+| Phase 2: Annonces, Médias & Messagerie | BIEN + MDIA + MSG | 21 req. | En attente |
+| Phase 3: Paiements, Réservations, IA & Dashboard | PAY + RESA + IA + DASH | 22 req. | En attente |
+| Phase 4: Gestion Locative, Avis & KYC | LOC + AVIS + KYC | 12 req. | En attente |
+| Phase 5: App Mobile, Tests & Déploiement | MOB | 4 req. + infra | En attente |
 
-**Total :** 5 phases · 23 plans · 66 exigences v1
+**Total:** 5 phases · 23 plans · 66 exigences v1
 
 ---
 *Roadmap créée : 2026-04-05*
