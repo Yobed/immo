@@ -11,7 +11,7 @@
 
 - [ ] **FOND-01** : Monorepo Turborepo initialisé avec apps/web, apps/mobile, packages/shared
 - [ ] **FOND-02** : App Next.js 14 (App Router, TypeScript strict) fonctionnelle
-- [ ] **FOND-03** : App Expo SDK 51 (Expo Router) fonctionnelle
+- [ ] **FOND-03** : App Expo SDK 52 (Expo Router) fonctionnelle — SDK 52 choisi (auto-détection monorepo, élimine config Metro manuelle vs SDK 51 spécifié initialement)
 - [ ] **FOND-04** : Package partagé `packages/shared` avec types TypeScript et utils
 - [ ] **FOND-05** : Design system Tailwind configuré (palette CI, typographie, borderRadius)
 - [ ] **FOND-06** : Variables d'environnement documentées et validées au démarrage
