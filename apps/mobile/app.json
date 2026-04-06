@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "Immo CI",
+    "slug": "immo-ci",
+    "version": "1.0.0",
+    "scheme": "immo-ci",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": { "supportsTablet": true, "bundleIdentifier": "ci.immo.app" },
+    "android": { "adaptiveIcon": { "backgroundColor": "#1A5276" }, "package": "ci.immo.app" },
+    "plugins": ["expo-router"]
+  }
+}
