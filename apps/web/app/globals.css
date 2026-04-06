@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -17,4 +19,10 @@
   --text:            #1C2833;  /* Texte principal */
   --text-muted:      #7F8C8D;  /* Texte secondaire */
   --border:          #E5E8EC;  /* Bordures */
+}
+
+body {
+  background-color: var(--surface);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
 }
