@@ -18,12 +18,12 @@
 
 ### Authentification
 
-- [ ] **AUTH-01** : Utilisateur peut s'inscrire avec email + mot de passe
-- [ ] **AUTH-02** : Utilisateur peut se connecter via Google OAuth
-- [ ] **AUTH-03** : Utilisateur peut s'inscrire / se connecter via OTP téléphone (WhatsApp ou SMS)
-- [ ] **AUTH-04** : Session persiste entre les navigations (Supabase SSR middleware)
-- [ ] **AUTH-05** : Profil créé automatiquement dans `profiles` à l'inscription (trigger ou webhook)
-- [ ] **AUTH-06** : Routes protégées selon le rôle (locataire / propriétaire / agence / admin)
+- [x] **AUTH-01** : Utilisateur peut s'inscrire avec email + mot de passe
+- [x] **AUTH-02** : Utilisateur peut se connecter via Google OAuth
+- [x] **AUTH-03** : Utilisateur peut s'inscrire / se connecter via OTP téléphone (WhatsApp ou SMS)
+- [x] **AUTH-04** : Session persiste entre les navigations (Supabase SSR middleware)
+- [x] **AUTH-05** : Profil créé automatiquement dans `profiles` à l'inscription (trigger ou webhook)
+- [x] **AUTH-06** : Routes protégées selon le rôle (locataire / propriétaire / agence / admin)
 
 ### Base de données & Backend
 
