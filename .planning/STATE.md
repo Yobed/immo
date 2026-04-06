@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-last_updated: "2026-04-06T01:59:15.250Z"
+last_updated: "2026-04-06T02:35:37.561Z"
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 5
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # State: Immo CI Platform
@@ -23,11 +23,11 @@ Voir : `.planning/PROJECT.md` (mis à jour 2026-04-05)
 ## Current Position
 
 Phase: 1 (Fondations & Infrastructure) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 
 - **Phase :** 1 / 5 — Fondations & Infrastructure
 - **Statut :** En cours d'exécution
-- **Prochaine action :** Exécuter plan 01-03 (Authentification Supabase)
+- **Prochaine action :** Exécuter plan 01-05 (si existant) ou passer à la phase 2
 
 ## Session Continuity
 
@@ -35,7 +35,9 @@ Plan: 4 of 5
 - Mode : YOLO · Granularité : Standard · Agents : Chercheur + Vérificateur plan + Vérificateur phase
 - Git initialisé, commit_docs = true
 - Plan 01-02 complété : 8 migrations Supabase (14 tables), RLS sur toutes les tables, handle_new_user trigger, database.ts placeholder
-- Dernière session arrêtée à : Completed 01-fondations-infrastructure/01-02-PLAN.md
+- Plan 01-03 complété : Auth Supabase SSR, middleware route protection, login/register/OTP pages
+- Plan 01-04 complété : Tailwind design system (CI palette, typography, Button/Card/Badge/Input)
+- Dernière session arrêtée à : Completed 01-fondations-infrastructure-04-PLAN.md
 
 ## Key Decisions
 
@@ -46,6 +48,9 @@ Plan: 4 of 5
 - **handle_new_user uses SECURITY DEFINER** — required to bypass RLS during auth.users insert trigger
 - **paiements table in migration 008** — prepares Phase 3 CinetPay without a 9th migration file
 - **database.ts is a placeholder** — regenerate via Supabase CLI after project creation and migration application
+- **cn() via clsx + twMerge** — all UI components use this for composable class merging; import from @/lib/utils
+- **CSS variables + Tailwind tokens co-exist** — Tailwind tokens (bg-primary) for standard usage, CSS vars (border-[var(--border)]) for values outside the palette
+- **vue360 badge uses purple-100/purple-700** — visually distinct from photo (green), video (orange), plan (blue)
 
 ## Performance Metrics
 
@@ -54,6 +59,7 @@ Plan: 4 of 5
 | 01-fondations-infrastructure | 01 | 5min | 2 | 23 |
 | 01-fondations-infrastructure | 02 | 25min | 2 | 9 |
 | Phase 01-fondations-infrastructure P03 | 18 | 3 tasks | 8 files |
+| Phase 01-fondations-infrastructure P04 | 15 | 5 tasks | 8 files |
 
 ## Progress Summary
 

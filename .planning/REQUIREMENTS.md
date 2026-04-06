@@ -13,7 +13,7 @@
 - [x] **FOND-02** : App Next.js 14 (App Router, TypeScript strict) fonctionnelle
 - [x] **FOND-03** : App Expo SDK 52 (Expo Router) fonctionnelle — SDK 52 choisi (auto-détection monorepo, élimine config Metro manuelle vs SDK 51 spécifié initialement)
 - [x] **FOND-04** : Package partagé `packages/shared` avec types TypeScript et utils
-- [ ] **FOND-05** : Design system Tailwind configuré (palette CI, typographie, borderRadius)
+- [x] **FOND-05** : Design system Tailwind configuré (palette CI, typographie, borderRadius)
 - [x] **FOND-06** : Variables d'environnement documentées et validées au démarrage
 
 ### Authentification
