@@ -126,9 +126,9 @@
 
 ### Landing page & SEO
 
-- [ ] **LAND-01** : Landing page 10 sections (Hero, Comment ça marche, Biens vedette, Fonctionnalités, Carte CI, Témoignages, Chiffres clés, Partenaires, CTA, Footer)
-- [ ] **LAND-02** : Hero avec search bar IA + CTA App Store / Play Store
-- [ ] **LAND-03** : SEO basique (meta tags, Open Graph, sitemap)
+- [x] **LAND-01** : Landing page 10 sections (Hero, Comment ça marche, Biens vedette, Fonctionnalités, Carte CI, Témoignages, Chiffres clés, Partenaires, CTA, Footer)
+- [x] **LAND-02** : Hero avec search bar IA + CTA App Store / Play Store
+- [x] **LAND-03** : SEO basique (meta tags, Open Graph, sitemap)
 
 ---
 
