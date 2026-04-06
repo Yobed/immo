@@ -36,6 +36,8 @@
 
 **Exigences couvertes:** BIEN-01 à BIEN-08, MDIA-01 à MDIA-08, MSG-01 à MSG-05
 
+**Plans:** 5 plans
+
 ### Plans
 
 | Plan | Titre | Description |
@@ -43,8 +45,15 @@
 | 02-01 | CRUD Biens | Formulaire multi-étapes propriétaire, validation Zod, publication/dépublication, liste + fiche |
 | 02-02 | Upload & Médias | Upload photos → Cloudinary, vidéos + 360° + plans → Supabase Storage, table biens_medias |
 | 02-03 | Carousel & Vue 360° | Composant BienCarousel (4 types, filtres, miniatures, swipe), Composant Bien360 (Pannellum + hotspots) |
-| 02-04 | Recherche & Carte | Full-text search, filtres (commune, prix, type, équipements), vue carte Mapbox/Google Maps |
+| 02-04 | Recherche & Carte | Full-text search, filtres (commune, prix, type, équipements), vue carte Mapbox |
 | 02-05 | Messagerie & Social | Messagerie temps réel (Supabase Realtime), favoris, demandes de visite |
+
+Plans:
+- [ ] 02-01-PLAN.md — CRUD biens complet (formulaire 4 étapes, API CRUD, liste + fiche publiques)
+- [ ] 02-02-PLAN.md — Upload médias (Cloudinary photos, Supabase Storage vidéo/360°/plans, drag & drop ordre)
+- [ ] 02-03-PLAN.md — Carousel & Vue 360° (Embla 4 types filtres miniatures, Pannellum dynamic ssr:false)
+- [ ] 02-04-PLAN.md — Recherche & Carte (FTS français, filtres combinés, Mapbox markers FCFA)
+- [ ] 02-05-PLAN.md — Messagerie & Social (Realtime messages, favoris upsert, demandes de visite)
 
 **Success Criteria:**
 1. Propriétaire publie un bien avec photos, vidéo et vue 360° en moins de 10 min
@@ -131,8 +140,8 @@
 
 | Phase | Titre | Exigences | Statut |
 |---|---|---|---|
-| Phase 1: Fondations & Infrastructure | FOND + AUTH + BDD + LAND | 24 req. | En attente |
-| Phase 2: Annonces, Médias & Messagerie | BIEN + MDIA + MSG | 21 req. | En attente |
+| Phase 1: Fondations & Infrastructure | FOND + AUTH + BDD + LAND | 24 req. | Complétée |
+| Phase 2: Annonces, Médias & Messagerie | BIEN + MDIA + MSG | 21 req. | En cours |
 | Phase 3: Paiements, Réservations, IA & Dashboard | PAY + RESA + IA + DASH | 22 req. | En attente |
 | Phase 4: Gestion Locative, Avis & KYC | LOC + AVIS + KYC | 12 req. | En attente |
 | Phase 5: App Mobile, Tests & Déploiement | MOB | 4 req. + infra | En attente |
@@ -141,4 +150,4 @@
 
 ---
 *Roadmap créée : 2026-04-05*
-*Prochaine action : `/gsd:plan-phase 1`*
+*Mise à jour : 2026-04-06 — Phase 2 planifiée (5 plans, 2 vagues)*
