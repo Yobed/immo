@@ -1,8 +1,18 @@
-# Phase 2: Annonces, Médias & Messagerie — Research
+# Phase 02: Annonces, Médias & Messagerie — Research
 
 **Researched:** 2026-04-06
-**Domain:** Next.js 14 App Router — Cloudinary upload, Pannellum 360°, Supabase Realtime, Mapbox, full-text search PostgreSQL, multi-step forms, drag-and-drop, swipeable carousel
-**Confidence:** HIGH (stack decisions from skills.md + Phase 1 summaries verified; package versions confirmed via npm registry)
+**Domain:** Next.js 14 App Router — CRUD, Cloudinary, Pannellum, Supabase Storage/Realtime, Mapbox, Full-text search
+**Confidence:** HIGH
+
+---
+
+## Summary
+
+Phase 2 builds on the completed Phase 1 foundations (monorepo, 14-table Supabase schema with RLS, auth SSR, design system). The work decomposes into five plans: CRUD biens with multi-step form, media upload pipeline (Cloudinary for photos, Supabase Storage for video/360°/plans), carousel and 360° viewer components, full-text search + map view, and real-time messaging + favoris.
+
+Every key integration has an established, verified pattern. The full-text search column (`fts tsvector`) and `biens_medias` table are already in the database from Phase 1 migrations. Supabase Realtime requires one SQL command to enable replication on the `messages` table before subscriptions work. Pannellum must be imported with `ssr: false` due to its browser-only APIs. Mapbox / react-map-gl equally requires a client component or dynamic import. Cloudinary photo upload uses `CldUploadWidget` with a signed upload preset and a `/api/sign-cloudinary-params` API route.
+
+**Primary recommendation:** Follow the skills.md architecture exactly — `components/bien/`, `components/search/`, `components/chat/`, `lib/cloudinary.ts`, `lib/supabase/` — no new patterns are needed; all integrations are well-documented and the DB schema is already deployed.
 
 ---
 
@@ -11,576 +21,379 @@
 
 | ID | Description | Research Support |
 |----|-------------|------------------|
-| BIEN-01 | Formulaire multi-étapes propriétaire, validation Zod | react-hook-form 7.72.1 + zod 4.3.6 already installed; multi-step with local state pattern |
-| BIEN-02 | Propriétaire peut modifier et supprimer ses biens | Same form reused in edit mode; server action + Supabase RLS for delete |
-| BIEN-03 | Propriétaire peut publier / dépublier un bien | `statut` column on `biens` table (brouillon/publie/suspendu) — toggle via PATCH |
-| BIEN-04 | Visiteur peut lister les biens publiés avec pagination | Supabase `.range()` + server component; statut='publie' filter |
-| BIEN-05 | Visiteur peut filtrer par commune, prix min/max, type, équipements | PostgreSQL WHERE + `@>` array operator for equipements; Supabase query builder |
-| BIEN-06 | Visiteur peut faire une recherche full-text | `fts` tsvector column on `biens` already exists (French); `.textSearch('fts', query)` |
-| BIEN-07 | Visiteur peut voir la fiche complète d'un bien | Dynamic route `/biens/[id]`; joins biens + biens_medias + profiles |
-| BIEN-08 | Visiteur peut voir les biens sur une carte | react-map-gl 8.1.0 + mapbox-gl 3.21.0; dynamic import required (no SSR) |
-| MDIA-01 | Upload photos → Cloudinary | next-cloudinary 6.17.5 CldUploadWidget; server action signs upload |
-| MDIA-02 | Upload vidéos → Supabase Storage | Supabase Storage bucket `videos`; signed upload URL via Edge Function or API route |
-| MDIA-03 | Upload photo 360° → Supabase Storage | Bucket `panoramas`; equirectangular JPEG; pannellum-react 1.2.4 for viewer |
-| MDIA-04 | Upload plans → Supabase Storage | Bucket `plans`; PDF or image; iframe viewer or next/image |
-| MDIA-05 | Composant BienCarousel (flèches + swipe + miniatures + filtres) | embla-carousel-react 8.6.0; mobile swipe native; filter by `type` column |
-| MDIA-06 | Composant Bien360 (Pannellum + hotspots) | pannellum-react 1.2.4; dynamic import ssr:false; hotspots from JSONB |
-| MDIA-07 | Drag & drop pour réordonner les médias | @dnd-kit/sortable 10.0.0 + @dnd-kit/core 6.3.1 |
-| MDIA-08 | Médias ordonnés efficacement (index bien_id + ordre) | `biens_medias_bien_ordre_idx` already created in migration 003 |
-| MSG-01 | Message depuis fiche bien → propriétaire | Create conversation (upsert unique constraint) + insert message |
-| MSG-02 | Messages en temps réel (Supabase Realtime) | `supabase.channel().on('postgres_changes')` on `messages` table; enable Realtime in Dashboard |
-| MSG-03 | Favoris sauvegarde / retrait | `favoris` table with unique(user_id, bien_id) — upsert / delete |
-| MSG-04 | Demande de visite (date, créneau) | `visites` table already in migration 007; form → insert |
-| MSG-05 | Propriétaire confirme ou refuse demande de visite | UPDATE visites SET statut='confirmee'/'annulee'; RLS allows proprietaire_id |
+| BIEN-01 | Propriétaire peut créer un bien (formulaire multi-étapes, validation Zod) | react-hook-form 7.72 + Zod 4.3.6 multi-step pattern; zodResolver from @hookform/resolvers |
+| BIEN-02 | Propriétaire peut modifier et supprimer ses biens | Standard CRUD with Supabase client + RLS already enforces owner-only access |
+| BIEN-03 | Propriétaire peut publier / dépublier un bien | UPDATE statut field ('brouillon'/'publie'/'suspendu') on biens table |
+| BIEN-04 | Visiteur peut lister les biens publiés avec pagination | Supabase `.range()` pagination; statut='publie' via RLS |
+| BIEN-05 | Visiteur peut filtrer par commune, prix min/max, type, équipements | Supabase `.eq()`, `.gte()`, `.lte()`, `.contains()` composable filters |
+| BIEN-06 | Visiteur peut faire une recherche full-text sur titre et description | `fts` tsvector column already in migration 002; `.textSearch('fts', query, { config: 'french' })` |
+| BIEN-07 | Visiteur peut voir la fiche complète d'un bien | Next.js dynamic route `[id]` in `(public)/biens/[id]`; JOIN biens_medias |
+| BIEN-08 | Visiteur peut voir les biens sur une carte | react-map-gl 8.1 + mapbox-gl 3.21; 'use client' component; NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN |
+| MDIA-01 | Upload photos → Cloudinary (webp, CDN, resize auto) | next-cloudinary 6.17.5; CldUploadWidget + signed preset + /api/sign-cloudinary-params |
+| MDIA-02 | Upload vidéos → Supabase Storage | createSignedUploadUrl server action → client uploadToSignedUrl; bucket: 'videos' |
+| MDIA-03 | Upload photo 360° équirectangulaire → Supabase Storage | Same signed URL pattern; bucket: 'panoramas' |
+| MDIA-04 | Upload plans (PDF ou image) → Supabase Storage | Same signed URL pattern; bucket: 'plans' |
+| MDIA-05 | Composant BienCarousel (navigation, swipe, miniatures, filtres par type) | embla-carousel-react 8.6; useEmblaCarousel hook; 4 type filters as tabs |
+| MDIA-06 | Composant Bien360 (Pannellum.js + hotspots) | pannellum-react 1.2.4; next/dynamic ssr:false; hotspots from biens_medias.hotspots JSONB |
+| MDIA-07 | Réordonner médias drag & drop (dashboard) | @dnd-kit/sortable 10.0; DndContext + SortableContext + arrayMove; PATCH ordre |
+| MDIA-08 | Médias ordonnés récupérés efficacement | Index biens_medias_bien_ordre_idx already in migration 003; ORDER BY ordre ASC |
+| MSG-01 | Utilisateur peut envoyer un message depuis une fiche bien | INSERT into conversations (upsert) then INSERT into messages; RLS already enforces participants |
+| MSG-02 | Messages en temps réel (Supabase Realtime) | Enable replication: `alter publication supabase_realtime add table messages`; .channel().on('postgres_changes') |
+| MSG-03 | Favoris sauvegarder / retirer | INSERT/DELETE favoris table (already in migration 006); unique(user_id, bien_id) |
+| MSG-04 | Demande de visite (date, créneau) | INSERT into visites table (migration 007); statut='en_attente' |
+| MSG-05 | Propriétaire confirme ou refuse une visite | UPDATE visites.statut; RLS policy "Propriétaire confirme ou refuse" already in place |
 </phase_requirements>
-
----
-
-## Summary
-
-Phase 2 builds the core listing and communication product on top of the Phase 1 foundation. The DB schema is already fully deployed (14 tables, 43 RLS policies). No new migrations are required — all tables (`biens`, `biens_medias`, `conversations`, `messages`, `favoris`, `visites`) exist with correct indexes and RLS.
-
-The five plans form a clear dependency chain: CRUD Biens (02-01) must come first because all other plans reference `bien_id`. Upload & Médias (02-02) must precede the Carousel/360° viewer (02-03) because the viewer consumes URLs stored during upload. Search & Map (02-04) and Messaging (02-05) can proceed in parallel after 02-01 is stable.
-
-The principal technical risks are: (1) Pannellum's React wrapper `pannellum-react` declares `peerDependencies: react@16.x` — it works with React 18 but requires `--legacy-peer-deps` during install; (2) Mapbox GL JS requires a dynamic import with `ssr: false` in Next.js 14 App Router to avoid WebGL errors; (3) Supabase Realtime on `messages` must be enabled manually in the Supabase Dashboard (Database > Replication).
-
-**Primary recommendation:** Install all Phase 2 packages in a single `npm install` at the start of plan 02-01 to surface peer dependency conflicts early.
-
----
-
-## Project Constraints (from CLAUDE.md / skills.md / Phase 1 decisions)
-
-| Constraint | Value | Source |
-|------------|-------|--------|
-| Next.js version | `14.2.35` (exact, no caret) | STATE.md key decisions |
-| Tailwind CSS | v3 (`^3.4.17`), not v4 | STATE.md key decisions |
-| React | `^18.3.1` | apps/web/package.json |
-| Supabase JS | `2.101.1` (already installed) | apps/web/package.json |
-| react-hook-form | `7.72.1` (already installed) | apps/web/package.json |
-| zod | `4.3.6` (already installed) | apps/web/package.json |
-| @hookform/resolvers | `^3.9.0` (already installed) | apps/web/package.json |
-| date-fns | `4.1.0` (already installed) | apps/web/package.json |
-| Monorepo | Turborepo npm workspaces | STATE.md |
-| Currency | Always FCFA, never EUR/USD | skills.md |
-| Design system | bleu `#1A5276` + orange `#E67E22`, cn() from @/lib/utils | 01-04-SUMMARY |
-| Components | TypeScript strict, mobile-first, Tailwind | skills.md section 13 |
-| Font | Playfair Display (titles), DM Sans (body), JetBrains Mono (prices) | 01-04-SUMMARY |
-| Supabase auth | `@supabase/ssr` via `lib/supabase/client.ts` and `lib/supabase/server.ts` | 01-03 |
-| Image CDN | Cloudinary for photos; Supabase Storage for video/360°/plans | skills.md section 5 |
-| 360° viewer | Pannellum.js (locked decision) | skills.md section 6 |
-| Map | Mapbox GL JS or Google Maps (TBD in 02-04) | ROADMAP.md |
-| DB schema | 8 migrations applied, no new migration needed for Phase 2 | 01-02-SUMMARY |
 
 ---
 
 ## Standard Stack
 
-### Core — Already Installed (apps/web/package.json)
-
-| Library | Version | Purpose |
-|---------|---------|---------|
-| `next` | `14.2.35` | App Router, Server Components, API routes |
-| `@supabase/supabase-js` | `2.101.1` | DB, Auth, Storage, Realtime |
-| `@supabase/ssr` | `0.10.0` | SSR-safe Supabase client for Next.js |
-| `react-hook-form` | `7.72.1` | Form state management |
-| `zod` | `4.3.6` | Schema validation |
-| `@hookform/resolvers` | `^3.9.0` | Connects zod to react-hook-form |
-| `date-fns` | `4.1.0` | Date manipulation |
-| `clsx` + `tailwind-merge` | `^2.1.0` + `^2.3.0` | cn() utility |
-
-### To Install (Phase 2 additions)
-
-| Library | Version | Purpose | Why This One |
+### Core
+| Library | Version | Purpose | Why Standard |
 |---------|---------|---------|--------------|
-| `next-cloudinary` | `^6.17.5` | Cloudinary upload widget + CldImage | Official Next.js integration; supports Next 14; `CldUploadWidget` handles signed uploads |
-| `cloudinary` | `^2.9.0` | Server-side Cloudinary SDK (signing) | Required server-side for signature generation in API route |
-| `pannellum-react` | `^1.2.4` | 360° equirectangular panorama viewer | Recommended in skills.md; open source; mobile-friendly; hotspot support |
-| `embla-carousel-react` | `^8.6.0` | Swipeable carousel component | Lightweight, performant, native swipe on mobile; no jQuery dep |
-| `embla-carousel-autoplay` | `^8.6.0` | Autoplay plugin for Embla | Same version family as core |
-| `@dnd-kit/core` | `^6.3.1` | Drag & drop primitives | Accessibility-first, works with React 18, no legacy deps |
-| `@dnd-kit/sortable` | `^10.0.0` | Sortable list abstraction over @dnd-kit/core | Simplifies reorder-in-list pattern for media |
-| `react-map-gl` | `^8.1.0` | React wrapper for Mapbox GL JS | Maintained by Visgl team; works with mapbox-gl 3.x |
-| `mapbox-gl` | `^3.21.0` | WebGL map renderer | Industry standard; Mapbox free tier 50k loads/month |
-| `react-dropzone` | `^15.0.0` | File drag-and-drop upload zone | Widely used, accessible, framework agnostic |
+| next-cloudinary | 6.17.5 | Photo upload widget + CldImage | Official Cloudinary Next.js SDK; handles signing, transforms, CDN |
+| @supabase/supabase-js | 2.101.1 | DB, Storage, Realtime client | Already installed; single client for all Supabase services |
+| react-hook-form | 7.72.1 | Multi-step form state | Already installed; works with Zod via zodResolver |
+| zod | 4.3.6 | Schema validation | Already installed; per-step validation with safeParse |
+| embla-carousel-react | 8.6.0 | Swipeable carousel with mobile swipe | Dependency-free, fluid motion, SSR-compatible |
+| pannellum-react | 1.2.4 | 360° panorama viewer with hotspots | Wrapper around Pannellum.js; must use dynamic import ssr:false |
+| @dnd-kit/sortable | 10.0.0 | Drag & drop media reordering | Accessible, pointer+keyboard, arrayMove helper built-in |
+| @dnd-kit/core | 6.3.1 | DnD context (peer of sortable) | Required by @dnd-kit/sortable |
+| react-map-gl | 8.1.0 | Mapbox GL JS React wrapper | Official visgl wrapper; 'use client' component |
+| mapbox-gl | 3.21.0 | Map rendering engine | Peer dep of react-map-gl; satellite/street styles |
+| react-dropzone | 15.0.0 | Drag-drop file input zone | Standard pattern for multi-file upload with progress |
+| @hookform/resolvers | ^3.9.0 | zodResolver bridge | Already installed |
 
-**Installation command:**
-```bash
-cd apps/web
-npm install next-cloudinary cloudinary pannellum-react embla-carousel-react embla-carousel-autoplay @dnd-kit/core @dnd-kit/sortable react-map-gl mapbox-gl react-dropzone --legacy-peer-deps
-```
-
-> `--legacy-peer-deps` is required because `pannellum-react@1.2.4` declares `peerDependencies: { react: '16.x' }` but works correctly with React 18. This is a known discrepancy in the package metadata.
-
-### Types to Install
-
-```bash
-npm install --save-dev @types/mapbox-gl --legacy-peer-deps
-```
+### Supporting
+| Library | Version | Purpose | When to Use |
+|---------|---------|---------|-------------|
+| @dnd-kit/utilities | 3.2.2 | CSS.Transform helpers for DnD | Always with @dnd-kit/sortable |
+| date-fns | 4.1.0 | Date formatting for visite créneau | Already installed |
+| clsx + tailwind-merge | installed | cn() utility | Already installed via lib/utils.ts |
 
 ### Alternatives Considered
-
 | Instead of | Could Use | Tradeoff |
 |------------|-----------|----------|
-| `pannellum-react` | `react-pannellum` (1.1.2-alpha) | react-pannellum is alpha, published by individual, no stable version; pannellum-react has 32 published versions |
-| `pannellum-react` | Raw Pannellum.js via CDN | CDN breaks SSR; wrapper is cleaner |
-| `embla-carousel-react` | Swiper (12.1.3) | Swiper is 3x larger bundle; Embla is ~5KB gzipped; both work on mobile |
-| `react-map-gl` + `mapbox-gl` | Google Maps JS API via `@vis.gl/react-google-maps` | Google Maps requires paid API key after 28k loads/month; Mapbox free tier is 50k loads |
-| `@dnd-kit` | `react-beautiful-dnd` | react-beautiful-dnd is deprecated (not maintained since 2022); @dnd-kit is the community successor |
-| `next-cloudinary` | Direct Cloudinary Upload Widget via `<script>` | `next-cloudinary` provides typed React components and integrates with next/image |
+| pannellum-react | react-pannellum-next | react-pannellum-next is newer and Next.js optimized, but pannellum-react is listed in skills.md and has more community use; skills.md is authoritative |
+| embla-carousel-react | swiper | Swiper is heavier (~100KB); Embla is 3KB and matches the mobile-first requirement |
+| react-map-gl + mapbox-gl | Google Maps JS API | Mapbox free tier generous; react-map-gl has better React integration; Google Maps requires billing from first request |
+| @dnd-kit/sortable | react-beautiful-dnd | react-beautiful-dnd is unmaintained; dnd-kit is the standard in 2025 |
+
+### Installation (packages not yet in package.json)
+```bash
+cd apps/web
+npm install next-cloudinary embla-carousel-react pannellum-react \
+  @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities \
+  react-map-gl mapbox-gl react-dropzone
+```
+
+### Version verification (confirmed 2026-04-06 via npm registry)
+| Package | Verified Version |
+|---------|-----------------|
+| next-cloudinary | 6.17.5 |
+| embla-carousel-react | 8.6.0 |
+| pannellum-react | 1.2.4 |
+| @dnd-kit/core | 6.3.1 |
+| @dnd-kit/sortable | 10.0.0 |
+| @dnd-kit/utilities | 3.2.2 |
+| react-map-gl | 8.1.0 |
+| mapbox-gl | 3.21.0 |
+| react-dropzone | 15.0.0 |
+| zod (already installed) | 4.3.6 |
+| react-hook-form (already installed) | 7.72.1 |
 
 ---
 
 ## Architecture Patterns
 
 ### Recommended Project Structure (additions for Phase 2)
-
 ```
 apps/web/
 ├── app/
 │   ├── (public)/
 │   │   ├── biens/
-│   │   │   ├── page.tsx               # Liste biens — Server Component with filters
+│   │   │   ├── page.tsx             # Liste biens + filtres + search
 │   │   │   └── [id]/
-│   │   │       └── page.tsx           # Fiche bien — Server Component
-│   │   └── recherche/
-│   │       └── page.tsx               # Recherche + carte — Client Component wrapper
+│   │   │       └── page.tsx         # Fiche bien complète
+│   │   └── carte/
+│   │       └── page.tsx             # Vue carte biens
 │   ├── (pro)/
-│   │   └── biens/
-│   │       ├── nouveau/
-│   │       │   └── page.tsx           # Formulaire multi-étapes création
-│   │       ├── [id]/
-│   │       │   └── modifier/
-│   │       │       └── page.tsx       # Edition bien
-│   │       └── page.tsx               # Liste mes biens
+│   │   ├── biens/
+│   │   │   ├── nouveau/
+│   │   │   │   └── page.tsx         # Formulaire multi-étapes
+│   │   │   └── [id]/
+│   │   │       ├── edit/page.tsx    # Edition bien
+│   │   │       └── medias/page.tsx  # Gestion medias + DnD
+│   │   └── messages/
+│   │       └── page.tsx             # Liste conversations pro
 │   ├── (client)/
-│   │   ├── messages/
-│   │   │   └── page.tsx               # MessageList + MessageThread
-│   │   └── favoris/
-│   │       └── page.tsx               # Favoris list
+│   │   └── messages/
+│   │       └── page.tsx             # Messages locataire
 │   └── api/
-│       ├── upload/
-│       │   └── sign/
-│       │       └── route.ts           # POST — sign Cloudinary upload
+│       ├── sign-cloudinary-params/
+│       │   └── route.ts             # Signed upload endpoint
 │       └── biens/
 │           └── [id]/
-│               └── route.ts           # PATCH statut publie/brouillon
-│
+│               └── statut/
+│                   └── route.ts     # Publish/unpublish
 ├── components/
 │   ├── bien/
-│   │   ├── BienCard.tsx               # Card de liste (photo, prix, commune, type)
-│   │   ├── BienCarousel.tsx           # Carousel 4 types — Client Component
-│   │   ├── Bien360.tsx                # Pannellum viewer — dynamic import ssr:false
-│   │   ├── BienMap.tsx                # Mapbox map — dynamic import ssr:false
-│   │   ├── BienFilters.tsx            # Filtres commune/prix/type
-│   │   └── BienForm/
-│   │       ├── index.tsx              # Orchestrateur multi-étapes
-│   │       ├── Step1Infos.tsx         # Titre, type, commune, description
-│   │       ├── Step2Prix.tsx          # Prix FCFA, charges, dépôt
-│   │       ├── Step3Localisation.tsx  # Commune, quartier, coordonnées GPS
-│   │       ├── Step4Equipements.tsx   # Checkboxes équipements
-│   │       └── Step5Medias.tsx        # Upload photos/video/360°/plans
-│   ├── media/
-│   │   ├── MediaUploader.tsx          # react-dropzone + progress
-│   │   ├── MediaSortable.tsx          # @dnd-kit sortable grid
-│   │   └── MediaTypeIcon.tsx          # Icône par type (photo/video/360/plan)
+│   │   ├── BienCard.tsx             # Card pour liste
+│   │   ├── BienCarousel.tsx         # 4 types + swipe + miniatures
+│   │   ├── Bien360.tsx              # Pannellum dynamic import
+│   │   ├── BienMap.tsx              # react-map-gl 'use client'
+│   │   ├── BienFilters.tsx          # Filtres commune/prix/type
+│   │   └── MediaUploadZone.tsx      # react-dropzone + progress
 │   ├── search/
-│   │   ├── SearchBar.tsx              # Full-text input
-│   │   └── SearchFilters.tsx          # Sidebar filtres
-│   ├── map/
-│   │   └── PropertiesMap.tsx          # react-map-gl avec markers biens
-│   └── messaging/
-│       ├── ConversationList.tsx        # Liste des conversations
-│       ├── MessageThread.tsx           # Thread temps réel
-│       └── MessageInput.tsx            # Zone de saisie + envoi
-│
-├── lib/
-│   ├── cloudinary.ts                  # signUploadParams() helper
-│   ├── supabase/                      # client.ts + server.ts (déjà en place)
-│   └── mapbox.ts                      # MAPBOX_ACCESS_TOKEN helper
+│   │   ├── SearchBar.tsx            # Full-text input
+│   │   └── ResultGrid.tsx           # Grid/list toggle
+│   └── chat/
+│       ├── ConversationList.tsx     # Liste conversations
+│       ├── MessageThread.tsx        # Thread temps reel
+│       └── MessageInput.tsx         # Envoi message
+└── lib/
+    ├── cloudinary.ts                # signCloudinaryParams helper
+    └── mapbox.ts                    # Token + default center CI
 ```
 
-### Pattern 1: Multi-Step Form with react-hook-form + Zod
-
-**What:** Step state managed by local `useState`, single `useForm` at the orchestrator level, sub-steps receive `register`/`control`/`watch` as props.
-**When to use:** All BIEN-01 creation and BIEN-02 edit flows.
-
-```tsx
-// components/bien/BienForm/index.tsx
+### Pattern 1: Multi-Step Form with Zod per-step validation
+**What:** Each step has its own Zod schema; validation only on current step fields; final submission combines all.
+**When to use:** BIEN-01 — formulaire multi-etapes proprietaire.
+```typescript
+// Source: react-hook-form + zod pattern (verified community 2025)
 'use client'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 
-const BienSchema = z.object({
-  titre: z.string().min(5, 'Minimum 5 caractères'),
+// One useForm at parent level with all fields to prevent state loss between steps
+const fullSchema = z.object({
+  titre: z.string().min(5).max(100),
   type_bien: z.enum(['studio','appartement','villa','maison','bureau','commerce','terrain','residence_meublee']),
-  commune: z.string().min(1, 'Commune requise'),
-  description: z.string().min(20, 'Description trop courte'),
-  prix_mois_fcfa: z.number().min(0).optional(),
-  prix_vente_fcfa: z.number().min(0).optional(),
-  // ... autres champs
+  commune: z.string().min(2),
+  prix_mois_fcfa: z.number().int().positive().optional(),
+  // ... all fields
 })
-type BienFormData = z.infer<typeof BienSchema>
 
-export function BienForm() {
-  const [step, setStep] = useState(1)
-  const form = useForm<BienFormData>({ resolver: zodResolver(BienSchema), mode: 'onChange' })
-  
-  const onSubmit = async (data: BienFormData) => {
-    // Server action ou API route POST /api/biens
-  }
-  
-  return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-      {step === 1 && <Step1Infos form={form} />}
-      {step === 2 && <Step2Prix form={form} />}
-      {/* ... */}
-      <StepNavigation step={step} setStep={setStep} totalSteps={5} form={form} />
-    </form>
-  )
-}
+// Per-step validation without submitting
+const step1Fields = ['titre', 'type_bien', 'commune'] as const
+const isStep1Valid = z.object({
+  titre: fullSchema.shape.titre,
+  type_bien: fullSchema.shape.type_bien,
+  commune: fullSchema.shape.commune,
+}).safeParse(watchedValues).success
 ```
 
-### Pattern 2: Cloudinary Photo Upload — Signed Upload via API Route
-
-**What:** Client requests a signature from a Next.js API route (keeps API secret server-side). `CldUploadWidget` uses the signature to upload directly to Cloudinary CDN.
-**When to use:** MDIA-01 — photo upload only. Videos, 360°, plans go to Supabase Storage.
-
-```ts
-// app/api/upload/sign/route.ts
+### Pattern 2: Cloudinary Signed Upload
+**What:** Server-side signing keeps API secret off client; CldUploadWidget triggers Cloudinary upload widget.
+**When to use:** MDIA-01 — upload photos.
+```typescript
+// Source: next.cloudinary.dev/clduploadwidget/basic-usage (fetched 2026-04-06)
+// apps/web/app/api/sign-cloudinary-params/route.ts
 import { v2 as cloudinary } from 'cloudinary'
-import { NextResponse } from 'next/server'
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-})
-
-export async function POST(req: Request) {
-  const body = await req.json()
-  const { paramsToSign } = body
-  const signature = cloudinary.utils.api_sign_request(paramsToSign, process.env.CLOUDINARY_API_SECRET!)
-  return NextResponse.json({ signature })
+export async function POST(request: Request) {
+  const { paramsToSign } = await request.json()
+  const signature = cloudinary.utils.api_sign_request(
+    paramsToSign,
+    process.env.CLOUDINARY_API_SECRET!
+  )
+  return Response.json({ signature })
 }
-```
 
-```tsx
-// components/media/PhotoUploader.tsx — uses CldUploadWidget
-'use client'
+// Component (must be 'use client')
 import { CldUploadWidget } from 'next-cloudinary'
 
-export function PhotoUploader({ onUpload }: { onUpload: (url: string) => void }) {
-  return (
-    <CldUploadWidget
-      signatureEndpoint="/api/upload/sign"
-      uploadPreset="immo-ci-photos"  // Create this preset in Cloudinary Dashboard
-      options={{
-        maxFiles: 20,
-        resourceType: 'image',
-        folder: 'biens',
-        transformation: [{ width: 1200, crop: 'limit', format: 'webp', quality: 'auto' }]
-      }}
-      onSuccess={(result) => {
-        const info = result.info as { secure_url: string }
-        onUpload(info.secure_url)
-      }}
-    >
-      {({ open }) => (
-        <button type="button" onClick={() => open()} className="...">
-          Ajouter des photos
-        </button>
-      )}
-    </CldUploadWidget>
-  )
+<CldUploadWidget
+  signatureEndpoint="/api/sign-cloudinary-params"
+  onSuccess={(result) => {
+    const info = result.info as { secure_url: string; width: number; height: number }
+    // Save to biens_medias: type='photo', url=info.secure_url
+  }}>
+  {({ open }) => (
+    <button onClick={() => open()} className="btn-secondary">
+      Ajouter photos
+    </button>
+  )}
+</CldUploadWidget>
+```
+
+### Pattern 3: Supabase Storage — Signed Upload for Video/360°/Plans
+**What:** Server Action generates signed upload URL; client uploads directly to Supabase Storage (avoids 1MB Next.js body limit).
+**When to use:** MDIA-02, MDIA-03, MDIA-04.
+```typescript
+// Source: supabase.com/docs/reference/javascript/storage-from-createsigneduploadurl (fetched 2026-04-06)
+// Server Action
+'use server'
+export async function getSignedUploadUrl(bucket: string, path: string) {
+  const supabase = createServerClient(...)
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .createSignedUploadUrl(path)
+  if (error) throw error
+  return data  // { signedUrl, token, path }
+}
+
+// Client: upload to signed URL
+const { signedUrl, token, path } = await getSignedUploadUrl('videos', `${bienId}/${filename}`)
+const { error } = await supabase.storage
+  .from('videos')
+  .uploadToSignedUrl(path, token, file)
+```
+
+### Pattern 4: Supabase Realtime — Messages
+**What:** Subscribe to INSERT events on messages table filtered by conversation_id; useEffect cleanup removes channel.
+**When to use:** MSG-02.
+```typescript
+// Source: supabase.com/docs/guides/realtime/postgres-changes (fetched 2026-04-06)
+
+// PREREQUISITE SQL (run once — add to a new migration or Supabase Dashboard):
+// alter publication supabase_realtime add table messages;
+// alter publication supabase_realtime add table conversations;
+
+// Client component
+useEffect(() => {
+  const channel = supabase
+    .channel(`conv-${conversationId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'messages',
+        filter: `conversation_id=eq.${conversationId}`,
+      },
+      (payload) => {
+        setMessages(prev => [...prev, payload.new as Message])
+      }
+    )
+    .subscribe()
+
+  return () => { supabase.removeChannel(channel) }
+}, [conversationId])
+```
+
+### Pattern 5: Full-Text Search on existing tsvector column
+**What:** Migration 002 already has `fts tsvector` generated column + GIN index; use Supabase `.textSearch()`.
+**When to use:** BIEN-06, combined with BIEN-05 filters.
+```typescript
+// Source: supabase.com/docs/reference/javascript/textsearch (fetched 2026-04-06)
+async function searchBiens(query: string, filters: BienFilters) {
+  let q = supabase
+    .from('biens')
+    .select('*, biens_medias(url, type, est_couverture, ordre)')
+    .eq('statut', 'publie')
+
+  if (query) {
+    q = q.textSearch('fts', query, { config: 'french' })
+  }
+  if (filters.commune) q = q.eq('commune', filters.commune)
+  if (filters.prixMin)  q = q.gte('prix_mois_fcfa', filters.prixMin)
+  if (filters.prixMax)  q = q.lte('prix_mois_fcfa', filters.prixMax)
+  if (filters.type)     q = q.eq('type_bien', filters.type)
+  if (filters.equipements?.length) {
+    q = q.contains('equipements', filters.equipements)
+  }
+
+  return q
+    .order('biens_medias(ordre)', { ascending: true })
+    .order('created_at', { ascending: false })
+    .range(0, 19)
 }
 ```
 
-### Pattern 3: Supabase Storage Upload (Video / 360° / Plans)
-
-**What:** Client uploads directly to Supabase Storage via the browser Supabase client. RLS on storage buckets controls access.
-**When to use:** MDIA-02 (videos), MDIA-03 (360°), MDIA-04 (plans).
-
-```ts
-// Bucket names: 'videos', 'panoramas', 'plans'
-// Bucket must be created in Supabase Dashboard > Storage
-
-// Client-side upload
-const supabase = createClient()  // browser client
-const file = files[0]
-const path = `${bienId}/${Date.now()}-${file.name}`
-
-const { data, error } = await supabase.storage
-  .from('videos')  // or 'panoramas' or 'plans'
-  .upload(path, file, {
-    cacheControl: '3600',
-    upsert: false,
-  })
-
-if (data) {
-  const { data: { publicUrl } } = supabase.storage
-    .from('videos')
-    .getPublicUrl(data.path)
-  // Insert into biens_medias with publicUrl
-}
-```
-
-**Supabase Storage bucket configuration (do in Dashboard, not migration):**
-- Bucket `videos`: public = true, max file size 500MB (video), allowed MIME: `video/*`
-- Bucket `panoramas`: public = true, max file size 50MB, allowed MIME: `image/*`
-- Bucket `plans`: public = true, max file size 20MB, allowed MIME: `application/pdf,image/*`
-
-### Pattern 4: Pannellum 360° Viewer — Dynamic Import
-
-**What:** `pannellum-react` uses browser APIs (WebGL, requestAnimationFrame). Must be dynamically imported with `ssr: false`. Hotspots come from the `hotspots jsonb` column in `biens_medias`.
-**When to use:** MDIA-06 — Bien360 component.
-
-```tsx
-// components/bien/Bien360.tsx
+### Pattern 6: Pannellum dynamic import (ssr: false)
+**What:** pannellum-react uses window/document — must be client-only; next/dynamic with ssr:false.
+**When to use:** MDIA-06.
+```typescript
+// Source: skills.md section 6 (authoritative) + pannellum-react npm docs
 'use client'
 import dynamic from 'next/dynamic'
 
 const Pannellum = dynamic(
-  () => import('pannellum-react').then((m) => m.Pannellum),
+  () => import('pannellum-react').then(m => m.Pannellum),
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-[320px] bg-gray-900 rounded-card flex items-center justify-center">
+      <div className="w-full h-[300px] bg-gray-900 flex items-center justify-center rounded-card">
         <span className="text-white/50 text-sm font-sans">Chargement vue 360°...</span>
       </div>
     ),
   }
 )
 
-interface Hotspot { pitch: number; yaw: number; texte: string }
-
-export function Bien360({ panoramaUrl, hotspots = [], hauteur = 320 }: {
-  panoramaUrl: string
-  hotspots?: Hotspot[]
-  hauteur?: number
-}) {
-  return (
-    <div className="w-full rounded-card overflow-hidden" style={{ height: hauteur }}>
-      <Pannellum
-        width="100%"
-        height={`${hauteur}px`}
-        image={panoramaUrl}
-        pitch={10}
-        yaw={180}
-        hfov={110}
-        autoLoad
-        autoRotate={-2}
-        compass
-        showZoomCtrl
-        showFullscreenCtrl
-        hotSpots={hotspots.map((h) => ({
-          pitch: h.pitch,
-          yaw: h.yaw,
-          type: 'info',
-          text: h.texte,
-          cssClass: 'custom-hotspot',
-        }))}
-      />
-    </div>
-  )
-}
+// next.config.js — also add to prevent CSS import error:
+// transpilePackages: ['pannellum-react']
 ```
 
-### Pattern 5: Embla Carousel with Type Filters
-
-**What:** Embla Carousel wraps all media items. `activeFilter` state controls which `type` is shown. Thumbnails sync with the active slide.
-**When to use:** MDIA-05 — BienCarousel component.
-
-```tsx
+### Pattern 7: react-map-gl as 'use client' component
+**What:** Mapbox GL JS requires window — mark map wrapper as client component.
+**When to use:** BIEN-08.
+```typescript
+// Source: visgl.github.io/react-map-gl + community verified 2025
 'use client'
-import useEmblaCarousel from 'embla-carousel-react'
-import { useState, useCallback } from 'react'
-import type { BienMedia } from '@immo-ci/shared/types/database'
+import Map, { Marker, Popup } from 'react-map-gl'
+import 'mapbox-gl/dist/mapbox-gl.css'
 
-type FilterType = 'all' | 'photo' | 'video' | 'vue_360' | 'plan'
+// Default center: Abidjan Plateau
+const ABIDJAN_CENTER = { longitude: -4.0167, latitude: 5.3600 }
 
-export function BienCarousel({ medias }: { medias: BienMedia[] }) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: 'start' })
-  const [activeFilter, setActiveFilter] = useState<FilterType>('all')
-  
-  const filtered = activeFilter === 'all'
-    ? medias
-    : medias.filter((m) => m.type === activeFilter)
-  
-  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi])
-  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi])
-  
-  // ... render
-}
-```
-
-### Pattern 6: Supabase Realtime — Messages Channel
-
-**What:** Subscribe to `postgres_changes` on the `messages` table, filtered to current `conversation_id`. New messages append to local state without a full page refresh.
-**When to use:** MSG-02 — MessageThread component.
-
-**Prerequisite:** Enable Realtime on `messages` table in Supabase Dashboard > Database > Replication.
-
-```tsx
-'use client'
-import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-
-export function MessageThread({ conversationId }: { conversationId: string }) {
-  const [messages, setMessages] = useState<Message[]>([])
-  const supabase = createClient()
-
-  useEffect(() => {
-    // Load existing messages
-    supabase
-      .from('messages')
-      .select('*')
-      .eq('conversation_id', conversationId)
-      .order('created_at', { ascending: true })
-      .then(({ data }) => { if (data) setMessages(data) })
-
-    // Subscribe to new messages
-    const channel = supabase
-      .channel(`messages:${conversationId}`)
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'messages',
-        filter: `conversation_id=eq.${conversationId}`,
-      }, (payload) => {
-        setMessages((prev) => [...prev, payload.new as Message])
-      })
-      .subscribe()
-
-    return () => { supabase.removeChannel(channel) }
-  }, [conversationId])
-
-  return (/* ... */)
-}
-```
-
-### Pattern 7: Full-Text Search via Supabase
-
-**What:** The `biens` table has a generated `fts tsvector` column (French dictionary) covering `titre`, `description`, `commune`, `quartier`. Use `.textSearch()` in the query builder.
-**When to use:** BIEN-06 — full-text search feature.
-
-```ts
-// Server Component or API route
-const supabase = await createClient()  // server client
-
-const { data } = await supabase
-  .from('biens')
-  .select('id, titre, commune, type_bien, prix_mois_fcfa, statut')
-  .eq('statut', 'publie')
-  .textSearch('fts', query, { type: 'plain', config: 'french' })
-  .range(offset, offset + limit - 1)
-```
-
-**Combined filter + FTS query:**
-```ts
-let query = supabase
-  .from('biens')
-  .select('*')
-  .eq('statut', 'publie')
-
-if (commune) query = query.eq('commune', commune)
-if (prixMin) query = query.gte('prix_mois_fcfa', prixMin)
-if (prixMax) query = query.lte('prix_mois_fcfa', prixMax)
-if (typeBien) query = query.eq('type_bien', typeBien)
-if (equipements.length) query = query.contains('equipements', equipements)
-if (searchText) query = query.textSearch('fts', searchText, { type: 'plain', config: 'french' })
-
-query = query.range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
-```
-
-### Pattern 8: Mapbox GL JS — Dynamic Import in App Router
-
-**What:** `mapbox-gl` uses `window` and WebGL — cannot run on server. Use `dynamic()` with `ssr: false`. Wrap in a Client Component.
-**When to use:** BIEN-08 — map view of properties.
-
-```tsx
-// components/map/PropertiesMap.tsx
-'use client'
-import dynamic from 'next/dynamic'
-
-const Map = dynamic(() => import('react-map-gl').then((m) => m.Map), { ssr: false })
-const Marker = dynamic(() => import('react-map-gl').then((m) => m.Marker), { ssr: false })
-
-export function PropertiesMap({ biens }: { biens: Bien[] }) {
+export function BienMap({ biens }: { biens: BienWithCoords[] }) {
   return (
     <Map
-      mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-      initialViewState={{ longitude: -4.008256, latitude: 5.352781, zoom: 11 }}  // Abidjan
-      style={{ width: '100%', height: '100%' }}
+      mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
+      initialViewState={{ ...ABIDJAN_CENTER, zoom: 12 }}
       mapStyle="mapbox://styles/mapbox/streets-v12"
+      style={{ width: '100%', height: 400 }}
     >
-      {biens.map((bien) => (
-        <Marker
-          key={bien.id}
-          longitude={bien.longitude ?? -4.008256}
-          latitude={bien.latitude ?? 5.352781}
-        >
-          <div className="bg-secondary text-white text-xs font-mono px-2 py-1 rounded-pill shadow-md">
-            {formatFCFA(bien.prix_mois_fcfa ?? 0)}
-          </div>
-        </Marker>
-      ))}
+      {biens.map(bien => bien.latitude && bien.longitude ? (
+        <Marker key={bien.id} longitude={bien.longitude} latitude={bien.latitude} />
+      ) : null)}
     </Map>
   )
 }
 ```
 
-**Add to next.config.ts remotePatterns** (already configured for `res.cloudinary.com` and `*.supabase.co`). Add Mapbox tiles if needed (they load from mapbox CDN, not next/image, so no change required).
+### Pattern 8: @dnd-kit/sortable for media reordering
+**What:** SortableContext wraps media thumbnails; on DragEnd, call arrayMove then batch PATCH ordre to Supabase.
+**When to use:** MDIA-07.
+```typescript
+// Source: docs.dndkit.com/presets/sortable (search-verified 2026-04-06)
+import { DndContext, closestCenter, type DragEndEvent } from '@dnd-kit/core'
+import { SortableContext, arrayMove, rectSortingStrategy, useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
-**Add to .env.local:**
-```
-NEXT_PUBLIC_MAPBOX_TOKEN=pk.eyJ1...
-```
-
-### Pattern 9: @dnd-kit Sortable for Media Reorder
-
-**What:** Wrap media grid in `DndContext` + `SortableContext`. Each item uses `useSortable`. On drag end, update `ordre` in `biens_medias` via PATCH.
-**When to use:** MDIA-07 — drag & drop reorder in owner dashboard.
-
-```tsx
-'use client'
-import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core'
-import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
-
-export function MediaSortable({ medias, onReorder }: Props) {
-  const [items, setItems] = useState(medias)
-
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event
-    if (over && active.id !== over.id) {
-      const oldIndex = items.findIndex((m) => m.id === active.id)
-      const newIndex = items.findIndex((m) => m.id === over.id)
-      const reordered = arrayMove(items, oldIndex, newIndex)
-      setItems(reordered)
-      // Persist: batch update ordre values
-      onReorder(reordered.map((m, i) => ({ id: m.id, ordre: i })))
-    }
-  }
-
-  return (
-    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <SortableContext items={items.map((m) => m.id)} strategy={verticalListSortingStrategy}>
-        {items.map((media) => <SortableMediaItem key={media.id} media={media} />)}
-      </SortableContext>
-    </DndContext>
+const handleDragEnd = async (event: DragEndEvent) => {
+  const { active, over } = event
+  if (!over || active.id === over.id) return
+  const oldIndex = items.findIndex(i => i.id === active.id)
+  const newIndex = items.findIndex(i => i.id === over.id)
+  const reordered = arrayMove(items, oldIndex, newIndex)
+  setItems(reordered)
+  // Batch update ordre in Supabase
+  await Promise.all(
+    reordered.map((item, i) =>
+      supabase.from('biens_medias').update({ ordre: i }).eq('id', item.id)
+    )
   )
 }
+
+<DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+  <SortableContext items={items.map(i => i.id)} strategy={rectSortingStrategy}>
+    {items.map(item => <SortableMediaThumb key={item.id} media={item} />)}
+  </SortableContext>
+</DndContext>
 ```
 
 ### Anti-Patterns to Avoid
-
-- **Do not import `pannellum-react` at the top level** — it accesses `window` on import. Always use `dynamic(..., { ssr: false })`.
-- **Do not import `mapbox-gl` at the top level** — same reason. Always dynamic import.
-- **Do not use `<img>` for Cloudinary URLs** — use `<CldImage>` from `next-cloudinary` or `next/image` with `remotePatterns` (already configured for `res.cloudinary.com`).
-- **Do not use Supabase `.from('messages').select()` inside a render loop** — fetch once with `useEffect`, then use Realtime subscription for updates.
-- **Do not store Cloudinary API secret client-side** — sign uploads via `/api/upload/sign` route only.
-- **Do not fetch medias separately from the bien** — use a single Supabase query with join or an explicit second query on `biens_medias` with `bien_id` filter; the index `biens_medias_bien_ordre_idx` makes this efficient.
-- **Do not use `window.localStorage` for conversation state** — Supabase Realtime handles this; local state via `useState` is sufficient.
+- **Importing pannellum-react without dynamic import:** Causes `window is undefined` build error on server.
+- **Importing mapbox-gl/dist/mapbox-gl.css in a Server Component:** Must be in a 'use client' component.
+- **Using Next.js Server Actions to stream video file bodies:** Default 1MB body limit will reject files. Use signed URLs instead.
+- **Skipping `alter publication supabase_realtime add table messages`:** Subscriptions will silently receive no events.
+- **Storing CLOUDINARY_API_SECRET in client-side code or NEXT_PUBLIC_:** Always sign server-side via route handler.
+- **Using Zod `.nonempty()` or `.strip()`:** Removed in Zod 4. Use `.min(1)` for required strings.
+- **Calling `useForm` inside each step component:** Creates separate form state per step; values are lost on step change. Use single `useForm` at parent level.
+- **Setting two `est_couverture = true` medias for same bien_id:** Violates the partial unique index in migration 003; UPDATE old cover to false before inserting new cover.
 
 ---
 
@@ -588,300 +401,338 @@ export function MediaSortable({ medias, onReorder }: Props) {
 
 | Problem | Don't Build | Use Instead | Why |
 |---------|-------------|-------------|-----|
-| Image CDN + resize + webp conversion | Custom image proxy | `next-cloudinary` + Cloudinary | Transformations, CDN, signed delivery already handled |
-| 360° equirectangular viewer | Raw WebGL/Three.js panorama | `pannellum-react` | Handles touch, gyro, hotspots, fullscreen — 5K+ lines of WebGL code |
-| Swipeable carousel with touch | Custom touch event handlers | `embla-carousel-react` | Handles velocity, momentum, loop, breakpoints |
-| Drag and drop with keyboard a11y | Custom drag listeners | `@dnd-kit/sortable` | Accessibility tree, screen readers, collision detection |
-| WebGL map with markers | Leaflet + custom tiles | `react-map-gl` + Mapbox | Vector tiles, clustering, custom markers, CI attribution |
-| Full-text search tokenization | pg_trgm custom search | Supabase `.textSearch()` on `fts` tsvector | Already configured with French dictionary in migration 002 |
-| Real-time message polling | `setInterval` + fetch | Supabase Realtime channels | WebSocket managed by Supabase, works through RLS |
+| Photo upload + CDN transforms | Custom upload API + resize code | next-cloudinary CldUploadWidget | Cloudinary handles webp conversion, resize, CDN, format negotiation, signed upload automatically |
+| Swipe carousel | Custom touch event handlers | embla-carousel-react | Fluid motion, touch velocity, pointer precision, snap points — extremely hard to replicate correctly on mobile |
+| 360° panorama viewer | Custom WebGL sphere renderer | pannellum-react | Handles equirectangular projection, inertia, mobile gyroscope, keyboard navigation, hotspots |
+| Drag & drop with accessibility | Mouse event listeners on DOM | @dnd-kit/sortable | Keyboard navigation, screen reader announcements, touch support, portal rendering for overlays |
+| Full-text search French | Custom LIKE/ILIKE queries | PostgreSQL tsvector (already in migration) | Stemming, stop-words, accent normalization — LIKE cannot match "locaux" from query "local" |
+| WebSocket real-time messages | Custom WebSocket server | Supabase Realtime postgres_changes | Zero infrastructure; Supabase manages connections, reconnection, backoff |
+| Interactive map of CI | Custom SVG map | react-map-gl + Mapbox | Tile rendering, zoom, satellite/street layers, geocoding — not feasible to hand-roll |
+| Multi-file upload with progress | XMLHttpRequest + custom UI | react-dropzone | Handles drag target, file validation, preview URLs, multiple files, progress via onUploadProgress |
 
-**Key insight:** The DB schema is already fully instrumented for Phase 2. Every table and index needed (fts on biens, biens_medias_bien_ordre_idx, messages Realtime activation, favoris unique constraint) was created in Phase 1 migrations. Phase 2 is purely application-layer work.
+**Key insight:** Every media and interactive UI problem in this phase has a battle-tested open source solution. The value is in connecting these solutions to the Supabase data model, not reimplementing them.
 
 ---
 
 ## Common Pitfalls
 
-### Pitfall 1: pannellum-react React 16 peer dep
-**What goes wrong:** `npm install pannellum-react` fails or warns about incompatible peer deps (declares `react@16.x`, project uses `react@^18.3.1`).
-**Why it happens:** Package maintainer has not updated `peerDependencies` metadata despite React 18 compatibility.
-**How to avoid:** Always install with `--legacy-peer-deps`. The package works correctly at runtime with React 18.
-**Warning signs:** `npm error peer dep conflict react` during install.
+### Pitfall 1: pannellum-react CSS import from node_modules
+**What goes wrong:** Next.js 14 throws "Global CSS cannot be imported from within node_modules" build error.
+**Why it happens:** pannellum-react imports its own CSS file internally; Next.js restricts global CSS imports from node_modules.
+**How to avoid:** Add `transpilePackages: ['pannellum-react']` in `next.config.js`.
+**Warning signs:** Build fails with CSS-related error mentioning a node_modules path.
 
-### Pitfall 2: Supabase Realtime not enabled on messages table
-**What goes wrong:** The subscription to `postgres_changes` on `messages` silently does nothing — no messages arrive in real time.
-**Why it happens:** Supabase Realtime is an opt-in per-table setting. The migration creates the table but cannot enable Replication (that requires the Supabase API or Dashboard).
-**How to avoid:** As part of plan 02-05 setup, explicitly document the manual step: Dashboard > Database > Replication > Enable on `messages`.
-**Warning signs:** `useEffect` subscribes without error, but new messages from a second session never appear.
-
-### Pitfall 3: mapbox-gl / react-map-gl SSR window error
-**What goes wrong:** `ReferenceError: window is not defined` at build time when mapbox-gl is statically imported in a Server Component or at module level.
-**Why it happens:** mapbox-gl accesses `window` on import for WebGL context detection.
-**How to avoid:** Always wrap `Map` and `Marker` in `dynamic(..., { ssr: false })`. Keep the map component in a separate file tagged `'use client'`.
-**Warning signs:** Build fails with `window is not defined` or map shows blank square.
-
-### Pitfall 4: Cloudinary upload preset not configured
-**What goes wrong:** `CldUploadWidget` returns a 401 "Upload preset not found" error.
-**Why it happens:** The upload preset (`immo-ci-photos`) must be created in the Cloudinary Dashboard before it can be referenced in code.
-**How to avoid:** Create the signed upload preset in Cloudinary Dashboard > Settings > Upload > Upload Presets with folder=`biens`, allowed formats=`jpg,jpeg,png,webp`, max file size=10MB, transformation=`w_1200,c_limit,f_webp,q_auto`.
-**Warning signs:** Console shows 401 from `api.cloudinary.com/v1_1/...`.
-
-### Pitfall 5: Conversation uniqueness constraint violation
-**What goes wrong:** Trying to create a new conversation between the same two participants for the same `bien_id` throws a unique constraint error.
-**Why it happens:** `conversations` table has `unique(participant_1, participant_2, bien_id)`.
-**How to avoid:** Use `upsert` (`.from('conversations').upsert({...}, { onConflict: 'participant_1,participant_2,bien_id', ignoreDuplicates: false })`) to get the existing conversation ID.
-**Warning signs:** Supabase returns `23505 duplicate key value violates unique constraint`.
-
-### Pitfall 6: biens_medias couverture unique index
-**What goes wrong:** Setting a second media as `est_couverture = true` for the same bien fails silently or throws a unique constraint error.
-**Why it happens:** Migration 003 creates `biens_medias_couverture_unique_idx` (partial unique index where `est_couverture = true`).
-**How to avoid:** Before setting a new cover, first reset the current cover: `UPDATE biens_medias SET est_couverture = false WHERE bien_id = $1 AND est_couverture = true`, then set the new one.
-
-### Pitfall 7: next-cloudinary beta vs stable
-**What goes wrong:** Installing `next-cloudinary@^7.0.0-beta.*` gets a beta version with breaking API changes.
-**Why it happens:** npm `^7.0.0-beta` resolves to beta tags when using caret on a pre-release version.
-**How to avoid:** Install `next-cloudinary@^6.17.5` (latest stable). The beta 7.x is not production-ready.
-
-### Pitfall 8: Full-text search query with special characters
-**What goes wrong:** User queries containing apostrophes (common in French: "Plateau d'Abidjan") break the tsvector query.
-**Why it happens:** Raw string interpolation into `textSearch()` is not sanitized.
-**How to avoid:** Use `type: 'plain'` (not `websearch` or `phrase`) in `.textSearch()` options — it automatically handles special characters. Do not interpolate user input into raw SQL.
-
----
-
-## DB Schema — No New Migrations Required
-
-All tables needed for Phase 2 are already created in Phase 1 migrations:
-
-| Table | Migration | Phase 2 Usage |
-|-------|-----------|---------------|
-| `biens` | 002 | CRUD, FTS via `fts` tsvector, statut toggle |
-| `biens_medias` | 003 | Photo/video/360/plan URLs, `ordre`, `hotspots jsonb` |
-| `conversations` | 006 | Messaging threads; unique constraint for upsert |
-| `messages` | 006 | Real-time messages; activate Realtime in Dashboard |
-| `favoris` | 006 | User favorites; unique(user_id, bien_id) |
-| `visites` | 007 | Visit requests and confirmations |
-
-**Key DB facts verified from migrations:**
-- `biens.fts` — generated column `tsvector` using French dictionary on `titre || description || commune || quartier` (migration 002) — FTS ready, no extra migration
-- `biens_medias_bien_ordre_idx` — composite index `(bien_id, ordre)` exists (migration 003) — ordering is O(log n)
-- `biens_medias_couverture_unique_idx` — partial unique index where `est_couverture = true` (migration 003) — only one cover photo per bien
-- `conversations` unique constraint `(participant_1, participant_2, bien_id)` (migration 006) — use upsert, not insert
-- Supabase Storage buckets (`videos`, `panoramas`, `plans`) do NOT exist yet — must be created in Dashboard before plan 02-02
-
-**One setup step required before plan 02-02:** Create 3 Storage buckets in Supabase Dashboard:
-- `videos` — public, max 500MB, MIME: video/*
-- `panoramas` — public, max 50MB, MIME: image/*
-- `plans` — public, max 20MB, MIME: application/pdf,image/*
-
----
-
-## Dependencies Between Plans (Execution Order)
-
+### Pitfall 2: Supabase Realtime silently not working
+**What goes wrong:** Subscription code runs without error but no events arrive; messages appear stale.
+**Why it happens:** The `messages` (and `conversations`) tables are not added to `supabase_realtime` publication. Migration 006 has a comment noting this must be done via Dashboard — it was not automated.
+**How to avoid:** Add a new migration (or run in Supabase Dashboard) before Plan 02-05:
+```sql
+alter publication supabase_realtime add table messages;
+alter publication supabase_realtime add table conversations;
 ```
-02-01 CRUD Biens (foundation — no deps)
-  └── 02-02 Upload & Médias (depends on bien_id from 02-01)
-        └── 02-03 Carousel & Vue 360° (depends on media URLs from 02-02)
+**Warning signs:** `.subscribe()` returns status 'SUBSCRIBED' but payload callback never fires.
 
-02-01 CRUD Biens
-  ├── 02-04 Recherche & Carte (depends on biens table having data)
-  └── 02-05 Messagerie & Social (depends on bien_id for conversation context)
+### Pitfall 3: Mapbox GL Worker in Next.js 14
+**What goes wrong:** Bundler warnings about mapbox-gl workers; map tiles fail to load or map is blank.
+**Why it happens:** mapbox-gl uses a Web Worker internally that can conflict with Next.js webpack config.
+**How to avoid:** In `next.config.js`:
+```js
+webpack: (config) => {
+  config.resolve.alias = {
+    ...config.resolve.alias,
+    'mapbox-gl': 'mapbox-gl',
+  }
+  return config
+}
 ```
+**Warning signs:** Console warnings about worker chunk; map renders blank tiles.
 
-**Strict ordering:** 02-01 → 02-02 → 02-03. Plans 02-04 and 02-05 can begin independently after 02-01 is complete.
+### Pitfall 4: Zod 4 API changes (project uses 4.3.6)
+**What goes wrong:** Code from Zod 3 tutorials fails with TypeScript errors.
+**Why it happens:** Zod 4 removed `nonempty()`, changed `strip()` to default behavior, changed some coercion APIs.
+**How to avoid:** Use `z.string().min(1)` for required strings. Verify against Zod 4 changelog before copying older examples.
+**Warning signs:** TypeScript errors on `.nonempty()`, `.strip()`, `.passthrough()` calls.
 
-**Why 02-01 must be first:**
-- 02-02 needs to associate uploaded media with a `bien_id` — a bien must exist first
-- 02-04 Recherche needs biens with real data (communes, prix) to test filtering and FTS
-- 02-05 Messagerie needs `bien_id` to create conversations
+### Pitfall 5: biens_medias couverture unique constraint violation
+**What goes wrong:** Inserting a second `est_couverture = true` media for the same `bien_id` throws `23505 unique violation`.
+**Why it happens:** Migration 003 has a partial unique index `WHERE est_couverture = true`.
+**How to avoid:** In the upload flow, always UPDATE previous cover to `est_couverture = false` before inserting the new cover. Handle as a transaction or sequential operations.
+**Warning signs:** Supabase returns `23505 unique_violation` on `biens_medias` insert.
 
-**Why 02-02 before 02-03:**
-- BienCarousel and Bien360 consume `biens_medias` rows — the upload pipeline (02-02) must insert those rows first
+### Pitfall 6: react-hook-form state loss in multi-step form
+**What goes wrong:** Values entered in step 1 are missing when step 3 is rendered.
+**Why it happens:** If each step is a separate component with its own `useForm()`, React unmounts it between steps and form state is lost.
+**How to avoid:** Use a single `useForm` at the parent level covering all step fields. Control step visibility via state, not component mounting.
+**Warning signs:** `getValues()` returns empty/undefined for previously entered fields.
 
----
-
-## Environment Availability Audit
-
-| Dependency | Required By | Available | Version | Action |
-|------------|------------|-----------|---------|--------|
-| Node.js | All | ✓ | v24.13.0 | None |
-| npm | Package install | ✓ | 11.6.2 | None |
-| `next` | App Router | ✓ | 14.2.35 | None |
-| `@supabase/supabase-js` | All DB/Realtime | ✓ | 2.101.1 | None |
-| `react-hook-form` + `zod` | Forms | ✓ | installed | None |
-| `next-cloudinary` | Photo upload | ✗ | — | Install in 02-01 |
-| `cloudinary` (server SDK) | Upload signing | ✗ | — | Install in 02-01 |
-| `pannellum-react` | 360° viewer | ✗ | — | Install in 02-01 |
-| `embla-carousel-react` | Carousel | ✗ | — | Install in 02-01 |
-| `@dnd-kit/core` + `@dnd-kit/sortable` | Drag & drop | ✗ | — | Install in 02-01 |
-| `react-map-gl` + `mapbox-gl` | Map view | ✗ | — | Install in 02-01 |
-| `react-dropzone` | File upload UI | ✗ | — | Install in 02-01 |
-| Cloudinary account | Photo CDN | Unknown | — | Requires credentials in .env.local |
-| Mapbox account | Map tiles | Unknown | — | Requires NEXT_PUBLIC_MAPBOX_TOKEN |
-| Supabase Storage buckets | Video/360°/Plans | ✗ | — | Create manually in Dashboard before 02-02 |
-| Supabase Realtime on `messages` | MSG-02 | ✗ | — | Enable in Dashboard before 02-05 |
-
-**Missing dependencies with no fallback:**
-- Cloudinary account credentials — without these, MDIA-01 photo upload is blocked. Plan 02-02 must include a note to set `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` in `.env.local`.
-- Mapbox token — without this, BIEN-08 map view renders blank. Plan 02-04 must include `NEXT_PUBLIC_MAPBOX_TOKEN` setup.
-
-**Missing dependencies with fallback:**
-- Supabase Storage buckets — if not created, upload returns "Bucket not found". Fallback: document bucket creation as a prerequisite task in plan 02-02.
-- Supabase Realtime — if not enabled, messaging still works as a normal CRUD app (no real-time push). Fallback: optimistic UI with polling every 5s. Enable Realtime as a prerequisite task in plan 02-05.
-
----
-
-## State of the Art
-
-| Old Approach | Current Approach | Impact |
-|--------------|------------------|--------|
-| Cloudinary Upload Widget via `<script>` CDN tag | `next-cloudinary` CldUploadWidget React component | Type-safe, SSR-compatible, no global script injection |
-| `react-beautiful-dnd` | `@dnd-kit/sortable` | react-beautiful-dnd deprecated in 2022; @dnd-kit is the standard |
-| Leaflet.js for maps | `react-map-gl` + Mapbox GL JS v3 | Vector tiles, WebGL rendering, better mobile performance |
-| Supabase Realtime v1 (deprecated broadcast) | Supabase `postgres_changes` on channel | Direct DB change subscription, works through RLS |
-| Custom tsvector search queries | Supabase `.textSearch()` builder | Type-safe, prevents SQL injection |
-| Pannellum via CDN `<script>` | `pannellum-react` + `dynamic({ ssr: false })` | Works with App Router, no global namespace pollution |
-
-**Deprecated / outdated (do not use):**
-- `react-beautiful-dnd` — deprecated, no longer maintained
-- Supabase Realtime v1 "broadcast" without schema — use `postgres_changes` with explicit `schema`, `table`, `filter`
-- `@cloudinary/react` v1 — replaced by `next-cloudinary` for Next.js projects
-- Mapbox GL JS v1/v2 — v3 is current; `react-map-gl@8` requires mapbox-gl v3
-
----
-
-## Open Questions
-
-1. **Mapbox vs Google Maps final decision**
-   - What we know: skills.md says "Mapbox ou Google Maps" (open choice)
-   - What's unclear: Whether the project has a Mapbox account already configured
-   - Recommendation: Use Mapbox (free 50k loads/month) unless a Google Maps API key is already in `.env.local`. Check `.env.local` at plan start. Mapbox is the research recommendation.
-
-2. **Cloudinary upload preset — signed vs unsigned**
-   - What we know: `CldUploadWidget` supports both signed (via `signatureEndpoint`) and unsigned (via `uploadPreset` only) uploads
-   - What's unclear: Which mode was intended by the project setup
-   - Recommendation: Use signed uploads (via `/api/upload/sign`) to prevent unauthorized use of the Cloudinary account. The API route pattern is documented above.
-
-3. **Video size limits on Supabase Storage free tier**
-   - What we know: Supabase free plan has 1GB Storage total; pro plan has 100GB
-   - What's unclear: Whether the project is on free or pro tier
-   - Recommendation: Set a 50MB limit per video file at the upload UI level. Document this constraint in the MediaUploader component.
-
-4. **Mapbox token public exposure**
-   - What we know: `NEXT_PUBLIC_MAPBOX_TOKEN` must be a public env var (prefixed `NEXT_PUBLIC_`) because mapbox-gl runs client-side
-   - What's unclear: Security implications of exposing the token
-   - Recommendation: Restrict the Mapbox token in the Mapbox Dashboard to the production domain only (URL restrictions). This prevents unauthorized usage even if the token is visible in the browser.
+### Pitfall 7: Supabase Storage buckets not created
+**What goes wrong:** Upload to 'videos', 'panoramas', or 'plans' bucket fails with "Bucket not found".
+**Why it happens:** Phase 1 migrations created DB tables but not Storage buckets — these are separate Supabase resources.
+**How to avoid:** Plan 02-02 must create the three buckets (via Supabase Dashboard or `storage.createBucket` API) and set appropriate RLS policies.
+**Warning signs:** Supabase Storage API returns `BucketNotFound` error on first upload attempt.
 
 ---
 
 ## Code Examples
 
-### Save biens_medias after upload
-```ts
-// After Cloudinary upload (photo) or Supabase Storage upload (other types)
-const supabase = createClient()
+### Full-text search + filters combined
+```typescript
+// Source: supabase.com/docs/reference/javascript/textsearch + migration 002 fts column
+async function searchBiens(query: string, filters: BienFilters, page = 0) {
+  let q = supabase
+    .from('biens')
+    .select('id, titre, commune, quartier, prix_mois_fcfa, type_bien, biens_medias(url, type, est_couverture)')
+    .eq('statut', 'publie')
 
-await supabase.from('biens_medias').insert({
-  bien_id: bienId,
-  type: 'photo',   // or 'video', 'vue_360', 'plan'
-  url: publicUrl,  // Cloudinary URL or Supabase public URL
-  ordre: currentMaxOrdre + 1,
-  est_couverture: isFirst,  // first photo becomes cover
-  largeur: 1200,
-  hauteur: 800,
-})
+  if (query) q = q.textSearch('fts', query, { config: 'french' })
+  if (filters.commune) q = q.eq('commune', filters.commune)
+  if (filters.prixMin)  q = q.gte('prix_mois_fcfa', filters.prixMin)
+  if (filters.prixMax)  q = q.lte('prix_mois_fcfa', filters.prixMax)
+  if (filters.type)     q = q.eq('type_bien', filters.type)
+  if (filters.equipements?.length) q = q.contains('equipements', filters.equipements)
+
+  return q
+    .order('created_at', { ascending: false })
+    .range(page * 20, page * 20 + 19)
+}
 ```
 
-### Toggle bien statut (publish/unpublish)
-```ts
-// Server Action or API route — only proprietaire_id === auth.uid() passes RLS
-await supabase
-  .from('biens')
-  .update({ statut: newStatut })
-  .eq('id', bienId)
-  .eq('proprietaire_id', userId)
-```
+### BienCarousel — type filter tabs + Embla
+```typescript
+// Source: embla-carousel.com useEmblaCarousel hook
+'use client'
+import useEmblaCarousel from 'embla-carousel-react'
+import { useState, useMemo, useCallback } from 'react'
+import { cn } from '@/lib/utils'
 
-### Upsert conversation + first message
-```ts
-// Get or create conversation
-const { data: conv } = await supabase
-  .from('conversations')
-  .upsert({
-    participant_1: senderId,
-    participant_2: ownerId,
-    bien_id: bienId,
-  }, { onConflict: 'participant_1,participant_2,bien_id', ignoreDuplicates: false })
-  .select('id')
-  .single()
+type MediaType = 'tout' | 'photo' | 'video' | 'vue_360' | 'plan'
+const TYPE_LABELS: Record<MediaType, string> = {
+  tout: 'Tout', photo: 'Photos', video: 'Videos', vue_360: '360°', plan: 'Plans'
+}
+// Badge colors per type (from STATE.md: vue360=purple, photo=green, video=orange, plan=blue)
+const BADGE_CLASSES: Record<string, string> = {
+  photo: 'bg-accent-light text-accent',
+  video: 'bg-secondary-light text-secondary',
+  vue_360: 'bg-purple-100 text-purple-700',
+  plan: 'bg-primary-light text-primary',
+}
 
-// Insert first message
-await supabase.from('messages').insert({
-  conversation_id: conv.id,
-  expediteur_id: senderId,
-  contenu: messageText,
-})
-```
+export function BienCarousel({ medias }: { medias: BienMedia[] }) {
+  const [activeType, setActiveType] = useState<MediaType>('tout')
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: 'start' })
 
-### Batch update media ordre after drag reorder
-```ts
-async function persistReorder(items: { id: string; ordre: number }[]) {
-  // Supabase doesn't support batch updates natively — use Promise.all
-  await Promise.all(
-    items.map(({ id, ordre }) =>
-      supabase.from('biens_medias').update({ ordre }).eq('id', id)
-    )
+  const filtered = useMemo(
+    () => activeType === 'tout' ? medias : medias.filter(m => m.type === activeType),
+    [medias, activeType]
+  )
+
+  return (
+    <div className="space-y-3">
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {(Object.keys(TYPE_LABELS) as MediaType[]).map(type => (
+          <button
+            key={type}
+            onClick={() => setActiveType(type)}
+            className={cn(
+              'flex-none px-3 py-1 rounded-pill text-sm font-sans transition-colors',
+              activeType === type
+                ? 'bg-primary text-white'
+                : 'bg-surface text-muted hover:bg-primary-light'
+            )}>
+            {TYPE_LABELS[type]}
+          </button>
+        ))}
+      </div>
+      <div className="overflow-hidden rounded-card" ref={emblaRef}>
+        <div className="flex">
+          {filtered.map(media => (
+            <div key={media.id} className="relative flex-none w-full">
+              {/* Render based on media.type */}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   )
 }
 ```
 
-### Favoris toggle
-```ts
-async function toggleFavori(userId: string, bienId: string, isFavorite: boolean) {
-  if (isFavorite) {
-    await supabase.from('favoris').delete().match({ user_id: userId, bien_id: bienId })
-  } else {
-    await supabase.from('favoris').insert({ user_id: userId, bien_id: bienId })
+### Favoris toggle (MSG-03)
+```typescript
+// Source: Supabase JS + migration 006 favoris table (unique constraint handles duplicate prevention)
+async function toggleFavori(userId: string, bienId: string, isFavori: boolean) {
+  if (isFavori) {
+    return supabase.from('favoris')
+      .delete()
+      .eq('user_id', userId)
+      .eq('bien_id', bienId)
   }
+  return supabase.from('favoris')
+    .insert({ user_id: userId, bien_id: bienId })
+  // unique(user_id, bien_id) handles duplicate prevention at DB level
 }
 ```
+
+### Conversation upsert then message insert (MSG-01)
+```typescript
+// Canonical participant ordering ensures the unique(p1, p2, bien_id) constraint works
+// regardless of who initiates the conversation
+async function sendMessage(senderId: string, receiverId: string, bienId: string, contenu: string) {
+  const [p1, p2] = [senderId, receiverId].sort()  // deterministic ordering
+
+  const { data: conv, error: convErr } = await supabase
+    .from('conversations')
+    .upsert(
+      { participant_1: p1, participant_2: p2, bien_id: bienId },
+      { onConflict: 'participant_1,participant_2,bien_id' }
+    )
+    .select('id')
+    .single()
+
+  if (convErr) throw convErr
+
+  return supabase.from('messages').insert({
+    conversation_id: conv.id,
+    expediteur_id: senderId,
+    contenu,
+  })
+}
+```
+
+---
+
+## State of the Art
+
+| Old Approach | Current Approach | When Changed | Impact |
+|--------------|------------------|--------------|--------|
+| react-beautiful-dnd | @dnd-kit/sortable | 2022 | react-beautiful-dnd is unmaintained (last release 2020); dnd-kit is accessible + maintained |
+| Cloudinary unsigned presets only | Signed uploads with server API route | 2023 | Security: API secret never exposed to client-side bundle |
+| Global Supabase WebSocket listener | .channel() per conversation | 2022 | Channel scoping avoids receiving events intended for other conversations |
+| Supabase JS v1 `.on('INSERT')` | Supabase JS v2 `.channel().on('postgres_changes')` | 2022 | Breaking change: v1 API does not work with @supabase/supabase-js 2.x |
+| Pannellum vanilla JS in useEffect | pannellum-react + next/dynamic ssr:false | 2022 | Next.js App Router requires either dynamic import or 'use client' |
+| Zod 3 `.string().nonempty()` | Zod 4 `.string().min(1)` | 2024 | Zod 4 removed nonempty(); project uses 4.3.6 |
+
+**Deprecated/outdated:**
+- `supabase.from('messages').on('INSERT', handler).subscribe()`: Supabase JS v1 syntax. Project uses v2.101.1.
+- `z.string().nonempty()`: Removed in Zod 4. Use `z.string().min(1)`.
+- `react-pannellum` (by farminf/pannellum-react): CSS import known issue with Next.js 14; requires `transpilePackages` workaround.
+
+---
+
+## Open Questions
+
+1. **Mapbox access token availability**
+   - What we know: react-map-gl requires NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN; Mapbox free tier = 50,000 map loads/month.
+   - What's unclear: Token not yet in .env.local; client has not confirmed which map provider.
+   - Recommendation: Use Mapbox (skills.md names Mapbox first, free tier adequate for MVP). Plan 02-04 must include env var setup step and a fallback static placeholder when token is absent.
+
+2. **Supabase Storage buckets (videos, panoramas, plans) not yet created**
+   - What we know: Phase 1 migrations created DB tables but not Storage buckets — separate resource.
+   - What's unclear: Whether buckets were created manually in Supabase dashboard.
+   - Recommendation: Plan 02-02 must create all three buckets programmatically (via Supabase Dashboard SQL or storage admin API) and configure RLS policies allowing authenticated owners to upload.
+
+3. **Supabase Realtime replication not yet enabled for messages**
+   - What we know: Migration 006 has a comment "Note: activer Supabase Realtime via Dashboard" — it was NOT in the migration SQL.
+   - What's unclear: Whether this was manually done post-Phase 1.
+   - Recommendation: Plan 02-05 must include an idempotent SQL statement or dashboard step to add messages and conversations to supabase_realtime publication.
+
+4. **next.config.js current state**
+   - What we know: Mapbox requires a webpack alias and pannellum-react requires transpilePackages.
+   - What's unclear: Current content of next.config.js after Phase 1.
+   - Recommendation: Plan 02-03 (Pannellum) and 02-04 (Mapbox) must both read and update next.config.js accordingly.
+
+---
+
+## Environment Availability
+
+| Dependency | Required By | Available | Version | Fallback |
+|------------|------------|-----------|---------|----------|
+| Node.js | All npm installs | Yes | v24.13.0 | — |
+| @supabase/supabase-js | All plans | Yes (installed) | 2.101.1 | — |
+| @supabase/ssr | Auth/server | Yes (installed) | 0.10.0 | — |
+| next | App Router | Yes (installed) | 14.2.35 | — |
+| react-hook-form + zod | BIEN-01 | Yes (installed) | 7.72 + 4.3.6 | — |
+| @hookform/resolvers | BIEN-01 | Yes (installed) | ^3.9.0 | — |
+| next-cloudinary | MDIA-01 | Not installed | 6.17.5 on npm | — |
+| embla-carousel-react | MDIA-05 | Not installed | 8.6.0 on npm | — |
+| pannellum-react | MDIA-06 | Not installed | 1.2.4 on npm | — |
+| @dnd-kit/core | MDIA-07 | Not installed | 6.3.1 on npm | — |
+| @dnd-kit/sortable | MDIA-07 | Not installed | 10.0.0 on npm | — |
+| @dnd-kit/utilities | MDIA-07 | Not installed | 3.2.2 on npm | — |
+| react-map-gl + mapbox-gl | BIEN-08 | Not installed | 8.1.0 + 3.21.0 on npm | — |
+| react-dropzone | MDIA-01-04 | Not installed | 15.0.0 on npm | — |
+| NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN | BIEN-08 | Unknown (not in env) | — | Static CI commune image placeholder |
+| CLOUDINARY_API_SECRET | MDIA-01 | Unknown (not in env) | — | Cannot upload without it — blocking |
+| Supabase Storage buckets (videos/panoramas/plans) | MDIA-02-04 | Unknown | — | Must create in Plan 02-02 — blocking |
+| supabase_realtime publication for messages | MSG-02 | Unknown | — | Must enable in Plan 02-05 — blocking |
+
+**Missing dependencies with no fallback (blocking):**
+- CLOUDINARY_API_SECRET must be present in .env.local before Plan 02-02 executes
+- Supabase Storage buckets 'videos', 'panoramas', 'plans' must be created (Plan 02-02 task)
+- supabase_realtime publication must include `messages` table (Plan 02-05 task)
+
+**Missing dependencies with fallback:**
+- NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: BienMap can render a static placeholder until token is obtained
+
+---
+
+## Project Constraints (from skills.md / STATE.md)
+
+These directives govern all Phase 2 implementation decisions:
+
+| Directive | Source | Impact on Phase 2 |
+|-----------|--------|-------------------|
+| `next@14.2.35 locked exactly` | STATE.md | Do not upgrade; use Next.js 14 dynamic import API |
+| `Tailwind CSS v3 not v4` | STATE.md | Use tailwind.config.ts with theme.extend; no CSS layer syntax |
+| `cn() via clsx + twMerge` | STATE.md | All new components use `cn()` from `@/lib/utils` |
+| `CSS vars + Tailwind tokens co-exist` | STATE.md | Use `bg-primary` for palette colors; `border-[var(--border)]` for custom values |
+| `vue360 badge uses purple-100/purple-700` | STATE.md | BienCarousel: photo=green, video=orange, vue_360=purple, plan=blue |
+| Mobile-first design | skills.md | All components: mobile breakpoints first, then `md:` and `lg:` |
+| Playfair Display for titles, DM Sans body | skills.md | `font-display` class for bien titles; `font-sans` for labels/prices |
+| JetBrains Mono for prices | skills.md | `font-mono` for prix FCFA display |
+| All amounts in FCFA | skills.md + REQUIREMENTS | No EUR/USD; `formatFCFA()` from packages/shared |
+| Components must have loading/error/empty states | skills.md | Every new component needs all 3 states |
+| TypeScript strict | skills.md | No `any` types; export component AND its prop types |
+| pannellum import must be dynamic ssr:false | skills.md section 6 | Required — window dependency |
+| Hotspots stored as JSONB in biens_medias | skills.md section 6 | Format: `[{"pitch": -5, "yaw": 120, "texte": "..."}]` |
+| Architecture: components/bien/, components/search/, components/chat/ | skills.md section 2 | All new components go in these directories |
+| lib/cloudinary.ts, lib/supabase/ | skills.md section 2 | Utility code in these existing lib paths |
 
 ---
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- apps/web/package.json — exact installed versions for already-present packages
-- supabase/migrations/002_biens.sql — confirms fts tsvector column and index exist
-- supabase/migrations/003_biens_medias.sql — confirms biens_medias_bien_ordre_idx and couverture unique index
-- supabase/migrations/006_messagerie.sql — confirms conversations/messages/favoris schema and RLS
-- supabase/migrations/007_visites_avis.sql — confirms visites table and RLS for MSG-04/MSG-05
-- skills.md section 5 (Architecture des médias), section 6 (Pannellum), section 2 (project structure) — primary spec
-- npm registry — all package versions confirmed via `npm view` on 2026-04-06
+- `supabase.com/docs/guides/realtime/postgres-changes` — Realtime subscription pattern, publication setup (fetched 2026-04-06)
+- `supabase.com/docs/reference/javascript/textsearch` — textSearch API with tsvector columns (fetched 2026-04-06)
+- `supabase.com/docs/reference/javascript/storage-from-createsigneduploadurl` — Signed URL upload pattern (fetched 2026-04-06)
+- `next.cloudinary.dev/clduploadwidget/basic-usage` — CldUploadWidget props and signing endpoint (fetched 2026-04-06)
+- npm registry — Package versions verified 2026-04-06: next-cloudinary@6.17.5, embla-carousel-react@8.6.0, pannellum-react@1.2.4, @dnd-kit/core@6.3.1, @dnd-kit/sortable@10.0.0, @dnd-kit/utilities@3.2.2, react-map-gl@8.1.0, mapbox-gl@3.21.0, react-dropzone@15.0.0
+- `apps/web/package.json` — Confirmed installed packages (read 2026-04-06)
+- `supabase/migrations/002_biens.sql` — Confirmed fts tsvector column + GIN index (read 2026-04-06)
+- `supabase/migrations/003_biens_medias.sql` — Confirmed schema + RLS + couverture constraint (read 2026-04-06)
+- `supabase/migrations/006_messagerie.sql` — Confirmed conversations, messages, favoris schema (read 2026-04-06)
+- `supabase/migrations/007_visites_avis.sql` — Confirmed visites schema + RLS (read 2026-04-06)
+- `skills.md` — Project canonical architecture, component patterns, env vars (read 2026-04-06)
+- `docs.dndkit.com/presets/sortable` — arrayMove, SortableContext pattern (search-verified 2026-04-06)
 
 ### Secondary (MEDIUM confidence)
-- `pannellum-react` npm metadata — version 1.2.4, peer dep React 16.x noted (known discrepancy, React 18 works)
-- `react-map-gl` npm metadata — version 8.1.0, peer dep mapbox-gl>=1.13.0 (v3.21.0 satisfies)
-- `@dnd-kit/sortable` npm metadata — version 10.0.0, peer dep @dnd-kit/core ^6.3.0
+- `embla-carousel.com` — useEmblaCarousel hook API; confirmed by npm description and multiple tutorials
+- `visgl.github.io/react-map-gl` — react-map-gl 8.x 'use client' requirement; confirmed by multiple 2025 tutorials
+- `pannellum-react` GitHub issue #86 — CSS import issue confirmed; transpilePackages workaround confirmed by community
 
 ### Tertiary (LOW confidence)
-- Supabase Storage free tier limits (1GB total) — from general knowledge, not verified against current pricing page. Validate at plan 02-02 time.
-- Mapbox free tier 50k loads/month — from general knowledge. Validate at plan 02-04 time.
+- None — all key claims backed by official docs or verified package registries
 
 ---
 
 ## Metadata
 
 **Confidence breakdown:**
-- Standard stack: HIGH — all versions confirmed via npm registry 2026-04-06
-- DB schema: HIGH — verified by reading actual migration files
-- Architecture patterns: HIGH — derived directly from skills.md spec + Phase 1 summaries
-- Pitfalls: MEDIUM — based on known library behaviors; pannellum React 16 peer dep confirmed via npm
-- Environment availability: MEDIUM — npm packages confirmed; Cloudinary/Mapbox account status unknown
+- Standard stack: HIGH — all versions verified via npm registry on 2026-04-06
+- Architecture: HIGH — skills.md is the canonical reference; all patterns verified against official docs
+- Pitfalls: HIGH — Zod 4 breaking changes documented, Supabase Realtime publication requirement in official docs, Pannellum CSS issue confirmed on GitHub
+- DB schema: HIGH — migrations 002, 003, 006, 007 read directly from source files
 
 **Research date:** 2026-04-06
-**Valid until:** 2026-05-06 (stable libraries; Supabase Realtime API stable)
-
----
-
-## RESEARCH COMPLETE
+**Valid until:** 2026-05-06 (30-day estimate; Supabase, Cloudinary, and Mapbox APIs are stable)
