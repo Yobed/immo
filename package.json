@@ -1,0 +1,17 @@
+{
+  "name": "immo-ci",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "type-check": "turbo type-check",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\""
+  },
+  "devDependencies": {
+    "turbo": "2.9.3",
+    "typescript": "6.0.2",
+    "prettier": "^3.0.0"
+  }
+}

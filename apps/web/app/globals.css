@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary:         #1A5276;  /* Bleu profond — confiance, institution */
+  --primary-light:   #EAF4FF;  /* Bleu clair — backgrounds info, badges */
+  --secondary:       #E67E22;  /* Orange CI — chaleur, CTA principaux */
+  --secondary-light: #FEF5E7;  /* Orange clair — hover states */
+  --accent:          #27AE60;  /* Vert — disponible, validé, succès */
+  --accent-light:    #E9F7EF;
+  --danger:          #E74C3C;  /* Rouge — alerte, indisponible, erreur */
+  --danger-light:    #FDEDEC;
+  --warning:         #F39C12;  /* Jaune — en attente, à vérifier */
+  --surface:         #F4F6F8;  /* Fond général de la page */
+  --surface-card:    #FFFFFF;  /* Fond des cartes */
+  --text:            #1C2833;  /* Texte principal */
+  --text-muted:      #7F8C8D;  /* Texte secondaire */
+  --border:          #E5E8EC;  /* Bordures */
+}
