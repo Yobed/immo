@@ -27,15 +27,15 @@
 
 ### Base de données & Backend
 
-- [ ] **BDD-01** : Migration 001 — table `profiles` avec RLS
-- [ ] **BDD-02** : Migration 002 — table `biens` avec RLS
-- [ ] **BDD-03** : Migration 003 — table `biens_medias` (photo/vidéo/360°/plan) avec RLS
-- [ ] **BDD-04** : Migration 004 — table `reservations` avec RLS
-- [ ] **BDD-05** : Migration 005 — tables `contrats` et `quittances` avec RLS
-- [ ] **BDD-06** : Migration 006 — tables `conversations` et `messages` avec RLS
-- [ ] **BDD-07** : Migration 007 — tables `visites` et `avis` avec RLS
-- [ ] **BDD-08** : Migration 008 — tables `notifications` et `analytics_events` avec RLS
-- [ ] **BDD-09** : Types TypeScript générés depuis Supabase CLI dans `packages/shared/types/database.ts`
+- [x] **BDD-01** : Migration 001 — table `profiles` avec RLS
+- [x] **BDD-02** : Migration 002 — table `biens` avec RLS
+- [x] **BDD-03** : Migration 003 — table `biens_medias` (photo/vidéo/360°/plan) avec RLS
+- [x] **BDD-04** : Migration 004 — table `reservations` avec RLS
+- [x] **BDD-05** : Migration 005 — tables `contrats` et `quittances` avec RLS
+- [x] **BDD-06** : Migration 006 — tables `conversations` et `messages` avec RLS
+- [x] **BDD-07** : Migration 007 — tables `visites` et `avis` avec RLS
+- [x] **BDD-08** : Migration 008 — tables `notifications` et `analytics_events` avec RLS
+- [x] **BDD-09** : Types TypeScript générés depuis Supabase CLI dans `packages/shared/types/database.ts`
 
 ### Annonces immobilières
 
