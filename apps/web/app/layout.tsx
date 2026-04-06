@@ -26,6 +26,20 @@ export const metadata: Metadata = {
   title: { template: '%s | Immo CI', default: "Immo CI — Immobilier en Côte d'Ivoire" },
   description:
     "Trouvez votre bien immobilier en Côte d'Ivoire. Location, vente, résidences meublées à Abidjan et partout en CI.",
+  openGraph: {
+    type: 'website',
+    locale: 'fr_CI',
+    url: 'https://immo-ci.vercel.app',
+    siteName: 'Immo CI',
+    title: "Immo CI — Immobilier en Côte d'Ivoire",
+    description: "Trouvez votre bien immobilier en Côte d'Ivoire. Location, vente à Abidjan.",
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Immo CI' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "Immo CI — Immobilier en Côte d'Ivoire",
+    description: "La plateforme immobilière premium de Côte d'Ivoire",
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
