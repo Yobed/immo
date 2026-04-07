@@ -5,6 +5,7 @@ import { TYPES_BIEN_LABELS, EQUIPEMENTS_LABELS } from '@immo-ci/shared/constants
 import { BienCarousel } from '@/components/bien/BienCarousel'
 import { FavorisButton } from '@/components/bien/FavorisButton'
 import { VisiteRequestForm } from '@/components/bien/VisiteRequestForm'
+import { ContactProprietaireButton } from '@/components/bien/ContactProprietaireButton'
 
 function formatFCFA(n: number) {
   return new Intl.NumberFormat('fr-CI', { style: 'decimal', maximumFractionDigits: 0 }).format(n) + ' FCFA'
@@ -100,6 +101,11 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             <span className="font-sans text-sm text-[var(--text)]">Sauvegarder ce bien</span>
             <FavorisButton bienId={bien.id} userId={user?.id ?? null} />
           </div>
+          <ContactProprietaireButton
+            bienId={bien.id}
+            proprietaireId={bien.proprietaire_id as string}
+            userId={user?.id ?? null}
+          />
           <VisiteRequestForm bienId={bien.id} proprietaireId={bien.proprietaire_id as string} />
         </div>
       </div>
