@@ -2,9 +2,17 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { BienForm } from '@/components/bien/BienForm'
 import type { BienFormData } from '@/components/bien/BienForm'
+import { Step5Medias } from '@/components/bien/BienForm/Step5Medias'
 
-export default async function ModifierBienPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ModifierBienPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ step?: string }>
+}) {
   const { id } = await params
+  const { step } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
@@ -22,8 +30,14 @@ export default async function ModifierBienPage({ params }: { params: Promise<{ i
   return (
     <main className="bg-surface min-h-screen py-8">
       <div className="max-w-3xl mx-auto px-4">
-        <h1 className="font-display text-3xl text-[var(--text)] mb-8">Modifier l'annonce</h1>
-        <BienForm defaultValues={bien as Partial<BienFormData>} />
+        <h1 className="font-display text-3xl text-[var(--text)] mb-8">
+          {step === 'medias' ? 'Ajouter des médias' : "Modifier l'annonce"}
+        </h1>
+        {step === 'medias' ? (
+          <Step5Medias bienId={id} />
+        ) : (
+          <BienForm defaultValues={bien as Partial<BienFormData>} />
+        )}
       </div>
     </main>
   )

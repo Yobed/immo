@@ -36,7 +36,7 @@ export const BienSchema = z.object({
 
 export type BienFormData = z.infer<typeof BienSchema>
 
-const TOTAL_STEPS = 4
+const TOTAL_STEPS = 5
 
 export function BienForm({ defaultValues }: { defaultValues?: Partial<BienFormData> }) {
   const [step, setStep] = useState(1)
@@ -86,6 +86,12 @@ export function BienForm({ defaultValues }: { defaultValues?: Partial<BienFormDa
         {step === 2 && <Step2Prix form={form} />}
         {step === 3 && <Step3Localisation form={form} />}
         {step === 4 && <Step4Equipements form={form} />}
+        {step === 5 && (
+          <div className="text-center py-6">
+            <p className="font-display text-xl text-[var(--text)] mb-2">Prêt à publier ?</p>
+            <p className="font-sans text-muted text-sm">Vous pourrez ajouter des photos, vidéos et une vue 360° à l&apos;étape suivante.</p>
+          </div>
+        )}
 
         <div className="flex justify-between mt-8">
           {step > 1 && (
@@ -111,7 +117,7 @@ export function BienForm({ defaultValues }: { defaultValues?: Partial<BienFormDa
             </Button>
           ) : (
             <Button type="submit" className="ml-auto" loading={isSubmitting}>
-              Enregistrer le bien
+              Continuer vers les médias
             </Button>
           )}
         </div>
