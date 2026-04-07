@@ -1,0 +1,78 @@
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import Link from 'next/link'
+import { BienCard } from '@/components/bien/BienCard'
+import { Button } from '@/components/ui'
+import { ToggleStatutButton } from '@/components/bien/ToggleStatutButton'
+
+type BienRow = {
+  id: string
+  titre: string
+  commune: string
+  type_bien: string
+  prix_mois_fcfa: number | null
+  prix_vente_fcfa: number | null
+  surface_m2: number | null
+  nb_pieces: number | null
+  statut: string
+  created_at: string
+}
+
+export default async function MesAnnoncesPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/auth/login')
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: biens } = await (supabase as any)
+    .from('biens')
+    .select('id, titre, commune, type_bien, prix_mois_fcfa, prix_vente_fcfa, surface_m2, nb_pieces, statut, created_at')
+    .eq('proprietaire_id', user.id)
+    .order('created_at', { ascending: false })
+
+  return (
+    <main className="bg-surface min-h-screen py-8">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="font-display text-3xl text-[var(--text)]">Mes annonces</h1>
+          <Link href="/biens/nouveau">
+            <Button variant="primary">+ Nouvelle annonce</Button>
+          </Link>
+        </div>
+        {(!biens || (biens as BienRow[]).length === 0) ? (
+          <div className="text-center py-16">
+            <p className="text-muted font-sans mb-4">Vous n'avez pas encore d'annonces.</p>
+            <Link href="/biens/nouveau"><Button>Créer ma première annonce</Button></Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {(biens as BienRow[]).map((bien) => (
+              <div key={bien.id} className="relative">
+                <BienCard
+                  id={bien.id}
+                  titre={bien.titre}
+                  commune={bien.commune}
+                  type_bien={bien.type_bien}
+                  prix_mois_fcfa={bien.prix_mois_fcfa}
+                  prix_vente_fcfa={bien.prix_vente_fcfa}
+                  surface_m2={bien.surface_m2}
+                  nb_pieces={bien.nb_pieces}
+                  statut={bien.statut}
+                />
+                {/* Actions propriétaire */}
+                <div className="flex gap-2 mt-2">
+                  <Link href={`/biens/${bien.id}/modifier`} className="flex-1">
+                    <Button variant="outline" size="sm" className="w-full">Modifier</Button>
+                  </Link>
+                  <div className="flex-1">
+                    <ToggleStatutButton bienId={bien.id} statut={bien.statut} />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </main>
+  )
+}
