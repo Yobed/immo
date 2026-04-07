@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Phase complete — ready for verification
-last_updated: "2026-04-07T08:11:19.312Z"
+status: Executing Phase 02
+last_updated: "2026-04-07T08:30:00.000Z"
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 8
+  total_plans: 10
   completed_plans: 6
 ---
 
@@ -18,16 +18,12 @@ progress:
 Voir : `.planning/PROJECT.md` (mis à jour 2026-04-05)
 
 **Core Value :** Un propriétaire ivoirien peut publier, encaisser et gérer ses locataires sans quitter la plateforme.
-**Focus actuel :** Phase 1 — Fondations & Infrastructure
+**Focus actuel :** Phase 2 — Annonces, Médias & Messagerie
 
 ## Current Position
 
-Phase: 1 (Fondations & Infrastructure) — EXECUTING
-Plan: 5 of 5
-
-- **Phase :** 1 / 5 — Fondations & Infrastructure
-- **Statut :** En cours d'exécution
-- **Prochaine action :** Exécuter plan 01-05 (si existant) ou passer à la phase 2
+Phase: 02 (annonces-medias-messagerie) — EXECUTING
+Plan: 2 of 5 (Wave 2 en attente)
 
 ## Session Continuity
 
@@ -37,6 +33,7 @@ Plan: 5 of 5
 - Plan 01-02 complété : 8 migrations Supabase (14 tables), RLS sur toutes les tables, handle_new_user trigger, database.ts placeholder
 - Plan 01-03 complété : Auth Supabase SSR, middleware route protection, login/register/OTP pages
 - Plan 01-04 complété : Tailwind design system (CI palette, typography, Button/Card/Badge/Input)
+- Plan 01-05 complété : Landing page 10 sections, SEO metadata, sitemap, robots
 - Plan 02-01 complété : BienForm 4 étapes (Zod), API CRUD biens, BienCard, pages publiques liste+fiche, pages pro listing+create+edit
 - Dernière session arrêtée à : Completed 02-annonces-medias-messagerie-01-PLAN.md
 
@@ -72,8 +69,8 @@ Plan: 5 of 5
 
 | Phase | Plans | Statut |
 |---|---|---|
-| 1 — Fondations & Infrastructure | 5 plans | En cours (2/5 completes) |
-| 2 — Annonces, Médias & Messagerie | 5 plans | En attente |
+| 1 — Fondations & Infrastructure | 5 plans | Complété |
+| 2 — Annonces, Médias & Messagerie | 5 plans | En cours (1/5 complété) |
 | 3 — Paiements, Réservations, IA & Dashboard | 5 plans | En attente |
 | 4 — Gestion Locative, Avis & KYC | 4 plans | En attente |
 | 5 — App Mobile, Tests & Déploiement | 4 plans | En attente |
