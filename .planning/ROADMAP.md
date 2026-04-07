@@ -70,7 +70,7 @@ Plans:
 
 **Exigences couvertes:** PAY-01 à PAY-06, RESA-01 à RESA-06, IA-01 à IA-04, DASH-01 à DASH-06
 
-**Plans:** 2/5 plans executed
+**Plans:** 5/5 plans executed
 
 ### Plans
 
@@ -85,9 +85,9 @@ Plans:
 Plans:
 - [x] 03-01-PLAN.md — CinetPay (lib/cinetpay.ts + /api/paiements/initier + webhook /v2/payment/check + page retour)
 - [x] 03-02-PLAN.md — Flow réservation (API conflits dates + ReservationFlow + pages nouvelle et statut)
-- [ ] 03-03-PLAN.md — Contrats OHADA (next.config.ts serverExternalPackages + lib/contrat-pdf.tsx + /api/contrats/generer)
-- [ ] 03-04-PLAN.md — Chatbot & IA (lib/claude.ts + /api/chat SSE streaming + scoring + ChatBot composant)
-- [ ] 03-05-PLAN.md — Dashboard Analytics (tailwind Tremor path + 6 composants + page Server Component)
+- [x] 03-03-PLAN.md — Contrats OHADA (next.config.ts serverExternalPackages + lib/contrat-pdf.tsx + /api/contrats/generer)
+- [x] 03-04-PLAN.md — Chatbot & IA (lib/claude.ts + /api/chat SSE streaming + scoring + ChatBot composant)
+- [x] 03-05-PLAN.md — Dashboard Analytics (tailwind Tremor path + 6 composants + page Server Component)
 
 **Success Criteria:**
 1. Paiement Wave complété de bout en bout (initier → webhook → confirmation BDD)
@@ -158,5 +158,39 @@ Plans:
 **Total:** 5 phases · 23 plans · 66 exigences v1
 
 ---
+
+## Backlog
+
+### Phase 999.1: Fraîcheur des annonces (BACKLOG)
+
+**Goal:** Empêcher les annonces "fantômes" — un bien non confirmé par le propriétaire tous les 15 jours est automatiquement désactivé (statut → inactif) et le propriétaire reçoit une notification WhatsApp/in-app.
+
+**Contexte:** Risque marché CI — la méfiance utilisateur naît des annonces obsolètes (bien loué depuis 1 mois, annonce toujours visible). Badge de fraîcheur + gamification (score propriétaire actif).
+
+**Approche envisagée:** n8n cron quotidien → query `biens` WHERE `updated_at < NOW() - INTERVAL '15 days'` AND `statut = 'publie'` → HTTP POST `/api/biens/webhook-inactivation` → `statut = 'inactif'` + notification in-app + WhatsApp.
+
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promouvoir avec /gsd:review-backlog quand prêt)
+
+---
+
+### Phase 999.2: Escrow CinetPay — Libération conditionnelle (BACKLOG)
+
+**Goal:** L'argent de la réservation est bloqué sur un compte de transit (séquestre) jusqu'à la remise des clés, validée par un code OTP reçu par le propriétaire. Éliminer le risque de paiement sans livraison.
+
+**Contexte:** Risque confiance CI majeur — méfiance culturelle envers le paiement en ligne sans remise physique des clés. Actuellement l'argent va directement au propriétaire après webhook CinetPay. Un escrow nécessite un compte de transit et une logique de libération conditionnelle — refactoring de `lib/cinetpay.ts` + `api/paiements/webhook`.
+
+**Approche envisagée:** CinetPay compte transit → réservation créée avec `statut = 'sequestre'` → propriétaire génère OTP à la remise → locataire valide OTP → libération automatique du paiement. Ou : délai de 48h avec option de litige.
+
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promouvoir avec /gsd:review-backlog quand prêt)
+
+---
 *Roadmap créée : 2026-04-05*
-*Mise à jour : 2026-04-06 — Phase 3 planifiée (5 plans, 3 vagues)*
+*Mise à jour : 2026-04-07 — Phase 4 planifiée (4 plans, 2 vagues) + 2 items backlog (999.1, 999.2)*

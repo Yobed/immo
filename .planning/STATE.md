@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to plan
-last_updated: "2026-04-07T15:12:33.420Z"
+last_updated: "2026-04-07T15:27:20.272Z"
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 14
-  completed_plans: 13
+  total_plans: 16
+  completed_plans: 15
 ---
 
 # State: Immo CI Platform
@@ -23,7 +23,7 @@ Voir : `.planning/PROJECT.md` (mis à jour 2026-04-05)
 ## Current Position
 
 Phase: 3
-Plan: 02 complété
+Plan: 05 complété
 
 ## Session Continuity
 
@@ -40,7 +40,8 @@ Plan: 02 complété
 - Plan 02-06 complété : Gap closure — FavorisButton + VisiteRequestForm wired into fiche bien, BienForm TOTAL_STEPS=5, modifier page handles ?step=medias with Step5Medias
 - Plan 03-01 complété : CinetPay intégration (initier + webhook + retour), PaiementButton, split commission
 - Plan 03-02 complété : Flow réservation — DatePicker + ReservationFlow 3 étapes + /api/reservations (conflict check 409) + pages nouvelle et statut
-- Dernière session arrêtée à : Completed 03-paiements-r-servations-ia-dashboard-02-PLAN.md
+- Plan 03-05 complété : Dashboard analytics — 6 composants (KPICard Tremor, RevenueBarChart/PaymentDonut/ConversionFunnel Recharts, OccupancyGauge Tremor, AlertesSection), page Server Component + Promise.all Supabase
+- Dernière session arrêtée à : Completed 03-paiements-r-servations-ia-dashboard-05-PLAN.md
 
 ## Key Decisions
 
@@ -72,6 +73,10 @@ Plan: 02 complété
 - **proprietaire_id NOT NULL sur reservations** — fetch bien.proprietaire_id avant insert reservation
 - **statut terminee remplace expiree dans reservations** — CHECK constraint reel: en_attente|confirmee|annulee|terminee
 - **contrats lie via reservation_id FK (pas contrat_id sur reservations)** — join via relation inverse Supabase dans la page statut
+- **Tremor v3.18.7 sans charts** — Card/Metric/BadgeDelta/ProgressBar uniquement; recharts pour tous les graphiques (BarChart, PieChart, FunnelChart)
+- **Dashboard pattern: Server Component + dynamic() ssr:false** — Server Component fetch Supabase, props serialisables aux Client Components; Recharts via dynamic(ssr:false) pour eviter hydration mismatch
+- **tailwind.config.ts content path @tremor obligatoire** — sans './node_modules/@tremor/**', Tremor est unstyled en production (CSS purge)
+- **bienIds.length guard avant .in() Supabase** — .in('col', []) retourne une erreur; toujours verifier longueur array avant query IN
 
 ## Performance Metrics
 
@@ -88,6 +93,7 @@ Plan: 02 complété
 | Phase 02-annonces-medias-messagerie P03 | 3min | 2 tasks | 5 files |
 | Phase 02-annonces-medias-messagerie P06 | 2min | 2 tasks | 3 files |
 | Phase 03-paiements-r-servations-ia-dashboard P02 | 15 | 2 tasks | 5 files |
+| Phase 03-paiements-r-servations-ia-dashboard P05 | 15 | 2 tasks | 9 files |
 
 ## Progress Summary
 
