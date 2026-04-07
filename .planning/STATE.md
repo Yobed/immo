@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Phase complete — ready for verification
-last_updated: "2026-04-06T02:42:54.266Z"
+last_updated: "2026-04-07T08:11:19.312Z"
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 5
-  completed_plans: 5
+  total_plans: 8
+  completed_plans: 6
 ---
 
 # State: Immo CI Platform
@@ -37,10 +37,15 @@ Plan: 5 of 5
 - Plan 01-02 complété : 8 migrations Supabase (14 tables), RLS sur toutes les tables, handle_new_user trigger, database.ts placeholder
 - Plan 01-03 complété : Auth Supabase SSR, middleware route protection, login/register/OTP pages
 - Plan 01-04 complété : Tailwind design system (CI palette, typography, Button/Card/Badge/Input)
-- Dernière session arrêtée à : Completed 01-fondations-infrastructure-04-PLAN.md
+- Plan 02-01 complété : BienForm 4 étapes (Zod), API CRUD biens, BienCard, pages publiques liste+fiche, pages pro listing+create+edit
+- Dernière session arrêtée à : Completed 02-annonces-medias-messagerie-01-PLAN.md
 
 ## Key Decisions
 
+- **supabase.from() cast to any in API routes** — database.ts Insert type is a minimal placeholder; regenerate after `npx supabase gen types`
+- **TYPES_BIEN moved communes.ts → biens.ts** — avoids duplicate export conflict in packages/shared/constants/index.ts
+- **ToggleStatutButton extracted as client component** — Server Components cannot use onClick+fetch in Next.js App Router
+- **DB field names: surface_m2, adresse_complete, charges_mois_fcfa** — actual schema differs from plan spec; always check database.ts Row type
 - **next@14.2.35 locked exactly** — prevents upgrade to Next.js 15/16 breaking App Router APIs
 - **Tailwind CSS v3 not v4** — design system uses tailwind.config.ts syntax (v4 removed it)
 - **Expo SDK 52 not 51** — SDK 52+ auto-detects monorepo, no Metro config needed
@@ -61,6 +66,7 @@ Plan: 5 of 5
 | Phase 01-fondations-infrastructure P03 | 18 | 3 tasks | 8 files |
 | Phase 01-fondations-infrastructure P04 | 15 | 5 tasks | 8 files |
 | Phase 01-fondations-infrastructure P05 | 20 | 4 tasks | 15 files |
+| Phase 02-annonces-medias-messagerie P01 | 134 | 3 tasks | 20 files |
 
 ## Progress Summary
 
