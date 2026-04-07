@@ -61,11 +61,11 @@
 
 ### Messagerie & Social
 
-- [ ] **MSG-01** : Utilisateur peut envoyer un message à un propriétaire depuis une fiche bien
-- [ ] **MSG-02** : Messages affichés en temps réel (Supabase Realtime)
-- [ ] **MSG-03** : Utilisateur peut sauvegarder / retirer un bien de ses favoris
-- [ ] **MSG-04** : Utilisateur peut demander une visite (date, créneau)
-- [ ] **MSG-05** : Propriétaire peut confirmer ou refuser une demande de visite
+- [x] **MSG-01** : Utilisateur peut envoyer un message à un propriétaire depuis une fiche bien
+- [x] **MSG-02** : Messages affichés en temps réel (Supabase Realtime)
+- [x] **MSG-03** : Utilisateur peut sauvegarder / retirer un bien de ses favoris
+- [x] **MSG-04** : Utilisateur peut demander une visite (date, créneau)
+- [x] **MSG-05** : Propriétaire peut confirmer ou refuser une demande de visite
 
 ### Paiements CinetPay
 

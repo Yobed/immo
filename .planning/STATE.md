@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-last_updated: "2026-04-07T08:21:44.649Z"
+last_updated: "2026-04-07T11:15:57.911Z"
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 9
 ---
 
 # State: Immo CI Platform
@@ -23,7 +23,7 @@ Voir : `.planning/PROJECT.md` (mis à jour 2026-04-05)
 ## Current Position
 
 Phase: 02 (annonces-medias-messagerie) — EXECUTING
-Plan: 3 of 5 (Wave 2 en attente)
+Plan: 4 of 5 (Wave 2 en attente)
 
 ## Session Continuity
 
@@ -36,7 +36,8 @@ Plan: 3 of 5 (Wave 2 en attente)
 - Plan 01-05 complété : Landing page 10 sections, SEO metadata, sitemap, robots
 - Plan 02-01 complété : BienForm 4 étapes (Zod), API CRUD biens, BienCard, pages publiques liste+fiche, pages pro listing+create+edit
 - Plan 02-02 complété : Pipeline upload médias — Cloudinary (signature serveur), Supabase Storage, biens_medias CRUD, MediaUploader, MediaSortable dnd-kit, Step5Medias
-- Dernière session arrêtée à : Completed 02-annonces-medias-messagerie-02-PLAN.md
+- Plan 02-05 complété : Messagerie Realtime (postgres_changes), FavorisButton, VisiteRequestForm, API visites POST+PATCH, pages /messages, /favoris, /visites
+- Dernière session arrêtée à : Completed 02-annonces-medias-messagerie-05-PLAN.md
 
 ## Key Decisions
 
@@ -56,6 +57,9 @@ Plan: 3 of 5 (Wave 2 en attente)
 - **vue360 badge uses purple-100/purple-700** — visually distinct from photo (green), video (orange), plan (blue)
 - **npm install --legacy-peer-deps at monorepo root** — pannellum-react@1.2.4 declares peer react@16.x; resolved with --legacy-peer-deps from workspace root
 - **biens_medias couverture reset pattern** — always reset est_couverture=false on bien before setting new couverture; respects partial unique index biens_medias_couverture_unique_idx
+- **expediteur_id pas emetteur_id dans messages DB** — toujours vérifier database.ts Row type avant de coder les composants
+- **locataire_id+notes+heure_debut/fin dans visites DB** — non demandeur_id+notes_demandeur+creneau; creneau splitté en heure_debut+heure_fin dans API route
+- **VisiteActions extrait en Client Component** — Server Action avec fetch URL absolue invalide dans Next.js App Router (cf. ToggleStatutButton pattern)
 - **Cloudinary signed upload pattern** — signUploadParams() in lib/cloudinary.ts + auth-gated POST /api/upload/sign + CldUploadWidget with signatureEndpoint prop
 
 ## Performance Metrics
@@ -69,6 +73,7 @@ Plan: 3 of 5 (Wave 2 en attente)
 | Phase 01-fondations-infrastructure P05 | 20 | 4 tasks | 15 files |
 | Phase 02-annonces-medias-messagerie P01 | 134 | 3 tasks | 20 files |
 | Phase 02-annonces-medias-messagerie P02 | 35 | 2 tasks | 7 files |
+| Phase 02-annonces-medias-messagerie P05 | 25 | 2 tasks | 11 files |
 
 ## Progress Summary
 

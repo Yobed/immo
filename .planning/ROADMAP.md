@@ -36,7 +36,7 @@
 
 **Exigences couvertes:** BIEN-01 à BIEN-08, MDIA-01 à MDIA-08, MSG-01 à MSG-05
 
-**Plans:** 2/5 plans executed
+**Plans:** 4/5 plans executed
 
 ### Plans
 
@@ -53,7 +53,7 @@ Plans:
 - [x] 02-02-PLAN.md — Upload médias (Cloudinary photos, Supabase Storage vidéo/360°/plans, drag & drop ordre)
 - [ ] 02-03-PLAN.md — Carousel & Vue 360° (Embla 4 types filtres miniatures, Pannellum dynamic ssr:false)
 - [x] 02-04-PLAN.md — Recherche & Carte (FTS français, filtres combinés, Mapbox markers FCFA)
-- [ ] 02-05-PLAN.md — Messagerie & Social (Realtime messages, favoris upsert, demandes de visite)
+- [x] 02-05-PLAN.md — Messagerie & Social (Realtime messages, favoris upsert, demandes de visite)
 
 **Success Criteria:**
 1. Propriétaire publie un bien avec photos, vidéo et vue 360° en moins de 10 min
