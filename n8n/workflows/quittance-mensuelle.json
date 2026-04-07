@@ -1,0 +1,114 @@
+{
+  "name": "Quittances Mensuelles — Immo CI",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 1 * *"
+            }
+          ]
+        },
+        "timezone": "Africa/Abidjan"
+      },
+      "id": "cron-node",
+      "name": "Cron 1er du mois 07:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT c.id AS contrat_id, c.locataire_id, c.proprietaire_id, c.loyer_mois_fcfa, p.telephone AS locataire_tel FROM contrats c JOIN profiles p ON p.id = c.locataire_id WHERE c.statut = 'signe' AND (c.date_fin IS NULL OR c.date_fin > CURRENT_DATE)",
+        "options": {}
+      },
+      "id": "supabase-query",
+      "name": "Requete contrats actifs",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [460, 300],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-pg-creds",
+          "name": "Supabase Postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.N8N_WEBHOOK_BASE_URL.replace('/webhook', '') }}/api/quittances/generer",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "contratId", "value": "={{ $json.contrat_id }}" }
+          ]
+        },
+        "options": { "response": { "response": { "responseFormat": "json" } } }
+      },
+      "id": "http-generer",
+      "name": "Generer quittance PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/{{ $env.WHATSAPP_PHONE_NUMBER_ID }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.WHATSAPP_ACCESS_TOKEN }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"{{ $('Requete contrats actifs').item.json.locataire_tel }}\",\n  \"type\": \"text\",\n  \"text\": {\n    \"body\": \"Bonjour, votre quittance de loyer du mois est disponible. Montant : {{ $('Requete contrats actifs').item.json.loyer_mois_fcfa }} FCFA. Telechargez-la ici : {{ $json.pdfUrl }}\"\n  }\n}",
+        "options": {}
+      },
+      "id": "whatsapp-node",
+      "name": "Envoyer WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "Cron 1er du mois 07:00": {
+      "main": [
+        [{ "node": "Requete contrats actifs", "type": "main", "index": 0 }]
+      ]
+    },
+    "Requete contrats actifs": {
+      "main": [
+        [{ "node": "Generer quittance PDF", "type": "main", "index": 0 }]
+      ]
+    },
+    "Generer quittance PDF": {
+      "main": [
+        [{ "node": "Envoyer WhatsApp", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "timezone": "Africa/Abidjan",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "tags": ["immo-ci", "locatif", "quittances"],
+  "triggerCount": 0,
+  "updatedAt": "2026-04-07T00:00:00.000Z",
+  "versionId": "1"
+}
