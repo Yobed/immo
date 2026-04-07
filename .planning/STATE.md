@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Executing Phase 02
-last_updated: "2026-04-07T08:30:00.000Z"
+status: Ready to execute
+last_updated: "2026-04-07T08:22:18.665Z"
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 10
-  completed_plans: 6
+  total_plans: 8
+  completed_plans: 7
 ---
 
 # State: Immo CI Platform
@@ -23,7 +23,7 @@ Voir : `.planning/PROJECT.md` (mis à jour 2026-04-05)
 ## Current Position
 
 Phase: 02 (annonces-medias-messagerie) — EXECUTING
-Plan: 2 of 5 (Wave 2 en attente)
+Plan: 3 of 5 (Wave 2 en attente)
 
 ## Session Continuity
 
@@ -35,7 +35,8 @@ Plan: 2 of 5 (Wave 2 en attente)
 - Plan 01-04 complété : Tailwind design system (CI palette, typography, Button/Card/Badge/Input)
 - Plan 01-05 complété : Landing page 10 sections, SEO metadata, sitemap, robots
 - Plan 02-01 complété : BienForm 4 étapes (Zod), API CRUD biens, BienCard, pages publiques liste+fiche, pages pro listing+create+edit
-- Dernière session arrêtée à : Completed 02-annonces-medias-messagerie-01-PLAN.md
+- Plan 02-04 complété : FTS textSearch + filtres + PropertiesMap Mapbox + SearchBar + SearchFilters + page /recherche
+- Dernière session arrêtée à : Completed 02-annonces-medias-messagerie-04-PLAN.md
 
 ## Key Decisions
 
@@ -53,6 +54,9 @@ Plan: 2 of 5 (Wave 2 en attente)
 - **cn() via clsx + twMerge** — all UI components use this for composable class merging; import from @/lib/utils
 - **CSS variables + Tailwind tokens co-exist** — Tailwind tokens (bg-primary) for standard usage, CSS vars (border-[var(--border)]) for values outside the palette
 - **vue360 badge uses purple-100/purple-700** — visually distinct from photo (green), video (orange), plan (blue)
+- **dynamic import ssr:false pour react-map-gl** — mapbox-gl accède à window sur import, crash SSR sans cette protection
+- **react-map-gl.d.ts stub** — node_modules absent dans worktree git; stub types permet compilation TypeScript sans installer les packages
+- **FTS type:plain config:french** — gère apostrophes (Plateau d'Abidjan) sans injection SQL possible
 
 ## Performance Metrics
 
@@ -64,6 +68,7 @@ Plan: 2 of 5 (Wave 2 en attente)
 | Phase 01-fondations-infrastructure P04 | 15 | 5 tasks | 8 files |
 | Phase 01-fondations-infrastructure P05 | 20 | 4 tasks | 15 files |
 | Phase 02-annonces-medias-messagerie P01 | 134 | 3 tasks | 20 files |
+| Phase 02-annonces-medias-messagerie P04 | 417 | 2 tasks | 7 files |
 
 ## Progress Summary
 
