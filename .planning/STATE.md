@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to execute
-last_updated: "2026-04-07T11:23:14.732Z"
+status: Phase complete — ready for verification
+last_updated: "2026-04-07T11:42:40.053Z"
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 8
-  completed_plans: 10
+  total_plans: 9
+  completed_plans: 11
 ---
 
 # State: Immo CI Platform
@@ -22,8 +22,8 @@ Voir : `.planning/PROJECT.md` (mis à jour 2026-04-05)
 
 ## Current Position
 
-Phase: 02 (annonces-medias-messagerie) — EXECUTING
-Plan: 5 of 5 (Wave 2 en attente)
+Phase: 02 (annonces-medias-messagerie) — COMPLETE
+Plan: 6 of 6 (all plans complete)
 
 ## Session Continuity
 
@@ -37,7 +37,8 @@ Plan: 5 of 5 (Wave 2 en attente)
 - Plan 02-01 complété : BienForm 4 étapes (Zod), API CRUD biens, BienCard, pages publiques liste+fiche, pages pro listing+create+edit
 - Plan 02-02 complété : Pipeline upload médias — Cloudinary (signature serveur), Supabase Storage, biens_medias CRUD, MediaUploader, MediaSortable dnd-kit, Step5Medias
 - Plan 02-05 complété : Messagerie Realtime (postgres_changes), FavorisButton, VisiteRequestForm, API visites POST+PATCH, pages /messages, /favoris, /visites
-- Dernière session arrêtée à : Completed 02-annonces-medias-messagerie-03-PLAN.md
+- Plan 02-06 complété : Gap closure — FavorisButton + VisiteRequestForm wired into fiche bien, BienForm TOTAL_STEPS=5, modifier page handles ?step=medias with Step5Medias
+- Dernière session arrêtée à : Completed 02-annonces-medias-messagerie-06-PLAN.md
 
 ## Key Decisions
 
@@ -63,6 +64,8 @@ Plan: 5 of 5 (Wave 2 en attente)
 - **Cloudinary signed upload pattern** — signUploadParams() in lib/cloudinary.ts + auth-gated POST /api/upload/sign + CldUploadWidget with signatureEndpoint prop
 - **pannellum-react and embla-carousel-react have no @types** — added custom .d.ts declarations in apps/web/types/; matches pre-existing pattern for other packages
 - **BienCarousel replaces cover img in fiche bien** — full medias array used with type-based filtering; duree_sec added to Supabase select for video duration display
+- **Step5Medias rendered outside BienForm in modifier page** — BienForm is creation-only (no bienId); Step5Medias requires bienId, so it lives at ?step=medias on the modifier page post-creation
+- **auth.getUser() in Server Component, userId passed as prop to Client Components** — avoids client re-auth; pattern established in fiche bien page for FavorisButton
 
 ## Performance Metrics
 
@@ -77,13 +80,14 @@ Plan: 5 of 5 (Wave 2 en attente)
 | Phase 02-annonces-medias-messagerie P02 | 35 | 2 tasks | 7 files |
 | Phase 02-annonces-medias-messagerie P05 | 25 | 2 tasks | 11 files |
 | Phase 02-annonces-medias-messagerie P03 | 3min | 2 tasks | 5 files |
+| Phase 02-annonces-medias-messagerie P06 | 2min | 2 tasks | 3 files |
 
 ## Progress Summary
 
 | Phase | Plans | Statut |
 |---|---|---|
 | 1 — Fondations & Infrastructure | 5 plans | Complété |
-| 2 — Annonces, Médias & Messagerie | 5 plans | En cours (2/5 complété) |
+| 2 — Annonces, Médias & Messagerie | 6 plans | Complété (6/6) |
 | 3 — Paiements, Réservations, IA & Dashboard | 5 plans | En attente |
 | 4 — Gestion Locative, Avis & KYC | 4 plans | En attente |
 | 5 — App Mobile, Tests & Déploiement | 4 plans | En attente |
