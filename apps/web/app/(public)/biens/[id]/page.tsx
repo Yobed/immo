@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { Badge } from '@/components/ui'
 import { TYPES_BIEN_LABELS, EQUIPEMENTS_LABELS } from '@immo-ci/shared/constants/biens'
+import { BienCarousel } from '@/components/bien/BienCarousel'
 
 function formatFCFA(n: number) {
   return new Intl.NumberFormat('fr-CI', { style: 'decimal', maximumFractionDigits: 0 }).format(n) + ' FCFA'
@@ -16,7 +17,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
     .from('biens')
     .select(`
       *,
-      biens_medias(id, url, type, titre, ordre, est_couverture, hotspots, embed_url),
+      biens_medias(id, url, type, titre, ordre, est_couverture, hotspots, embed_url, duree_sec),
       profiles!biens_proprietaire_id_fkey(full_name, avatar_url)
     `)
     .eq('id', id)
@@ -27,16 +28,22 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const medias = ((bien.biens_medias as any[]) ?? []).sort((a: any, b: any) => a.ordre - b.ordre)
-  const cover = medias.find((m) => m.est_couverture)?.url ?? medias[0]?.url
 
   return (
     <main className="bg-surface min-h-screen py-8">
       <div className="max-w-4xl mx-auto px-4">
-        {/* Photo couverture */}
-        {cover && (
-          <div className="relative aspect-video rounded-card overflow-hidden mb-6 bg-[var(--surface)]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={cover} alt={bien.titre} className="w-full h-full object-cover" />
+        {/* Carousel médias */}
+        {medias.length > 0 && (
+          <div className="mb-6">
+            <BienCarousel medias={medias.map((m: any) => ({
+              id: m.id,
+              type: m.type,
+              url: m.url,
+              embed_url: m.embed_url,
+              titre: m.titre,
+              hotspots: m.hotspots,
+              duree_sec: m.duree_sec,
+            }))} />
           </div>
         )}
 
