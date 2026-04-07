@@ -1,11 +1,12 @@
 'use client'
+// ANTI-PATTERN CRITIQUE: Ne jamais importer mapbox-gl ou react-map-gl en import statique au top
+// mapbox-gl accède à window sur import — dynamic import obligatoire pour éviter SSR crash
 import dynamic from 'next/dynamic'
 import { useState, useCallback } from 'react'
 import Link from 'next/link'
 import { MAPBOX_TOKEN, ABIDJAN_CENTER } from '@/lib/mapbox'
 
-// Imports dynamiques obligatoires — mapbox-gl accède à window sur import
-// ANTI-PATTERN CRITIQUE: Ne jamais importer mapbox-gl ou react-map-gl en import statique
+// Imports dynamiques obligatoires — ssr: false empêche mapbox-gl d'accéder à window côté serveur
 const Map = dynamic(() => import('react-map-gl').then((m) => m.Map), { ssr: false })
 const Marker = dynamic(() => import('react-map-gl').then((m) => m.Marker), { ssr: false })
 const Popup = dynamic(() => import('react-map-gl').then((m) => m.Popup), { ssr: false })
