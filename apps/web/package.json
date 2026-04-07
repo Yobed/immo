@@ -17,6 +17,7 @@
     "@immo-ci/shared": "*",
     "@supabase/ssr": "0.10.0",
     "@supabase/supabase-js": "2.101.1",
+    "@tremor/react": "^3.18.7",
     "cloudinary": "^2.9.0",
     "clsx": "^2.1.0",
     "date-fns": "4.1.0",
@@ -31,6 +32,7 @@
     "react-dropzone": "^15.0.0",
     "react-hook-form": "7.72.1",
     "react-map-gl": "^8.1.0",
+    "recharts": "^3.8.1",
     "tailwind-merge": "^2.3.0",
     "zod": "4.3.6"
   },
