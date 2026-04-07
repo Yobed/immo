@@ -43,10 +43,10 @@
 - [x] **BIEN-02** : Propriétaire peut modifier et supprimer ses biens
 - [x] **BIEN-03** : Propriétaire peut publier / dépublier un bien
 - [x] **BIEN-04** : Visiteur peut lister les biens publiés avec pagination
-- [ ] **BIEN-05** : Visiteur peut filtrer par commune, prix min/max, type, équipements
-- [ ] **BIEN-06** : Visiteur peut faire une recherche full-text sur titre et description
+- [x] **BIEN-05** : Visiteur peut filtrer par commune, prix min/max, type, équipements
+- [x] **BIEN-06** : Visiteur peut faire une recherche full-text sur titre et description
 - [x] **BIEN-07** : Visiteur peut voir la fiche complète d'un bien (photos, description, carte, prix)
-- [ ] **BIEN-08** : Visiteur peut voir les biens sur une carte (Mapbox ou Google Maps)
+- [x] **BIEN-08** : Visiteur peut voir les biens sur une carte (Mapbox ou Google Maps)
 
 ### Médias
 

@@ -52,7 +52,7 @@ Plans:
 - [x] 02-01-PLAN.md — CRUD biens complet (formulaire 4 étapes, API CRUD, liste + fiche publiques)
 - [x] 02-02-PLAN.md — Upload médias (Cloudinary photos, Supabase Storage vidéo/360°/plans, drag & drop ordre)
 - [ ] 02-03-PLAN.md — Carousel & Vue 360° (Embla 4 types filtres miniatures, Pannellum dynamic ssr:false)
-- [ ] 02-04-PLAN.md — Recherche & Carte (FTS français, filtres combinés, Mapbox markers FCFA)
+- [x] 02-04-PLAN.md — Recherche & Carte (FTS français, filtres combinés, Mapbox markers FCFA)
 - [ ] 02-05-PLAN.md — Messagerie & Social (Realtime messages, favoris upsert, demandes de visite)
 
 **Success Criteria:**
