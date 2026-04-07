@@ -78,12 +78,12 @@
 
 ### Réservations & Contrats
 
-- [ ] **RESA-01** : Locataire peut initier une réservation (sélection dates + paiement)
-- [ ] **RESA-02** : Réservation créée avec statut `en_attente` puis confirmée après paiement
-- [ ] **RESA-03** : Contrat de bail PDF généré automatiquement après confirmation (@react-pdf/renderer)
-- [ ] **RESA-04** : Contrat conforme droit ivoirien OHADA (toutes clauses obligatoires)
-- [ ] **RESA-05** : Montants toujours en FCFA en lettres ET en chiffres dans le contrat
-- [ ] **RESA-06** : Contrat PDF stocké dans Supabase Storage, accessible aux deux parties
+- [x] **RESA-01** : Locataire peut initier une réservation (sélection dates + paiement)
+- [x] **RESA-02** : Réservation créée avec statut `en_attente` puis confirmée après paiement
+- [x] **RESA-03** : Contrat de bail PDF généré automatiquement après confirmation (@react-pdf/renderer)
+- [x] **RESA-04** : Contrat conforme droit ivoirien OHADA (toutes clauses obligatoires)
+- [x] **RESA-05** : Montants toujours en FCFA en lettres ET en chiffres dans le contrat
+- [x] **RESA-06** : Contrat PDF stocké dans Supabase Storage, accessible aux deux parties
 
 ### Gestion locative
 

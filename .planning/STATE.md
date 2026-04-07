@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to plan
-last_updated: "2026-04-07T11:49:17.643Z"
+last_updated: "2026-04-07T15:12:33.420Z"
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 11
-  completed_plans: 11
+  total_plans: 14
+  completed_plans: 13
 ---
 
 # State: Immo CI Platform
@@ -23,7 +23,7 @@ Voir : `.planning/PROJECT.md` (mis à jour 2026-04-05)
 ## Current Position
 
 Phase: 3
-Plan: Not started
+Plan: 02 complété
 
 ## Session Continuity
 
@@ -38,7 +38,9 @@ Plan: Not started
 - Plan 02-02 complété : Pipeline upload médias — Cloudinary (signature serveur), Supabase Storage, biens_medias CRUD, MediaUploader, MediaSortable dnd-kit, Step5Medias
 - Plan 02-05 complété : Messagerie Realtime (postgres_changes), FavorisButton, VisiteRequestForm, API visites POST+PATCH, pages /messages, /favoris, /visites
 - Plan 02-06 complété : Gap closure — FavorisButton + VisiteRequestForm wired into fiche bien, BienForm TOTAL_STEPS=5, modifier page handles ?step=medias with Step5Medias
-- Dernière session arrêtée à : Completed 02-annonces-medias-messagerie-06-PLAN.md
+- Plan 03-01 complété : CinetPay intégration (initier + webhook + retour), PaiementButton, split commission
+- Plan 03-02 complété : Flow réservation — DatePicker + ReservationFlow 3 étapes + /api/reservations (conflict check 409) + pages nouvelle et statut
+- Dernière session arrêtée à : Completed 03-paiements-r-servations-ia-dashboard-02-PLAN.md
 
 ## Key Decisions
 
@@ -66,6 +68,10 @@ Plan: Not started
 - **BienCarousel replaces cover img in fiche bien** — full medias array used with type-based filtering; duree_sec added to Supabase select for video duration display
 - **Step5Medias rendered outside BienForm in modifier page** — BienForm is creation-only (no bienId); Step5Medias requires bienId, so it lives at ?step=medias on the modifier page post-creation
 - **auth.getUser() in Server Component, userId passed as prop to Client Components** — avoids client re-auth; pattern established in fiche bien page for FavorisButton
+- **reservations schema: montant_loyer_fcfa + montant_total_fcfa (pas montant_fcfa)** — migration 004 differe du plan spec; toujours verifier les migrations avant de coder les inserts
+- **proprietaire_id NOT NULL sur reservations** — fetch bien.proprietaire_id avant insert reservation
+- **statut terminee remplace expiree dans reservations** — CHECK constraint reel: en_attente|confirmee|annulee|terminee
+- **contrats lie via reservation_id FK (pas contrat_id sur reservations)** — join via relation inverse Supabase dans la page statut
 
 ## Performance Metrics
 
@@ -81,6 +87,7 @@ Plan: Not started
 | Phase 02-annonces-medias-messagerie P05 | 25 | 2 tasks | 11 files |
 | Phase 02-annonces-medias-messagerie P03 | 3min | 2 tasks | 5 files |
 | Phase 02-annonces-medias-messagerie P06 | 2min | 2 tasks | 3 files |
+| Phase 03-paiements-r-servations-ia-dashboard P02 | 15 | 2 tasks | 5 files |
 
 ## Progress Summary
 

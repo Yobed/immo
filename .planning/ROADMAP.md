@@ -70,7 +70,7 @@ Plans:
 
 **Exigences couvertes:** PAY-01 à PAY-06, RESA-01 à RESA-06, IA-01 à IA-04, DASH-01 à DASH-06
 
-**Plans:** 5 plans
+**Plans:** 2/5 plans executed
 
 ### Plans
 
@@ -83,8 +83,8 @@ Plans:
 | 03-05 | Dashboard Analytics | KPI cards Tremor, Recharts (bar/gauge/donut/funnel), alertes prioritaires, fetch Supabase parallèle |
 
 Plans:
-- [ ] 03-01-PLAN.md — CinetPay (lib/cinetpay.ts + /api/paiements/initier + webhook /v2/payment/check + page retour)
-- [ ] 03-02-PLAN.md — Flow réservation (API conflits dates + ReservationFlow + pages nouvelle et statut)
+- [x] 03-01-PLAN.md — CinetPay (lib/cinetpay.ts + /api/paiements/initier + webhook /v2/payment/check + page retour)
+- [x] 03-02-PLAN.md — Flow réservation (API conflits dates + ReservationFlow + pages nouvelle et statut)
 - [ ] 03-03-PLAN.md — Contrats OHADA (next.config.ts serverExternalPackages + lib/contrat-pdf.tsx + /api/contrats/generer)
 - [ ] 03-04-PLAN.md — Chatbot & IA (lib/claude.ts + /api/chat SSE streaming + scoring + ChatBot composant)
 - [ ] 03-05-PLAN.md — Dashboard Analytics (tailwind Tremor path + 6 composants + page Server Component)
