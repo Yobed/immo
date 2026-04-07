@@ -1,0 +1,137 @@
+{
+  "name": "Relances Loyer — Immo CI",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        },
+        "timezone": "Africa/Abidjan"
+      },
+      "id": "cron-daily",
+      "name": "Cron quotidien 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT q.id AS quittance_id, q.contrat_id, q.locataire_id, q.proprietaire_id, q.montant_total_fcfa, q.date_echeance, q.statut, p.telephone AS locataire_tel, pp.telephone AS proprietaire_tel, CASE WHEN (q.date_echeance::date - CURRENT_DATE) = 3 THEN 'J-3' WHEN (q.date_echeance::date - CURRENT_DATE) = 1 THEN 'J-1' WHEN (CURRENT_DATE - q.date_echeance::date) = 1 THEN 'J+1' WHEN (CURRENT_DATE - q.date_echeance::date) = 7 THEN 'J+7' ELSE NULL END AS jalon FROM quittances q JOIN profiles p ON p.id = q.locataire_id JOIN profiles pp ON pp.id = q.proprietaire_id WHERE q.statut IN ('en_attente', 'en_retard') AND ((q.date_echeance::date - CURRENT_DATE) IN (3, 1) OR (CURRENT_DATE - q.date_echeance::date) IN (1, 7))",
+        "options": {}
+      },
+      "id": "postgres-query",
+      "name": "Quittances à relancer",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [460, 300],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-pg-creds",
+          "name": "Supabase Postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.jalon }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "filter-jalon",
+      "name": "Filtrer jalon non null",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/{{ $env.WHATSAPP_PHONE_NUMBER_ID }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.WHATSAPP_ACCESS_TOKEN }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ messaging_product: 'whatsapp', to: $json.locataire_tel, type: 'text', text: { body: $json.jalon === 'J-3' ? 'Rappel : votre loyer de ' + $json.montant_total_fcfa.toLocaleString('fr-FR') + ' FCFA est dû le ' + $json.date_echeance + '. Merci de procéder au règlement. — Immo CI' : $json.jalon === 'J-1' ? 'RAPPEL URGENT : votre loyer de ' + $json.montant_total_fcfa.toLocaleString('fr-FR') + ' FCFA est dû DEMAIN (' + $json.date_echeance + '). — Immo CI' : $json.jalon === 'J+1' ? '⚠️ Votre loyer de ' + $json.montant_total_fcfa.toLocaleString('fr-FR') + ' FCFA était dû le ' + $json.date_echeance + '. Votre compte est en retard. — Immo CI' : 'DERNIER RAPPEL : votre loyer de ' + $json.montant_total_fcfa.toLocaleString('fr-FR') + ' FCFA est en retard depuis 7 jours. Contactez votre propriétaire. — Immo CI' } }) }}",
+        "options": { "response": { "response": { "responseFormat": "json" } } }
+      },
+      "id": "whatsapp-send",
+      "name": "Envoyer WhatsApp relance",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.N8N_WEBHOOK_BASE_URL.replace('/webhook', '') }}/api/quittances/webhook",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ quittanceId: $('Quittances à relancer').item.json.quittance_id, locataireId: $('Quittances à relancer').item.json.locataire_id, proprietaireId: $('Quittances à relancer').item.json.proprietaire_id, jalon: $('Quittances à relancer').item.json.jalon, montantFcfa: $('Quittances à relancer').item.json.montant_total_fcfa, dateEcheance: $('Quittances à relancer').item.json.date_echeance }) }}",
+        "options": {}
+      },
+      "id": "webhook-update",
+      "name": "Mettre à jour statut & notifications",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 300]
+    }
+  ],
+  "connections": {
+    "Cron quotidien 08:00": {
+      "main": [
+        [{ "node": "Quittances à relancer", "type": "main", "index": 0 }]
+      ]
+    },
+    "Quittances à relancer": {
+      "main": [
+        [{ "node": "Filtrer jalon non null", "type": "main", "index": 0 }]
+      ]
+    },
+    "Filtrer jalon non null": {
+      "main": [
+        [{ "node": "Envoyer WhatsApp relance", "type": "main", "index": 0 }]
+      ]
+    },
+    "Envoyer WhatsApp relance": {
+      "main": [
+        [{ "node": "Mettre à jour statut & notifications", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "timezone": "Africa/Abidjan",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "tags": ["immo-ci", "locatif", "relances"],
+  "triggerCount": 0,
+  "updatedAt": "2026-04-07T00:00:00.000Z",
+  "versionId": "1"
+}
