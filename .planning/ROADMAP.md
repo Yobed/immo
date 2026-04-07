@@ -70,6 +70,8 @@ Plans:
 
 **Exigences couvertes:** PAY-01 à PAY-06, RESA-01 à RESA-06, IA-01 à IA-04, DASH-01 à DASH-06
 
+**Plans:** 5 plans
+
 ### Plans
 
 | Plan | Titre | Description |
@@ -78,7 +80,14 @@ Plans:
 | 03-02 | Flow Réservation | Sélection dates → paiement → confirmation → état réservation, gestion conflits dates |
 | 03-03 | Contrats PDF OHADA | @react-pdf/renderer, toutes clauses OHADA, montants FCFA lettres + chiffres, stockage Supabase |
 | 03-04 | Chatbot & IA | Claude API chatbot CI (géographie Abidjan, prix FCFA, multi-turn), scoring annonces, génération desc |
-| 03-05 | Dashboard Analytics | KPI cards Tremor, Recharts (bar/gauge/donut/funnel), alertes prioritaires, calendrier encaissements |
+| 03-05 | Dashboard Analytics | KPI cards Tremor, Recharts (bar/gauge/donut/funnel), alertes prioritaires, fetch Supabase parallèle |
+
+Plans:
+- [ ] 03-01-PLAN.md — CinetPay (lib/cinetpay.ts + /api/paiements/initier + webhook /v2/payment/check + page retour)
+- [ ] 03-02-PLAN.md — Flow réservation (API conflits dates + ReservationFlow + pages nouvelle et statut)
+- [ ] 03-03-PLAN.md — Contrats OHADA (next.config.ts serverExternalPackages + lib/contrat-pdf.tsx + /api/contrats/generer)
+- [ ] 03-04-PLAN.md — Chatbot & IA (lib/claude.ts + /api/chat SSE streaming + scoring + ChatBot composant)
+- [ ] 03-05-PLAN.md — Dashboard Analytics (tailwind Tremor path + 6 composants + page Server Component)
 
 **Success Criteria:**
 1. Paiement Wave complété de bout en bout (initier → webhook → confirmation BDD)
@@ -141,8 +150,8 @@ Plans:
 | Phase | Titre | Exigences | Statut |
 |---|---|---|---|
 | Phase 1: Fondations & Infrastructure | FOND + AUTH + BDD + LAND | 24 req. | Complétée |
-| Phase 2: Annonces, Médias & Messagerie | BIEN + MDIA + MSG | 21 req. | En cours |
-| Phase 3: Paiements, Réservations, IA & Dashboard | PAY + RESA + IA + DASH | 22 req. | En attente |
+| Phase 2: Annonces, Médias & Messagerie | BIEN + MDIA + MSG | 21 req. | Complétée |
+| Phase 3: Paiements, Réservations, IA & Dashboard | PAY + RESA + IA + DASH | 22 req. | Planifiée |
 | Phase 4: Gestion Locative, Avis & KYC | LOC + AVIS + KYC | 12 req. | En attente |
 | Phase 5: App Mobile, Tests & Déploiement | MOB | 4 req. + infra | En attente |
 
@@ -150,4 +159,4 @@ Plans:
 
 ---
 *Roadmap créée : 2026-04-05*
-*Mise à jour : 2026-04-06 — Phase 2 planifiée (5 plans, 2 vagues)*
+*Mise à jour : 2026-04-06 — Phase 3 planifiée (5 plans, 3 vagues)*
