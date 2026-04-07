@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-last_updated: "2026-04-07T11:15:57.911Z"
+last_updated: "2026-04-07T11:23:14.732Z"
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 8
-  completed_plans: 9
+  completed_plans: 10
 ---
 
 # State: Immo CI Platform
@@ -23,7 +23,7 @@ Voir : `.planning/PROJECT.md` (mis à jour 2026-04-05)
 ## Current Position
 
 Phase: 02 (annonces-medias-messagerie) — EXECUTING
-Plan: 4 of 5 (Wave 2 en attente)
+Plan: 5 of 5 (Wave 2 en attente)
 
 ## Session Continuity
 
@@ -37,7 +37,7 @@ Plan: 4 of 5 (Wave 2 en attente)
 - Plan 02-01 complété : BienForm 4 étapes (Zod), API CRUD biens, BienCard, pages publiques liste+fiche, pages pro listing+create+edit
 - Plan 02-02 complété : Pipeline upload médias — Cloudinary (signature serveur), Supabase Storage, biens_medias CRUD, MediaUploader, MediaSortable dnd-kit, Step5Medias
 - Plan 02-05 complété : Messagerie Realtime (postgres_changes), FavorisButton, VisiteRequestForm, API visites POST+PATCH, pages /messages, /favoris, /visites
-- Dernière session arrêtée à : Completed 02-annonces-medias-messagerie-05-PLAN.md
+- Dernière session arrêtée à : Completed 02-annonces-medias-messagerie-03-PLAN.md
 
 ## Key Decisions
 
@@ -61,6 +61,8 @@ Plan: 4 of 5 (Wave 2 en attente)
 - **locataire_id+notes+heure_debut/fin dans visites DB** — non demandeur_id+notes_demandeur+creneau; creneau splitté en heure_debut+heure_fin dans API route
 - **VisiteActions extrait en Client Component** — Server Action avec fetch URL absolue invalide dans Next.js App Router (cf. ToggleStatutButton pattern)
 - **Cloudinary signed upload pattern** — signUploadParams() in lib/cloudinary.ts + auth-gated POST /api/upload/sign + CldUploadWidget with signatureEndpoint prop
+- **pannellum-react and embla-carousel-react have no @types** — added custom .d.ts declarations in apps/web/types/; matches pre-existing pattern for other packages
+- **BienCarousel replaces cover img in fiche bien** — full medias array used with type-based filtering; duree_sec added to Supabase select for video duration display
 
 ## Performance Metrics
 
@@ -74,6 +76,7 @@ Plan: 4 of 5 (Wave 2 en attente)
 | Phase 02-annonces-medias-messagerie P01 | 134 | 3 tasks | 20 files |
 | Phase 02-annonces-medias-messagerie P02 | 35 | 2 tasks | 7 files |
 | Phase 02-annonces-medias-messagerie P05 | 25 | 2 tasks | 11 files |
+| Phase 02-annonces-medias-messagerie P03 | 3min | 2 tasks | 5 files |
 
 ## Progress Summary
 

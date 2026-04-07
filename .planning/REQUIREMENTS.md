@@ -54,8 +54,8 @@
 - [x] **MDIA-02** : Propriétaire peut uploader des vidéos → Supabase Storage
 - [x] **MDIA-03** : Propriétaire peut uploader une photo 360° équirectangulaire → Supabase Storage
 - [x] **MDIA-04** : Propriétaire peut uploader des plans (PDF ou image) → Supabase Storage
-- [ ] **MDIA-05** : Composant `BienCarousel` : navigation flèches + swipe, miniatures, filtres par type
-- [ ] **MDIA-06** : Composant `Bien360` : vue Pannellum.js avec hotspots configurables
+- [x] **MDIA-05** : Composant `BienCarousel` : navigation flèches + swipe, miniatures, filtres par type
+- [x] **MDIA-06** : Composant `Bien360` : vue Pannellum.js avec hotspots configurables
 - [x] **MDIA-07** : Propriétaire peut réordonner les médias par drag & drop (dashboard)
 - [x] **MDIA-08** : Médias ordonnés récupérés efficacement (index bien_id + ordre)
 
