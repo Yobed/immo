@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Executing Phase 02
-last_updated: "2026-04-07T08:30:00.000Z"
+status: Ready to execute
+last_updated: "2026-04-07T08:21:44.649Z"
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 10
-  completed_plans: 6
+  total_plans: 8
+  completed_plans: 7
 ---
 
 # State: Immo CI Platform
@@ -23,7 +23,7 @@ Voir : `.planning/PROJECT.md` (mis à jour 2026-04-05)
 ## Current Position
 
 Phase: 02 (annonces-medias-messagerie) — EXECUTING
-Plan: 2 of 5 (Wave 2 en attente)
+Plan: 3 of 5 (Wave 2 en attente)
 
 ## Session Continuity
 
@@ -35,7 +35,8 @@ Plan: 2 of 5 (Wave 2 en attente)
 - Plan 01-04 complété : Tailwind design system (CI palette, typography, Button/Card/Badge/Input)
 - Plan 01-05 complété : Landing page 10 sections, SEO metadata, sitemap, robots
 - Plan 02-01 complété : BienForm 4 étapes (Zod), API CRUD biens, BienCard, pages publiques liste+fiche, pages pro listing+create+edit
-- Dernière session arrêtée à : Completed 02-annonces-medias-messagerie-01-PLAN.md
+- Plan 02-02 complété : Pipeline upload médias — Cloudinary (signature serveur), Supabase Storage, biens_medias CRUD, MediaUploader, MediaSortable dnd-kit, Step5Medias
+- Dernière session arrêtée à : Completed 02-annonces-medias-messagerie-02-PLAN.md
 
 ## Key Decisions
 
@@ -53,6 +54,9 @@ Plan: 2 of 5 (Wave 2 en attente)
 - **cn() via clsx + twMerge** — all UI components use this for composable class merging; import from @/lib/utils
 - **CSS variables + Tailwind tokens co-exist** — Tailwind tokens (bg-primary) for standard usage, CSS vars (border-[var(--border)]) for values outside the palette
 - **vue360 badge uses purple-100/purple-700** — visually distinct from photo (green), video (orange), plan (blue)
+- **npm install --legacy-peer-deps at monorepo root** — pannellum-react@1.2.4 declares peer react@16.x; resolved with --legacy-peer-deps from workspace root
+- **biens_medias couverture reset pattern** — always reset est_couverture=false on bien before setting new couverture; respects partial unique index biens_medias_couverture_unique_idx
+- **Cloudinary signed upload pattern** — signUploadParams() in lib/cloudinary.ts + auth-gated POST /api/upload/sign + CldUploadWidget with signatureEndpoint prop
 
 ## Performance Metrics
 
@@ -64,13 +68,14 @@ Plan: 2 of 5 (Wave 2 en attente)
 | Phase 01-fondations-infrastructure P04 | 15 | 5 tasks | 8 files |
 | Phase 01-fondations-infrastructure P05 | 20 | 4 tasks | 15 files |
 | Phase 02-annonces-medias-messagerie P01 | 134 | 3 tasks | 20 files |
+| Phase 02-annonces-medias-messagerie P02 | 35 | 2 tasks | 7 files |
 
 ## Progress Summary
 
 | Phase | Plans | Statut |
 |---|---|---|
 | 1 — Fondations & Infrastructure | 5 plans | Complété |
-| 2 — Annonces, Médias & Messagerie | 5 plans | En cours (1/5 complété) |
+| 2 — Annonces, Médias & Messagerie | 5 plans | En cours (2/5 complété) |
 | 3 — Paiements, Réservations, IA & Dashboard | 5 plans | En attente |
 | 4 — Gestion Locative, Avis & KYC | 4 plans | En attente |
 | 5 — App Mobile, Tests & Déploiement | 4 plans | En attente |

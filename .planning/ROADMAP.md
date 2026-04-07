@@ -36,7 +36,7 @@
 
 **Exigences couvertes:** BIEN-01 à BIEN-08, MDIA-01 à MDIA-08, MSG-01 à MSG-05
 
-**Plans:** 1/5 plans executed
+**Plans:** 2/5 plans executed
 
 ### Plans
 
@@ -50,7 +50,7 @@
 
 Plans:
 - [x] 02-01-PLAN.md — CRUD biens complet (formulaire 4 étapes, API CRUD, liste + fiche publiques)
-- [ ] 02-02-PLAN.md — Upload médias (Cloudinary photos, Supabase Storage vidéo/360°/plans, drag & drop ordre)
+- [x] 02-02-PLAN.md — Upload médias (Cloudinary photos, Supabase Storage vidéo/360°/plans, drag & drop ordre)
 - [ ] 02-03-PLAN.md — Carousel & Vue 360° (Embla 4 types filtres miniatures, Pannellum dynamic ssr:false)
 - [ ] 02-04-PLAN.md — Recherche & Carte (FTS français, filtres combinés, Mapbox markers FCFA)
 - [ ] 02-05-PLAN.md — Messagerie & Social (Realtime messages, favoris upsert, demandes de visite)
