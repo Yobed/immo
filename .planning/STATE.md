@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to plan
-last_updated: "2026-04-07T15:27:20.272Z"
+status: In progress
+last_updated: "2026-04-07T16:00:00.000Z"
 progress:
   total_phases: 5
   completed_phases: 2
@@ -22,8 +22,8 @@ Voir : `.planning/PROJECT.md` (mis à jour 2026-04-05)
 
 ## Current Position
 
-Phase: 3
-Plan: 05 complété
+Phase: 4
+Plan: 01 complété
 
 ## Session Continuity
 
@@ -41,7 +41,9 @@ Plan: 05 complété
 - Plan 03-01 complété : CinetPay intégration (initier + webhook + retour), PaiementButton, split commission
 - Plan 03-02 complété : Flow réservation — DatePicker + ReservationFlow 3 étapes + /api/reservations (conflict check 409) + pages nouvelle et statut
 - Plan 03-05 complété : Dashboard analytics — 6 composants (KPICard Tremor, RevenueBarChart/PaymentDonut/ConversionFunnel Recharts, OccupancyGauge Tremor, AlertesSection), page Server Component + Promise.all Supabase
-- Dernière session arrêtée à : Completed 03-paiements-r-servations-ia-dashboard-05-PLAN.md
+- Plan 03-03 complété : Contrats PDF OHADA — next.config.ts serverExternalPackages, lib/contrat-pdf.tsx (6 articles OHADA, montantEnLettres fr-FR), POST /api/contrats/generer (renderToBuffer + Storage), GET /api/contrats/[id] (auth guard)
+- Plan 04-01 complété : Pipeline quittances mensuelles — quittance-pdf.tsx, Edge Function Deno coordinator, POST /api/quittances/generer (renderToBuffer + Storage), workflow n8n cron 1er du mois + WhatsApp
+- Dernière session arrêtée à : Completed 04-gestion-locative-avis-kyc-04-01-PLAN.md
 
 ## Key Decisions
 
@@ -77,6 +79,12 @@ Plan: 05 complété
 - **Dashboard pattern: Server Component + dynamic() ssr:false** — Server Component fetch Supabase, props serialisables aux Client Components; Recharts via dynamic(ssr:false) pour eviter hydration mismatch
 - **tailwind.config.ts content path @tremor obligatoire** — sans './node_modules/@tremor/**', Tremor est unstyled en production (CSS purge)
 - **bienIds.length guard avant .in() Supabase** — .in('col', []) retourne une erreur; toujours verifier longueur array avant query IN
+- **to-words currency:false obligatoire** — currency:true genere "euros" meme avec locale fr-FR; toujours passer currency:false + suffixe "francs CFA" manuel
+- **renderToBuffer avec createElement()** — renderToBuffer attend un ReactElement; passer createElement(ContratDocument, props) pas du JSX direct
+- **montant_loyer_fcfa dans reservations** — champ reel pour le montant du loyer (pas montant_fcfa); toujours verifier migration 004
+- **Edge Function Deno = coordinator uniquement** — react-pdf indisponible dans Deno; pattern: Edge Fn appelle /api/quittances/generer via HTTP; Next.js gere renderToBuffer
+- **x-service-key header** — shared secret pour authentifier les appels Edge Function -> Next.js API
+- **Idempotence quittances via UNIQUE INDEX** — (contrat_id, mois) empeche les doublons; retour skipped:true si existant avec pdf_url
 
 ## Performance Metrics
 
@@ -94,6 +102,7 @@ Plan: 05 complété
 | Phase 02-annonces-medias-messagerie P06 | 2min | 2 tasks | 3 files |
 | Phase 03-paiements-r-servations-ia-dashboard P02 | 15 | 2 tasks | 5 files |
 | Phase 03-paiements-r-servations-ia-dashboard P05 | 15 | 2 tasks | 9 files |
+| Phase 04-gestion-locative-avis-kyc P01 | 15 | 2 tasks | 5 files |
 
 ## Progress Summary
 
@@ -102,7 +111,7 @@ Plan: 05 complété
 | 1 — Fondations & Infrastructure | 5 plans | Complété |
 | 2 — Annonces, Médias & Messagerie | 6 plans | Complété (6/6) |
 | 3 — Paiements, Réservations, IA & Dashboard | 5 plans | En attente |
-| 4 — Gestion Locative, Avis & KYC | 4 plans | En attente |
+| 4 — Gestion Locative, Avis & KYC | 4 plans | En cours (1/4) |
 | 5 — App Mobile, Tests & Déploiement | 4 plans | En attente |
 
 ## Key Context
