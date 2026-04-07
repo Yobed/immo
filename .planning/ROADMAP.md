@@ -124,24 +124,33 @@ Plans:
 
 ## Phase 5: App Mobile, Tests & Déploiement
 
-**Goal:** App Expo complète avec navigation, écrans adaptés React Native, notifications push Firebase FCM, tests E2E Playwright + Detox, déploiement Vercel + App Store + Google Play.
+**Goal:** App Expo complète avec navigation Expo Router 4, écrans React Native adaptés, notifications push Firebase FCM, tests E2E Playwright + Maestro, déploiement Vercel + EAS Build (App Store + Google Play).
 
 **Exigences couvertes:** MOB-01 à MOB-04
+
+**Plans:** 4 plans
 
 ### Plans
 
 | Plan | Titre | Description |
 |---|---|---|
-| 05-01 | App Expo | Navigation par onglets, écrans principaux (liste, fiche, réservation, profil), adaptations React Native |
-| 05-02 | Notifications Push | Firebase FCM, notifications push mobile, deep links depuis notification |
-| 05-03 | Tests & Qualité | Playwright (web E2E), Detox (mobile), optimisation images WebP, Lighthouse > 90 |
-| 05-04 | Déploiement | Vercel (web), EAS Build (iOS + Android), soumission App Store + Google Play |
+| 05-01 | App Expo — Navigation + Écrans | Migration FCM, client Supabase RN, hook useAuth, navigation Expo Router, 4 onglets + auth + fiche bien |
+| 05-02 | Notifications Push FCM | Expo Push Service + Edge Function send-push, hook usePushNotifications, deep links |
+| 05-03 | Tests E2E — Playwright + Maestro | 3 specs Playwright web (auth/réservation/dashboard), 3 flows Maestro mobile (auth/search/profil) |
+| 05-04 | Déploiement Vercel + EAS Build | vercel.json, eas.json 3 profils, app.json iOS+Android, GitHub Actions CD web + mobile |
+
+Plans:
+- [ ] 05-01-PLAN.md — App Expo (migration 009 fcm_token, Supabase RN client, useAuth, navigation tabs + auth + fiche bien, StyleSheet CI)
+- [ ] 05-02-PLAN.md — Push FCM (Edge Function send-push Expo Push Service, usePushNotifications, deep links notifications)
+- [ ] 05-03-PLAN.md — Tests E2E (Playwright 3 specs web, Maestro 3 flows mobile YAML)
+- [ ] 05-04-PLAN.md — Déploiement (vercel.json, eas.json, app.json, GitHub Actions deploy-web + eas-build)
 
 **Success Criteria:**
 1. App mobile installable sur iOS et Android (via TestFlight et Play Console)
-2. Notifications push reçues sur appareil réel depuis Firebase FCM
-3. Lighthouse score > 90 sur la landing page (mobile et desktop)
-4. Tests Playwright couvrent auth, réservation et paiement sans échec
+2. Notifications push reçues sur appareil réel (Expo Push Token enregistré dans profiles.fcm_token)
+3. Tests Playwright couvrent auth, réservation et dashboard sans échec en CI
+4. Flows Maestro exécutables sur device Android physique via `maestro test`
+5. `vercel.json` valide + GitHub Actions deploy-web déclenché sur push main
 
 ---
 
@@ -153,9 +162,9 @@ Plans:
 | Phase 2: Annonces, Médias & Messagerie | BIEN + MDIA + MSG | 21 req. | Complétée |
 | Phase 3: Paiements, Réservations, IA & Dashboard | PAY + RESA + IA + DASH | 22 req. | Planifiée |
 | Phase 4: Gestion Locative, Avis & KYC | LOC + AVIS + KYC | 12 req. | En attente |
-| Phase 5: App Mobile, Tests & Déploiement | MOB | 4 req. + infra | En attente |
+| Phase 5: App Mobile, Tests & Déploiement | MOB | 4 req. + infra | Planifiée |
 
-**Total:** 5 phases · 23 plans · 66 exigences v1
+**Total:** 5 phases · 27 plans · 66 exigences v1
 
 ---
 
@@ -193,4 +202,4 @@ Plans:
 
 ---
 *Roadmap créée : 2026-04-05*
-*Mise à jour : 2026-04-07 — Phase 4 planifiée (4 plans, 2 vagues) + 2 items backlog (999.1, 999.2)*
+*Mise à jour : 2026-04-07 — Phase 5 planifiée (4 plans, 2 vagues) — Maestro remplace Detox, StyleSheet natif RN (NativeWind v4 incompatible SDK 52 New Architecture)*
