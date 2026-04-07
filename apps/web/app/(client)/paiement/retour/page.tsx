@@ -1,0 +1,46 @@
+import Link from 'next/link'
+
+interface Props {
+  searchParams: { cpm_trans_id?: string; cpm_error_message?: string }
+}
+
+export default function PaiementRetourPage({ searchParams }: Props) {
+  const isSuccess = !searchParams.cpm_error_message ||
+                    searchParams.cpm_error_message === ''
+  return (
+    <div className="min-h-screen bg-surface flex items-center justify-center p-4">
+      <div className="bg-surface-card rounded-card p-8 max-w-md w-full text-center shadow-sm">
+        {isSuccess ? (
+          <>
+            <div className="text-5xl mb-4">&#10003;</div>
+            <h1 className="font-display text-2xl text-primary mb-2">
+              Paiement confirme !
+            </h1>
+            <p className="text-muted mb-6">
+              Votre reservation est confirmee. Un contrat sera genere automatiquement.
+            </p>
+          </>
+        ) : (
+          <>
+            <div className="text-5xl mb-4">&#10007;</div>
+            <h1 className="font-display text-2xl text-danger mb-2">
+              Paiement non abouti
+            </h1>
+            <p className="text-muted mb-2">
+              {searchParams.cpm_error_message ?? 'La transaction a ete annulee ou refusee.'}
+            </p>
+            <p className="text-sm text-muted mb-6">
+              Ref. transaction : {searchParams.cpm_trans_id ?? '—'}
+            </p>
+          </>
+        )}
+        <Link
+          href="/"
+          className="inline-block bg-primary text-white px-6 py-2 rounded-btn text-sm font-medium hover:opacity-90"
+        >
+          Retour a l&apos;accueil
+        </Link>
+      </div>
+    </div>
+  )
+}
