@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import { Badge } from '@/components/ui'
 import { TYPES_BIEN_LABELS, EQUIPEMENTS_LABELS } from '@immo-ci/shared/constants/biens'
 import { BienCarousel } from '@/components/bien/BienCarousel'
+import { FavorisButton } from '@/components/bien/FavorisButton'
+import { VisiteRequestForm } from '@/components/bien/VisiteRequestForm'
 
 function formatFCFA(n: number) {
   return new Intl.NumberFormat('fr-CI', { style: 'decimal', maximumFractionDigits: 0 }).format(n) + ' FCFA'
@@ -11,6 +13,7 @@ function formatFCFA(n: number) {
 export default async function FicheBienPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: bien } = await (supabase as any)
@@ -90,6 +93,15 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             </div>
           </div>
         )}
+
+        {/* Actions visiteur */}
+        <div className="mt-6 space-y-4">
+          <div className="flex items-center justify-between bg-white rounded-card border border-[var(--border)] p-4">
+            <span className="font-sans text-sm text-[var(--text)]">Sauvegarder ce bien</span>
+            <FavorisButton bienId={bien.id} userId={user?.id ?? null} />
+          </div>
+          <VisiteRequestForm bienId={bien.id} proprietaireId={bien.proprietaire_id as string} />
+        </div>
       </div>
     </main>
   )
