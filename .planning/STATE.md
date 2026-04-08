@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: In progress
-last_updated: "2026-04-08T05:24:27.947Z"
+last_updated: "2026-04-08T05:42:16.121Z"
 progress:
   total_phases: 7
   completed_phases: 4
   total_plans: 24
-  completed_plans: 22
+  completed_plans: 23
 ---
 
 # State: Immo CI Platform
@@ -23,8 +23,8 @@ Voir : `.planning/PROJECT.md` (mis à jour 2026-04-05)
 ## Current Position
 
 Phase: 05 (app-mobile-tests-d-ploiement) — EXECUTING
-Plans complétés: 05-01, 05-03
-Plan suivant: 05-02 (Push FCM)
+Plans complétés: 05-01, 05-02, 05-03
+Plan suivant: 05-04 (Déploiement)
 
 ## Session Continuity
 
@@ -48,7 +48,8 @@ Plan suivant: 05-02 (Push FCM)
 - Plan 04-03 complété : Système avis bidirectionnel — StarRating SVG, AvisCard, AvisForm, ReponseForm, POST /api/avis (guards terminee+23505+cible), PATCH /api/avis/[id]/reponse, pages /client/avis + /pro/avis avec note moyenne
 - Plan 05-01 complété : App mobile scaffold Expo — migration 009 fcm_token, client Supabase RN (detectSessionInUrl:false + expo-sqlite), AuthGuard useSegments, 4 onglets CI-styled, BienCard + StatutBadge, 17 fichiers
 - Plan 05-03 complété : Suite tests qualité — Playwright @1.59.1 (10 tests E2E web: auth/réservation/dashboard), 3 flows Maestro YAML mobile (auth/search-biens/profil, appId ci.immo.app)
-- Dernière session arrêtée à : Wave 1 complète (05-01 + 05-03)
+- Plan 05-02 complété : Push FCM — Edge Function send-push (Expo Push Service), hook usePushNotifications (registration + deep links), écran notifications, expo-notifications SDK 52
+- Dernière session arrêtée à : Completed 05-02-PLAN.md (Push FCM)
 
 ## Key Decisions
 
@@ -101,6 +102,9 @@ Plan suivant: 05-02 (Push FCM)
 - **playwright workers:1 + fullyParallel:false** — évite conflits auth state entre tests E2E (session partagée même serveur Next.js)
 - **Maestro runFlow conditionnel** — search-biens.yaml et profil.yaml lancent auth.yaml si non connecté (when: visible: Se connecter)
 - **role selectors Playwright prioritaires** — getByRole/getByPlaceholder/getByText résistants aux changements CSS Tailwind
+- **Expo Push Service (exp.host) vs FCM V1 direct** — plus simple en v1, pas de service account Google nécessaire; EAS gère conversion FCM/APNs
+- **PushNotificationsHandler composant null-render dans SessionProvider** — useSession requiert provider dans l'arbre React; return null = pure side effect
+- **ExponentPushToken stocké dans profiles.fcm_token** — pas le token FCM natif; EAS/Expo gère la conversion automatiquement
 
 ## Performance Metrics
 
@@ -122,6 +126,7 @@ Plan suivant: 05-02 (Push FCM)
 | Phase 04-gestion-locative-avis-kyc P03 | 15 | 2 tasks | 8 files |
 | Phase 05-app-mobile-tests-d-ploiement P01 | 9min | 3 tasks | 17 files |
 | Phase 05-app-mobile-tests-d-ploiement P03 | 15min | 2 tasks | 8 files |
+| Phase 05-app-mobile-tests-d-ploiement P02 | 2 | 2 tasks | 5 files |
 
 ## Progress Summary
 
@@ -131,7 +136,7 @@ Plan suivant: 05-02 (Push FCM)
 | 2 — Annonces, Médias & Messagerie | 6 plans | Complété (6/6) |
 | 3 — Paiements, Réservations, IA & Dashboard | 5 plans | En attente |
 | 4 — Gestion Locative, Avis & KYC | 4 plans | En cours (3/4) |
-| 5 — App Mobile, Tests & Déploiement | 4 plans | En cours (1/4) |
+| 5 — App Mobile, Tests & Déploiement | 4 plans | En cours (3/4) |
 
 ## Key Context
 
