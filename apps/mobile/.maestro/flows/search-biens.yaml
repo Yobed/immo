@@ -1,0 +1,63 @@
+# Flow Maestro: Recherche de biens et navigation vers fiche
+# Prérequis: App connectée avec compte test
+# Ce flow suppose que la connexion a déjà eu lieu (utiliser auth.yaml avant)
+
+appId: ci.immo.app
+---
+- launchApp
+
+# Si sur l'écran login, se connecter d'abord
+- runFlow:
+    when:
+      visible:
+        text: "Se connecter"
+    file: auth.yaml
+
+# Aller sur l'onglet Accueil
+- tapOn:
+    text: "Accueil"
+
+- waitForAnimationToEnd
+
+# Vérifier que la liste de biens est chargée (au moins 1 carte)
+- assertVisible:
+    text: "FCFA"
+    timeout: 8000
+
+# Rechercher par commune
+- tapOn:
+    placeholder: "Rechercher par commune ou titre..."
+- inputText: "Cocody"
+
+- waitForAnimationToEnd
+
+# Vérifier que des résultats s'affichent OU message vide
+# (pas d'assertion stricte sur le nombre de résultats)
+- assertVisible:
+    anyOf:
+      - text: "FCFA"
+      - text: "Aucun bien trouvé"
+
+# Effacer la recherche
+- tapOn:
+    placeholder: "Rechercher par commune ou titre..."
+- clearText
+
+- waitForAnimationToEnd
+
+# Taper sur le premier bien visible
+- tapOn:
+    text: "FCFA"    # Premier prix visible = premier bien
+    index: 0
+
+- waitForAnimationToEnd
+
+# Vérifier la fiche bien
+- assertVisible:
+    text: "FCFA"    # Prix toujours visible
+
+- assertVisible:
+    text: "Réserver ce bien"
+
+# Revenir à la liste
+- pressKey: Back

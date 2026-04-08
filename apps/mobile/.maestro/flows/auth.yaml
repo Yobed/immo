@@ -1,0 +1,64 @@
+# Flow Maestro: Authentification mobile
+# Prérequis: App installée sur device avec appId ci.immo.app
+# Compte test: test@immo-ci.com / TestPassword123!
+# Exécution: maestro test .maestro/flows/auth.yaml
+
+appId: ci.immo.app
+---
+- launchApp:
+    clearState: true    # Reset état app pour test propre
+
+# Vérifier que l'écran login est affiché (app démarre sur login si non connecté)
+- assertVisible:
+    text: "Immo CI"
+
+- assertVisible:
+    text: "Connectez-vous"
+
+# Remplir le formulaire de connexion
+- tapOn:
+    placeholder: "Email"
+- inputText: "test@immo-ci.com"
+
+- tapOn:
+    placeholder: "Mot de passe"
+- inputText: "TestPassword123!"
+
+- tapOn:
+    text: "Se connecter"
+
+# Attendre la navigation vers les onglets
+- waitForAnimationToEnd
+
+# Vérifier l'arrivée sur l'écran Accueil (onglet 1)
+- assertVisible:
+    text: "Accueil"
+
+# Vérifier la tab bar (4 onglets)
+- assertVisible:
+    text: "Favoris"
+- assertVisible:
+    text: "Réservations"
+- assertVisible:
+    text: "Profil"
+
+# Naviguer vers Profil
+- tapOn:
+    text: "Profil"
+
+- assertVisible:
+    text: "Déconnexion"
+
+# Tester la déconnexion
+- tapOn:
+    text: "Déconnexion"
+
+- assertVisible:
+    text: "Déconnexion"    # Dialog de confirmation
+
+- tapOn:
+    text: "Déconnexion"   # Confirmer dans l'Alert
+
+# Vérifier retour sur login
+- assertVisible:
+    text: "Immo CI"

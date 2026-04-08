@@ -1,0 +1,48 @@
+# Flow Maestro: Profil utilisateur et badge KYC
+# Prérequis: App connectée avec compte test
+
+appId: ci.immo.app
+---
+- launchApp
+
+# Se connecter si nécessaire
+- runFlow:
+    when:
+      visible:
+        text: "Se connecter"
+    file: auth.yaml
+
+# Naviguer vers l'onglet Profil
+- tapOn:
+    text: "Profil"
+
+- waitForAnimationToEnd
+
+# Vérifier que le nom est visible (initiales dans l'avatar ou nom complet)
+- assertVisible:
+    id: "profil-screen"
+    optional: true    # fallback si pas de testId
+
+# Vérifier l'email ou le rôle
+- assertVisible:
+    anyOf:
+      - text: "Locataire"
+      - text: "Propriétaire"
+      - text: "Agence"
+      - text: "test@immo-ci.com"
+
+# Vérifier la section KYC
+- assertVisible:
+    text: "Statut KYC"
+
+# Vérifier que le badge statut est présent (une des valeurs possibles)
+- assertVisible:
+    anyOf:
+      - text: "Non soumis"
+      - text: "En cours"
+      - text: "Approuvé"
+      - text: "Rejeté"
+
+# Vérifier le bouton déconnexion
+- assertVisible:
+    text: "Déconnexion"
