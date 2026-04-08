@@ -143,7 +143,7 @@ Plans:
 - [x] 05-01-PLAN.md — App Expo (migration 009 fcm_token, Supabase RN client, useAuth, navigation tabs + auth + fiche bien, StyleSheet CI)
 - [x] 05-02-PLAN.md — Push FCM (Edge Function send-push Expo Push Service, usePushNotifications, deep links notifications)
 - [x] 05-03-PLAN.md — Tests E2E (Playwright 3 specs web, Maestro 3 flows mobile YAML)
-- [ ] 05-04-PLAN.md — Déploiement (vercel.json, eas.json, app.json, GitHub Actions deploy-web + eas-build)
+- [x] 05-04-PLAN.md — Déploiement (vercel.json, eas.json, app.json, GitHub Actions deploy-web + eas-build)
 
 **Success Criteria:**
 1. App mobile installable sur iOS et Android (via TestFlight et Play Console)

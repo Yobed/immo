@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: In progress
-last_updated: "2026-04-08T05:42:16.121Z"
+last_updated: "2026-04-08T05:45:00.000Z"
 progress:
   total_phases: 7
   completed_phases: 4
   total_plans: 24
-  completed_plans: 23
+  completed_plans: 24
 ---
 
 # State: Immo CI Platform
@@ -23,8 +23,8 @@ Voir : `.planning/PROJECT.md` (mis à jour 2026-04-05)
 ## Current Position
 
 Phase: 05 (app-mobile-tests-d-ploiement) — EXECUTING
-Plans complétés: 05-01, 05-02, 05-03
-Plan suivant: 05-04 (Déploiement)
+Plans complétés: 05-01, 05-02, 05-03, 05-04
+Phase 5 COMPLETE — en attente de vérification
 
 ## Session Continuity
 
@@ -49,7 +49,8 @@ Plan suivant: 05-04 (Déploiement)
 - Plan 05-01 complété : App mobile scaffold Expo — migration 009 fcm_token, client Supabase RN (detectSessionInUrl:false + expo-sqlite), AuthGuard useSegments, 4 onglets CI-styled, BienCard + StatutBadge, 17 fichiers
 - Plan 05-03 complété : Suite tests qualité — Playwright @1.59.1 (10 tests E2E web: auth/réservation/dashboard), 3 flows Maestro YAML mobile (auth/search-biens/profil, appId ci.immo.app)
 - Plan 05-02 complété : Push FCM — Edge Function send-push (Expo Push Service), hook usePushNotifications (registration + deep links), écran notifications, expo-notifications SDK 52
-- Dernière session arrêtée à : Completed 05-02-PLAN.md (Push FCM)
+- Plan 05-04 complété : Pipeline déploiement — vercel.json Turborepo, eas.json 3 profils, app.json mis à jour, GitHub Actions deploy-web.yml (push main → Vercel) + eas-build.yml (tag v* → EAS iOS+Android)
+- Dernière session arrêtée à : Wave 2 complète (05-02 + 05-04) — Phase 5 tous plans exécutés
 
 ## Key Decisions
 
@@ -105,6 +106,9 @@ Plan suivant: 05-04 (Déploiement)
 - **Expo Push Service (exp.host) vs FCM V1 direct** — plus simple en v1, pas de service account Google nécessaire; EAS gère conversion FCM/APNs
 - **PushNotificationsHandler composant null-render dans SessionProvider** — useSession requiert provider dans l'arbre React; return null = pure side effect
 - **ExponentPushToken stocké dans profiles.fcm_token** — pas le token FCM natif; EAS/Expo gère la conversion automatiquement
+- **vercel.json sans rootDirectory** — Vercel reste à la racine pour que Turborepo résolve les workspaces npm
+- **newArchEnabled:false dans app.json** — compatibilité NativeWind v4 et libs tierces SDK 52
+- **eas build --no-wait** — builds EAS soumis asynchrones, pas de timeout CI bloquant (60min)
 
 ## Performance Metrics
 
@@ -126,7 +130,8 @@ Plan suivant: 05-04 (Déploiement)
 | Phase 04-gestion-locative-avis-kyc P03 | 15 | 2 tasks | 8 files |
 | Phase 05-app-mobile-tests-d-ploiement P01 | 9min | 3 tasks | 17 files |
 | Phase 05-app-mobile-tests-d-ploiement P03 | 15min | 2 tasks | 8 files |
-| Phase 05-app-mobile-tests-d-ploiement P02 | 2 | 2 tasks | 5 files |
+| Phase 05-app-mobile-tests-d-ploiement P02 | 2min | 2 tasks | 5 files |
+| Phase 05-app-mobile-tests-d-ploiement P04 | 8min | 2 tasks | 7 files |
 
 ## Progress Summary
 
