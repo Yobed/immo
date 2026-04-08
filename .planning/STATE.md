@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to execute
+status: In progress
 last_updated: "2026-04-08T05:24:27.947Z"
 progress:
   total_phases: 7
   completed_phases: 4
   total_plans: 24
-  completed_plans: 21
+  completed_plans: 22
 ---
 
 # State: Immo CI Platform
@@ -23,7 +23,8 @@ Voir : `.planning/PROJECT.md` (mis à jour 2026-04-05)
 ## Current Position
 
 Phase: 05 (app-mobile-tests-d-ploiement) — EXECUTING
-Plan: 2 of 4
+Plans complétés: 05-01, 05-03
+Plan suivant: 05-02 (Push FCM)
 
 ## Session Continuity
 
@@ -46,7 +47,8 @@ Plan: 2 of 4
 - Plan 04-02 complété : Workflow relances loyer + page quittances propriétaire
 - Plan 04-03 complété : Système avis bidirectionnel — StarRating SVG, AvisCard, AvisForm, ReponseForm, POST /api/avis (guards terminee+23505+cible), PATCH /api/avis/[id]/reponse, pages /client/avis + /pro/avis avec note moyenne
 - Plan 05-01 complété : App mobile scaffold Expo — migration 009 fcm_token, client Supabase RN (detectSessionInUrl:false + expo-sqlite), AuthGuard useSegments, 4 onglets CI-styled, BienCard + StatutBadge, 17 fichiers
-- Dernière session arrêtée à : Completed 05-app-mobile-tests-d-ploiement-05-01-PLAN.md
+- Plan 05-03 complété : Suite tests qualité — Playwright @1.59.1 (10 tests E2E web: auth/réservation/dashboard), 3 flows Maestro YAML mobile (auth/search-biens/profil, appId ci.immo.app)
+- Dernière session arrêtée à : Wave 1 complète (05-01 + 05-03)
 
 ## Key Decisions
 
@@ -96,6 +98,9 @@ Plan: 2 of 4
 - **profiles.full_name (pas nom+prenom) en mobile** — schéma réel Supabase; initiales via split(' ')
 - **detectSessionInUrl:false obligatoire en React Native** — crash Hermes si true (pas de browser URL)
 - **expo-sqlite localStorage pour Supabase auth mobile** — alternative moderne à AsyncStorage; import ordre critique: url-polyfill > expo-sqlite/localStorage > createClient
+- **playwright workers:1 + fullyParallel:false** — évite conflits auth state entre tests E2E (session partagée même serveur Next.js)
+- **Maestro runFlow conditionnel** — search-biens.yaml et profil.yaml lancent auth.yaml si non connecté (when: visible: Se connecter)
+- **role selectors Playwright prioritaires** — getByRole/getByPlaceholder/getByText résistants aux changements CSS Tailwind
 
 ## Performance Metrics
 
@@ -116,6 +121,7 @@ Plan: 2 of 4
 | Phase 04-gestion-locative-avis-kyc P01 | 15 | 2 tasks | 5 files |
 | Phase 04-gestion-locative-avis-kyc P03 | 15 | 2 tasks | 8 files |
 | Phase 05-app-mobile-tests-d-ploiement P01 | 9min | 3 tasks | 17 files |
+| Phase 05-app-mobile-tests-d-ploiement P03 | 15min | 2 tasks | 8 files |
 
 ## Progress Summary
 
@@ -125,7 +131,7 @@ Plan: 2 of 4
 | 2 — Annonces, Médias & Messagerie | 6 plans | Complété (6/6) |
 | 3 — Paiements, Réservations, IA & Dashboard | 5 plans | En attente |
 | 4 — Gestion Locative, Avis & KYC | 4 plans | En cours (3/4) |
-| 5 — App Mobile, Tests & Déploiement | 4 plans | En attente |
+| 5 — App Mobile, Tests & Déploiement | 4 plans | En cours (1/4) |
 
 ## Key Context
 

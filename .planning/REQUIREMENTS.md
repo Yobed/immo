@@ -122,7 +122,7 @@
 - [x] **MOB-01** : App Expo avec navigation par onglets (Expo Router)
 - [x] **MOB-02** : Écrans principaux : liste biens, fiche bien, réservation, profil
 - [ ] **MOB-03** : Composants React Native adaptés depuis le web (~85% code partagé)
-- [ ] **MOB-04** : Notifications push Firebase FCM fonctionnelles
+- [x] **MOB-04** : Notifications push Firebase FCM fonctionnelles
 
 ### Landing page & SEO
 
