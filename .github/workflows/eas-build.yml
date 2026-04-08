@@ -1,0 +1,62 @@
+# .github/workflows/eas-build.yml
+# Build EAS production (iOS + Android) déclenché sur push de tag semver
+# Usage: git tag v1.0.0 && git push --tags
+#
+# Secrets requis dans GitHub -> Settings -> Secrets and variables -> Actions:
+#   EXPO_TOKEN: depuis expo.dev/settings/access-tokens
+#
+# Prérequis:
+#   - apps/mobile/app.json: extra.eas.projectId renseigné
+#   - apps/mobile/eas.json: profil production configuré
+#   - Certificats iOS gérés par EAS (auto-provisioned)
+#   - Keystore Android géré par EAS (auto-generated premier build)
+
+name: EAS Build (Mobile Production)
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'   # semver: v1.0.0, v1.2.3, etc.
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false    # Ne pas annuler les builds en cours
+
+jobs:
+  build:
+    name: EAS Build Production
+    runs-on: ubuntu-latest
+    timeout-minutes: 60         # Les builds EAS peuvent prendre 30-45 min
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies (root)
+        run: npm ci
+
+      - name: Install EAS CLI
+        run: npm install --global eas-cli
+
+      - name: EAS Build -- Android (App Bundle)
+        working-directory: apps/mobile
+        run: eas build --platform android --profile production --non-interactive --no-wait
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: EAS Build -- iOS
+        working-directory: apps/mobile
+        run: eas build --platform ios --profile production --non-interactive --no-wait
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Notify build submitted
+        run: |
+          echo "Builds EAS soumis pour le tag ${{ github.ref_name }}"
+          echo "Suivre la progression sur: https://expo.dev/accounts/immo-ci/projects/immo-ci/builds"
