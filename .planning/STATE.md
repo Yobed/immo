@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: In progress
-last_updated: "2026-04-07T16:00:00.000Z"
+status: Ready to execute
+last_updated: "2026-04-08T05:24:27.947Z"
 progress:
-  total_phases: 5
-  completed_phases: 2
-  total_plans: 16
-  completed_plans: 15
+  total_phases: 7
+  completed_phases: 4
+  total_plans: 24
+  completed_plans: 21
 ---
 
 # State: Immo CI Platform
@@ -22,8 +22,8 @@ Voir : `.planning/PROJECT.md` (mis à jour 2026-04-05)
 
 ## Current Position
 
-Phase: 4
-Plan: 03 complété
+Phase: 05 (app-mobile-tests-d-ploiement) — EXECUTING
+Plan: 2 of 4
 
 ## Session Continuity
 
@@ -45,7 +45,8 @@ Plan: 03 complété
 - Plan 04-01 complété : Pipeline quittances mensuelles — quittance-pdf.tsx, Edge Function Deno coordinator, POST /api/quittances/generer (renderToBuffer + Storage), workflow n8n cron 1er du mois + WhatsApp
 - Plan 04-02 complété : Workflow relances loyer + page quittances propriétaire
 - Plan 04-03 complété : Système avis bidirectionnel — StarRating SVG, AvisCard, AvisForm, ReponseForm, POST /api/avis (guards terminee+23505+cible), PATCH /api/avis/[id]/reponse, pages /client/avis + /pro/avis avec note moyenne
-- Dernière session arrêtée à : Completed 04-gestion-locative-avis-kyc-04-03-PLAN.md
+- Plan 05-01 complété : App mobile scaffold Expo — migration 009 fcm_token, client Supabase RN (detectSessionInUrl:false + expo-sqlite), AuthGuard useSegments, 4 onglets CI-styled, BienCard + StatutBadge, 17 fichiers
+- Dernière session arrêtée à : Completed 05-app-mobile-tests-d-ploiement-05-01-PLAN.md
 
 ## Key Decisions
 
@@ -90,6 +91,11 @@ Plan: 03 complété
 - **Two-step filter pour réservations sans avis** — Supabase JS ne supporte pas les sous-requêtes SQL inline dans .not(); fetch IDs en étape 1 puis .not('id','in',...) avec guard longueur > 0
 - **StarRating SVG pur sans lib externe** — path polygon étoile, fill orange #E67E22 si active, stroke gray sinon; disabled={readonly} sur button
 - **Notification avis_recu avec lien_type=reservation** — lien vers réservation pas vers avis directement
+- **useAuth.tsx (pas .ts) en React Native** — JSX dans hooks nécessite extension .tsx sinon TS1005/TS1128 errors
+- **BienListItem type local mobile** — schéma réel biens: prix_mois_fcfa/prix_vente_fcfa (pas prix); photos dans biens_medias (pas photo_principale_url)
+- **profiles.full_name (pas nom+prenom) en mobile** — schéma réel Supabase; initiales via split(' ')
+- **detectSessionInUrl:false obligatoire en React Native** — crash Hermes si true (pas de browser URL)
+- **expo-sqlite localStorage pour Supabase auth mobile** — alternative moderne à AsyncStorage; import ordre critique: url-polyfill > expo-sqlite/localStorage > createClient
 
 ## Performance Metrics
 
@@ -109,6 +115,7 @@ Plan: 03 complété
 | Phase 03-paiements-r-servations-ia-dashboard P05 | 15 | 2 tasks | 9 files |
 | Phase 04-gestion-locative-avis-kyc P01 | 15 | 2 tasks | 5 files |
 | Phase 04-gestion-locative-avis-kyc P03 | 15 | 2 tasks | 8 files |
+| Phase 05-app-mobile-tests-d-ploiement P01 | 9min | 3 tasks | 17 files |
 
 ## Progress Summary
 

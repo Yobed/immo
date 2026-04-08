@@ -102,12 +102,12 @@
 
 ### Dashboard propriétaire
 
-- [ ] **DASH-01** : 4 KPI cards : revenus du mois, taux d'occupation, réservations en attente, messages non lus
-- [ ] **DASH-02** : Bar chart revenus 12 derniers mois (Recharts)
-- [ ] **DASH-03** : Gauge taux d'occupation par bien (Tremor)
-- [ ] **DASH-04** : Donut répartition paiements par méthode (Wave, OM, MTN, Moov, CB)
-- [ ] **DASH-05** : Section alertes triées par priorité (rouge / orange / jaune)
-- [ ] **DASH-06** : Funnel de conversion : vues → contacts → visites → réservations → signatures
+- [x] **DASH-01** : 4 KPI cards : revenus du mois, taux d'occupation, réservations en attente, messages non lus
+- [x] **DASH-02** : Bar chart revenus 12 derniers mois (Recharts)
+- [x] **DASH-03** : Gauge taux d'occupation par bien (Tremor)
+- [x] **DASH-04** : Donut répartition paiements par méthode (Wave, OM, MTN, Moov, CB)
+- [x] **DASH-05** : Section alertes triées par priorité (rouge / orange / jaune)
+- [x] **DASH-06** : Funnel de conversion : vues → contacts → visites → réservations → signatures
 
 ### Avis & KYC
 
@@ -119,8 +119,8 @@
 
 ### App mobile Expo
 
-- [ ] **MOB-01** : App Expo avec navigation par onglets (Expo Router)
-- [ ] **MOB-02** : Écrans principaux : liste biens, fiche bien, réservation, profil
+- [x] **MOB-01** : App Expo avec navigation par onglets (Expo Router)
+- [x] **MOB-02** : Écrans principaux : liste biens, fiche bien, réservation, profil
 - [ ] **MOB-03** : Composants React Native adaptés depuis le web (~85% code partagé)
 - [ ] **MOB-04** : Notifications push Firebase FCM fonctionnelles
 
