@@ -18,6 +18,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@hookform/resolvers": "^3.9.0",
     "@immo-ci/shared": "*",
+    "@react-pdf/renderer": "^4.4.0",
     "@supabase/ssr": "0.10.0",
     "@supabase/supabase-js": "2.101.1",
     "@tremor/react": "^3.18.7",
@@ -37,6 +38,7 @@
     "react-map-gl": "^8.1.0",
     "recharts": "^3.8.1",
     "tailwind-merge": "^2.3.0",
+    "to-words": "^5.4.0",
     "zod": "4.3.6"
   },
   "devDependencies": {
