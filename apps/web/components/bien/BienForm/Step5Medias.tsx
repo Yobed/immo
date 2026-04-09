@@ -1,8 +1,10 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { MediaUploader } from '@/components/media/MediaUploader'
 import { MediaSortable } from '@/components/media/MediaSortable'
 import { createClient } from '@/lib/supabase/client'
+import { authFetch } from '@/lib/auth-fetch'
 
 type MediaType = 'photo' | 'video' | 'vue_360' | 'plan'
 
@@ -22,6 +24,8 @@ interface Step5MediasProps {
 export function Step5Medias({ bienId }: Step5MediasProps) {
   const [medias, setMedias] = useState<Media[]>([])
   const [activeType, setActiveType] = useState<MediaType>('photo')
+  const [publishing, setPublishing] = useState(false)
+  const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
@@ -33,6 +37,17 @@ export function Step5Medias({ bienId }: Step5MediasProps) {
       .then(({ data }) => { if (data) setMedias(data as Media[]) })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bienId])
+
+  const handlePublish = async () => {
+    setPublishing(true)
+    await authFetch(`/api/biens/${bienId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ statut: 'publie' }),
+    })
+    setPublishing(false)
+    router.push('/mes-biens')
+  }
 
   const handleUploadComplete = (_url: string, _type: MediaType) => {
     // Refresh medialist after upload
@@ -92,6 +107,25 @@ export function Step5Medias({ bienId }: Step5MediasProps) {
           <MediaSortable bienId={bienId} initialMedias={medias} />
         </div>
       )}
+
+      {/* Actions de fin */}
+      <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-[var(--border)]">
+        <button
+          type="button"
+          onClick={() => router.push('/mes-biens')}
+          className="flex-1 py-3 px-6 rounded-btn border border-[var(--border)] font-sans text-sm text-[var(--text)] hover:border-primary/40 transition-colors"
+        >
+          Enregistrer en brouillon
+        </button>
+        <button
+          type="button"
+          onClick={handlePublish}
+          disabled={publishing}
+          className="flex-1 py-3 px-6 rounded-btn bg-primary text-white font-sans font-medium text-sm hover:bg-primary/90 transition-colors disabled:opacity-60"
+        >
+          {publishing ? 'Publication…' : 'Publier l\'annonce'}
+        </button>
+      </div>
     </div>
   )
 }
