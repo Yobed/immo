@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { KYCStatusBadge } from '@/components/kyc/KYCStatusBadge'
 import { KYCUploader } from '@/components/kyc/KYCUploader'
+import { ProfileEditForm } from '@/components/profil/ProfileEditForm'
 
 type KYCStatut = 'non_verifie' | 'en_cours' | 'verifie'
 
@@ -39,33 +40,17 @@ export default async function ProfilPage() {
         <section className="bg-white rounded-card shadow-card p-6 space-y-4">
           <h2 className="font-display text-xl text-[var(--text)]">Informations personnelles</h2>
 
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-sans text-muted uppercase tracking-wide mb-1">
-                Nom complet
-              </label>
-              <p className="font-sans text-[var(--text)]">
-                {p?.nom_complet ?? '—'}
-              </p>
+          <div className="space-y-4">
+            <div className="pb-3 border-b border-[var(--border)]">
+              <label className="block text-xs font-sans text-muted uppercase tracking-wide mb-1">Email</label>
+              <p className="font-sans text-sm text-muted">{p?.email ?? user.email ?? '—'}</p>
+              <p className="text-xs text-muted font-sans mt-0.5">L&apos;email ne peut pas être modifié ici.</p>
             </div>
-
-            <div>
-              <label className="block text-xs font-sans text-muted uppercase tracking-wide mb-1">
-                Email
-              </label>
-              <p className="font-sans text-[var(--text)]">
-                {p?.email ?? user.email ?? '—'}
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-xs font-sans text-muted uppercase tracking-wide mb-1">
-                Téléphone
-              </label>
-              <p className="font-sans text-[var(--text)]">
-                {p?.telephone ?? '—'}
-              </p>
-            </div>
+            <ProfileEditForm
+              initialNom={p?.nom_complet ?? ''}
+              initialTelephone={p?.telephone ?? ''}
+              userId={user.id}
+            />
           </div>
         </section>
 
@@ -83,7 +68,7 @@ export default async function ProfilPage() {
           )}
 
           {kycStatut === 'en_cours' && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-card p-4 text-sm font-sans text-yellow-800">
+            <div className="bg-warning/10 border border-warning/30 rounded-card p-4 text-sm font-sans text-warning">
               Documents soumis — vérification en cours (2-3 jours ouvrés)
             </div>
           )}

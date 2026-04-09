@@ -79,19 +79,19 @@ export default async function QuittancesPage({ searchParams }: PageProps) {
         {/* Stats rapides */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <Card className="p-4 text-center">
-            <p className="text-2xl font-bold">{stats.total}</p>
+            <p className="text-2xl font-bold font-mono">{stats.total}</p>
             <p className="text-sm text-muted">Total</p>
           </Card>
           <Card className="p-4 text-center border-l-4 border-warning">
-            <p className="text-2xl font-bold text-warning">{stats.en_attente}</p>
+            <p className="text-2xl font-bold font-mono text-warning">{stats.en_attente}</p>
             <p className="text-sm text-muted">En attente</p>
           </Card>
           <Card className="p-4 text-center border-l-4 border-danger">
-            <p className="text-2xl font-bold text-danger">{stats.en_retard}</p>
+            <p className="text-2xl font-bold font-mono text-danger">{stats.en_retard}</p>
             <p className="text-sm text-muted">En retard</p>
           </Card>
           <Card className="p-4 text-center border-l-4 border-accent">
-            <p className="text-2xl font-bold text-accent">{stats.payee}</p>
+            <p className="text-2xl font-bold font-mono text-accent">{stats.payee}</p>
             <p className="text-sm text-muted">Payées</p>
           </Card>
         </div>
@@ -144,7 +144,7 @@ export default async function QuittancesPage({ searchParams }: PageProps) {
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="font-bold text-[var(--text)]">{Number(q.montant_total_fcfa).toLocaleString('fr-FR')} FCFA</p>
+                    <p className="font-bold font-mono text-[var(--text)]">{Number(q.montant_total_fcfa).toLocaleString('fr-FR')} FCFA</p>
                     {q.pdf_url && (
                       <a
                         href={q.pdf_url}

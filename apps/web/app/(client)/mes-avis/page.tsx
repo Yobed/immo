@@ -63,76 +63,78 @@ export default async function ClientAvisPage() {
     : null
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Mes Avis</h1>
+    <div className="bg-surface min-h-screen">
+      <div className="max-w-3xl mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold font-display text-[var(--text)] mb-6">Mes Avis</h1>
 
-      {/* Réservations à noter */}
-      {reservationsANoter.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-800 mb-3">
-            À évaluer ({reservationsANoter.length})
-          </h2>
-          <div className="space-y-4">
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {reservationsANoter.map((resa: any) => {
-              const bien = resa.biens as { titre: string; commune: string } | null
-              const proprio = resa['profiles!proprietaire_id'] as { id: string; nom_complet: string } | null
-              return (
-                <Card key={resa.id} className="p-4">
-                  <p className="font-medium text-gray-900 mb-1">
-                    {bien?.titre ?? 'Bien'} — {bien?.commune}
-                  </p>
-                  <p className="text-sm text-gray-500 mb-3">
-                    Séjour terminé le {new Date(resa.date_fin).toLocaleDateString('fr-FR')}
-                  </p>
-                  <AvisForm
-                    reservationId={resa.id}
-                    cibleId={proprio?.id ?? ''}
-                    cibleNom={proprio?.nom_complet ?? 'le propriétaire'}
-                  />
-                </Card>
-              )
-            })}
-          </div>
-        </section>
-      )}
-
-      {/* Avis reçus */}
-      <section>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-gray-800">
-            Avis reçus ({avisRecus.length})
-          </h2>
-          {noteMoyenne && (
-            <span className="text-sm font-medium text-orange-600 bg-orange-50 px-3 py-1 rounded-full">
-              Note moyenne: {noteMoyenne}/5
-            </span>
-          )}
-        </div>
-
-        {avisRecus.length === 0 ? (
-          <Card className="p-8 text-center text-gray-500">
-            <p>Aucun avis reçu pour le moment.</p>
-          </Card>
-        ) : (
-          <div className="space-y-3">
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {avisRecus.map((avis: any) => {
-              const auteur = avis['profiles!auteur_id'] as { nom_complet: string } | null
-              return (
-                <AvisCard
-                  key={avis.id}
-                  auteurNom={auteur?.nom_complet ?? 'Anonyme'}
-                  note={avis.note}
-                  commentaire={avis.commentaire}
-                  reponseCible={avis.reponse_cible}
-                  dateCreation={avis.created_at}
-                />
-              )
-            })}
-          </div>
+        {/* Réservations à noter */}
+        {reservationsANoter.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-lg font-semibold text-[var(--text)] mb-3">
+              À évaluer ({reservationsANoter.length})
+            </h2>
+            <div className="space-y-4">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {reservationsANoter.map((resa: any) => {
+                const bien = resa.biens as { titre: string; commune: string } | null
+                const proprio = resa['profiles!proprietaire_id'] as { id: string; nom_complet: string } | null
+                return (
+                  <Card key={resa.id} className="p-4">
+                    <p className="font-medium text-[var(--text)] mb-1">
+                      {bien?.titre ?? 'Bien'} — {bien?.commune}
+                    </p>
+                    <p className="text-sm text-muted mb-3">
+                      Séjour terminé le {new Date(resa.date_fin).toLocaleDateString('fr-FR')}
+                    </p>
+                    <AvisForm
+                      reservationId={resa.id}
+                      cibleId={proprio?.id ?? ''}
+                      cibleNom={proprio?.nom_complet ?? 'le propriétaire'}
+                    />
+                  </Card>
+                )
+              })}
+            </div>
+          </section>
         )}
-      </section>
+
+        {/* Avis reçus */}
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-semibold text-[var(--text)]">
+              Avis reçus ({avisRecus.length})
+            </h2>
+            {noteMoyenne && (
+              <span className="text-sm font-medium text-secondary bg-[var(--surface)] px-3 py-1 rounded-full border border-[var(--border)]">
+                Note moyenne: {noteMoyenne}/5
+              </span>
+            )}
+          </div>
+
+          {avisRecus.length === 0 ? (
+            <Card className="p-8 text-center text-muted">
+              <p>Aucun avis reçu pour le moment.</p>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {avisRecus.map((avis: any) => {
+                const auteur = avis['profiles!auteur_id'] as { nom_complet: string } | null
+                return (
+                  <AvisCard
+                    key={avis.id}
+                    auteurNom={auteur?.nom_complet ?? 'Anonyme'}
+                    note={avis.note}
+                    commentaire={avis.commentaire}
+                    reponseCible={avis.reponse_cible}
+                    dateCreation={avis.created_at}
+                  />
+                )
+              })}
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   )
 }

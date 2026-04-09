@@ -176,7 +176,7 @@ export default function LoginPage() {
           href="/verify-otp"
           className="text-sm text-primary hover:underline"
         >
-          Se connecter avec mon Téléphone (OTP)
+          Se connecter par téléphone (OTP)
         </Link>
       </div>
     </div>

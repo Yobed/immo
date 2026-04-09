@@ -36,7 +36,16 @@ export default async function VisitesPropriétairePage() {
       <div className="max-w-4xl mx-auto px-4">
         <h1 className="font-display text-3xl text-[var(--text)] mb-6">Demandes de visite</h1>
         {(!visites || visites.length === 0) ? (
-          <p className="text-center text-muted font-sans py-16">Aucune demande de visite.</p>
+          <div className="text-center py-16">
+            <div className="text-5xl mb-4">📅</div>
+            <p className="font-display text-xl text-[var(--text)] mb-2">Aucune demande de visite</p>
+            <p className="text-muted font-sans text-sm mb-6">
+              Les demandes de visite apparaîtront ici une fois vos annonces publiées.
+            </p>
+            <a href="/mes-biens" className="inline-block px-6 py-2 bg-primary text-white rounded-btn text-sm font-sans font-medium hover:bg-primary/90 transition-colors">
+              Voir mes annonces
+            </a>
+          </div>
         ) : (
           <div className="space-y-4">
             {(visites as any[]).map((visite) => (

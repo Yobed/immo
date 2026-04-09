@@ -1,12 +1,6 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
-import { Badge } from '@/components/ui'
-import { TYPES_BIEN_LABELS } from '@immo-ci/shared/constants/biens'
-
-function formatFCFA(n: number) {
-  return new Intl.NumberFormat('fr-CI', { style: 'decimal', maximumFractionDigits: 0 }).format(n) + ' FCFA'
-}
+import { BienCard } from '@/components/bien/BienCard'
 
 type BienRow = {
   id: string
@@ -69,63 +63,22 @@ export async function FeaturedProperties() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto mb-10">
-          {rows.map((bien) => {
-            const photo = coverMap[bien.id]
-            const prix = bien.prix_nuit_fcfa
-              ? `${formatFCFA(bien.prix_nuit_fcfa)}/nuit`
-              : bien.prix_mois_fcfa
-              ? `${formatFCFA(bien.prix_mois_fcfa)}/mois`
-              : bien.prix_vente_fcfa
-              ? formatFCFA(bien.prix_vente_fcfa)
-              : null
-
-            return (
-              <Link key={bien.id} href={`/biens/${bien.id}`} className="block group">
-                <div className="bg-white rounded-card border border-[var(--border)] overflow-hidden hover:shadow-lg transition-shadow">
-                  {/* Photo */}
-                  <div className="relative aspect-[4/3] bg-primary/10">
-                    {photo ? (
-                      <Image
-                        src={photo}
-                        alt={bien.titre}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-primary/20 text-5xl">
-                        🏠
-                      </div>
-                    )}
-                    <div className="absolute top-3 left-3">
-                      <Badge variant="default" className="text-xs">
-                        {TYPES_BIEN_LABELS[bien.type_bien] ?? bien.type_bien}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  {/* Infos */}
-                  <div className="p-4">
-                    {prix && (
-                      <p className="font-mono text-lg font-semibold text-primary mb-1">{prix}</p>
-                    )}
-                    <h3 className="font-display text-base font-semibold text-[var(--text)] line-clamp-1 mb-1">
-                      {bien.titre}
-                    </h3>
-                    <p className="font-sans text-sm text-muted mb-3">
-                      {bien.quartier ? `${bien.quartier}, ` : ''}{bien.commune}
-                    </p>
-                    {(bien.surface_m2 || bien.nb_pieces) && (
-                      <div className="flex gap-4 text-xs text-muted font-sans">
-                        {bien.nb_pieces && <span>{bien.nb_pieces} pièce{bien.nb_pieces > 1 ? 's' : ''}</span>}
-                        {bien.surface_m2 && <span>{bien.surface_m2} m²</span>}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </Link>
-            )
-          })}
+          {rows.map((bien) => (
+            <BienCard
+              key={bien.id}
+              id={bien.id}
+              titre={bien.titre}
+              commune={bien.commune}
+              quartier={bien.quartier}
+              type_bien={bien.type_bien}
+              prix_mois_fcfa={bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa}
+              prix_nuit_fcfa={bien.prix_nuit_fcfa}
+              prix_vente_fcfa={bien.prix_vente_fcfa}
+              surface_m2={bien.surface_m2}
+              nb_pieces={bien.nb_pieces}
+              photo_url={coverMap[bien.id] ?? null}
+            />
+          ))}
         </div>
 
         <div className="text-center">

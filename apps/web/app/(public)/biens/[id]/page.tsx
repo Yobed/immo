@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
+import Image from 'next/image'
 import { Badge } from '@/components/ui'
 import { TYPES_BIEN_LABELS, EQUIPEMENTS_LABELS } from '@immo-ci/shared/constants/biens'
 import { BienCarousel } from '@/components/bien/BienCarousel'
@@ -223,8 +224,13 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
               <div className="bg-white rounded-card border border-[var(--border)] p-4 mb-4 flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-bold text-lg flex-shrink-0">
                   {proprio.avatar_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={proprio.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover" />
+                    <Image
+                      src={proprio.avatar_url}
+                      alt={proprio.full_name ?? 'Propriétaire'}
+                      width={48}
+                      height={48}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
                   ) : (
                     proprio.full_name?.charAt(0) ?? 'P'
                   )}

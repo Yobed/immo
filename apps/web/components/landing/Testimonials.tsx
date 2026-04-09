@@ -31,7 +31,7 @@ function StarRating({ rating }: { rating: number }) {
       {Array.from({ length: 5 }).map((_, i) => (
         <span
           key={i}
-          className={i < rating ? 'text-secondary' : 'text-gray-200'}
+          className={i < rating ? 'text-secondary' : 'text-[var(--border)]'}
           aria-hidden="true"
         >
           &#9733;
@@ -61,15 +61,15 @@ export function Testimonials() {
               className="bg-surface rounded-card p-6 flex flex-col gap-4"
             >
               <StarRating rating={t.rating} />
-              <p className="font-sans text-sm text-gray-700 leading-relaxed flex-1">
+              <p className="font-sans text-sm text-[var(--text)] leading-relaxed flex-1">
                 &ldquo;{t.text}&rdquo;
               </p>
-              <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
+              <div className="flex items-center gap-3 pt-2 border-t border-[var(--border)]">
                 <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-mono text-xs font-semibold shrink-0">
                   {t.avatar}
                 </div>
                 <div>
-                  <p className="font-sans text-sm font-semibold text-gray-800">{t.name}</p>
+                  <p className="font-sans text-sm font-semibold text-[var(--text)]">{t.name}</p>
                   <p className="font-sans text-xs text-muted">{t.role}</p>
                 </div>
               </div>

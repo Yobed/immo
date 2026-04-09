@@ -2,51 +2,82 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { ConversationList } from '@/components/messaging/ConversationList'
 import { MessageThread } from '@/components/messaging/MessageThread'
+import Link from 'next/link'
 
 export default async function MessagesPage({
   searchParams,
 }: {
-  searchParams: { conv?: string }
+  searchParams: Promise<{ conv?: string }> | { conv?: string }
 }) {
+  const params = typeof (searchParams as any).then === 'function'
+    ? await (searchParams as Promise<{ conv?: string }>)
+    : (searchParams as { conv?: string })
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Charger les conversations de l'utilisateur
   const { data: conversations } = await supabase
     .from('conversations')
     .select('id, bien_id, participant_1, participant_2, updated_at, biens(titre)')
     .or(`participant_1.eq.${user.id},participant_2.eq.${user.id}`)
     .order('updated_at', { ascending: false })
 
-  const activeConvId = searchParams.conv ?? conversations?.[0]?.id
+  const activeConvId = params.conv ?? undefined
+  // On desktop auto-select first conversation if none active
+  const desktopConvId = activeConvId ?? conversations?.[0]?.id
 
   return (
     <main className="bg-surface min-h-screen">
-      <div className="max-w-5xl mx-auto h-screen flex">
-        {/* Sidebar conversations */}
-        <aside className="w-72 flex-shrink-0 border-r border-[var(--border)] bg-white flex flex-col">
-          <div className="p-4 border-b border-[var(--border)]">
-            <h1 className="font-display text-xl text-[var(--text)]">Messages</h1>
-          </div>
-          <div className="flex-1 overflow-y-auto">
-            <ConversationList
-              conversations={(conversations ?? []) as any[]}
-              activeId={activeConvId}
-              currentUserId={user.id}
-            />
-          </div>
-        </aside>
+      <div className="max-w-5xl mx-auto" style={{ height: 'calc(100vh - 64px)' }}>
+        <div className="flex h-full">
 
-        {/* Thread actif */}
-        <div className="flex-1 flex flex-col bg-[var(--surface)]">
-          {activeConvId ? (
-            <MessageThread conversationId={activeConvId} currentUserId={user.id} />
-          ) : (
-            <div className="flex-1 flex items-center justify-center">
-              <p className="text-muted font-sans">Sélectionnez une conversation</p>
+          {/* Sidebar — full screen on mobile when no conv selected, hidden on mobile when conv active */}
+          <aside className={`
+            ${activeConvId ? 'hidden lg:flex' : 'flex'}
+            w-full lg:w-72 lg:flex-shrink-0
+            flex-col border-r border-[var(--border)] bg-white
+          `}>
+            <div className="p-4 border-b border-[var(--border)]">
+              <h1 className="font-display text-xl text-[var(--text)]">Messages</h1>
             </div>
-          )}
+            <div className="flex-1 overflow-y-auto">
+              <ConversationList
+                conversations={(conversations ?? []) as any[]}
+                activeId={desktopConvId}
+                currentUserId={user.id}
+              />
+            </div>
+          </aside>
+
+          {/* Thread — full screen on mobile when conv selected */}
+          <div className={`
+            ${activeConvId ? 'flex' : 'hidden lg:flex'}
+            flex-1 flex-col bg-[var(--surface)]
+          `}>
+            {/* Mobile back button */}
+            {activeConvId && (
+              <div className="lg:hidden px-4 py-3 border-b border-[var(--border)] bg-white flex items-center gap-2">
+                <Link href="/messages" className="flex items-center gap-1.5 text-sm font-sans text-muted hover:text-primary transition-colors">
+                  <svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
+                    <path d="M19 12H5M5 12l7 7M5 12l7-7" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Retour aux messages
+                </Link>
+              </div>
+            )}
+
+            {desktopConvId ? (
+              <MessageThread conversationId={activeConvId ?? desktopConvId} currentUserId={user.id} />
+            ) : (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-4xl mb-3">💬</div>
+                  <p className="text-muted font-sans text-sm">Sélectionnez une conversation</p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </main>

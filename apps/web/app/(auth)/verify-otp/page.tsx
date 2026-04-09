@@ -79,7 +79,7 @@ export default function VerifyOtpPage() {
           Immo CI
         </h1>
         <h2 className="mt-4 text-2xl font-semibold text-[var(--text)]">
-          Connexion par Téléphone
+          Connexion par téléphone
         </h2>
         <p className="mt-2 text-sm text-muted">
           {step === 'phone'
