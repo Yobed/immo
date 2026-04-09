@@ -14,10 +14,10 @@ export default function PaiementRetourPage({ searchParams }: Props) {
           <>
             <div className="text-5xl mb-4">&#10003;</div>
             <h1 className="font-display text-2xl text-primary mb-2">
-              Paiement confirme !
+              Paiement confirmé !
             </h1>
             <p className="text-muted mb-6">
-              Votre reservation est confirmee. Un contrat sera genere automatiquement.
+              Votre réservation est confirmée. Un contrat sera généré automatiquement.
             </p>
           </>
         ) : (
@@ -27,7 +27,7 @@ export default function PaiementRetourPage({ searchParams }: Props) {
               Paiement non abouti
             </h1>
             <p className="text-muted mb-2">
-              {searchParams.cpm_error_message ?? 'La transaction a ete annulee ou refusee.'}
+              {searchParams.cpm_error_message ?? 'La transaction a été annulée ou refusée.'}
             </p>
             <p className="text-sm text-muted mb-6">
               Ref. transaction : {searchParams.cpm_trans_id ?? '—'}
@@ -38,7 +38,7 @@ export default function PaiementRetourPage({ searchParams }: Props) {
           href="/"
           className="inline-block bg-primary text-white px-6 py-2 rounded-btn text-sm font-medium hover:opacity-90"
         >
-          Retour a l&apos;accueil
+          Retour à l&apos;accueil
         </Link>
       </div>
     </div>

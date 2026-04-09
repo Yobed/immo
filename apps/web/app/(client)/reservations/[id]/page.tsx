@@ -5,9 +5,9 @@ import { PaiementButton } from '@/components/paiements/PaiementButton'
 
 const STATUT_LABELS: Record<string, { label: string; color: string }> = {
   en_attente: { label: 'En attente de paiement', color: 'text-warning' },
-  confirmee:  { label: 'Confirmee',              color: 'text-accent'  },
-  annulee:    { label: 'Annulee',                color: 'text-danger'  },
-  terminee:   { label: 'Terminee',               color: 'text-muted'   },
+  confirmee:  { label: 'Confirmée',              color: 'text-accent'  },
+  annulee:    { label: 'Annulée',                color: 'text-danger'  },
+  terminee:   { label: 'Terminée',               color: 'text-muted'   },
 }
 
 export default async function ReservationDetailPage({ params }: { params: { id: string } }) {
@@ -36,7 +36,7 @@ export default async function ReservationDetailPage({ params }: { params: { id: 
   return (
     <div className="min-h-screen bg-surface py-8 px-4">
       <div className="max-w-lg mx-auto bg-surface-card rounded-card p-6 shadow-sm space-y-4">
-        <h1 className="font-display text-xl text-primary">Detail de la reservation</h1>
+        <h1 className="font-display text-xl text-primary">Détail de la réservation</h1>
 
         <p className="text-sm text-muted">
           Bien : <span className="text-text font-medium">{reservation.biens?.titre}</span>
@@ -69,12 +69,12 @@ export default async function ReservationDetailPage({ params }: { params: { id: 
             rel="noopener noreferrer"
             className="inline-block bg-primary text-white px-4 py-2 rounded-btn text-sm font-medium hover:opacity-90"
           >
-            Telecharger le contrat PDF
+            Télécharger le contrat PDF
           </a>
         )}
 
         <Link href="/" className="block text-sm text-muted hover:underline">
-          Retour a l&apos;accueil
+          Retour à l&apos;accueil
         </Link>
       </div>
     </div>

@@ -71,95 +71,97 @@ export default async function QuittancesPage({ searchParams }: PageProps) {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">Mes Quittances</h1>
-      <p className="text-gray-500 mb-6">Suivi des loyers de vos locataires</p>
+    <div className="bg-surface min-h-screen">
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold font-display text-[var(--text)] mb-2">Mes Quittances</h1>
+        <p className="text-muted mb-6">Suivi des loyers de vos locataires</p>
 
-      {/* Stats rapides */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <Card className="p-4 text-center">
-          <p className="text-2xl font-bold">{stats.total}</p>
-          <p className="text-sm text-gray-500">Total</p>
-        </Card>
-        <Card className="p-4 text-center border-l-4 border-yellow-400">
-          <p className="text-2xl font-bold text-yellow-600">{stats.en_attente}</p>
-          <p className="text-sm text-gray-500">En attente</p>
-        </Card>
-        <Card className="p-4 text-center border-l-4 border-red-500">
-          <p className="text-2xl font-bold text-red-600">{stats.en_retard}</p>
-          <p className="text-sm text-gray-500">En retard</p>
-        </Card>
-        <Card className="p-4 text-center border-l-4 border-green-500">
-          <p className="text-2xl font-bold text-green-600">{stats.payee}</p>
-          <p className="text-sm text-gray-500">Payées</p>
-        </Card>
-      </div>
-
-      {/* Filtres statut */}
-      <div className="flex gap-2 mb-6 flex-wrap">
-        {FILTRES.map(f => (
-          <Link
-            key={f.value}
-            href={`/quittances${f.value === 'tous' ? '' : `?statut=${f.value}`}`}
-            className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
-              (filtreStatut ?? 'tous') === f.value
-                ? 'bg-primary text-white border-primary'
-                : 'bg-white text-gray-700 border-gray-200 hover:border-primary'
-            }`}
-          >
-            {f.label}
-          </Link>
-        ))}
-      </div>
-
-      {/* Liste quittances */}
-      {!quittances || quittances.length === 0 ? (
-        <Card className="p-12 text-center text-gray-500">
-          <p className="text-lg">Aucune quittance trouvée</p>
-          <p className="text-sm mt-2">Les quittances sont générées automatiquement le 1er de chaque mois.</p>
-        </Card>
-      ) : (
-        <div className="space-y-3">
-          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-          {quittances.map((q: any) => {
-            const bien      = q.contrats?.biens as { titre: string; commune: string } | null
-            const locataire = q['profiles!locataire_id'] as { nom_complet: string; telephone: string } | null
-            const badge     = STATUT_BADGE[q.statut] ?? { variant: 'default' as const, label: q.statut }
-            const moisLabel = new Date(q.mois).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
-
-            return (
-              <Card key={q.id} className="p-4 flex items-center justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold text-gray-900 capitalize">{moisLabel}</span>
-                    <Badge variant={badge.variant}>{badge.label}</Badge>
-                  </div>
-                  <p className="text-sm text-gray-600 truncate">
-                    {locataire?.nom_complet ?? 'Locataire'} · {bien?.titre ?? 'Bien'}, {bien?.commune}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Échéance: {new Date(q.date_echeance).toLocaleDateString('fr-FR')}
-                    {q.date_paiement && ` · Payé le: ${new Date(q.date_paiement).toLocaleDateString('fr-FR')}`}
-                  </p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="font-bold text-gray-900">{Number(q.montant_total_fcfa).toLocaleString('fr-FR')} FCFA</p>
-                  {q.pdf_url && (
-                    <a
-                      href={q.pdf_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-primary hover:underline"
-                    >
-                      Télécharger PDF
-                    </a>
-                  )}
-                </div>
-              </Card>
-            )
-          })}
+        {/* Stats rapides */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <Card className="p-4 text-center">
+            <p className="text-2xl font-bold">{stats.total}</p>
+            <p className="text-sm text-muted">Total</p>
+          </Card>
+          <Card className="p-4 text-center border-l-4 border-warning">
+            <p className="text-2xl font-bold text-warning">{stats.en_attente}</p>
+            <p className="text-sm text-muted">En attente</p>
+          </Card>
+          <Card className="p-4 text-center border-l-4 border-danger">
+            <p className="text-2xl font-bold text-danger">{stats.en_retard}</p>
+            <p className="text-sm text-muted">En retard</p>
+          </Card>
+          <Card className="p-4 text-center border-l-4 border-accent">
+            <p className="text-2xl font-bold text-accent">{stats.payee}</p>
+            <p className="text-sm text-muted">Payées</p>
+          </Card>
         </div>
-      )}
+
+        {/* Filtres statut */}
+        <div className="flex gap-2 mb-6 flex-wrap">
+          {FILTRES.map(f => (
+            <Link
+              key={f.value}
+              href={`/quittances${f.value === 'tous' ? '' : `?statut=${f.value}`}`}
+              className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
+                (filtreStatut ?? 'tous') === f.value
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-white text-[var(--text)] border-[var(--border)] hover:border-primary'
+              }`}
+            >
+              {f.label}
+            </Link>
+          ))}
+        </div>
+
+        {/* Liste quittances */}
+        {!quittances || quittances.length === 0 ? (
+          <Card className="p-12 text-center text-muted">
+            <p className="text-lg">Aucune quittance trouvée</p>
+            <p className="text-sm mt-2">Les quittances sont générées automatiquement le 1er de chaque mois.</p>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+            {quittances.map((q: any) => {
+              const bien      = q.contrats?.biens as { titre: string; commune: string } | null
+              const locataire = q['profiles!locataire_id'] as { nom_complet: string; telephone: string } | null
+              const badge     = STATUT_BADGE[q.statut] ?? { variant: 'default' as const, label: q.statut }
+              const moisLabel = new Date(q.mois).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+
+              return (
+                <Card key={q.id} className="p-4 flex items-center justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-semibold text-[var(--text)] capitalize">{moisLabel}</span>
+                      <Badge variant={badge.variant}>{badge.label}</Badge>
+                    </div>
+                    <p className="text-sm text-muted truncate">
+                      {locataire?.nom_complet ?? 'Locataire'} · {bien?.titre ?? 'Bien'}, {bien?.commune}
+                    </p>
+                    <p className="text-xs text-muted mt-1">
+                      Échéance: {new Date(q.date_echeance).toLocaleDateString('fr-FR')}
+                      {q.date_paiement && ` · Payé le: ${new Date(q.date_paiement).toLocaleDateString('fr-FR')}`}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="font-bold text-[var(--text)]">{Number(q.montant_total_fcfa).toLocaleString('fr-FR')} FCFA</p>
+                    {q.pdf_url && (
+                      <a
+                        href={q.pdf_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-primary hover:underline"
+                      >
+                        Télécharger PDF
+                      </a>
+                    )}
+                  </div>
+                </Card>
+              )
+            })}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

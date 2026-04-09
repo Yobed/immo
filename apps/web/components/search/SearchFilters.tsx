@@ -11,7 +11,7 @@ import {
 } from '@immo-ci/shared/constants/biens'
 import { cn } from '@/lib/utils'
 
-export function SearchFilters() {
+export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -44,7 +44,8 @@ export function SearchFilters() {
     if (equipements.length) params.set('equipements', equipements.join(','))
     else params.delete('equipements')
     router.push(`${pathname}?${params.toString()}`)
-  }, [commune, prixMin, prixMax, typeBien, equipements, pathname, searchParams, router])
+    onApply?.()
+  }, [commune, prixMin, prixMax, typeBien, equipements, pathname, searchParams, router, onApply])
 
   const clearFilters = () => {
     setCommune('')

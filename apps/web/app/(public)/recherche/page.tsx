@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { BienCard } from '@/components/bien/BienCard'
 import { SearchBar } from '@/components/search/SearchBar'
 import { SearchFilters } from '@/components/search/SearchFilters'
+import { MobileFiltersDrawer } from '@/components/search/MobileFiltersDrawer'
 import { PropertiesMap } from '@/components/map/PropertiesMap'
 
 const PAGE_SIZE = 12
@@ -91,6 +92,8 @@ export default async function RecherchePage({
 
   const hasFilters = params.q || params.commune || params.prix_min || params.prix_max || params.type_bien || params.equipements
 
+  const activeFilterCount = [params.commune, params.prix_min, params.prix_max, params.type_bien, params.equipements].filter(Boolean).length
+
   return (
     <main className="bg-surface min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4">
@@ -108,16 +111,19 @@ export default async function RecherchePage({
           {/* Résultats */}
           <div className="flex-1 min-w-0">
             {/* Header résultats */}
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-muted font-sans">
-                {totalResults === 0
-                  ? 'Aucun résultat'
-                  : `${totalResults} bien${totalResults > 1 ? 's' : ''} trouvé${totalResults > 1 ? 's' : ''}`}
-                {params.q && <span className="text-[var(--text)]"> pour « {params.q} »</span>}
-                {params.type_bien === 'residence_meublee' && (
-                  <span className="ml-2 text-amber-600 font-medium">· Résidences meublées</span>
-                )}
-              </p>
+            <div className="flex items-center justify-between mb-4 gap-3">
+              <div className="flex items-center gap-3">
+                <MobileFiltersDrawer activeCount={activeFilterCount} />
+                <p className="text-sm text-muted font-sans">
+                  {totalResults === 0
+                    ? 'Aucun résultat'
+                    : `${totalResults} bien${totalResults > 1 ? 's' : ''} trouvé${totalResults > 1 ? 's' : ''}`}
+                  {params.q && <span className="text-[var(--text)]"> pour « {params.q} »</span>}
+                  {params.type_bien === 'residence_meublee' && (
+                    <span className="ml-2 text-amber-600 font-medium">· Résidences meublées</span>
+                  )}
+                </p>
+              </div>
               {/* Toggle grille / carte */}
               <div className="flex gap-2">
                 <a href={`/recherche?${new URLSearchParams({ ...params, vue: 'grille' }).toString()}`}

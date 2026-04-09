@@ -91,7 +91,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
         <div className="flex flex-col lg:flex-row gap-8 items-start">
 
           {/* ── Colonne gauche : médias + détails ── */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 pb-24 lg:pb-0">
 
             {/* Carousel médias */}
             {medias.length > 0 ? (
@@ -236,17 +236,6 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
               </div>
             )}
 
-            {/* Actions mobile — visiteurs uniquement */}
-            {!isOwner && (
-              <div className="lg:hidden space-y-3 pb-6">
-                <MobileActions
-                  bien={bien}
-                  userId={user?.id ?? null}
-                  isNuitee={isNuitee}
-                  prix={prix}
-                />
-              </div>
-            )}
 
             {/* Actions mobile — propriétaire */}
             {isOwner && (
@@ -349,6 +338,38 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
           </div>
         </div>
       </div>
+
+      {/* Barre CTA fixe — mobile uniquement — visiteurs */}
+      {!isOwner && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-white border-t border-[var(--border)] px-4 py-3 flex items-center gap-3 shadow-lg">
+          {prix && (
+            <div className="flex-shrink-0">
+              <p className="font-mono text-lg text-primary font-bold leading-tight">
+                {prix.label}
+                <span className="text-xs font-normal text-muted">{prix.suffix}</span>
+              </p>
+            </div>
+          )}
+          <div className="flex-1 flex gap-2">
+            {isNuitee ? (
+              <a
+                href={`/reservations/nouvelle?bienId=${bien.id}`}
+                className="flex-1 text-center py-3 px-4 rounded-btn bg-primary text-white font-sans font-semibold text-sm hover:bg-primary/90 transition-colors"
+              >
+                📅 Réserver
+              </a>
+            ) : (
+              <a
+                href={`#contact`}
+                className="flex-1 text-center py-3 px-4 rounded-btn bg-primary text-white font-sans font-semibold text-sm hover:bg-primary/90 transition-colors"
+              >
+                📩 Demander une visite
+              </a>
+            )}
+            <FavorisButton bienId={bien.id} userId={user?.id ?? null} />
+          </div>
+        </div>
+      )}
     </main>
   )
 }
