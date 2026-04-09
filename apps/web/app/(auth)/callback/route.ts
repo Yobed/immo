@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
 
           // Nouveau user Google : full_name vide → onboarding
           if (!profile || profile.full_name === '') {
-            return NextResponse.redirect(`${origin}/auth/complete-profile`)
+            return NextResponse.redirect(`${origin}/complete-profile`)
           }
         }
 
