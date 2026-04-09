@@ -104,38 +104,62 @@ export default async function RecherchePage({
 
         <div className="flex gap-6">
           {/* Sidebar filtres */}
-          <aside className="hidden lg:block w-64 flex-shrink-0">
-            <SearchFilters />
+          <aside className="hidden lg:block w-72 flex-shrink-0">
+            <div className="sticky top-20">
+              <SearchFilters />
+            </div>
           </aside>
 
           {/* Résultats */}
           <div className="flex-1 min-w-0">
             {/* Header résultats */}
-            <div className="flex items-center justify-between mb-4 gap-3">
-              <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between mb-5 gap-3">
+              <div className="flex items-center gap-3 min-w-0">
                 <MobileFiltersDrawer activeCount={activeFilterCount} />
-                <p className="text-sm text-muted font-sans">
-                  {totalResults === 0
-                    ? 'Aucun résultat'
-                    : `${totalResults} bien${totalResults > 1 ? 's' : ''} trouvé${totalResults > 1 ? 's' : ''}`}
-                  {params.q && <span className="text-[var(--text)]"> pour « {params.q} »</span>}
-                  {params.type_bien === 'residence_meublee' && (
-                    <span className="ml-2 text-amber-600 font-medium">· Résidences meublées</span>
+                <div className="min-w-0">
+                  <p className="text-sm font-sans font-semibold text-[var(--text)]">
+                    {totalResults === 0
+                      ? 'Aucun résultat'
+                      : `${totalResults} bien${totalResults > 1 ? 's' : ''} trouvé${totalResults > 1 ? 's' : ''}`}
+                  </p>
+                  {(params.q || params.type_bien === 'residence_meublee') && (
+                    <p className="text-xs text-[var(--text-muted)] font-sans mt-0.5">
+                      {params.q && <>pour « {params.q} »</>}
+                      {params.type_bien === 'residence_meublee' && (
+                        <span className="text-[var(--secondary)] font-medium">
+                          {params.q ? ' · ' : ''}Résidences meublées
+                        </span>
+                      )}
+                    </p>
                   )}
-                </p>
+                </div>
               </div>
+
               {/* Toggle grille / carte */}
-              <div className="flex gap-2">
+              <div className="flex gap-1 bg-white border border-[var(--border)] rounded-btn p-1"
+                style={{ boxShadow: 'var(--shadow-xs)' }}>
                 <a href={`/recherche?${new URLSearchParams({ ...params, vue: 'grille' }).toString()}`}
-                  className={`px-3 py-1.5 rounded-btn text-sm font-sans border transition-colors ${
-                    vue === 'grille' ? 'bg-primary text-white border-primary' : 'border-[var(--border)] text-muted hover:border-primary/40'
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-xs font-sans font-medium transition-all duration-200 ${
+                    vue === 'grille'
+                      ? 'bg-[var(--primary)] text-white shadow-sm'
+                      : 'text-[var(--text-muted)] hover:text-[var(--primary)]'
                   }`}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
+                    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+                  </svg>
                   Grille
                 </a>
                 <a href={`/recherche?${new URLSearchParams({ ...params, vue: 'carte' }).toString()}`}
-                  className={`px-3 py-1.5 rounded-btn text-sm font-sans border transition-colors ${
-                    vue === 'carte' ? 'bg-primary text-white border-primary' : 'border-[var(--border)] text-muted hover:border-primary/40'
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-xs font-sans font-medium transition-all duration-200 ${
+                    vue === 'carte'
+                      ? 'bg-[var(--primary)] text-white shadow-sm'
+                      : 'text-[var(--text-muted)] hover:text-[var(--primary)]'
                   }`}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
+                    <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+                    <line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>
+                  </svg>
                   Carte
                 </a>
               </div>
