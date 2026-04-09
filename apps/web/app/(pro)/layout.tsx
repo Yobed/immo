@@ -29,10 +29,10 @@ export default async function ProLayout({ children }: { children: React.ReactNod
 
           <div className="flex items-center gap-1">
             <Link
-              href="/biens"
+              href="/mes-biens"
               className="px-3 py-1.5 font-sans text-sm text-[var(--text)] hover:text-primary transition-colors"
             >
-              Mes annonces
+              Mes biens
             </Link>
             <Link
               href="/visites"

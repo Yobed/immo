@@ -35,7 +35,7 @@ type AnalyticsRow  = { type: string; created_at: string }
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/connexion')
+  if (!user) redirect('/login')
 
   // --- Fetch parallele pour minimiser le temps de chargement ---
   const now       = new Date()

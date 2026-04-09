@@ -6,7 +6,7 @@ import type { Notification } from '@/components/notifications/NotificationItem'
 export default async function NotificationsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect('/login')
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: notifications } = await (supabase as any)

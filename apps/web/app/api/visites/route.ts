@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { getServerUser } from '@/lib/server-auth'
 
 // POST — créer une demande de visite
 export async function POST(request: Request) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { user, supabase } = await getServerUser(request)
   if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
   const body = await request.json()
@@ -38,8 +37,7 @@ export async function POST(request: Request) {
 
 // PATCH — propriétaire confirme ou annule
 export async function PATCH(request: Request) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { user, supabase } = await getServerUser(request)
   if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
   const { visite_id, statut } = await request.json()

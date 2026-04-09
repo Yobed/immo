@@ -10,7 +10,7 @@ export default async function MessagesPage({
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect('/login')
 
   // Charger les conversations de l'utilisateur
   const { data: conversations } = await supabase

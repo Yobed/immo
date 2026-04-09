@@ -1,4 +1,5 @@
 'use client'
+import { authFetch } from '@/lib/auth-fetch'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { StarRating } from './StarRating'
@@ -28,7 +29,7 @@ export function AvisForm({ reservationId, cibleId, cibleNom, onSuccess }: AvisFo
     setLoading(true)
     setError(null)
 
-    const res = await fetch('/api/avis', {
+    const res = await authFetch('/api/avis', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ reservationId, cibleId, note, commentaire }),

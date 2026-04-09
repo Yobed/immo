@@ -1,4 +1,5 @@
 'use client'
+import { authFetch } from '@/lib/auth-fetch'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
@@ -20,7 +21,7 @@ export function ReponseForm({ avisId }: ReponseFormProps) {
     setLoading(true)
     setError(null)
 
-    const res = await fetch(`/api/avis/${avisId}/reponse`, {
+    const res = await authFetch(`/api/avis/${avisId}/reponse`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ reponse }),

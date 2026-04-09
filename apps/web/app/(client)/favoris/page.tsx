@@ -5,7 +5,7 @@ import { BienCard } from '@/components/bien/BienCard'
 export default async function FavorisPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect('/login')
 
   const { data: favoris } = await supabase
     .from('favoris')

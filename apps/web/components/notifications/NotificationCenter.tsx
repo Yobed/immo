@@ -1,4 +1,5 @@
 'use client'
+import { authFetch } from '@/lib/auth-fetch'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { NotificationItem } from './NotificationItem'

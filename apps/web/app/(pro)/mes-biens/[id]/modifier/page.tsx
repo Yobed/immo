@@ -15,7 +15,7 @@ export default async function ModifierBienPage({
   const { step } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect('/login')
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: bien } = await (supabase as any)

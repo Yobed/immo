@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { getServerUser } from '@/lib/server-auth'
 import { initierPaiement, arrondir5, calculerSplit } from '@/lib/cinetpay'
 import crypto from 'crypto'
 
 export async function POST(req: NextRequest) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { user, supabase } = await getServerUser(req)
   if (!user) return NextResponse.json({ error: 'Non authentifie' }, { status: 401 })
 
   const body = await req.json() as {

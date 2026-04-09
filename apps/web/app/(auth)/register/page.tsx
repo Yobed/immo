@@ -13,9 +13,7 @@ const registerSchema = z.object({
   password: z
     .string()
     .min(8, 'Le mot de passe doit contenir au moins 8 caractères'),
-  role: z.enum(['locataire', 'proprietaire'], {
-    required_error: 'Veuillez sélectionner un rôle',
-  }),
+  role: z.enum(['locataire', 'proprietaire']),
 })
 
 type RegisterFormData = z.infer<typeof registerSchema>

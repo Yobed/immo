@@ -1,4 +1,5 @@
 'use client'
+import { authFetch } from '@/lib/auth-fetch'
 import { cn } from '@/lib/utils'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
@@ -23,7 +24,7 @@ export function NotificationItem({ notification, onRead }: NotificationItemProps
   const handleClick = async () => {
     if (notification.lu) return
 
-    await fetch(`/api/notifications/${notification.id}`, {
+    await authFetch(`/api/notifications/${notification.id}`, {
       method: 'PATCH',
     })
     onRead(notification.id)

@@ -1,4 +1,5 @@
 'use client'
+import { authFetch } from '@/lib/auth-fetch'
 import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { NotificationItem } from './NotificationItem'
@@ -62,7 +63,7 @@ export function NotificationBell({ userId, initialUnreadCount }: NotificationBel
     setOpen(nextOpen)
 
     if (nextOpen && !loaded) {
-      const res = await fetch('/api/notifications?limit=5')
+      const res = await authFetch('/api/notifications?limit=5')
       if (res.ok) {
         const json = await res.json() as { notifications: Notification[] }
         setNotifications(json.notifications.slice(0, 5))

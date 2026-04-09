@@ -1,4 +1,5 @@
 'use client'
+import { authFetch } from '@/lib/auth-fetch'
 import { useState } from 'react'
 import { DatePicker }     from './DatePicker'
 import { PaiementButton } from '@/components/paiements/PaiementButton'
@@ -29,7 +30,7 @@ export function ReservationFlow({ bienId, bienTitre, prixMoisFcfa }: Props) {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/api/reservations', {
+      const res = await authFetch('/api/reservations', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ bienId, dateDebut, dateFin }),

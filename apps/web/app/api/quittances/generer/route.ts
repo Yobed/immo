@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Contrat introuvable ou non signe' }, { status: 404 })
   }
 
-  const bien = contrat.biens as { id: string; adresse_complete: string; commune: string } | null
+  const bien = contrat.biens as unknown as { id: string; adresse_complete: string; commune: string } | null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const locataire = (contrat as any)['profiles!locataire_id'] as { nom_complet: string; telephone: string } | null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
     statut:          'en_attente',
   }
 
-  const pdfBuffer = await renderToBuffer(createElement(QuittanceDocument, quittanceProps))
+  const pdfBuffer = await renderToBuffer(createElement(QuittanceDocument, quittanceProps) as any)
 
   // Creer le bucket 'quittances' si necessaire
   await supabase.storage.createBucket('quittances', { public: false }).catch(() => {

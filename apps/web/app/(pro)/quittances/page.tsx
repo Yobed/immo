@@ -29,7 +29,7 @@ interface PageProps {
 export default async function QuittancesPage({ searchParams }: PageProps) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/connexion')
+  if (!user) redirect('/login')
 
   const { statut: filtreStatut } = await searchParams
   const filtreActif = filtreStatut && filtreStatut !== 'tous' ? filtreStatut : null

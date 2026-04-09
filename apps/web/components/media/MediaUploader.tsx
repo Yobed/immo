@@ -1,10 +1,6 @@
 'use client'
-import { useState, useCallback } from 'react'
-import { useDropzone } from 'react-dropzone'
-import { CldUploadWidget } from 'next-cloudinary'
+import { useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { MediaTypeBadge } from './MediaTypeIcon'
-import { cn } from '@/lib/utils'
 
 type MediaType = 'photo' | 'video' | 'vue_360' | 'plan'
 
@@ -14,123 +10,118 @@ interface MediaUploaderProps {
   onUploadComplete: (url: string, type: MediaType) => void
 }
 
-const BUCKET_MAP: Record<Exclude<MediaType, 'photo'>, string> = {
-  video:   'videos',
-  vue_360: 'panoramas',
-  plan:    'plans',
+const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!
+
+const CONFIG: Record<MediaType, {
+  resourceType: string
+  accept: string
+  multiple: boolean
+  emoji: string
+  hint: string
+  size: string
+}> = {
+  photo:   { resourceType: 'image', accept: 'image/jpg,image/jpeg,image/png,image/webp', multiple: true,  emoji: '🖼️', hint: 'Cliquer pour ajouter des photos',          size: 'JPG, PNG, WEBP — max 10 MB' },
+  video:   { resourceType: 'video', accept: 'video/mp4,video/quicktime,video/webm',      multiple: false, emoji: '🎥', hint: 'Cliquer pour ajouter une vidéo',            size: 'MP4, MOV, WEBM — max 500 MB' },
+  vue_360: { resourceType: 'image', accept: 'image/jpg,image/jpeg,image/png',            multiple: false, emoji: '🌐', hint: 'Image panoramique équirectangulaire',        size: 'JPG, PNG — max 50 MB' },
+  plan:    { resourceType: 'auto',  accept: 'application/pdf,image/jpg,image/jpeg,image/png', multiple: false, emoji: '📐', hint: 'Plan du bien (PDF ou image)',          size: 'PDF, JPG, PNG — max 20 MB' },
 }
 
-const ACCEPT_MAP: Record<Exclude<MediaType, 'photo'>, Record<string, string[]>> = {
-  video:   { 'video/*': ['.mp4', '.mov', '.avi', '.webm'] },
-  vue_360: { 'image/*': ['.jpg', '.jpeg', '.png'] },
-  plan:    { 'application/pdf': ['.pdf'], 'image/*': ['.jpg', '.jpeg', '.png'] },
+async function getAuthHeader(): Promise<Record<string, string>> {
+  const supabase = createClient()
+  const { data: { session } } = await supabase.auth.getSession()
+  return session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}
 }
 
 export function MediaUploader({ bienId, type, onUploadComplete }: MediaUploaderProps) {
+  const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [error, setError] = useState<string | null>(null)
 
-  // Supabase Storage upload (video, 360, plan)
-  const uploadToStorage = useCallback(async (file: File) => {
+  const cfg = CONFIG[type]
+
+  const uploadFile = async (file: File) => {
+    const fd = new FormData()
+    fd.append('file', file)
+    fd.append('upload_preset', 'immo-ci-media')
+    fd.append('folder', `biens/${bienId}`)
+    fd.append('tags', `${type},${bienId}`)
+
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${cfg.resourceType}/upload`,
+      { method: 'POST', body: fd }
+    )
+    if (!res.ok) throw new Error(`Cloudinary: ${res.status}`)
+    const data = await res.json()
+    return data.secure_url as string
+  }
+
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return
     setUploading(true)
+    setError(null)
     setProgress(0)
-    const supabase = createClient()
-    const bucket = BUCKET_MAP[type as Exclude<MediaType, 'photo'>]
-    const path = `${bienId}/${Date.now()}-${file.name}`
 
-    const { data, error } = await supabase.storage
-      .from(bucket)
-      .upload(path, file, { cacheControl: '3600', upsert: false })
+    const arr = Array.from(files)
+    const auth = await getAuthHeader()
 
-    if (error) {
-      console.error('Storage upload error:', error)
-      setUploading(false)
-      return
+    for (let i = 0; i < arr.length; i++) {
+      try {
+        const url = await uploadFile(arr[i])
+        await fetch(`/api/biens/${bienId}/medias`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...auth },
+          body: JSON.stringify({ type, url, ordre: 99 }),
+        })
+        onUploadComplete(url, type)
+        setProgress(Math.round(((i + 1) / arr.length) * 100))
+      } catch (e) {
+        setError(String(e))
+      }
     }
 
-    const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(data.path)
-
-    // Persist in biens_medias
-    await fetch(`/api/biens/${bienId}/medias`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type, url: publicUrl, ordre: 99 }),
-    })
-
-    onUploadComplete(publicUrl, type)
     setUploading(false)
-    setProgress(100)
-  }, [bienId, type, onUploadComplete])
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    accept: ACCEPT_MAP[type as Exclude<MediaType, 'photo'>],
-    maxFiles: 1,
-    onDrop: (files) => { if (files[0]) uploadToStorage(files[0]) },
-    disabled: uploading,
-  })
-
-  // Photo: use Cloudinary widget
-  if (type === 'photo') {
-    return (
-      <CldUploadWidget
-        signatureEndpoint="/api/upload/sign"
-        uploadPreset="immo-ci-photos"
-        options={{
-          maxFiles: 20,
-          resourceType: 'image',
-          folder: `biens/${bienId}`,
-        }}
-        onSuccess={async (result) => {
-          const info = result.info as { secure_url: string }
-          await fetch(`/api/biens/${bienId}/medias`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type: 'photo', url: info.secure_url, ordre: 99 }),
-          })
-          onUploadComplete(info.secure_url, 'photo')
-        }}
-      >
-        {({ open }) => (
-          <button
-            type="button"
-            onClick={() => open()}
-            className="w-full p-8 border-2 border-dashed border-primary/40 rounded-card hover:border-primary hover:bg-primary-light/30 transition-colors text-center"
-          >
-            <p className="text-muted font-sans text-sm">Cliquer pour ajouter des photos</p>
-            <p className="text-xs text-muted/70 mt-1">JPG, PNG, WEBP — max 10 MB par photo</p>
-          </button>
-        )}
-      </CldUploadWidget>
-    )
+    if (inputRef.current) inputRef.current.value = ''
   }
 
   return (
-    <div
-      {...getRootProps()}
-      className={cn(
-        'w-full p-8 border-2 border-dashed rounded-card transition-colors text-center cursor-pointer',
-        isDragActive ? 'border-primary bg-primary-light/30' : 'border-[var(--border)] hover:border-primary/40',
-        uploading && 'opacity-60 cursor-not-allowed'
-      )}
-    >
-      <input {...getInputProps()} />
-      {uploading ? (
-        <div className="space-y-2">
-          <div className="h-2 bg-[var(--border)] rounded-pill overflow-hidden">
-            <div className="h-full bg-primary rounded-pill transition-all" style={{ width: `${progress}%` }} />
+    <div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept={cfg.accept}
+        multiple={cfg.multiple}
+        className="hidden"
+        onChange={(e) => handleFiles(e.target.files)}
+      />
+
+      <button
+        type="button"
+        disabled={uploading}
+        onClick={() => inputRef.current?.click()}
+        className="w-full p-10 border-2 border-dashed border-primary/40 rounded-card hover:border-primary hover:bg-primary-light/20 transition-colors text-center disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {uploading ? (
+          <div className="space-y-3">
+            <div className="h-2 bg-[var(--border)] rounded-full overflow-hidden">
+              <div
+                className="h-full bg-primary rounded-full transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <p className="text-sm text-muted font-sans">Upload en cours… {progress}%</p>
           </div>
-          <p className="text-sm text-muted font-sans">Upload en cours...</p>
-        </div>
-      ) : (
-        <>
-          <MediaTypeBadge type={type} className="mb-3" />
-          <p className="text-muted font-sans text-sm mt-2">
-            {isDragActive ? 'Déposer le fichier ici' : `Glisser un fichier ${type === 'vue_360' ? 'panoramique (équirectangulaire)' : type} ici`}
-          </p>
-          <p className="text-xs text-muted/70 mt-1">
-            {type === 'video' ? 'MP4, MOV, WEBM — max 500 MB' : type === 'plan' ? 'PDF ou image — max 20 MB' : 'JPG, PNG — max 50 MB'}
-          </p>
-        </>
+        ) : (
+          <>
+            <div className="text-4xl mb-3">{cfg.emoji}</div>
+            <p className="text-[var(--text)] font-sans font-medium text-sm">{cfg.hint}</p>
+            <p className="text-xs text-muted mt-2">{cfg.size}</p>
+          </>
+        )}
+      </button>
+
+      {error && (
+        <p className="mt-2 text-sm text-red-600 font-sans">{error}</p>
       )}
     </div>
   )

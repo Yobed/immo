@@ -21,7 +21,7 @@ type BienRow = {
 export default async function MesAnnoncesPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect('/login')
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: biens } = await (supabase as any)
@@ -35,14 +35,14 @@ export default async function MesAnnoncesPage() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between mb-6">
           <h1 className="font-display text-3xl text-[var(--text)]">Mes annonces</h1>
-          <Link href="/biens/nouveau">
+          <Link href="/mes-biens/nouveau">
             <Button variant="primary">+ Nouvelle annonce</Button>
           </Link>
         </div>
         {(!biens || (biens as BienRow[]).length === 0) ? (
           <div className="text-center py-16">
             <p className="text-muted font-sans mb-4">Vous n'avez pas encore d'annonces.</p>
-            <Link href="/biens/nouveau"><Button>Créer ma première annonce</Button></Link>
+            <Link href="/mes-biens/nouveau"><Button>Créer ma première annonce</Button></Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -61,8 +61,11 @@ export default async function MesAnnoncesPage() {
                 />
                 {/* Actions propriétaire */}
                 <div className="flex gap-2 mt-2">
-                  <Link href={`/biens/${bien.id}/modifier`} className="flex-1">
+                  <Link href={`/mes-biens/${bien.id}/modifier`} className="flex-1">
                     <Button variant="outline" size="sm" className="w-full">Modifier</Button>
+                  </Link>
+                  <Link href={`/mes-biens/${bien.id}/modifier?step=medias`} className="flex-1">
+                    <Button variant="outline" size="sm" className="w-full">📷 Médias</Button>
                   </Link>
                   <div className="flex-1">
                     <ToggleStatutButton bienId={bien.id} statut={bien.statut} />

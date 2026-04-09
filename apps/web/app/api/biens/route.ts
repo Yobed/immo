@@ -3,7 +3,16 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+
+  // Try cookie-based auth, then Authorization header (client-side fetch)
+  let { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    const token = request.headers.get('authorization')?.replace('Bearer ', '')
+    if (token) {
+      const { data } = await supabase.auth.getUser(token)
+      user = data.user
+    }
+  }
   if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

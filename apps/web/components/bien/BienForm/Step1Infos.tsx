@@ -2,6 +2,7 @@
 import { UseFormReturn } from 'react-hook-form'
 import { Input } from '@/components/ui'
 import { TYPES_BIEN_LABELS, TYPES_BIEN } from '@immo-ci/shared/constants/biens'
+import { COMMUNES_CI } from '@immo-ci/shared/constants/communes'
 import type { BienFormData } from './index'
 
 export function Step1Infos({ form }: { form: UseFormReturn<BienFormData> }) {
@@ -39,6 +40,17 @@ export function Step1Infos({ form }: { form: UseFormReturn<BienFormData> }) {
           {...register('description')}
         />
         {errors.description && <p className="text-danger text-xs mt-1">{errors.description.message}</p>}
+      </div>
+      <div>
+        <label className="block text-sm font-sans font-medium text-[var(--text)] mb-2">Commune *</label>
+        <select
+          {...register('commune')}
+          className="w-full rounded-btn border border-[var(--border)] px-3 py-2 text-sm font-sans focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white"
+        >
+          <option value="">Sélectionner une commune...</option>
+          {COMMUNES_CI.map((c) => <option key={c} value={c}>{c}</option>)}
+        </select>
+        {errors.commune && <p className="text-danger text-xs mt-1">{errors.commune.message}</p>}
       </div>
       <div className="grid grid-cols-2 gap-4">
         <Input label="Superficie (m²)" type="number" {...register('surface_m2', { valueAsNumber: true })} />

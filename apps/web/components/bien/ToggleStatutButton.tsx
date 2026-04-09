@@ -1,4 +1,5 @@
 'use client'
+import { authFetch } from '@/lib/auth-fetch'
 import { Button } from '@/components/ui'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -15,7 +16,7 @@ export function ToggleStatutButton({ bienId, statut }: ToggleStatutButtonProps) 
   const handleToggle = async () => {
     setLoading(true)
     try {
-      await fetch(`/api/biens/${bienId}`, {
+      await authFetch(`/api/biens/${bienId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ statut: statut === 'publie' ? 'brouillon' : 'publie' }),

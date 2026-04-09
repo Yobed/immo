@@ -1,0 +1,25 @@
+const { getDefaultConfig } = require('expo/metro-config')
+const path = require('path')
+
+const projectRoot = __dirname
+const workspaceRoot = path.resolve(projectRoot, '../..')
+
+const config = getDefaultConfig(projectRoot)
+
+// Monorepo: watch packages/shared only
+config.watchFolders = [
+  path.resolve(workspaceRoot, 'packages/shared'),
+]
+
+config.resolver.nodeModulesPaths = [
+  path.resolve(projectRoot, 'node_modules'),
+  path.resolve(workspaceRoot, 'node_modules'),
+]
+
+// Resolve @immo-ci/shared to packages/shared
+// React/RN resolved from root node_modules (single version — no duplicate)
+config.resolver.extraNodeModules = {
+  '@immo-ci/shared': path.resolve(workspaceRoot, 'packages/shared'),
+}
+
+module.exports = config

@@ -1,4 +1,5 @@
 'use client'
+import { authFetch } from '@/lib/auth-fetch'
 import { useState } from 'react'
 
 interface Props {
@@ -16,7 +17,7 @@ export function PaiementButton({ reservationId, montantFcfa, description, classN
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/api/paiements/initier', {
+      const res = await authFetch('/api/paiements/initier', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ reservationId, montantFcfa, description }),

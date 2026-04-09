@@ -1,15 +1,12 @@
 'use client'
-// ANTI-PATTERN CRITIQUE: Ne jamais importer mapbox-gl ou react-map-gl en import statique au top
-// mapbox-gl accède à window sur import — dynamic import obligatoire pour éviter SSR crash
 import dynamic from 'next/dynamic'
 import { useState, useCallback } from 'react'
 import Link from 'next/link'
 import { MAPBOX_TOKEN, ABIDJAN_CENTER } from '@/lib/mapbox'
 
-// Imports dynamiques obligatoires — ssr: false empêche mapbox-gl d'accéder à window côté serveur
-const Map = dynamic(() => import('react-map-gl').then((m) => m.Map), { ssr: false })
-const Marker = dynamic(() => import('react-map-gl').then((m) => m.Marker), { ssr: false })
-const Popup = dynamic(() => import('react-map-gl').then((m) => m.Popup), { ssr: false })
+const Map    = dynamic(() => import('react-map-gl/mapbox').then((m) => m.Map),    { ssr: false })
+const Marker = dynamic(() => import('react-map-gl/mapbox').then((m) => m.Marker), { ssr: false })
+const Popup  = dynamic(() => import('react-map-gl/mapbox').then((m) => m.Popup),  { ssr: false })
 
 interface BienMarker {
   id: string
@@ -52,9 +49,7 @@ export function PropertiesMap({ biens, hauteur = 500 }: PropertiesMapProps) {
         className="w-full rounded-card bg-[var(--surface)] flex items-center justify-center border border-[var(--border)]"
         style={{ height: hauteur }}
       >
-        <p className="text-muted font-sans text-sm">
-          Carte non disponible — configurer NEXT_PUBLIC_MAPBOX_TOKEN
-        </p>
+        <p className="text-muted font-sans text-sm">Carte en chargement...</p>
       </div>
     )
   }

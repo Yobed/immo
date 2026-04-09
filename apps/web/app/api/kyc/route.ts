@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
-import { createClient } from '@/lib/supabase/server'
+import { getServerUser } from '@/lib/server-auth'
 
 // POST /api/kyc — utilisateur soumet ses documents KYC
 export async function POST(req: NextRequest) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
+  const { user, supabase } = await getServerUser(req)
   if (!user) {
     return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
   }

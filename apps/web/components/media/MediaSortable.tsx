@@ -1,5 +1,6 @@
 'use client'
 import { useState, useCallback } from 'react'
+import { authFetch } from '@/lib/auth-fetch'
 import {
   DndContext,
   closestCenter,
@@ -91,6 +92,7 @@ interface MediaSortableProps {
   initialMedias: MediaItem[]
 }
 
+
 export function MediaSortable({ bienId, initialMedias }: MediaSortableProps) {
   const [items, setItems] = useState(initialMedias)
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
@@ -105,7 +107,7 @@ export function MediaSortable({ bienId, initialMedias }: MediaSortableProps) {
     setItems(reordered)
 
     // Persiste le nouvel ordre
-    await fetch(`/api/biens/${bienId}/medias`, {
+    await authFetch(`/api/biens/${bienId}/medias`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -115,7 +117,7 @@ export function MediaSortable({ bienId, initialMedias }: MediaSortableProps) {
   }, [items, bienId])
 
   const handleDelete = useCallback(async (mediaId: string) => {
-    await fetch(`/api/biens/${bienId}/medias`, {
+    await authFetch(`/api/biens/${bienId}/medias`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ mediaId }),
@@ -124,7 +126,7 @@ export function MediaSortable({ bienId, initialMedias }: MediaSortableProps) {
   }, [bienId])
 
   const handleSetCover = useCallback(async (mediaId: string) => {
-    await fetch(`/api/biens/${bienId}/medias`, {
+    await authFetch(`/api/biens/${bienId}/medias`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ couverture_id: mediaId }),

@@ -1,4 +1,5 @@
 'use client'
+import { authFetch } from '@/lib/auth-fetch'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button, Input } from '@/components/ui'
@@ -37,7 +38,7 @@ export function VisiteRequestForm({ bienId, proprietaireId }: VisiteRequestFormP
     if (!date || !creneau) return
 
     setSubmitting(true)
-    const res = await fetch('/api/visites', {
+    const res = await authFetch('/api/visites', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ bien_id: bienId, proprietaire_id: proprietaireId, date_souhaitee: date, creneau, message }),

@@ -13,7 +13,7 @@ const STATUT_LABELS: Record<string, { label: string; color: string }> = {
 export default async function ReservationDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/connexion')
+  if (!user) redirect('/login')
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: reservation } = await (supabase.from('reservations') as any)

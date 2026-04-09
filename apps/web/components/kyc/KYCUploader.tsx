@@ -1,4 +1,5 @@
 'use client'
+import { authFetch } from '@/lib/auth-fetch'
 import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { createClient } from '@/lib/supabase/client'
@@ -76,7 +77,7 @@ export function KYCUploader({ userId, currentStatut }: KYCUploaderProps) {
     if (!cniUrl || !selfieUrl) return
     setError(null)
 
-    const res = await fetch('/api/kyc', {
+    const res = await authFetch('/api/kyc', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ cniUrl, selfieUrl }),
