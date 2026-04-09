@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json(reservation, { status: 201 })
 }
 
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
   const { user, supabase } = await getServerUser(req)
   if (!user) return NextResponse.json({ error: 'Non authentifie' }, { status: 401 })
 

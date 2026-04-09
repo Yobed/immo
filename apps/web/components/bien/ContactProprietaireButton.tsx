@@ -17,7 +17,7 @@ export function ContactProprietaireButton({ bienId, proprietaireId, userId }: Co
 
   const handleContact = async () => {
     if (!userId) {
-      router.push('/auth/login')
+      router.push('/login')
       return
     }
 
@@ -38,7 +38,7 @@ export function ContactProprietaireButton({ bienId, proprietaireId, userId }: Co
         .single()
 
       if (error) throw error
-      router.push(`/messages?c=${data.id}`)
+      router.push(`/messages?conv=${data.id}`)
     } catch {
       // Fallback: navigate to messages without pre-selected conversation
       router.push('/messages')

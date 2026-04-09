@@ -20,7 +20,7 @@ export function FavorisButton({ bienId, userId, initialIsFavori = false, classNa
     e.stopPropagation()
 
     if (!userId) {
-      window.location.href = '/auth/login'
+      window.location.href = '/login'
       return
     }
 

@@ -37,6 +37,9 @@ export default async function ClientLayout({ children }: { children: React.React
             <Link href="/mes-visites" className="px-3 py-1.5 font-sans text-sm text-[var(--text)] hover:text-primary transition-colors">
               Visites
             </Link>
+            <Link href="/reservations" className="px-3 py-1.5 font-sans text-sm text-[var(--text)] hover:text-primary transition-colors">
+              Réservations
+            </Link>
             <Link href="/mes-avis" className="px-3 py-1.5 font-sans text-sm text-[var(--text)] hover:text-primary transition-colors">
               Mes avis
             </Link>
