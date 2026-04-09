@@ -100,7 +100,7 @@ export default async function QuittancesPage({ searchParams }: PageProps) {
         {FILTRES.map(f => (
           <Link
             key={f.value}
-            href={`/pro/quittances${f.value === 'tous' ? '' : `?statut=${f.value}`}`}
+            href={`/quittances${f.value === 'tous' ? '' : `?statut=${f.value}`}`}
             className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
               (filtreStatut ?? 'tous') === f.value
                 ? 'bg-primary text-white border-primary'

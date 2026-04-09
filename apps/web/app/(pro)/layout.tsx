@@ -47,6 +47,12 @@ export default async function ProLayout({ children }: { children: React.ReactNod
               Quittances
             </Link>
             <Link
+              href="/avis-recus"
+              className="px-3 py-1.5 font-sans text-sm text-[var(--text)] hover:text-primary transition-colors"
+            >
+              Avis reçus
+            </Link>
+            <Link
               href="/profil"
               className="px-3 py-1.5 font-sans text-sm text-[var(--text)] hover:text-primary transition-colors"
             >

@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui'
+import { authFetch } from '@/lib/auth-fetch'
 
 interface VisiteActionsProps {
   visiteId: string
@@ -13,7 +14,7 @@ export function VisiteActions({ visiteId }: VisiteActionsProps) {
 
   const handleAction = async (statut: 'confirmee' | 'annulee') => {
     setLoading(statut)
-    await fetch('/api/visites', {
+    await authFetch('/api/visites', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ visite_id: visiteId, statut }),
