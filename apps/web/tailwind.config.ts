@@ -24,8 +24,8 @@ const config: Config = {
         danger:  { DEFAULT: '#D93025', light: '#FEF1F0' },
         warning: { DEFAULT: '#D08700', light: '#FFFBEC' },
         surface: { DEFAULT: '#F6F7FB', card: '#FFFFFF', raised: '#FFFFFF' },
-        muted:   '#64748B',
-        subtle:  '#94A3B8',
+        muted:   '#2D3748',
+        subtle:  '#4A5568',
         border:  { DEFAULT: '#E2E7F3', hover: '#B8C4DE' },
       },
       fontFamily: {
