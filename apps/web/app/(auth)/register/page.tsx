@@ -42,7 +42,7 @@ export default function RegisterPage() {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${origin}/auth/callback`,
+        redirectTo: `${origin}/callback`,
       },
     })
     setGoogleLoading(false)
