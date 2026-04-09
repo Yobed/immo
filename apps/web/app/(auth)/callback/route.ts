@@ -6,7 +6,6 @@ import type { NextRequest } from 'next/server'
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/'
 
   if (code) {
     const cookieStore = await cookies()
@@ -29,10 +28,42 @@ export async function GET(request: NextRequest) {
 
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`)
+      // Récupérer l'utilisateur authentifié
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (user) {
+        const provider = user.app_metadata?.provider ?? ''
+
+        // Vérifier si c'est un nouvel utilisateur Google (profil incomplet)
+        if (provider === 'google') {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, role')
+            .eq('id', user.id)
+            .single()
+
+          // Nouveau user Google : full_name vide → onboarding
+          if (!profile || profile.full_name === '') {
+            return NextResponse.redirect(`${origin}/auth/complete-profile`)
+          }
+        }
+
+        // Utilisateur existant → rediriger selon le rôle
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+
+        if (profile?.role === 'proprietaire') {
+          return NextResponse.redirect(`${origin}/dashboard`)
+        }
+        return NextResponse.redirect(`${origin}/`)
+      }
+
+      return NextResponse.redirect(`${origin}/`)
     }
   }
 
-  // Rediriger vers la page de connexion avec un message d'erreur
   return NextResponse.redirect(`${origin}/login?error=auth_callback_error`)
 }
