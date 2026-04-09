@@ -2,7 +2,7 @@
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useState, useCallback } from 'react'
 import { Button, Input } from '@/components/ui'
-import { COMMUNES_CI } from '@immo-ci/shared/constants/communes'
+import { CommuneAutocomplete } from './CommuneAutocomplete'
 import {
   TYPES_BIEN,
   TYPES_BIEN_LABELS,
@@ -73,23 +73,16 @@ export function SearchFilters() {
         )}
       </div>
 
-      {/* Commune */}
+      {/* Commune / quartier */}
       <div>
         <label className="block text-sm font-sans font-medium text-[var(--text)] mb-2">
-          Commune
+          Commune ou quartier
         </label>
-        <select
+        <CommuneAutocomplete
           value={commune}
-          onChange={(e) => setCommune(e.target.value)}
-          className="w-full rounded-btn border border-[var(--border)] px-3 py-2 text-sm font-sans focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white"
-        >
-          <option value="">Toutes les communes</option>
-          {COMMUNES_CI.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
+          onChange={setCommune}
+          placeholder="Ex : Cocody, Angré..."
+        />
       </div>
 
       {/* Type de bien */}

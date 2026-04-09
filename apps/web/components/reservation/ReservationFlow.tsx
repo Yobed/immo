@@ -7,12 +7,19 @@ import { PaiementButton } from '@/components/paiements/PaiementButton'
 type Step = 'dates' | 'recap' | 'paiement'
 
 interface Props {
-  bienId:       string
-  bienTitre:    string
-  prixMoisFcfa: number
+  bienId:        string
+  bienTitre:     string
+  prixMoisFcfa:  number
+  prixNuitFcfa?: number   // défini → mode location à la nuitée
 }
 
-export function ReservationFlow({ bienId, bienTitre, prixMoisFcfa }: Props) {
+function formatFCFA(n: number) {
+  return new Intl.NumberFormat('fr-CI', { style: 'decimal', maximumFractionDigits: 0 }).format(n) + ' FCFA'
+}
+
+export function ReservationFlow({ bienId, bienTitre, prixMoisFcfa, prixNuitFcfa }: Props) {
+  const isNuitee = prixNuitFcfa !== undefined && prixNuitFcfa > 0
+
   const [step,          setStep]          = useState<Step>('dates')
   const [dateDebut,     setDateDebut]     = useState('')
   const [dateFin,       setDateFin]       = useState('')
@@ -20,11 +27,19 @@ export function ReservationFlow({ bienId, bienTitre, prixMoisFcfa }: Props) {
   const [error,         setError]         = useState<string | null>(null)
   const [loading,       setLoading]       = useState(false)
 
-  async function handleDatesSelected(debut: string, fin: string) {
+  function handleDatesSelected(debut: string, fin: string) {
     setDateDebut(debut)
     setDateFin(fin)
     setStep('recap')
   }
+
+  const nbNuits = dateDebut && dateFin
+    ? Math.max(0, Math.ceil((new Date(dateFin).getTime() - new Date(dateDebut).getTime()) / 86400000))
+    : 0
+
+  const montantAffiche = isNuitee
+    ? prixNuitFcfa! * nbNuits
+    : prixMoisFcfa
 
   async function handleConfirmerReservation() {
     setLoading(true)
@@ -37,7 +52,7 @@ export function ReservationFlow({ bienId, bienTitre, prixMoisFcfa }: Props) {
       })
       const data = await res.json()
       if (!res.ok) {
-        setError(data.error ?? 'Erreur lors de la creation de la reservation')
+        setError(data.error ?? 'Erreur lors de la création de la réservation')
         return
       }
       setReservationId(data.id)
@@ -49,13 +64,14 @@ export function ReservationFlow({ bienId, bienTitre, prixMoisFcfa }: Props) {
     }
   }
 
-  const nbNuits = dateDebut && dateFin
-    ? Math.max(0, Math.ceil((new Date(dateFin).getTime() - new Date(dateDebut).getTime()) / 86400000))
-    : 0
-
   return (
-    <div className="bg-surface-card rounded-card p-6 shadow-sm">
-      <h2 className="font-display text-xl text-primary mb-4">Reserver ce bien</h2>
+    <div className="bg-white rounded-card border border-[var(--border)] p-6 shadow-sm">
+      <h2 className="font-display text-xl text-primary mb-1">
+        {isNuitee ? 'Réserver ce séjour' : 'Réserver ce bien'}
+      </h2>
+      {isNuitee && (
+        <p className="text-sm text-muted font-sans mb-4">{formatFCFA(prixNuitFcfa!)} / nuit</p>
+      )}
 
       {step === 'dates' && (
         <DatePicker onDatesSelected={handleDatesSelected} />
@@ -63,27 +79,48 @@ export function ReservationFlow({ bienId, bienTitre, prixMoisFcfa }: Props) {
 
       {step === 'recap' && (
         <div className="space-y-4">
-          <p className="text-sm text-muted">Bien : <span className="text-text font-medium">{bienTitre}</span></p>
-          <p className="text-sm text-muted">Arrivee : <span className="text-text font-medium">{dateDebut}</span></p>
-          <p className="text-sm text-muted">Depart : <span className="text-text font-medium">{dateFin}</span></p>
-          <p className="text-sm text-muted">Duree : <span className="text-text font-medium">{nbNuits} nuit(s)</span></p>
-          <p className="text-lg font-semibold font-mono text-primary">
-            {prixMoisFcfa.toLocaleString('fr-FR')} FCFA / mois
-          </p>
+          <div className="bg-surface rounded-btn p-4 space-y-2 text-sm font-sans">
+            <div className="flex justify-between">
+              <span className="text-muted">Bien</span>
+              <span className="font-medium text-[var(--text)]">{bienTitre}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted">Arrivée</span>
+              <span className="font-medium text-[var(--text)]">{dateDebut}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted">Départ</span>
+              <span className="font-medium text-[var(--text)]">{dateFin}</span>
+            </div>
+            {isNuitee && (
+              <div className="flex justify-between">
+                <span className="text-muted">Durée</span>
+                <span className="font-medium text-[var(--text)]">{nbNuits} nuit{nbNuits > 1 ? 's' : ''}</span>
+              </div>
+            )}
+            <div className="border-t border-[var(--border)] pt-2 flex justify-between font-medium">
+              <span className="text-[var(--text)]">
+                {isNuitee ? `${formatFCFA(prixNuitFcfa!)} × ${nbNuits} nuit${nbNuits > 1 ? 's' : ''}` : 'Loyer mensuel'}
+              </span>
+              <span className="font-mono text-lg text-primary">{formatFCFA(montantAffiche)}</span>
+            </div>
+          </div>
+
           {error && <p className="text-danger text-sm">{error}</p>}
+
           <div className="flex gap-3">
             <button
               onClick={() => { setStep('dates'); setError(null) }}
-              className="flex-1 border border-[var(--border)] text-text py-2 rounded-btn text-sm hover:bg-surface transition-colors"
+              className="flex-1 border border-[var(--border)] text-[var(--text)] py-2 rounded-btn text-sm hover:bg-surface transition-colors"
             >
               Modifier les dates
             </button>
             <button
               onClick={handleConfirmerReservation}
-              disabled={loading}
-              className="flex-1 bg-primary text-white py-2 rounded-btn text-sm font-medium hover:opacity-90 disabled:opacity-50"
+              disabled={loading || (isNuitee && nbNuits === 0)}
+              className="flex-1 bg-primary text-white py-2 rounded-btn text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
             >
-              {loading ? 'Confirmation...' : 'Confirmer la reservation'}
+              {loading ? 'Confirmation…' : 'Confirmer la réservation'}
             </button>
           </div>
         </div>
@@ -91,13 +128,13 @@ export function ReservationFlow({ bienId, bienTitre, prixMoisFcfa }: Props) {
 
       {step === 'paiement' && reservationId && (
         <div className="space-y-4">
-          <div className="bg-accent-light rounded-btn p-3 text-accent text-sm">
-            Reservation creee ! Finalisez par le paiement.
+          <div className="bg-accent-light rounded-btn p-3 text-accent text-sm font-sans">
+            Réservation créée ! Finalisez par le paiement.
           </div>
           <PaiementButton
             reservationId={reservationId}
-            montantFcfa={prixMoisFcfa}
-            description={`Reservation : ${bienTitre}`}
+            montantFcfa={montantAffiche}
+            description={`Réservation : ${bienTitre}`}
             className="w-full"
           />
         </div>

@@ -104,7 +104,8 @@ export function Step5Medias({ bienId }: Step5MediasProps) {
           <h3 className="font-sans font-medium text-sm text-muted mb-3 uppercase tracking-wide">
             Médias uploadés ({medias.length}) — glisser pour réordonner
           </h3>
-          <MediaSortable bienId={bienId} initialMedias={medias} />
+          {/* key force le remontage du composant quand la liste change (useState interne) */}
+          <MediaSortable key={medias.map((m) => m.id).join(',')} bienId={bienId} initialMedias={medias} />
         </div>
       )}
 

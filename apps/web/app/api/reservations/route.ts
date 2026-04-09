@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
   // Recuperer le prix et le proprietaire_id du bien
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: bien } = await (supabase.from('biens') as any)
-    .select('prix_mois_fcfa, charges_mois_fcfa, depot_garantie_fcfa, proprietaire_id')
+    .select('type_bien, prix_mois_fcfa, prix_nuit_fcfa, charges_mois_fcfa, depot_garantie_fcfa, proprietaire_id')
     .eq('id', body.bienId)
     .single()
 
@@ -46,9 +46,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Bien introuvable' }, { status: 404 })
   }
 
-  const loyer   = bien.prix_mois_fcfa ?? 0
+  const isNuitee = bien.type_bien === 'residence_meublee' && bien.prix_nuit_fcfa
+  const nbNuits  = Math.ceil(
+    (new Date(body.dateFin).getTime() - new Date(body.dateDebut).getTime()) / 86400000
+  )
+
+  const loyer   = isNuitee ? (bien.prix_nuit_fcfa ?? 0) * nbNuits : (bien.prix_mois_fcfa ?? 0)
   const charges = bien.charges_mois_fcfa ?? 0
-  const depot   = bien.depot_garantie_fcfa ?? 0
+  const depot   = isNuitee ? 0 : (bien.depot_garantie_fcfa ?? 0)
   // 10 % commission plateforme, arrondie au multiple de 5 (regle XOF)
   const commission = Math.round((loyer * 10 / 100) / 5) * 5
   const total      = loyer + charges + depot

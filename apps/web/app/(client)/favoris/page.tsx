@@ -9,18 +9,32 @@ export default async function FavorisPage() {
 
   const { data: favoris } = await supabase
     .from('favoris')
-    .select(`
-      id,
-      biens(
-        id, titre, commune, type_bien, prix_mois_fcfa, prix_vente_fcfa,
-        surface_m2, nb_pieces,
-        biens_medias(url, est_couverture, ordre, type)
-      )
-    `)
+    .select('id, biens(id, titre, commune, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces)')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
-  const biens = (favoris ?? []).map((f) => f.biens).filter(Boolean) as any[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const biens = ((favoris ?? []).map((f) => f.biens).filter(Boolean)) as any[]
+
+  // Requête séparée pour les photos de couverture
+  let coverMap: Record<string, string> = {}
+  if (biens.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: medias } = await (supabase as any)
+      .from('biens_medias')
+      .select('bien_id, url, est_couverture, ordre')
+      .in('bien_id', biens.map((b) => b.id))
+      .eq('type', 'photo')
+      .order('ordre', { ascending: true })
+
+    if (medias) {
+      for (const m of medias as { bien_id: string; url: string; est_couverture: boolean }[]) {
+        if (!coverMap[m.bien_id] || m.est_couverture) {
+          coverMap[m.bien_id] = m.url
+        }
+      }
+    }
+  }
 
   return (
     <main className="bg-surface min-h-screen py-8">
@@ -35,24 +49,21 @@ export default async function FavorisPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {biens.map((bien) => {
-              const medias = (bien.biens_medias ?? []) as Array<{ url: string; est_couverture: boolean; type: string }>
-              const cover = medias.filter((m) => m.type === 'photo').find((m) => m.est_couverture) ?? medias[0]
-              return (
-                <BienCard
-                  key={bien.id}
-                  id={bien.id}
-                  titre={bien.titre}
-                  commune={bien.commune}
-                  type_bien={bien.type_bien}
-                  prix_mois_fcfa={bien.prix_mois_fcfa}
-                  prix_vente_fcfa={bien.prix_vente_fcfa}
-                  surface_m2={bien.surface_m2}
-                  nb_pieces={bien.nb_pieces}
-                  photo_url={cover?.url ?? null}
-                />
-              )
-            })}
+            {biens.map((bien) => (
+              <BienCard
+                key={bien.id}
+                id={bien.id}
+                titre={bien.titre}
+                commune={bien.commune}
+                type_bien={bien.type_bien}
+                prix_mois_fcfa={bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa}
+                prix_nuit_fcfa={bien.prix_nuit_fcfa}
+                prix_vente_fcfa={bien.prix_vente_fcfa}
+                surface_m2={bien.surface_m2}
+                nb_pieces={bien.nb_pieces}
+                photo_url={coverMap[bien.id] ?? null}
+              />
+            ))}
           </div>
         )}
       </div>

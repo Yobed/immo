@@ -36,7 +36,7 @@ export default async function ModifierBienPage({
         {step === 'medias' ? (
           <Step5Medias bienId={id} />
         ) : (
-          <BienForm defaultValues={bien as Partial<BienFormData>} />
+          <BienForm defaultValues={bien as Partial<BienFormData>} bienId={id} />
         )}
       </div>
     </main>

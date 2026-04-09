@@ -16,12 +16,14 @@ export default async function NouvelleReservationPage({ searchParams }: Props) {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: bien } = await (supabase.from('biens') as any)
-    .select('id, titre, commune, prix_mois_fcfa')
+    .select('id, titre, commune, type_bien, prix_mois_fcfa, prix_nuit_fcfa')
     .eq('id', bienId)
     .eq('statut', 'publie')
     .single()
 
   if (!bien) redirect('/')
+
+  const isNuitee = bien.type_bien === 'residence_meublee'
 
   return (
     <div className="min-h-screen bg-surface py-8 px-4">
@@ -32,6 +34,7 @@ export default async function NouvelleReservationPage({ searchParams }: Props) {
           bienId={bien.id}
           bienTitre={bien.titre}
           prixMoisFcfa={bien.prix_mois_fcfa ?? 0}
+          prixNuitFcfa={isNuitee ? (bien.prix_nuit_fcfa ?? 0) : undefined}
         />
       </div>
     </div>

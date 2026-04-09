@@ -47,7 +47,7 @@ export function VisiteRequestForm({ bienId, proprietaireId }: VisiteRequestFormP
     if (res.ok) {
       setSuccess(true)
     } else if (res.status === 401) {
-      router.push('/auth/login')
+      router.push('/login')
     }
     setSubmitting(false)
   }
