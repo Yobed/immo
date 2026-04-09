@@ -30,15 +30,18 @@ export default async function ProLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-[var(--surface)]">
-      <header className="bg-white border-b border-[var(--border)] sticky top-0 z-40 shadow-sm">
+      <header className="glass sticky top-0 z-40 border-b border-[var(--border)]"
+        style={{ boxShadow: 'var(--shadow-sm)' }}>
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
 
           {/* Logo */}
-          <Link href="/dashboard" className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-display font-bold text-sm">IC</div>
-            <div className="hidden sm:block">
-              <span className="font-display text-lg text-primary">Immo CI</span>
-              <span className="ml-1.5 text-xs font-sans text-white bg-secondary px-1.5 py-0.5 rounded-pill">PRO</span>
+          <Link href="/dashboard" className="flex items-center gap-2.5 flex-shrink-0 group">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--primary)] to-[var(--primary-mid)] flex items-center justify-center text-white font-display font-bold text-sm shadow-sm transition-transform duration-200 group-hover:scale-105">
+              IC
+            </div>
+            <div className="hidden sm:flex items-center gap-2">
+              <span className="font-display text-lg font-semibold text-[var(--primary)] tracking-tight">Immo CI</span>
+              <span className="text-xs font-sans font-semibold text-white bg-[var(--secondary)] px-2 py-0.5 rounded-pill tracking-wider">PRO</span>
             </div>
           </Link>
 
@@ -48,9 +51,9 @@ export default async function ProLayout({ children }: { children: React.ReactNod
               <Link
                 key={link.href}
                 href={link.href}
-                className="flex items-center gap-1.5 px-3 py-1.5 font-sans text-sm text-muted hover:text-primary hover:bg-primary/5 transition-colors rounded-btn"
+                className="flex items-center gap-1.5 px-3 py-2 font-sans text-sm text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--primary-light)] transition-all duration-200 rounded-btn"
               >
-                <span className="text-base">{link.icon}</span>
+                <span className="text-sm">{link.icon}</span>
                 {link.label}
               </Link>
             ))}
@@ -58,18 +61,16 @@ export default async function ProLayout({ children }: { children: React.ReactNod
 
           {/* Right side */}
           <div className="flex items-center gap-2">
-            {/* Nouvelle annonce */}
             <Link
               href="/mes-biens/nouveau"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-secondary text-white text-sm font-sans font-medium rounded-btn hover:bg-secondary/90 transition-colors"
+              className="btn-secondary-glow hidden sm:flex items-center gap-1.5 px-4 py-2 bg-[var(--secondary)] text-white text-sm font-sans font-medium rounded-btn"
             >
-              <span>+</span> Annonce
+              <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" fill="none"><path d="M12 5v14M5 12h14"/></svg>
+              Annonce
             </Link>
 
             {user && <NotificationBell userId={user.id} initialUnreadCount={unreadCount} />}
-
             {user && <UserMenu email={user.email ?? ''} role="pro" />}
-
             <MobileMenu links={navLinks} ctaLinks={[{ href: '/mes-biens/nouveau', label: '+ Nouvelle annonce', variant: 'primary' }]} />
           </div>
         </div>

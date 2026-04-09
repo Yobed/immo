@@ -30,13 +30,16 @@ export default async function ClientLayout({ children }: { children: React.React
 
   return (
     <div className="min-h-screen bg-[var(--surface)]">
-      <header className="bg-white border-b border-[var(--border)] sticky top-0 z-40 shadow-sm">
+      <header className="glass sticky top-0 z-40 border-b border-[var(--border)]"
+        style={{ boxShadow: 'var(--shadow-sm)' }}>
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
 
           {/* Logo */}
-          <Link href="/biens" className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-display font-bold text-sm">IC</div>
-            <span className="font-display text-lg text-primary hidden sm:block">Immo CI</span>
+          <Link href="/biens" className="flex items-center gap-2.5 flex-shrink-0 group">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--primary)] to-[var(--primary-mid)] flex items-center justify-center text-white font-display font-bold text-sm shadow-sm transition-transform duration-200 group-hover:scale-105">
+              IC
+            </div>
+            <span className="font-display text-lg font-semibold text-[var(--primary)] hidden sm:block tracking-tight">Immo CI</span>
           </Link>
 
           {/* Nav desktop */}
@@ -45,9 +48,9 @@ export default async function ClientLayout({ children }: { children: React.React
               <Link
                 key={link.href}
                 href={link.href}
-                className="flex items-center gap-1.5 px-3 py-1.5 font-sans text-sm text-muted hover:text-primary hover:bg-primary/5 transition-colors rounded-btn"
+                className="flex items-center gap-1.5 px-3 py-2 font-sans text-sm text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--primary-light)] transition-all duration-200 rounded-btn"
               >
-                <span className="text-base">{link.icon}</span>
+                <span className="text-sm">{link.icon}</span>
                 {link.label}
               </Link>
             ))}
@@ -56,9 +59,7 @@ export default async function ClientLayout({ children }: { children: React.React
           {/* Right side */}
           <div className="flex items-center gap-2">
             {user && <NotificationBell userId={user.id} initialUnreadCount={unreadCount} />}
-
             {user && <UserMenu email={user.email ?? ''} role="client" />}
-
             <MobileMenu links={navLinks} />
           </div>
         </div>
