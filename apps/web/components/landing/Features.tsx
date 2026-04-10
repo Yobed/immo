@@ -68,10 +68,10 @@ export function Features() {
           <p className="font-sans text-sm font-semibold text-[var(--secondary)] uppercase tracking-widest mb-3">
             Fonctionnalités
           </p>
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-[var(--primary)] mb-4">
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-4">
             Tout pour votre immobilier
           </h2>
-          <p className="font-sans text-[var(--text-muted)] text-base max-w-xl mx-auto leading-relaxed">
+          <p className="font-sans text-white/65 text-base max-w-xl mx-auto leading-relaxed">
             Tout ce dont vous avez besoin pour louer, vendre ou gérer vos biens en Côte d&apos;Ivoire.
           </p>
         </div>
@@ -79,8 +79,8 @@ export function Features() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
           {features.map((feature) => (
             <div key={feature.title}
-              className="group relative bg-[var(--primary)] rounded-[20px] p-7 overflow-hidden card-lift">
-              <div className="absolute inset-0 bg-dots opacity-20 pointer-events-none" />
+              className="group relative bg-white/8 border border-white/15 rounded-[20px] p-7 overflow-hidden card-lift hover:bg-white/12 transition-colors duration-300">
+              <div className="absolute inset-0 bg-dots opacity-15 pointer-events-none" />
               <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/5 pointer-events-none" />
               <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-[var(--secondary)]/10 pointer-events-none" />
 

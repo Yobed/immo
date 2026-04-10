@@ -51,8 +51,8 @@ export function BienCard({
   return (
     <Link href={`/biens/${id}`} className="block group h-full">
       <article
-        className="bg-white rounded-[18px] overflow-hidden border border-[var(--border)] card-lift h-full flex flex-col"
-        style={{ boxShadow: 'var(--shadow-card)' }}
+        className="bg-white rounded-[18px] overflow-hidden border border-[#D0D8EE] card-lift h-full flex flex-col"
+        style={{ boxShadow: '0 2px 12px rgba(12, 45, 94, 0.08), 0 0 0 1px rgba(12, 45, 94, 0.06)' }}
       >
         {/* ── Photo ── */}
         <div className="relative aspect-[4/3] bg-[var(--surface)] img-zoom-wrap overflow-hidden">
