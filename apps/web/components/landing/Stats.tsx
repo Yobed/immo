@@ -65,7 +65,7 @@ function StatCard({ target, label, suffix, icon, tenths, delay, active }: {
       <div className="relative">
         <div className="mb-3"><Icon type={icon} /></div>
         <p className="font-mono text-4xl md:text-5xl font-bold mb-1" style={{
-          background: 'linear-gradient(135deg,#E8B84B,#BF8C2C)',
+          background: 'linear-gradient(135deg,#FB923C,#F97316)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',

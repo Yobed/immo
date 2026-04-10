@@ -36,7 +36,7 @@ export default async function PublicLayout({ children }: { children: React.React
             </div>
             <span className="font-display text-xl font-semibold text-[var(--primary)] hidden sm:block tracking-tight">
               Immo <span className="text-gradient-gold" style={{
-                background: 'linear-gradient(135deg,#BF8C2C,#E8B84B)',
+                background: 'linear-gradient(135deg,#F97316,#FB923C)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',

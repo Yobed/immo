@@ -22,7 +22,7 @@ export function CTAFinal() {
           <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-5 leading-tight">
             Prêt à trouver<br />
             <span style={{
-              background: 'linear-gradient(135deg,#BF8C2C,#E8B84B,#BF8C2C)',
+              background: 'linear-gradient(135deg,#F97316,#FB923C,#F97316)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',

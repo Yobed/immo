@@ -19,7 +19,7 @@ export function Hero() {
 
       {/* Orbes flottants décoratifs */}
       <div className="hero-float-1 absolute top-[12%] right-[8%] w-72 h-72 rounded-full opacity-[0.07] pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #BF8C2C 0%, transparent 70%)' }} />
+        style={{ background: 'radial-gradient(circle, #F97316 0%, transparent 70%)' }} />
       <div className="hero-float-2 absolute bottom-[15%] right-[20%] w-48 h-48 rounded-full opacity-[0.05] pointer-events-none"
         style={{ background: 'radial-gradient(circle, #ffffff 0%, transparent 70%)' }} />
       <div className="hero-float-3 absolute top-[40%] right-[3%] w-32 h-32 rounded-full opacity-[0.08] pointer-events-none"

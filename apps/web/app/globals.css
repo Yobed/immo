@@ -14,10 +14,10 @@
   --primary-light:   #EEF3FD;   /* Surface info légère */
   --primary-glow:    rgba(12, 45, 94, 0.10);
 
-  /* Or ivoirien */
-  --secondary:       #BF8C2C;   /* Or chaud — luxe, chaleur */
-  --secondary-light: #FFF9ED;
-  --secondary-glow:  rgba(191, 140, 44, 0.15);
+  /* Orange Côte d'Ivoire */
+  --secondary:       #F97316;   /* Orange vif — énergie, dynamisme */
+  --secondary-light: #FFF7ED;
+  --secondary-glow:  rgba(249, 115, 22, 0.15);
 
   /* États */
   --accent:          #0D9F6E;   /* Émeraude — disponible, validé */
@@ -233,8 +233,8 @@ body {
   background-clip: text;
 }
 
-.text-gradient-gold {
-  background: linear-gradient(135deg, #BF8C2C 0%, #E8B84B 50%, #BF8C2C 100%);
+.text-gradient-orange {
+  background: linear-gradient(135deg, #F97316 0%, #FB923C 50%, #F97316 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -327,7 +327,7 @@ body {
   transition: all 200ms var(--ease-out);
 }
 .btn-secondary-glow:hover {
-  box-shadow: 0 4px 20px var(--secondary-glow), 0 2px 8px rgba(191, 140, 44, 0.20);
+  box-shadow: 0 4px 20px var(--secondary-glow), 0 2px 8px rgba(249, 115, 22, 0.20);
   transform: translateY(-1px);
 }
 
