@@ -17,16 +17,16 @@ export function Hero() {
     <section className="relative min-h-[92vh] bg-primary flex items-stretch overflow-hidden">
 
       {/* ── CÔTÉ GAUCHE : image ─────────────────────────────── */}
-      <div className="hidden lg:block relative w-[46%] shrink-0 overflow-hidden">
+      <div className="hidden lg:block relative w-[52%] shrink-0 overflow-hidden">
 
         {/* Photo de fond */}
         <Image
-          src="https://images.unsplash.com/photo-1613977257363-707ba9348227?w=1200&q=85&auto=format&fit=crop"
+          src="/hero-bg.jpg"
           alt="Belle résidence à Abidjan"
           fill
-          className="object-cover object-center"
+          className="object-cover object-center scale-105"
           priority
-          sizes="46vw"
+          sizes="52vw"
         />
 
         {/* Overlay dégradé : sombre en bas + bord droit pour transition */}
@@ -93,7 +93,7 @@ export function Hero() {
         {/* Image mobile (visible seulement < lg) */}
         <div className="lg:hidden absolute inset-0 pointer-events-none">
           <Image
-            src="https://images.unsplash.com/photo-1613977257363-707ba9348227?w=800&q=70&auto=format&fit=crop"
+            src="/hero-bg.jpg"
             alt="Belle résidence"
             fill
             className="object-cover object-center opacity-10"
