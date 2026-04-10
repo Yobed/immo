@@ -1,9 +1,11 @@
+'use client'
+import { useInView } from '@/hooks/useInView'
+
 const features = [
   {
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-        <path d="M11 8v6M8 11h6"/>
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/>
       </svg>
     ),
     title: 'Vue 360°',
@@ -12,8 +14,7 @@ const features = [
   {
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-        <line x1="1" y1="10" x2="23" y2="10"/>
+        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
       </svg>
     ),
     title: 'Paiement Wave & Orange Money',
@@ -42,8 +43,7 @@ const features = [
   {
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
-        <line x1="6" y1="20" x2="6" y2="14"/>
+        <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
       </svg>
     ),
     title: 'Dashboard Analytics',
@@ -61,10 +61,12 @@ const features = [
 ]
 
 export function Features() {
+  const { ref, visible } = useInView(0.08)
+
   return (
-    <section className="py-24 bg-[var(--primary)]">
+    <section ref={ref as React.RefObject<HTMLElement>} className="py-24 bg-[var(--primary)]">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
+        <div className={`text-center mb-16 sr sr-up ${visible ? 'visible' : ''}`}>
           <p className="font-sans text-sm font-semibold text-[var(--secondary)] uppercase tracking-widest mb-3">
             Fonctionnalités
           </p>
@@ -77,20 +79,23 @@ export function Features() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
-          {features.map((feature) => (
-            <div key={feature.title}
-              className="group relative bg-white/8 border border-white/15 rounded-[20px] p-7 overflow-hidden card-lift hover:bg-white/12 transition-colors duration-300">
+          {features.map((feature, i) => (
+            <div
+              key={feature.title}
+              className={`sr sr-up ${visible ? 'visible' : ''} group relative bg-white/8 border border-white/15 rounded-[20px] p-7 overflow-hidden card-lift hover:bg-white/12 transition-all duration-700`}
+              style={{ transitionDelay: visible ? `${80 + i * 80}ms` : '0ms' }}
+            >
               <div className="absolute inset-0 bg-dots opacity-15 pointer-events-none" />
               <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/5 pointer-events-none" />
               <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-[var(--secondary)]/10 pointer-events-none" />
 
               <div className="relative">
-                <div className="w-12 h-12 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center text-white mb-5">
+                <div className="w-12 h-12 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center text-white mb-5 group-hover:bg-white/15 group-hover:scale-110 transition-all duration-300">
                   {feature.icon}
                 </div>
                 <h3 className="font-display text-lg font-semibold text-white mb-2.5">{feature.title}</h3>
                 <p className="font-sans text-sm text-white/70 leading-relaxed">{feature.description}</p>
-                <div className="mt-5 h-px w-12 bg-gradient-to-r from-[var(--secondary)] to-transparent opacity-70" />
+                <div className="mt-5 h-px w-12 bg-gradient-to-r from-[var(--secondary)] to-transparent opacity-70 group-hover:w-20 transition-all duration-500" />
               </div>
             </div>
           ))}

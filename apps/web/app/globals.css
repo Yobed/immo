@@ -420,3 +420,70 @@ input:focus, select:focus, textarea:focus {
 main {
   animation: fadeIn 0.3s var(--ease-out) both;
 }
+
+/* ══════════════════════════════════════════════════════
+   LANDING ANIMATIONS
+══════════════════════════════════════════════════════ */
+
+/* Keyframes */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes scalePop {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  40%       { transform: translateY(-22px) rotate(3deg); }
+  70%       { transform: translateY(-10px) rotate(-1deg); }
+}
+@keyframes floatAlt {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  40%       { transform: translateY(-14px) rotate(-2deg); }
+  70%       { transform: translateY(-28px) rotate(2deg); }
+}
+@keyframes pulse-ring {
+  0%   { transform: scale(1); opacity: 0.4; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+@keyframes shimmerText {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* Hero — auto-play on load */
+.hero-badge    { animation: fadeInDown 0.65s cubic-bezier(0.22,1,0.36,1) 0.05s both; }
+.hero-title    { animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.2s both; }
+.hero-subtitle { animation: fadeUp 0.7s cubic-bezier(0.22,1,0.36,1) 0.38s both; }
+.hero-search   { animation: fadeUp 0.7s cubic-bezier(0.22,1,0.36,1) 0.52s both; }
+.hero-pills    { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.68s both; }
+.hero-float-1  { animation: float 8s ease-in-out infinite; }
+.hero-float-2  { animation: floatAlt 10s ease-in-out infinite 1.5s; }
+.hero-float-3  { animation: float 12s ease-in-out infinite 3s; }
+
+/* Scroll-reveal utilities (JS adds .visible class via IntersectionObserver) */
+.sr {
+  opacity: 0;
+  transition: opacity 0.7s cubic-bezier(0.22,1,0.36,1),
+              transform 0.7s cubic-bezier(0.22,1,0.36,1);
+}
+.sr-up   { transform: translateY(30px); }
+.sr-down { transform: translateY(-20px); }
+.sr-left { transform: translateX(-24px); }
+.sr-scale { transform: scale(0.88); }
+.sr-pop   { transform: scale(0.8); }
+
+.sr.visible {
+  opacity: 1;
+  transform: none;
+}

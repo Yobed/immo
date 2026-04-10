@@ -1,3 +1,6 @@
+'use client'
+import { useInView } from '@/hooks/useInView'
+
 const testimonials = [
   {
     id: 1,
@@ -29,11 +32,7 @@ function StarRating({ rating }: { rating: number }) {
   return (
     <div className="flex gap-0.5" aria-label={`Note: ${rating} sur 5`}>
       {Array.from({ length: 5 }).map((_, i) => (
-        <span
-          key={i}
-          className={i < rating ? 'text-secondary' : 'text-[var(--border)]'}
-          aria-hidden="true"
-        >
+        <span key={i} className={i < rating ? 'text-secondary' : 'text-[var(--border)]'} aria-hidden="true">
           &#9733;
         </span>
       ))}
@@ -42,15 +41,16 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export function Testimonials() {
+  const { ref, visible } = useInView(0.1)
+
   return (
-    <section className="py-20 bg-[var(--primary)] relative overflow-hidden">
-      {/* Décor */}
+    <section ref={ref as React.RefObject<HTMLElement>} className="py-20 bg-[var(--primary)] relative overflow-hidden">
       <div className="absolute inset-0 bg-dots opacity-20 pointer-events-none" />
       <div className="absolute top-0 left-0 w-80 h-80 rounded-full bg-[var(--secondary)]/6 blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full bg-white/4 blur-3xl pointer-events-none" />
 
       <div className="relative container mx-auto px-4">
-        <div className="text-center mb-14">
+        <div className={`text-center mb-14 sr sr-up ${visible ? 'visible' : ''}`}>
           <p className="font-sans text-sm font-semibold text-[var(--secondary)] uppercase tracking-widest mb-3">
             Témoignages
           </p>
@@ -63,10 +63,11 @@ export function Testimonials() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-6xl mx-auto">
-          {testimonials.map((t) => (
+          {testimonials.map((t, i) => (
             <div
               key={t.id}
-              className="bg-white/8 border border-white/12 rounded-[20px] p-6 flex flex-col gap-4 hover:bg-white/12 transition-colors duration-300"
+              className={`sr sr-up ${visible ? 'visible' : ''} bg-white/8 border border-white/12 rounded-[20px] p-6 flex flex-col gap-4 hover:bg-white/12 transition-all duration-700`}
+              style={{ transitionDelay: visible ? `${80 + i * 120}ms` : '0ms' }}
             >
               <StarRating rating={t.rating} />
               <p className="font-sans text-sm text-white/80 leading-relaxed flex-1">

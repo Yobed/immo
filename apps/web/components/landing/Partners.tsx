@@ -1,6 +1,7 @@
 'use client'
 import Image from 'next/image'
 import { useRef } from 'react'
+import { useInView } from '@/hooks/useInView'
 
 const partners = [
   {
@@ -70,6 +71,7 @@ const partners = [
 
 export function Partners() {
   const scrollRef = useRef<HTMLDivElement>(null)
+  const { ref, visible } = useInView(0.1)
 
   const scroll = (dir: 'left' | 'right') => {
     if (!scrollRef.current) return
@@ -77,10 +79,10 @@ export function Partners() {
   }
 
   return (
-    <section className="py-16 bg-white border-t border-[#E2E7F3]">
+    <section ref={ref as React.RefObject<HTMLElement>} className="py-16 bg-white border-t border-[#E2E7F3]">
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-10">
+        <div className={`text-center mb-10 sr sr-up ${visible ? 'visible' : ''}`}>
           <p className="font-sans text-sm font-semibold text-[var(--secondary)] uppercase tracking-widest mb-2">
             Intégrations
           </p>
@@ -93,7 +95,10 @@ export function Partners() {
         </div>
 
         {/* Carousel */}
-        <div className="relative">
+        <div
+          className={`sr sr-up ${visible ? 'visible' : ''} relative`}
+          style={{ transitionDelay: visible ? '120ms' : '0ms' }}
+        >
           {/* Fades */}
           <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
           <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
@@ -114,12 +119,17 @@ export function Partners() {
 
           {/* Scroll track */}
           <div ref={scrollRef} className="carousel-scroll px-10 py-2">
-            {partners.map((p) => (
-              <div key={p.name}
-                className="shrink-0 w-48 flex flex-col items-center justify-center gap-3 p-5 rounded-[16px] border transition-all duration-200 hover:-translate-y-1 hover:shadow-lg cursor-default"
-                style={{ backgroundColor: p.bg, borderColor: p.border, minHeight: '110px' }}
+            {partners.map((p, i) => (
+              <div
+                key={p.name}
+                className={`sr sr-scale ${visible ? 'visible' : ''} shrink-0 w-48 flex flex-col items-center justify-center gap-3 p-5 rounded-[16px] border transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lg cursor-default`}
+                style={{
+                  backgroundColor: p.bg,
+                  borderColor: p.border,
+                  minHeight: '110px',
+                  transitionDelay: visible ? `${150 + i * 70}ms` : '0ms',
+                }}
               >
-                {/* Logo */}
                 {p.logo ? (
                   <div className="flex items-center justify-center" style={{ height: '60px' }}>
                     <Image
@@ -136,7 +146,6 @@ export function Partners() {
                     {p.customLogo}
                   </div>
                 )}
-                {/* Tagline */}
                 <p className="font-sans text-xs text-center text-muted">{p.tagline}</p>
               </div>
             ))}

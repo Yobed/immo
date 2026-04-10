@@ -1,3 +1,6 @@
+'use client'
+import { useInView } from '@/hooks/useInView'
+
 const IconPublish = () => (
   <svg width="26" height="26" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
     <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
@@ -22,33 +25,20 @@ const IconPayment = () => (
 )
 
 export function HowItWorks() {
+  const { ref, visible } = useInView(0.1)
+
   const steps = [
-    {
-      icon: <IconPublish />,
-      number: '01',
-      title: 'Publiez',
-      description: 'Créez votre annonce en quelques minutes. Photos, description, prix en FCFA — votre bien est visible immédiatement.',
-    },
-    {
-      icon: <IconCalendar />,
-      number: '02',
-      title: 'Réservez',
-      description: 'Les locataires ou acheteurs intéressés vous contactent directement. Planifiez des visites en un clic.',
-    },
-    {
-      icon: <IconPayment />,
-      number: '03',
-      title: 'Payez',
-      description: 'Paiement sécurisé via Wave, Orange Money, MTN ou CinetPay. Contrats OHADA générés automatiquement.',
-    },
+    { icon: <IconPublish />, number: '01', title: 'Publiez', description: 'Créez votre annonce en quelques minutes. Photos, description, prix en FCFA — votre bien est visible immédiatement.' },
+    { icon: <IconCalendar />, number: '02', title: 'Réservez', description: 'Les locataires ou acheteurs intéressés vous contactent directement. Planifiez des visites en un clic.' },
+    { icon: <IconPayment />, number: '03', title: 'Payez', description: 'Paiement sécurisé via Wave, Orange Money, MTN ou CinetPay. Contrats OHADA générés automatiquement.' },
   ]
 
   return (
-    <section className="py-24 bg-white relative overflow-hidden">
+    <section ref={ref as React.RefObject<HTMLElement>} className="py-24 bg-white relative overflow-hidden">
       <div className="absolute inset-0 bg-grid opacity-40 pointer-events-none" />
 
       <div className="relative container mx-auto px-4">
-        <div className="text-center mb-16">
+        <div className={`text-center mb-16 sr sr-up ${visible ? 'visible' : ''}`}>
           <p className="font-sans text-sm font-semibold text-[var(--secondary)] uppercase tracking-widest mb-3">
             Simple &amp; rapide
           </p>
@@ -62,7 +52,11 @@ export function HowItWorks() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {steps.map((step, i) => (
-            <div key={step.number} className="relative group">
+            <div
+              key={step.number}
+              className={`sr sr-up ${visible ? 'visible' : ''} relative group`}
+              style={{ transitionDelay: visible ? `${100 + i * 140}ms` : '0ms' }}
+            >
               {i < steps.length - 1 && (
                 <div className="hidden md:block absolute top-10 left-[calc(100%+4px)] w-[calc(100%-8px)] h-px bg-gradient-to-r from-[var(--primary)]/20 to-[var(--secondary)]/20 z-0" />
               )}
@@ -71,7 +65,7 @@ export function HowItWorks() {
                 <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-white/5 pointer-events-none" />
 
                 <div className="relative inline-flex items-center justify-center mb-5">
-                  <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-white">
+                  <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-white group-hover:bg-white/20 group-hover:scale-110 transition-all duration-300">
                     {step.icon}
                   </div>
                   <span className="absolute -top-2 -right-2 font-mono text-[10px] font-bold text-[var(--primary)] bg-[var(--secondary)] rounded-pill px-1.5 py-0.5 leading-none">
@@ -81,7 +75,7 @@ export function HowItWorks() {
 
                 <h3 className="font-display text-xl font-semibold text-white mb-3">{step.title}</h3>
                 <p className="font-sans text-sm text-white/70 leading-relaxed">{step.description}</p>
-                <div className="mt-5 mx-auto h-0.5 w-10 bg-gradient-to-r from-[var(--secondary)] to-transparent rounded-full" />
+                <div className="mt-5 mx-auto h-0.5 w-10 bg-gradient-to-r from-[var(--secondary)] to-transparent rounded-full group-hover:w-16 transition-all duration-500" />
               </div>
             </div>
           ))}
