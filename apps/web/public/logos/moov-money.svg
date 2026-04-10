@@ -1,12 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
-  <!-- Orange diamond background -->
-  <rect x="10" y="10" width="100" height="100" rx="16" fill="#FF6B00" transform="rotate(45 60 60)"/>
-  <!-- MOOV text in dark blue -->
-  <text x="60" y="52" font-family="Arial Black, sans-serif" font-weight="900" font-size="22" fill="#003399" text-anchor="middle" letter-spacing="1">MOOV</text>
-  <!-- Money text in white -->
-  <text x="60" y="74" font-family="Arial Black, sans-serif" font-weight="900" font-size="20" fill="white" text-anchor="middle">Money</text>
-  <!-- Swoosh lines (white) -->
-  <path d="M78 76 Q85 72 90 76" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-  <path d="M80 80 Q88 75 94 80" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
-  <path d="M82 84 Q91 78 98 84" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<?xml version="1.0" standalone="no"?>
+<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+ width="512.000000pt" height="512.000000pt" viewBox="0 0 512.000000 512.000000"
+ preserveAspectRatio="xMidYMid meet">
+<g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"
+fill="#FF6B00" stroke="none">
+<path d="M1646 3435 c-9 -25 -7 -518 3 -533 5 -9 29 -12 82 -10 l74 3 -1 98
+c-1 53 0 97 1 97 1 0 12 -27 24 -60 l22 -60 54 0 c59 0 69 9 91 85 7 24 10 11
+14 -65 l5 -95 78 -3 77 -3 -2 278 -3 278 -71 3 c-78 3 -81 1 -106 -63 -9 -22
+-28 -66 -42 -97 -14 -31 -26 -62 -26 -67 0 -33 -22 2 -67 107 l-51 117 -75 3
+c-61 2 -76 0 -81 -13z"/>
+<path d="M2310 3430 c-103 -48 -120 -86 -120 -267 0 -124 3 -142 23 -178 13
+-23 43 -52 71 -70 42 -25 62 -31 126 -33 63 -3 86 0 130 19 56 24 110 84 110
+123 0 43 17 49 23 8 8 -48 36 -85 91 -119 49 -32 169 -43 231 -23 48 16 112
+74 131 118 17 43 18 261 1 310 -16 43 -63 91 -112 113 -55 25 -175 25 -230 0
+-56 -25 -103 -82 -112 -133 l-6 -42 -13 42 c-17 59 -38 88 -87 119 -35 23 -55
+27 -127 30 -70 3 -93 0 -130 -17z m176 -141 c12 -9 14 -37 12 -128 l-3 -116
+-38 -12 c-31 -11 -44 -10 -73 2 l-35 14 3 118 c3 114 4 118 28 131 28 14 84
+10 106 -9z m482 -7 c8 -10 12 -51 12 -117 0 -120 -11 -138 -80 -137 -67 1 -71
+9 -68 141 3 112 4 116 28 128 31 16 90 8 108 -15z"/>
+<path d="M3100 3431 c0 -11 14 -57 31 -103 17 -45 41 -112 54 -148 13 -36 41
+-114 63 -175 l40 -110 73 0 73 0 21 55 c12 30 36 98 54 150 18 52 36 104 41
+115 20 47 70 192 72 210 3 19 -3 20 -77 20 l-80 0 -47 -140 c-26 -77 -47 -150
+-48 -162 0 -30 -20 -30 -20 -1 0 12 -21 86 -46 165 l-46 143 -79 0 c-71 0 -79
+-2 -79 -19z"/>
+</g>
 </svg>
