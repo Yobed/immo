@@ -48,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="fr"
       className={`${playfair.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}
     >
-      <body className="font-sans bg-surface text-text antialiased">{children}</body>
+      <body className="font-sans bg-white text-text antialiased">{children}</body>
     </html>
   )
 }

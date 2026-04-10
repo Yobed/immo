@@ -28,7 +28,7 @@
   --warning-light:   #FFFBEC;
 
   /* Surfaces */
-  --surface:         #F6F7FB;
+  --surface:         #FFFFFF;
   --surface-card:    #FFFFFF;
   --surface-raised:  #FFFFFF;
 
@@ -68,7 +68,7 @@ html {
 }
 
 body {
-  background-color: var(--surface);
+  background-color: #ffffff;
   color: var(--text);
   font-family: 'DM Sans', -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -337,11 +337,12 @@ body {
 }
 .img-zoom-wrap img,
 .img-zoom-wrap .img-zoom {
-  transition: transform 600ms var(--ease-gentle);
+  transition: transform 500ms var(--ease-gentle);
+  will-change: transform;
 }
 .img-zoom-wrap:hover img,
 .img-zoom-wrap:hover .img-zoom {
-  transform: scale(1.07);
+  transform: scale(1.12);
 }
 
 /* Badge pill avec glow */
@@ -388,6 +389,29 @@ input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--primary) !important;
   box-shadow: 0 0 0 3px var(--primary-light) !important;
+}
+
+/* ══════════════════════════════════════════════════════
+   CAROUSEL HORIZONTAL
+══════════════════════════════════════════════════════ */
+.carousel-scroll {
+  display: flex;
+  gap: 1.25rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.5rem;
+}
+.carousel-scroll::-webkit-scrollbar { height: 4px; }
+.carousel-scroll::-webkit-scrollbar-track { background: transparent; }
+.carousel-scroll::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 99px;
+}
+.carousel-scroll > * {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
 }
 
 /* ══════════════════════════════════════════════════════

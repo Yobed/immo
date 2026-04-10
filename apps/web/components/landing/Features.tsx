@@ -62,7 +62,7 @@ const features = [
 
 export function Features() {
   return (
-    <section className="py-24 bg-[var(--surface)]">
+    <section className="py-24 bg-[var(--primary)]">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <p className="font-sans text-sm font-semibold text-[var(--secondary)] uppercase tracking-widest mb-3">

@@ -43,34 +43,42 @@ function StarRating({ rating }: { rating: number }) {
 
 export function Testimonials() {
   return (
-    <section className="py-20 bg-white">
-      <div className="container mx-auto px-4">
+    <section className="py-20 bg-[var(--primary)] relative overflow-hidden">
+      {/* Décor */}
+      <div className="absolute inset-0 bg-dots opacity-20 pointer-events-none" />
+      <div className="absolute top-0 left-0 w-80 h-80 rounded-full bg-[var(--secondary)]/6 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full bg-white/4 blur-3xl pointer-events-none" />
+
+      <div className="relative container mx-auto px-4">
         <div className="text-center mb-14">
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-primary mb-4">
+          <p className="font-sans text-sm font-semibold text-[var(--secondary)] uppercase tracking-widest mb-3">
+            Témoignages
+          </p>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-4">
             Ce que disent nos utilisateurs
           </h2>
-          <p className="font-sans text-muted text-lg max-w-xl mx-auto">
+          <p className="font-sans text-white/60 text-base max-w-xl mx-auto">
             Des milliers de propriétaires, locataires et agences nous font confiance chaque jour.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-6xl mx-auto">
           {testimonials.map((t) => (
             <div
               key={t.id}
-              className="bg-surface rounded-card p-6 flex flex-col gap-4"
+              className="bg-white/8 border border-white/12 rounded-[20px] p-6 flex flex-col gap-4 hover:bg-white/12 transition-colors duration-300"
             >
               <StarRating rating={t.rating} />
-              <p className="font-sans text-sm text-[var(--text)] leading-relaxed flex-1">
+              <p className="font-sans text-sm text-white/80 leading-relaxed flex-1">
                 &ldquo;{t.text}&rdquo;
               </p>
-              <div className="flex items-center gap-3 pt-2 border-t border-[var(--border)]">
-                <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-mono text-xs font-semibold shrink-0">
+              <div className="flex items-center gap-3 pt-3 border-t border-white/15">
+                <div className="w-10 h-10 rounded-full bg-[var(--secondary)] flex items-center justify-center text-white font-mono text-xs font-semibold shrink-0">
                   {t.avatar}
                 </div>
                 <div>
-                  <p className="font-sans text-sm font-semibold text-[var(--text)]">{t.name}</p>
-                  <p className="font-sans text-xs text-muted">{t.role}</p>
+                  <p className="font-sans text-sm font-semibold text-white">{t.name}</p>
+                  <p className="font-sans text-xs text-white/50">{t.role}</p>
                 </div>
               </div>
             </div>

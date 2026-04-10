@@ -49,9 +49,9 @@ export function BienCard({
   const typeConf = TYPE_CONFIG[type_bien] ?? { bg: 'bg-slate-50', text: 'text-slate-600', dot: 'bg-slate-400' }
 
   return (
-    <Link href={`/biens/${id}`} className="block group">
+    <Link href={`/biens/${id}`} className="block group h-full">
       <article
-        className="bg-white rounded-[18px] overflow-hidden border border-[var(--border)] card-lift"
+        className="bg-white rounded-[18px] overflow-hidden border border-[var(--border)] card-lift h-full flex flex-col"
         style={{ boxShadow: 'var(--shadow-card)' }}
       >
         {/* ── Photo ── */}
@@ -124,7 +124,7 @@ export function BienCard({
         </div>
 
         {/* ── Infos ── */}
-        <div className="p-4">
+        <div className="p-4 flex flex-col flex-1">
           <h3 className="font-sans font-semibold text-[var(--text)] text-sm leading-snug line-clamp-2 mb-2 group-hover:text-[var(--primary)] transition-colors duration-200">
             {titre}
           </h3>
@@ -141,7 +141,7 @@ export function BienCard({
 
           {/* Stats */}
           {(surface_m2 || nb_pieces) && (
-            <div className="flex items-center gap-4 pt-3 border-t border-[var(--border)]">
+            <div className="flex items-center gap-4 pt-3 border-t border-[var(--border)] mt-auto">
               {surface_m2 && (
                 <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-sans">
                   <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" className="text-[var(--primary)]/50">

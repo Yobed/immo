@@ -23,7 +23,7 @@ const config: Config = {
         accent:  { DEFAULT: '#0D9F6E', light: '#EDFAF3' },
         danger:  { DEFAULT: '#D93025', light: '#FEF1F0' },
         warning: { DEFAULT: '#D08700', light: '#FFFBEC' },
-        surface: { DEFAULT: '#F6F7FB', card: '#FFFFFF', raised: '#FFFFFF' },
+        surface: { DEFAULT: '#FFFFFF', card: '#FFFFFF', raised: '#FFFFFF' },
         muted:   '#2D3748',
         subtle:  '#4A5568',
         border:  { DEFAULT: '#E2E7F3', hover: '#B8C4DE' },
