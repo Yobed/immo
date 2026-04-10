@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <!-- Orange diamond background -->
+  <rect x="10" y="10" width="100" height="100" rx="16" fill="#FF6B00" transform="rotate(45 60 60)"/>
+  <!-- MOOV text in dark blue -->
+  <text x="60" y="52" font-family="Arial Black, sans-serif" font-weight="900" font-size="22" fill="#003399" text-anchor="middle" letter-spacing="1">MOOV</text>
+  <!-- Money text in white -->
+  <text x="60" y="74" font-family="Arial Black, sans-serif" font-weight="900" font-size="20" fill="white" text-anchor="middle">Money</text>
+  <!-- Swoosh lines (white) -->
+  <path d="M78 76 Q85 72 90 76" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M80 80 Q88 75 94 80" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M82 84 Q91 78 98 84" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+</svg>

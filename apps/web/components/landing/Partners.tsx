@@ -1,91 +1,69 @@
 'use client'
+import Image from 'next/image'
 import { useRef } from 'react'
 
 const partners = [
   {
     name: 'Wave',
     tagline: 'Paiement mobile',
-    color: '#1A6BF5',
-    bg: '#EBF2FF',
-    border: '#C3D8FF',
-    logo: (
-      <svg viewBox="0 0 60 24" fill="none" className="h-7 w-auto">
-        {/* Wave stylized W */}
-        <path d="M4 18 L10 6 L16 14 L22 6 L28 18" stroke="#1A6BF5" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-        <text x="33" y="18" fontFamily="system-ui,sans-serif" fontWeight="700" fontSize="13" fill="#1A6BF5">Wave</text>
-      </svg>
-    ),
+    logo: '/logos/wave.svg',
+    bg: '#E6F9FF',
+    border: '#99E5F7',
+    logoSize: { w: 60, h: 60 },
   },
   {
     name: 'Orange Money',
     tagline: 'Mobile money',
-    color: '#FF6600',
+    logo: '/logos/orange-money.svg',
     bg: '#FFF3EB',
     border: '#FFD0B0',
-    logo: (
-      <svg viewBox="0 0 80 24" fill="none" className="h-7 w-auto">
-        <circle cx="12" cy="12" r="10" fill="#FF6600"/>
-        <circle cx="12" cy="12" r="6" fill="white" opacity="0.9"/>
-        <circle cx="12" cy="12" r="3" fill="#FF6600"/>
-        <text x="27" y="17" fontFamily="system-ui,sans-serif" fontWeight="700" fontSize="11" fill="#FF6600">Orange</text>
-        <text x="27" y="29" fontFamily="system-ui,sans-serif" fontWeight="700" fontSize="11" fill="#FF6600">Money</text>
-      </svg>
-    ),
+    logoSize: { w: 130, h: 40 },
   },
   {
-    name: 'MTN',
+    name: 'MTN Mobile Money',
     tagline: 'Mobile money',
-    color: '#FFCC00',
+    logo: '/logos/mtn.svg',
     bg: '#FFFBE0',
     border: '#FFE680',
-    logo: (
-      <svg viewBox="0 0 56 24" fill="none" className="h-7 w-auto">
-        <rect x="0" y="4" width="56" height="16" rx="4" fill="#FFCC00"/>
-        <text x="6" y="17" fontFamily="system-ui,sans-serif" fontWeight="900" fontSize="13" fill="#000" letterSpacing="1">MTN</text>
-      </svg>
-    ),
+    logoSize: { w: 130, h: 65 },
   },
   {
     name: 'Moov Money',
     tagline: 'Paiement mobile',
-    color: '#0066CC',
-    bg: '#EBF0FF',
-    border: '#B3CCFF',
-    logo: (
-      <svg viewBox="0 0 84 24" fill="none" className="h-7 w-auto">
-        <circle cx="12" cy="12" r="10" fill="#0066CC"/>
-        <path d="M7 12 L10 8 L12 12 L14 8 L17 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-        <text x="27" y="17" fontFamily="system-ui,sans-serif" fontWeight="700" fontSize="11" fill="#0066CC">Moov</text>
-        <text x="27" y="29" fontFamily="system-ui,sans-serif" fontWeight="700" fontSize="11" fill="#0066CC">Money</text>
-      </svg>
-    ),
+    logo: '/logos/moov-money.svg',
+    bg: '#FFF0E6',
+    border: '#FFD0A8',
+    logoSize: { w: 65, h: 65 },
   },
   {
     name: 'CinetPay',
     tagline: 'Agrégateur CI',
-    color: '#E10F28',
+    logo: null,
     bg: '#FFEBEE',
     border: '#FFB3BB',
-    logo: (
-      <svg viewBox="0 0 76 24" fill="none" className="h-7 w-auto">
-        <rect x="0" y="2" width="22" height="20" rx="4" fill="#E10F28"/>
-        <text x="3" y="17" fontFamily="system-ui,sans-serif" fontWeight="900" fontSize="12" fill="white">C</text>
-        <text x="27" y="17" fontFamily="system-ui,sans-serif" fontWeight="700" fontSize="13" fill="#E10F28">CinetPay</text>
-      </svg>
+    logoSize: { w: 110, h: 40 },
+    customLogo: (
+      <div className="flex items-center gap-2">
+        <div className="w-9 h-9 rounded-lg flex items-center justify-center font-black text-white text-xl" style={{ background: 'linear-gradient(135deg,#E10F28,#FF4444)' }}>C</div>
+        <span className="font-black text-lg" style={{ color: '#E10F28' }}>CinetPay</span>
+      </div>
     ),
   },
   {
     name: 'Cloudinary',
     tagline: 'Stockage médias',
-    color: '#3448C5',
+    logo: null,
     bg: '#ECEEFF',
     border: '#BBC5FF',
-    logo: (
-      <svg viewBox="0 0 92 24" fill="none" className="h-7 w-auto">
-        {/* Cloud icon */}
-        <path d="M5 16a4 4 0 01-.5-8 5.5 5.5 0 0110.6-1.5A3 3 0 0118 13a3 3 0 01-3 3H5z" fill="#3448C5" opacity="0.9"/>
-        <text x="22" y="17" fontFamily="system-ui,sans-serif" fontWeight="700" fontSize="12" fill="#3448C5">Cloudinary</text>
-      </svg>
+    logoSize: { w: 120, h: 40 },
+    customLogo: (
+      <div className="flex items-center gap-2">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+          <path d="M6.5 19a4.5 4.5 0 010-9 .5.5 0 00.5-.5 6.5 6.5 0 0112.42-2A4.5 4.5 0 0118.5 19H6.5z" fill="#3448C5"/>
+          <path d="M9 14l3-3 3 3M12 11v6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        <span className="font-bold text-sm" style={{ color: '#3448C5' }}>Cloudinary</span>
+      </div>
     ),
   },
 ]
@@ -95,11 +73,11 @@ export function Partners() {
 
   const scroll = (dir: 'left' | 'right') => {
     if (!scrollRef.current) return
-    scrollRef.current.scrollBy({ left: dir === 'right' ? 300 : -300, behavior: 'smooth' })
+    scrollRef.current.scrollBy({ left: dir === 'right' ? 220 : -220, behavior: 'smooth' })
   }
 
   return (
-    <section className="py-16 bg-white border-t border-[var(--border)]">
+    <section className="py-16 bg-white border-t border-[#E2E7F3]">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-10">
@@ -116,10 +94,9 @@ export function Partners() {
 
         {/* Carousel */}
         <div className="relative">
-          {/* Left fade */}
-          <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
-          {/* Right fade */}
-          <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+          {/* Fades */}
+          <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
 
           {/* Arrows */}
           <button type="button" onClick={() => scroll('left')}
@@ -136,21 +113,31 @@ export function Partners() {
           </button>
 
           {/* Scroll track */}
-          <div ref={scrollRef} className="carousel-scroll px-8">
+          <div ref={scrollRef} className="carousel-scroll px-10 py-2">
             {partners.map((p) => (
               <div key={p.name}
-                className="shrink-0 w-44 flex flex-col items-center gap-3 p-5 rounded-[16px] border transition-all duration-200 hover:-translate-y-1 hover:shadow-md cursor-default"
-                style={{ backgroundColor: p.bg, borderColor: p.border }}
+                className="shrink-0 w-48 flex flex-col items-center justify-center gap-3 p-5 rounded-[16px] border transition-all duration-200 hover:-translate-y-1 hover:shadow-lg cursor-default"
+                style={{ backgroundColor: p.bg, borderColor: p.border, minHeight: '110px' }}
               >
                 {/* Logo */}
-                <div className="flex items-center justify-center h-10">
-                  {p.logo}
-                </div>
-                {/* Name */}
-                <div className="text-center">
-                  <p className="font-sans font-bold text-sm" style={{ color: p.color }}>{p.name}</p>
-                  <p className="font-sans text-xs text-muted mt-0.5">{p.tagline}</p>
-                </div>
+                {p.logo ? (
+                  <div className="flex items-center justify-center" style={{ height: '60px' }}>
+                    <Image
+                      src={p.logo}
+                      alt={p.name}
+                      width={p.logoSize.w}
+                      height={p.logoSize.h}
+                      className="object-contain"
+                      style={{ maxHeight: '56px', width: 'auto' }}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-14">
+                    {p.customLogo}
+                  </div>
+                )}
+                {/* Tagline */}
+                <p className="font-sans text-xs text-center text-muted">{p.tagline}</p>
               </div>
             ))}
           </div>
