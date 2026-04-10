@@ -87,7 +87,10 @@ export function NotificationBell({ userId, initialUnreadCount }: NotificationBel
         aria-label="Notifications"
         className="relative p-2 rounded-btn hover:bg-[var(--surface)] transition-colors"
       >
-        <span className="text-xl leading-none" aria-hidden>🔔</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 01-3.46 0"/>
+        </svg>
         {unreadCount > 0 && (
           <span className="absolute top-1 right-1 min-w-[16px] h-4 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full px-0.5">
             {unreadCount > 99 ? '99+' : unreadCount}

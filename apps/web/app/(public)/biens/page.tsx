@@ -5,13 +5,13 @@ const PAGE_SIZE = 12
 
 const TYPE_FILTERS = [
   { label: 'Tous', value: '' },
-  { label: '🏠 Appartements', value: 'appartement' },
-  { label: '🏡 Villas', value: 'villa' },
-  { label: '🛋️ Résidences meublées', value: 'residence_meublee' },
-  { label: '🛏 Studios', value: 'studio' },
-  { label: '🏘 Maisons', value: 'maison' },
-  { label: '🏢 Bureaux', value: 'bureau' },
-  { label: '🌍 Terrains', value: 'terrain' },
+  { label: 'Appartements', value: 'appartement' },
+  { label: 'Villas', value: 'villa' },
+  { label: 'Résidences meublées', value: 'residence_meublee' },
+  { label: 'Studios', value: 'studio' },
+  { label: 'Maisons', value: 'maison' },
+  { label: 'Bureaux', value: 'bureau' },
+  { label: 'Terrains', value: 'terrain' },
 ]
 
 type BienRow = {
@@ -108,7 +108,12 @@ export default async function BiensListePage({
       <div className="max-w-7xl mx-auto px-4 py-8">
         {bienRows.length === 0 ? (
           <div className="text-center py-24">
-            <div className="text-5xl mb-4">🏚</div>
+            <div className="flex justify-center mb-4">
+              <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-muted">
+                <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/>
+                <path d="M9 21V12h6v9"/>
+              </svg>
+            </div>
             <p className="font-display text-xl text-[var(--text)] mb-2">Aucune annonce trouvée</p>
             <p className="text-muted font-sans text-sm mb-6">Essayez un autre type de bien ou supprimez les filtres.</p>
             <a href="/biens" className="inline-block px-6 py-2 bg-primary text-white rounded-btn text-sm font-sans hover:bg-primary/90 transition-colors">

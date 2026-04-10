@@ -50,11 +50,18 @@ export function ProfileEditForm({ initialNom, initialTelephone, userId }: Profil
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="px-4 py-2 rounded-btn border border-[var(--border)] font-sans text-sm text-[var(--text)] hover:border-primary/40 hover:text-primary transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-btn border border-[var(--border)] font-sans text-sm text-[var(--text)] hover:border-primary/40 hover:text-primary transition-colors"
           >
-            ✏️ Modifier
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+            Modifier
           </button>
-          {success && <span className="text-sm text-accent font-sans">✓ Profil mis à jour</span>}
+          {success && <span className="text-sm text-accent font-sans flex items-center gap-1">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Profil mis à jour
+          </span>}
         </div>
       </div>
     )

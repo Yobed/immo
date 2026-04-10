@@ -186,7 +186,12 @@ export default async function RecherchePage({
             {/* Résultats vides */}
             {bienRows.length === 0 ? (
               <div className="text-center py-16">
-                <div className="text-5xl mb-4">🏚</div>
+                <div className="flex justify-center mb-4">
+                  <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-muted">
+                    <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/>
+                    <path d="M9 21V12h6v9"/>
+                  </svg>
+                </div>
                 <p className="font-display text-xl text-[var(--text)] mb-2">Aucune annonce trouvée</p>
                 <p className="text-muted font-sans text-sm mb-6">Essayez un autre filtre ou modifiez votre recherche.</p>
                 {hasFilters && (

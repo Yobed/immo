@@ -125,8 +125,16 @@ export function CommuneAutocomplete({
                   : 'text-[var(--text)] hover:bg-[var(--surface)]'
               }`}
             >
-              <span className="text-base leading-none">
-                {s.type === 'commune' ? '🏙️' : '📍'}
+              <span className="flex-shrink-0 flex items-center justify-center w-4 h-4">
+                {s.type === 'commune' ? (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted">
+                    <rect x="2" y="7" width="20" height="15" rx="1"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/>
+                  </svg>
+                ) : (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
+                  </svg>
+                )}
               </span>
               <span className="flex-1">{s.label}</span>
               <span className="text-xs text-muted capitalize">{s.type}</span>

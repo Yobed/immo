@@ -216,7 +216,12 @@ export default function RegisterPage() {
                 className="sr-only"
               />
               <div className="text-center">
-                <div className="text-2xl mb-1">🏠</div>
+                <div className="flex justify-center mb-1">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                    <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/>
+                    <path d="M9 21V12h6v9"/>
+                  </svg>
+                </div>
                 <span className="text-sm font-medium text-[var(--text)]">Locataire</span>
               </div>
             </label>
@@ -228,7 +233,14 @@ export default function RegisterPage() {
                 className="sr-only"
               />
               <div className="text-center">
-                <div className="text-2xl mb-1">🔑</div>
+                <div className="flex justify-center mb-1">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                    <circle cx="7.5" cy="15.5" r="5.5"/>
+                    <path d="M10.5 12.5 L19 4"/>
+                    <path d="M19 4 l2 2"/>
+                    <path d="M17 6 l2 2"/>
+                  </svg>
+                </div>
                 <span className="text-sm font-medium text-[var(--text)]">Propriétaire</span>
               </div>
             </label>

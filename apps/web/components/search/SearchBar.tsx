@@ -4,11 +4,27 @@ import { useRouter } from 'next/navigation'
 import { COMMUNES_CI, QUARTIERS_PREMIUM } from '@immo-ci/shared/constants/communes'
 import { TYPES_BIEN_LABELS } from '@immo-ci/shared/constants/biens'
 
+const IconCommune = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="7" width="20" height="15" rx="1"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/>
+  </svg>
+)
+const IconPin = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
+  </svg>
+)
+const IconHome = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/>
+  </svg>
+)
+
 // Pool de suggestions statique — pas de useSearchParams
 const ALL_SUGGESTIONS = [
-  ...COMMUNES_CI.map((c) => ({ label: c, category: 'Commune', icon: '🏙️' })),
-  ...QUARTIERS_PREMIUM.map((q) => ({ label: q, category: 'Quartier', icon: '📍' })),
-  ...Object.values(TYPES_BIEN_LABELS).map((label) => ({ label, category: 'Type', icon: '🏠' })),
+  ...COMMUNES_CI.map((c) => ({ label: c, category: 'Commune', iconEl: <IconCommune /> })),
+  ...QUARTIERS_PREMIUM.map((q) => ({ label: q, category: 'Quartier', iconEl: <IconPin /> })),
+  ...Object.values(TYPES_BIEN_LABELS).map((label) => ({ label, category: 'Type', iconEl: <IconHome /> })),
 ]
 
 interface SearchBarProps {
@@ -118,7 +134,7 @@ export function SearchBar({
                   idx === highlighted ? 'bg-primary/8 text-primary' : 'text-[var(--text)] hover:bg-[var(--surface)]'
                 }`}
               >
-                <span className="w-5 text-center flex-shrink-0">{s.icon}</span>
+                <span className="w-5 text-center flex-shrink-0 flex items-center justify-center text-muted">{s.iconEl}</span>
                 <span className="flex-1 font-medium">{s.label}</span>
                 <span className="text-xs text-muted">{s.category}</span>
               </button>

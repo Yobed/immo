@@ -72,7 +72,11 @@ export default async function MessagesPage({
             ) : (
               <div className="flex-1 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="text-4xl mb-3">💬</div>
+                  <div className="flex justify-center mb-3">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-muted">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                  </div>
                   <p className="text-muted font-sans text-sm">Sélectionnez une conversation</p>
                 </div>
               </div>

@@ -62,8 +62,9 @@ export default async function ProfilPage() {
           </div>
 
           {kycStatut === 'verifie' && (
-            <div className="bg-accent-light/20 border border-accent/30 rounded-card p-4 text-sm font-sans text-accent">
-              ✓ Identité vérifiée — badge affiché sur vos annonces
+            <div className="bg-accent-light/20 border border-accent/30 rounded-card p-4 text-sm font-sans text-accent flex items-center gap-2">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0"><polyline points="20 6 9 17 4 12"/></svg>
+              Identité vérifiée — badge affiché sur vos annonces
             </div>
           )}
 

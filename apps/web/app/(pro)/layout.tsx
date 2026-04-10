@@ -5,12 +5,12 @@ import { MobileMenu } from '@/components/layout/MobileMenu'
 import { UserMenu } from '@/components/auth/UserMenu'
 
 const navLinks = [
-  { href: '/mes-biens', label: 'Mes annonces', icon: '🏠' },
-  { href: '/visites', label: 'Visites', icon: '📅' },
-  { href: '/quittances', label: 'Quittances', icon: '📄' },
-  { href: '/avis-recus', label: 'Avis reçus', icon: '⭐' },
-  { href: '/profil', label: 'Profil & KYC', icon: '👤' },
-  { href: '/messages', label: 'Messages', icon: '💬' },
+  { href: '/mes-biens', label: 'Mes annonces' },
+  { href: '/visites', label: 'Visites' },
+  { href: '/quittances', label: 'Quittances' },
+  { href: '/avis-recus', label: 'Avis reçus' },
+  { href: '/profil', label: 'Profil & KYC' },
+  { href: '/messages', label: 'Messages' },
 ]
 
 export default async function ProLayout({ children }: { children: React.ReactNode }) {
@@ -53,7 +53,6 @@ export default async function ProLayout({ children }: { children: React.ReactNod
                 href={link.href}
                 className="flex items-center gap-1.5 px-3 py-2 font-sans text-sm text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--primary-light)] transition-all duration-200 rounded-btn"
               >
-                <span className="text-sm">{link.icon}</span>
                 {link.label}
               </Link>
             ))}

@@ -91,7 +91,7 @@ export default async function MesAnnoncesPage() {
                     <Button variant="outline" size="sm" className="w-full">Modifier</Button>
                   </Link>
                   <Link href={`/mes-biens/${bien.id}/modifier?step=medias`} className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full">📷 Médias</Button>
+                    <Button variant="outline" size="sm" className="w-full">Médias</Button>
                   </Link>
                   <div className="flex-1">
                     <ToggleStatutButton bienId={bien.id} statut={bien.statut} />

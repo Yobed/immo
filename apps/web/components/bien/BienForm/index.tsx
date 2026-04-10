@@ -162,7 +162,11 @@ export function BienForm({ defaultValues, bienId }: BienFormProps) {
         {step === 4 && <Step4Equipements form={form} />}
         {step === 5 && (
           <div className="text-center py-6">
-            <div className="text-5xl mb-4">✅</div>
+            <div className="flex justify-center mb-4">
+              <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-accent">
+                <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+              </svg>
+            </div>
             <p className="font-display text-xl text-[var(--text)] mb-2">Prêt à ajouter les médias ?</p>
             <p className="font-sans text-muted text-sm">
               {bienId

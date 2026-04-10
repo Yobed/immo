@@ -11,7 +11,7 @@ export function KYCStatusBadge({ statut, className }: KYCStatusBadgeProps) {
   if (statut === 'verifie') {
     return (
       <Badge variant="success" className={className}>
-        ✓ Vérifié
+        Vérifié
       </Badge>
     )
   }

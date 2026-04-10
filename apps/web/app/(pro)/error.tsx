@@ -5,7 +5,12 @@ export default function ProError({ error, reset }: { error: Error; reset: () => 
   return (
     <div className="min-h-screen bg-[var(--surface)] flex items-center justify-center p-4">
       <div className="bg-white rounded-card border border-[var(--border)] p-8 max-w-md w-full text-center">
-        <div className="text-4xl mb-4">⚠️</div>
+        <div className="flex justify-center mb-4">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-warning">
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
         <h1 className="font-display text-xl text-[var(--text)] mb-2">Une erreur est survenue</h1>
         <p className="font-sans text-sm text-muted mb-6">{error.message ?? 'Veuillez réessayer.'}</p>
         <div className="flex gap-3 justify-center">

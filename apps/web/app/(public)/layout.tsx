@@ -9,9 +9,9 @@ export default async function PublicLayout({ children }: { children: React.React
   const { data: { user } } = await supabase.auth.getUser()
 
   const navLinks = [
-    { href: '/biens', label: 'Annonces', icon: '🏠' },
-    { href: '/recherche', label: 'Rechercher', icon: '🔍' },
-    { href: '/recherche?type_bien=residence_meublee', label: 'Résidences meublées', icon: '🛋️' },
+    { href: '/biens', label: 'Annonces' },
+    { href: '/recherche', label: 'Rechercher' },
+    { href: '/recherche?type_bien=residence_meublee', label: 'Résidences meublées' },
   ]
 
   const ctaLinks = user

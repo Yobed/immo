@@ -126,7 +126,10 @@ export function KYCUploader({ userId, currentStatut }: KYCUploaderProps) {
           </label>
           {cniUrl ? (
             <div className="p-4 border-2 border-accent rounded-card bg-accent-light/20 text-center">
-              <p className="text-sm font-sans text-accent font-medium">✓ CNI uploadée</p>
+              <p className="text-sm font-sans text-accent font-medium flex items-center gap-1">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                CNI uploadée
+              </p>
               <button
                 type="button"
                 onClick={() => setCniUrl(null)}
@@ -168,7 +171,10 @@ export function KYCUploader({ userId, currentStatut }: KYCUploaderProps) {
           </label>
           {selfieUrl ? (
             <div className="p-4 border-2 border-accent rounded-card bg-accent-light/20 text-center">
-              <p className="text-sm font-sans text-accent font-medium">✓ Selfie uploadé</p>
+              <p className="text-sm font-sans text-accent font-medium flex items-center gap-1">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Selfie uploadé
+              </p>
               <button
                 type="button"
                 onClick={() => setSelfieUrl(null)}

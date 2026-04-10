@@ -1,5 +1,5 @@
 'use client'
-import { useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 type MediaType = 'photo' | 'video' | 'vue_360' | 'plan'
@@ -12,18 +12,42 @@ interface MediaUploaderProps {
 
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!
 
+const MEDIA_ICONS: Record<MediaType, React.ReactNode> = {
+  photo: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary/40">
+      <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+      <polyline points="21 15 16 10 5 21"/>
+    </svg>
+  ),
+  video: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary/40">
+      <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+    </svg>
+  ),
+  vue_360: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary/40">
+      <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/>
+    </svg>
+  ),
+  plan: (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary/40">
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+    </svg>
+  ),
+}
+
 const CONFIG: Record<MediaType, {
   resourceType: string
   accept: string
   multiple: boolean
-  emoji: string
   hint: string
   size: string
 }> = {
-  photo:   { resourceType: 'image', accept: 'image/jpg,image/jpeg,image/png,image/webp', multiple: true,  emoji: '🖼️', hint: 'Cliquer pour ajouter des photos',          size: 'JPG, PNG, WEBP — max 10 MB' },
-  video:   { resourceType: 'video', accept: 'video/mp4,video/quicktime,video/webm',      multiple: false, emoji: '🎥', hint: 'Cliquer pour ajouter une vidéo',            size: 'MP4, MOV, WEBM — max 500 MB' },
-  vue_360: { resourceType: 'image', accept: 'image/jpg,image/jpeg,image/png',            multiple: false, emoji: '🌐', hint: 'Image panoramique équirectangulaire',        size: 'JPG, PNG — max 50 MB' },
-  plan:    { resourceType: 'auto',  accept: 'application/pdf,image/jpg,image/jpeg,image/png', multiple: false, emoji: '📐', hint: 'Plan du bien (PDF ou image)',          size: 'PDF, JPG, PNG — max 20 MB' },
+  photo:   { resourceType: 'image', accept: 'image/jpg,image/jpeg,image/png,image/webp', multiple: true,  hint: 'Cliquer pour ajouter des photos',          size: 'JPG, PNG, WEBP — max 10 MB' },
+  video:   { resourceType: 'video', accept: 'video/mp4,video/quicktime,video/webm',      multiple: false, hint: 'Cliquer pour ajouter une vidéo',            size: 'MP4, MOV, WEBM — max 500 MB' },
+  vue_360: { resourceType: 'image', accept: 'image/jpg,image/jpeg,image/png',            multiple: false, hint: 'Image panoramique équirectangulaire',        size: 'JPG, PNG — max 50 MB' },
+  plan:    { resourceType: 'auto',  accept: 'application/pdf,image/jpg,image/jpeg,image/png', multiple: false, hint: 'Plan du bien (PDF ou image)',          size: 'PDF, JPG, PNG — max 20 MB' },
 }
 
 async function getAuthHeader(): Promise<Record<string, string>> {
@@ -113,7 +137,7 @@ export function MediaUploader({ bienId, type, onUploadComplete }: MediaUploaderP
           </div>
         ) : (
           <>
-            <div className="text-4xl mb-3">{cfg.emoji}</div>
+            <div className="flex justify-center mb-3">{MEDIA_ICONS[type]}</div>
             <p className="text-[var(--text)] font-sans font-medium text-sm">{cfg.hint}</p>
             <p className="text-xs text-muted mt-2">{cfg.size}</p>
           </>

@@ -1,8 +1,36 @@
+const StatIcon = ({ type }: { type: string }) => {
+  if (type === 'biens') return (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/80 mx-auto">
+      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/>
+      <path d="M9 21V12h6v9"/>
+    </svg>
+  )
+  if (type === 'communes') return (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/80 mx-auto">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+      <circle cx="12" cy="9" r="2.5"/>
+    </svg>
+  )
+  if (type === 'satisfaction') return (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/80 mx-auto">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+      <line x1="9" y1="9" x2="9.01" y2="9"/>
+      <line x1="15" y1="9" x2="15.01" y2="9"/>
+    </svg>
+  )
+  return (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/80 mx-auto">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </svg>
+  )
+}
+
 const stats = [
-  { value: '2 450', label: 'Biens disponibles',  suffix: '',  icon: '🏘️' },
-  { value: '12',   label: 'Communes couvertes', suffix: '',  icon: '📍' },
-  { value: '98',   label: 'Satisfaction client', suffix: '%', icon: '⭐' },
-  { value: '4.8',  label: 'Note moyenne',        suffix: '/5',icon: '🏆' },
+  { value: '2 450', label: 'Biens disponibles',  suffix: '',  iconType: 'biens' },
+  { value: '12',   label: 'Communes couvertes', suffix: '',  iconType: 'communes' },
+  { value: '98',   label: 'Satisfaction client', suffix: '%', iconType: 'satisfaction' },
+  { value: '4.8',  label: 'Note moyenne',        suffix: '/5',iconType: 'note' },
 ]
 
 export function Stats() {
@@ -33,7 +61,7 @@ export function Stats() {
             >
               <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
               <div className="relative">
-                <div className="text-3xl mb-3">{stat.icon}</div>
+                <div className="mb-3"><StatIcon type={stat.iconType} /></div>
                 <p className="font-mono text-4xl md:text-5xl font-bold mb-1"
                   style={{
                     background: 'linear-gradient(135deg,#E8B84B,#BF8C2C)',
