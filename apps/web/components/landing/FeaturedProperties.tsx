@@ -76,7 +76,7 @@ export async function FeaturedProperties() {
         {/* Carousel */}
         <CardsCarousel>
           {rows.map((bien) => (
-            <div key={bien.id} className="w-72 sm:w-80 shrink-0">
+            <div key={bien.id} className="w-64 sm:w-72 lg:w-80 shrink-0">
               <BienCard
                 id={bien.id}
                 titre={bien.titre}

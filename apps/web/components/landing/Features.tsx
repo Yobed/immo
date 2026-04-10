@@ -64,7 +64,7 @@ export function Features() {
   const { ref, visible } = useInView(0.08)
 
   return (
-    <section ref={ref as React.RefObject<HTMLElement>} className="py-24 bg-[var(--primary)]">
+    <section ref={ref as React.RefObject<HTMLElement>} className="py-16 sm:py-24 bg-[var(--primary)] overflow-hidden">
       <div className="container mx-auto px-4">
         <div className={`text-center mb-16 sr sr-up ${visible ? 'visible' : ''}`}>
           <p className="font-sans text-sm font-semibold text-[var(--secondary)] uppercase tracking-widest mb-3">

@@ -34,7 +34,7 @@ export function HowItWorks() {
   ]
 
   return (
-    <section ref={ref as React.RefObject<HTMLElement>} className="py-24 bg-white relative overflow-hidden">
+    <section ref={ref as React.RefObject<HTMLElement>} className="py-16 sm:py-24 bg-white relative overflow-hidden">
       <div className="absolute inset-0 bg-grid opacity-40 pointer-events-none" />
 
       <div className="relative container mx-auto px-4">

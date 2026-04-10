@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Playfair_Display, DM_Sans, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 
@@ -20,6 +20,12 @@ const jetbrainsMono = JetBrains_Mono({
   variable: '--font-mono',
   display: 'swap',
 })
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_URL ?? 'https://immo-ci.vercel.app'),
@@ -48,7 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="fr"
       className={`${playfair.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}
     >
-      <body className="font-sans bg-white text-text antialiased">{children}</body>
+      <body className="font-sans bg-white text-text antialiased overflow-x-hidden">{children}</body>
     </html>
   )
 }

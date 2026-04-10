@@ -11,19 +11,19 @@ export function CardsCarousel({ children, cardWidth = 300 }: CardsCarouselProps)
 
   const scroll = (dir: 'left' | 'right') => {
     if (!scrollRef.current) return
-    const amount = cardWidth + 20
+    const amount = cardWidth + 16
     scrollRef.current.scrollBy({ left: dir === 'right' ? amount : -amount, behavior: 'smooth' })
   }
 
   return (
-    <div className="relative">
-      {/* Left arrow */}
+    <div className="relative -mx-4 sm:mx-0">
+      {/* Flèche gauche — masquée sur mobile (swipe natif) */}
       <button
         type="button"
         onClick={() => scroll('left')}
-        className="absolute left-2 top-1/2 -translate-y-8 z-20
+        className="hidden sm:flex absolute left-0 top-1/2 -translate-y-8 z-20
           w-9 h-9 rounded-full bg-white border border-[var(--border)] shadow-lg
-          flex items-center justify-center text-[var(--text-muted)]
+          items-center justify-center text-[var(--text-muted)]
           hover:border-[var(--primary)] hover:text-[var(--primary)]
           transition-all duration-200 active:scale-95"
         aria-label="Précédent"
@@ -36,19 +36,19 @@ export function CardsCarousel({ children, cardWidth = 300 }: CardsCarouselProps)
       {/* Scroll container */}
       <div
         ref={scrollRef}
-        className="carousel-scroll px-2"
-        style={{ paddingBottom: '8px' }}
+        className="carousel-scroll px-4 sm:px-2"
+        style={{ paddingBottom: '12px' }}
       >
         {children}
       </div>
 
-      {/* Right arrow */}
+      {/* Flèche droite */}
       <button
         type="button"
         onClick={() => scroll('right')}
-        className="absolute right-2 top-1/2 -translate-y-8 z-20
+        className="hidden sm:flex absolute right-0 top-1/2 -translate-y-8 z-20
           w-9 h-9 rounded-full bg-white border border-[var(--border)] shadow-lg
-          flex items-center justify-center text-[var(--text-muted)]
+          items-center justify-center text-[var(--text-muted)]
           hover:border-[var(--primary)] hover:text-[var(--primary)]
           transition-all duration-200 active:scale-95"
         aria-label="Suivant"

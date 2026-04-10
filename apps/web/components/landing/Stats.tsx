@@ -64,7 +64,7 @@ function StatCard({ target, label, suffix, icon, tenths, delay, active }: {
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
       <div className="relative">
         <div className="mb-3"><Icon type={icon} /></div>
-        <p className="font-mono text-4xl md:text-5xl font-bold mb-1" style={{
+        <p className="font-mono text-3xl sm:text-4xl md:text-5xl font-bold mb-1" style={{
           background: 'linear-gradient(135deg,#FB923C,#F97316)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',

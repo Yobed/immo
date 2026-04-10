@@ -44,7 +44,7 @@ export function Testimonials() {
   const { ref, visible } = useInView(0.1)
 
   return (
-    <section ref={ref as React.RefObject<HTMLElement>} className="py-20 bg-[var(--primary)] relative overflow-hidden">
+    <section ref={ref as React.RefObject<HTMLElement>} className="py-14 sm:py-20 bg-[var(--primary)] relative overflow-hidden">
       <div className="absolute inset-0 bg-dots opacity-20 pointer-events-none" />
       <div className="absolute top-0 left-0 w-80 h-80 rounded-full bg-[var(--secondary)]/6 blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full bg-white/4 blur-3xl pointer-events-none" />

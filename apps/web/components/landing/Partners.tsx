@@ -109,11 +109,11 @@ export function Partners() {
           </button>
 
           {/* Piste de défilement */}
-          <div ref={scrollRef} className="carousel-scroll px-12 py-4">
+          <div ref={scrollRef} className="carousel-scroll px-4 sm:px-12 py-3 sm:py-4">
             {partners.map((p, i) => (
               <div
                 key={p.name}
-                className={`sr sr-scale ${visible ? 'visible' : ''} shrink-0 w-52 flex flex-col items-center justify-center gap-4 p-6 rounded-2xl bg-white cursor-default transition-all duration-300 hover:-translate-y-2`}
+                className={`sr sr-scale ${visible ? 'visible' : ''} shrink-0 w-40 sm:w-48 lg:w-52 flex flex-col items-center justify-center gap-3 sm:gap-4 p-4 sm:p-6 rounded-2xl bg-white cursor-default transition-all duration-300 hover:-translate-y-2`}
                 style={{
                   minHeight: '130px',
                   transitionDelay: visible ? `${150 + i * 70}ms` : '0ms',
