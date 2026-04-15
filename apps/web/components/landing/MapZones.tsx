@@ -1,7 +1,12 @@
 'use client'
 import { useState } from 'react'
-import { PropertiesMap } from '@/components/map/PropertiesMap'
+import dynamic from 'next/dynamic'
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
+
+const PropertiesMap = dynamic(
+  () => import('@/components/map/PropertiesMap').then((m) => m.PropertiesMap),
+  { ssr: false, loading: () => <div style={{ height: 550 }} className="w-full rounded-[20px] bg-white/10 animate-pulse" /> }
+)
 
 const communesCoords: Record<string, { lat: number, lng: number }> = {
   'Cocody': { lat: 5.345, lng: -3.985 },

@@ -1,12 +1,11 @@
 'use client'
-import dynamic from 'next/dynamic'
 import { useState, useCallback, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { MAPBOX_TOKEN, ABIDJAN_CENTER } from '@/lib/mapbox'
+import type { MapRef } from 'react-map-gl/mapbox'
 
-const Map    = dynamic(() => import('react-map-gl/mapbox').then((m) => m.Map),    { ssr: false })
-const Marker = dynamic(() => import('react-map-gl/mapbox').then((m) => m.Marker), { ssr: false })
-const Popup  = dynamic(() => import('react-map-gl/mapbox').then((m) => m.Popup),  { ssr: false })
+// Import statique — on est déjà dans un composant 'use client', SSR désactivé via le composant parent
+import Map, { Marker, Popup } from 'react-map-gl/mapbox'
 
 interface BienMarker {
   id: string
@@ -31,34 +30,41 @@ interface PropertiesMapProps {
   biens: BienMarker[]
   hauteur?: number
   mapTheme?: string
-  targetCenter?: { lat: number, lng: number } | null
+  targetCenter?: { lat: number; lng: number } | null
 }
 
-export function PropertiesMap({ biens, hauteur = 500, mapTheme = "mapbox://styles/mapbox/streets-v12", targetCenter = null }: PropertiesMapProps) {
+export function PropertiesMap({
+  biens,
+  hauteur = 500,
+  mapTheme = 'mapbox://styles/mapbox/streets-v12',
+  targetCenter = null,
+}: PropertiesMapProps) {
   const [selectedBien, setSelectedBien] = useState<BienMarker | null>(null)
-  
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mapRef = useRef<any>(null)
+  const mapRef = useRef<MapRef>(null)
 
   const handleMarkerClick = useCallback((bien: BienMarker) => {
     setSelectedBien((prev) => (prev?.id === bien.id ? null : bien))
   }, [])
 
+  // flyTo quand la commune cible change
   useEffect(() => {
-    if (mapRef.current) {
-      if (targetCenter) {
-        mapRef.current.flyTo({
-          center: [targetCenter.lng, targetCenter.lat],
-          zoom: 12.5,
-          duration: 1500
-        })
-      } else {
-        mapRef.current.flyTo({
-          center: [ABIDJAN_CENTER.longitude, ABIDJAN_CENTER.latitude],
-          zoom: ABIDJAN_CENTER.zoom,
-          duration: 1500
-        })
-      }
+    const map = mapRef.current?.getMap()
+    if (!map) return
+
+    if (targetCenter) {
+      map.flyTo({
+        center: [targetCenter.lng, targetCenter.lat],
+        zoom: 13,
+        duration: 1400,
+        essential: true,
+      })
+    } else {
+      map.flyTo({
+        center: [ABIDJAN_CENTER.longitude, ABIDJAN_CENTER.latitude],
+        zoom: ABIDJAN_CENTER.zoom,
+        duration: 1400,
+        essential: true,
+      })
     }
   }, [targetCenter])
 
