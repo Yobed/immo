@@ -14,24 +14,29 @@ export function Hero() {
   }
 
   return (
-    <section className="relative bg-primary overflow-hidden" style={{ minHeight: '92svh' }}>
+    <section
+      className="relative bg-primary overflow-hidden flex flex-col lg:flex-row"
+      style={{ minHeight: '92svh' }}
+    >
 
-      {/* ── IMAGE GAUCHE — desktop uniquement ── */}
-      <div className="hidden lg:block absolute left-0 top-0 bottom-0 w-[52%] overflow-hidden">
+      {/* ══════════════════════════════════
+          PANNEAU GAUCHE — image (desktop)
+      ══════════════════════════════════ */}
+      <div className="hidden lg:block relative w-[52%] shrink-0 self-stretch">
         <Image
           src="/hero-bg.jpg"
-          alt="Belle résidence"
+          alt="Belle résidence à Abidjan"
           fill
           className="object-cover object-center"
           priority
           sizes="52vw"
         />
-        {/* Overlay transition vers le côté droit */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/30 to-primary/90" />
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/50 via-transparent to-primary/20" />
+        {/* Overlay : transition douce vers le panneau droit */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-primary/20 to-primary" />
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/40 via-transparent to-primary/10" />
 
-        {/* Card flottante — haut */}
-        <div className="hero-float-1 absolute top-8 left-6 flex items-center gap-2.5 bg-white/95 backdrop-blur-sm rounded-2xl px-4 py-3 shadow-xl">
+        {/* Badge vivant — en haut à gauche */}
+        <div className="hero-float-1 absolute top-8 left-6 flex items-center gap-2.5 bg-white/95 backdrop-blur-sm rounded-2xl px-4 py-3 shadow-xl z-10">
           <span className="relative flex h-2.5 w-2.5 shrink-0">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#F97316] opacity-75" />
             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#F97316]" />
@@ -42,8 +47,8 @@ export function Hero() {
           </div>
         </div>
 
-        {/* Card flottante — bas */}
-        <div className="hero-float-2 absolute bottom-12 left-6 bg-white/95 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-xl" style={{ maxWidth: '200px' }}>
+        {/* Card satisfaction — en bas à gauche */}
+        <div className="hero-float-2 absolute bottom-12 left-6 bg-white/95 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-xl z-10" style={{ maxWidth: 200 }}>
           <div className="flex items-center gap-2 mb-1.5">
             <div className="flex gap-0.5">
               {[1,2,3,4,5].map(i => (
@@ -66,25 +71,31 @@ export function Hero() {
         </div>
       </div>
 
-      {/* ── FOND MOBILE : image subtile ── */}
-      <div className="lg:hidden absolute inset-0 pointer-events-none">
-        <Image
-          src="/hero-bg.jpg"
-          alt=""
-          fill
-          className="object-cover object-center opacity-[0.08]"
-          priority
-          sizes="100vw"
-        />
-      </div>
+      {/* ══════════════════════════════════
+          PANNEAU DROIT — contenu
+      ══════════════════════════════════ */}
+      <div className="relative flex-1 flex items-center overflow-hidden">
 
-      {/* Déco fond */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-[#0d3a5c] lg:from-transparent lg:via-transparent lg:to-transparent" />
-      <div className="absolute inset-0 bg-dots opacity-20 pointer-events-none" />
+        {/* Fond navy + déco */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-[#0d3a5c]" />
+        <div className="absolute inset-0 bg-dots opacity-20 pointer-events-none" />
+        <div className="hero-float-3 absolute top-[8%] right-[4%] w-56 h-56 rounded-full opacity-[0.07] pointer-events-none"
+          style={{ background: 'radial-gradient(circle, #F97316 0%, transparent 70%)' }} />
 
-      {/* ── CONTENU ── */}
-      <div className="relative z-10 flex items-center justify-end min-h-[92svh] lg:min-h-0 lg:h-full">
-        <div className="w-full lg:w-[52%] px-5 sm:px-8 lg:px-12 py-16 sm:py-20 text-white">
+        {/* Image mobile subtile */}
+        <div className="lg:hidden absolute inset-0 pointer-events-none">
+          <Image
+            src="/hero-bg.jpg"
+            alt=""
+            fill
+            className="object-cover object-center opacity-[0.07]"
+            priority
+            sizes="100vw"
+          />
+        </div>
+
+        {/* Contenu */}
+        <div className="relative z-10 w-full px-5 sm:px-10 lg:px-12 xl:px-16 py-16 sm:py-20">
           <div className="max-w-lg mx-auto lg:mx-0">
 
             {/* Badge */}
@@ -93,12 +104,12 @@ export function Hero() {
             </span>
 
             {/* Titre */}
-            <h1 className="hero-title font-display text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight mb-4">
-              Trouvez votre bien<br />
+            <h1 className="hero-title font-display text-3xl sm:text-4xl lg:text-[2.75rem] xl:text-5xl font-bold leading-tight mb-4">
+              <span className="text-white">Trouvez votre bien</span><br />
               <span style={{ color: '#F97316' }}>en Côte d&apos;Ivoire</span>
             </h1>
 
-            <p className="hero-subtitle font-sans text-sm sm:text-base text-white/75 mb-6 leading-relaxed">
+            <p className="hero-subtitle font-sans text-sm sm:text-base text-white/75 mb-6 leading-relaxed max-w-md">
               Location, vente et résidences meublées à Abidjan.
               Réservation et paiement en ligne en quelques clics.
             </p>
@@ -108,10 +119,10 @@ export function Hero() {
               <input
                 type="text"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                onChange={e => setSearch(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleSearch()}
                 placeholder="Commune, quartier..."
-                className="flex-1 rounded-xl px-4 py-3 text-gray-800 bg-white border-0 focus:outline-none focus:ring-2 focus:ring-[#F97316] text-sm shadow-lg"
+                className="flex-1 min-w-0 rounded-xl px-4 py-3 text-gray-800 bg-white border-0 focus:outline-none focus:ring-2 focus:ring-[#F97316] text-sm shadow-lg"
               />
               <Button size="lg" variant="secondary" className="shrink-0 shadow-lg text-sm" onClick={handleSearch}>
                 Rechercher
@@ -122,10 +133,10 @@ export function Hero() {
             <div className="hero-pills flex flex-wrap gap-2 mb-8">
               {[
                 { label: 'Appartements', href: '/recherche?type_bien=appartement' },
-                { label: 'Villas', href: '/recherche?type_bien=villa' },
+                { label: 'Villas',       href: '/recherche?type_bien=villa' },
                 { label: 'Résidences meublées', href: '/recherche?type_bien=residence_meublee' },
-                { label: 'Studios', href: '/recherche?type_bien=studio' },
-              ].map((item) => (
+                { label: 'Studios',      href: '/recherche?type_bien=studio' },
+              ].map(item => (
                 <a key={item.label} href={item.href}
                   className="px-3 py-1.5 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-200 text-xs sm:text-sm font-sans text-white/90 hover:text-white">
                   {item.label}
@@ -134,12 +145,12 @@ export function Hero() {
             </div>
 
             {/* Stats */}
-            <div className="hero-pills flex gap-6 sm:gap-8 pt-4 border-t border-white/10">
+            <div className="hero-pills flex gap-6 sm:gap-10 pt-4 border-t border-white/10">
               {[
                 { value: '2 450+', label: 'Biens' },
-                { value: '12', label: 'Communes' },
-                { value: '98%', label: 'Satisfaction' },
-              ].map((s) => (
+                { value: '12',     label: 'Communes' },
+                { value: '98%',    label: 'Satisfaction' },
+              ].map(s => (
                 <div key={s.label} className="flex flex-col gap-0.5">
                   <span className="font-mono text-lg sm:text-xl font-bold" style={{ color: '#F97316' }}>{s.value}</span>
                   <span className="font-sans text-[10px] sm:text-xs text-white/50">{s.label}</span>
