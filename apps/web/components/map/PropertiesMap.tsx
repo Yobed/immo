@@ -30,9 +30,10 @@ function formatFCFA(n: number): string {
 interface PropertiesMapProps {
   biens: BienMarker[]
   hauteur?: number
+  mapTheme?: string
 }
 
-export function PropertiesMap({ biens, hauteur = 500 }: PropertiesMapProps) {
+export function PropertiesMap({ biens, hauteur = 500, mapTheme = "mapbox://styles/mapbox/streets-v12" }: PropertiesMapProps) {
   const [selectedBien, setSelectedBien] = useState<BienMarker | null>(null)
 
   const handleMarkerClick = useCallback((bien: BienMarker) => {
@@ -63,7 +64,7 @@ export function PropertiesMap({ biens, hauteur = 500 }: PropertiesMapProps) {
         mapboxAccessToken={MAPBOX_TOKEN}
         initialViewState={ABIDJAN_CENTER}
         style={{ width: '100%', height: '100%' }}
-        mapStyle="mapbox://styles/mapbox/streets-v12"
+        mapStyle={mapTheme}
       >
         {biensWithCoords.map((bien) => (
           <Marker
