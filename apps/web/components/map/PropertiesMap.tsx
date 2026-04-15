@@ -3,7 +3,8 @@ import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { MAPBOX_TOKEN, ABIDJAN_CENTER } from '@/lib/mapbox'
 import type { MapRef } from 'react-map-gl/mapbox'
-import Map, { Marker, Popup } from 'react-map-gl/mapbox'
+import Map, { Marker } from 'react-map-gl/mapbox'
+import 'mapbox-gl/dist/mapbox-gl.css'
 
 export interface BienMarker {
   id: string
@@ -27,19 +28,22 @@ const TYPE_LABELS: Record<string, string> = {
   bureau: 'Bureau',
   commerce: 'Commerce',
   terrain: 'Terrain',
-  residence_meublee: 'Résidence meublée',
+  residence_meublee: 'Rés. meublée',
 }
 
-function formatFCFA(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace('.0', '')} M FCFA`
-  if (n >= 1_000) return `${Math.round(n / 1_000)} k FCFA`
-  return `${n} FCFA`
-}
-
-function getPrix(b: BienMarker): { label: string; suffix: string } | null {
-  if (b.prix_nuit_fcfa) return { label: formatFCFA(b.prix_nuit_fcfa), suffix: '/nuit' }
-  if (b.prix_mois_fcfa) return { label: formatFCFA(b.prix_mois_fcfa), suffix: '/mois' }
-  if (b.prix_vente_fcfa) return { label: formatFCFA(b.prix_vente_fcfa), suffix: '' }
+function formatPrice(b: BienMarker): { label: string; suffix: string } | null {
+  if (b.prix_nuit_fcfa) {
+    const v = b.prix_nuit_fcfa
+    return { label: v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}M` : `${Math.round(v / 1_000)}k`, suffix: '/nuit' }
+  }
+  if (b.prix_mois_fcfa) {
+    const v = b.prix_mois_fcfa
+    return { label: v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}M` : `${Math.round(v / 1_000)}k`, suffix: '/mois' }
+  }
+  if (b.prix_vente_fcfa) {
+    const v = b.prix_vente_fcfa
+    return { label: v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}M` : `${Math.round(v / 1_000)}k`, suffix: '' }
+  }
   return null
 }
 
@@ -63,117 +67,147 @@ export function PropertiesMap({
     setSelectedBien((prev) => (prev?.id === bien.id ? null : bien))
   }, [])
 
+  // ── Fly-to when commune filter changes ───────────────────────────────────
   useEffect(() => {
     const map = mapRef.current?.getMap()
     if (!map) return
     if (targetCenter) {
-      map.flyTo({ center: [targetCenter.lng, targetCenter.lat], zoom: 13, duration: 1400, essential: true })
+      map.flyTo({ center: [targetCenter.lng, targetCenter.lat], zoom: 13, duration: 1300, essential: true })
     } else {
-      map.flyTo({ center: [ABIDJAN_CENTER.longitude, ABIDJAN_CENTER.latitude], zoom: ABIDJAN_CENTER.zoom, duration: 1400, essential: true })
+      map.flyTo({ center: [ABIDJAN_CENTER.longitude, ABIDJAN_CENTER.latitude], zoom: ABIDJAN_CENTER.zoom, duration: 1300, essential: true })
     }
+    setSelectedBien(null) // close panel on commune change
   }, [targetCenter])
 
   const biensWithCoords = useMemo(
-    () => biens.filter((b) => b.latitude !== null && b.longitude !== null),
+    () => biens.filter((b) => b.latitude !== null && b.longitude !== null && b.latitude !== 0 && b.longitude !== 0),
     [biens]
   )
 
   if (!MAPBOX_TOKEN) {
     return (
       <div className="w-full rounded-card bg-surface flex items-center justify-center border border-border" style={{ height: hauteur }}>
-        <p className="text-muted font-sans text-sm">Carte en chargement...</p>
+        <p className="text-muted font-sans text-sm">Token Mapbox manquant</p>
       </div>
     )
   }
 
-  const prix = selectedBien ? getPrix(selectedBien) : null
+  const prix = selectedBien ? formatPrice(selectedBien) : null
 
   return (
-    <div className="w-full rounded-card overflow-hidden border border-border" style={{ height: hauteur }}>
+    <div className="w-full rounded-card overflow-hidden border border-border relative" style={{ height: hauteur }}>
+      {/* ── Mapbox Map ─────────────────────────────────────────────────────── */}
       <Map
         ref={mapRef}
         mapboxAccessToken={MAPBOX_TOKEN}
         initialViewState={ABIDJAN_CENTER}
         style={{ width: '100%', height: '100%' }}
         mapStyle={mapTheme}
+        onClick={() => setSelectedBien(null)}
       >
-        {biensWithCoords.map((bien) => (
-          <Marker
-            key={bien.id}
-            longitude={Number(bien.longitude)}
-            latitude={Number(bien.latitude)}
-            anchor="bottom"
-          >
-            <button
-              onClick={() => handleMarkerClick(bien)}
-              className="group relative"
-              title={bien.titre}
+        {biensWithCoords.map((bien) => {
+          const p = formatPrice(bien)
+          return (
+            <Marker
+              key={bien.id}
+              longitude={Number(bien.longitude)}
+              latitude={Number(bien.latitude)}
+              anchor="bottom"
             >
-              {/* Pin label with price */}
-              <span className="flex items-center gap-1 bg-[var(--secondary)] text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-lg ring-2 ring-white group-hover:scale-110 transition-transform duration-200 whitespace-nowrap">
-                {getPrix(bien)?.label ?? '—'}
-              </span>
-              {/* Triangle pointer */}
-              <span className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[6px] border-t-[var(--secondary)]" />
-            </button>
-          </Marker>
-        ))}
-
-        {selectedBien && selectedBien.longitude && selectedBien.latitude && (
-          <Popup
-            longitude={Number(selectedBien.longitude)}
-            latitude={Number(selectedBien.latitude)}
-            anchor="top"
-            onClose={() => setSelectedBien(null)}
-            closeButton={true}
-            closeOnClick={false}
-            maxWidth="240px"
-          >
-            <div className="overflow-hidden rounded-lg" style={{ minWidth: 200 }}>
-              {/* Photo */}
-              {selectedBien.photo_url ? (
-                <div className="relative h-28 bg-gray-100 overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={selectedBien.photo_url} alt={selectedBien.titre} className="w-full h-full object-cover" />
-                  <span className="absolute top-1.5 left-1.5 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded font-sans">
-                    {TYPE_LABELS[selectedBien.type_bien] ?? selectedBien.type_bien}
-                  </span>
-                </div>
-              ) : (
-                <div className="h-16 bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                  <span className="text-xs text-muted font-sans">{TYPE_LABELS[selectedBien.type_bien] ?? selectedBien.type_bien}</span>
-                </div>
-              )}
-
-              {/* Info */}
-              <div className="p-2.5">
-                <p className="font-sans text-sm font-semibold text-[var(--text)] line-clamp-2 leading-tight mb-1">
-                  {selectedBien.titre}
-                </p>
-                <p className="text-[11px] text-muted font-sans mb-1.5 flex items-center gap-1">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                    <circle cx="12" cy="9" r="2.5"/>
-                  </svg>
-                  {selectedBien.quartier ? `${selectedBien.quartier}, ` : ''}{selectedBien.commune}
-                </p>
-                {prix && (
-                  <p className="font-bold text-sm text-[var(--primary)]">
-                    {prix.label}
-                    <span className="font-normal text-[11px] text-muted ml-0.5">{prix.suffix}</span>
-                  </p>
-                )}
-                <Link
-                  href={`/biens/${selectedBien.id}`}
-                  className="mt-2 flex items-center justify-center w-full bg-[var(--primary)] text-white text-xs font-sans font-semibold py-1.5 rounded-lg hover:bg-[var(--primary)]/90 transition-colors"
-                >
-                  Voir la fiche →
-                </Link>
-              </div>
-            </div>
-          </Popup>
-        )}
+              <button
+                onClick={(e) => { e.stopPropagation(); handleMarkerClick(bien) }}
+                style={{
+                  background: selectedBien?.id === bien.id ? '#0C2D5E' : '#F97316',
+                  color: '#fff',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  fontFamily: 'DM Sans, sans-serif',
+                  padding: '4px 10px',
+                  borderRadius: '999px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
+                  border: '2px solid white',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  transition: 'transform 0.15s ease',
+                  transform: selectedBien?.id === bien.id ? 'scale(1.15)' : 'scale(1)',
+                  lineHeight: 1.3,
+                }}
+              >
+                {p ? `${p.label} FCFA` : '—'}
+              </button>
+            </Marker>
+          )
+        })}
       </Map>
+
+      {/* ── Custom info panel (outside Mapbox DOM — full Tailwind support) ── */}
+      {selectedBien && (
+        <div
+          className="absolute top-3 right-3 z-10 bg-white rounded-xl shadow-xl overflow-hidden animate-scale-in"
+          style={{ width: 230, maxWidth: 'calc(100vw - 24px)' }}
+        >
+          {/* Photo */}
+          {selectedBien.photo_url ? (
+            <div className="relative h-28 bg-gray-100 overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={selectedBien.photo_url}
+                alt={selectedBien.titre}
+                className="w-full h-full object-cover"
+              />
+              <span className="absolute top-2 left-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full font-sans">
+                {TYPE_LABELS[selectedBien.type_bien] ?? selectedBien.type_bien}
+              </span>
+            </div>
+          ) : (
+            <div className="h-14 bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+              <span className="text-xs text-muted font-sans font-medium">
+                {TYPE_LABELS[selectedBien.type_bien] ?? selectedBien.type_bien}
+              </span>
+            </div>
+          )}
+
+          {/* Info */}
+          <div className="p-3">
+            <p className="font-sans text-sm font-semibold text-gray-900 line-clamp-2 leading-tight mb-1">
+              {selectedBien.titre}
+            </p>
+            <p className="text-xs text-gray-500 font-sans flex items-center gap-1 mb-2">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0 text-gray-400">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+              </svg>
+              {selectedBien.quartier ? `${selectedBien.quartier}, ` : ''}{selectedBien.commune}
+            </p>
+            {prix && (
+              <p className="font-bold text-base text-primary mb-2.5">
+                {prix.label}{' '}
+                <span className="font-normal text-xs text-gray-400">FCFA{prix.suffix}</span>
+              </p>
+            )}
+            <Link
+              href={`/biens/${selectedBien.id}`}
+              className="flex items-center justify-center w-full bg-primary text-white text-xs font-sans font-semibold py-2 rounded-lg hover:bg-primary-mid transition-colors"
+            >
+              Voir la fiche →
+            </Link>
+          </div>
+
+          {/* Close button */}
+          <button
+            onClick={() => setSelectedBien(null)}
+            className="absolute top-2 right-2 w-6 h-6 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition-colors z-10"
+          >
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      )}
+
+      {/* Biens count badge on the map */}
+      <div className="absolute bottom-3 left-3 z-10 bg-white/90 backdrop-blur-sm text-xs font-sans font-medium text-gray-700 px-3 py-1.5 rounded-full shadow-md border border-gray-100">
+        {biensWithCoords.length} bien{biensWithCoords.length !== 1 ? 's' : ''} sur la carte
+      </div>
     </div>
   )
 }
