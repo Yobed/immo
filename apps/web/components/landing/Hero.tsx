@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import Link from 'next/link'
 
 const BG_IMAGES = [
@@ -40,38 +40,32 @@ export function Hero() {
   return (
     <section className="relative overflow-hidden bg-primary" style={{ minHeight: '100svh' }}>
 
-      {/* ── Background Slideshow with Progressive Zoom ──────────────────────── */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <AnimatePresence initial={false}>
-          <motion.div
-            key={currentBg}
-            initial={{ opacity: 0, scale: 1 }}
-            animate={{ opacity: 1, scale: 1.15 }}
-            exit={{ opacity: 0 }}
-            transition={{
-              opacity: { duration: 1.5, ease: 'easeInOut' },
-              scale: { duration: 10, ease: 'linear' }
-            }}
-            className="absolute inset-0 origin-center"
-          >
-            <Image
-              src={BG_IMAGES[currentBg]}
-              alt="Immobilier Côte d'Ivoire"
-              fill
-              className="object-cover"
-              sizes="100vw"
-              priority={currentBg === 0}
-              quality={90}
-            />
-          </motion.div>
-        </AnimatePresence>
+      {/* ── Background Slideshow (CSS approach — fiable) ─────────────────────── */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
 
-        {/* Gradient overlays to ensure text readability */}
-        <div className="absolute inset-0 bg-[#0C2D5E]/60 mix-blend-multiply" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0C2D5E] via-[#0C2D5E]/80 to-transparent" />
-        <div 
-          className="absolute inset-0 anim-mesh opacity-40 mix-blend-overlay" 
-          style={{ background: 'linear-gradient(135deg, rgba(7,25,58,0.8) 0%, rgba(12,45,94,0.4) 40%, rgba(14,61,107,0.8) 70%, rgba(12,45,94,0.4) 100%)' }} 
+        {/* Slides: toutes rendues, seule la courante est visible */}
+        {BG_IMAGES.map((src, i) => (
+          <div
+            key={src}
+            className="absolute inset-0 bg-center bg-cover bg-no-repeat"
+            style={{
+              backgroundImage: `url(${src})`,
+              opacity: i === currentBg ? 1 : 0,
+              transition: 'opacity 1.5s ease-in-out',
+              animation: i === currentBg ? 'kenBurns 10s ease-out forwards' : 'none',
+              transform: i === currentBg ? undefined : 'scale(1)',
+              willChange: 'opacity, transform',
+            }}
+          />
+        ))}
+
+        {/* Overlay 1 — teinte bleue légère pour cohérence de couleur */}
+        <div className="absolute inset-0" style={{ background: 'rgba(8, 20, 52, 0.55)' }} />
+
+        {/* Overlay 2 — gradient du bas pour lisibilité du contenu */}
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(to top, #0C2D5E 0%, rgba(12,45,94,0.7) 30%, rgba(12,45,94,0.25) 60%, transparent 100%)' }}
         />
       </div>
 
