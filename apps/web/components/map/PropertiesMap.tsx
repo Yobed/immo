@@ -1,6 +1,6 @@
 'use client'
 import dynamic from 'next/dynamic'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { MAPBOX_TOKEN, ABIDJAN_CENTER } from '@/lib/mapbox'
 
@@ -31,14 +31,36 @@ interface PropertiesMapProps {
   biens: BienMarker[]
   hauteur?: number
   mapTheme?: string
+  targetCenter?: { lat: number, lng: number } | null
 }
 
-export function PropertiesMap({ biens, hauteur = 500, mapTheme = "mapbox://styles/mapbox/streets-v12" }: PropertiesMapProps) {
+export function PropertiesMap({ biens, hauteur = 500, mapTheme = "mapbox://styles/mapbox/streets-v12", targetCenter = null }: PropertiesMapProps) {
   const [selectedBien, setSelectedBien] = useState<BienMarker | null>(null)
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mapRef = useRef<any>(null)
 
   const handleMarkerClick = useCallback((bien: BienMarker) => {
     setSelectedBien((prev) => (prev?.id === bien.id ? null : bien))
   }, [])
+
+  useEffect(() => {
+    if (mapRef.current) {
+      if (targetCenter) {
+        mapRef.current.flyTo({
+          center: [targetCenter.lng, targetCenter.lat],
+          zoom: 12.5,
+          duration: 1500
+        })
+      } else {
+        mapRef.current.flyTo({
+          center: [ABIDJAN_CENTER.longitude, ABIDJAN_CENTER.latitude],
+          zoom: ABIDJAN_CENTER.zoom,
+          duration: 1500
+        })
+      }
+    }
+  }, [targetCenter])
 
   const biensWithCoords = biens.filter(
     (b) => b.latitude !== null && b.longitude !== null
@@ -61,6 +83,7 @@ export function PropertiesMap({ biens, hauteur = 500, mapTheme = "mapbox://style
       style={{ height: hauteur }}
     >
       <Map
+        ref={mapRef}
         mapboxAccessToken={MAPBOX_TOKEN}
         initialViewState={ABIDJAN_CENTER}
         style={{ width: '100%', height: '100%' }}
@@ -69,8 +92,8 @@ export function PropertiesMap({ biens, hauteur = 500, mapTheme = "mapbox://style
         {biensWithCoords.map((bien) => (
           <Marker
             key={bien.id}
-            longitude={bien.longitude!}
-            latitude={bien.latitude!}
+            longitude={Number(bien.longitude)}
+            latitude={Number(bien.latitude)}
             anchor="bottom"
           >
             <button
@@ -88,8 +111,8 @@ export function PropertiesMap({ biens, hauteur = 500, mapTheme = "mapbox://style
 
         {selectedBien && selectedBien.longitude && selectedBien.latitude && (
           <Popup
-            longitude={selectedBien.longitude}
-            latitude={selectedBien.latitude}
+            longitude={Number(selectedBien.longitude)}
+            latitude={Number(selectedBien.latitude)}
             anchor="top"
             onClose={() => setSelectedBien(null)}
             closeButton

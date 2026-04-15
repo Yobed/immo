@@ -1,11 +1,23 @@
 'use client'
+import { useState } from 'react'
 import { PropertiesMap } from '@/components/map/PropertiesMap'
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
 
-const communes = [
-  'Cocody', 'Plateau', 'Marcory', 'Yopougon', 'Adjamé', 'Abobo',
-  'Koumassi', 'Port-Bouet', 'Bingerville', 'Attécoubé', 'Treichville', 'Songon',
-]
+const communesCoords: Record<string, { lat: number, lng: number }> = {
+  'Cocody': { lat: 5.345, lng: -3.985 },
+  'Plateau': { lat: 5.326, lng: -4.017 },
+  'Marcory': { lat: 5.304, lng: -3.974 },
+  'Yopougon': { lat: 5.334, lng: -4.053 },
+  'Adjamé': { lat: 5.356, lng: -4.020 },
+  'Abobo': { lat: 5.421, lng: -4.017 },
+  'Koumassi': { lat: 5.295, lng: -3.945 },
+  'Port-Bouet': { lat: 5.253, lng: -3.944 },
+  'Bingerville': { lat: 5.353, lng: -3.886 },
+  'Attécoubé': { lat: 5.332, lng: -4.032 },
+  'Treichville': { lat: 5.303, lng: -4.008 },
+  'Songon': { lat: 5.312, lng: -4.225 }
+}
+const communes = Object.keys(communesCoords)
 
 interface BienMarker {
   id: string
@@ -18,7 +30,14 @@ interface BienMarker {
 }
 
 export function MapZones({ biens }: { biens: BienMarker[] }) {
+  const [activeCommune, setActiveCommune] = useState<string | null>(null)
   const biensWithCoords = biens.filter(b => b.latitude && b.longitude)
+
+  const filteredBiens = activeCommune 
+    ? biensWithCoords.filter(b => b.commune === activeCommune)
+    : biensWithCoords;
+
+  const targetCenter = activeCommune ? communesCoords[activeCommune] : null;
 
   return (
     <section className="py-24 bg-[#0C2D5E] relative overflow-hidden">
@@ -37,27 +56,40 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
             Découvrez nos exclusivités sur la carte
           </h2>
           <p className="font-sans text-white/70 text-lg md:text-xl max-w-2xl mx-auto">
-            Passez la carte en revue et naviguez visuellement dans notre catalogue géolocalisé pour trouver la perle rare.
+            Filtrez par commune pour naviguer visuellement dans notre catalogue géolocalisé.
           </p>
         </ScrollReveal>
 
         {biensWithCoords.length > 0 && (
           <ScrollReveal delay={0.2} className="max-w-6xl mx-auto rounded-[24px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 p-1.5 bg-white/5 backdrop-blur-xl mb-16">
             <div className="rounded-[20px] overflow-hidden relative">
-               <PropertiesMap biens={biensWithCoords} hauteur={550} mapTheme="mapbox://styles/mapbox/dark-v11" />
+               <PropertiesMap 
+                 biens={filteredBiens} 
+                 hauteur={550} 
+                 mapTheme="mapbox://styles/mapbox/streets-v12" 
+                 targetCenter={targetCenter}
+               />
             </div>
           </ScrollReveal>
         )}
 
         <ScrollReveal delay={0.3} className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto">
-          {communes.map((commune) => (
-            <span
-              key={commune}
-              className="inline-flex items-center px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white font-sans text-sm font-medium hover:bg-[var(--secondary)] hover:border-transparent transition-all duration-300 backdrop-blur cursor-pointer"
-            >
-              {commune}
-            </span>
-          ))}
+          {communes.map((commune) => {
+            const isActive = activeCommune === commune
+            return (
+              <button
+                key={commune}
+                onClick={() => setActiveCommune(isActive ? null : commune)}
+                className={`inline-flex items-center px-4 py-2 rounded-full border transition-all duration-300 backdrop-blur ${
+                  isActive 
+                  ? 'bg-[var(--secondary)] border-[var(--secondary)] text-white shadow-lg scale-105'
+                  : 'bg-white/5 border-white/10 text-white font-sans hover:bg-white/20 hover:border-white/30'
+                } text-sm font-medium focus:outline-none`}
+              >
+                {commune}
+              </button>
+            )
+          })}
         </ScrollReveal>
 
         <ScrollReveal delay={0.4} className="text-center mt-10 font-sans text-white/40 text-xs tracking-wider uppercase">
