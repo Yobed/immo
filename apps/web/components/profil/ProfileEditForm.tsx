@@ -22,7 +22,7 @@ export function ProfileEditForm({ initialNom, initialTelephone, userId }: Profil
     const supabase = createClient()
     const { error: err } = await supabase
       .from('profiles')
-      .update({ nom_complet: nom.trim(), telephone: telephone.trim() })
+      .update({ full_name: nom.trim(), telephone: telephone.trim() })
       .eq('id', userId)
 
     if (err) {

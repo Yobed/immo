@@ -37,10 +37,15 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         sizes[size],
         className
       )}
+      aria-busy={loading}
+      aria-live="polite"
       {...props}
     >
       {loading && (
-        <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+        <>
+          <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+          <span className="sr-only">Chargement en cours</span>
+        </>
       )}
       {children}
     </button>
