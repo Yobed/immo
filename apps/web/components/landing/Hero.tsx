@@ -51,11 +51,12 @@ export function Hero({ bgImages }: { bgImages?: string[] }) {
             className="absolute inset-0 bg-no-repeat"
             style={{
               backgroundImage: `url(${src})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center 20%',
+              backgroundSize: '80% auto',
+              backgroundPosition: 'center 30%',
               opacity: i === currentBg ? 1 : 0,
               transition: 'opacity 1.5s ease-in-out',
-              willChange: 'opacity',
+              animation: i === currentBg ? 'kenBurns 10s ease-out forwards' : 'none',
+              willChange: 'opacity, transform',
             }}
           />
         ))}
