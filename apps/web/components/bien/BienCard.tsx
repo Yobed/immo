@@ -1,5 +1,7 @@
+'use client'
 import Link from 'next/link'
 import Image from 'next/image'
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import { TYPES_BIEN_LABELS } from '@immo-ci/shared/constants/biens'
 
 interface BienCardProps {
@@ -48,12 +50,48 @@ export function BienCard({
 
   const typeConf = TYPE_CONFIG[type_bien] ?? { bg: 'bg-slate-50', text: 'text-slate-600', dot: 'bg-slate-400' }
 
+  // 3D Tilt Logic
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+  const mouseXSpring = useSpring(x, { stiffness: 300, damping: 40 })
+  const mouseYSpring = useSpring(y, { stiffness: 300, damping: 40 })
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["2.5deg", "-2.5deg"])
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-2.5deg", "2.5deg"])
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const width = rect.width
+    const height = rect.height
+    const mouseX = e.clientX - rect.left
+    const mouseY = e.clientY - rect.top
+    const xPct = mouseX / width - 0.5
+    const yPct = mouseY / height - 0.5
+    x.set(xPct)
+    y.set(yPct)
+  }
+
+  const handleMouseLeave = () => {
+    x.set(0)
+    y.set(0)
+  }
+
   return (
-    <Link href={`/biens/${id}`} className="block group h-full">
-      <article
-        className="bg-white rounded-[18px] overflow-hidden border border-[#D0D8EE] card-lift h-full flex flex-col"
-        style={{ boxShadow: '0 2px 12px rgba(12, 45, 94, 0.08), 0 0 0 1px rgba(12, 45, 94, 0.06)' }}
+    <Link href={`/biens/${id}`} className="block group h-full" style={{ perspective: 1200 }}>
+      {/* 3D Bento Card wrapper */}
+      <motion.article
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+        whileHover={{ scale: 1.01 }}
+        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+        className="bg-white rounded-[22px] overflow-hidden border border-[var(--border)] h-full flex flex-col relative transition-shadow duration-500 hover:shadow-2xl hover:shadow-[var(--primary)]/10"
       >
+        {/* Inner Glow (Reflet sur le verre) */}
+        <div 
+          className="absolute inset-0 rounded-[22px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-20" 
+          style={{ boxShadow: 'inset 0 0 24px rgba(255, 255, 255, 0.9), inset 0 0 0 1px rgba(255,255,255,0.3)' }} 
+        />
+
         {/* ── Photo ── */}
         <div className="relative aspect-[4/3] bg-[var(--surface)] img-zoom-wrap overflow-hidden">
           {photo_url ? (
@@ -61,7 +99,7 @@ export function BienCard({
               src={photo_url}
               alt={titre}
               fill
-              className="object-cover img-zoom"
+              className="object-cover transition-transform duration-[10000ms] ease-out group-hover:scale-110"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
           ) : (
@@ -81,7 +119,7 @@ export function BienCard({
           <div className="absolute top-3 left-3">
             <span className={`
               inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill text-xs font-sans font-medium
-              badge-glow ${typeConf.bg} ${typeConf.text}
+              badge-glow ${typeConf.bg} ${typeConf.text} shadow-sm border border-black/5
             `}>
               <span className={`w-1.5 h-1.5 rounded-full ${typeConf.dot}`} />
               {TYPES_BIEN_LABELS[type_bien] ?? type_bien}
@@ -97,14 +135,14 @@ export function BienCard({
             </div>
           )}
 
-          {/* Prix — bas gauche avec style or */}
+          {/* Prix — bas gauche avec style premium (Shadow drop) */}
           {prix && (
-            <div className="absolute bottom-3 left-3">
-              <div className="flex items-baseline gap-1 px-3 py-1.5 rounded-pill bg-white/95 backdrop-blur-sm badge-glow">
-                <span className="font-mono text-sm font-bold text-[var(--primary)]">
+            <div className="absolute bottom-3 left-3 transform translate-z-10">
+              <div className="flex items-baseline gap-1 px-3.5 py-1.5 rounded-pill bg-white/95 backdrop-blur-md shadow-lg border border-white/20">
+                <span className="font-mono text-sm font-bold text-[var(--primary)] tabular-nums tracking-tight">
                   {prix.value}
                 </span>
-                <span className="text-xs text-[var(--text-muted)] font-sans">
+                <span className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-sans font-semibold">
                   FCFA{prix.suffix}
                 </span>
               </div>
@@ -113,9 +151,9 @@ export function BienCard({
 
           {/* Favori placeholder haut droite si pas brouillon */}
           {statut !== 'brouillon' && (
-            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <div className="w-8 h-8 rounded-full glass flex items-center justify-center">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[var(--text-muted)]">
+            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-95 group-hover:scale-100">
+              <div className="w-8 h-8 rounded-full bg-white/30 backdrop-blur flex items-center justify-center hover:bg-white/50 transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white drop-shadow-md">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                 </svg>
               </div>
@@ -124,13 +162,13 @@ export function BienCard({
         </div>
 
         {/* ── Infos ── */}
-        <div className="p-4 flex flex-col flex-1">
-          <h3 className="font-sans font-semibold text-[var(--text)] text-sm leading-snug line-clamp-2 mb-2 group-hover:text-[var(--primary)] transition-colors duration-200">
+        <div className="p-4 flex flex-col flex-1 bg-white relative z-10 border-t border-[var(--border)]/50">
+          <h3 className="font-sans font-bold text-[var(--primary)] text-sm leading-snug line-clamp-2 mb-2 group-hover:text-secondary transition-colors duration-200">
             {titre}
           </h3>
 
-          <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-sans mb-3.5">
-            <svg width="11" height="11" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" fill="none" className="flex-shrink-0 text-[var(--secondary)]">
+          <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-muted)] font-sans mb-4 uppercase tracking-wider font-medium">
+            <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" className="flex-shrink-0 text-[var(--secondary)]">
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
               <circle cx="12" cy="10" r="3"/>
             </svg>
@@ -139,32 +177,32 @@ export function BienCard({
             </span>
           </div>
 
-          {/* Stats */}
+          {/* Stats Bento style */}
           {(surface_m2 || nb_pieces) && (
-            <div className="flex items-center gap-4 pt-3 border-t border-[var(--border)] mt-auto">
+            <div className="flex items-center gap-3 pt-3 border-t border-slate-100 mt-auto">
               {surface_m2 && (
-                <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-sans">
-                  <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" className="text-[var(--primary)]/50">
+                <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 rounded-lg text-xs font-sans text-[var(--text-muted)] border border-slate-100">
+                  <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" fill="none" className="text-[var(--primary)]/60">
                     <rect x="3" y="3" width="18" height="18" rx="2"/>
                     <path d="M3 9h18M9 21V9"/>
                   </svg>
-                  <span className="font-medium text-[var(--text)]">{surface_m2}</span>
-                  <span>m²</span>
+                  <span className="font-semibold text-slate-700">{surface_m2}</span>
+                  <span className="text-[10px]">m²</span>
                 </div>
               )}
               {nb_pieces && (
-                <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-sans">
-                  <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" className="text-[var(--primary)]/50">
+                <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 rounded-lg text-xs font-sans text-[var(--text-muted)] border border-slate-100">
+                  <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" fill="none" className="text-[var(--primary)]/60">
                     <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
                   </svg>
-                  <span className="font-medium text-[var(--text)]">{nb_pieces}</span>
-                  <span>pièce{nb_pieces > 1 ? 's' : ''}</span>
+                  <span className="font-semibold text-slate-700">{nb_pieces}</span>
+                  <span className="text-[10px]">pcs</span>
                 </div>
               )}
             </div>
           )}
         </div>
-      </article>
+      </motion.article>
     </Link>
   )
 }

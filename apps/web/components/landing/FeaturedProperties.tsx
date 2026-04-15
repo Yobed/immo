@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { BienCard } from '@/components/bien/BienCard'
 import { CardsCarousel } from '@/components/ui/CardsCarousel'
+import { ScrollReveal } from '@/components/ui/ScrollReveal'
 
 type BienRow = {
   id: string
@@ -50,62 +51,70 @@ export async function FeaturedProperties() {
   if (rows.length === 0) return null
 
   return (
-    <section className="py-20 bg-[#F4F7FF]">
-      <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="flex items-end justify-between mb-10">
+    <section className="relative py-28 bg-[#F4F7FF] overflow-hidden">
+      {/* Background Topography / Noise Editorial Texture */}
+      <div 
+        className="absolute inset-0 opacity-[0.035] pointer-events-none mix-blend-multiply" 
+        style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }} 
+      />
+      
+      <div className="container relative z-10 mx-auto px-4">
+        {/* Header with Scroll Reveal */}
+        <ScrollReveal className="flex items-end justify-between mb-12">
           <div>
-            <p className="font-sans text-sm font-semibold text-[var(--secondary)] uppercase tracking-widest mb-2">
-              Sélection
+            <p className="font-sans text-xs font-bold text-[var(--secondary)] uppercase tracking-[0.2em] mb-3">
+              Sélection d&apos;exception
             </p>
-            <h2 className="font-display text-3xl md:text-4xl font-bold text-[var(--primary)]">
+            <h2 className="font-display text-4xl md:text-5xl font-bold text-[var(--primary)] leading-tight">
               Dernières annonces
             </h2>
           </div>
           <Link
             href="/biens"
-            className="hidden sm:inline-flex items-center gap-1.5 font-sans text-sm font-medium text-[var(--primary)] hover:text-[var(--primary-mid)] transition-colors"
+            className="hidden sm:inline-flex items-center gap-2 font-sans text-sm font-semibold text-[var(--primary)] border-b-2 border-transparent hover:border-[var(--secondary)] pb-1 transition-all group"
           >
-            Voir tout
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <span>Voir tout</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-x-1 transition-transform">
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
           </Link>
-        </div>
+        </ScrollReveal>
 
-        {/* Carousel */}
-        <CardsCarousel>
-          {rows.map((bien) => (
-            <div key={bien.id} className="w-64 sm:w-72 lg:w-80 shrink-0">
-              <BienCard
-                id={bien.id}
-                titre={bien.titre}
-                commune={bien.commune}
-                quartier={bien.quartier}
-                type_bien={bien.type_bien}
-                prix_mois_fcfa={bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa}
-                prix_nuit_fcfa={bien.prix_nuit_fcfa}
-                prix_vente_fcfa={bien.prix_vente_fcfa}
-                surface_m2={bien.surface_m2}
-                nb_pieces={bien.nb_pieces}
-                photo_url={coverMap[bien.id] ?? null}
-              />
-            </div>
-          ))}
-        </CardsCarousel>
+        {/* Carousel wrapped in Scroll Reveal with a slight delay */}
+        <ScrollReveal delay={0.15}>
+          <CardsCarousel>
+            {rows.map((bien) => (
+              <div key={bien.id} className="w-[280px] sm:w-[320px] lg:w-[340px] shrink-0 py-4">
+                <BienCard
+                  id={bien.id}
+                  titre={bien.titre}
+                  commune={bien.commune}
+                  quartier={bien.quartier}
+                  type_bien={bien.type_bien}
+                  prix_mois_fcfa={bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa}
+                  prix_nuit_fcfa={bien.prix_nuit_fcfa}
+                  prix_vente_fcfa={bien.prix_vente_fcfa}
+                  surface_m2={bien.surface_m2}
+                  nb_pieces={bien.nb_pieces}
+                  photo_url={coverMap[bien.id] ?? null}
+                />
+              </div>
+            ))}
+          </CardsCarousel>
+        </ScrollReveal>
 
         {/* CTA mobile */}
-        <div className="text-center mt-8 sm:hidden">
+        <ScrollReveal delay={0.2} className="text-center mt-12 sm:hidden">
           <Link
             href="/biens"
-            className="inline-flex items-center gap-2 font-sans font-medium text-sm text-[var(--primary)] border border-[var(--primary)]/30 px-5 py-2.5 rounded-btn hover:bg-[var(--primary-light)] transition-colors"
+            className="inline-flex items-center gap-2 font-sans font-bold text-sm text-[var(--primary)] border-2 border-[var(--primary)] px-6 py-3 rounded-full hover:bg-[var(--primary)] hover:text-white transition-all shadow-lg active:scale-95"
           >
-            Voir toutes les annonces
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            Explorer les propriétés
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
           </Link>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   )
