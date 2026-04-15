@@ -123,8 +123,8 @@ function StatCard({
           {display}<span className="text-2xl">{suffix}</span>
         </p>
 
-        <p className="font-display font-semibold text-white text-sm mb-0.5">{label}</p>
-        <p className="font-sans text-white/45 text-xs">{desc}</p>
+        <p className="font-display font-semibold text-white text-base mb-0.5">{label}</p>
+        <p className="font-sans text-white/45 text-sm">{desc}</p>
       </div>
     </div>
   )
@@ -153,13 +153,13 @@ export function Stats() {
       <div className="relative container mx-auto px-4">
         {/* Header */}
         <div className={`text-center mb-16 sr sr-up ${visible ? 'visible' : ''}`}>
-          <span className="inline-block mb-4 px-4 py-1.5 rounded-full border border-secondary/30 bg-secondary/10 text-secondary text-xs font-bold uppercase tracking-wider font-sans">
+          <span className="inline-block mb-4 px-4 py-1.5 rounded-full border border-secondary/30 bg-secondary/10 text-secondary text-sm font-bold uppercase tracking-wider font-sans">
             Nos résultats
           </span>
-          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
+          <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4">
             Immo CI en chiffres
           </h2>
-          <p className="font-sans text-white/55 text-base max-w-md mx-auto leading-relaxed">
+          <p className="font-sans text-white/55 text-lg max-w-md mx-auto leading-relaxed">
             La confiance de milliers d&apos;ivoiriens, prouvée par les données.
           </p>
         </div>

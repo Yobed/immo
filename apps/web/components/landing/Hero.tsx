@@ -75,7 +75,7 @@ export function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
             className="font-display font-bold leading-tight mb-6"
-            style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)' }}
+            style={{ fontSize: 'clamp(3rem, 6vw, 5.5rem)' }}
           >
             <span className="text-white">Trouvez votre bien</span>
             <br />
@@ -86,7 +86,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="font-sans text-base sm:text-lg text-white/70 mb-8 leading-relaxed max-w-lg"
+            className="font-sans text-lg sm:text-xl text-white/70 mb-8 leading-relaxed max-w-lg"
           >
             Location, vente et résidences meublées à Abidjan.
             <br className="hidden sm:block" />
@@ -110,7 +110,7 @@ export function Hero() {
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 placeholder="Commune, quartier, type de bien…"
-                className="w-full pl-11 pr-4 py-4 rounded-[14px] bg-white text-gray-800 font-sans text-sm border-0 focus:outline-none focus:ring-2 focus:ring-secondary shadow-xl placeholder-gray-400"
+                className="w-full pl-11 pr-4 py-4 rounded-[14px] bg-white text-gray-800 font-sans text-base border-0 focus:outline-none focus:ring-2 focus:ring-secondary shadow-xl placeholder-gray-400"
               />
             </div>
             <button

@@ -139,7 +139,7 @@ export function BienCard({
           {prix && (
             <div className="absolute bottom-3 left-3 transform translate-z-10">
               <div className="flex items-baseline gap-1 px-3.5 py-1.5 rounded-pill bg-white/95 backdrop-blur-md shadow-lg border border-white/20">
-                <span className="font-mono text-sm font-bold text-[var(--primary)] tabular-nums tracking-tight">
+                <span className="font-mono text-base font-bold text-[var(--primary)] tabular-nums tracking-tight">
                   {prix.value}
                 </span>
                 <span className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-sans font-semibold">
@@ -163,11 +163,11 @@ export function BienCard({
 
         {/* ── Infos ── */}
         <div className="p-4 flex flex-col flex-1 bg-white relative z-10 border-t border-[var(--border)]/50">
-          <h3 className="font-sans font-bold text-[var(--primary)] text-sm leading-snug line-clamp-2 mb-2 group-hover:text-secondary transition-colors duration-200">
+          <h3 className="font-sans font-bold text-[var(--primary)] text-base leading-snug line-clamp-2 mb-2 group-hover:text-secondary transition-colors duration-200">
             {titre}
           </h3>
 
-          <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-muted)] font-sans mb-4 uppercase tracking-wider font-medium">
+          <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-sans mb-4 uppercase tracking-wider font-medium">
             <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" className="flex-shrink-0 text-[var(--secondary)]">
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
               <circle cx="12" cy="10" r="3"/>

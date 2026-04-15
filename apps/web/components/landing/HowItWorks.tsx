@@ -68,13 +68,13 @@ export function HowItWorks() {
       <div className="relative container mx-auto px-4">
         {/* Header */}
         <div className={`text-center mb-16 sm:mb-20 sr sr-up ${visible ? 'visible' : ''}`}>
-          <span className="inline-block mb-4 px-4 py-1.5 rounded-full bg-secondary/10 text-secondary text-xs font-sans font-bold uppercase tracking-wider border border-secondary/20">
+          <span className="inline-block mb-4 px-4 py-1.5 rounded-full bg-secondary/10 text-secondary text-sm font-sans font-bold uppercase tracking-wider border border-secondary/20">
             Simple &amp; rapide
           </span>
-          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-5 leading-tight">
+          <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-primary mb-5 leading-tight">
             Comment ça marche
           </h2>
-          <p className="font-sans text-base text-muted max-w-lg mx-auto leading-relaxed">
+          <p className="font-sans text-lg text-muted max-w-lg mx-auto leading-relaxed">
             Trouver ou louer un bien immobilier en Côte d&apos;Ivoire n&apos;a jamais été aussi simple.
           </p>
         </div>
@@ -135,8 +135,8 @@ export function HowItWorks() {
                   {i + 1}
                 </div>
 
-                <h3 className="font-display text-xl font-bold text-primary mb-3">{step.title}</h3>
-                <p className="font-sans text-sm text-muted leading-relaxed">{step.description}</p>
+                <h3 className="font-display text-2xl font-bold text-primary mb-3">{step.title}</h3>
+                <p className="font-sans text-base text-muted leading-relaxed">{step.description}</p>
 
                 {/* Bottom accent line */}
                 <div

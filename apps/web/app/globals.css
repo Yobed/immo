@@ -578,3 +578,48 @@ main {
   border: 1px solid rgba(12,45,94,0.08);
 }
 
+/* ── Floating property cards ── */
+@keyframes cardFloat {
+  0%,100% {
+    transform: translateY(0px);
+    box-shadow: 0 16px 48px rgba(12,45,94,0.22), 0 4px 12px rgba(12,45,94,0.12);
+  }
+  50% {
+    transform: translateY(-10px);
+    box-shadow: 0 28px 72px rgba(12,45,94,0.30), 0 8px 20px rgba(12,45,94,0.16);
+  }
+}
+
+.floating-card {
+  animation: cardFloat 5s ease-in-out infinite;
+  animation-delay: var(--float-delay, 0s);
+  /* Override the card shadow to make it look floating */
+  border-radius: 22px;
+  will-change: transform;
+}
+
+.floating-card > * {
+  border-radius: 22px;
+  overflow: hidden;
+}
+
+/* ── Global font scale improvements ── */
+.section-eyebrow {
+  font-size: 0.875rem;   /* 14px */
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.section-title {
+  font-size: clamp(2rem, 4vw, 3.75rem);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.section-subtitle {
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  line-height: 1.65;
+}
+
+

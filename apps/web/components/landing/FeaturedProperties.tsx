@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { BienCard } from '@/components/bien/BienCard'
-import { CardsCarousel } from '@/components/ui/CardsCarousel'
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
 
 type BienRow = {
@@ -17,6 +16,11 @@ type BienRow = {
   nb_pieces: number | null
 }
 
+/* Chaque card est décalée verticalement pour un effet masonry léger */
+const OFFSETS = [0, 16, 8, 24, 12, 4, 20, 8, 16, 0, 24, 12, 8, 20, 4, 16]
+/* Animation flottante décalée pour chaque carte */
+const FLOAT_DELAYS = ['0s','0.4s','0.8s','1.2s','0.2s','0.6s','1.0s','1.4s','0.3s','0.7s','1.1s','0.5s','0.9s','0.1s','1.3s','0.8s']
+
 export async function FeaturedProperties() {
   const supabase = await createClient()
 
@@ -26,12 +30,12 @@ export async function FeaturedProperties() {
     .select('id, titre, commune, quartier, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces')
     .eq('statut', 'publie')
     .order('created_at', { ascending: false })
-    .limit(10)
+    .limit(16)
 
   const rows = (biens ?? []) as BienRow[]
 
   // Photos de couverture
-  let coverMap: Record<string, string> = {}
+  const coverMap: Record<string, string> = {}
   if (rows.length > 0) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: medias } = await (supabase as any)
@@ -51,73 +55,84 @@ export async function FeaturedProperties() {
   if (rows.length === 0) return null
 
   return (
-    <section className="relative py-24 sm:py-32 overflow-hidden" style={{ background: 'linear-gradient(180deg, #F0F5FF 0%, #F8FAFF 100%)' }}>
-      {/* Ambient orb */}
+    <section
+      className="relative py-24 sm:py-32 overflow-hidden"
+      style={{ background: 'linear-gradient(180deg, #05132E 0%, #0C2D5E 60%, #081E48 100%)' }}
+    >
+      {/* Ambient glows */}
+      <div className="absolute inset-0 bg-dots opacity-10 pointer-events-none" />
       <div
-        className="absolute top-0 right-0 w-[600px] h-[400px] pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse at top right, rgba(249,115,22,0.07) 0%, transparent 70%)', filter: 'blur(40px)' }}
+        className="absolute top-0 left-0 w-[700px] h-[700px] anim-orb-1 pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(249,115,22,0.1) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(80px)' }}
       />
-      <div className="absolute inset-0 bg-grid opacity-20 pointer-events-none" />
+      <div
+        className="absolute bottom-0 right-0 w-[600px] h-[600px] anim-orb-2 pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(26,77,143,0.5) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(60px)' }}
+      />
 
       <div className="container relative z-10 mx-auto px-4">
         {/* Header */}
-        <ScrollReveal className="flex items-end justify-between mb-12">
+        <ScrollReveal className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-16">
           <div>
-            <span className="inline-block mb-3 px-3 py-1 rounded-full bg-secondary/10 border border-secondary/20 text-secondary text-xs font-sans font-bold uppercase tracking-wider">
+            <span className="inline-block mb-4 px-4 py-1.5 rounded-full border border-secondary/30 bg-secondary/10 text-secondary text-sm font-sans font-bold uppercase tracking-wider">
               Sélection d&apos;exception
             </span>
-            <h2 className="font-display text-4xl md:text-5xl font-bold text-primary leading-tight mt-1">
+            <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight">
               Dernières annonces
             </h2>
+            <p className="font-sans text-white/55 text-lg mt-3 max-w-md">
+              {rows.length} biens disponibles, mis à jour en temps réel.
+            </p>
           </div>
           <Link
             href="/biens"
-            className="hidden sm:inline-flex items-center gap-2 font-sans text-sm font-semibold text-primary border border-primary/20 rounded-full px-5 py-2 hover:bg-primary hover:text-white transition-all duration-200 group"
+            className="shrink-0 inline-flex items-center gap-2.5 font-sans text-sm font-semibold text-white border border-white/20 rounded-full px-6 py-3 hover:bg-white hover:text-primary transition-all duration-300 group self-start sm:self-auto"
           >
-            <span>Voir tout</span>
-            <svg
-              width="14" height="14" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-              className="group-hover:translate-x-1 transition-transform"
-            >
+            <span>Voir tout ({rows.length}+)</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-x-1 transition-transform">
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
           </Link>
         </ScrollReveal>
 
-        {/* Carousel */}
-        <ScrollReveal delay={0.15}>
-          <CardsCarousel>
-            {rows.map((bien) => (
-              <div key={bien.id} className="w-[280px] sm:w-[320px] lg:w-[340px] shrink-0 py-4">
-                <BienCard
-                  id={bien.id}
-                  titre={bien.titre}
-                  commune={bien.commune}
-                  quartier={bien.quartier}
-                  type_bien={bien.type_bien}
-                  prix_mois_fcfa={bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa}
-                  prix_nuit_fcfa={bien.prix_nuit_fcfa}
-                  prix_vente_fcfa={bien.prix_vente_fcfa}
-                  surface_m2={bien.surface_m2}
-                  nb_pieces={bien.nb_pieces}
-                  photo_url={coverMap[bien.id] ?? null}
-                />
-              </div>
-            ))}
-          </CardsCarousel>
-        </ScrollReveal>
+        {/* Floating grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {rows.map((bien, i) => (
+            <div
+              key={bien.id}
+              className="floating-card"
+              style={{
+                '--float-delay': FLOAT_DELAYS[i % FLOAT_DELAYS.length],
+                '--card-offset': `${OFFSETS[i % OFFSETS.length]}px`,
+                animationDelay: FLOAT_DELAYS[i % FLOAT_DELAYS.length],
+                marginTop: i % 4 !== 0 ? `${OFFSETS[i % OFFSETS.length]}px` : '0',
+              } as React.CSSProperties}
+            >
+              <BienCard
+                id={bien.id}
+                titre={bien.titre}
+                commune={bien.commune}
+                quartier={bien.quartier}
+                type_bien={bien.type_bien}
+                prix_mois_fcfa={bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa}
+                prix_nuit_fcfa={bien.prix_nuit_fcfa}
+                prix_vente_fcfa={bien.prix_vente_fcfa}
+                surface_m2={bien.surface_m2}
+                nb_pieces={bien.nb_pieces}
+                photo_url={coverMap[bien.id] ?? null}
+              />
+            </div>
+          ))}
+        </div>
 
-        {/* Mobile CTA */}
-        <ScrollReveal delay={0.2} className="text-center mt-12 sm:hidden">
+        {/* Bottom CTA */}
+        <ScrollReveal delay={0.3} className="text-center mt-16">
           <Link
             href="/biens"
-            className="inline-flex items-center gap-2 font-sans font-bold text-sm text-primary border-2 border-primary px-7 py-3 rounded-full hover:bg-primary hover:text-white transition-all duration-200 shadow-lg active:scale-95"
+            className="inline-flex items-center gap-3 font-sans font-bold text-base bg-secondary text-white px-10 py-4 rounded-[14px] hover:bg-secondary/90 transition-all duration-200 shadow-xl hover:scale-105 active:scale-95 anim-pulse-glow"
           >
-            Explorer les propriétés
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            Explorer tous les biens
           </Link>
         </ScrollReveal>
       </div>

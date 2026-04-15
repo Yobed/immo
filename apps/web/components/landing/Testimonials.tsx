@@ -66,10 +66,10 @@ export function Testimonials() {
           <span className="inline-block mb-4 px-4 py-1.5 rounded-full border border-secondary/25 bg-secondary/8 text-secondary text-xs font-bold uppercase tracking-wider font-sans">
             Témoignages
           </span>
-          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-4 mt-2">
+          <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-primary mb-4 mt-2">
             Ce que disent nos utilisateurs
           </h2>
-          <p className="font-sans text-muted text-base max-w-xl mx-auto leading-relaxed">
+          <p className="font-sans text-muted text-lg max-w-xl mx-auto leading-relaxed">
             Des milliers de propriétaires, locataires et agences nous font confiance chaque jour.
           </p>
         </div>
@@ -106,7 +106,7 @@ export function Testimonials() {
               </div>
 
               {/* Text */}
-              <p className="font-sans text-sm text-gray-600 leading-relaxed flex-1 italic">
+              <p className="font-sans text-base text-gray-600 leading-relaxed flex-1 italic">
                 &ldquo;{t.text}&rdquo;
               </p>
 
@@ -119,8 +119,8 @@ export function Testimonials() {
                   {t.avatar}
                 </div>
                 <div>
-                  <p className="font-sans text-sm font-bold text-primary">{t.name}</p>
-                  <p className="font-sans text-xs text-muted">{t.role} · {t.location}</p>
+                  <p className="font-sans text-base font-bold text-primary">{t.name}</p>
+                  <p className="font-sans text-sm text-muted">{t.role} · {t.location}</p>
                 </div>
                 {/* Verified badge */}
                 <div className="ml-auto flex items-center gap-1">

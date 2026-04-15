@@ -81,13 +81,13 @@ export function Features() {
       <div className="relative container mx-auto px-4">
         {/* Header */}
         <div className={`text-center mb-14 sr sr-up ${visible ? 'visible' : ''}`}>
-          <span className="inline-block mb-4 px-4 py-1.5 rounded-full border border-secondary/30 bg-secondary/10 text-secondary text-xs font-sans font-bold uppercase tracking-wider">
+          <span className="inline-block mb-4 px-4 py-1.5 rounded-full border border-secondary/30 bg-secondary/10 text-secondary text-sm font-sans font-bold uppercase tracking-wider">
             Fonctionnalités
           </span>
-          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5">
+          <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-5">
             Tout pour votre immobilier
           </h2>
-          <p className="font-sans text-white/60 text-base max-w-xl mx-auto leading-relaxed">
+          <p className="font-sans text-white/60 text-lg max-w-xl mx-auto leading-relaxed">
             Une plateforme complète pour louer, vendre ou gérer vos biens en Côte d&apos;Ivoire.
           </p>
         </div>
@@ -116,8 +116,8 @@ export function Features() {
                 >
                   {f.icon}
                 </div>
-                <h3 className="font-display text-xl font-bold text-white mb-2.5">{f.title}</h3>
-                <p className="font-sans text-sm text-white/65 leading-relaxed">{f.description}</p>
+                <h3 className="font-display text-2xl font-bold text-white mb-3">{f.title}</h3>
+                <p className="font-sans text-base text-white/65 leading-relaxed">{f.description}</p>
 
                 {/* Bottom accent */}
                 <div
