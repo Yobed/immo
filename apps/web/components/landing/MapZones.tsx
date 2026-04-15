@@ -1,7 +1,8 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import dynamic from 'next/dynamic'
-import { ScrollReveal } from '@/components/ui/ScrollReveal'
+import { motion, useInView } from 'framer-motion'
+import { containerVariants, itemVariants } from './Features'
 import type { BienMarker } from '@/components/map/PropertiesMap'
 
 const PropertiesMap = dynamic(
@@ -38,6 +39,8 @@ const communes = Object.keys(communesCoords)
 export function MapZones({ biens }: { biens: BienMarker[] }) {
   const [activeCommune, setActiveCommune] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const containerRef = useRef<HTMLElement>(null)
+  const inView = useInView(containerRef, { once: true, margin: "-100px" })
 
   const biensWithCoords = useMemo(() => biens.filter((b) => b.latitude && b.longitude), [biens])
 
@@ -68,7 +71,7 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
   const targetCenter = activeCommune ? communesCoords[activeCommune] : null
 
   return (
-    <section className="py-16 md:py-24 bg-[#0C2D5E] relative overflow-hidden">
+    <section ref={containerRef} className="py-16 md:py-24 bg-[#0C2D5E] relative overflow-hidden">
       {/* Noise texture */}
       <div
         className="absolute inset-0 opacity-[0.04] pointer-events-none"
@@ -78,9 +81,14 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
         }}
       />
 
-      <div className="container relative z-10 mx-auto px-4">
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate={inView ? "visible" : "hidden"}
+        className="container relative z-10 mx-auto px-4"
+      >
         {/* Header */}
-        <ScrollReveal className="text-center mb-10 md:mb-14">
+        <motion.div variants={itemVariants} className="text-center mb-10 md:mb-14">
           <p className="font-sans text-xs font-bold text-[var(--secondary)] uppercase tracking-[0.2em] mb-3">
             Couverture Nationale
           </p>
@@ -90,10 +98,10 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
           <p className="font-sans text-white/60 text-base md:text-lg max-w-xl mx-auto">
             Filtrez par commune, cherchez par nom ou quartier, et visualisez chaque bien géolocalisé.
           </p>
-        </ScrollReveal>
+        </motion.div>
 
         {/* Search bar */}
-        <ScrollReveal delay={0.1} className="max-w-lg mx-auto mb-8">
+        <motion.div variants={itemVariants} className="max-w-lg mx-auto mb-8">
           <div className="relative">
             <span className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-white/40">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -125,11 +133,11 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
             {activeCommune ? ` à ${activeCommune}` : ''}
             {searchQuery ? ` pour « ${searchQuery} »` : ''}
           </p>
-        </ScrollReveal>
+        </motion.div>
 
         {/* Map */}
         {biensWithCoords.length > 0 && (
-          <ScrollReveal delay={0.2} className="max-w-6xl mx-auto mb-8 md:mb-12">
+          <motion.div variants={itemVariants} className="max-w-6xl mx-auto mb-8 md:mb-12">
             <div className="rounded-[20px] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.5)] ring-1 ring-white/10 p-1 bg-white/5 backdrop-blur-xl">
               <div className="rounded-[16px] overflow-hidden">
                 <PropertiesMap
@@ -140,11 +148,11 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
                 />
               </div>
             </div>
-          </ScrollReveal>
+          </motion.div>
         )}
 
         {/* Commune filter buttons */}
-        <ScrollReveal delay={0.3}>
+        <motion.div variants={itemVariants}>
           <p className="text-center text-white/50 text-xs font-sans uppercase tracking-widest mb-4">
             Filtrer par commune
           </p>
@@ -199,12 +207,12 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
               )
             })}
           </div>
-        </ScrollReveal>
+        </motion.div>
 
-        <ScrollReveal delay={0.4} className="text-center mt-8 text-white/30 text-xs tracking-wider uppercase font-sans">
+        <motion.div variants={itemVariants} className="text-center mt-8 text-white/30 text-xs tracking-wider uppercase font-sans">
           + Bouaké, Yamoussoukro, San-Pédro et d&apos;autres villes à venir
-        </ScrollReveal>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   )
 }

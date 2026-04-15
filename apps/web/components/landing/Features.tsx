@@ -1,5 +1,5 @@
 'use client'
-import { useInView } from '@/hooks/useInView'
+import { motion, Variants } from 'framer-motion'
 
 const features = [
   {
@@ -68,11 +68,29 @@ const features = [
   },
 ]
 
-export function Features() {
-  const { ref, visible } = useInView(0.06)
+export const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.2,
+    },
+  },
+}
 
+export const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
+  },
+}
+
+export function Features() {
   return (
-    <section ref={ref as React.RefObject<HTMLElement>} className="py-20 sm:py-28 bg-primary relative overflow-hidden">
+    <section className="py-20 sm:py-28 bg-primary relative overflow-hidden">
       {/* Orbs */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] anim-orb-1 pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(249,115,22,0.12) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(60px)' }}/>
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] anim-orb-2 pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(26,77,143,0.4) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(50px)' }}/>
@@ -80,7 +98,13 @@ export function Features() {
 
       <div className="relative container mx-auto px-4">
         {/* Header */}
-        <div className={`text-center mb-14 sr sr-up ${visible ? 'visible' : ''}`}>
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="text-center mb-14"
+        >
           <span className="inline-block mb-4 px-4 py-1.5 rounded-full border border-secondary/30 bg-secondary/10 text-secondary text-sm font-sans font-bold uppercase tracking-wider">
             Fonctionnalités
           </span>
@@ -90,15 +114,21 @@ export function Features() {
           <p className="font-sans text-white/60 text-lg max-w-xl mx-auto leading-relaxed">
             Une plateforme complète pour louer, vendre ou gérer vos biens en Côte d&apos;Ivoire.
           </p>
-        </div>
+        </motion.div>
 
         {/* Bento Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-6xl mx-auto">
-          {features.map((f, i) => (
-            <div
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-6xl mx-auto"
+        >
+          {features.map((f) => (
+            <motion.div
               key={f.id}
-              className={`${f.span} sr sr-up ${visible ? 'visible' : ''} group relative card-glass rounded-[22px] p-7 overflow-hidden transition-all duration-500 hover:bg-white/10 hover:-translate-y-1 cursor-default`}
-              style={{ transitionDelay: visible ? `${60 + i * 70}ms` : '0ms' }}
+              variants={itemVariants}
+              className={`${f.span} group relative card-glass rounded-[22px] p-7 overflow-hidden transition-all duration-500 hover:bg-white/10 hover:-translate-y-1 cursor-default will-change-transform shadow-lg hover:shadow-2xl`}
             >
               {/* Background glow on hover */}
               <div
@@ -121,7 +151,7 @@ export function Features() {
 
                 {/* Bottom accent */}
                 <div
-                  className="mt-6 h-px rounded-full w-10 group-hover:w-16 transition-all duration-500"
+                  className="mt-6 h-px rounded-full w-10 group-hover:w-16 transition-all duration-500 shadow-sm"
                   style={{ background: `linear-gradient(90deg, ${f.accent}, transparent)` }}
                 />
               </div>
@@ -129,16 +159,17 @@ export function Features() {
               {/* Featured badge */}
               {f.featured && (
                 <div
-                  className="absolute top-4 right-4 text-[10px] font-sans font-bold px-2 py-0.5 rounded-full"
+                  className="absolute top-4 right-4 text-[10px] font-sans font-bold px-2 py-0.5 rounded-full shadow-sm"
                   style={{ background: `${f.accent}30`, color: f.accent, border: `1px solid ${f.accent}40` }}
                 >
                   Populaire
                 </div>
               )}
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   )
 }
+

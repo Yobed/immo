@@ -1,7 +1,8 @@
 'use client'
 import Image from 'next/image'
 import { useRef } from 'react'
-import { useInView } from '@/hooks/useInView'
+import { motion, useInView } from 'framer-motion'
+import { containerVariants, itemVariants } from './Features'
 
 const partners = [
   {
@@ -59,7 +60,9 @@ const partners = [
 
 export function Partners() {
   const scrollRef = useRef<HTMLDivElement>(null)
-  const { ref, visible } = useInView(0.1)
+  
+  const containerRef = useRef<HTMLDivElement>(null)
+  const inView = useInView(containerRef, { once: true, margin: "-100px" })
 
   const scroll = (dir: 'left' | 'right') => {
     if (!scrollRef.current) return
@@ -67,11 +70,16 @@ export function Partners() {
   }
 
   return (
-    <section ref={ref as React.RefObject<HTMLElement>} className="py-16 bg-white border-t border-[#E2E7F3]">
+    <section ref={containerRef} className="py-16 bg-white border-t border-[#E2E7F3]">
       <div className="container mx-auto px-4">
 
         {/* Header */}
-        <div className={`text-center mb-12 sr sr-up ${visible ? 'visible' : ''}`}>
+        <motion.div
+           initial={{ opacity: 0, y: 30 }}
+           animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+           className="text-center mb-12"
+        >
           <p className="font-sans text-sm font-semibold text-[var(--secondary)] uppercase tracking-widest mb-2">
             Intégrations
           </p>
@@ -81,12 +89,14 @@ export function Partners() {
           <p className="font-sans text-[var(--text-muted)] text-sm max-w-md mx-auto">
             Les solutions de paiement et services les plus utilisés en Côte d&apos;Ivoire.
           </p>
-        </div>
+        </motion.div>
 
         {/* Carousel */}
-        <div
-          className={`sr sr-up ${visible ? 'visible' : ''} relative`}
-          style={{ transitionDelay: visible ? '120ms' : '0ms' }}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate={inView ? "visible" : "hidden"}
+          className="relative"
         >
           {/* Fades latéraux */}
           <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
@@ -109,15 +119,17 @@ export function Partners() {
           </button>
 
           {/* Piste de défilement */}
-          <div ref={scrollRef} className="carousel-scroll px-4 sm:px-12 py-3 sm:py-4">
-            {partners.map((p, i) => (
-              <div
+          <div ref={scrollRef} className="carousel-scroll px-4 sm:px-12 py-3 sm:py-4 flex gap-[10px]" style={{ scrollSnapType: 'x mandatory' }}>
+            {partners.map((p) => (
+              <motion.div
+                variants={itemVariants}
+                whileHover={{ y: -8 }}
                 key={p.name}
-                className={`sr sr-scale ${visible ? 'visible' : ''} shrink-0 w-40 sm:w-48 lg:w-52 flex flex-col items-center justify-center gap-3 sm:gap-4 p-4 sm:p-6 rounded-2xl bg-white cursor-default transition-all duration-300 hover:-translate-y-2`}
+                className="shrink-0 w-40 sm:w-48 lg:w-52 flex flex-col items-center justify-center gap-3 sm:gap-4 p-4 sm:p-6 rounded-2xl bg-white cursor-default transition-shadow duration-300"
                 style={{
                   minHeight: '130px',
-                  transitionDelay: visible ? `${150 + i * 70}ms` : '0ms',
                   boxShadow: '0 4px 20px rgba(12,45,94,0.08), 0 1px 4px rgba(12,45,94,0.06)',
+                  scrollSnapAlign: 'center',
                 }}
                 onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 12px 36px rgba(12,45,94,0.14), 0 2px 8px rgba(12,45,94,0.08)')}
                 onMouseLeave={e => (e.currentTarget.style.boxShadow = '0 4px 20px rgba(12,45,94,0.08), 0 1px 4px rgba(12,45,94,0.06)')}
@@ -149,10 +161,10 @@ export function Partners() {
 
                 {/* Tagline */}
                 <p className="font-sans text-xs text-center text-[var(--text-muted)] leading-snug">{p.tagline}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   )

@@ -1,5 +1,7 @@
 'use client'
-import { useInView } from '@/hooks/useInView'
+import { motion, useInView } from 'framer-motion'
+import { useRef } from 'react'
+import { containerVariants, itemVariants } from './Features'
 
 const testimonials = [
   {
@@ -35,11 +37,12 @@ const testimonials = [
 ]
 
 export function Testimonials() {
-  const { ref, visible } = useInView(0.1)
+  const ref = useRef(null)
+  const inView = useInView(ref, { once: true, margin: "-100px" })
 
   return (
     <section
-      ref={ref as React.RefObject<HTMLElement>}
+      ref={ref}
       className="py-20 sm:py-28 relative overflow-hidden"
       style={{ background: 'linear-gradient(180deg, #FFFFFF 0%, #F0F5FF 100%)' }}
     >
@@ -54,7 +57,12 @@ export function Testimonials() {
 
       <div className="relative container mx-auto px-4">
         {/* Header */}
-        <div className={`text-center mb-16 sr sr-up ${visible ? 'visible' : ''}`}>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="text-center mb-16"
+        >
           {/* Stars row */}
           <div className="flex justify-center gap-1 mb-4">
             {[1,2,3,4,5].map(i => (
@@ -72,16 +80,22 @@ export function Testimonials() {
           <p className="font-sans text-muted text-lg max-w-xl mx-auto leading-relaxed">
             Des milliers de propriétaires, locataires et agences nous font confiance chaque jour.
           </p>
-        </div>
+        </motion.div>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-6xl mx-auto">
-          {testimonials.map((t, i) => (
-            <div
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate={inView ? "visible" : "hidden"}
+          className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-6xl mx-auto"
+        >
+          {testimonials.map((t) => (
+            <motion.div
               key={t.id}
-              className={`sr sr-up ${visible ? 'visible' : ''} group relative bg-white rounded-[22px] p-7 flex flex-col gap-4 transition-all duration-700 hover:-translate-y-2`}
+              variants={itemVariants}
+              whileHover={{ y: -8 }}
+              className="group relative bg-white rounded-[22px] p-7 flex flex-col gap-4 transition-shadow duration-500 hover:shadow-2xl"
               style={{
-                transitionDelay: visible ? `${80 + i * 130}ms` : '0ms',
                 boxShadow: '0 2px 20px rgba(12,45,94,0.06), 0 0 0 1px rgba(12,45,94,0.06)',
               }}
             >
@@ -92,7 +106,7 @@ export function Testimonials() {
               />
 
               {/* Quote icon */}
-              <svg className="absolute top-5 right-5 opacity-8" width="36" height="36" viewBox="0 0 24 24" fill={t.color}>
+              <svg className="absolute top-5 right-5 opacity-8 text-[var(--muted)]" width="36" height="36" viewBox="0 0 24 24" fill={t.color}>
                 <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
               </svg>
 
@@ -130,18 +144,23 @@ export function Testimonials() {
                   <span className="font-sans text-[10px] text-muted">Vérifié</span>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* Bottom counter */}
-        <div className={`sr sr-up ${visible ? 'visible' : ''} text-center mt-14`} style={{ transitionDelay: visible ? '450ms' : '0ms' }}>
+        <motion.div
+           initial={{ opacity: 0 }}
+           animate={inView ? { opacity: 1 } : { opacity: 0 }}
+           transition={{ duration: 0.8, delay: 0.6 }}
+           className="text-center mt-14"
+        >
           <p className="font-sans text-sm text-muted">
             Rejoignez{' '}
             <span className="font-bold text-primary">+2 450 utilisateurs</span>{' '}
             qui nous font déjà confiance
           </p>
-        </div>
+        </motion.div>
       </div>
     </section>
   )

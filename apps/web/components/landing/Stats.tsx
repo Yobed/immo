@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { useInView } from '@/hooks/useInView'
+import { motion, Variants } from 'framer-motion'
 
 function useCounter(target: number, active: boolean, duration = 1800) {
   const [count, setCount] = useState(0)
@@ -31,7 +31,6 @@ const STATS = [
       </svg>
     ),
     color: '#F97316',
-    delay: 0,
   },
   {
     target: 12,
@@ -44,7 +43,6 @@ const STATS = [
       </svg>
     ),
     color: '#0D9F6E',
-    delay: 100,
   },
   {
     target: 98,
@@ -57,7 +55,6 @@ const STATS = [
       </svg>
     ),
     color: '#F97316',
-    delay: 200,
   },
   {
     target: 48,
@@ -71,23 +68,42 @@ const STATS = [
     ),
     tenths: true,
     color: '#0D9F6E',
-    delay: 300,
   },
 ]
 
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.3,
+    },
+  },
+}
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { type: 'spring', stiffness: 100, damping: 20 }
+  },
+}
+
 function StatCard({
-  target, label, suffix, desc, icon, tenths, color, delay, active,
+  target, label, suffix, desc, icon, tenths, color, active,
 }: {
   target: number; label: string; suffix: string; desc: string; icon: React.ReactNode
-  tenths?: boolean; color: string; delay: number; active: boolean
+  tenths?: boolean; color: string; active: boolean
 }) {
   const count = useCounter(target, active)
   const display = tenths ? (count / 10).toFixed(1) : count.toLocaleString('fr-FR')
 
   return (
-    <div
-      className={`sr sr-up ${active ? 'visible' : ''} group relative rounded-[24px] p-7 overflow-hidden transition-all duration-700 hover:-translate-y-2 cursor-default card-glass`}
-      style={{ transitionDelay: `${delay}ms` }}
+    <motion.div
+      variants={itemVariants}
+      className={`group relative rounded-[24px] p-7 overflow-hidden transition-all duration-700 hover:-translate-y-2 cursor-default card-glass`}
     >
       {/* Glow on hover */}
       <div
@@ -126,16 +142,15 @@ function StatCard({
         <p className="font-display font-semibold text-white text-base mb-0.5">{label}</p>
         <p className="font-sans text-white/45 text-sm">{desc}</p>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
 export function Stats() {
-  const { ref, visible } = useInView(0.12)
+  const [isActive, setIsActive] = useState(false)
 
   return (
     <section
-      ref={ref as React.RefObject<HTMLElement>}
       className="py-20 sm:py-28 relative overflow-hidden"
       style={{ background: 'linear-gradient(180deg, #06173A 0%, #0C2D5E 50%, #0a2550 100%)' }}
     >
@@ -152,7 +167,13 @@ export function Stats() {
 
       <div className="relative container mx-auto px-4">
         {/* Header */}
-        <div className={`text-center mb-16 sr sr-up ${visible ? 'visible' : ''}`}>
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="text-center mb-16"
+        >
           <span className="inline-block mb-4 px-4 py-1.5 rounded-full border border-secondary/30 bg-secondary/10 text-secondary text-sm font-bold uppercase tracking-wider font-sans">
             Nos résultats
           </span>
@@ -162,24 +183,37 @@ export function Stats() {
           <p className="font-sans text-white/55 text-lg max-w-md mx-auto leading-relaxed">
             La confiance de milliers d&apos;ivoiriens, prouvée par les données.
           </p>
-        </div>
+        </motion.div>
 
         {/* Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          onViewportEnter={() => setIsActive(true)}
+          className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto"
+        >
           {STATS.map((s) => (
-            <StatCard key={s.label} {...s} active={visible} />
+            <StatCard key={s.label} {...s} active={isActive} />
           ))}
-        </div>
+        </motion.div>
 
         {/* Bottom trust bar */}
-        <div className={`sr sr-up ${visible ? 'visible' : ''} mt-16 flex flex-wrap justify-center gap-6`} style={{ transitionDelay: '400ms' }}>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="mt-16 flex flex-wrap justify-center gap-6"
+        >
           {['Wave', 'Orange Money', 'MTN', 'CinetPay'].map((p) => (
             <div key={p} className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2">
               <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
               <span className="font-sans text-xs text-white/60 font-medium">{p}</span>
             </div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   )

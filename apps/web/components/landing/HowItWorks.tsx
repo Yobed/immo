@@ -1,5 +1,7 @@
 'use client'
-import { useInView } from '@/hooks/useInView'
+import { motion, useInView } from 'framer-motion'
+import { useRef } from 'react'
+import { containerVariants, itemVariants } from './Features'
 
 const steps = [
   {
@@ -48,11 +50,12 @@ const steps = [
 ]
 
 export function HowItWorks() {
-  const { ref, visible } = useInView(0.1)
+  const containerRef = useRef<HTMLElement>(null)
+  const inView = useInView(containerRef, { once: true, margin: "-100px" })
 
   return (
     <section
-      ref={ref as React.RefObject<HTMLElement>}
+      ref={containerRef}
       className="py-20 sm:py-28 relative overflow-hidden"
       style={{ background: 'linear-gradient(180deg, #F8FAFF 0%, #FFFFFF 100%)' }}
     >
@@ -67,7 +70,12 @@ export function HowItWorks() {
 
       <div className="relative container mx-auto px-4">
         {/* Header */}
-        <div className={`text-center mb-16 sm:mb-20 sr sr-up ${visible ? 'visible' : ''}`}>
+        <motion.div
+           initial={{ opacity: 0, y: 30 }}
+           animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+           className="text-center mb-16 sm:mb-20"
+        >
           <span className="inline-block mb-4 px-4 py-1.5 rounded-full bg-secondary/10 text-secondary text-sm font-sans font-bold uppercase tracking-wider border border-secondary/20">
             Simple &amp; rapide
           </span>
@@ -77,10 +85,15 @@ export function HowItWorks() {
           <p className="font-sans text-lg text-muted max-w-lg mx-auto leading-relaxed">
             Trouver ou louer un bien immobilier en Côte d&apos;Ivoire n&apos;a jamais été aussi simple.
           </p>
-        </div>
+        </motion.div>
 
         {/* Steps */}
-        <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate={inView ? "visible" : "hidden"}
+          className="relative grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto"
+        >
           {/* Connector line (desktop) */}
           <div
             className="hidden md:block absolute top-16 left-[calc(16.67%+32px)] right-[calc(16.67%+32px)] h-px pointer-events-none"
@@ -91,18 +104,19 @@ export function HowItWorks() {
               style={{
                 background: 'inherit',
                 transition: 'transform 1.2s cubic-bezier(0.22,1,0.36,1) 0.4s',
-                transform: visible ? 'scaleX(1)' : 'scaleX(0)',
+                transform: inView ? 'scaleX(1)' : 'scaleX(0)',
               }}
             />
           </div>
 
-          {steps.map((step, i) => (
-            <div
+          {steps.map((step) => (
+            <motion.div
               key={step.number}
-              className={`sr sr-up ${visible ? 'visible' : ''} group`}
-              style={{ transitionDelay: `${100 + i * 160}ms` }}
+              variants={itemVariants}
+              whileHover={{ y: -8 }}
+              className="group"
             >
-              <div className="relative rounded-[24px] p-8 text-center bg-white shadow-card hover:shadow-card-hover transition-all duration-500 border border-border hover:-translate-y-2">
+              <div className="relative rounded-[24px] p-8 text-center bg-white shadow-card hover:shadow-card-hover transition-all duration-500 border border-border">
                 {/* Big number background */}
                 <span
                   className="absolute top-4 right-5 font-mono font-black text-7xl leading-none select-none pointer-events-none"
@@ -132,7 +146,7 @@ export function HowItWorks() {
                   className="absolute top-5 left-5 w-7 h-7 rounded-full flex items-center justify-center font-mono text-xs font-bold text-white"
                   style={{ background: step.color }}
                 >
-                  {i + 1}
+                  {parseInt(step.number, 10)}
                 </div>
 
                 <h3 className="font-display text-2xl font-bold text-primary mb-3">{step.title}</h3>
@@ -144,9 +158,9 @@ export function HowItWorks() {
                   style={{ background: `linear-gradient(90deg, ${step.color}, transparent)` }}
                 />
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   )

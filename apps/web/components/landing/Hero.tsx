@@ -86,17 +86,17 @@ export function Hero({ bgImages }: { bgImages?: string[] }) {
       {/* ── Grid overlay ───────────────────────────────────────────── */}
       <div className="absolute inset-0 bg-dots opacity-10 pointer-events-none" />
 
-      <div className="relative z-10 container mx-auto px-4 flex flex-col lg:flex-row items-center min-h-screen gap-12 py-24 lg:py-0">
+      <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center justify-between min-h-screen gap-12 py-24 lg:py-0">
 
         {/* ── LEFT CONTENT ─────────────────────────────────────────── */}
-        <div className="flex-1 max-w-2xl">
+        <div className="flex-1 max-w-xl lg:max-w-[700px] z-10 shrink-0">
 
           {/* Live badge */}
           <motion.div
             initial={{ opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="inline-flex items-center gap-2.5 mb-8 px-4 py-2 rounded-full bg-white/8 border border-white/15 backdrop-blur-sm"
+            className="inline-flex items-center gap-2.5 mb-8 px-4 py-2 rounded-full bg-white/8 border border-white/15 backdrop-blur-sm shadow-xl"
           >
             <span className="relative flex h-2.5 w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75" />
@@ -112,19 +112,18 @@ export function Hero({ bgImages }: { bgImages?: string[] }) {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-            className="font-display font-bold leading-tight mb-6"
-            style={{ fontSize: 'clamp(3rem, 6vw, 5.5rem)' }}
+            className="font-display font-bold leading-tight mb-6 drop-shadow-xl"
+            style={{ fontSize: 'clamp(2.8rem, 5vw, 5.5rem)' }}
           >
-            <span className="text-white">Trouvez votre bien</span>
-            <br />
-            <span className="text-shimmer">en Côte d&apos;Ivoire</span>
+            <span className="text-white block whitespace-nowrap">Trouvez votre bien</span>
+            <span className="text-white block whitespace-nowrap">en Côte d&apos;Ivoire</span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="font-sans text-lg sm:text-xl text-white/70 mb-8 leading-relaxed max-w-lg"
+            className="font-sans text-lg sm:text-xl text-white/90 mb-8 leading-relaxed max-w-lg drop-shadow-md"
           >
             Location, vente et résidences meublées à Abidjan.
             <br className="hidden sm:block" />
@@ -153,7 +152,7 @@ export function Hero({ bgImages }: { bgImages?: string[] }) {
             </div>
             <button
               onClick={handleSearch}
-              className="shrink-0 px-7 py-4 rounded-[14px] bg-secondary text-white font-sans font-bold text-sm hover:bg-secondary/90 transition-all duration-200 shadow-xl anim-pulse-glow hover:scale-105 active:scale-95"
+              className="shrink-0 px-7 py-4 rounded-[14px] bg-secondary text-white font-sans font-bold text-sm hover:bg-secondary/90 transition-all duration-200 shadow-xl hover:scale-105 active:scale-95"
             >
               Rechercher
             </button>
@@ -171,7 +170,7 @@ export function Hero({ bgImages }: { bgImages?: string[] }) {
                 key={t.label}
                 href={t.href}
                 style={{ animationDelay: `${0.5 + i * 0.06}s` }}
-                className="px-3.5 py-1.5 rounded-full bg-white/8 border border-white/15 hover:bg-white/18 hover:border-white/30 transition-all duration-200 text-xs font-sans text-white/80 hover:text-white backdrop-blur-sm"
+                className="px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 hover:border-white/40 transition-all duration-200 text-xs font-sans text-white/90 hover:text-white backdrop-blur-sm shadow-md"
               >
                 {t.label}
               </Link>
@@ -183,7 +182,7 @@ export function Hero({ bgImages }: { bgImages?: string[] }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="flex items-center gap-8 pt-6 border-t border-white/10"
+            className="flex items-center gap-8 pt-6 border-t border-white/20"
           >
             {[
               { value: '2 450+', label: 'Biens en ligne' },
@@ -191,39 +190,39 @@ export function Hero({ bgImages }: { bgImages?: string[] }) {
               { value: '98%',    label: 'Satisfaction' },
             ].map((s) => (
               <div key={s.label} className="flex flex-col">
-                <span className="font-mono text-xl font-bold text-secondary">{s.value}</span>
-                <span className="font-sans text-xs text-white/50">{s.label}</span>
+                <span className="font-mono text-xl font-bold text-secondary drop-shadow-md">{s.value}</span>
+                <span className="font-sans text-xs text-white/70">{s.label}</span>
               </div>
             ))}
           </motion.div>
         </div>
 
         {/* ── RIGHT — Floating property cards ───────────────────────── */}
-        <div className="hidden lg:flex flex-col items-end gap-5 flex-1 max-w-sm relative py-8">
+        <div className="hidden lg:flex flex-col items-end gap-6 flex-1 max-w-[550px] relative py-8">
 
           {/* Main card */}
           <motion.div
             initial={{ opacity: 0, x: 60, rotate: 3 }}
             animate={{ opacity: 1, x: 0, rotate: 2 }}
             transition={{ duration: 1, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="hero-float-1 w-full card-glass rounded-[24px] overflow-hidden shadow-2xl"
+            className="hero-float-1 w-full card-glass rounded-[32px] overflow-hidden shadow-2xl"
           >
-            <div className="relative h-48 bg-primary-mid overflow-hidden">
-              <Image src="/hero-bg.jpg" alt="Propriété à Abidjan" fill className="object-cover" sizes="380px" />
+            <div className="relative h-[340px] bg-primary-mid overflow-hidden">
+              <Image src="/hero-bg.jpg" alt="Propriété à Abidjan" fill className="object-cover hover:scale-105 transition-transform duration-700" sizes="550px" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              <div className="absolute top-3 left-3 bg-secondary text-white text-[10px] font-sans font-bold px-2.5 py-1 rounded-full">
+              <div className="absolute top-4 left-4 bg-secondary text-white text-xs font-sans font-bold px-3 py-1.5 rounded-full shadow-lg">
                 Disponible
               </div>
             </div>
-            <div className="p-4 bg-white/95 backdrop-blur-xl">
-              <div className="flex items-start justify-between mb-1.5">
-                <p className="font-sans font-semibold text-sm text-gray-900">Villa moderne — Cocody</p>
-                <span className="text-xs font-mono font-bold text-primary bg-primary/8 px-2 py-0.5 rounded">Villa</span>
+            <div className="p-5 bg-white/95 backdrop-blur-xl">
+              <div className="flex items-start justify-between mb-2">
+                <p className="font-sans font-semibold text-base text-gray-900">Villa moderne — Cocody</p>
+                <span className="text-xs font-mono font-bold text-primary bg-primary/8 px-2.5 py-1 rounded">Villa</span>
               </div>
-              <p className="font-mono font-bold text-lg text-primary">2,5M <span className="text-xs font-sans font-normal text-gray-400">FCFA/mois</span></p>
-              <div className="flex items-center gap-1 mt-1.5 text-gray-400">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-                <span className="text-[11px] font-sans">Cocody Ambassades, Abidjan</span>
+              <p className="font-mono font-bold text-xl text-primary">2,5M <span className="text-xs font-sans font-normal text-gray-400">FCFA/mois</span></p>
+              <div className="flex items-center gap-1.5 mt-2 text-gray-400">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+                <span className="text-[13px] font-sans">Cocody Ambassades, Abidjan</span>
               </div>
             </div>
           </motion.div>
@@ -233,15 +232,15 @@ export function Hero({ bgImages }: { bgImages?: string[] }) {
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.9, delay: 0.65, ease: [0.22, 1, 0.36, 1] }}
-            className="hero-float-2 w-[88%] card-glass-light rounded-[20px] px-4 py-3.5 shadow-lg"
+            className="hero-float-2 w-[88%] card-glass-light rounded-[24px] px-4 py-3.5 shadow-xl"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+              <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
               </div>
               <div>
                 <p className="font-sans text-xs text-gray-500">Nouvelle demande reçue</p>
-                <p className="font-sans font-semibold text-sm text-gray-800">Studio à Marcory</p>
+                <p className="font-sans font-semibold text-base text-gray-800">Studio à Marcory</p>
               </div>
               <span className="ml-auto text-[10px] text-gray-400 font-sans">à l&apos;instant</span>
             </div>
@@ -252,14 +251,14 @@ export function Hero({ bgImages }: { bgImages?: string[] }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.85 }}
-            className="hero-float-3 flex items-center gap-3 card-glass-light rounded-[16px] px-4 py-3 shadow-md w-[75%]"
+            className="hero-float-3 flex items-center justify-center gap-3 card-glass-light rounded-[20px] px-4 py-3 shadow-lg w-[75%]"
           >
             <div className="flex gap-0.5">
               {[1,2,3,4,5].map(i => (
-                <svg key={i} width="12" height="12" viewBox="0 0 24 24" fill="#F97316"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill="#F97316"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               ))}
             </div>
-            <span className="font-sans text-xs text-gray-600 font-medium">4.8/5 · 98% satisfaits</span>
+            <span className="font-sans text-sm text-gray-600 font-medium">4.8/5 · 98% satisfaits</span>
           </motion.div>
         </div>
       </div>

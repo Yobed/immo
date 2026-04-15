@@ -16,10 +16,7 @@ type BienRow = {
   nb_pieces: number | null
 }
 
-/* Chaque card est décalée verticalement pour un effet masonry léger */
 const OFFSETS = [0, 16, 8, 24, 12, 4, 20, 8, 16, 0, 24, 12, 8, 20, 4, 16]
-/* Animation flottante décalée pour chaque carte */
-const FLOAT_DELAYS = ['0s','0.4s','0.8s','1.2s','0.2s','0.6s','1.0s','1.4s','0.3s','0.7s','1.1s','0.5s','0.9s','0.1s','1.3s','0.8s']
 
 export async function FeaturedProperties() {
   const supabase = await createClient()
@@ -95,33 +92,35 @@ export async function FeaturedProperties() {
           </Link>
         </ScrollReveal>
 
-        {/* Floating grid */}
+        {/* Floating grid with ScrollReveal stagger effect built-in our custom structure */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {rows.map((bien, i) => (
-            <div
+            <ScrollReveal
               key={bien.id}
-              className="floating-card"
-              style={{
-                '--float-delay': FLOAT_DELAYS[i % FLOAT_DELAYS.length],
-                '--card-offset': `${OFFSETS[i % OFFSETS.length]}px`,
-                animationDelay: FLOAT_DELAYS[i % FLOAT_DELAYS.length],
-                marginTop: i % 4 !== 0 ? `${OFFSETS[i % OFFSETS.length]}px` : '0',
-              } as React.CSSProperties}
+              delay={0.1 + (i % 4) * 0.15} /* Stagger based on column index */
+              className="h-full"
             >
-              <BienCard
-                id={bien.id}
-                titre={bien.titre}
-                commune={bien.commune}
-                quartier={bien.quartier}
-                type_bien={bien.type_bien}
-                prix_mois_fcfa={bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa}
-                prix_nuit_fcfa={bien.prix_nuit_fcfa}
-                prix_vente_fcfa={bien.prix_vente_fcfa}
-                surface_m2={bien.surface_m2}
-                nb_pieces={bien.nb_pieces}
-                photo_url={coverMap[bien.id] ?? null}
-              />
-            </div>
+              <div
+                className="h-full"
+                style={{
+                  marginTop: i % 4 !== 0 ? `${OFFSETS[i % OFFSETS.length]}px` : '0',
+                }}
+              >
+                <BienCard
+                  id={bien.id}
+                  titre={bien.titre}
+                  commune={bien.commune}
+                  quartier={bien.quartier}
+                  type_bien={bien.type_bien}
+                  prix_mois_fcfa={bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa}
+                  prix_nuit_fcfa={bien.prix_nuit_fcfa}
+                  prix_vente_fcfa={bien.prix_vente_fcfa}
+                  surface_m2={bien.surface_m2}
+                  nb_pieces={bien.nb_pieces}
+                  photo_url={coverMap[bien.id] ?? null}
+                />
+              </div>
+            </ScrollReveal>
           ))}
         </div>
 
