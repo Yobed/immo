@@ -5,24 +5,25 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 
-const BG_IMAGES = [
+const FALLBACK_BG = [
   'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2000&auto=format&fit=crop',
   'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2000&auto=format&fit=crop',
   'https://images.unsplash.com/photo-1600607687920-4e2a09be1587?q=80&w=2000&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1613490900233-08145a3b2b8b?q=80&w=2000&auto=format&fit=crop'
+  'https://images.unsplash.com/photo-1613490900233-08145a3b2b8b?q=80&w=2000&auto=format&fit=crop',
 ]
 
-export function Hero() {
+export function Hero({ bgImages }: { bgImages?: string[] }) {
+  const images = (bgImages && bgImages.length >= 2) ? bgImages : FALLBACK_BG
   const [search, setSearch] = useState('')
   const [currentBg, setCurrentBg] = useState(0)
   const router = useRouter()
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentBg((prev) => (prev + 1) % BG_IMAGES.length)
+      setCurrentBg((prev) => (prev + 1) % images.length)
     }, 6000)
     return () => clearInterval(timer)
-  }, [])
+  }, [images.length])
 
   const handleSearch = () => {
     const q = search.trim()
@@ -44,7 +45,7 @@ export function Hero() {
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
 
         {/* Slides: toutes rendues, seule la courante est visible */}
-        {BG_IMAGES.map((src, i) => (
+        {images.map((src, i) => (
           <div
             key={src}
             className="absolute inset-0 bg-center bg-cover bg-no-repeat"

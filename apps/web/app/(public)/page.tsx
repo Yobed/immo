@@ -48,9 +48,21 @@ export default async function HomePage() {
     photo_url: photoMap[b.id] ?? null,
   }))
 
+  // Extraire les meilleures photos de biens pour le diaporama Hero (max 8)
+  const FALLBACK_IMAGES = [
+    'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2000&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2000&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1600607687920-4e2a09be1587?q=80&w=2000&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1613490900233-08145a3b2b8b?q=80&w=2000&auto=format&fit=crop',
+  ]
+  const heroBgImages = Object.values(photoMap)
+    .filter(Boolean)
+    .slice(0, 8)
+  const bgImages = heroBgImages.length >= 2 ? heroBgImages : FALLBACK_IMAGES
+
   return (
     <main>
-      <Hero />
+      <Hero bgImages={bgImages} />
       <HowItWorks />
       <FeaturedProperties />
       <Features />
