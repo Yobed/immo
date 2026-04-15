@@ -3,100 +3,138 @@ import { useInView } from '@/hooks/useInView'
 
 const features = [
   {
+    id: 'visite',
+    title: 'Visite 360°',
+    description: 'Explorez chaque pièce à distance avec notre technologie de visite immersive. Gagnez du temps avant de vous déplacer.',
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/>
+      <svg width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
       </svg>
     ),
-    title: 'Vue 360°',
-    description: 'Visitez les biens virtuellement avec notre technologie de visite immersive 360°. Gagnez du temps avant la visite physique.',
+    accent: '#F97316',
+    span: 'col-span-1 md:col-span-2',
+    featured: true,
   },
   {
+    id: 'paiement',
+    title: 'Wave & Orange Money',
+    description: 'Paiements sécurisés 100% mobile.',
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
-      </svg>
+      <svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" fill="none"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
     ),
-    title: 'Paiement Wave & Orange Money',
-    description: 'Payez votre loyer ou acompte en toute sécurité via Wave, Orange Money, MTN ou CinetPay. 100% mobile.',
+    accent: '#0D9F6E',
+    span: 'col-span-1',
   },
   {
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-        <polyline points="14 2 14 8 20 8"/>
-        <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-      </svg>
-    ),
+    id: 'contrat',
     title: 'Contrats OHADA',
-    description: 'Générez des contrats de bail conformes au droit OHADA en quelques clics. Signatures électroniques incluses.',
+    description: 'Baux conformes générés et signés électroniquement.',
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    ),
+    accent: '#1A4D8F',
+    span: 'col-span-1',
   },
   {
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-      </svg>
-    ),
+    id: 'ia',
     title: 'Assistant IA',
-    description: 'Notre assistant intelligent répond à vos questions 24h/24, vous aide à trouver le bien idéal et planifie vos visites.',
+    description: 'Réponses instantanées 24h/24, recommandations personnalisées et planification de visites automatique.',
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    ),
+    accent: '#F97316',
+    span: 'col-span-1 md:col-span-2',
+    featured: true,
   },
   {
+    id: 'analytics',
+    title: 'Analytics Pro',
+    description: 'Taux d\'occupation, revenus, leads en temps réel.',
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
-      </svg>
+      <svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" fill="none"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
     ),
-    title: 'Dashboard Analytics',
-    description: 'Propriétaires et agences : suivez vos performances en temps réel. Taux d\'occupation, revenus, leads qualifiés.',
+    accent: '#0D9F6E',
+    span: 'col-span-1',
   },
   {
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.21 1.18 2 2 0 012.18 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.91 7.09a16 16 0 006 6l1.45-1.45a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
-      </svg>
-    ),
+    id: 'notif',
     title: 'Notifications WhatsApp',
-    description: 'Recevez des alertes instantanées sur WhatsApp pour chaque nouvelle demande, visite ou paiement reçu.',
+    description: 'Alertes instantanées pour chaque demande, visite ou paiement — directement sur WhatsApp.',
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" fill="none"><path d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 0112 19a19.5 19.5 0 01-6-6 19.79 19.79 0 01-2-8.72A2 2 0 015.09 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L9.91 9.09a16 16 0 006 6l1.45-1.45a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+    ),
+    accent: '#1A4D8F',
+    span: 'col-span-1',
   },
 ]
 
 export function Features() {
-  const { ref, visible } = useInView(0.08)
+  const { ref, visible } = useInView(0.06)
 
   return (
-    <section ref={ref as React.RefObject<HTMLElement>} className="py-16 sm:py-24 bg-[var(--primary)] overflow-hidden">
-      <div className="container mx-auto px-4">
-        <div className={`text-center mb-16 sr sr-up ${visible ? 'visible' : ''}`}>
-          <p className="font-sans text-sm font-semibold text-[var(--secondary)] uppercase tracking-widest mb-3">
+    <section ref={ref as React.RefObject<HTMLElement>} className="py-20 sm:py-28 bg-primary relative overflow-hidden">
+      {/* Orbs */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] anim-orb-1 pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(249,115,22,0.12) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(60px)' }}/>
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] anim-orb-2 pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(26,77,143,0.4) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(50px)' }}/>
+      <div className="absolute inset-0 bg-dots opacity-10 pointer-events-none"/>
+
+      <div className="relative container mx-auto px-4">
+        {/* Header */}
+        <div className={`text-center mb-14 sr sr-up ${visible ? 'visible' : ''}`}>
+          <span className="inline-block mb-4 px-4 py-1.5 rounded-full border border-secondary/30 bg-secondary/10 text-secondary text-xs font-sans font-bold uppercase tracking-wider">
             Fonctionnalités
-          </p>
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-white mb-4">
+          </span>
+          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5">
             Tout pour votre immobilier
           </h2>
-          <p className="font-sans text-white/65 text-base max-w-xl mx-auto leading-relaxed">
-            Tout ce dont vous avez besoin pour louer, vendre ou gérer vos biens en Côte d&apos;Ivoire.
+          <p className="font-sans text-white/60 text-base max-w-xl mx-auto leading-relaxed">
+            Une plateforme complète pour louer, vendre ou gérer vos biens en Côte d&apos;Ivoire.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
-          {features.map((feature, i) => (
+        {/* Bento Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-6xl mx-auto">
+          {features.map((f, i) => (
             <div
-              key={feature.title}
-              className={`sr sr-up ${visible ? 'visible' : ''} group relative bg-white/8 border border-white/15 rounded-[20px] p-7 overflow-hidden card-lift hover:bg-white/12 transition-all duration-700`}
-              style={{ transitionDelay: visible ? `${80 + i * 80}ms` : '0ms' }}
+              key={f.id}
+              className={`${f.span} sr sr-up ${visible ? 'visible' : ''} group relative card-glass rounded-[22px] p-7 overflow-hidden transition-all duration-500 hover:bg-white/10 hover:-translate-y-1 cursor-default`}
+              style={{ transitionDelay: visible ? `${60 + i * 70}ms` : '0ms' }}
             >
-              <div className="absolute inset-0 bg-dots opacity-15 pointer-events-none" />
-              <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/5 pointer-events-none" />
-              <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-[var(--secondary)]/10 pointer-events-none" />
+              {/* Background glow on hover */}
+              <div
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-[22px]"
+                style={{ background: `radial-gradient(circle at 30% 40%, ${f.accent}18 0%, transparent 60%)` }}
+              />
+              {/* Corner accent */}
+              <div className="absolute top-0 right-0 w-24 h-24 pointer-events-none" style={{ background: `radial-gradient(circle, ${f.accent}12 0%, transparent 70%)` }}/>
 
               <div className="relative">
-                <div className="w-12 h-12 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center text-white mb-5 group-hover:bg-white/15 group-hover:scale-110 transition-all duration-300">
-                  {feature.icon}
+                {/* Icon */}
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300"
+                  style={{ background: `${f.accent}18`, color: f.accent }}
+                >
+                  {f.icon}
                 </div>
-                <h3 className="font-display text-lg font-semibold text-white mb-2.5">{feature.title}</h3>
-                <p className="font-sans text-sm text-white/70 leading-relaxed">{feature.description}</p>
-                <div className="mt-5 h-px w-12 bg-gradient-to-r from-[var(--secondary)] to-transparent opacity-70 group-hover:w-20 transition-all duration-500" />
+                <h3 className="font-display text-xl font-bold text-white mb-2.5">{f.title}</h3>
+                <p className="font-sans text-sm text-white/65 leading-relaxed">{f.description}</p>
+
+                {/* Bottom accent */}
+                <div
+                  className="mt-6 h-px rounded-full w-10 group-hover:w-16 transition-all duration-500"
+                  style={{ background: `linear-gradient(90deg, ${f.accent}, transparent)` }}
+                />
               </div>
+
+              {/* Featured badge */}
+              {f.featured && (
+                <div
+                  className="absolute top-4 right-4 text-[10px] font-sans font-bold px-2 py-0.5 rounded-full"
+                  style={{ background: `${f.accent}30`, color: f.accent, border: `1px solid ${f.accent}40` }}
+                >
+                  Populaire
+                </div>
+              )}
             </div>
           ))}
         </div>

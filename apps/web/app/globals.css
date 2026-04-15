@@ -492,3 +492,89 @@ main {
   opacity: 1;
   transform: none;
 }
+
+/* ══════════════════════════════════════════════════════
+   REDESIGN — NEW KEYFRAMES & UTILITIES
+══════════════════════════════════════════════════════ */
+
+@keyframes orbFloat1 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33%     { transform: translate(40px,-50px) scale(1.08); }
+  66%     { transform: translate(-30px,30px) scale(0.95); }
+}
+@keyframes orbFloat2 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33%     { transform: translate(-50px,35px) scale(1.05); }
+  66%     { transform: translate(35px,-25px) scale(0.97); }
+}
+@keyframes meshBg {
+  0%,100% { background-position: 0% 50%; }
+  50%     { background-position: 100% 50%; }
+}
+@keyframes textShimmerAnim {
+  0%   { background-position: -300% 50%; }
+  100% { background-position: 300% 50%; }
+}
+@keyframes drawLTR {
+  from { transform: scaleX(0); transform-origin: left; }
+  to   { transform: scaleX(1); transform-origin: left; }
+}
+@keyframes spinBorder {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes pulseGlow {
+  0%,100% { box-shadow: 0 0 0 0 rgba(249,115,22,0); }
+  50%     { box-shadow: 0 0 30px 8px rgba(249,115,22,0.3); }
+}
+@keyframes blobMorph {
+  0%,100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  25%     { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+  50%     { border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%; }
+  75%     { border-radius: 60% 40% 60% 30% / 60% 40% 50% 60%; }
+}
+@keyframes cardEntrance {
+  from { opacity: 0; transform: translateY(40px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Utility classes ── */
+.anim-orb-1       { animation: orbFloat1 18s ease-in-out infinite; }
+.anim-orb-2       { animation: orbFloat2 22s ease-in-out infinite; }
+.anim-mesh        { animation: meshBg 8s ease infinite; background-size: 300% 300%; }
+.anim-blob        { animation: blobMorph 12s ease-in-out infinite; }
+.anim-spin-border { animation: spinBorder 4s linear infinite; }
+.anim-pulse-glow  { animation: pulseGlow 2.5s ease-in-out infinite; }
+.text-shimmer {
+  background: linear-gradient(90deg, #F97316 0%, #FFB84D 30%, #F97316 60%, #FB923C 100%);
+  background-size: 300% 100%;
+  animation: textShimmerAnim 4s linear infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.gradient-border-spin {
+  position: relative;
+}
+.gradient-border-spin::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: conic-gradient(from 0deg, #F97316, #0C2D5E, #F97316);
+  animation: spinBorder 3s linear infinite;
+  z-index: -1;
+}
+.card-glass {
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.card-glass-light {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(12,45,94,0.08);
+}
+
