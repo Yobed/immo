@@ -1,13 +1,28 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+
+const BG_IMAGES = [
+  'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2000&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2000&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1600607687920-4e2a09be1587?q=80&w=2000&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1613490900233-08145a3b2b8b?q=80&w=2000&auto=format&fit=crop'
+]
 
 export function Hero() {
   const [search, setSearch] = useState('')
+  const [currentBg, setCurrentBg] = useState(0)
   const router = useRouter()
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentBg((prev) => (prev + 1) % BG_IMAGES.length)
+    }, 6000)
+    return () => clearInterval(timer)
+  }, [])
 
   const handleSearch = () => {
     const q = search.trim()
@@ -25,11 +40,40 @@ export function Hero() {
   return (
     <section className="relative overflow-hidden bg-primary" style={{ minHeight: '100svh' }}>
 
-      {/* ── Animated gradient mesh background ──────────────────────── */}
-      <div
-        className="absolute inset-0 anim-mesh pointer-events-none"
-        style={{ background: 'linear-gradient(135deg, #07193A 0%, #0C2D5E 40%, #0E3D6B 70%, #0C2D5E 100%)' }}
-      />
+      {/* ── Background Slideshow with Progressive Zoom ──────────────────────── */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <AnimatePresence initial={false}>
+          <motion.div
+            key={currentBg}
+            initial={{ opacity: 0, scale: 1 }}
+            animate={{ opacity: 1, scale: 1.15 }}
+            exit={{ opacity: 0 }}
+            transition={{
+              opacity: { duration: 1.5, ease: 'easeInOut' },
+              scale: { duration: 10, ease: 'linear' }
+            }}
+            className="absolute inset-0 origin-center"
+          >
+            <Image
+              src={BG_IMAGES[currentBg]}
+              alt="Immobilier Côte d'Ivoire"
+              fill
+              className="object-cover"
+              sizes="100vw"
+              priority={currentBg === 0}
+              quality={90}
+            />
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Gradient overlays to ensure text readability */}
+        <div className="absolute inset-0 bg-[#0C2D5E]/60 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0C2D5E] via-[#0C2D5E]/80 to-transparent" />
+        <div 
+          className="absolute inset-0 anim-mesh opacity-40 mix-blend-overlay" 
+          style={{ background: 'linear-gradient(135deg, rgba(7,25,58,0.8) 0%, rgba(12,45,94,0.4) 40%, rgba(14,61,107,0.8) 70%, rgba(12,45,94,0.4) 100%)' }} 
+        />
+      </div>
 
       {/* ── Floating orbs ──────────────────────────────────────────── */}
       <div
