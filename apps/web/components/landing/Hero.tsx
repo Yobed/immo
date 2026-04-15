@@ -48,14 +48,14 @@ export function Hero({ bgImages }: { bgImages?: string[] }) {
         {images.map((src, i) => (
           <div
             key={src}
-            className="absolute inset-0 bg-center bg-cover bg-no-repeat"
+            className="absolute inset-0 bg-no-repeat"
             style={{
               backgroundImage: `url(${src})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center 20%',
               opacity: i === currentBg ? 1 : 0,
               transition: 'opacity 1.5s ease-in-out',
-              animation: i === currentBg ? 'kenBurns 10s ease-out forwards' : 'none',
-              transform: i === currentBg ? undefined : 'scale(1)',
-              willChange: 'opacity, transform',
+              willChange: 'opacity',
             }}
           />
         ))}
