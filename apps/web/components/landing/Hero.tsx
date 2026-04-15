@@ -60,13 +60,13 @@ export function Hero({ bgImages }: { bgImages?: string[] }) {
           />
         ))}
 
-        {/* Overlay 1 — teinte bleue légère pour cohérence de couleur */}
-        <div className="absolute inset-0" style={{ background: 'rgba(8, 20, 52, 0.55)' }} />
+        {/* Overlay 1 — teinte bleue légère (réduite pour voir l'image) */}
+        <div className="absolute inset-0" style={{ background: 'rgba(8, 20, 52, 0.38)' }} />
 
-        {/* Overlay 2 — gradient du bas pour lisibilité du contenu */}
+        {/* Overlay 2 — gradient seulement en bas pour lisibilité du texte */}
         <div
           className="absolute inset-0"
-          style={{ background: 'linear-gradient(to top, #0C2D5E 0%, rgba(12,45,94,0.7) 30%, rgba(12,45,94,0.25) 60%, transparent 100%)' }}
+          style={{ background: 'linear-gradient(to top, #0C2D5E 0%, rgba(12,45,94,0.65) 25%, rgba(12,45,94,0.15) 55%, transparent 100%)' }}
         />
       </div>
 
