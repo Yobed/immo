@@ -1,8 +1,10 @@
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
+import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'framer-motion'
 import { TYPES_BIEN_LABELS } from '@immo-ci/shared/constants/biens'
+import { useState } from 'react'
+import { Home, Building2, Warehouse, MapPin, Ruler, Layers, Star, Plus } from 'lucide-react'
 
 interface BienCardProps {
   id: string
@@ -17,29 +19,33 @@ interface BienCardProps {
   nb_pieces: number | null
   photo_url?: string | null
   statut?: string
+  isExclusive?: boolean
 }
 
 function formatFCFA(n: number): string {
   return new Intl.NumberFormat('fr-CI', { style: 'decimal', maximumFractionDigits: 0 }).format(n)
 }
 
-const TYPE_CONFIG: Record<string, { bg: string; text: string; dot: string }> = {
-  villa:             { bg: 'bg-violet-50',  text: 'text-violet-700',  dot: 'bg-violet-400' },
-  appartement:       { bg: 'bg-blue-50',    text: 'text-blue-700',    dot: 'bg-blue-400' },
-  studio:            { bg: 'bg-cyan-50',    text: 'text-cyan-700',    dot: 'bg-cyan-400' },
-  maison:            { bg: 'bg-orange-50',  text: 'text-orange-700',  dot: 'bg-orange-400' },
-  residence_meublee: { bg: 'bg-amber-50',   text: 'text-amber-700',   dot: 'bg-amber-400' },
-  bureau:            { bg: 'bg-slate-50',   text: 'text-slate-600',   dot: 'bg-slate-400' },
-  commerce:          { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-400' },
-  terrain:           { bg: 'bg-lime-50',    text: 'text-lime-700',    dot: 'bg-lime-500' },
+const TYPE_CONFIG: Record<string, { bg: string; text: string; dot: string; icon: any }> = {
+  villa:             { bg: 'bg-indigo-50/80',   text: 'text-indigo-700',  dot: 'bg-indigo-400',  icon: Home },
+  appartement:       { bg: 'bg-blue-50/80',     text: 'text-blue-700',    dot: 'bg-blue-400',    icon: Building2 },
+  studio:            { bg: 'bg-cyan-50/80',     text: 'text-cyan-700',    dot: 'bg-cyan-400',    icon: Warehouse },
+  maison:            { bg: 'bg-orange-50/80',   text: 'text-orange-700',  dot: 'bg-orange-400',  icon: Home },
+  residence_meublee: { bg: 'bg-amber-50/80',    text: 'text-amber-700',   dot: 'bg-amber-400',   icon: Star },
+  bureau:            { bg: 'bg-slate-50/80',    text: 'text-slate-600',   dot: 'bg-slate-400',   icon: Building2 },
+  commerce:          { bg: 'bg-emerald-50/80',  text: 'text-emerald-700', dot: 'bg-emerald-400',  icon: Building2 },
+  terrain:           { bg: 'bg-lime-50/80',     text: 'text-lime-700',    dot: 'bg-lime-500',    icon: Layers },
 }
 
 export function BienCard({
   id, titre, commune, quartier, type_bien,
   prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa,
-  surface_m2, nb_pieces, photo_url, statut,
+  surface_m2, nb_pieces, photo_url, isExclusive = false,
 }: BienCardProps) {
   const isNuitee = !!prix_nuit_fcfa
+  const [isFavorited, setIsFavorited] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
+  
   const prix = isNuitee
     ? { value: formatFCFA(prix_nuit_fcfa!), suffix: '/nuit' }
     : prix_mois_fcfa
@@ -48,161 +54,177 @@ export function BienCard({
     ? { value: formatFCFA(prix_vente_fcfa), suffix: '' }
     : null
 
-  const typeConf = TYPE_CONFIG[type_bien] ?? { bg: 'bg-slate-50', text: 'text-slate-600', dot: 'bg-slate-400' }
+  const typeConf = TYPE_CONFIG[type_bien] ?? { bg: 'bg-slate-50', text: 'text-slate-600', dot: 'bg-slate-400', icon: Home }
 
-  // 3D Tilt Logic
-  const x = useMotionValue(0)
-  const y = useMotionValue(0)
-  const mouseXSpring = useSpring(x, { stiffness: 300, damping: 40 })
-  const mouseYSpring = useSpring(y, { stiffness: 300, damping: 40 })
-  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["2.5deg", "-2.5deg"])
-  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-2.5deg", "2.5deg"])
+  // 3D Tilt & Shine Logic
+  const mouseX = useMotionValue(0)
+  const mouseY = useMotionValue(0)
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], ["8deg", "-8deg"]), { stiffness: 400, damping: 40 })
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], ["-8deg", "8deg"]), { stiffness: 400, damping: 40 })
+  
+  const glareX = useSpring(useTransform(mouseX, [-0.5, 0.5], ["-20%", "120%"]), { stiffness: 400, damping: 40 })
+  const glareY = useSpring(useTransform(mouseY, [-0.5, 0.5], ["-20%", "120%"]), { stiffness: 400, damping: 40 })
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
-    const width = rect.width
-    const height = rect.height
-    const mouseX = e.clientX - rect.left
-    const mouseY = e.clientY - rect.top
-    const xPct = mouseX / width - 0.5
-    const yPct = mouseY / height - 0.5
-    x.set(xPct)
-    y.set(yPct)
+    mouseX.set((e.clientX - rect.left) / rect.width - 0.5)
+    mouseY.set((e.clientY - rect.top) / rect.height - 0.5)
   }
 
   const handleMouseLeave = () => {
-    x.set(0)
-    y.set(0)
+    mouseX.set(0)
+    mouseY.set(0)
+    setIsHovered(false)
   }
 
   return (
-    <Link href={`/biens/${id}`} className="block group h-full" style={{ perspective: 1200 }}>
-      {/* 3D Bento Card wrapper */}
-      <motion.article
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-        whileHover={{ scale: 1.01 }}
-        transition={{ type: "spring", stiffness: 400, damping: 30 }}
-        className="bg-white rounded-[22px] overflow-hidden border border-[var(--border)] h-full flex flex-col relative transition-shadow duration-500 hover:shadow-2xl hover:shadow-[var(--primary)]/10"
-      >
-        {/* Inner Glow (Reflet sur le verre) */}
-        <div 
-          className="absolute inset-0 rounded-[22px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-20" 
-          style={{ boxShadow: 'inset 0 0 24px rgba(255, 255, 255, 0.9), inset 0 0 0 1px rgba(255,255,255,0.3)' }} 
-        />
+    <div 
+      className="relative group perspective-1000" 
+      onMouseMove={handleMouseMove} 
+      onMouseLeave={handleMouseLeave}
+      onMouseEnter={() => setIsHovered(true)}
+    >
+      <Link href={`/biens/${id}`} className="block h-full">
+        <motion.article
+          style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+          className="bg-white rounded-[2rem] overflow-hidden border border-gray-100/50 h-full flex flex-col relative transition-all duration-700 hover:shadow-[0_45px_80px_-20px_rgba(0,0,0,0.15)] bg-clip-padding backdrop-blur-sm"
+        >
+          {/* Glare Effect */}
+          <motion.div 
+            className="absolute inset-0 z-30 pointer-events-none opacity-0 group-hover:opacity-40 transition-opacity duration-500"
+            style={{ 
+              background: `radial-gradient(circle at center, rgba(255,255,255,0.8) 0%, transparent 60%)`,
+              left: glareX,
+              top: glareY,
+              width: '100%',
+              height: '100%',
+              filter: 'blur(100px)'
+            }}
+          />
 
-        {/* ── Photo ── */}
-        <div className="relative aspect-[4/3] bg-[var(--surface)] img-zoom-wrap overflow-hidden">
-          {photo_url ? (
-            <Image
-              src={photo_url}
-              alt={titre}
-              fill
-              className="object-cover transition-transform duration-[10000ms] ease-out group-hover:scale-110"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            />
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center gap-2.5 bg-gradient-to-br from-[var(--primary-light)] to-[var(--surface)]">
-              <svg width="44" height="44" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1" fill="none" className="text-[var(--primary)]/25">
-                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-                <polyline points="9 22 9 12 15 12 15 22"/>
-              </svg>
-              <p className="text-xs font-sans text-[var(--text-muted)]/60">Aucune photo</p>
+          {/* ── Photo Section ── */}
+          <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden m-2 rounded-[1.7rem]">
+            <AnimatePresence>
+              {photo_url ? (
+                <Image
+                  src={photo_url}
+                  alt={titre}
+                  fill
+                  className="object-cover transition-transform duration-[6000ms] ease-out group-hover:scale-110"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-gray-50 to-gray-200">
+                  <Home className="w-12 h-12 text-gray-300" />
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Image bientôt disponible</span>
+                </div>
+              )}
+            </AnimatePresence>
+
+            {/* Premium Overlays */}
+            <div className="absolute inset-0 bg-gradient-to-t from-gray-900/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            
+            {/* Top Badges */}
+            <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-10">
+              <span className={`
+                inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider
+                ${typeConf.bg} ${typeConf.text} shadow-lg backdrop-blur-xl border border-white/40
+              `}>
+                <span className={`w-1.5 h-1.5 rounded-full ${typeConf.dot} shadow-[0_0_8px_${typeConf.dot.split('-')[1]}]`} />
+                {TYPES_BIEN_LABELS[type_bien] ?? type_bien}
+              </span>
+
+              {isExclusive && (
+                <span className="bg-gray-950 text-white px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-2xl border border-white/10">
+                  <Star className="w-3 h-3 text-secondary fill-secondary" />
+                  Édition Limitée
+                </span>
+              )}
             </div>
-          )}
 
-          {/* Gradient overlay bas */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
-
-          {/* Type badge — haut gauche */}
-          <div className="absolute top-3 left-3">
-            <span className={`
-              inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill text-xs font-sans font-medium
-              badge-glow ${typeConf.bg} ${typeConf.text} shadow-sm border border-black/5
-            `}>
-              <span className={`w-1.5 h-1.5 rounded-full ${typeConf.dot}`} />
-              {TYPES_BIEN_LABELS[type_bien] ?? type_bien}
-            </span>
-          </div>
-
-          {/* Statut brouillon */}
-          {statut === 'brouillon' && (
-            <div className="absolute top-3 right-3">
-              <span className="inline-flex items-center px-2.5 py-1 rounded-pill text-xs font-sans font-medium bg-[var(--warning)]/90 text-white badge-glow">
-                Brouillon
+            {/* Price Tag - Glassmorphism */}
+            {prix && (
+              <div className="absolute bottom-4 left-4 transform translate-z-30">
+                <motion.div 
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="flex items-baseline gap-1.5 px-5 py-2.5 rounded-2xl bg-white/90 backdrop-blur-2xl shadow-[0_15px_30px_rgba(0,0,0,0.15)] border border-white/40"
+                >
+                  <span className="font-display text-xl font-bold text-gray-900 tabular-nums tracking-tight">
+                    {prix.value}
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-primary/80">
+                    FCFA{prix.suffix}
+                  </span>
+                </motion.div>
+              </div>
+            )}
+            
+            {/* Hover Action Tooltip */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0 pointer-events-none">
+              <span className="bg-primary text-white px-6 py-2.5 rounded-full text-xs font-bold shadow-2xl flex items-center gap-2 border border-white/20">
+                Consulter l&apos;offre
+                <Plus className="w-4 h-4" />
               </span>
             </div>
-          )}
-
-          {/* Prix — bas gauche avec style premium (Shadow drop) */}
-          {prix && (
-            <div className="absolute bottom-3 left-3 transform translate-z-10">
-              <div className="flex items-baseline gap-1 px-3.5 py-1.5 rounded-pill bg-white/95 backdrop-blur-md shadow-lg border border-white/20">
-                <span className="font-mono text-base font-bold text-[var(--primary)] tabular-nums tracking-tight">
-                  {prix.value}
-                </span>
-                <span className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-sans font-semibold">
-                  FCFA{prix.suffix}
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Favori placeholder haut droite si pas brouillon */}
-          {statut !== 'brouillon' && (
-            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-95 group-hover:scale-100">
-              <div className="w-8 h-8 rounded-full bg-white/30 backdrop-blur flex items-center justify-center hover:bg-white/50 transition-colors">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white drop-shadow-md">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                </svg>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ── Infos ── */}
-        <div className="p-4 flex flex-col flex-1 bg-white relative z-10 border-t border-[var(--border)]/50">
-          <h3 className="font-sans font-bold text-[var(--primary)] text-base leading-snug line-clamp-2 mb-2 group-hover:text-secondary transition-colors duration-200">
-            {titre}
-          </h3>
-
-          <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-sans mb-4 uppercase tracking-wider font-medium">
-            <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" className="flex-shrink-0 text-[var(--secondary)]">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
-              <circle cx="12" cy="10" r="3"/>
-            </svg>
-            <span className="line-clamp-1">
-              {quartier ? `${quartier}, ` : ''}{commune}
-            </span>
           </div>
 
-          {/* Stats Bento style */}
-          {(surface_m2 || nb_pieces) && (
-            <div className="flex items-center gap-3 pt-3 border-t border-slate-100 mt-auto">
+          {/* ── Content Section ── */}
+          <div className="p-7 flex flex-col flex-1 relative z-10 h-full">
+            {/* Location Line */}
+            <div className="flex items-center gap-2 text-[10px] font-bold text-primary/60 uppercase tracking-[0.2em] mb-3">
+              <MapPin className="w-3 h-3 mb-0.5" />
+              <span>{commune}{quartier ? ` • ${quartier}` : ''}</span>
+            </div>
+
+            <h3 className="font-display font-bold text-gray-950 text-xl leading-[1.2] mb-5 group-hover:text-primary transition-colors duration-300 line-clamp-2">
+              {titre}
+            </h3>
+
+            {/* Stats Grid */}
+            <div className="mt-auto grid grid-cols-2 gap-3 pt-6 border-t border-gray-100">
               {surface_m2 && (
-                <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 rounded-lg text-xs font-sans text-[var(--text-muted)] border border-slate-100">
-                  <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" fill="none" className="text-[var(--primary)]/60">
-                    <rect x="3" y="3" width="18" height="18" rx="2"/>
-                    <path d="M3 9h18M9 21V9"/>
-                  </svg>
-                  <span className="font-semibold text-slate-700">{surface_m2}</span>
-                  <span className="text-[10px]">m²</span>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Surface</span>
+                  <div className="flex items-center gap-2 text-sm font-bold text-gray-800">
+                    <Ruler className="w-4 h-4 text-primary/30" />
+                    {surface_m2} m²
+                  </div>
                 </div>
               )}
               {nb_pieces && (
-                <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-50 rounded-lg text-xs font-sans text-[var(--text-muted)] border border-slate-100">
-                  <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" fill="none" className="text-[var(--primary)]/60">
-                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-                  </svg>
-                  <span className="font-semibold text-slate-700">{nb_pieces}</span>
-                  <span className="text-[10px]">pcs</span>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Pièces</span>
+                  <div className="flex items-center gap-2 text-sm font-bold text-gray-800">
+                    <Layers className="w-4 h-4 text-primary/30" />
+                    {nb_pieces} {nb_pieces > 1 ? 'Chambres' : 'Chambre'}
+                  </div>
                 </div>
               )}
             </div>
-          )}
-        </div>
-      </motion.article>
-    </Link>
+          </div>
+        </motion.article>
+      </Link>
+
+      {/* Persistent Action Bar (Favorite) */}
+      <div className="absolute top-6 right-6 z-40">
+        <button 
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsFavorited(!isFavorited); }}
+          className={`
+            w-11 h-11 rounded-full flex items-center justify-center transition-all duration-500 
+            ${isFavorited 
+              ? 'bg-secondary text-white shadow-lg shadow-secondary/30 scale-110' 
+              : 'bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white hover:text-secondary hover:shadow-xl hover:scale-110'
+            }
+          `}
+        >
+          <Star 
+            className={`w-5 h-5 transition-all duration-300 ${isFavorited ? 'fill-white' : ''}`} 
+            strokeWidth={isFavorited ? 0 : 2}
+          />
+        </button>
+      </div>
+    </div>
   )
 }

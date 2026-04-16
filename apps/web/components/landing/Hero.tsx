@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import { MagneticWrapper } from './MagneticWrapper'
 
 const FALLBACK_BG = [
   'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2000&auto=format&fit=crop',
@@ -12,7 +13,35 @@ const FALLBACK_BG = [
   'https://images.unsplash.com/photo-1613490900233-08145a3b2b8b?q=80&w=2000&auto=format&fit=crop',
 ]
 
-export function Hero({ bgImages }: { bgImages?: string[] }) {
+const TYPE_LABELS: Record<string, string> = {
+  appartement: 'Appartement', maison: 'Maison', villa: 'Villa',
+  studio: 'Studio', bureau: 'Bureau', commerce: 'Commerce',
+  terrain: 'Terrain', residence_meublee: 'Rés. Meublée',
+}
+
+interface FeaturedBien {
+  id: string
+  titre: string
+  commune: string
+  quartier: string | null
+  type_bien: string
+  prix_mois_fcfa: number | null
+  prix_nuit_fcfa: number | null
+  prix_vente_fcfa: number | null
+  photo_url?: string | null
+}
+
+function fmtPrice(b: FeaturedBien): { value: string; suffix: string } | null {
+  const fmt = (n: number) => n >= 1_000_000
+    ? `${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`
+    : `${Math.round(n / 1_000)}k`
+  if (b.prix_nuit_fcfa)  return { value: fmt(b.prix_nuit_fcfa),  suffix: '/nuit' }
+  if (b.prix_mois_fcfa)  return { value: fmt(b.prix_mois_fcfa),  suffix: '/mois' }
+  if (b.prix_vente_fcfa) return { value: fmt(b.prix_vente_fcfa), suffix: '' }
+  return null
+}
+
+export function Hero({ bgImages, featuredBien }: { bgImages?: string[]; featuredBien?: FeaturedBien | null }) {
   const images = (bgImages && bgImages.length >= 2) ? bgImages : FALLBACK_BG
   const [search, setSearch] = useState('')
   const [currentBg, setCurrentBg] = useState(0)
@@ -86,24 +115,26 @@ export function Hero({ bgImages }: { bgImages?: string[] }) {
       {/* ── Grid overlay ───────────────────────────────────────────── */}
       <div className="absolute inset-0 bg-dots opacity-10 pointer-events-none" />
 
-      <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center justify-between min-h-screen gap-12 py-24 lg:py-0">
+      <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 lg:px-12 xl:px-16 flex flex-col lg:flex-row items-center justify-between min-h-[100svh] gap-20 pt-32 pb-20 lg:py-0">
 
         {/* ── LEFT CONTENT ─────────────────────────────────────────── */}
-        <div className="flex-1 max-w-xl lg:max-w-[700px] z-10 shrink-0">
+        <div className="flex-1 max-w-xl lg:max-w-[750px] z-10 shrink-0">
 
           {/* Live badge */}
           <motion.div
             initial={{ opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="inline-flex items-center gap-2.5 mb-8 px-4 py-2 rounded-full bg-white/8 border border-white/15 backdrop-blur-sm shadow-xl"
+            className="inline-flex items-center gap-2.5 mb-8 p-1 pr-4 rounded-full bg-white/5 border border-white/10 backdrop-blur-md shadow-xl"
           >
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-secondary" />
-            </span>
-            <span className="font-sans text-sm text-white/80 font-medium">
-              Plateforme immobilière N°1 en Côte d&apos;Ivoire
+            <div className="w-7 h-7 rounded-full bg-secondary/20 flex items-center justify-center">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-secondary" />
+              </span>
+            </div>
+            <span className="font-sans text-sm text-white/90 font-medium tracking-wide uppercase text-[11px]">
+              Plateforme immobilière N°1
             </span>
           </motion.div>
 
@@ -113,7 +144,7 @@ export function Hero({ bgImages }: { bgImages?: string[] }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
             className="font-display font-bold leading-tight mb-6 drop-shadow-xl"
-            style={{ fontSize: 'clamp(2.8rem, 5vw, 5.5rem)' }}
+            style={{ fontSize: 'clamp(2.5rem, 8vw, 6.5rem)' }}
           >
             <span className="text-white block whitespace-nowrap">Trouvez votre bien</span>
             <span className="text-white block whitespace-nowrap">en Côte d&apos;Ivoire</span>
@@ -123,7 +154,7 @@ export function Hero({ bgImages }: { bgImages?: string[] }) {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="font-sans text-lg sm:text-xl text-white/90 mb-8 leading-relaxed max-w-lg drop-shadow-md"
+            className="font-sans text-lg sm:text-xl text-white/90 mb-10 leading-relaxed max-w-lg drop-shadow-md"
           >
             Location, vente et résidences meublées à Abidjan.
             <br className="hidden sm:block" />
@@ -135,10 +166,10 @@ export function Hero({ bgImages }: { bgImages?: string[] }) {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="flex flex-col sm:flex-row gap-2 mb-6"
+            className="flex flex-col sm:flex-row gap-3 mb-8 p-2 rounded-[2rem] sm:rounded-[3rem] bg-white/10 border border-white/20 backdrop-blur-md shadow-2xl"
           >
             <div className="relative flex-1">
-              <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 text-white/60 pointer-events-none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
               </svg>
               <input
@@ -147,15 +178,22 @@ export function Hero({ bgImages }: { bgImages?: string[] }) {
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 placeholder="Commune, quartier, type de bien…"
-                className="w-full pl-11 pr-4 py-4 rounded-[14px] bg-white text-gray-800 font-sans text-base border-0 focus:outline-none focus:ring-2 focus:ring-secondary shadow-xl placeholder-gray-400"
+                className="w-full pl-12 sm:pl-16 pr-6 py-4 rounded-full bg-transparent text-white font-sans text-base sm:text-lg border-0 focus:outline-none focus:ring-0 placeholder-white/60"
               />
             </div>
-            <button
-              onClick={handleSearch}
-              className="shrink-0 px-7 py-4 rounded-[14px] bg-secondary text-white font-sans font-bold text-sm hover:bg-secondary/90 transition-all duration-200 shadow-xl hover:scale-105 active:scale-95"
-            >
-              Rechercher
-            </button>
+            <MagneticWrapper>
+              <button
+                onClick={handleSearch}
+                className="group w-full sm:w-auto mt-2 sm:mt-0 flex justify-center sm:inline-flex items-center gap-3 pl-8 pr-3 py-3 rounded-full bg-white text-primary font-sans font-bold text-[15px] hover:bg-gray-50 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98] shadow-lg"
+              >
+                Rechercher
+                <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-1 group-hover:scale-105">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </svg>
+                </div>
+              </button>
+            </MagneticWrapper>
           </motion.div>
 
           {/* Type pills */}
@@ -163,14 +201,14 @@ export function Hero({ bgImages }: { bgImages?: string[] }) {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            className="flex flex-wrap gap-2 mb-10"
+            className="flex flex-wrap gap-2 sm:gap-2.5 mb-12 justify-center sm:justify-start"
           >
             {TYPES.map((t, i) => (
               <Link
                 key={t.label}
                 href={t.href}
                 style={{ animationDelay: `${0.5 + i * 0.06}s` }}
-                className="px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 hover:border-white/40 transition-all duration-200 text-xs font-sans text-white/90 hover:text-white backdrop-blur-sm shadow-md"
+                className="px-4 py-2 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 hover:border-white/40 transition-all duration-200 text-xs font-sans text-white/90 hover:text-white backdrop-blur-sm shadow-md"
               >
                 {t.label}
               </Link>
@@ -182,7 +220,7 @@ export function Hero({ bgImages }: { bgImages?: string[] }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="flex items-center gap-8 pt-6 border-t border-white/20"
+            className="flex flex-wrap items-center justify-center sm:justify-start gap-6 sm:gap-10 pt-8 border-t border-white/20 text-center sm:text-left"
           >
             {[
               { value: '2 450+', label: 'Biens en ligne' },
@@ -190,15 +228,15 @@ export function Hero({ bgImages }: { bgImages?: string[] }) {
               { value: '98%',    label: 'Satisfaction' },
             ].map((s) => (
               <div key={s.label} className="flex flex-col">
-                <span className="font-mono text-xl font-bold text-secondary drop-shadow-md">{s.value}</span>
-                <span className="font-sans text-xs text-white/70">{s.label}</span>
+                <span className="font-mono text-[22px] font-bold text-secondary drop-shadow-md">{s.value}</span>
+                <span className="font-sans text-[13px] text-white/70 mt-1">{s.label}</span>
               </div>
             ))}
           </motion.div>
         </div>
 
         {/* ── RIGHT — Floating property cards ───────────────────────── */}
-        <div className="hidden lg:flex flex-col items-end gap-6 flex-1 max-w-[550px] relative py-8">
+        <div className="hidden lg:flex flex-col items-end gap-6 flex-1 max-w-[650px] relative py-8 ml-20 mr-[-4rem]">
 
           {/* Main card */}
           <motion.div
@@ -207,23 +245,56 @@ export function Hero({ bgImages }: { bgImages?: string[] }) {
             transition={{ duration: 1, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className="hero-float-1 w-full card-glass rounded-[32px] overflow-hidden shadow-2xl"
           >
-            <div className="relative h-[340px] bg-primary-mid overflow-hidden">
-              <Image src="/hero-bg.jpg" alt="Propriété à Abidjan" fill className="object-cover hover:scale-105 transition-transform duration-700" sizes="550px" />
+            <div className="relative h-[400px] bg-primary-mid overflow-hidden">
+              {images.map((src, i) => (
+                <Image
+                  key={src}
+                  src={src}
+                  alt="Propriété à Abidjan"
+                  fill
+                  className="object-cover transition-opacity duration-[1500ms] ease-in-out"
+                  style={{ opacity: i === currentBg ? 1 : 0 }}
+                  sizes="650px"
+                />
+              ))}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              <div className="absolute top-4 left-4 bg-secondary text-white text-xs font-sans font-bold px-3 py-1.5 rounded-full shadow-lg">
+              <div className="absolute top-5 left-5 bg-secondary text-white text-xs font-sans font-bold px-3.5 py-2 rounded-full shadow-lg">
                 Disponible
               </div>
             </div>
-            <div className="p-5 bg-white/95 backdrop-blur-xl">
-              <div className="flex items-start justify-between mb-2">
-                <p className="font-sans font-semibold text-base text-gray-900">Villa moderne — Cocody</p>
-                <span className="text-xs font-mono font-bold text-primary bg-primary/8 px-2.5 py-1 rounded">Villa</span>
+            <div className="p-6 bg-white/95 backdrop-blur-xl">
+              <div className="flex items-start justify-between mb-3">
+                <p className="font-sans font-semibold text-lg text-gray-900 line-clamp-1">
+                  {featuredBien?.titre ?? 'Bien en vedette'}
+                </p>
+                <span className="shrink-0 text-xs font-mono font-bold text-primary bg-primary/8 px-3 py-1.5 rounded ml-2">
+                  {featuredBien ? (TYPE_LABELS[featuredBien.type_bien] ?? featuredBien.type_bien) : 'Villa'}
+                </span>
               </div>
-              <p className="font-mono font-bold text-xl text-primary">2,5M <span className="text-xs font-sans font-normal text-gray-400">FCFA/mois</span></p>
-              <div className="flex items-center gap-1.5 mt-2 text-gray-400">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-                <span className="text-[13px] font-sans">Cocody Ambassades, Abidjan</span>
+              {featuredBien && fmtPrice(featuredBien) ? (
+                <p className="font-mono font-bold text-2xl text-primary">
+                  {fmtPrice(featuredBien)!.value}{' '}
+                  <span className="text-xs font-sans font-normal text-gray-400">FCFA{fmtPrice(featuredBien)!.suffix}</span>
+                </p>
+              ) : (
+                <p className="font-mono font-bold text-2xl text-primary">Prix sur demande</p>
+              )}
+              <div className="flex items-center gap-2 mt-3 text-gray-400">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+                <span className="text-sm font-sans">
+                  {featuredBien
+                    ? `${featuredBien.quartier ? featuredBien.quartier + ', ' : ''}${featuredBien.commune}, Abidjan`
+                    : 'Cocody Ambassades, Abidjan'}
+                </span>
               </div>
+              {featuredBien && (
+                <Link
+                  href={`/biens/${featuredBien.id}`}
+                  className="mt-4 flex items-center gap-2 text-xs font-sans font-semibold text-primary hover:text-secondary transition-colors"
+                >
+                  Voir la fiche →
+                </Link>
+              )}
             </div>
           </motion.div>
 
@@ -232,17 +303,17 @@ export function Hero({ bgImages }: { bgImages?: string[] }) {
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.9, delay: 0.65, ease: [0.22, 1, 0.36, 1] }}
-            className="hero-float-2 w-[88%] card-glass-light rounded-[24px] px-4 py-3.5 shadow-xl"
+            className="hero-float-2 w-[85%] card-glass-light rounded-[24px] px-5 py-4 shadow-xl"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="2"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
               </div>
               <div>
-                <p className="font-sans text-xs text-gray-500">Nouvelle demande reçue</p>
+                <p className="font-sans text-xs text-gray-500 mb-0.5">Nouvelle demande reçue</p>
                 <p className="font-sans font-semibold text-base text-gray-800">Studio à Marcory</p>
               </div>
-              <span className="ml-auto text-[10px] text-gray-400 font-sans">à l&apos;instant</span>
+              <span className="ml-auto text-[11px] text-gray-400 font-sans">à l&apos;instant</span>
             </div>
           </motion.div>
 
@@ -251,14 +322,14 @@ export function Hero({ bgImages }: { bgImages?: string[] }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.85 }}
-            className="hero-float-3 flex items-center justify-center gap-3 card-glass-light rounded-[20px] px-4 py-3 shadow-lg w-[75%]"
+            className="hero-float-3 flex items-center justify-center gap-3.5 card-glass-light rounded-[20px] px-5 py-4 shadow-lg w-[70%]"
           >
-            <div className="flex gap-0.5">
+            <div className="flex gap-1">
               {[1,2,3,4,5].map(i => (
-                <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill="#F97316"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill="#F97316"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               ))}
             </div>
-            <span className="font-sans text-sm text-gray-600 font-medium">4.8/5 · 98% satisfaits</span>
+            <span className="font-sans text-[15px] text-gray-600 font-medium">4.8/5 · 98% satisfaits</span>
           </motion.div>
         </div>
       </div>

@@ -20,6 +20,7 @@ interface BienMedia {
 
 interface BienCarouselProps {
   medias: BienMedia[]
+  isHero?: boolean
 }
 
 const FILTER_LABELS: Record<FilterType, string> = {
@@ -43,19 +44,19 @@ function formatDuration(sec: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
-function MediaSlide({ media }: { media: BienMedia }) {
+function MediaSlide({ media, isHero }: { media: BienMedia, isHero?: boolean }) {
   if (media.type === 'vue_360') {
-    return <Bien360 panoramaUrl={media.url} hotspots={media.hotspots ?? []} hauteur={400} />
+    return <Bien360 panoramaUrl={media.url} hotspots={media.hotspots ?? []} hauteur={isHero ? 1000 : 400} />
   }
 
   if (media.type === 'video') {
     // YouTube/Vimeo embed
     if (media.embed_url) {
       return (
-        <div className="relative w-full aspect-video">
+        <div className={cn("relative w-full", isHero ? "h-full" : "aspect-video")}>
           <iframe
             src={media.embed_url}
-            className="w-full h-full rounded-card"
+            className={cn("w-full h-full", !isHero && "rounded-card")}
             allowFullScreen
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           />
@@ -64,7 +65,7 @@ function MediaSlide({ media }: { media: BienMedia }) {
     }
     // Supabase Storage video
     return (
-      <div className="relative w-full aspect-video bg-gray-900 rounded-card overflow-hidden">
+      <div className={cn("relative w-full bg-gray-900 overflow-hidden", isHero ? "h-full" : "aspect-video rounded-card")}>
         <video
           src={media.url}
           controls
@@ -84,13 +85,13 @@ function MediaSlide({ media }: { media: BienMedia }) {
     // PDF ou image
     if (media.url.endsWith('.pdf')) {
       return (
-        <div className="w-full aspect-[4/3] rounded-card overflow-hidden border border-[var(--border)]">
+        <div className={cn("w-full overflow-hidden border border-[var(--border)]", isHero ? "h-full" : "aspect-[4/3] rounded-card")}>
           <iframe src={media.url} className="w-full h-full" title="Plan du bien" />
         </div>
       )
     }
     return (
-      <div className="relative w-full aspect-[4/3] bg-[var(--surface)] rounded-card overflow-hidden">
+      <div className={cn("relative w-full bg-[var(--surface)] overflow-hidden", isHero ? "h-full" : "aspect-[4/3] rounded-card")}>
         <Image src={media.url} alt="Plan du bien" fill className="object-contain" sizes="100vw" />
       </div>
     )
@@ -98,20 +99,20 @@ function MediaSlide({ media }: { media: BienMedia }) {
 
   // Photo (type='photo')
   return (
-    <div className="relative w-full aspect-[4/3] bg-[var(--surface)] rounded-card overflow-hidden">
+    <div className={cn("relative w-full bg-[var(--surface)] overflow-hidden", isHero ? "h-full" : "aspect-[4/3] rounded-card")}>
       <Image
         src={media.url}
         alt={media.titre ?? 'Photo du bien'}
         fill
         className="object-cover"
-        sizes="(max-width: 768px) 100vw, 800px"
+        sizes="100vw"
         priority
       />
     </div>
   )
 }
 
-export function BienCarousel({ medias }: BienCarouselProps) {
+export function BienCarousel({ medias, isHero = false }: BienCarouselProps) {
   const [activeFilter, setActiveFilter] = useState<FilterType>('all')
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: 'start' })
@@ -140,22 +141,22 @@ export function BienCarousel({ medias }: BienCarouselProps) {
     emblaApi?.scrollTo(0, true)
   }, [activeFilter, emblaApi])
 
-  // Filtres disponibles (seulement les types présents)
-  const availableTypes = Array.from(new Set(medias.map((m) => m.type)))
-  const filters: FilterType[] = ['all', ...availableTypes]
-
   if (medias.length === 0) {
     return (
-      <div className="w-full aspect-[4/3] bg-[var(--surface)] rounded-card flex items-center justify-center">
+      <div className={cn("w-full bg-[var(--surface)] flex items-center justify-center", isHero ? "h-full" : "aspect-[4/3] rounded-card")}>
         <p className="text-muted font-sans text-sm">Aucun média disponible</p>
       </div>
     )
   }
 
+  // Filtres disponibles (seulement les types présents)
+  const availableTypes = Array.from(new Set(medias.map((m) => m.type)))
+  const filters: FilterType[] = ['all', ...availableTypes]
+
   return (
-    <div className="w-full space-y-3">
-      {/* Filtres par type */}
-      {availableTypes.length > 1 && (
+    <div className={cn("w-full", !isHero && "space-y-3", isHero && "h-full")}>
+      {/* Filtres par type - Cachés en Hero */}
+      {!isHero && availableTypes.length > 1 && (
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {filters.map((filter) => (
             <button
@@ -180,24 +181,26 @@ export function BienCarousel({ medias }: BienCarouselProps) {
       )}
 
       {/* Carousel principal */}
-      <div className="relative group">
-        <div className="overflow-hidden rounded-card" ref={emblaRef}>
-          <div className="flex">
+      <div className={cn("relative group", isHero && "h-full")}>
+        <div className={cn("overflow-hidden", !isHero && "rounded-card", isHero && "h-full")} ref={emblaRef}>
+          <div className={cn("flex", isHero && "h-full")}>
             {filtered.map((media) => (
-              <div key={media.id} className="flex-shrink-0 w-full pr-2 last:pr-0">
-                <div className="relative">
-                  <MediaSlide media={media} />
+              <div key={media.id} className={cn("flex-shrink-0 w-full", !isHero && "pr-2", isHero && "h-full pr-0")}>
+                <div className={cn("relative", isHero && "h-full")}>
+                  <MediaSlide media={media} isHero={isHero} />
                   {/* Badge type */}
-                  <div className="absolute top-3 right-3 pointer-events-none">
-                    <span className={cn(
-                      'inline-flex items-center px-2 py-1 rounded-pill text-xs font-sans font-medium shadow-sm',
-                      BADGE_CLASSES[media.type]
-                    )}>
-                      {FILTER_LABELS[media.type]}
-                    </span>
-                  </div>
+                  {!isHero && (
+                    <div className="absolute top-3 right-3 pointer-events-none">
+                      <span className={cn(
+                        'inline-flex items-center px-2 py-1 rounded-pill text-xs font-sans font-medium shadow-sm',
+                        BADGE_CLASSES[media.type]
+                      )}>
+                        {FILTER_LABELS[media.type]}
+                      </span>
+                    </div>
+                  )}
                   {/* Titre du média */}
-                  {media.titre && (
+                  {media.titre && !isHero && (
                     <div className="absolute bottom-3 left-3 right-3 pointer-events-none">
                       <span className="bg-black/50 text-white text-xs font-sans px-2 py-1 rounded-pill backdrop-blur-sm">
                         {media.titre}
@@ -215,31 +218,34 @@ export function BienCarousel({ medias }: BienCarouselProps) {
           <>
             <button
               onClick={scrollPrev}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+              className="absolute left-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/10 backdrop-blur-3xl border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:scale-110 shadow-2xl z-30"
               aria-label="Précédent"
             >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M11 2L5 8l6 6" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M15 18l-6-6 6-6" /></svg>
             </button>
             <button
               onClick={scrollNext}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+              className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/10 backdrop-blur-3xl border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:scale-110 shadow-2xl z-30"
               aria-label="Suivant"
             >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M5 2l6 6-6 6" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M9 18l6-6-6-6" /></svg>
             </button>
           </>
         )}
 
         {/* Compteur */}
         {filtered.length > 1 && (
-          <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs font-mono px-2 py-1 rounded-pill">
-            {selectedIndex + 1} / {filtered.length}
+          <div className={cn(
+            "absolute font-display font-black tracking-tighter z-30",
+            isHero ? "bottom-10 right-10 text-white text-4xl opacity-40" : "bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-pill"
+          )}>
+            {selectedIndex + 1} <span className="text-[0.6em] opacity-50">/</span> {filtered.length}
           </div>
         )}
       </div>
 
-      {/* Miniatures */}
-      {filtered.length > 1 && (
+      {/* Miniatures - Cachées en Hero */}
+      {!isHero && filtered.length > 1 && (
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {filtered.map((media, idx) => (
             <button
@@ -264,7 +270,7 @@ export function BienCarousel({ medias }: BienCarouselProps) {
       )}
 
       {/* Dots pour mobile */}
-      {filtered.length > 1 && filtered.length <= 10 && (
+      {!isHero && filtered.length > 1 && filtered.length <= 10 && (
         <div className="flex justify-center gap-1.5 sm:hidden">
           {filtered.map((_, idx) => (
             <button

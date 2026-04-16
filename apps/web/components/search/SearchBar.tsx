@@ -3,28 +3,17 @@ import { useState, useRef, useEffect, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { COMMUNES_CI, QUARTIERS_PREMIUM } from '@immo-ci/shared/constants/communes'
 import { TYPES_BIEN_LABELS } from '@immo-ci/shared/constants/biens'
+import { Search, MapPin, Home, Building2, X, ArrowRight, Loader2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
-const IconCommune = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="7" width="20" height="15" rx="1"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/>
-  </svg>
-)
-const IconPin = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
-  </svg>
-)
-const IconHome = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/>
-  </svg>
-)
-
-// Pool de suggestions statique — pas de useSearchParams
 const ALL_SUGGESTIONS = [
-  ...COMMUNES_CI.map((c) => ({ label: c, category: 'Commune', iconEl: <IconCommune /> })),
-  ...QUARTIERS_PREMIUM.map((q) => ({ label: q, category: 'Quartier', iconEl: <IconPin /> })),
-  ...Object.values(TYPES_BIEN_LABELS).map((label) => ({ label, category: 'Type', iconEl: <IconHome /> })),
+  ...COMMUNES_CI.map((c) => ({ label: c, category: 'Commune', icon: MapPin })),
+  ...QUARTIERS_PREMIUM.map((q) => ({ label: q, category: 'Quartier', icon: MapPin })),
+  ...Object.entries(TYPES_BIEN_LABELS).map(([key, label]) => ({ 
+    label, 
+    category: 'Type', 
+    icon: label.toLowerCase().includes('meublée') ? Home : Building2 
+  })),
 ]
 
 interface SearchBarProps {
@@ -34,7 +23,7 @@ interface SearchBarProps {
 }
 
 export function SearchBar({
-  placeholder = 'Commune, quartier, type de bien...',
+  placeholder = 'Où souhaitez-vous habiter ?',
   className = '',
   initialQuery = '',
 }: SearchBarProps) {
@@ -63,18 +52,19 @@ export function SearchBar({
   }, [])
 
   const navigate = (q: string) => {
-    startTransition(() => router.push(`/recherche?q=${encodeURIComponent(q.trim())}`))
+    startTransition(() => {
+      router.push(`/recherche?q=${encodeURIComponent(q.trim())}`)
+      setOpen(false)
+    })
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setOpen(false)
     if (query.trim()) navigate(query)
   }
 
   const selectSuggestion = (label: string) => {
     setQuery(label)
-    setOpen(false)
     navigate(label)
   }
 
@@ -89,12 +79,9 @@ export function SearchBar({
 
   return (
     <div ref={containerRef} className={`relative ${className}`}>
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <div className="relative flex-1 min-w-0">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
-            width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
-            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35" strokeLinecap="round"/>
-          </svg>
+      <form onSubmit={handleSubmit} className="group flex items-center gap-3 p-1.5 bg-white rounded-[1.5rem] border border-gray-100 shadow-xl shadow-gray-200/40 focus-within:ring-4 focus-within:ring-primary/5 focus-within:border-primary/20 transition-all duration-300">
+        <div className="relative flex-1 flex items-center gap-3 pl-4">
+          <Search className={`w-5 h-5 transition-colors duration-300 ${query ? 'text-primary' : 'text-gray-400'}`} />
           <input
             ref={inputRef}
             type="text"
@@ -104,44 +91,75 @@ export function SearchBar({
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             autoComplete="off"
-            className="w-full rounded-btn border border-[var(--border)] pl-9 pr-8 py-2.5 text-sm font-sans focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+            className="w-full bg-transparent py-3 text-base md:text-lg font-display font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none"
           />
           {query && (
-            <button type="button" tabIndex={-1}
-              onClick={() => { setQuery(''); inputRef.current?.focus(); setOpen(true) }}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-[var(--text)]">
-              <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" fill="none">
-                <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/>
-              </svg>
+            <button 
+              type="button" 
+              onClick={() => { setQuery(''); inputRef.current?.focus() }}
+              className="p-1.5 hover:bg-gray-100 rounded-full text-gray-400 transition-colors"
+            >
+              <X className="w-4 h-4" />
             </button>
           )}
         </div>
-        <button type="submit" disabled={isPending}
-          className="flex-shrink-0 px-4 py-2.5 bg-primary text-white text-sm font-sans font-medium rounded-btn hover:bg-primary/90 disabled:opacity-70 transition-colors">
-          {isPending ? '…' : 'Chercher'}
+        
+        <button 
+          type="submit" 
+          disabled={isPending || !query.trim()}
+          className="flex items-center gap-2 px-6 py-3.5 bg-gray-950 text-white rounded-2xl font-display font-bold text-sm tracking-wide disabled:opacity-50 hover:bg-primary hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95 translate-all duration-300"
+        >
+          {isPending ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <>
+              Découvrir
+              <ArrowRight className="w-4 h-4" />
+            </>
+          )}
         </button>
       </form>
 
-      {open && suggestions.length > 0 && (
-        <ul className="absolute z-[100] top-full left-0 right-0 mt-1 bg-white border border-[var(--border)] rounded-card shadow-lg overflow-hidden">
-          {suggestions.map((s, idx) => (
-            <li key={`${s.category}-${s.label}`}>
-              <button
-                type="button"
-                onMouseDown={(e) => { e.preventDefault(); selectSuggestion(s.label) }}
-                onMouseEnter={() => setHighlighted(idx)}
-                className={`w-full text-left px-3 py-2.5 flex items-center gap-2.5 text-sm font-sans border-b border-[var(--border)] last:border-b-0 transition-colors ${
-                  idx === highlighted ? 'bg-primary/8 text-primary' : 'text-[var(--text)] hover:bg-[var(--surface)]'
-                }`}
-              >
-                <span className="w-5 text-center flex-shrink-0 flex items-center justify-center text-muted">{s.iconEl}</span>
-                <span className="flex-1 font-medium">{s.label}</span>
-                <span className="text-xs text-muted">{s.category}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <AnimatePresence>
+        {open && suggestions.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            className="absolute z-[100] top-full left-0 right-0 mt-4 overflow-hidden bg-white/80 backdrop-blur-xl rounded-[2rem] border border-white/40 shadow-2xl p-2"
+          >
+            <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 px-4 py-3 mb-1">
+              Suggestions de recherche
+            </div>
+            <ul className="space-y-1">
+              {suggestions.map((s, idx) => (
+                <li key={`${s.category}-${s.label}`}>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => { e.preventDefault(); selectSuggestion(s.label) }}
+                    onMouseEnter={() => setHighlighted(idx)}
+                    className={`w-full text-left px-4 py-3.5 flex items-center gap-4 rounded-xl transition-all duration-200 ${
+                      idx === highlighted 
+                        ? 'bg-primary/10 text-primary translate-x-1' 
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className={`p-2.5 rounded-xl transition-colors ${
+                      idx === highlighted ? 'bg-primary/20' : 'bg-gray-100'
+                    }`}>
+                      <s.icon className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-sm font-bold">{s.label}</div>
+                      <div className="text-[10px] text-gray-400 font-sans">{s.category}</div>
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

@@ -90,7 +90,7 @@ export const itemVariants: Variants = {
 
 export function Features() {
   return (
-    <section className="py-20 sm:py-28 bg-primary relative overflow-hidden">
+    <section className="py-20 sm:py-24 bg-primary relative overflow-hidden -mt-10 rounded-t-[3rem] z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.3)]">
       {/* Orbs */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] anim-orb-1 pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(249,115,22,0.12) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(60px)' }}/>
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] anim-orb-2 pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(26,77,143,0.4) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(50px)' }}/>
@@ -99,10 +99,10 @@ export function Features() {
       <div className="relative container mx-auto px-4">
         {/* Header */}
         <motion.div 
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="text-center mb-14"
         >
           <span className="inline-block mb-4 px-4 py-1.5 rounded-full border border-secondary/30 bg-secondary/10 text-secondary text-sm font-sans font-bold uppercase tracking-wider">
@@ -128,30 +128,31 @@ export function Features() {
             <motion.div
               key={f.id}
               variants={itemVariants}
-              className={`${f.span} group relative card-glass rounded-[22px] p-7 overflow-hidden transition-all duration-500 hover:bg-white/10 hover:-translate-y-1 cursor-default will-change-transform shadow-lg hover:shadow-2xl`}
+              className={`${f.span} group rounded-[2.5rem] p-2 bg-white/[0.03] border border-white/10 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-2 hover:shadow-2xl active:scale-[0.98]`}
             >
-              {/* Background glow on hover */}
-              <div
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-[22px]"
-                style={{ background: `radial-gradient(circle at 30% 40%, ${f.accent}18 0%, transparent 60%)` }}
-              />
-              {/* Corner accent */}
-              <div className="absolute top-0 right-0 w-24 h-24 pointer-events-none" style={{ background: `radial-gradient(circle, ${f.accent}12 0%, transparent 70%)` }}/>
+              <div className="relative h-full bg-white rounded-[calc(2.5rem-0.5rem)] p-8 overflow-hidden shadow-[inset_0_1px_1px_rgba(255,255,255,1)]">
+                {/* Background glow on hover */}
+                <div
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] pointer-events-none rounded-[calc(2.5rem-0.5rem)]"
+                  style={{ background: `radial-gradient(circle at 30% 40%, ${f.accent}08 0%, transparent 60%)` }}
+                />
+                {/* Corner accent */}
+                <div className="absolute top-0 right-0 w-24 h-24 pointer-events-none" style={{ background: `radial-gradient(circle, ${f.accent}05 0%, transparent 70%)` }}/>
 
-              <div className="relative">
+                <div className="relative">
                 {/* Icon */}
                 <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300"
-                  style={{ background: `${f.accent}18`, color: f.accent }}
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-110 group-hover:-translate-y-1"
+                  style={{ background: `${f.accent}15`, color: f.accent }}
                 >
                   {f.icon}
                 </div>
-                <h3 className="font-display text-2xl font-bold text-white mb-3">{f.title}</h3>
-                <p className="font-sans text-base text-white/65 leading-relaxed">{f.description}</p>
+                <h3 className="font-display text-2xl font-bold text-[#0C2D5E] mb-3">{f.title}</h3>
+                <p className="font-sans text-base text-[#1A4D8F]/70 leading-relaxed">{f.description}</p>
 
                 {/* Bottom accent */}
                 <div
-                  className="mt-6 h-px rounded-full w-10 group-hover:w-16 transition-all duration-500 shadow-sm"
+                  className="mt-8 h-1 rounded-full w-10 group-hover:w-20 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] shadow-sm"
                   style={{ background: `linear-gradient(90deg, ${f.accent}, transparent)` }}
                 />
               </div>
@@ -159,12 +160,13 @@ export function Features() {
               {/* Featured badge */}
               {f.featured && (
                 <div
-                  className="absolute top-4 right-4 text-[10px] font-sans font-bold px-2 py-0.5 rounded-full shadow-sm"
-                  style={{ background: `${f.accent}30`, color: f.accent, border: `1px solid ${f.accent}40` }}
+                  className="absolute top-6 right-6 text-[10px] font-sans font-bold px-3 py-1.5 rounded-full shadow-sm"
+                  style={{ background: `${f.accent}15`, color: f.accent, border: `1px solid ${f.accent}30` }}
                 >
-                  Populaire
+                  ⭐ Populaire
                 </div>
               )}
+              </div>
             </motion.div>
           ))}
         </motion.div>

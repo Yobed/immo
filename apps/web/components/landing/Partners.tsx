@@ -70,13 +70,14 @@ export function Partners() {
   }
 
   return (
-    <section ref={containerRef} className="py-16 bg-white border-t border-[#E2E7F3]">
+    <section ref={containerRef} className="py-20 bg-white border-t border-[#E2E7F3] relative -mt-10 rounded-t-[3rem] z-[80] shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
       <div className="container mx-auto px-4">
 
         {/* Header */}
         <motion.div
            initial={{ opacity: 0, y: 30 }}
-           animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+           whileInView={{ opacity: 1, y: 0 }}
+           viewport={{ once: true, margin: "-100px" }}
            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
            className="text-center mb-12"
         >
@@ -95,7 +96,8 @@ export function Partners() {
         <motion.div
           variants={containerVariants}
           initial="hidden"
-          animate={inView ? "visible" : "hidden"}
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
           className="relative"
         >
           {/* Fades latéraux */}

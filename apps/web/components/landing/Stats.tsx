@@ -151,7 +151,7 @@ export function Stats() {
 
   return (
     <section
-      className="py-20 sm:py-28 relative overflow-hidden"
+      className="py-20 sm:py-24 relative overflow-hidden -mt-10 rounded-t-[3rem] z-[70] shadow-[0_-10px_40px_rgba(0,0,0,0.2)]"
       style={{ background: 'linear-gradient(180deg, #06173A 0%, #0C2D5E 50%, #0a2550 100%)' }}
     >
       {/* Animated orbs */}
@@ -192,7 +192,7 @@ export function Stats() {
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
           onViewportEnter={() => setIsActive(true)}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto"
         >
           {STATS.map((s) => (
             <StatCard key={s.label} {...s} active={isActive} />

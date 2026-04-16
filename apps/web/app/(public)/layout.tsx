@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { MobileMenu } from '@/components/layout/MobileMenu'
 import { SearchBar } from '@/components/search/SearchBar'
 import { UserMenu } from '@/components/auth/UserMenu'
+import { MagneticWrapper } from '@/components/landing/MagneticWrapper'
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -29,20 +30,22 @@ export default async function PublicLayout({ children }: { children: React.React
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 flex-shrink-0 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center text-white font-display font-bold text-sm shadow-sm transition-transform duration-200 group-hover:scale-105"
-              style={{ boxShadow: 'var(--shadow-primary-glow)' }}>
-              IC
-            </div>
-            <span className="font-display text-xl font-semibold text-[var(--primary)] hidden sm:block tracking-tight">
-              Immo <span className="text-gradient-gold" style={{
-                background: 'linear-gradient(135deg,#F97316,#FB923C)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}>CI</span>
-            </span>
-          </Link>
+          <MagneticWrapper>
+            <Link href="/" className="flex items-center gap-2.5 flex-shrink-0 group">
+              <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center text-white font-display font-bold text-sm shadow-sm transition-transform duration-200 group-hover:scale-105"
+                style={{ boxShadow: 'var(--shadow-primary-glow)' }}>
+                IC
+              </div>
+              <span className="font-display text-xl font-semibold text-[var(--primary)] hidden sm:block tracking-tight">
+                Immo <span className="text-gradient-gold" style={{
+                  background: 'linear-gradient(135deg,#F97316,#FB923C)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}>CI</span>
+              </span>
+            </Link>
+          </MagneticWrapper>
 
           {/* Search bar — desktop */}
           <div className="hidden md:block flex-1 max-w-md">
@@ -51,14 +54,18 @@ export default async function PublicLayout({ children }: { children: React.React
 
           {/* Nav desktop */}
           <nav className="hidden md:flex items-center gap-0.5">
-            <Link href="/biens"
-              className="nav-link px-3 py-2 font-sans text-sm text-[var(--text-muted)] hover:text-[var(--primary)] transition-colors duration-200 rounded-btn hover:bg-[var(--primary-light)]">
-              Annonces
-            </Link>
-            <Link href="/recherche?type_bien=residence_meublee"
-              className="nav-link px-3 py-2 font-sans text-sm text-[var(--text-muted)] hover:text-[var(--primary)] transition-colors duration-200 rounded-btn hover:bg-[var(--primary-light)]">
-              Résidences
-            </Link>
+            <MagneticWrapper>
+              <Link href="/biens"
+                className="nav-link px-3 py-2 font-sans text-sm text-[var(--text-muted)] hover:text-[var(--primary)] transition-colors duration-200 rounded-btn hover:bg-[var(--primary-light)]">
+                Annonces
+              </Link>
+            </MagneticWrapper>
+            <MagneticWrapper>
+              <Link href="/recherche?type_bien=residence_meublee"
+                className="nav-link px-3 py-2 font-sans text-sm text-[var(--text-muted)] hover:text-[var(--primary)] transition-colors duration-200 rounded-btn hover:bg-[var(--primary-light)]">
+                Résidences
+              </Link>
+            </MagneticWrapper>
 
             <div className="w-px h-5 bg-[var(--border)] mx-2" />
 
@@ -66,14 +73,18 @@ export default async function PublicLayout({ children }: { children: React.React
               <UserMenu email={user.email ?? ''} role="public" />
             ) : (
               <div className="flex items-center gap-2">
-                <Link href="/login"
-                  className="px-3 py-2 font-sans text-sm text-[var(--text)] hover:text-[var(--primary)] transition-colors duration-200 rounded-btn hover:bg-[var(--surface)]">
-                  Se connecter
-                </Link>
-                <Link href="/register"
-                  className="btn-primary-glow px-4 py-2 font-sans text-sm font-medium bg-[var(--primary)] text-white rounded-btn">
-                  S&apos;inscrire
-                </Link>
+                <MagneticWrapper>
+                  <Link href="/login"
+                    className="px-3 py-2 font-sans text-sm text-[var(--text)] hover:text-[var(--primary)] transition-colors duration-200 rounded-btn hover:bg-[var(--surface)]">
+                    Se connecter
+                  </Link>
+                </MagneticWrapper>
+                <MagneticWrapper>
+                  <Link href="/register"
+                    className="btn-primary-glow px-4 py-2 font-sans text-sm font-medium bg-[var(--primary)] text-white rounded-btn">
+                    S&apos;inscrire
+                  </Link>
+                </MagneticWrapper>
               </div>
             )}
           </nav>

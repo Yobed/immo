@@ -43,7 +43,7 @@ export function Testimonials() {
   return (
     <section
       ref={ref}
-      className="py-20 sm:py-28 relative overflow-hidden"
+      className="py-20 sm:py-24 relative overflow-hidden bg-white -mt-10 rounded-t-[3rem] z-[60] shadow-[0_-10px_40px_rgba(0,0,0,0.1)]"
       style={{ background: 'linear-gradient(180deg, #FFFFFF 0%, #F0F5FF 100%)' }}
     >
       {/* Subtle grid */}
@@ -59,7 +59,8 @@ export function Testimonials() {
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="text-center mb-16"
         >
@@ -86,7 +87,8 @@ export function Testimonials() {
         <motion.div
           variants={containerVariants}
           initial="hidden"
-          animate={inView ? "visible" : "hidden"}
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
           className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-6xl mx-auto"
         >
           {testimonials.map((t) => (
@@ -151,7 +153,8 @@ export function Testimonials() {
         {/* Bottom counter */}
         <motion.div
            initial={{ opacity: 0 }}
-           animate={inView ? { opacity: 1 } : { opacity: 0 }}
+           whileInView={{ opacity: 1 }}
+           viewport={{ once: true }}
            transition={{ duration: 0.8, delay: 0.6 }}
            className="text-center mt-14"
         >

@@ -7,6 +7,7 @@ import { Button, Input } from '@/components/ui'
 interface VisiteRequestFormProps {
   bienId: string
   proprietaireId: string
+  isPremium?: boolean
 }
 
 const CRENEAUX = [
@@ -20,7 +21,7 @@ const CRENEAUX = [
   '17:00 - 18:00',
 ]
 
-export function VisiteRequestForm({ bienId, proprietaireId }: VisiteRequestFormProps) {
+export function VisiteRequestForm({ bienId, proprietaireId, isPremium = false }: VisiteRequestFormProps) {
   const [date, setDate] = useState('')
   const [creneau, setCreneau] = useState('')
   const [message, setMessage] = useState('')
@@ -62,8 +63,21 @@ export function VisiteRequestForm({ bienId, proprietaireId }: VisiteRequestFormP
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 bg-white rounded-card border border-[var(--border)] p-5">
-      <h3 className="font-display text-lg text-[var(--text)]">Demander une visite</h3>
+    <form
+      onSubmit={handleSubmit}
+      className={`space-y-4 rounded-card p-5 ${
+        isPremium
+          ? 'bg-neutral-900 border border-white/10 text-white'
+          : 'bg-white border border-[var(--border)]'
+      }`}
+    >
+      <h3
+        className={`font-display text-lg ${
+          isPremium ? 'text-white' : 'text-[var(--text)]'
+        }`}
+      >
+        Demander une visite
+      </h3>
 
       <Input
         label="Date souhaitée"
@@ -72,20 +86,31 @@ export function VisiteRequestForm({ bienId, proprietaireId }: VisiteRequestFormP
         value={date}
         onChange={(e) => setDate(e.target.value)}
         required
+        className={isPremium ? 'bg-white/5 border-white/10 text-white' : ''}
       />
 
       <div>
-        <label className="block text-sm font-sans font-medium text-[var(--text)] mb-2">Créneau horaire</label>
+        <label
+          className={`block text-sm font-sans font-medium mb-2 ${
+            isPremium ? 'text-white/70' : 'text-[var(--text)]'
+          }`}
+        >
+          Créneau horaire
+        </label>
         <div className="grid grid-cols-2 gap-2">
           {CRENEAUX.map((c) => (
             <button
               key={c}
               type="button"
               onClick={() => setCreneau(c)}
-              className={`px-3 py-2 rounded-btn text-xs font-sans border transition-colors ${
+              className={`px-3 py-2 rounded-btn text-xs font-sans border transition-all ${
                 creneau === c
-                  ? 'border-primary bg-primary-light text-primary font-medium'
-                  : 'border-[var(--border)] text-muted hover:border-primary/40'
+                  ? isPremium
+                    ? 'border-white bg-white text-black font-bold'
+                    : 'border-primary bg-primary-light text-primary font-medium'
+                  : isPremium
+                    ? 'border-white/10 text-white/50 hover:border-white/30'
+                    : 'border-[var(--border)] text-muted hover:border-primary/40'
               }`}
             >
               {c}
@@ -95,7 +120,11 @@ export function VisiteRequestForm({ bienId, proprietaireId }: VisiteRequestFormP
       </div>
 
       <div>
-        <label className="block text-sm font-sans font-medium text-[var(--text)] mb-2">
+        <label
+          className={`block text-sm font-sans font-medium mb-2 ${
+            isPremium ? 'text-white/70' : 'text-[var(--text)]'
+          }`}
+        >
           Message (optionnel)
         </label>
         <textarea
@@ -103,11 +132,20 @@ export function VisiteRequestForm({ bienId, proprietaireId }: VisiteRequestFormP
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Informations complémentaires pour le propriétaire..."
-          className="w-full rounded-btn border border-[var(--border)] px-3 py-2 text-sm font-sans resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
+          className={`w-full rounded-btn px-3 py-2 text-sm font-sans resize-none focus:outline-none focus:ring-2 ${
+            isPremium
+              ? 'bg-white/5 border-white/10 text-white focus:ring-white/20'
+              : 'bg-white border border-[var(--border)] focus:ring-primary/30'
+          }`}
         />
       </div>
 
-      <Button type="submit" className="w-full" loading={submitting} disabled={!date || !creneau}>
+      <Button
+        type="submit"
+        className={`w-full ${isPremium ? 'bg-white text-black hover:bg-neutral-200' : ''}`}
+        loading={submitting}
+        disabled={!date || !creneau}
+      >
         Envoyer la demande
       </Button>
     </form>

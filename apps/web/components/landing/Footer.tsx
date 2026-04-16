@@ -54,7 +54,7 @@ export function Footer() {
         </div>
 
         {/* Colonnes */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-12">
           {columns.map((col) => (
             <div key={col.title}>
               <h4 className="font-display text-sm font-semibold text-white/90 uppercase tracking-wider mb-4">

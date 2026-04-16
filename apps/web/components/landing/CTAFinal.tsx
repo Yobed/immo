@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
 import { containerVariants, itemVariants } from './Features'
+import { MagneticWrapper } from './MagneticWrapper'
 
 export function CTAFinal() {
   const containerRef = useRef<HTMLElement>(null)
@@ -11,7 +12,7 @@ export function CTAFinal() {
   return (
     <section
       ref={containerRef}
-      className="py-28 relative overflow-hidden"
+      className="py-20 sm:py-24 relative overflow-hidden -mt-10 rounded-t-[3rem] z-[90] shadow-[0_-10px_40px_rgba(0,0,0,0.3)]"
     >
       {/* Animated mesh gradient background */}
       <div
@@ -35,7 +36,8 @@ export function CTAFinal() {
       <motion.div 
         variants={containerVariants}
         initial="hidden"
-        animate={inView ? "visible" : "hidden"}
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
         className="relative container mx-auto px-4 text-center"
       >
         {/* Pill badge */}
@@ -63,25 +65,29 @@ export function CTAFinal() {
         {/* Buttons */}
         <motion.div
           variants={itemVariants}
-          className="flex flex-col sm:flex-row gap-4 justify-center"
+          className="flex flex-col sm:flex-row gap-4 justify-center items-center"
         >
-          <Link
-            href="/biens"
-            className="group relative inline-flex items-center justify-center gap-3 font-sans font-bold rounded-[14px] bg-secondary text-white px-9 py-4 text-base shadow-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl active:scale-95 overflow-hidden anim-pulse-glow"
-          >
-            {/* Shine effect */}
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-            <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            Chercher un bien
-          </Link>
+          <MagneticWrapper>
+            <Link
+              href="/biens"
+              className="group relative inline-flex items-center justify-center gap-3 font-sans font-bold rounded-[14px] bg-secondary text-white px-9 py-4 text-base shadow-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl active:scale-95 overflow-hidden anim-pulse-glow"
+            >
+              {/* Shine effect */}
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+              <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              Chercher un bien
+            </Link>
+          </MagneticWrapper>
 
-          <Link
-            href="/register"
-            className="group inline-flex items-center justify-center gap-3 font-sans font-bold rounded-[14px] border-2 border-white/30 text-white hover:bg-white/10 hover:border-white/60 transition-all duration-300 px-9 py-4 text-base hover:scale-105 active:scale-95"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none"><path d="M12 5v14M5 12h14"/></svg>
-            Publier un bien
-          </Link>
+          <MagneticWrapper>
+            <Link
+              href="/register"
+              className="group inline-flex items-center justify-center gap-3 font-sans font-bold rounded-[14px] border-2 border-white/30 text-white hover:bg-white/10 hover:border-white/60 transition-all duration-300 px-9 py-4 text-base hover:scale-105 active:scale-95"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none"><path d="M12 5v14M5 12h14"/></svg>
+              Publier un bien
+            </Link>
+          </MagneticWrapper>
         </motion.div>
 
         {/* Trust row */}

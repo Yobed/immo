@@ -12,16 +12,20 @@ interface BienMapProps {
   longitude?: number | null
   titre: string
   commune?: string | null
+  hauteur?: number
 }
 
-export function BienMap({ latitude, longitude, titre, commune }: BienMapProps) {
+export function BienMap({ latitude, longitude, titre, commune, hauteur = 256 }: BienMapProps) {
   const hasCoords = !!(latitude && longitude)
   const center = hasCoords
     ? { latitude: latitude!, longitude: longitude! }
     : ABIDJAN_CENTER
 
   return (
-    <div className="w-full h-64 rounded-card overflow-hidden border border-[var(--border)] relative">
+    <div 
+      className="w-full rounded-card overflow-hidden border border-[var(--border)] relative"
+      style={{ height: hauteur }}
+    >
       <Map
         mapboxAccessToken={MAPBOX_TOKEN}
         initialViewState={{ longitude: center.longitude, latitude: center.latitude, zoom: hasCoords ? 14 : 11 }}

@@ -56,8 +56,8 @@ export function HowItWorks() {
   return (
     <section
       ref={containerRef}
-      className="py-20 sm:py-28 relative overflow-hidden"
-      style={{ background: 'linear-gradient(180deg, #F8FAFF 0%, #FFFFFF 100%)' }}
+      className="py-20 sm:py-28 relative overflow-hidden bg-white -mt-10 rounded-t-[3rem] z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.1)]"
+      style={{ background: 'linear-gradient(180deg, #FFFFFF 0%, #F8FAFF 100%)' }}
     >
       {/* Subtle grid */}
       <div className="absolute inset-0 bg-grid opacity-30 pointer-events-none" />
@@ -109,14 +109,14 @@ export function HowItWorks() {
             />
           </div>
 
-          {steps.map((step) => (
+          {steps.map((step, i) => (
             <motion.div
               key={step.number}
               variants={itemVariants}
-              whileHover={{ y: -8 }}
-              className="group"
+              custom={i}
+              className="group rounded-[2rem] p-2 bg-black/[0.02] border border-black/[0.04] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-2 hover:shadow-xl active:scale-[0.98]"
             >
-              <div className="relative rounded-[24px] p-8 text-center bg-white shadow-card hover:shadow-card-hover transition-all duration-500 border border-border">
+              <div className="relative h-full rounded-[calc(2rem-0.5rem)] p-8 text-center bg-white shadow-[inset_0_1px_1px_rgba(255,255,255,1)]">
                 {/* Big number background */}
                 <span
                   className="absolute top-4 right-5 font-mono font-black text-7xl leading-none select-none pointer-events-none"
@@ -128,7 +128,7 @@ export function HowItWorks() {
                 {/* Icon container — gradient border spin */}
                 <div className="relative inline-flex items-center justify-center mb-6 mx-auto">
                   <div
-                    className="w-20 h-20 rounded-2xl flex items-center justify-center relative z-10 group-hover:scale-110 transition-transform duration-300"
+                    className="w-20 h-20 rounded-2xl flex items-center justify-center relative z-10 transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-[1.15] group-hover:-translate-y-1"
                     style={{ background: step.bg, color: step.color }}
                   >
                     {step.icon}
@@ -143,7 +143,7 @@ export function HowItWorks() {
 
                 {/* Step number badge */}
                 <div
-                  className="absolute top-5 left-5 w-7 h-7 rounded-full flex items-center justify-center font-mono text-xs font-bold text-white"
+                  className="absolute top-5 left-5 w-7 h-7 rounded-full flex items-center justify-center font-mono text-xs font-bold text-white shadow-md relative z-10"
                   style={{ background: step.color }}
                 >
                   {parseInt(step.number, 10)}

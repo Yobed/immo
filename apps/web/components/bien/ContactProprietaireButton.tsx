@@ -8,9 +8,10 @@ interface ContactProprietaireButtonProps {
   bienId: string
   proprietaireId: string
   userId: string | null
+  className?: string
 }
 
-export function ContactProprietaireButton({ bienId, proprietaireId, userId }: ContactProprietaireButtonProps) {
+export function ContactProprietaireButton({ bienId, proprietaireId, userId, className }: ContactProprietaireButtonProps) {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const supabase = createClient()
@@ -51,7 +52,7 @@ export function ContactProprietaireButton({ bienId, proprietaireId, userId }: Co
     <Button
       onClick={handleContact}
       loading={loading}
-      className="w-full"
+      className={className}
     >
       Contacter le propriétaire
     </Button>

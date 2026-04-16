@@ -53,7 +53,7 @@ export async function FeaturedProperties() {
 
   return (
     <section
-      className="relative py-24 sm:py-32 overflow-hidden"
+      className="relative py-20 sm:py-24 overflow-hidden -mt-10 rounded-t-[3rem] z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.2)]"
       style={{ background: 'linear-gradient(180deg, #05132E 0%, #0C2D5E 60%, #081E48 100%)' }}
     >
       {/* Ambient glows */}
@@ -83,12 +83,14 @@ export async function FeaturedProperties() {
           </div>
           <Link
             href="/biens"
-            className="shrink-0 inline-flex items-center gap-2.5 font-sans text-sm font-semibold text-white border border-white/20 rounded-full px-6 py-3 hover:bg-white hover:text-primary transition-all duration-300 group self-start sm:self-auto"
+            className="group shrink-0 inline-flex items-center gap-3 font-sans text-sm font-semibold text-white border border-white/20 rounded-full pl-6 pr-2 py-2 hover:bg-white/5 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:shadow-xl active:scale-[0.98] self-start sm:self-auto"
           >
             <span>Voir tout ({rows.length}+)</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-x-1 transition-transform">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
+            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-1 group-hover:scale-105">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </div>
           </Link>
         </ScrollReveal>
 
@@ -101,10 +103,10 @@ export async function FeaturedProperties() {
               className="h-full"
             >
               <div
-                className="h-full"
+                className="h-full xl:mt-[var(--card-offset)]"
                 style={{
-                  marginTop: i % 4 !== 0 ? `${OFFSETS[i % OFFSETS.length]}px` : '0',
-                }}
+                  '--card-offset': i % 4 !== 0 ? `${OFFSETS[i % OFFSETS.length]}px` : '0',
+                } as React.CSSProperties}
               >
                 <BienCard
                   id={bien.id}
@@ -125,13 +127,15 @@ export async function FeaturedProperties() {
         </div>
 
         {/* Bottom CTA */}
-        <ScrollReveal delay={0.3} className="text-center mt-16">
+        <ScrollReveal delay={0.3} className="text-center mt-24">
           <Link
             href="/biens"
-            className="inline-flex items-center gap-3 font-sans font-bold text-base bg-secondary text-white px-10 py-4 rounded-[14px] hover:bg-secondary/90 transition-all duration-200 shadow-xl hover:scale-105 active:scale-95 anim-pulse-glow"
+            className="group inline-flex items-center gap-4 font-sans font-bold text-base bg-secondary text-white pl-8 pr-2 py-2 rounded-full transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] shadow-[0_10px_30px_rgba(249,115,22,0.3)] hover:shadow-[0_20px_40px_rgba(249,115,22,0.4)] hover:-translate-y-1 active:scale-[0.98] mx-auto overflow-hidden"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             Explorer tous les biens
+            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-1 group-hover:scale-105">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
           </Link>
         </ScrollReveal>
       </div>

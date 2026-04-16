@@ -9,6 +9,9 @@ import { Stats } from '@/components/landing/Stats'
 import { Partners } from '@/components/landing/Partners'
 import { CTAFinal } from '@/components/landing/CTAFinal'
 import { Footer } from '@/components/landing/Footer'
+import { CustomCursor } from '@/components/landing/CustomCursor'
+import { LifestyleMatcher } from '@/components/landing/LifestyleMatcher'
+import { PremiumShowcase } from '@/components/landing/PremiumShowcase'
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -60,13 +63,41 @@ export default async function HomePage() {
     .slice(0, 8)
   const bgImages = heroBgImages.length >= 2 ? heroBgImages : FALLBACK_IMAGES
 
+  // Bien vedette pour la carte flottante du Hero (1er bien publié avec photo)
+  const featuredBien = biensWithPhoto.find((b) => b.photo_url) ?? biensWithPhoto[0] ?? null
+
+  // Sélectionner les 3 biens les plus prestigieux (prix le plus élevé) pour le PremiumShowcase
+  const premiumProperties = [...biensWithPhoto]
+    .filter(b => b.photo_url)
+    .sort((a, b) => {
+      const priceA = a.prix_vente_fcfa || a.prix_mois_fcfa || 0;
+      const priceB = b.prix_vente_fcfa || b.prix_mois_fcfa || 0;
+      return priceB - priceA;
+    })
+    .slice(0, 3)
+    .map(b => ({
+      id: b.id,
+      title: b.titre,
+      location: b.commune + (b.quartier ? `, ${b.quartier}` : ''),
+      price: b.prix_vente_fcfa 
+        ? `${b.prix_vente_fcfa.toLocaleString()} FCFA` 
+        : b.prix_mois_fcfa 
+          ? `${b.prix_mois_fcfa.toLocaleString()} FCFA / mois`
+          : 'Prix sur demande',
+      tags: [b.type_bien.replace('_', ' '), b.commune],
+      image: b.photo_url!
+    }))
+
   return (
     <main>
-      <Hero bgImages={bgImages} />
+      <CustomCursor />
+      <Hero bgImages={bgImages} featuredBien={featuredBien} />
+      <LifestyleMatcher />
       <HowItWorks />
       <FeaturedProperties />
-      <Features />
+      <PremiumShowcase properties={premiumProperties} />
       <MapZones biens={biensWithPhoto} />
+      <Features />
       <Testimonials />
       <Stats />
       <Partners />
