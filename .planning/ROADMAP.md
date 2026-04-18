@@ -200,6 +200,16 @@ Plans:
 Plans:
 - [ ] TBD (promouvoir avec /gsd:review-backlog quand prêt)
 
+### Phase 1000: Améliorations des disponibilités et plate-forme de référence
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 999
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 1000 to break down)
+
 ---
 *Roadmap créée : 2026-04-05*
 *Mise à jour : 2026-04-07 — Phase 5 planifiée (4 plans, 2 vagues) — Maestro remplace Detox, StyleSheet natif RN (NativeWind v4 incompatible SDK 52 New Architecture)*

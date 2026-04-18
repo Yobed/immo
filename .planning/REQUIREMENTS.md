@@ -189,3 +189,17 @@
 ---
 *Requirements dÃ©finis : 2026-04-05*
 *DerniÃ¨re mise Ã  jour : 2026-04-05 aprÃ¨s initialisation*
+
+### Phase 1000 Requirements
+
+- [x] **AVAIL-01** : Indicateur visuel 'Pulse' sur la Mapbox pour les biens disponibles.
+- [x] **AVAIL-02** : Filtrage 'Disponibles' haute visibilité dans MapZones.
+- [ ] **AVAIL-03** : Interface de gestion de disponibilité dans le dashboard propriétaire (PRO).
+- [ ] **AVAIL-04** : Automatisation métier : mise à jour automatique 'est_disponible' lors d'une réservation.
+
+### Phase 1000 Requirements
+
+- [x] **AVAIL-01** : Indicateur visuel 'Pulse' sur la Mapbox pour les biens disponibles.
+- [x] **AVAIL-02** : Filtrage 'Disponibles' haute visibilité dans MapZones.
+- [ ] **AVAIL-03** : Interface de gestion de disponibilité dans le dashboard propriétaire (PRO).
+- [ ] **AVAIL-04** : Automatisation métier : mise à jour automatique 'est_disponible' lors d'une réservation.
