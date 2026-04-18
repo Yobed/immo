@@ -6,6 +6,8 @@ import { UserMenu } from '@/components/auth/UserMenu'
 import { MagneticWrapper } from '@/components/landing/MagneticWrapper'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
 
+import { ConciergerieLive } from '@/components/chat/ConciergerieLive'
+
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -101,6 +103,7 @@ export default async function PublicLayout({ children }: { children: React.React
 
       {children}
 
+      <ConciergerieLive isFloatingTrigger={true} />
     </>
   )
 }

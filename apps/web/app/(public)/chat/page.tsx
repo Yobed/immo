@@ -1,21 +1,28 @@
 import { ChatBot } from '@/components/chat/ChatBot'
 
 export const metadata = {
-  title:       'Assistant IA — Immo CI',
-  description: 'Votre assistant immobilier expert en Cote d\'Ivoire. Trouvez le bien ideal a Abidjan.',
+  title:       'Élite Immo CI — Conciergerie Live',
+  description: 'Votre conseiller immobilier de luxe dédié. L\'excellence au service de votre projet en Côte d\'Ivoire.',
 }
 
 export default function ChatPage() {
   return (
-    <div className="min-h-screen bg-surface flex flex-col">
-      <div className="max-w-2xl mx-auto w-full flex-1 flex flex-col p-4 py-8">
-        <h1 className="font-display text-2xl text-primary mb-2 text-center">
-          Assistant Immobilier CI
-        </h1>
-        <p className="text-muted text-sm text-center mb-6">
-          Posez vos questions sur les biens a Abidjan et en Cote d&apos;Ivoire
-        </p>
-        <div className="flex-1" style={{ minHeight: '500px' }}>
+    <div className="min-h-screen bg-[var(--midnight)] flex flex-col pt-32 pb-20">
+      <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col px-6">
+        <div className="text-center mb-10">
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <span className="w-12 h-[1px] bg-[var(--accent-luxury)]" />
+            <h1 className="font-display text-3xl md:text-4xl text-white font-bold tracking-tight">
+              Élite Immo CI
+            </h1>
+            <span className="w-12 h-[1px] bg-[var(--accent-luxury)]" />
+          </div>
+          <p className="text-white/40 text-xs font-bold uppercase tracking-[0.5em] font-display">
+            Conciergerie Live & Conseiller Dédié
+          </p>
+        </div>
+        
+        <div className="flex-1 rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl bg-[var(--midnight-muted)]/50 backdrop-blur-xl" style={{ minHeight: '650px' }}>
           <ChatBot />
         </div>
       </div>

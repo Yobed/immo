@@ -11,6 +11,7 @@ import { BienCarousel } from '@/components/bien/BienCarousel'
 import { FavorisButton } from '@/components/bien/FavorisButton'
 import { VisiteRequestForm } from '@/components/bien/VisiteRequestForm'
 import { ContactProprietaireButton } from '@/components/bien/ContactProprietaireButton'
+import { ConciergerieLive } from '@/components/chat/ConciergerieLive'
 import { BienMap } from '@/components/bien/BienMap'
 import { 
   MapPin, 
@@ -477,10 +478,9 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                           userId={user?.id ?? null}
                           className="w-full flex items-center justify-center gap-4 py-6 bg-transparent border border-white/10 rounded-2xl text-[10px] font-bold uppercase tracking-[0.4em] font-display hover:border-white/30 transition-all duration-500 hover:bg-white/5 text-white"
                         />
-                        <button className="w-full flex items-center justify-center gap-4 py-6 bg-transparent border border-white/10 rounded-2xl text-[10px] font-bold uppercase tracking-[0.4em] font-display hover:border-white/30 transition-all duration-500 hover:bg-white/5 text-white">
-                          <MessageCircle className="w-4 h-4 text-[var(--accent-luxury)]" />
-                          Conciergerie Live
-                        </button>
+                        <ConciergerieLive 
+                          propertyContext={`Bien : ${bien.titre}\nCommune : ${bien.commune}\nQuartier : ${bien.quartier}\nPrix : ${formatFCFA(prixValue!)}${prixSuffix}\nType : ${bien.type_bien}\nDescription : ${bien.description}`}
+                        />
                       </div>
                     </div>
                   ) : (

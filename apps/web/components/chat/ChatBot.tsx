@@ -1,19 +1,27 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
-import { ChatMessage }                  from './ChatMessage'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ChatMessage } from './ChatMessage'
+import { Sparkles, Send, X, MessageCircle, Mic, Phone, ShieldCheck } from 'lucide-react'
 
 type Message = { role: 'user' | 'assistant'; content: string }
 
 const PLACEHOLDER_SUGGESTIONS = [
-  'Cherche un F3 a Cocody entre 300 000 et 400 000 FCFA',
-  'Quels sont les prix a Yopougon ?',
-  'Je cherche une villa meublee pour 1 mois',
+  'Quels sont les atouts de ce bien ?',
+  'Services de conciergerie disponibles ?',
+  'Je souhaite planifier une visite VIP',
 ]
 
-export function ChatBot() {
+interface ChatBotProps {
+  context?: string
+  onClose?: () => void
+  isFloating?: boolean
+}
+
+export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) {
   const [messages, setMessages] = useState<Message[]>([])
-  const [input,    setInput]    = useState('')
-  const [loading,  setLoading]  = useState(false)
+  const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -29,17 +37,17 @@ export function ChatBot() {
     setInput('')
     setLoading(true)
 
-    // Ajouter un message assistant vide pour le streaming
+    // AI message placeholder
     setMessages(prev => [...prev, { role: 'assistant', content: '' }])
 
     try {
       const res = await fetch('/api/chat', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ messages: newMessages }),
+        body: JSON.stringify({ messages: newMessages, context }),
       })
 
-      if (!res.body) throw new Error('Pas de stream')
+      if (!res.body) throw new Error('No stream')
 
       const reader = res.body.getReader()
       const decoder = new TextDecoder()
@@ -49,7 +57,6 @@ export function ChatBot() {
         const { done, value } = await reader.read()
         if (done) break
         assistantText += decoder.decode(value, { stream: true })
-        // Mettre a jour le dernier message assistant avec le texte accumule
         setMessages(prev => {
           const updated = [...prev]
           updated[updated.length - 1] = { role: 'assistant', content: assistantText }
@@ -61,7 +68,7 @@ export function ChatBot() {
         const updated = [...prev]
         updated[updated.length - 1] = {
           role: 'assistant',
-          content: 'Desolee, une erreur est survenue. Veuillez reessayer.',
+          content: 'Excellence, une légère perturbation est survenue. Veuillez m\'excuser et réitérer votre demande.',
         }
         return updated
       })
@@ -71,31 +78,58 @@ export function ChatBot() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-surface-card rounded-card shadow-sm overflow-hidden">
-      {/* Header */}
-      <div className="bg-primary px-4 py-3 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-sm">
-          IA
-        </div>
-        <div>
-          <p className="text-white font-medium text-sm">Assistant Immo CI</p>
-          <p className="text-white/70 text-xs">Expert immobilier Cote d&apos;Ivoire</p>
-        </div>
+    <div className={`flex flex-col h-full bg-[var(--midnight)] border border-white/10 ${isFloating ? 'rounded-[2rem] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)]' : 'rounded-none'} overflow-hidden backdrop-blur-3xl relative`}>
+      {/* Background patterns */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--accent-luxury)] blur-[100px]" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-secondary blur-[100px]" />
       </div>
 
-      {/* Zone messages */}
-      <div className="flex-1 overflow-y-auto p-4 min-h-0">
+      {/* Header */}
+      <div className="relative z-10 px-8 py-6 bg-white/[0.03] border-b border-white/5 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[var(--accent-luxury)] bg-[var(--midnight-muted)] p-1 flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-[var(--accent-luxury)]" />
+            </div>
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-[var(--midnight)] shadow-lg" />
+          </div>
+          <div>
+            <h3 className="text-white font-display font-bold text-base tracking-tight">Élite Immo CI</h3>
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-secondary" />
+              <p className="text-[9px] uppercase font-bold tracking-[0.2em] text-white/40">Conseiller Dédié en Ligne</p>
+            </div>
+          </div>
+        </div>
+        {onClose && (
+          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+            <X className="w-5 h-5 text-white/50" />
+          </button>
+        )}
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-8 relative z-10 space-y-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
         {messages.length === 0 ? (
-          <div className="space-y-3">
-            <p className="text-center text-muted text-sm py-4">
-              Bonjour ! Je suis votre assistant immobilier CI. Comment puis-je vous aider ?
-            </p>
-            <div className="space-y-2">
+          <div className="h-full flex flex-col justify-center items-center text-center space-y-8 py-12">
+            <div className="w-20 h-20 rounded-3xl bg-white/[0.02] border border-white/5 flex items-center justify-center mb-4">
+              <ShieldCheck className="w-10 h-10 text-[var(--accent-luxury)] opacity-50" />
+            </div>
+            <div>
+              <p className="text-xl font-display font-light text-white mb-2 italic">
+                Bienvenue dans votre espace privilégié.
+              </p>
+              <p className="text-sm text-white/40 max-w-[280px] leading-relaxed mx-auto uppercase tracking-widest text-[10px] font-bold">
+                Comment puis-je satisfaire votre recherche d&apos;exception ?
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-3 w-full max-w-[320px]">
               {PLACEHOLDER_SUGGESTIONS.map((s, i) => (
                 <button
                   key={i}
                   onClick={() => sendMessage(s)}
-                  className="w-full text-left text-sm bg-primary-light text-primary px-3 py-2 rounded-btn hover:bg-primary hover:text-white transition-colors"
+                  className="w-full text-center text-[10px] uppercase tracking-widest font-bold bg-white/5 border border-white/5 text-white/60 px-5 py-3 rounded-xl hover:bg-white/[0.08] hover:text-white hover:border-white/20 transition-all duration-500"
                 >
                   {s}
                 </button>
@@ -109,33 +143,40 @@ export function ChatBot() {
         )}
         {loading && messages[messages.length - 1]?.role === 'assistant' &&
           messages[messages.length - 1]?.content === '' && (
-          <div className="flex justify-start mb-3">
-            <div className="bg-surface-card border border-[var(--border)] px-4 py-2 rounded-2xl rounded-tl-sm text-muted text-sm">
-              En cours de reflexion...
-            </div>
+          <div className="flex justify-start items-center gap-4">
+             <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+                <div className="w-1.5 h-1.5 bg-[var(--accent-luxury)] rounded-full animate-pulse" />
+             </div>
+             <p className="text-[10px] uppercase font-bold tracking-[0.3em] text-white/20">Analyse en cours...</p>
           </div>
         )}
-        <div ref={bottomRef} />
+        <div ref={bottomRef} className="h-4" />
       </div>
 
       {/* Input */}
-      <div className="border-t border-[var(--border)] p-3 flex gap-2">
-        <input
-          type="text"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }}
-          placeholder="Posez votre question immobiliere..."
-          disabled={loading}
-          className="flex-1 border border-[var(--border)] rounded-btn px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
-        />
-        <button
-          onClick={() => sendMessage()}
-          disabled={!input.trim() || loading}
-          className="bg-primary text-white px-4 py-2 rounded-btn text-sm font-medium hover:opacity-90 disabled:opacity-40 transition-opacity"
-        >
-          Envoyer
-        </button>
+      <div className="p-6 relative z-10 bg-white/[0.02] border-t border-white/5">
+        <div className="flex gap-4 p-2 bg-[var(--midnight-muted)]/50 rounded-2xl border border-white/5 focus-within:border-[var(--accent-luxury)]/30 transition-all duration-500">
+          <input
+            type="text"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }}
+            placeholder="Échangez avec votre conseiller..."
+            disabled={loading}
+            className="flex-1 bg-transparent px-4 py-2 text-sm text-white placeholder-white/20 focus:outline-none disabled:opacity-50"
+          />
+          <button
+            onClick={() => sendMessage()}
+            disabled={!input.trim() || loading}
+            className="w-10 h-10 rounded-xl bg-[var(--accent-luxury)] text-[var(--midnight)] flex items-center justify-center disabled:opacity-20 hover:scale-105 active:scale-95 transition-all shadow-lg"
+          >
+            <Send className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="flex justify-center gap-8 mt-4 opacity-20 hover:opacity-100 transition-opacity duration-1000">
+           <Mic className="w-3.5 h-3.5 text-white cursor-not-allowed" />
+           <Phone className="w-3.5 h-3.5 text-white cursor-not-allowed" />
+        </div>
       </div>
     </div>
   )

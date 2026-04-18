@@ -16,7 +16,6 @@ type BienRow = {
   nb_pieces: number | null
 }
 
-const OFFSETS = [0, 40, 20, 60, 30, 10, 50, 20, 40, 0, 60, 30, 20, 50, 10, 40]
 
 export async function FeaturedProperties() {
   const supabase = await createClient()
@@ -84,31 +83,23 @@ export async function FeaturedProperties() {
           </div>
         </ScrollReveal>
 
-        {/* Masonry-like grid with side-entry already handled inside PremiumBienCard */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 md:gap-y-16 gap-x-12">
+        {/* Grille alignée — cartes sur la même ligne de base */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {rows.map((bien, i) => (
-            <div
+            <PremiumBienCard
               key={bien.id}
-              className="h-full"
-            >
-              <div className="lg:mt-[0px]" style={{
-                marginTop: i % 3 !== 0 ? `${OFFSETS[i % OFFSETS.length]}px` : '0',
-              } as any}>
-                <PremiumBienCard
-                  id={bien.id}
-                  titre={bien.titre}
-                  commune={bien.commune}
-                  quartier={bien.quartier}
-                  type_bien={bien.type_bien}
-                  prix_mois_fcfa={bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa}
-                  prix_vente_fcfa={bien.prix_vente_fcfa}
-                  surface_m2={bien.surface_m2}
-                  nb_pieces={bien.nb_pieces}
-                  photo_url={coverMap[bien.id] ?? null}
-                  index={i}
-                />
-              </div>
-            </div>
+              id={bien.id}
+              titre={bien.titre}
+              commune={bien.commune}
+              quartier={bien.quartier}
+              type_bien={bien.type_bien}
+              prix_mois_fcfa={bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa}
+              prix_vente_fcfa={bien.prix_vente_fcfa}
+              surface_m2={bien.surface_m2}
+              nb_pieces={bien.nb_pieces}
+              photo_url={coverMap[bien.id] ?? null}
+              index={i}
+            />
           ))}
         </div>
 

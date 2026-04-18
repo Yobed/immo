@@ -296,47 +296,7 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
           </motion.div>
         )}
 
-        {/* Commune filter buttons */}
-        <motion.div variants={itemVariants} className="pt-8">
-          <div className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto">
-             <button
-              onClick={() => setActiveCommune(null)}
-              className={`px-6 py-2 rounded-full border text-[10px] uppercase tracking-widest font-bold transition-all duration-700 ease-[0.16, 1, 0.3, 1] active:scale-[0.98] ${
-                activeCommune === null
-                  ? 'bg-[var(--text)] text-[var(--background)] border-[var(--text)]'
-                  : 'bg-[var(--surface-card)] border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)]'
-              }`}
-            >
-              Toute la Côte d&apos;Ivoire
-            </button>
-
-            {communes.map((commune) => {
-              const count = communeCounts[commune] ?? 0
-              const isActive = activeCommune === commune
-              return (
-                <button
-                  key={commune}
-                  onClick={() => setActiveCommune(isActive ? null : commune)}
-                  className={`px-6 py-2 rounded-full border text-[10px] uppercase tracking-widest font-bold transition-all duration-700 ease-[0.16, 1, 0.3, 1] active:scale-[0.98] ${
-                    isActive
-                      ? 'bg-[var(--text)] border-[var(--text)] text-[var(--background)]'
-                      : count === 0
-                      ? 'bg-transparent border-[var(--border)] opacity-20 text-[var(--text-muted)] cursor-default'
-                      : 'bg-[var(--surface-card)] border-[var(--border)] text-[var(--text-muted)] hover:bg-[var(--surface-card)] hover:text-[var(--text)]'
-                  }`}
-                  disabled={count === 0}
-                >
-                  {commune}
-                  {count > 0 && (
-                    <span className="ml-2 opacity-60">{count}</span>
-                  )}
-                </button>
-              )
-            })}
-          </div>
-        </motion.div>
-
-         <motion.div variants={itemVariants} className="text-center mt-12 text-[var(--text-muted)] opacity-50 text-[9px] tracking-[0.3em] uppercase font-sans">
+        <motion.div variants={itemVariants} className="text-center mt-12 text-[var(--text-muted)] opacity-50 text-[9px] tracking-[0.3em] uppercase font-sans">
           Extension en cours : San-Pédro · Bouaké · Yamoussoukro
         </motion.div>
       </motion.div>

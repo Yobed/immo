@@ -3,13 +3,13 @@ import { chatImmobilierStream } from '@/lib/claude'
 import type { ChatMessage }     from '@/lib/claude'
 
 export async function POST(req: NextRequest) {
-  const { messages } = await req.json() as { messages: ChatMessage[] }
+  const { messages, context } = await req.json() as { messages: ChatMessage[], context?: string }
 
   if (!messages || !Array.isArray(messages)) {
     return new Response(JSON.stringify({ error: 'messages requis' }), { status: 400 })
   }
 
-  const stream = await chatImmobilierStream(messages)
+  const stream = await chatImmobilierStream(messages, context)
 
   // Convertir Anthropic stream -> Web ReadableStream pour Next.js Response
   const readable = new ReadableStream({

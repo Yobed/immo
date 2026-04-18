@@ -148,47 +148,47 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
         {/* ── LEFT CONTENT ─────────────────────────────────────────── */}
         <div className="flex-1 max-w-2xl z-20">
 
-          {/* Prestige Label */}
+          {/* Badge */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="inline-flex items-center gap-4 mb-8"
+            className="inline-flex items-center gap-2 mb-6 px-3 py-1.5 rounded-full border border-[var(--accent-luxury)]/30 bg-[var(--accent-luxury)]/8"
           >
-            <span className="w-8 h-px bg-[var(--text-subtle)] opacity-40" />
-            <span className="font-sans text-[11px] text-[var(--text-muted)] font-bold tracking-[0.6em] uppercase">
-              Abidjan Premier Collective
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-luxury)]" />
+            <span className="font-sans text-[11px] text-[var(--accent-luxury)] font-semibold tracking-[0.3em] uppercase">
+              Plateforme immobilière N°1 en Côte d&apos;Ivoire
             </span>
           </motion.div>
 
-          {/* Editorial Headline */}
+          {/* Titre principal */}
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.2, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="font-display font-light leading-[0.95] mb-8 md:mb-10 tracking-tighter text-[var(--text)]"
-            style={{ fontSize: 'clamp(2.5rem, 9vw, 8rem)' }}
+            className="font-display font-bold leading-tight mb-6 text-[var(--text)]"
+            style={{ fontSize: 'clamp(2.4rem, 6vw, 5.5rem)' }}
           >
-            L&apos;horizon <br />
-            <span className="font-serif italic opacity-90 block pl-4 lg:pl-12">redéfini.</span>
+            Trouvez votre bien<br />
+            <span style={{ color: 'var(--accent-luxury)' }}>en Côte d&apos;Ivoire</span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, x: -15 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="font-sans text-xl text-[var(--text-muted)] mb-12 leading-relaxed max-w-md border-l border-[var(--border)] pl-8 font-light"
+            className="font-sans text-lg text-[var(--text-muted)] mb-10 leading-relaxed max-w-md"
           >
-            Curateur d&apos;espaces singuliers et de panoramas d&apos;exception. 
-            Sélection confidentielle pour une vie sans compromis.
+            Location, vente et résidences meublées à Abidjan.<br />
+            Réservation et paiement sécurisé en quelques clics.
           </motion.p>
 
-          {/* Search bar — Architectural Minimalist */}
+          {/* Barre de recherche */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col sm:flex-row gap-0 mb-8 md:mb-12 bg-[var(--surface-card)] border border-[var(--border)] backdrop-blur-xl overflow-hidden rounded-sm group focus-within:border-[var(--accent-luxury)] transition-all duration-700"
+            className="flex flex-col sm:flex-row gap-0 mb-8 md:mb-10 bg-[var(--surface-card)] border border-[var(--border)] backdrop-blur-xl overflow-hidden rounded-lg group focus-within:border-[var(--accent-luxury)] transition-all duration-500"
           >
             <div className="relative flex-1">
               <input
@@ -196,15 +196,15 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                placeholder="Localité, style ou référence..."
-                className="w-full px-6 md:px-8 py-4 md:py-6 bg-transparent text-[var(--text)] font-sans text-base md:text-lg border-0 focus:outline-none placeholder-[var(--text-subtle)] font-light"
+                placeholder="Commune, quartier, type de bien..."
+                className="w-full px-5 py-4 bg-transparent text-[var(--text)] font-sans text-sm border-0 focus:outline-none placeholder-[var(--text-subtle)]"
               />
             </div>
             <button
               onClick={handleSearch}
-              className="px-8 md:px-10 py-4 md:py-6 bg-[var(--text)] text-[var(--background)] font-sans font-bold text-[10px] md:text-[11px] tracking-[0.3em] md:tracking-[0.4em] uppercase hover:bg-[var(--accent-luxury)] hover:text-[var(--background)] transition-all duration-700"
+              className="px-7 py-4 bg-[var(--accent-luxury)] text-white font-sans font-bold text-sm tracking-wide hover:opacity-90 transition-opacity"
             >
-              Initier la recherche
+              Rechercher
             </button>
           </motion.div>
 
