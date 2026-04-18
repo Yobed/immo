@@ -64,12 +64,12 @@ export async function FeaturedProperties() {
             </span>
             <h2 className="font-display text-5xl md:text-8xl text-[var(--text)] leading-[1] tracking-tight">
               Dernières <br/>
-              <span className="italic font-serif opacity-30">Annonces.</span>
+              <span className="italic font-serif opacity-60">Annonces.</span>
             </h2>
           </div>
           
           <div className="flex flex-col items-start lg:items-end">
-            <p className="font-sans text-xl text-[var(--text-subtle)] mb-10 max-w-sm lg:text-right leading-relaxed font-light">
+            <p className="font-sans text-xl text-[var(--text-muted)] mb-10 max-w-sm lg:text-right leading-relaxed font-light">
               Une sélection rigoureuse de propriétés d'exception à travers les quartiers les plus prisés.
             </p>
             <Link

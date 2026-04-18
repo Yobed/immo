@@ -328,7 +328,7 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
                 >
                   {commune}
                   {count > 0 && (
-                    <span className="ml-2 opacity-30">{count}</span>
+                    <span className="ml-2 opacity-60">{count}</span>
                   )}
                 </button>
               )
@@ -336,7 +336,7 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
           </div>
         </motion.div>
 
-         <motion.div variants={itemVariants} className="text-center mt-12 text-[var(--text-muted)] opacity-30 text-[9px] tracking-[0.3em] uppercase font-sans">
+         <motion.div variants={itemVariants} className="text-center mt-12 text-[var(--text-muted)] opacity-50 text-[9px] tracking-[0.3em] uppercase font-sans">
           Extension en cours : San-Pédro · Bouaké · Yamoussoukro
         </motion.div>
       </motion.div>

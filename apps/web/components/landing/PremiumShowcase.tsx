@@ -180,7 +180,7 @@ export const PremiumShowcase = ({ properties }: { properties?: Property[] }) => 
         
         <div className="relative z-10 text-center max-w-3xl mx-auto flex flex-col items-center px-4">
           <div className="mb-8 md:mb-12">
-            <Star className="w-8 h-8 md:w-12 md:h-12 text-[var(--accent-luxury)] fill-[var(--accent-luxury)] opacity-30" />
+            <Star className="w-8 h-8 md:w-12 md:h-12 text-[var(--accent-luxury)] fill-[var(--accent-luxury)] opacity-60" />
           </div>
           
           <h2 className="text-3xl md:text-7xl font-display font-light text-[var(--text)] mb-8 md:mb-12 leading-[1.1] tracking-tight">

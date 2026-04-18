@@ -81,7 +81,7 @@ export function Stats() {
             viewport={{ once: true }}
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
           >
-            <span className="text-[var(--text-subtle)] font-sans tracking-[0.4em] uppercase text-[10px] mb-6 block font-medium">
+            <span className="text-[var(--text-muted)] font-sans tracking-[0.4em] uppercase text-[10px] mb-6 block font-medium">
               Performance & Rigueur
             </span>
             <h2 className="font-display text-4xl md:text-7xl font-light text-[var(--text)] leading-[1.1] tracking-tighter">

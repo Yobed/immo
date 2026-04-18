@@ -137,7 +137,7 @@ export function Partners() {
               >
                 {/* Logo */}
                 {p.logo ? (
-                  <div className="flex items-center justify-center transition-all duration-700 opacity-60 hover:opacity-100" style={{ height: '40px' }}>
+                  <div className="flex items-center justify-center transition-all duration-700 opacity-85 hover:opacity-100" style={{ height: '40px' }}>
                     <Image
                       src={p.logo}
                       alt={p.name}
@@ -151,7 +151,7 @@ export function Partners() {
                     />
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center h-[50px] opacity-60 hover:opacity-100">
+                  <div className="flex items-center justify-center h-[50px] opacity-85 hover:opacity-100">
                     <div className="scale-[0.65] md:scale-75 origin-center dark:invert-0 invert">{p.customLogo}</div>
                   </div>
                 )}

@@ -104,7 +104,7 @@ export function Features() {
             viewport={{ once: true }}
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
           >
-            <span className="text-[var(--text-subtle)] font-sans tracking-[0.4em] uppercase text-[11px] mb-6 block">
+            <span className="text-[var(--text-muted)] font-sans tracking-[0.4em] uppercase text-[11px] mb-6 block">
               L'Écosystème ImmoDash
             </span>
             <h2 className="font-display text-5xl md:text-7xl font-light text-[var(--text)] leading-[1.1] tracking-tighter">

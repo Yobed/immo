@@ -58,7 +58,7 @@ export function PremiumBienCard({
               />
             ) : (
               <div className="w-full h-full bg-[var(--midnight-light)] flex items-center justify-center">
-                <MapPin className="w-8 h-8 text-[var(--text)] opacity-10" />
+                <MapPin className="w-8 h-8 text-[var(--text-muted)] opacity-40" />
               </div>
             )}
             
