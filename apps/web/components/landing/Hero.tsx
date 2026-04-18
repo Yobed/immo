@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
+import { motion, useScroll, useTransform } from 'framer-motion'
 import Link from 'next/link'
 
 const FALLBACK_BG = [
@@ -97,24 +97,43 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
     <section ref={sectionRef} className="relative overflow-hidden bg-[var(--background)]" style={{ minHeight: '90svh' }}>
 
       {/* ── Background Slideshow ─────────────────────────────────────────── */}
-      <motion.div style={{ y, opacity }} className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <AnimatePresence>
-          <motion.div
-            key={currentItem.photo_url}
-            initial={{ opacity: 0, scale: 1.1 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: `url('${currentItem.photo_url}')` }}
-          />
-        </AnimatePresence>
+      {/* Toutes les images empilées + transition CSS opacity pure = zéro CLS */}
+      <motion.div
+        style={{ y, opacity }}
+        className="absolute inset-0 pointer-events-none"
+        aria-hidden="true"
+      >
+        {carouselData.map((item, idx) => (
+          <div
+            key={item.photo_url}
+            className="absolute inset-0 will-change-[opacity]"
+            style={{
+              opacity: idx === currentIdx ? 1 : 0,
+              transition: 'opacity 1.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
+          >
+            <Image
+              src={item.photo_url!}
+              alt=""
+              fill
+              className="object-cover object-center"
+              priority={idx === 0}
+              loading={idx === 0 ? 'eager' : 'lazy'}
+              sizes="100vw"
+              quality={85}
+            />
+          </div>
+        ))}
 
-        {/* Cinematic Overlays */}
-        <div className="absolute inset-0 bg-[var(--background)]/30" />
+        {/* Overlays cinématiques — stables, jamais rechargés */}
+        <div className="absolute inset-0 bg-[var(--background)]/35" />
         <div
           className="absolute inset-0"
-          style={{ background: 'linear-gradient(to top, var(--background) 0%, rgba(2,6,23,0.1) 50%, transparent 100%)' }}
+          style={{ background: 'linear-gradient(to top, var(--background) 0%, rgba(2,6,23,0.08) 55%, transparent 100%)' }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(to right, var(--background)/60 0%, transparent 60%)' }}
         />
       </motion.div>
 
