@@ -40,7 +40,7 @@ export function NotificationItem({ notification, onRead }: NotificationItemProps
       onClick={handleClick}
       className={cn(
         'px-4 py-3 cursor-pointer transition-colors hover:bg-gray-50 border-b border-[var(--border)] last:border-b-0',
-        notification.lu ? 'bg-white' : 'bg-blue-50'
+        notification.lu ? 'bg-[var(--surface-card)]' : 'bg-blue-50'
       )}
     >
       <div className="flex items-start justify-between gap-2">

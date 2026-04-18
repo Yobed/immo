@@ -63,8 +63,8 @@ export default async function HomePage() {
     .slice(0, 8)
   const bgImages = heroBgImages.length >= 2 ? heroBgImages : FALLBACK_IMAGES
 
-  // Bien vedette pour la carte flottante du Hero (1er bien publié avec photo)
-  const featuredBien = biensWithPhoto.find((b) => b.photo_url) ?? biensWithPhoto[0] ?? null
+  // Bien vedettes pour la carte flottante du Hero (plusieurs pour le cycle)
+  const featuredBiens = biensWithPhoto.filter((b) => b.photo_url).slice(0, 8)
 
   // Sélectionner les 3 biens les plus prestigieux (prix le plus élevé) pour le PremiumShowcase
   const premiumProperties = [...biensWithPhoto]
@@ -91,7 +91,7 @@ export default async function HomePage() {
   return (
     <main>
       <CustomCursor />
-      <Hero bgImages={bgImages} featuredBien={featuredBien} />
+      <Hero bgImages={bgImages} featuredBiens={featuredBiens} />
       <LifestyleMatcher />
       <HowItWorks />
       <FeaturedProperties />

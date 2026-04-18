@@ -62,7 +62,7 @@ export function CardsCarousel({ children, cardWidth = 300 }: CardsCarouselProps)
         className="hidden sm:flex absolute left-0 top-1/2 -translate-y-8 z-20
           w-10 h-10 rounded-full bg-white/80 backdrop-blur-md border border-[var(--border)] shadow-xl
           items-center justify-center text-[var(--text-muted)]
-          hover:border-secondary hover:text-secondary hover:bg-white
+          hover:border-secondary hover:text-secondary hover:bg-[var(--surface-card)]
           transition-all duration-300 active:scale-90"
         aria-label="Précédent"
       >
@@ -86,7 +86,7 @@ export function CardsCarousel({ children, cardWidth = 300 }: CardsCarouselProps)
         className="hidden sm:flex absolute right-0 top-1/2 -translate-y-8 z-20
           w-10 h-10 rounded-full bg-white/80 backdrop-blur-md border border-[var(--border)] shadow-xl
           items-center justify-center text-[var(--text-muted)]
-          hover:border-secondary hover:text-secondary hover:bg-white
+          hover:border-secondary hover:text-secondary hover:bg-[var(--surface-card)]
           transition-all duration-300 active:scale-90"
         aria-label="Suivant"
       >

@@ -51,7 +51,7 @@ export function StarRating({ value, onChange, size = 'md', className }: StarRati
         </button>
       ))}
       {!readonly && value > 0 && (
-        <span className="ml-2 text-sm font-medium text-gray-700">{value}/5</span>
+        <span className="ml-2 text-sm font-medium text-white/80">{value}/5</span>
       )}
     </div>
   )

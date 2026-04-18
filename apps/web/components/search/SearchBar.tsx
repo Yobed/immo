@@ -79,9 +79,9 @@ export function SearchBar({
 
   return (
     <div ref={containerRef} className={`relative ${className}`}>
-      <form onSubmit={handleSubmit} className="group flex items-center gap-3 p-1.5 bg-white rounded-[1.5rem] border border-gray-100 shadow-xl shadow-gray-200/40 focus-within:ring-4 focus-within:ring-primary/5 focus-within:border-primary/20 transition-all duration-300">
+      <form onSubmit={handleSubmit} className="group flex items-center gap-3 p-1.5 bg-[var(--midnight-muted)] rounded-[1.5rem] border border-[var(--border)] shadow-2xl shadow-black/40 focus-within:border-[var(--accent-luxury)]/50 transition-all duration-300">
         <div className="relative flex-1 flex items-center gap-3 pl-4">
-          <Search className={`w-5 h-5 transition-colors duration-300 ${query ? 'text-primary' : 'text-gray-400'}`} />
+          <Search className={`w-5 h-5 transition-colors duration-300 ${query ? 'text-[var(--accent-luxury)]' : 'text-[var(--text-muted)]'}`} />
           <input
             ref={inputRef}
             type="text"
@@ -91,13 +91,13 @@ export function SearchBar({
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             autoComplete="off"
-            className="w-full bg-transparent py-3 text-base md:text-lg font-display font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none"
+            className="w-full bg-transparent py-3 text-base md:text-lg font-display font-medium text-[var(--off-white)] placeholder:text-[var(--text-muted)] focus:outline-none"
           />
           {query && (
             <button 
               type="button" 
               onClick={() => { setQuery(''); inputRef.current?.focus() }}
-              className="p-1.5 hover:bg-gray-100 rounded-full text-gray-400 transition-colors"
+              className="p-1.5 hover:bg-[var(--midnight-light)] rounded-full text-[var(--text-muted)] transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -107,7 +107,7 @@ export function SearchBar({
         <button 
           type="submit" 
           disabled={isPending || !query.trim()}
-          className="flex items-center gap-2 px-6 py-3.5 bg-gray-950 text-white rounded-2xl font-display font-bold text-sm tracking-wide disabled:opacity-50 hover:bg-primary hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95 translate-all duration-300"
+          className="flex items-center gap-2 px-6 py-3.5 bg-[var(--accent-luxury)] text-white rounded-2xl font-display font-bold text-sm tracking-wide disabled:opacity-50 hover:opacity-90 hover:shadow-lg hover:shadow-[var(--accent-luxury)]/20 transition-all active:scale-95 translate-all duration-300"
         >
           {isPending ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -126,9 +126,9 @@ export function SearchBar({
             initial={{ opacity: 0, y: 10, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
-            className="absolute z-[100] top-full left-0 right-0 mt-4 overflow-hidden bg-white/80 backdrop-blur-xl rounded-[2rem] border border-white/40 shadow-2xl p-2"
+            className="absolute z-[100] top-full left-0 right-0 mt-4 overflow-hidden bg-[var(--midnight-muted)]/90 backdrop-blur-xl rounded-[2rem] border border-[var(--border)] shadow-2xl p-2"
           >
-            <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 px-4 py-3 mb-1">
+            <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] px-4 py-3 mb-1">
               Suggestions de recherche
             </div>
             <ul className="space-y-1">
@@ -140,18 +140,18 @@ export function SearchBar({
                     onMouseEnter={() => setHighlighted(idx)}
                     className={`w-full text-left px-4 py-3.5 flex items-center gap-4 rounded-xl transition-all duration-200 ${
                       idx === highlighted 
-                        ? 'bg-primary/10 text-primary translate-x-1' 
-                        : 'text-gray-700 hover:bg-gray-50'
+                        ? 'bg-[var(--accent-luxury)]/10 text-[var(--accent-luxury)] translate-x-1' 
+                        : 'text-[var(--off-white-muted)] hover:bg-[var(--midnight-light)]'
                     }`}
                   >
                     <div className={`p-2.5 rounded-xl transition-colors ${
-                      idx === highlighted ? 'bg-primary/20' : 'bg-gray-100'
+                      idx === highlighted ? 'bg-[var(--accent-luxury)]/20' : 'bg-[var(--midnight-light)]'
                     }`}>
                       <s.icon className="w-4 h-4" />
                     </div>
                     <div className="flex-1">
                       <div className="text-sm font-bold">{s.label}</div>
-                      <div className="text-[10px] text-gray-400 font-sans">{s.category}</div>
+                      <div className="text-[10px] text-[var(--text-muted)] font-sans">{s.category}</div>
                     </div>
                   </button>
                 </li>

@@ -70,7 +70,7 @@ export function Partners() {
   }
 
   return (
-    <section ref={containerRef} className="py-20 bg-white border-t border-[#E2E7F3] relative -mt-10 rounded-t-[3rem] z-[80] shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
+    <section ref={containerRef} className="py-[var(--section-py)] bg-[var(--background)] relative z-[80] border-y border-[var(--border)]">
       <div className="container mx-auto px-4">
 
         {/* Header */}
@@ -78,17 +78,18 @@ export function Partners() {
            initial={{ opacity: 0, y: 30 }}
            whileInView={{ opacity: 1, y: 0 }}
            viewport={{ once: true, margin: "-100px" }}
-           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-           className="text-center mb-12"
+           transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+           className="text-center mb-16"
         >
-          <p className="font-sans text-sm font-semibold text-[var(--secondary)] uppercase tracking-widest mb-2">
-            Intégrations
+          <p className="font-sans text-xs font-semibold text-[var(--accent-luxury)] uppercase tracking-[0.3em] mb-4">
+            Écosystème
           </p>
-          <h2 className="font-display text-2xl md:text-3xl font-bold text-[var(--primary)] mb-2">
-            Nos partenaires
+          <h2 className="font-display text-3xl md:text-5xl font-light text-[var(--text)] mb-6 tracking-tight">
+            Partenaires de Confiance
           </h2>
-          <p className="font-sans text-[var(--text-muted)] text-sm max-w-md mx-auto">
-            Les solutions de paiement et services les plus utilisés en Côte d&apos;Ivoire.
+          <div className="w-24 h-px bg-gradient-to-r from-transparent via-[var(--accent-luxury)] to-transparent mx-auto mb-8 opacity-30" />
+          <p className="font-sans text-[var(--text-muted)] text-lg max-w-2xl mx-auto leading-relaxed font-light">
+            Une synergie parfaite avec les leaders technologiques et financiers de la région pour une expérience sans compromis.
           </p>
         </motion.div>
 
@@ -98,71 +99,68 @@ export function Partners() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
-          className="relative"
+          className="relative max-w-6xl mx-auto"
         >
-          {/* Fades latéraux */}
-          <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
-
-          {/* Bouton gauche */}
-          <button type="button" onClick={() => scroll('left')}
-            className="absolute left-1 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white border border-[var(--border)] shadow-lg flex items-center justify-center text-[var(--text-muted)] hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all active:scale-95">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          {/* Boutons... (same logic as before but with theme vars) */}
+          <button 
+            type="button" 
+            onClick={() => scroll('left')}
+            className="absolute -left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-[var(--surface-card)] backdrop-blur-md border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text)] hover:border-[var(--accent-luxury)] transition-all active:scale-95 group hidden md:flex"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-0.5 transition-transform">
               <polyline points="15 18 9 12 15 6"/>
             </svg>
           </button>
 
-          {/* Bouton droit */}
-          <button type="button" onClick={() => scroll('right')}
-            className="absolute right-1 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white border border-[var(--border)] shadow-lg flex items-center justify-center text-[var(--text-muted)] hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all active:scale-95">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <button 
+            type="button" 
+            onClick={() => scroll('right')}
+            className="absolute -right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-[var(--surface-card)] backdrop-blur-md border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text)] hover:border-[var(--accent-luxury)] transition-all active:scale-95 group hidden md:flex"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-x-0.5 transition-transform">
               <polyline points="9 18 15 12 9 6"/>
             </svg>
           </button>
 
           {/* Piste de défilement */}
-          <div ref={scrollRef} className="carousel-scroll px-4 sm:px-12 py-3 sm:py-4 flex gap-[10px]" style={{ scrollSnapType: 'x mandatory' }}>
+          <div ref={scrollRef} className="carousel-scroll px-4 flex gap-6 overflow-x-auto pb-8 scrollbar-hide pt-4" style={{ scrollSnapType: 'x mandatory' }}>
             {partners.map((p) => (
               <motion.div
                 variants={itemVariants}
-                whileHover={{ y: -8 }}
+                whileHover={{ y: -5, borderColor: 'var(--accent-luxury)', backgroundColor: 'var(--primary-light)' }}
                 key={p.name}
-                className="shrink-0 w-40 sm:w-48 lg:w-52 flex flex-col items-center justify-center gap-3 sm:gap-4 p-4 sm:p-6 rounded-2xl bg-white cursor-default transition-shadow duration-300"
+                className="shrink-0 w-32 sm:w-44 lg:w-48 flex flex-col items-center justify-center gap-2 p-3 md:p-4 rounded-xl bg-[var(--surface-card)] border border-[var(--border)] cursor-default transition-all duration-500"
                 style={{
-                  minHeight: '130px',
-                  boxShadow: '0 4px 20px rgba(12,45,94,0.08), 0 1px 4px rgba(12,45,94,0.06)',
+                  minHeight: '70px',
                   scrollSnapAlign: 'center',
                 }}
-                onMouseEnter={e => (e.currentTarget.style.boxShadow = '0 12px 36px rgba(12,45,94,0.14), 0 2px 8px rgba(12,45,94,0.08)')}
-                onMouseLeave={e => (e.currentTarget.style.boxShadow = '0 4px 20px rgba(12,45,94,0.08), 0 1px 4px rgba(12,45,94,0.06)')}
               >
                 {/* Logo */}
                 {p.logo ? (
-                  <div className="flex items-center justify-center" style={{ height: '76px' }}>
+                  <div className="flex items-center justify-center transition-all duration-700 opacity-60 hover:opacity-100" style={{ height: '40px' }}>
                     <Image
                       src={p.logo}
                       alt={p.name}
                       width={p.logoSize.w}
                       height={p.logoSize.h}
-                      className="object-contain"
+                      className="object-contain dark:brightness-100 brightness-0 dark:invert-0 invert"
                       style={{
-                        maxHeight: '72px',
+                        maxHeight: '35px',
                         width: 'auto',
-                        filter: 'drop-shadow(0 4px 10px rgba(0,0,0,0.18))',
                       }}
                     />
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center h-[76px]">
-                    {p.customLogo}
+                  <div className="flex items-center justify-center h-[50px] opacity-60 hover:opacity-100">
+                    <div className="scale-[0.65] md:scale-75 origin-center dark:invert-0 invert">{p.customLogo}</div>
                   </div>
                 )}
 
-                {/* Séparateur */}
-                <div className="w-8 h-px bg-[var(--border)]" />
-
-                {/* Tagline */}
-                <p className="font-sans text-xs text-center text-[var(--text-muted)] leading-snug">{p.tagline}</p>
+                {/* Info */}
+                <div className="text-center">
+                  <h3 className="font-sans text-[8px] md:text-[9px] font-bold text-[var(--text)] uppercase tracking-widest mb-1">{p.name}</h3>
+                   <p className="font-sans text-[7px] md:text-[8px] text-[var(--text-muted)] uppercase tracking-widest">{p.tagline}</p>
+                </div>
               </motion.div>
             ))}
           </div>

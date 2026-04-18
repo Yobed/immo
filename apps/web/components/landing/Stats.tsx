@@ -1,8 +1,8 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { motion, Variants } from 'framer-motion'
+import { useEffect, useState, useRef } from 'react'
+import { motion, Variants, useScroll, useTransform } from 'framer-motion'
 
-function useCounter(target: number, active: boolean, duration = 1800) {
+function useCounter(target: number, active: boolean, duration = 2500) {
   const [count, setCount] = useState(0)
   useEffect(() => {
     if (!active) return
@@ -22,199 +22,128 @@ function useCounter(target: number, active: boolean, duration = 1800) {
 const STATS = [
   {
     target: 2450,
-    label: 'Biens disponibles',
+    label: 'Collection exclusive',
     suffix: '+',
-    desc: 'Annonces vérifiées',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/>
-      </svg>
-    ),
-    color: '#F97316',
+    desc: 'Propriétés de prestige rigoureusement sélectionnées.',
+    accent: '#F97316',
   },
   {
     target: 12,
-    label: 'Communes',
+    label: 'Rayonnement Local',
     suffix: '',
-    desc: 'Couverte à Abidjan',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
-      </svg>
-    ),
-    color: '#0D9F6E',
+    desc: 'Communes stratégiques couvertes avec excellence.',
+    accent: '#fafbfc',
   },
   {
     target: 98,
-    label: 'Satisfaction',
+    label: 'Indice de Confiance',
     suffix: '%',
-    desc: 'Clients satisfaits',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
-      </svg>
-    ),
-    color: '#F97316',
+    desc: 'Satisfaction client au sommet de l\'exigence.',
+    accent: '#0D9F6E',
   },
   {
     target: 48,
-    label: 'Note moyenne',
+    label: 'Prestige Global',
     suffix: '/5',
-    desc: 'Sur toutes les plateformes',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-      </svg>
-    ),
+    desc: 'Une note reflétant notre engagement absolu.',
     tenths: true,
-    color: '#0D9F6E',
+    accent: '#fafbfc',
   },
 ]
 
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.3,
-    },
-  },
+export function Stats() {
+  const [isActive, setIsActive] = useState(false)
+  const containerRef = useRef(null)
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"]
+  })
+
+  const y1 = useTransform(scrollYProgress, [0, 1], [0, -50])
+
+  return (
+    <section
+      ref={containerRef}
+      className="py-[var(--section-py)] bg-[var(--background)] relative overflow-hidden -mt-10 rounded-t-[3rem] z-[70]"
+    >
+      {/* Background Ambience */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none">
+        <div className="absolute top-1/2 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[var(--border)] to-transparent" />
+        <div className="absolute top-0 left-1/2 w-[1px] h-full bg-gradient-to-b from-transparent via-[var(--border)] to-transparent" />
+      </div>
+
+      <div className="relative container mx-auto px-6 max-w-7xl">
+        {/* Editorial Header */}
+        <div className="mb-16 md:mb-24 flex flex-col md:flex-row justify-between items-end gap-12">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <span className="text-[var(--text-subtle)] font-sans tracking-[0.4em] uppercase text-[10px] mb-6 block font-medium">
+              Performance & Rigueur
+            </span>
+            <h2 className="font-display text-4xl md:text-7xl font-light text-[var(--text)] leading-[1.1] tracking-tighter">
+              L'immobilier en <br/>
+              <span className="italic font-serif opacity-70">Sa Plus Haute Expression.</span>
+            </h2>
+          </motion.div>
+
+            <p className="font-sans text-base md:text-lg text-[var(--text-muted)] max-w-sm leading-relaxed">
+              Nos chiffres ne sont pas des statistiques, mais le reflet d'un standard de service inégalé.
+            </p>
+        </div>
+
+        {/* Minimalist Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 relative">
+          {/* Vertical Divider Line for Large Screens */}
+          <div className="absolute inset-y-0 left-1/4 w-[1px] bg-[var(--border)] opacity-20 hidden lg:block" />
+          <div className="absolute inset-y-0 left-2/4 w-[1px] bg-[var(--border)] opacity-20 hidden lg:block" />
+          <div className="absolute inset-y-0 left-3/4 w-[1px] bg-[var(--border)] opacity-20 hidden lg:block" />
+
+          {STATS.map((s, idx) => (
+            <StatItem key={s.label} {...s} index={idx} onEnter={() => setIsActive(true)} active={isActive} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
 }
 
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: { type: 'spring', stiffness: 100, damping: 20 }
-  },
-}
-
-function StatCard({
-  target, label, suffix, desc, icon, tenths, color, active,
-}: {
-  target: number; label: string; suffix: string; desc: string; icon: React.ReactNode
-  tenths?: boolean; color: string; active: boolean
-}) {
+function StatItem({ target, label, suffix, desc, tenths, accent, index, onEnter, active }: any) {
   const count = useCounter(target, active)
   const display = tenths ? (count / 10).toFixed(1) : count.toLocaleString('fr-FR')
 
   return (
     <motion.div
-      variants={itemVariants}
-      className={`group relative rounded-[24px] p-7 overflow-hidden transition-all duration-700 hover:-translate-y-2 cursor-default card-glass`}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      onViewportEnter={onEnter}
+      transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: index * 0.1 }}
+      className="group"
     >
-      {/* Glow on hover */}
-      <div
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[24px] pointer-events-none"
-        style={{ background: `radial-gradient(circle at 50% 50%, ${color}20 0%, transparent 70%)` }}
-      />
-
-      {/* Top gradient accent bar */}
-      <div
-        className="absolute top-0 left-6 right-6 h-[2px] rounded-full opacity-50 group-hover:opacity-100 transition-opacity duration-300"
-        style={{ background: `linear-gradient(90deg, transparent, ${color}, transparent)` }}
-      />
-
-      <div className="relative">
-        {/* Icon */}
-        <div
-          className="w-11 h-11 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300"
-          style={{ background: `${color}18`, color }}
-        >
-          {icon}
-        </div>
-
-        {/* Number */}
-        <p
-          className="font-mono text-4xl sm:text-5xl font-bold mb-1 leading-none"
-          style={{
-            background: `linear-gradient(135deg, ${color}, ${color}BB)`,
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-          }}
-        >
-          {display}<span className="text-2xl">{suffix}</span>
-        </p>
-
-        <p className="font-display font-semibold text-white text-base mb-0.5">{label}</p>
-        <p className="font-sans text-white/45 text-sm">{desc}</p>
-      </div>
-    </motion.div>
-  )
-}
-
-export function Stats() {
-  const [isActive, setIsActive] = useState(false)
-
-  return (
-    <section
-      className="py-20 sm:py-24 relative overflow-hidden -mt-10 rounded-t-[3rem] z-[70] shadow-[0_-10px_40px_rgba(0,0,0,0.2)]"
-      style={{ background: 'linear-gradient(180deg, #06173A 0%, #0C2D5E 50%, #0a2550 100%)' }}
-    >
-      {/* Animated orbs */}
-      <div
-        className="absolute right-0 top-0 w-[500px] h-[500px] anim-orb-1 pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(249,115,22,0.14) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(60px)' }}
-      />
-      <div
-        className="absolute left-0 bottom-0 w-[400px] h-[400px] anim-orb-2 pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(13,159,110,0.12) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(50px)' }}
-      />
-      <div className="absolute inset-0 bg-dots opacity-10 pointer-events-none" />
-
-      <div className="relative container mx-auto px-4">
-        {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="text-center mb-16"
-        >
-          <span className="inline-block mb-4 px-4 py-1.5 rounded-full border border-secondary/30 bg-secondary/10 text-secondary text-sm font-bold uppercase tracking-wider font-sans">
-            Nos résultats
+      <div className="mb-8">
+        <span className="text-[10px] font-sans tracking-[0.2em] uppercase text-[var(--text-muted)] opacity-90 mb-8 block transition-colors group-hover:text-[var(--text)]">
+          Ref. 0{index + 1}
+        </span>
+        <div className="flex items-baseline gap-1 mb-4">
+          <span className="font-display text-6xl md:text-8xl font-thin tracking-tighter text-[var(--text)] transition-transform duration-700 group-hover:scale-105 inline-block">
+            {display}
           </span>
-          <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4">
-            Immo CI en chiffres
-          </h2>
-          <p className="font-sans text-white/55 text-lg max-w-md mx-auto leading-relaxed">
-            La confiance de milliers d&apos;ivoiriens, prouvée par les données.
-          </p>
-        </motion.div>
-
-        {/* Grid */}
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-          onViewportEnter={() => setIsActive(true)}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto"
-        >
-          {STATS.map((s) => (
-            <StatCard key={s.label} {...s} active={isActive} />
-          ))}
-        </motion.div>
-
-        {/* Bottom trust bar */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-          className="mt-16 flex flex-wrap justify-center gap-6"
-        >
-          {['Wave', 'Orange Money', 'MTN', 'CinetPay'].map((p) => (
-            <div key={p} className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
-              <span className="font-sans text-xs text-white/60 font-medium">{p}</span>
-            </div>
-          ))}
-        </motion.div>
+          <span className="font-serif italic text-2xl md:text-4xl text-[var(--text-muted)]">{suffix}</span>
+        </div>
+        <h3 className="font-display text-xl font-light text-[var(--text)] mb-4 tracking-tight">
+          {label}
+        </h3>
+        <p className="font-sans text-xs text-[var(--text-muted)] leading-relaxed max-w-[200px]">
+          {desc}
+        </p>
       </div>
-    </section>
+       <div 
+        className="h-[1px] w-0 bg-gradient-to-r from-[#fafbfc]/20 to-transparent transition-all duration-1000 ease-[0.16, 1, 0.3, 1] group-hover:w-full"
+      />
+    </motion.div>
   )
 }

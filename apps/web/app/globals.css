@@ -11,55 +11,94 @@ html, body {
 
 /* ══════════════════════════════════════════════════════
    DESIGN TOKENS
+   Standardized variables for prestige, contrast and spacing.
 ══════════════════════════════════════════════════════ */
 :root {
-  /* Palette principale */
-  --primary:         #0C2D5E;   /* Marine profond — prestige, confiance */
-  --primary-mid:     #1A4D8F;   /* Bleu intermédiaire */
-  --primary-light:   #EEF3FD;   /* Surface info légère */
-  --primary-glow:    rgba(12, 45, 94, 0.10);
+  /* Branding Palette */
+  --secondary:       #F97316;   /* Orange branding remains as pop */
+  --accent-gold:     #C5A059;   /* Champagne Gold — sophisticated */
+  --danger:          #ef4444;
+  --ease-expo:       cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft:       cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Semantic Spacing Tokens — tightened for denser homepage */
+  --section-py:      4rem;      /* py-16 instead of py-20 */
+  --section-py-lg:   6rem;      /* py-24 instead of py-32 */
+  --container-px:    1.5rem;
+}
 
-  /* Orange Côte d'Ivoire */
-  --secondary:       #F97316;   /* Orange vif — énergie, dynamisme */
-  --secondary-light: #FFF7ED;
-  --secondary-glow:  rgba(249, 115, 22, 0.15);
+/* ═══════════════════════════════════════════════
+   DEEP ESTATE SAPPHIRE — Dark Theme (default)
+═══════════════════════════════════════════════ */
+:root, [data-theme='dark'] {
+  --midnight:        #020617;
+  --midnight-muted:  #0f172a;
+  --midnight-light:  #1e293b;
+  --midnight-glow:   rgba(2, 6, 23, 0.6);
 
-  /* États */
-  --accent:          #0D9F6E;   /* Émeraude — disponible, validé */
-  --accent-light:    #EDFAF3;
-  --danger:          #D93025;
-  --danger-light:    #FEF1F0;
-  --warning:         #D08700;
-  --warning-light:   #FFFBEC;
+  --off-white:       #f8fafc;
+  --off-white-muted: #e2e8f0;   /* was #cbd5e1 — slightly lighter */
 
-  /* Surfaces */
-  --surface:         #FFFFFF;
-  --surface-card:    #FFFFFF;
-  --surface-raised:  #FFFFFF;
+  /* Text hierarchy — all readable on dark */
+  --text:            #f8fafc;
+  --text-muted:      #cbd5e1;   /* slate-300 — WCAG AA on dark */
+  --text-subtle:     #94a3b8;   /* slate-400 — decorative only */
 
-  /* Texte */
-  --text:            #0A0F1E;
-  --text-muted:      #2D3748;
-  --text-subtle:     #4A5568;
+  --surface:         rgba(15, 23, 42, 0.6);
+  --surface-card:    rgba(30, 41, 59, 0.5);
+  --background:      #020617;
 
-  /* Bordures */
-  --border:          #E2E7F3;
-  --border-hover:    #B8C4DE;
+  --border:          rgba(255, 255, 255, 0.1);
+  --border-hover:    rgba(255, 255, 255, 0.25);
 
-  /* Ombres */
-  --shadow-xs:  0 1px 2px rgba(12, 45, 94, 0.04);
-  --shadow-sm:  0 1px 4px rgba(12, 45, 94, 0.06), 0 2px 8px rgba(12, 45, 94, 0.04);
-  --shadow-md:  0 4px 16px rgba(12, 45, 94, 0.08), 0 2px 6px rgba(12, 45, 94, 0.04);
-  --shadow-lg:  0 12px 40px rgba(12, 45, 94, 0.12), 0 4px 12px rgba(12, 45, 94, 0.06);
-  --shadow-xl:  0 24px 60px rgba(12, 45, 94, 0.16), 0 8px 20px rgba(12, 45, 94, 0.08);
-  --shadow-card:       0 2px 8px rgba(12, 45, 94, 0.06), 0 0 0 1px rgba(12, 45, 94, 0.04);
-  --shadow-card-hover: 0 12px 40px rgba(12, 45, 94, 0.14), 0 4px 12px rgba(12, 45, 94, 0.06);
+  --primary:         #0f172a;
+  --primary-mid:     #1e293b;
+  --primary-light:   rgba(255, 255, 255, 0.05);
 
-  /* Courbes de Bézier */
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-out:    cubic-bezier(0.0, 0.0, 0.2, 1);
-  --ease-in-out: cubic-bezier(0.4, 0.0, 0.2, 1);
-  --ease-gentle: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --glass-surface:   rgba(2, 6, 23, 0.7);
+  --glass-border:    rgba(255, 255, 255, 0.08);
+  --glass-blur:      32px;
+
+  --accent-luxury:   #D4AF37;
+}
+
+/* ═══════════════════════════════════════════════
+   PRISTINE IVORY — Light Theme (maximum contrast)
+═══════════════════════════════════════════════ */
+[data-theme='light'] {
+  --background:      #f8fafc;   /* slate-50 — not stark white */
+  
+  /* Text hierarchy — ALL on light backgrounds */
+  --text:            #0f172a;   /* slate-900, near-black */
+  --text-muted:      #334155;   /* slate-700 — WCAG AA ≥ 4.5:1 */
+  --text-subtle:     #475569;   /* slate-600 — decorative small text */
+
+  --surface:         #f1f5f9;   /* slate-100 */
+  --surface-card:    #ffffff;
+
+  --border:          #cbd5e1;   /* slate-300 */
+  --border-hover:    #64748b;   /* slate-500 */
+
+  --primary:         #0f172a;
+  --primary-mid:     #1e293b;
+  --primary-light:   #f1f5f9;
+
+  --glass-surface:   rgba(255, 255, 255, 0.96);
+  --glass-border:    rgba(15, 23, 42, 0.12);
+  --glass-blur:      20px;
+
+  /* Remapping dark-specific tokens for light mode */
+  --off-white:           #0f172a;   /* inverted: dark text on light bg */
+  --off-white-muted:     #334155;
+  --midnight:            #f8fafc;   /* inverted: light bg */
+  --midnight-muted:      #f1f5f9;   /* slightly tinted white card */
+  --midnight-light:      #e2e8f0;   /* slate-200 for inputs/hover bg */
+
+  --accent-luxury:   #92400e;   /* amber-800 — readable on white */
+}
+
+html {
+  font-size: 105%;
 }
 
 /* ══════════════════════════════════════════════════════
@@ -73,17 +112,22 @@ html {
 }
 
 body {
-  background-color: #ffffff;
-  color: var(--text);
+  background-color: var(--background);  /* theme-aware */
+  color: var(--text);                   /* theme-aware */
   font-family: 'DM Sans', -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
+  overflow-x: hidden;
+}
+
+.font-serif {
+  font-family: 'Playfair Display', serif;
 }
 
 ::selection {
-  background: var(--primary-light);
-  color: var(--primary);
+  background: var(--secondary);
+  color: #fff;
 }
 
 :focus-visible {
@@ -215,19 +259,19 @@ body {
   box-shadow: var(--shadow-card-hover);
 }
 
-/* Glassmorphism */
+/* Glassmorphism — Theme Aware */
 .glass {
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: var(--glass-surface);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  border: 1px solid var(--glass-border);
 }
 
 .glass-dark {
-  background: rgba(12, 45, 94, 0.85);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--glass-surface); /* Already switch via variables */
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  border: 1px solid var(--glass-border);
 }
 
 /* Gradient text */

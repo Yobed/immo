@@ -4,6 +4,7 @@ import { MobileMenu } from '@/components/layout/MobileMenu'
 import { SearchBar } from '@/components/search/SearchBar'
 import { UserMenu } from '@/components/auth/UserMenu'
 import { MagneticWrapper } from '@/components/landing/MagneticWrapper'
+import { ThemeToggle } from '@/components/layout/ThemeToggle'
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -36,7 +37,7 @@ export default async function PublicLayout({ children }: { children: React.React
                 style={{ boxShadow: 'var(--shadow-primary-glow)' }}>
                 IC
               </div>
-              <span className="font-display text-xl font-semibold text-[var(--primary)] hidden sm:block tracking-tight">
+              <span className="font-display text-xl font-semibold text-[var(--text)] hidden sm:block tracking-tight">
                 Immo <span className="text-gradient-gold" style={{
                   background: 'linear-gradient(135deg,#F97316,#FB923C)',
                   WebkitBackgroundClip: 'text',
@@ -56,16 +57,20 @@ export default async function PublicLayout({ children }: { children: React.React
           <nav className="hidden md:flex items-center gap-0.5">
             <MagneticWrapper>
               <Link href="/biens"
-                className="nav-link px-3 py-2 font-sans text-sm text-[var(--text-muted)] hover:text-[var(--primary)] transition-colors duration-200 rounded-btn hover:bg-[var(--primary-light)]">
+                className="nav-link px-3 py-2 font-sans text-sm text-[var(--text-muted)] hover:text-[var(--text)] transition-colors duration-200 rounded-btn hover:bg-[var(--surface)]">
                 Annonces
               </Link>
             </MagneticWrapper>
             <MagneticWrapper>
               <Link href="/recherche?type_bien=residence_meublee"
-                className="nav-link px-3 py-2 font-sans text-sm text-[var(--text-muted)] hover:text-[var(--primary)] transition-colors duration-200 rounded-btn hover:bg-[var(--primary-light)]">
+                className="nav-link px-3 py-2 font-sans text-sm text-[var(--text-muted)] hover:text-[var(--text)] transition-colors duration-200 rounded-btn hover:bg-[var(--surface)]">
                 Résidences
               </Link>
             </MagneticWrapper>
+
+            <div className="w-px h-5 bg-[var(--border)] mx-2" />
+
+            <ThemeToggle />
 
             <div className="w-px h-5 bg-[var(--border)] mx-2" />
 
@@ -75,13 +80,13 @@ export default async function PublicLayout({ children }: { children: React.React
               <div className="flex items-center gap-2">
                 <MagneticWrapper>
                   <Link href="/login"
-                    className="px-3 py-2 font-sans text-sm text-[var(--text)] hover:text-[var(--primary)] transition-colors duration-200 rounded-btn hover:bg-[var(--surface)]">
+                    className="px-3 py-2 font-sans text-sm text-[var(--text-muted)] hover:text-[var(--text)] transition-colors duration-200 rounded-btn hover:bg-[var(--surface)]">
                     Se connecter
                   </Link>
                 </MagneticWrapper>
                 <MagneticWrapper>
                   <Link href="/register"
-                    className="btn-primary-glow px-4 py-2 font-sans text-sm font-medium bg-[var(--primary)] text-white rounded-btn">
+                    className="px-4 py-2 font-sans text-sm font-semibold bg-[var(--secondary)] text-white rounded-btn hover:opacity-90 transition-opacity">
                     S&apos;inscrire
                   </Link>
                 </MagneticWrapper>
@@ -96,46 +101,6 @@ export default async function PublicLayout({ children }: { children: React.React
 
       {children}
 
-      {/* ── Footer ── */}
-      <footer className="bg-[var(--primary)] mt-16 relative overflow-hidden">
-        {/* Pattern de fond */}
-        <div className="absolute inset-0 bg-dots opacity-20 pointer-events-none" />
-
-        <div className="relative max-w-7xl mx-auto px-4 py-10">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-
-            {/* Logo blanc */}
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center">
-                <span className="font-display font-bold text-sm text-white">IC</span>
-              </div>
-              <span className="font-display text-xl font-semibold text-white tracking-tight">
-                Immo CI
-              </span>
-            </div>
-
-            {/* Liens */}
-            <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-white/60 font-sans">
-              {[
-                { href: '/biens', label: 'Annonces' },
-                { href: '/recherche', label: 'Recherche' },
-                { href: '/register', label: 'Publier un bien' },
-                { href: '/login', label: 'Connexion' },
-              ].map(({ href, label }) => (
-                <Link key={href} href={href}
-                  className="hover:text-white transition-colors duration-200">
-                  {label}
-                </Link>
-              ))}
-            </div>
-
-            {/* Copyright */}
-            <p className="text-xs text-white/40 font-sans">
-              © 2025 Immo CI · Abidjan
-            </p>
-          </div>
-        </div>
-      </footer>
     </>
   )
 }

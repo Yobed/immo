@@ -92,7 +92,7 @@ export function MessageThread({ conversationId, currentUserId }: MessageThreadPr
                     'max-w-[75%] px-4 py-2.5 rounded-card text-sm font-sans',
                     isOwn
                       ? 'bg-primary text-white rounded-br-btn'
-                      : 'bg-white border border-[var(--border)] text-[var(--text)] rounded-bl-btn'
+                      : 'bg-[var(--surface-card)] border border-[var(--border)] text-[var(--text)] rounded-bl-btn'
                   )}
                 >
                   <p className="whitespace-pre-wrap leading-relaxed">{msg.contenu}</p>

@@ -7,162 +7,116 @@ const testimonials = [
   {
     id: 1,
     name: 'Kouassi Yao',
-    role: 'Propriétaire',
-    location: 'Cocody',
-    avatar: 'KY',
-    rating: 5,
-    text: "Grâce à Immo CI, j'ai loué mon appartement en moins d'une semaine. Les paiements via Wave arrivent directement sur mon compte. Je recommande vivement !",
-    color: '#F97316',
+    role: 'Investisseur',
+    location: 'Cocody Riviera',
+    text: "Une fluidité transactionnelle sans précédent. L'intégration des baux OHADA et la rapidité des flux financiers via Wave ont transformé ma gestion locative.",
   },
   {
     id: 2,
     name: 'Aminata Koné',
-    role: 'Locataire',
-    location: 'Plateau',
-    avatar: 'AK',
-    rating: 5,
-    text: "J'ai trouvé mon studio au Plateau en 3 jours. La visite virtuelle 360° m'a permis de choisir sans me déplacer. Le contrat OHADA est rassurant.",
-    color: '#0D9F6E',
+    role: 'Résidente',
+    location: 'Plateau Business District',
+    text: "L'immersion 360° n'est pas un gadget, c'est un outil de décision. J'ai acquis ma résidence sans la moindre friction géographique.",
   },
   {
     id: 3,
-    name: 'Prestige Immo',
-    role: 'Agence partenaire',
-    location: 'Marcory',
-    avatar: 'PI',
-    rating: 5,
-    text: "Notre agence gère plus de 200 biens sur Immo CI. Le dashboard analytics nous donne une visibilité parfaite et les leads sont toujours qualifiés.",
-    color: '#1A4D8F',
+    name: 'Jean-Marc D.',
+    role: 'Directeur d\'Agence',
+    location: 'Marcory Zone 4',
+    text: "Bien plus qu'une plateforme, c'est un écosystème de confiance. Les leads qualifiés et les données analytiques nous offrent une vision stratégique du marché.",
   },
 ]
 
 export function Testimonials() {
   const ref = useRef(null)
-  const inView = useInView(ref, { once: true, margin: "-100px" })
 
   return (
     <section
       ref={ref}
-      className="py-20 sm:py-24 relative overflow-hidden bg-white -mt-10 rounded-t-[3rem] z-[60] shadow-[0_-10px_40px_rgba(0,0,0,0.1)]"
-      style={{ background: 'linear-gradient(180deg, #FFFFFF 0%, #F0F5FF 100%)' }}
+      className="py-[var(--section-py)] bg-[var(--background)] relative overflow-hidden -mt-10 rounded-t-[3rem] z-[60] border-t border-[var(--border)]"
     >
-      {/* Subtle grid */}
-      <div className="absolute inset-0 bg-grid opacity-25 pointer-events-none" />
+      {/* Background Ambience */}
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] pointer-events-none opacity-10" style={{ background: 'radial-gradient(circle, var(--accent-gold) 0%, transparent 70%)', filter: 'blur(100px)' }}/>
+      
+      <div className="relative container mx-auto px-6 max-w-7xl">
+        {/* Editorial Header */}
+        <div className="max-w-3xl mb-16 md:mb-24">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <span className="text-[var(--text-muted)] font-sans tracking-[0.4em] uppercase text-[10px] mb-6 block">
+              Voix de l&apos;Excellence
+            </span>
+            <h2 className="font-display text-5xl md:text-7xl font-light text-[var(--text)] leading-[1.1] tracking-tighter">
+              Une Confiance <br/>
+              <span className="italic font-serif opacity-70">Sans Frontières.</span>
+            </h2>
+          </motion.div>
+        </div>
 
-      {/* Orb */}
-      <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse, rgba(249,115,22,0.06) 0%, transparent 70%)', filter: 'blur(40px)' }}
-      />
-
-      <div className="relative container mx-auto px-4">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center mb-16"
-        >
-          {/* Stars row */}
-          <div className="flex justify-center gap-1 mb-4">
-            {[1,2,3,4,5].map(i => (
-              <svg key={i} width="18" height="18" viewBox="0 0 24 24" fill="#F97316">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-              </svg>
-            ))}
-          </div>
-          <span className="inline-block mb-4 px-4 py-1.5 rounded-full border border-secondary/25 bg-secondary/8 text-secondary text-xs font-bold uppercase tracking-wider font-sans">
-            Témoignages
-          </span>
-          <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-primary mb-4 mt-2">
-            Ce que disent nos utilisateurs
-          </h2>
-          <p className="font-sans text-muted text-lg max-w-xl mx-auto leading-relaxed">
-            Des milliers de propriétaires, locataires et agences nous font confiance chaque jour.
-          </p>
-        </motion.div>
-
-        {/* Cards */}
+        {/* Editorial Grids */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-6xl mx-auto"
+          className="grid grid-cols-1 lg:grid-cols-3 gap-16 relative"
         >
-          {testimonials.map((t) => (
+          {testimonials.map((t, idx) => (
             <motion.div
               key={t.id}
               variants={itemVariants}
-              whileHover={{ y: -8 }}
-              className="group relative bg-white rounded-[22px] p-7 flex flex-col gap-4 transition-shadow duration-500 hover:shadow-2xl"
-              style={{
-                boxShadow: '0 2px 20px rgba(12,45,94,0.06), 0 0 0 1px rgba(12,45,94,0.06)',
-              }}
+              className="group relative"
             >
-              {/* Top accent */}
-              <div
-                className="absolute top-0 left-7 right-7 h-[2px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                style={{ background: `linear-gradient(90deg, transparent, ${t.color}, transparent)` }}
+              <div className="relative z-10">
+                {/* Large Serif Quote Mark */}
+                <span className="absolute -top-12 -left-4 font-serif text-[120px] text-[var(--border)] opacity-20 pointer-events-none">
+                  &ldquo;
+                </span>
+                
+                <p className="font-sans text-xl text-[var(--text-muted)] leading-relaxed mb-12 relative z-10 h-[100px] lg:h-[140px] italic">
+                  {t.text}
+                </p>
+
+                <div className="flex items-center gap-6 pt-10 border-t border-[var(--border)]">
+                  <div className="flex-1">
+                    <h4 className="font-display text-[var(--text)] text-base font-light tracking-tight mb-1">
+                      {t.name}
+                    </h4>
+                    <p className="font-sans text-[10px] tracking-[0.2em] uppercase text-[var(--text-muted)] italic font-medium">
+                      {t.role} · {t.location}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Hover Line Animation */}
+              <div 
+                className="absolute -bottom-4 left-0 h-[1px] w-0 bg-[#fafbfc]/20 transition-all duration-1000 group-hover:w-full"
               />
-
-              {/* Quote icon */}
-              <svg className="absolute top-5 right-5 opacity-8 text-[var(--muted)]" width="36" height="36" viewBox="0 0 24 24" fill={t.color}>
-                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
-              </svg>
-
-              {/* Stars */}
-              <div className="flex gap-0.5">
-                {Array.from({ length: t.rating }).map((_, i) => (
-                  <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill={t.color}>
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                  </svg>
-                ))}
-              </div>
-
-              {/* Text */}
-              <p className="font-sans text-base text-gray-600 leading-relaxed flex-1 italic">
-                &ldquo;{t.text}&rdquo;
-              </p>
-
-              {/* Author */}
-              <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-white font-mono text-xs font-bold shrink-0"
-                  style={{ background: `linear-gradient(135deg, ${t.color}, ${t.color}80)` }}
-                >
-                  {t.avatar}
-                </div>
-                <div>
-                  <p className="font-sans text-base font-bold text-primary">{t.name}</p>
-                  <p className="font-sans text-sm text-muted">{t.role} · {t.location}</p>
-                </div>
-                {/* Verified badge */}
-                <div className="ml-auto flex items-center gap-1">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill={t.color}>
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                  </svg>
-                  <span className="font-sans text-[10px] text-muted">Vérifié</span>
-                </div>
-              </div>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* Bottom counter */}
+        {/* Brand Sign-off */}
         <motion.div
            initial={{ opacity: 0 }}
            whileInView={{ opacity: 1 }}
            viewport={{ once: true }}
-           transition={{ duration: 0.8, delay: 0.6 }}
-           className="text-center mt-14"
+           transition={{ duration: 1.2, delay: 0.8 }}
+           className="mt-24 pt-16 border-t border-[var(--border)] flex flex-col md:flex-row justify-between items-center gap-8"
         >
-          <p className="font-sans text-sm text-muted">
-            Rejoignez{' '}
-            <span className="font-bold text-primary">+2 450 utilisateurs</span>{' '}
-            qui nous font déjà confiance
+          <p className="font-sans text-[10px] tracking-[0.3em] uppercase text-[var(--text-muted)] font-bold italic">
+            Reconnu par +2 450 leaders en Côte d&apos;Ivoire
           </p>
+          <div className="flex gap-4 opacity-50 contrast-125 dark:invert-0 invert transition-all">
+             <span className="font-display text-sm text-[var(--text)] font-medium italic">Signature Estate</span>
+             <span className="font-display text-sm text-[var(--text)] font-medium italic">Elite Real Estate</span>
+             <span className="font-display text-sm text-[var(--text)] font-medium italic">Heritage Lux</span>
+          </div>
         </motion.div>
       </div>
     </section>

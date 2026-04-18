@@ -171,8 +171,8 @@ export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
   const equipBadge = equipements.length
 
   return (
-    <div className="bg-white rounded-[18px] border border-[var(--border)] overflow-hidden"
-      style={{ boxShadow: 'var(--shadow-card)' }}>
+    <div className="bg-[var(--midnight-muted)] rounded-[18px] border border-[var(--border)] overflow-hidden"
+      style={{ boxShadow: '0 20px 50px rgba(0,0,0,0.3)' }}>
 
       {/* ── En-tête ── */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
@@ -211,8 +211,8 @@ export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
             className={cn(
               'w-full flex items-center gap-2.5 px-3 py-2 rounded-btn text-sm font-sans transition-all duration-150',
               !typeBien
-                ? 'bg-[var(--primary)] text-white font-medium'
-                : 'text-[var(--text-muted)] hover:bg-[var(--surface)] hover:text-[var(--text)]'
+                ? 'bg-[var(--accent-luxury)] text-white font-medium shadow-lg shadow-[var(--accent-luxury)]/20'
+                : 'text-[var(--text-muted)] hover:bg-[var(--midnight-light)] hover:text-[var(--off-white)]'
             )}>
             <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
               <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
@@ -271,33 +271,33 @@ export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
 
       {/* Équipements */}
       <FilterSection icon={<IconEquip />} label="Équipements" badge={equipBadge} defaultOpen={false}>
-        <div className="flex flex-wrap gap-1.5">
-          {EQUIPEMENTS_DISPONIBLES.map(eq => (
-            <button key={eq} type="button" onClick={() => toggleEquipement(eq)}
-              className={cn(
-                'px-3 py-1.5 rounded-pill text-xs font-sans border transition-all duration-150 select-none',
-                equipements.includes(eq)
-                  ? 'bg-[var(--primary)] border-[var(--primary)] text-white font-medium'
-                  : 'border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--primary)]/40 hover:text-[var(--primary)]'
-              )}>
-              {EQUIPEMENTS_LABELS[eq]}
-            </button>
-          ))}
+          <div className="flex flex-wrap gap-1.5">
+            {EQUIPEMENTS_DISPONIBLES.map(eq => (
+              <button key={eq} type="button" onClick={() => toggleEquipement(eq)}
+                className={cn(
+                  'px-3 py-1.5 rounded-pill text-xs font-sans border transition-all duration-150 select-none',
+                  equipements.includes(eq)
+                    ? 'bg-[var(--accent-luxury)] border-[var(--accent-luxury)] text-white font-medium shadow-lg shadow-[var(--accent-luxury)]/20'
+                    : 'border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--accent-luxury)]/50 hover:text-[var(--off-white)] bg-[var(--midnight-light)]'
+                )}>
+                {EQUIPEMENTS_LABELS[eq]}
+              </button>
+            ))}
+          </div>
+        </FilterSection>
+  
+        {/* ── Bouton appliquer ── */}
+        <div className="px-5 py-4 bg-[var(--midnight-muted)] border-t border-[var(--border)]">
+          <button
+            onClick={applyFilters}
+            className="w-full flex items-center justify-center gap-2 py-3 bg-[var(--accent-luxury)] text-white text-sm font-sans font-semibold rounded-btn hover:opacity-90 transition-all shadow-xl shadow-[var(--accent-luxury)]/20 active:scale-[0.98]"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" fill="none">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Appliquer les filtres
+          </button>
         </div>
-      </FilterSection>
-
-      {/* ── Bouton appliquer ── */}
-      <div className="px-5 py-4 bg-[var(--surface)] border-t border-[var(--border)]">
-        <button
-          onClick={applyFilters}
-          className="btn-primary-glow w-full flex items-center justify-center gap-2 py-2.5 bg-[var(--primary)] text-white text-sm font-sans font-semibold rounded-btn"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" fill="none">
-            <polyline points="20 6 9 17 4 12"/>
-          </svg>
-          Appliquer les filtres
-        </button>
       </div>
-    </div>
-  )
-}
+    )
+  }

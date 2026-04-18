@@ -27,14 +27,14 @@ function formatFCFA(n: number): string {
 }
 
 const TYPE_CONFIG: Record<string, { bg: string; text: string; dot: string; icon: any }> = {
-  villa:             { bg: 'bg-indigo-50/80',   text: 'text-indigo-700',  dot: 'bg-indigo-400',  icon: Home },
-  appartement:       { bg: 'bg-blue-50/80',     text: 'text-blue-700',    dot: 'bg-blue-400',    icon: Building2 },
-  studio:            { bg: 'bg-cyan-50/80',     text: 'text-cyan-700',    dot: 'bg-cyan-400',    icon: Warehouse },
-  maison:            { bg: 'bg-orange-50/80',   text: 'text-orange-700',  dot: 'bg-orange-400',  icon: Home },
-  residence_meublee: { bg: 'bg-amber-50/80',    text: 'text-amber-700',   dot: 'bg-amber-400',   icon: Star },
-  bureau:            { bg: 'bg-slate-50/80',    text: 'text-slate-600',   dot: 'bg-slate-400',   icon: Building2 },
-  commerce:          { bg: 'bg-emerald-50/80',  text: 'text-emerald-700', dot: 'bg-emerald-400',  icon: Building2 },
-  terrain:           { bg: 'bg-lime-50/80',     text: 'text-lime-700',    dot: 'bg-lime-500',    icon: Layers },
+  villa:             { bg: 'bg-indigo-500/20',   text: 'text-indigo-300',  dot: 'bg-indigo-400',  icon: Home },
+  appartement:       { bg: 'bg-blue-500/20',     text: 'text-blue-300',    dot: 'bg-blue-400',    icon: Building2 },
+  studio:            { bg: 'bg-cyan-500/20',     text: 'text-cyan-300',    dot: 'bg-cyan-400',    icon: Warehouse },
+  maison:            { bg: 'bg-orange-500/20',   text: 'text-orange-300',  dot: 'bg-orange-400',  icon: Home },
+  residence_meublee: { bg: 'bg-amber-500/20',    text: 'text-amber-300',   dot: 'bg-amber-400',   icon: Star },
+  bureau:            { bg: 'bg-slate-500/20',    text: 'text-slate-300',   dot: 'bg-slate-400',   icon: Building2 },
+  commerce:          { bg: 'bg-emerald-500/20',  text: 'text-emerald-300', dot: 'bg-emerald-400',  icon: Building2 },
+  terrain:           { bg: 'bg-lime-500/20',     text: 'text-lime-300',    dot: 'bg-lime-500',    icon: Layers },
 }
 
 export function BienCard({
@@ -88,7 +88,7 @@ export function BienCard({
       <Link href={`/biens/${id}`} className="block h-full">
         <motion.article
           style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-          className="bg-white rounded-[2rem] overflow-hidden border border-gray-100/50 h-full flex flex-col relative transition-all duration-700 hover:shadow-[0_45px_80px_-20px_rgba(0,0,0,0.15)] bg-clip-padding backdrop-blur-sm"
+          className="bg-[#050510] rounded-[2rem] overflow-hidden border border-white/10 h-full flex flex-col relative transition-all duration-700 hover:shadow-[0_45px_80px_-20px_rgba(0,0,0,0.5)] bg-clip-padding backdrop-blur-sm"
         >
           {/* Glare Effect */}
           <motion.div 
@@ -104,7 +104,7 @@ export function BienCard({
           />
 
           {/* ── Photo Section ── */}
-          <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden m-2 rounded-[1.7rem]">
+          <div className="relative aspect-[4/3] bg-[var(--midnight-muted)] border-b border-[var(--border)] overflow-hidden m-2 rounded-[1.7rem]">
             <AnimatePresence>
               {photo_url ? (
                 <Image
@@ -115,9 +115,9 @@ export function BienCard({
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
               ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-gray-50 to-gray-200">
-                  <Home className="w-12 h-12 text-gray-300" />
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Image bientôt disponible</span>
+                <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-[var(--midnight-muted)] to-[var(--midnight)]">
+                  <Home className="w-12 h-12 text-white/20" />
+                  <span className="text-[10px] font-bold text-[var(--accent-luxury)] uppercase tracking-widest italic">Clichage en cours...</span>
                 </div>
               )}
             </AnimatePresence>
@@ -149,12 +149,12 @@ export function BienCard({
                 <motion.div 
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="flex items-baseline gap-1.5 px-5 py-2.5 rounded-2xl bg-white/90 backdrop-blur-2xl shadow-[0_15px_30px_rgba(0,0,0,0.15)] border border-white/40"
+                  className="flex items-baseline gap-1.5 px-5 py-2.5 rounded-2xl bg-[var(--midnight-muted)]/90 backdrop-blur-2xl shadow-[0_15px_30px_rgba(0,0,0,0.3)] border border-white/20"
                 >
-                  <span className="font-display text-xl font-bold text-gray-900 tabular-nums tracking-tight">
+                  <span className="font-display text-xl font-bold text-white tabular-nums tracking-tight">
                     {prix.value}
                   </span>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-primary/80">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--accent-luxury)]">
                     FCFA{prix.suffix}
                   </span>
                 </motion.div>
@@ -173,32 +173,34 @@ export function BienCard({
           {/* ── Content Section ── */}
           <div className="p-7 flex flex-col flex-1 relative z-10 h-full">
             {/* Location Line */}
-            <div className="flex items-center gap-2 text-[10px] font-bold text-primary/60 uppercase tracking-[0.2em] mb-3">
+            <div className="flex items-center gap-2 text-[10px] font-bold text-[var(--accent-luxury)] uppercase tracking-[0.2em] mb-3">
               <MapPin className="w-3 h-3 mb-0.5" />
               <span>{commune}{quartier ? ` • ${quartier}` : ''}</span>
             </div>
 
-            <h3 className="font-display font-bold text-gray-950 text-xl leading-[1.2] mb-5 group-hover:text-primary transition-colors duration-300 line-clamp-2">
+            <h3 className="font-display font-bold text-white text-xl leading-[1.2] mb-5 group-hover:text-[var(--accent-luxury)] transition-colors duration-300 line-clamp-2">
               {titre}
             </h3>
 
             {/* Stats Grid */}
-            <div className="mt-auto grid grid-cols-2 gap-3 pt-6 border-t border-gray-100">
+            <div className="mt-auto grid grid-cols-2 gap-3 pt-6 border-t border-white/10">
               {surface_m2 && (
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Surface</span>
-                  <div className="flex items-center gap-2 text-sm font-bold text-gray-800">
-                    <Ruler className="w-4 h-4 text-primary/30" />
+                  <span className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Surface</span>
+                  <div className="flex items-center gap-2 text-sm font-bold text-white">
+                    <Ruler className="w-4 h-4 text-[var(--accent-luxury)]/80" />
                     {surface_m2} m²
                   </div>
                 </div>
               )}
               {nb_pieces && (
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Pièces</span>
-                  <div className="flex items-center gap-2 text-sm font-bold text-gray-800">
-                    <Layers className="w-4 h-4 text-primary/30" />
-                    {nb_pieces} {nb_pieces > 1 ? 'Chambres' : 'Chambre'}
+                  <span className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Pièces</span>
+                  <div className="flex items-center gap-2 text-sm font-bold text-white">
+                    <Layers className="w-4 h-4 text-[var(--accent-luxury)]/80" />
+                    <span className="text-sm font-bold text-white">
+                      {nb_pieces} {nb_pieces > 1 ? 'Chambres' : 'Chambre'}
+                    </span>
                   </div>
                 </div>
               )}
@@ -212,10 +214,10 @@ export function BienCard({
         <button 
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsFavorited(!isFavorited); }}
           className={`
-            w-11 h-11 rounded-full flex items-center justify-center transition-all duration-500 
+            w-11 h-11 rounded-full flex items-center justify-center transition-all duration-500 z-50
             ${isFavorited 
-              ? 'bg-secondary text-white shadow-lg shadow-secondary/30 scale-110' 
-              : 'bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white hover:text-secondary hover:shadow-xl hover:scale-110'
+              ? 'bg-[var(--accent-luxury)] text-white shadow-lg shadow-[var(--accent-luxury)]/30 scale-110' 
+              : 'bg-black/40 backdrop-blur-md border border-white/20 text-white hover:bg-black/60 hover:text-[var(--accent-luxury)] hover:shadow-xl hover:scale-110'
             }
           `}
         >

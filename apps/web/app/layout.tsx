@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Playfair_Display, DM_Sans, JetBrains_Mono } from 'next/font/google'
+import { Playfair_Display, Inter, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 
 const playfair = Playfair_Display({
@@ -8,9 +8,8 @@ const playfair = Playfair_Display({
   variable: '--font-display',
   display: 'swap',
 })
-const dmSans = DM_Sans({
+const inter = Inter({
   subsets: ['latin'],
-  weight: ['300', '400', '500'],
   variable: '--font-sans',
   display: 'swap',
 })
@@ -48,13 +47,20 @@ export const metadata: Metadata = {
   },
 }
 
+import { ThemeProvider } from '@/components/providers/ThemeProvider'
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="fr"
-      className={`${playfair.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}
+      className={`${playfair.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
     >
-      <body className="font-sans bg-white text-text antialiased">{children}</body>
+      <body className="font-sans bg-[var(--background)] text-[var(--text)] antialiased">
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   )
 }

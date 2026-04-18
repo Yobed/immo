@@ -12,25 +12,15 @@ export function CTAFinal() {
   return (
     <section
       ref={containerRef}
-      className="py-20 sm:py-24 relative overflow-hidden -mt-10 rounded-t-[3rem] z-[90] shadow-[0_-10px_40px_rgba(0,0,0,0.3)]"
+      className="py-[var(--section-py)] relative overflow-hidden -mt-10 rounded-t-[3em] z-[90] bg-[var(--background)] border-t border-[var(--border)]"
     >
-      {/* Animated mesh gradient background */}
+      {/* Sophisticated Mesh */}
       <div
-        className="absolute inset-0 anim-mesh"
-        style={{ background: 'linear-gradient(135deg, #0a1f40, #0C2D5E, #1a4585, #F97316, #0C2D5E, #0a1f40)' }}
-      />
-
-      {/* Noise texture */}
-      <div className="absolute inset-0 bg-dots opacity-15 pointer-events-none" />
-
-      {/* Morphing blobs */}
-      <div
-        className="absolute -top-20 -right-20 w-[600px] h-[600px] anim-blob pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(249,115,22,0.2) 0%, transparent 60%)', filter: 'blur(60px)' }}
-      />
-      <div
-        className="absolute -bottom-20 -left-20 w-[500px] h-[500px] pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(26,77,143,0.5) 0%, transparent 60%)', filter: 'blur(60px)', animation: 'orbFloat2 20s ease-in-out infinite' }}
+        className="absolute inset-0 opacity-10 mix-blend-soft-light"
+        style={{ 
+          background: 'radial-gradient(circle at 20% 30%, var(--accent-luxury) 0%, transparent 50%), radial-gradient(circle at 80% 70%, var(--primary) 0%, transparent 50%)',
+          filter: 'blur(120px)'
+        }}
       />
 
       <motion.div 
@@ -38,72 +28,79 @@ export function CTAFinal() {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}
-        className="relative container mx-auto px-4 text-center"
+        className="relative container mx-auto px-6 max-w-5xl text-center"
       >
-        {/* Pill badge */}
-        <motion.div variants={itemVariants} className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-2 mb-8">
-          <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
-          <span className="font-sans text-sm font-medium text-white/80">Gratuit pour commencer</span>
-        </motion.div>
-
-        {/* Headline */}
-        <motion.div variants={itemVariants}>
-          <h2
-            className="font-display font-bold text-white leading-tight mb-6"
-            style={{ fontSize: 'clamp(2rem, 5vw, 4rem)' }}
-          >
-            Prêt à trouver
-            <br />
-            <span className="text-shimmer">votre bien idéal ?</span>
+        <motion.div variants={itemVariants} className="mb-12">
+           <span className="text-[var(--text-muted)] font-sans tracking-[0.4em] uppercase text-[10px] mb-8 block font-bold">
+            Executive Access
+          </span>
+          <h2 className="font-display text-5xl md:text-8xl font-light text-[var(--text)] leading-[1.1] tracking-tighter mb-12">
+            Inscrivez votre <br/>
+            <span className="italic font-serif opacity-70">Légende.</span>
           </h2>
-
-          <p className="font-sans text-white/60 text-base max-w-lg mx-auto mb-12 leading-relaxed">
-            Rejoignez des milliers d&apos;ivoiriens qui font confiance à Immo CI pour leurs projets immobiliers.
+          <p className="font-sans text-lg text-[var(--text-muted)] max-w-xl mx-auto mb-16 leading-relaxed font-light">
+            Qu'il s'agisse d'acquérir un joyau architectural ou de proposer un bien d'exception, notre plateforme est le point de rencontre de l'élite immobilière.
           </p>
         </motion.div>
 
-        {/* Buttons */}
+        {/* Professional Actions */}
         <motion.div
           variants={itemVariants}
-          className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+          className="flex flex-col sm:flex-row gap-8 justify-center items-center mb-24"
         >
           <MagneticWrapper>
             <Link
               href="/biens"
-              className="group relative inline-flex items-center justify-center gap-3 font-sans font-bold rounded-[14px] bg-secondary text-white px-9 py-4 text-base shadow-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl active:scale-95 overflow-hidden anim-pulse-glow"
+              className="group relative px-12 py-6 bg-[var(--text)] text-[var(--background)] font-sans text-xs font-bold tracking-[0.3em] uppercase transition-all hover:bg-[var(--accent-luxury)] hover:text-white hover:scale-105 duration-700 rounded-sm"
             >
-              {/* Shine effect */}
-              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-              <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              Chercher un bien
+              Explorer la Collection
             </Link>
           </MagneticWrapper>
 
           <MagneticWrapper>
             <Link
               href="/register"
-              className="group inline-flex items-center justify-center gap-3 font-sans font-bold rounded-[14px] border-2 border-white/30 text-white hover:bg-white/10 hover:border-white/60 transition-all duration-300 px-9 py-4 text-base hover:scale-105 active:scale-95"
+              className="group relative px-12 py-6 border border-[var(--border)] text-[var(--text)] font-sans text-xs font-bold tracking-[0.3em] uppercase transition-all hover:border-[var(--accent-luxury)] hover:bg-[var(--accent-luxury)] hover:text-white duration-700 rounded-sm"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none"><path d="M12 5v14M5 12h14"/></svg>
-              Publier un bien
+              Signaler un Bien
             </Link>
           </MagneticWrapper>
         </motion.div>
 
-        {/* Trust row */}
+        {/* Editorial Trust Row */}
         <motion.div
            variants={itemVariants}
-           className="mt-16 flex flex-wrap items-center justify-center gap-8"
+           className="flex flex-wrap items-center justify-center gap-x-16 gap-y-8 border-t border-white/[0.05] pt-16"
         >
           {[
-            { icon: '🔒', text: 'Paiement sécurisé' },
-            { icon: '📄', text: 'Contrats OHADA' },
-            { icon: '⭐', text: '4.8/5 satisfaction' },
-            { icon: '🏆', text: 'N°1 en Côte d\'Ivoire' },
-          ].map((item) => (
-            <div key={item.text} className="flex items-center gap-2 text-white/50">
-              <span>{item.icon}</span>
-              <span className="font-sans text-sm">{item.text}</span>
+            { 
+              icon: (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                  <path d="M12 2L3 7v9c0 5 9 6 9 6s9-1 9-6V7l-9-5z"/>
+                </svg>
+              ), 
+              text: 'Sécurité Transactionnelle' 
+            },
+            { 
+              icon: (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                </svg>
+              ), 
+              text: 'Baux OHADA' 
+            },
+            { 
+              icon: (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                  <path d="M12 2L15 9h7l-5.5 4.5 2 7.5L12 16l-6.5 5 2-7.5L2 9h7l3-7z"/>
+                </svg>
+              ), 
+              text: 'Excellence 4.8/5' 
+            },
+          ].map((item, idx) => (
+            <div key={idx} className="flex items-center gap-4 text-[#fafbfc]/60 group hover:text-[#fafbfc]/90 transition-colors duration-500">
+              {item.icon}
+              <span className="font-sans text-[10px] tracking-[0.2em] uppercase font-bold italic">{item.text}</span>
             </div>
           ))}
         </motion.div>

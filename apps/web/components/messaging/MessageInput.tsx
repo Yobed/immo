@@ -39,7 +39,7 @@ export function MessageInput({ conversationId, expediteurId }: MessageInputProps
   }
 
   return (
-    <div className="flex gap-2 p-4 border-t border-[var(--border)] bg-white">
+    <div className="flex gap-2 p-4 border-t border-[var(--border)] bg-[var(--surface-card)]">
       <textarea
         ref={inputRef}
         value={contenu}

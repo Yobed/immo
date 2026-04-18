@@ -67,13 +67,13 @@ export function VisiteRequestForm({ bienId, proprietaireId, isPremium = false }:
       onSubmit={handleSubmit}
       className={`space-y-4 rounded-card p-5 ${
         isPremium
-          ? 'bg-neutral-900 border border-white/10 text-white'
-          : 'bg-white border border-[var(--border)]'
+          ? 'bg-[var(--midnight-muted)] border border-[var(--border)] text-[var(--text)]'
+          : 'bg-[var(--surface-card)] border border-[var(--border)]'
       }`}
     >
       <h3
         className={`font-display text-lg ${
-          isPremium ? 'text-white' : 'text-[var(--text)]'
+          isPremium ? 'text-[var(--text)]' : 'text-[var(--text)]'
         }`}
       >
         Demander une visite
@@ -106,7 +106,7 @@ export function VisiteRequestForm({ bienId, proprietaireId, isPremium = false }:
               className={`px-3 py-2 rounded-btn text-xs font-sans border transition-all ${
                 creneau === c
                   ? isPremium
-                    ? 'border-white bg-white text-black font-bold'
+                    ? 'border-[var(--accent-luxury)] bg-[var(--accent-luxury)]/20 text-[var(--accent-luxury)] font-bold'
                     : 'border-primary bg-primary-light text-primary font-medium'
                   : isPremium
                     ? 'border-white/10 text-white/50 hover:border-white/30'
@@ -135,14 +135,14 @@ export function VisiteRequestForm({ bienId, proprietaireId, isPremium = false }:
           className={`w-full rounded-btn px-3 py-2 text-sm font-sans resize-none focus:outline-none focus:ring-2 ${
             isPremium
               ? 'bg-white/5 border-white/10 text-white focus:ring-white/20'
-              : 'bg-white border border-[var(--border)] focus:ring-primary/30'
+              : 'bg-[var(--surface-card)] border border-[var(--border)] focus:ring-primary/30'
           }`}
         />
       </div>
 
       <Button
         type="submit"
-        className={`w-full ${isPremium ? 'bg-white text-black hover:bg-neutral-200' : ''}`}
+        className={`w-full ${isPremium ? 'bg-[var(--accent-luxury)] text-white hover:bg-[var(--accent-luxury)]/90 shadow-lg shadow-[var(--accent-luxury)]/20' : ''}`}
         loading={submitting}
         disabled={!date || !creneau}
       >

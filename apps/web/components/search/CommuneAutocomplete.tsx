@@ -87,14 +87,14 @@ export function CommuneAutocomplete({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           autoComplete="off"
-          className="w-full rounded-btn border border-[var(--border)] px-3 py-2 pr-8 text-sm font-sans focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white"
+          className="w-full rounded-btn border border-[var(--border)] px-3 py-2 pr-8 text-sm font-sans focus:outline-none focus:border-[var(--accent-luxury)] bg-[var(--midnight-light)] text-[var(--text)] placeholder:text-[var(--text-muted)]"
         />
         {/* Icône loupe / effacer */}
         {value ? (
           <button
             type="button"
             onClick={() => { onChange(''); inputRef.current?.focus(); setOpen(true) }}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-[var(--text)] transition-colors"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--off-white)] transition-colors"
             tabIndex={-1}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
@@ -102,7 +102,7 @@ export function CommuneAutocomplete({
             </svg>
           </button>
         ) : (
-          <div className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none">
+          <div className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none">
             <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
               <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35" strokeLinecap="round"/>
             </svg>
@@ -112,7 +112,7 @@ export function CommuneAutocomplete({
 
       {/* Dropdown suggestions */}
       {open && suggestions.length > 0 && (
-        <div className="absolute z-[100] top-full left-0 right-0 mt-1 bg-white border border-[var(--border)] rounded-card shadow-lg overflow-hidden">
+        <div className="absolute z-[100] top-full left-0 right-0 mt-1 bg-[var(--midnight-muted)] border border-[var(--border)] rounded-card shadow-2xl overflow-hidden backdrop-blur-xl">
           {suggestions.map((s, idx) => (
             <button
               key={`${s.type}-${s.label}`}
@@ -121,23 +121,23 @@ export function CommuneAutocomplete({
               onMouseEnter={() => setHighlighted(idx)}
               className={`w-full text-left px-3 py-2 flex items-center gap-2 text-sm font-sans transition-colors ${
                 idx === highlighted
-                  ? 'bg-primary/5 text-primary'
-                  : 'text-[var(--text)] hover:bg-[var(--surface)]'
+                  ? 'bg-[var(--accent-luxury)]/10 text-[var(--accent-luxury)]'
+                  : 'text-[var(--off-white-muted)] hover:bg-[var(--midnight-light)]'
               }`}
             >
               <span className="flex-shrink-0 flex items-center justify-center w-4 h-4">
                 {s.type === 'commune' ? (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-50">
                     <rect x="2" y="7" width="20" height="15" rx="1"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/>
                   </svg>
                 ) : (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-50">
                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
                   </svg>
                 )}
               </span>
               <span className="flex-1">{s.label}</span>
-              <span className="text-xs text-muted capitalize">{s.type}</span>
+              <span className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] opacity-60">{s.type}</span>
             </button>
           ))}
         </div>

@@ -62,15 +62,15 @@ export function AvisForm({ reservationId, cibleId, cibleNom, onSuccess }: AvisFo
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-gray-50 rounded-lg">
-      <h3 className="font-semibold text-gray-900">Évaluer {cibleNom}</h3>
+      <h3 className="font-semibold text-white">Évaluer {cibleNom}</h3>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Note *</label>
+        <label className="block text-sm font-medium text-white/80 mb-2">Note *</label>
         <StarRating value={note} onChange={setNote} size="lg" />
       </div>
 
       <div>
-        <label htmlFor="commentaire" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="commentaire" className="block text-sm font-medium text-white/80 mb-1">
           Commentaire (optionnel)
         </label>
         <textarea

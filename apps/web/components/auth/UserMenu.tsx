@@ -45,7 +45,7 @@ export function UserMenu({ email, role = 'public' }: UserMenuProps) {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-[var(--border)] rounded-card z-[200] overflow-hidden anim-fade-down"
+        <div className="absolute right-0 top-full mt-2 w-56 bg-[var(--surface-card)] border border-[var(--border)] rounded-card z-[200] overflow-hidden anim-fade-down"
           style={{ boxShadow: 'var(--shadow-lg)' }}>
           {/* Email */}
           <div className="px-4 py-3 border-b border-[var(--border)] bg-[var(--surface)]">

@@ -16,7 +16,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       <input
         ref={ref}
         className={cn(
-          'w-full rounded-btn border border-[var(--border)] bg-white px-3 py-2 text-sm',
+          'w-full rounded-btn border border-[var(--border)] bg-[var(--surface-card)] px-3 py-2 text-sm',
           'placeholder:text-[var(--text-muted)] transition-colors',
           'focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary',
           'disabled:bg-[var(--surface)] disabled:cursor-not-allowed',

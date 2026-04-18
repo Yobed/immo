@@ -13,7 +13,7 @@ export function Step3Localisation({ form }: { form: UseFormReturn<BienFormData> 
         <label className="block text-sm font-sans font-medium text-[var(--text)] mb-2">Commune *</label>
         <select
           {...register('commune')}
-          className="w-full rounded-btn border border-[var(--border)] px-3 py-2 text-sm font-sans focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white"
+          className="w-full rounded-btn border border-[var(--border)] px-3 py-2 text-sm font-sans focus:outline-none focus:ring-2 focus:ring-primary/30 bg-[var(--surface-card)]"
         >
           <option value="">Sélectionner une commune...</option>
           {COMMUNES_CI.map((c) => <option key={c} value={c}>{c}</option>)}

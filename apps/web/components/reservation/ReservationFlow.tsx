@@ -65,7 +65,7 @@ export function ReservationFlow({ bienId, bienTitre, prixMoisFcfa, prixNuitFcfa 
   }
 
   return (
-    <div className="bg-white rounded-card border border-[var(--border)] p-6 shadow-sm">
+    <div className="bg-[var(--surface-card)] rounded-card border border-[var(--border)] p-6 shadow-sm">
       <h2 className="font-display text-xl text-primary mb-1">
         {isNuitee ? 'Réserver ce séjour' : 'Réserver ce bien'}
       </h2>

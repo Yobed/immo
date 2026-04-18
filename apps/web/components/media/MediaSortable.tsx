@@ -46,7 +46,7 @@ function SortableMediaItem({
       ref={setNodeRef}
       style={style}
       className={cn(
-        'flex items-center gap-3 p-3 bg-white rounded-card border border-[var(--border)] select-none',
+        'flex items-center gap-3 p-3 bg-[var(--surface-card)] rounded-card border border-[var(--border)] select-none',
         isDragging && 'opacity-50 shadow-lg'
       )}
     >

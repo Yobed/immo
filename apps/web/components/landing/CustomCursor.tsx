@@ -74,7 +74,7 @@ export const CustomCursor = () => {
         transition={{ duration: 0.2 }}
       />
       <motion.div
-        className="fixed top-0 left-0 w-2 h-2 bg-white rounded-full pointer-events-none z-[10000] mix-blend-difference hidden md:block"
+        className="fixed top-0 left-0 w-2 h-2 bg-[var(--surface-card)] rounded-full pointer-events-none z-[10000] mix-blend-difference hidden md:block"
         style={{
           x: dotX,
           y: dotY,

@@ -55,7 +55,7 @@ export function FavorisButton({ bienId, userId, initialIsFavori = false, classNa
         'w-10 h-10 rounded-full flex items-center justify-center transition-colors shadow-sm',
         isFavori
           ? 'bg-danger text-white hover:bg-danger/90'
-          : 'bg-white text-muted hover:text-danger hover:border-danger border border-[var(--border)]',
+          : 'bg-[var(--surface-card)] text-muted hover:text-danger hover:border-danger border border-[var(--border)]',
         loading && 'opacity-60 cursor-not-allowed',
         className
       )}

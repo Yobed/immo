@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { ThemeToggle } from '@/components/layout/ThemeToggle'
 
 interface NavLink {
   href: string
@@ -40,12 +41,15 @@ export function MobileMenu({ links, ctaLinks }: MobileMenuProps) {
 
       {/* Drawer */}
       <div className={cn(
-        'fixed top-0 right-0 bottom-0 z-50 w-72 bg-white shadow-2xl flex flex-col transition-transform duration-300 md:hidden',
+        'fixed top-0 right-0 bottom-0 z-50 w-72 bg-[var(--surface-card)] shadow-2xl flex flex-col transition-transform duration-300 md:hidden',
         open ? 'translate-x-0' : 'translate-x-full'
       )}>
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
-          <span className="font-display text-lg text-primary">Menu</span>
+          <div className="flex items-center gap-4">
+             <span className="font-display text-lg text-primary">Menu</span>
+             <ThemeToggle />
+          </div>
           <button onClick={() => setOpen(false)} className="p-1.5 rounded-btn hover:bg-[var(--surface)] transition-colors">
             <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" /></svg>
           </button>

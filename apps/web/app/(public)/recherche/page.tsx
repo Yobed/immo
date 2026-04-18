@@ -79,13 +79,13 @@ export default async function RecherchePage({
   const activeFilterCount = [params.commune, params.prix_min, params.prix_max, params.type_bien, params.equipements].filter(Boolean).length
 
   return (
-    <main className="bg-gray-50/50 min-h-screen pt-24 pb-16">
+    <main className="bg-midnight min-h-screen pt-24 pb-16">
       <div className="max-w-[1600px] mx-auto px-4 lg:px-8">
         
         {/* Superior Search & Stats Header */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-12">
           <div className="flex-1 max-w-3xl">
-            <h1 className="font-display text-3xl md:text-5xl font-bold text-gray-950 mb-4 tracking-tight">
+            <h1 className="font-display text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">
               Trouvez votre résidence
             </h1>
             <SearchBar className="w-full" initialQuery={params.q ?? ''} />
@@ -96,12 +96,12 @@ export default async function RecherchePage({
               <p className="text-3xl font-display font-bold text-primary tabular-nums">
                 {totalResults}
               </p>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/70">
                 Propriétés trouvées
               </p>
             </div>
-            <div className="h-12 w-px bg-gray-200" />
-            <div className="flex gap-1.5 p-1.5 bg-white rounded-2xl border border-gray-100 shadow-sm">
+            <div className="h-12 w-px bg-white/10" />
+            <div className="flex gap-1.5 p-1.5 bg-midnight rounded-2xl border border-white/10 shadow-sm">
               <ViewToggle active={vue === 'grille'} href={`/recherche?${new URLSearchParams({ ...params, vue: 'grille' }).toString()}`} icon={Grid} label="Grille" />
               <ViewToggle active={vue === 'carte'} href={`/recherche?${new URLSearchParams({ ...params, vue: 'carte' }).toString()}`} icon={MapIcon} label="Carte" />
             </div>
@@ -111,10 +111,10 @@ export default async function RecherchePage({
         <div className="flex flex-col lg:flex-row gap-10">
           {/* Side Filters (Editorial Style) */}
           <aside className="hidden lg:block w-80 shrink-0">
-            <div className="sticky top-28 bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm">
+            <div className="sticky top-28 bg-white/5 rounded-[2rem] border border-white/10 p-8 shadow-sm backdrop-blur-md">
               <div className="flex items-center gap-2 mb-8">
                 <SlidersHorizontal className="w-4 h-4 text-primary" />
-                <h3 className="font-display font-bold text-lg text-gray-900">Affinage</h3>
+                <h3 className="font-display font-bold text-lg text-white">Affinage</h3>
               </div>
               <SearchFilters />
             </div>
@@ -127,7 +127,7 @@ export default async function RecherchePage({
             </div>
 
             {vue === 'carte' && bienRows.length > 0 && (
-              <div className="mb-10 rounded-[3rem] overflow-hidden border border-gray-200 shadow-2xl h-[500px]">
+              <div className="mb-10 rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl h-[500px]">
                 <PropertiesMap
                   biens={bienRows.map((b) => ({
                     id: b.id,
@@ -172,7 +172,7 @@ export default async function RecherchePage({
 function ViewToggle({ active, href, icon: Icon, label }: { active: boolean; href: string; icon: any; label: string }) {
   return (
     <a href={href} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-      active ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
+      active ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-white/70 hover:text-white hover:bg-white/5'
     }`}>
       <Icon className="w-4 h-4" />
       {label}
@@ -182,14 +182,14 @@ function ViewToggle({ active, href, icon: Icon, label }: { active: boolean; href
 
 function PaginationGroup({ params, page, totalPages }: { params: any; page: number; totalPages: number }) {
   return (
-    <nav className="flex items-center gap-1.5 p-1.5 bg-white rounded-2xl border border-gray-100 shadow-sm">
+    <nav className="flex items-center gap-1.5 p-1.5 bg-midnight rounded-2xl border border-white/10 shadow-sm">
       {page > 0 && <PageLink href={`/recherche?${new URLSearchParams({ ...params, page: String(page - 1) }).toString()}`} icon="←" />}
       {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
         <a 
           key={i}
           href={`/recherche?${new URLSearchParams({ ...params, page: String(i) }).toString()}`}
           className={`w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold transition-all ${
-            i === page ? 'bg-primary text-white' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
+            i === page ? 'bg-primary text-white' : 'text-white/70 hover:bg-white/5 hover:text-white'
           }`}
         >
           {i + 1}
@@ -202,7 +202,7 @@ function PaginationGroup({ params, page, totalPages }: { params: any; page: numb
 
 function PageLink({ href, icon }: { href: string; icon: string }) {
   return (
-    <a href={href} className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 border border-gray-100 text-gray-900 transition-all hover:bg-gray-100">
+    <a href={href} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white transition-all hover:bg-white/10">
       <span className="text-lg leading-none mt-[-2px]">{icon}</span>
     </a>
   )
@@ -210,12 +210,12 @@ function PageLink({ href, icon }: { href: string; icon: string }) {
 
 function EmptyResults({ hasFilters }: { hasFilters: boolean }) {
   return (
-    <div className="text-center py-32 bg-white rounded-[3rem] border border-dashed border-gray-200">
-      <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-        <Compass className="w-8 h-8 text-gray-300" />
+    <div className="text-center py-32 bg-white/5 rounded-[3rem] border border-dashed border-white/10">
+      <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+        <Compass className="w-8 h-8 text-white/40" />
       </div>
-      <h3 className="font-display text-2xl font-bold text-gray-900 mb-2">Aucun résultat trouvé</h3>
-      <p className="text-gray-500 font-sans max-w-sm mx-auto mb-8">
+      <h3 className="font-display text-2xl font-bold text-white mb-2">Aucun résultat trouvé</h3>
+      <p className="text-white/80 font-sans max-w-sm mx-auto mb-8">
         Nous n&apos;avons pas trouvé de propriétés correspondant à vos critères actuels.
       </p>
       {hasFilters && (

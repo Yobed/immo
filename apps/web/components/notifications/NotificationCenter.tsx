@@ -68,11 +68,11 @@ export function NotificationCenter({ initialNotifications, userId }: Notificatio
       </div>
 
       {notifications.length === 0 ? (
-        <div className="bg-white rounded-card shadow-card p-12 text-center">
+        <div className="bg-[var(--surface-card)] rounded-card shadow-card p-12 text-center">
           <p className="font-sans text-muted text-sm">Aucune notification</p>
         </div>
       ) : (
-        <div className="bg-white rounded-card shadow-card overflow-hidden">
+        <div className="bg-[var(--surface-card)] rounded-card shadow-card overflow-hidden">
           {notifications.map((notification) => (
             <NotificationItem
               key={notification.id}

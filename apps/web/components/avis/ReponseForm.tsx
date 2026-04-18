@@ -67,7 +67,7 @@ export function ReponseForm({ avisId }: ReponseFormProps) {
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="text-sm text-gray-500 hover:text-gray-700"
+          className="text-sm text-[var(--text-muted)] hover:text-white/80"
         >
           Annuler
         </button>

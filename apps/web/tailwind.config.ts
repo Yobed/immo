@@ -9,29 +9,45 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary:   {
-          DEFAULT: '#0C2D5E',
-          mid:     '#1A4D8F',
-          light:   '#EEF3FD',
-          glow:    'rgba(12,45,94,0.10)',
+        primary: {
+          DEFAULT: 'oklch(25% 0.05 260)', // Deep Navy
+          mid: 'oklch(40% 0.08 260)',
+          light: 'oklch(95% 0.02 260)',
+          glow: 'oklch(25% 0.05 260 / 10%)',
         },
         secondary: {
-          DEFAULT: '#F97316',
-          light:   '#FFF7ED',
-          glow:    'rgba(249, 115, 22, 0.15)',
+          DEFAULT: 'oklch(65% 0.18 45)', // Burnt Orange/Gold
+          light: 'oklch(97% 0.05 45)',
+          glow: 'oklch(65% 0.18 45 / 15%)',
         },
-        accent:  { DEFAULT: '#0D9F6E', light: '#EDFAF3' },
-        danger:  { DEFAULT: '#D93025', light: '#FEF1F0' },
-        warning: { DEFAULT: '#D08700', light: '#FFFBEC' },
-        surface: { DEFAULT: '#FFFFFF', card: '#FFFFFF', raised: '#FFFFFF' },
-        muted:   '#2D3748',
-        subtle:  '#4A5568',
-        border:  { DEFAULT: '#E2E7F3', hover: '#B8C4DE' },
+        accent: {
+          DEFAULT: 'oklch(60% 0.15 150)', // Emerald/Green
+          light: 'oklch(96% 0.03 150)',
+        },
+        danger: {
+          DEFAULT: 'oklch(55% 0.18 25)', // Red
+          light: 'oklch(96% 0.03 25)',
+        },
+        warning: {
+          DEFAULT: 'oklch(75% 0.15 80)', // Gold/Yellow
+          light: 'oklch(97% 0.03 80)',
+        },
+        surface: {
+          DEFAULT: 'oklch(100% 0 0)',
+          card: 'oklch(99% 0.005 260)',
+          raised: 'oklch(100% 0 0)',
+        },
+        muted: 'oklch(45% 0.02 260)',
+        subtle: 'oklch(65% 0.01 260)',
+        border: {
+          DEFAULT: 'oklch(92% 0.01 260)',
+          hover: 'oklch(85% 0.02 260)',
+        },
       },
       fontFamily: {
-        display: ['Playfair Display', 'Georgia', 'serif'],
-        sans:    ['DM Sans', '-apple-system', 'sans-serif'],
-        mono:    ['JetBrains Mono', 'monospace'],
+        display: ['Unbounded', 'system-ui', 'sans-serif'],
+        sans: ['Public Sans', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
       },
       borderRadius: {
         card: '16px',
