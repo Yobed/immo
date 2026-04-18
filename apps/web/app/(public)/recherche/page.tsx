@@ -56,8 +56,10 @@ export default async function RecherchePage({
     dbQuery = dbQuery.textSearch('fts', params.q.trim(), { type: 'plain', config: 'french' })
   }
   if (params.commune) dbQuery = dbQuery.ilike('commune', `%${params.commune}%`)
-  if (params.prix_min) dbQuery = dbQuery.gte('prix_mois_fcfa', parseInt(params.prix_min, 10))
-  if (params.prix_max) dbQuery = dbQuery.lte('prix_mois_fcfa', parseInt(params.prix_max, 10))
+  const prixMin = params.prix_min ? parseInt(params.prix_min, 10) : NaN
+  const prixMax = params.prix_max ? parseInt(params.prix_max, 10) : NaN
+  if (!isNaN(prixMin)) dbQuery = dbQuery.gte('prix_mois_fcfa', prixMin)
+  if (!isNaN(prixMax)) dbQuery = dbQuery.lte('prix_mois_fcfa', prixMax)
   if (params.type_bien) dbQuery = dbQuery.eq('type_bien', params.type_bien)
   if (params.equipements) {
     const equipList = params.equipements.split(',').filter(Boolean)
@@ -234,7 +236,7 @@ async function getCoverMap(supabase: any, ids: string[]) {
     .select('bien_id, url, est_couverture')
     .in('bien_id', ids)
     .eq('type', 'photo')
-    .order('ordre', { ascending: true })
+    .order('est_couverture', { ascending: false }).order('ordre', { ascending: true })
   const map: Record<string, string> = {}
   if (medias) {
     for (const m of medias) {

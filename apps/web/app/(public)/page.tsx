@@ -1,3 +1,5 @@
+export const revalidate = 300 // ISR: revalide toutes les 5 min
+
 import { createClient } from '@/lib/supabase/server'
 import { Hero } from '@/components/landing/Hero'
 import { HowItWorks } from '@/components/landing/HowItWorks'

@@ -7,24 +7,44 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
   const body = await request.json()
-  const { bien_id, proprietaire_id, date_souhaitee, creneau, message } = body
+  const { bien_id, date_souhaitee, creneau, message } = body
 
-  if (!bien_id || !proprietaire_id || !date_souhaitee || !creneau) {
+  if (!bien_id || !date_souhaitee || !creneau) {
     return NextResponse.json({ error: 'Champs obligatoires manquants' }, { status: 400 })
   }
 
-  // creneau format: "08:00 - 09:00" → heure_debut: "08:00", heure_fin: "09:00"
-  const [heure_debut, heure_fin] = (creneau as string).split(' - ').map((s: string) => s.trim())
+  // Sécurité : récupère le proprio depuis la DB, ne pas faire confiance au body
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: bien, error: bienError } = await (supabase as any)
+    .from('biens')
+    .select('proprietaire_id, statut')
+    .eq('id', bien_id)
+    .single()
 
-  const { data, error } = await supabase
+  if (bienError || !bien) {
+    return NextResponse.json({ error: 'Bien introuvable' }, { status: 404 })
+  }
+  if (bien.statut !== 'publie') {
+    return NextResponse.json({ error: 'Ce bien n\'est pas disponible' }, { status: 400 })
+  }
+  if (bien.proprietaire_id === user.id) {
+    return NextResponse.json({ error: 'Vous ne pouvez pas demander une visite pour votre propre bien' }, { status: 400 })
+  }
+
+  // creneau format: "08:00 - 09:00" → heure_debut: "08:00", heure_fin: "09:00"
+  const parts = (creneau as string).split(' - ').map((s: string) => s.trim())
+  const heure_debut = parts[0] ?? null
+  const heure_fin = parts[1] ?? null
+
+  const { data, error } = await (supabase as any)
     .from('visites')
     .insert({
       bien_id,
       locataire_id: user.id,
-      proprietaire_id,
+      proprietaire_id: bien.proprietaire_id, // from DB, not body
       date_souhaitee,
-      heure_debut: heure_debut ?? null,
-      heure_fin: heure_fin ?? null,
+      heure_debut,
+      heure_fin,
       notes: message ?? null,
       statut: 'en_attente',
     })
@@ -45,11 +65,12 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Payload invalide' }, { status: 400 })
   }
 
-  const { data, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
     .from('visites')
     .update({ statut })
     .eq('id', visite_id)
-    .eq('proprietaire_id', user.id)   // RLS: seul le proprio peut confirmer/annuler
+    .eq('proprietaire_id', user.id) // RLS: seul le proprio peut confirmer/annuler
     .select('id, statut')
     .single()
 

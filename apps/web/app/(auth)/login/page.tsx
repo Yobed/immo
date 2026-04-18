@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -15,6 +16,7 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>
 
 export default function LoginPage() {
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [googleLoading, setGoogleLoading] = useState(false)
@@ -40,11 +42,11 @@ export default function LoginPage() {
 
     if (error) {
       setError('Identifiants incorrects. Veuillez réessayer.')
+      setLoading(false)
     } else {
-      window.location.href = '/dashboard'
+      router.push('/dashboard')
+      router.refresh()
     }
-
-    setLoading(false)
   }
 
   const handleGoogleLogin = async () => {

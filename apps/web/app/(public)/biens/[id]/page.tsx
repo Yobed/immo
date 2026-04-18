@@ -1,6 +1,10 @@
+export const revalidate = 3600 // ISR: revalide toutes les 1h
+
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
 import Image from 'next/image'
+import { formatFCFA } from '@/lib/format'
 import { Badge } from '@/components/ui'
 import { TYPES_BIEN_LABELS, EQUIPEMENTS_LABELS } from '@immo-ci/shared/constants/biens'
 import { BienCarousel } from '@/components/bien/BienCarousel'
@@ -30,8 +34,39 @@ import {
 } from 'lucide-react'
 import * as motion from 'framer-motion/client'
 
-function formatFCFA(n: number) {
-  return new Intl.NumberFormat('fr-CI', { style: 'decimal', maximumFractionDigits: 0 }).format(n) + ' FCFA'
+// generateMetadata — SEO dynamique par bien
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const supabase = await createClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: bien } = await (supabase as any)
+    .from('biens')
+    .select('titre, commune, quartier, type_bien, prix_mois_fcfa, prix_vente_fcfa, biens_medias(url, est_couverture, ordre)')
+    .eq('id', id)
+    .eq('statut', 'publie')
+    .single()
+
+  if (!bien) return { title: 'Bien introuvable — Immo CI' }
+
+  const photo = (bien.biens_medias as { url: string; est_couverture: boolean; ordre: number }[] | null)
+    ?.sort((a, b) => (b.est_couverture ? 1 : 0) - (a.est_couverture ? 1 : 0))[0]?.url
+  const lieu = [bien.quartier, bien.commune].filter(Boolean).join(', ')
+  const prix = bien.prix_vente_fcfa
+    ? formatFCFA(bien.prix_vente_fcfa)
+    : bien.prix_mois_fcfa ? `${formatFCFA(bien.prix_mois_fcfa)}/mois` : ''
+  const desc = `${bien.type_bien} à ${lieu}${prix ? ` — ${prix}` : ''}. Découvrez ce bien sur Immo CI, la plateforme immobilière N°1 en Côte d'Ivoire.`
+
+  return {
+    title: `${bien.titre} — ${lieu} | Immo CI`,
+    description: desc,
+    openGraph: {
+      title: bien.titre,
+      description: desc,
+      images: photo ? [{ url: photo, width: 1200, height: 800, alt: bien.titre }] : [],
+      type: 'article',
+    },
+    twitter: { card: 'summary_large_image', title: bien.titre, description: desc },
+  }
 }
 
 const EQUIPEMENTS_ICONS: Record<string, any> = {

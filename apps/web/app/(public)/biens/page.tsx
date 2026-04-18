@@ -231,7 +231,7 @@ async function getCoverMap(supabase: any, ids: string[]) {
     .select('bien_id, url, est_couverture')
     .in('bien_id', ids)
     .eq('type', 'photo')
-    .order('ordre', { ascending: true })
+    .order('est_couverture', { ascending: false }).order('ordre', { ascending: true })
   
   const map: Record<string, string> = {}
   if (medias) {
