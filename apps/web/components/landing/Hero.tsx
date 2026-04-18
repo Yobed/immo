@@ -103,27 +103,33 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
         className="absolute inset-0 pointer-events-none"
         aria-hidden="true"
       >
-        {carouselData.map((item, idx) => (
-          <div
-            key={item.photo_url}
-            className="absolute inset-0 will-change-[opacity]"
-            style={{
-              opacity: idx === currentIdx ? 1 : 0,
-              transition: 'opacity 1.4s cubic-bezier(0.4, 0, 0.2, 1)',
-            }}
-          >
-            <Image
-              src={item.photo_url!}
-              alt=""
-              fill
-              className="object-cover object-center"
-              priority={idx === 0}
-              loading={idx === 0 ? 'eager' : 'lazy'}
-              sizes="100vw"
-              quality={85}
-            />
-          </div>
-        ))}
+        {carouselData.map((item, idx) => {
+          const isActive = idx === currentIdx
+          return (
+            <div
+              key={item.photo_url}
+              className="absolute inset-0 overflow-hidden"
+              style={{
+                opacity: isActive ? 1 : 0,
+                transition: 'opacity 1.4s cubic-bezier(0.4, 0, 0.2, 1)',
+              }}
+            >
+              {/* Ken Burns : zoom synchronisé avec l'intervalle de 8s */}
+              <div className={isActive ? 'kb-active' : 'kb-idle'} style={{ width: '100%', height: '100%' }}>
+                <Image
+                  src={item.photo_url!}
+                  alt=""
+                  fill
+                  className="object-cover object-center"
+                  priority={idx === 0}
+                  loading={idx === 0 ? 'eager' : 'lazy'}
+                  sizes="100vw"
+                  quality={85}
+                />
+              </div>
+            </div>
+          )
+        })}
 
         {/* Overlays cinématiques — stables, jamais rechargés */}
         <div className="absolute inset-0 bg-[var(--background)]/35" />
@@ -223,14 +229,16 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
 
         {/* ── RIGHT — Cinematic Side ───────────────────────────── */}
         <div className="hidden lg:block relative flex-1 max-w-md xl:max-w-lg z-20">
+          {/* Conteneur taille fixe : évite que AnimatePresence double la hauteur = zéro saut */}
+          <div className="relative aspect-[3/4] rounded-sm overflow-hidden border border-[var(--border)] shadow-[0_40px_80px_rgba(0,0,0,0.3)] bg-[var(--midnight-muted)]">
           <AnimatePresence>
             <motion.div
               key={currentItem.photo_url}
-              initial={{ opacity: 0, scale: 0.95, x: 20 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              exit={{ opacity: 0, scale: 1.05, x: -20 }}
-              transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-              className="relative aspect-[3/4] overflow-hidden rounded-sm border border-[var(--border)] shadow-[0_40px_80px_rgba(0,0,0,0.3)] bg-[var(--midnight-muted)]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+              className="absolute inset-0 overflow-hidden"
             >
               <Image
                 src={currentItem.photo_url}
@@ -266,6 +274,7 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
               </div>
             </motion.div>
           </AnimatePresence>
+          </div>{/* fin conteneur fixe aspect-[3/4] */}
 
           {/* Floating Detail Overlay */}
           <motion.div
