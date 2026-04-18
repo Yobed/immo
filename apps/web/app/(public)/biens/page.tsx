@@ -6,7 +6,8 @@ import * as React from 'react'
 import { Home, Building2, Palmtree, Warehouse, Briefcase, Landmark, Shovel, ArrowRight, Filter, AlertCircle } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 const TYPE_FILTERS: { label: string; value: string; icon: LucideIcon }[] = [
   { label: 'Tous',               value: '',                  icon: Home },
@@ -36,12 +37,30 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as [number,number,number,number] } },
 }
 
-export default function BiensListePage({
-  searchParams: searchParamsPromise,
-}: {
-  searchParams: Promise<{ type_bien?: string }>
-}) {
-  const [activeType, setActiveType] = useState<string>('')
+// Suspense requis par Next.js 14 quand useSearchParams() est utilisé dans un client component
+export default function BiensListePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-midnight flex items-center justify-center">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-4xl px-4">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="aspect-[3/4] bg-white/5 animate-pulse rounded-[1.5rem]" />
+          ))}
+        </div>
+      </div>
+    }>
+      <BiensContent />
+    </Suspense>
+  )
+}
+
+function BiensContent() {
+  // useSearchParams() = hook Next.js correct pour client components
+  // évite la prop searchParams instable qui causait un useEffect en boucle infinie
+  const searchParams = useSearchParams()
+  const typeFromUrl = searchParams.get('type_bien') ?? ''
+
+  const [activeType, setActiveType] = useState<string>(typeFromUrl)
   const [biens, setBiens] = useState<BienRow[]>([])
   const [typeResults, setTypeResults] = useState<TypeRow[]>([])
   const [coverMap, setCoverMap] = useState<Record<string, string>>({})
@@ -49,7 +68,7 @@ export default function BiensListePage({
   const [error, setError] = useState<string | null>(null)
   const [count, setCount] = useState(0)
 
-  // Instance Supabase stable — ne pas recréer à chaque render
+  // Instance Supabase stable — une seule fois, jamais recréée
   const supabaseRef = useRef(createClient())
   const supabase = supabaseRef.current
 
@@ -79,8 +98,7 @@ export default function BiensListePage({
       setError(null)
 
       try {
-        const params = await searchParamsPromise
-        const type = params.type_bien ?? ''
+        const type = typeFromUrl
         if (!cancelled) setActiveType(type)
 
         if (type) {
@@ -130,7 +148,7 @@ export default function BiensListePage({
 
     loadData()
     return () => { cancelled = true }
-  }, [searchParamsPromise, supabase, getCoverMap])
+  }, [typeFromUrl, supabase, getCoverMap])
 
   const activeLabel = TYPE_FILTERS.find(f => f.value === activeType)?.label ?? activeType
 
