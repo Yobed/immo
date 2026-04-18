@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
+import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } from 'framer-motion'
 import { TYPES_BIEN_LABELS } from '@immo-ci/shared/constants/biens'
 import { useState } from 'react'
 import { Home, Building2, Warehouse, MapPin, Ruler, Layers, Star, ArrowRight } from 'lucide-react'
@@ -52,15 +52,14 @@ export function BienCard({
 
   const typeConf = TYPE_CONFIG[type_bien] ?? { bg: 'bg-slate-500/15', text: 'text-slate-300', dot: 'bg-slate-400', icon: Home }
 
-  // 3D tilt — respecte prefers-reduced-motion
-  const prefersReduced = typeof window !== 'undefined'
-    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    : false
+  // 3D tilt — useReducedMotion() = hook Framer Motion, safe SSR + hydration
+  const prefersReduced = useReducedMotion()
+  const TILT = prefersReduced ? 0 : 5
 
   const mouseX = useMotionValue(0)
   const mouseY = useMotionValue(0)
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], prefersReduced ? ['0deg', '0deg'] : ['5deg', '-5deg']), { stiffness: 500, damping: 50 })
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], prefersReduced ? ['0deg', '0deg'] : ['-5deg', '5deg']), { stiffness: 500, damping: 50 })
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [`${TILT}deg`, `-${TILT}deg`]), { stiffness: 500, damping: 50 })
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [`-${TILT}deg`, `${TILT}deg`]), { stiffness: 500, damping: 50 })
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (prefersReduced) return

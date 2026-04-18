@@ -55,13 +55,12 @@ export default function BiensListePage({
 
   const getCoverMap = useCallback(async (ids: string[]) => {
     if (ids.length === 0) return {}
-    const { data: medias } = await supabase
+    const { data: medias } = await (supabase as any)
       .from('biens_medias')
       .select('bien_id, url, est_couverture')
       .in('bien_id', ids)
       .eq('type', 'photo')
       .order('est_couverture', { ascending: false })
-      .order('ordre', { ascending: true })
 
     const map: Record<string, string> = {}
     if (medias) {
@@ -86,7 +85,8 @@ export default function BiensListePage({
 
         if (type) {
           // Mode filtre actif — grille paginée
-          const { data, count: c, error: err } = await supabase
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data, count: c, error: err } = await (supabase as any)
             .from('biens')
             .select(
               'id, titre, commune, quartier, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces',
@@ -106,7 +106,8 @@ export default function BiensListePage({
           // Mode magazine — carousels par catégorie
           const results = await Promise.all(
             TYPE_FILTERS.filter(f => f.value !== '').map(async (f) => {
-              const { data } = await supabase
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const { data } = await (supabase as any)
                 .from('biens')
                 .select('id, titre, commune, quartier, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces')
                 .eq('statut', 'publie')
