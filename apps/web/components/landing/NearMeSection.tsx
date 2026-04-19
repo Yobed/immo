@@ -140,7 +140,7 @@ export function NearMeSection() {
             </div>
             <h2 className="font-display text-4xl md:text-7xl text-[var(--text)] leading-tight tracking-tight">
               Résidences <br/>
-              <span className="italic font-serif opacity-60 text-[var(--accent-luxury)]">À quelques minutes.</span>
+              <span className="italic font-serif text-[var(--accent-luxury)] drop-shadow-sm">À quelques minutes.</span>
             </h2>
           </div>
 
@@ -215,12 +215,12 @@ export function NearMeSection() {
                     />
                     {/* Badge de distance flottant */}
                     <div className="absolute top-6 right-6 z-20 flex flex-col items-end gap-2">
-                      <div className="px-4 py-2 rounded-xl bg-[var(--midnight-glow)] backdrop-blur-xl border border-[var(--border)] text-[10px] font-bold text-[var(--text)] shadow-2xl flex items-center gap-2 group-hover/card:bg-[var(--accent-luxury)] group-hover/card:text-white transition-all duration-500">
+                      <div className="px-4 py-2 rounded-xl bg-[var(--midnight-glow)]/90 backdrop-blur-xl border border-[var(--border)] text-[10px] font-bold text-[var(--text)] shadow-2xl flex items-center gap-2 group-hover/card:bg-[var(--accent-luxury)] group-hover/card:text-white group-hover/card:border-[var(--accent-luxury)] transition-all duration-500">
                         <MapPin className="w-3 h-3" />
                         {(b.dist_meters / 1000).toFixed(1)} km
                       </div>
-                      <div className="px-4 py-2 rounded-xl bg-[var(--surface)] backdrop-blur-md border border-[var(--border)] text-[10px] font-bold text-[var(--text-muted)] flex items-center gap-2 transition-all">
-                        <Car className="w-3 h-3 text-[var(--accent-luxury)]" />
+                      <div className="px-4 py-2 rounded-xl bg-[var(--surface)]/90 backdrop-blur-md border border-[var(--border)] text-[10px] font-bold text-[var(--text-muted)] flex items-center gap-2 transition-all">
+                        <Clock className="w-3 h-3 text-[var(--accent-luxury)]" />
                         ~ {getTravelTime(b.dist_meters)}
                       </div>
                     </div>

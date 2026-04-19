@@ -93,6 +93,10 @@ export function PropertiesMap({
     
     const zoom = targetCenter ? 13 : ABIDJAN_CENTER.zoom
 
+    if (targetCenter) {
+      setUserLocation({ lng: targetCenter.lng, lat: targetCenter.lat })
+    }
+
     // Validate center before flying
     if (typeof center[0] === 'number' && typeof center[1] === 'number' && !isNaN(center[0]) && !isNaN(center[1])) {
       map.flyTo({ 
@@ -190,41 +194,41 @@ export function PropertiesMap({
 
       <style>{`
         @keyframes sonar-wave {
-          0% { transform: scale(0.6); opacity: 1; box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7); }
-          100% { transform: scale(2.5); opacity: 0; box-shadow: 0 0 0 20px rgba(249, 115, 22, 0); }
+          0% { transform: scale(0.6); opacity: 1; border-color: rgba(249, 115, 22, 0.5); }
+          100% { transform: scale(3.5); opacity: 0; border-color: rgba(249, 115, 22, 0); }
         }
         .sonar-effect {
           position: absolute;
-          width: 44px; height: 44px;
-          background: rgba(249, 115, 22, 0.3);
-          border: 2px solid rgba(249, 115, 22, 0.5);
+          width: 32px; height: 32px;
+          background: rgba(249, 115, 22, 0.15);
+          border: 1.5px solid rgba(249, 115, 22, 0.4);
           border-radius: 50%;
-          animation: sonar-wave 1.8s infinite ease-out;
+          animation: sonar-wave 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
           z-index: -1;
           pointer-events: none;
         }
         
-        @keyframes marker-blink {
-          0%, 100% { transform: scale(1); opacity: 1; filter: brightness(1); }
-          50% { transform: scale(1.1); opacity: 0.9; filter: brightness(1.3); }
+        @keyframes marker-hover-float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-5px); }
         }
-        .marker-blink-animation {
-          animation: marker-blink 1s infinite cubic-bezier(0.4, 0, 0.2, 1);
+        .marker-float {
+          animation: marker-hover-float 1.5s infinite ease-in-out;
         }
 
-        .premium-glow {
-          box-shadow: 0 0 15px rgba(249, 115, 22, 0.5), 0 0 30px rgba(249, 115, 22, 0.3);
+        .premium-shadow {
+          filter: drop-shadow(0 0 12px rgba(249, 115, 22, 0.4));
         }
 
         @keyframes user-pulse {
-          0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
-          70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+          0% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.8), 0 0 0 0 rgba(14, 165, 233, 0.4); }
+          70% { box-shadow: 0 0 0 10px rgba(14, 165, 233, 0), 0 0 0 20px rgba(14, 165, 233, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0), 0 0 0 0 rgba(14, 165, 233, 0); }
         }
         .user-dot-pulse {
-          width: 16px; height: 16px; background: #3b82f6; border: 3px solid white;
-          border-radius: 50%; box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-          animation: user-pulse 2s infinite;
+          width: 14px; height: 14px; background: #0ea5e9; border: 3px solid white;
+          border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+          animation: user-pulse 2.5s infinite;
         }
       `}</style>
 
@@ -279,13 +283,14 @@ export function PropertiesMap({
             >
               <button
                 onClick={(e) => { e.stopPropagation(); handleMarkerClick(bien) }}
-                className={`group relative flex flex-col items-center outline-none transition-all duration-300 ${!isSelected ? 'marker-blink-animation' : ''}`}
+                className={`group relative flex flex-col items-center outline-none transition-all duration-300 ${isSelected ? 'marker-float' : ''}`}
                 title={bien.titre}
               >
                 {/* Energetic Pulsing Ring for "Clignotant" effect */}
                 {!isSelected && (
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
                     <div className="sonar-effect" />
+                    <div className="sonar-effect" style={{ animationDelay: '0.6s' }} />
                   </div>
                 )}
 
