@@ -1,5 +1,6 @@
 'use client'
 import { createClient } from '@/lib/supabase/client'
+import Link from 'next/link'
 import { BienCard } from '@/components/bien/BienCard'
 import { CardsCarousel } from '@/components/ui/CardsCarousel'
 import * as React from 'react'
