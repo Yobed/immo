@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo, useRef } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { motion, useInView } from 'framer-motion'
 import { useTheme } from 'next-themes'
@@ -71,6 +71,7 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [onlyAvailable, setOnlyAvailable] = useState(false)
   const [selectedEquips, setSelectedEquips] = useState<string[]>([])
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
   const { theme } = useTheme()
   const containerRef = useRef<HTMLElement>(null)
   const inView = useInView(containerRef, { once: true, margin: "-100px" })
@@ -135,6 +136,17 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
     }
     return list
   }, [biensWithCoords, activeCommune, activeType, searchQueryMinPrice, searchQueryMaxPrice, searchQuery, onlyAvailable])
+
+  // Detect user location for itinerary feature
+  useEffect(() => {
+    if (typeof window !== 'undefined' && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        (err) => console.warn('MapZones: Geolocation disabled'),
+        { timeout: 10000 }
+      )
+    }
+  }, [])
 
   const targetCenter = activeCommune ? communesCoords[activeCommune] : null
   const mapStyle = theme === 'light' ? 'mapbox://styles/mapbox/light-v11' : 'mapbox://styles/mapbox/dark-v11'
@@ -347,20 +359,27 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
 
 
         {/* Map - Deep Contrast */}
-        {biensWithCoords.length > 0 && (
-          <motion.div variants={itemVariants} className="mb-14">
-            <div className="rounded-3xl overflow-hidden ring-1 ring-[var(--border)] p-1 bg-[var(--surface-card)] backdrop-blur-3xl transition-all duration-1000 ease-[0.16, 1, 0.3, 1] hover:ring-[var(--accent-luxury)]">
-              <div className="rounded-[calc(1.5rem-4px)] overflow-hidden bg-[var(--background)]">
-                <PropertiesMap
-                  biens={filteredBiens}
-                  hauteur={600}
-                  mapTheme={mapStyle}
-                  targetCenter={targetCenter}
-                />
-              </div>
+        <motion.div variants={itemVariants} className="mb-14">
+          <div className="rounded-3xl overflow-hidden ring-1 ring-[var(--border)] p-1 bg-[var(--surface-card)] backdrop-blur-3xl transition-all duration-1000 ease-[0.16, 1, 0.3, 1] hover:ring-[var(--accent-luxury)]">
+            <div className="rounded-[calc(1.5rem-4px)] overflow-hidden bg-[var(--background)] relative">
+              {filteredBiens.length === 0 && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 backdrop-blur-[2px] pointer-events-none">
+                  <div className="bg-[var(--midnight)] border border-[var(--border)] p-4 rounded-2xl shadow-2xl text-center">
+                    <p className="text-[var(--accent-luxury)] text-xs font-bold uppercase tracking-widest mb-1">Aucun bien trouvé</p>
+                    <p className="text-[var(--text-muted)] text-[10px] uppercase tracking-widest">Essayez de modifier vos filtres</p>
+                  </div>
+                </div>
+              )}
+              <PropertiesMap
+                biens={filteredBiens}
+                hauteur={600}
+                mapTheme={mapStyle}
+                targetCenter={targetCenter}
+                userLocation={userLocation}
+              />
             </div>
-          </motion.div>
-        )}
+          </div>
+        </motion.div>
 
         <motion.div variants={itemVariants} className="text-center mt-12 text-[var(--text-muted)] opacity-50 text-[9px] tracking-[0.3em] uppercase font-sans">
           Extension en cours : San-Pédro · Bouaké · Yamoussoukro

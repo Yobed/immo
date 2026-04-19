@@ -24,6 +24,8 @@ interface PremiumBienCardProps {
   est_disponible?: boolean
   url_visite_3d?: string | null
   index?: number
+  onSelect?: (id: string) => void
+  isSelected?: boolean
 }
 
 function formatFCFA(n: number): string {
@@ -38,7 +40,9 @@ export function PremiumBienCard({
   is_verifie,
   score_ia,
   url_visite_3d,
-  index = 0
+  index = 0,
+  onSelect,
+  isSelected
 }: PremiumBienCardProps) {
   
   const prix = prix_vente_fcfa
@@ -57,9 +61,26 @@ export function PremiumBienCard({
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: (index % 4) * 0.1 }}
       className="group relative flex flex-col h-full"
     >
-      <Link href={`/biens/${id}`} className="flex flex-col h-full no-underline">
+      <div 
+        className="flex flex-col h-full cursor-pointer"
+        onClick={(e) => {
+          if (onSelect) {
+            e.preventDefault();
+            onSelect(id);
+          }
+        }}
+      >
+        <Link 
+          href={`/biens/${id}`} 
+          className="flex flex-col h-full no-underline"
+          onClick={(e) => {
+            if (onSelect) {
+              e.preventDefault();
+            }
+          }}
+        >
         {/* Master Container: Pure White/Zinc card with diffusion shadow */}
-        <div className="relative flex flex-col h-full bg-[var(--surface-card)] rounded-[2rem] overflow-hidden border border-[var(--border)] transition-all duration-700 hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.12)] hover:-translate-y-2 group-active:scale-[0.98]">
+        <div className={`relative flex flex-col h-full bg-[var(--surface-card)] rounded-[2rem] overflow-hidden border transition-all duration-700 hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.12)] hover:-translate-y-2 group-active:scale-[0.98] ${isSelected ? 'border-[var(--accent-luxury)] ring-1 ring-[var(--accent-luxury)]' : 'border-[var(--border)]'}`}>
           
           {/* 1. Image Architectural Section */}
           <div className="relative aspect-[4/5] overflow-hidden bg-[var(--midnight-muted)]">
@@ -183,7 +204,8 @@ export function PremiumBienCard({
             )}
           </div>
         </div>
-      </Link>
+        </Link>
+      </div>
     </motion.div>
   )
 }

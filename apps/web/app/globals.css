@@ -60,6 +60,8 @@ html, body {
   --glass-blur:      32px;
 
   --accent-luxury:   #D4AF37;
+  --accent-luxury-glow:  rgba(212, 175, 55, 0.4);
+  --accent-luxury-muted: rgba(212, 175, 55, 0.15);
   --on-primary:      #f8fafc;   /* Light text on dark primary */
   --on-accent:       #020617;   /* Dark text on gold accent */
 }
@@ -735,4 +737,60 @@ main {
     animation-duration: 3s;
     opacity: 0.6;
   }
+}
+
+/* ══════════════════════════════════════════════════════
+   MAP EXTRAS (LUXURY SONAR & GLOW)
+══════════════════════════════════════════════════════ */
+
+@keyframes luxury-sonar {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(3); opacity: 0; }
+}
+
+@keyframes luxury-blink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+.sonar-effect {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 2px solid #D4AF37;
+  border-radius: 50%;
+  animation: luxury-sonar 2s infinite;
+  pointer-events: none;
+}
+
+.marker-luxury-blink {
+  animation: luxury-blink 2s ease-in-out infinite;
+}
+
+.user-dot-pulse {
+  width: 16px;
+  height: 16px;
+  background: #3B82F6;
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
+  position: relative;
+}
+
+.user-dot-pulse::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.4);
+  animation: ping 2s infinite;
+}
+
+.premium-glow {
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.5), 0 0 10px rgba(255, 255, 255, 0.2);
+  transition: box-shadow 0.4s ease;
+}
+
+.premium-glow:hover {
+  box-shadow: 0 0 40px rgba(212, 175, 55, 0.8), 0 0 20px rgba(255, 255, 255, 0.4);
 }

@@ -1,7 +1,7 @@
 'use client'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { BienCard } from '@/components/bien/BienCard'
+import { PremiumBienCard } from '@/components/bien/PremiumBienCard'
 import { CardsCarousel } from '@/components/ui/CardsCarousel'
 import * as React from 'react'
 import { Home, Building2, Palmtree, Warehouse, Briefcase, Landmark, Shovel, ArrowRight, Filter, AlertCircle, MapPin } from 'lucide-react'
@@ -247,14 +247,30 @@ function BiensContent() {
                 <EmptyState />
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {biens.map((bien) => (
+                  {biens.map((bien, i) => (
                     <motion.div key={bien.id} variants={itemVariants} className="relative group/card">
-                      <BienCard {...bienProps(bien, coverMap)} />
+                      <PremiumBienCard
+                        id={bien.id}
+                        titre={bien.titre}
+                        commune={bien.commune}
+                        quartier={bien.quartier}
+                        type_bien={bien.type_bien}
+                        prix_mois_fcfa={bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa}
+                        prix_nuit_fcfa={bien.prix_nuit_fcfa}
+                        prix_vente_fcfa={bien.prix_vente_fcfa}
+                        surface_m2={bien.surface_m2}
+                        nb_pieces={bien.nb_pieces}
+                        photo_url={coverMap[bien.id] ?? null}
+                        is_verifie={bien.is_verifie}
+                        score_ia={bien.score_ia}
+                        url_visite_3d={bien.url_visite_3d}
+                        index={i}
+                      />
                       {currentUserId === bien.proprietaire_id && (
-                        <div className="absolute top-6 right-6 z-20">
+                        <div className="absolute top-4 left-4 z-20">
                           <Link 
                             href={`/mes-biens/${bien.id}/modifier`}
-                            className="px-5 py-2.5 bg-secondary text-white rounded-xl text-[10px] font-bold uppercase tracking-wider shadow-2xl hover:scale-105 transition-transform border border-white/20"
+                            className="px-4 py-2 bg-black/60 backdrop-blur-md text-white rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-xl hover:scale-105 transition-transform border border-white/20"
                           >
                             Modifier
                           </Link>
@@ -305,14 +321,30 @@ function BiensContent() {
 
                   <CardsCarousel cardWidth={340}>
                     <div className="flex gap-6">
-                      {row.biens.map((bien: BienRow) => (
-                        <div key={bien.id} className="w-[300px] sm:w-[340px] lg:w-[380px] shrink-0 relative group/card">
-                          <BienCard {...bienProps(bien, coverMap)} isExclusive={idx === 0} />
+                      {row.biens.map((bien: BienRow, i: number) => (
+                        <div key={bien.id} className="w-[280px] sm:w-[320px] shrink-0 relative group/card">
+                          <PremiumBienCard
+                            id={bien.id}
+                            titre={bien.titre}
+                            commune={bien.commune}
+                            quartier={bien.quartier}
+                            type_bien={bien.type_bien}
+                            prix_mois_fcfa={bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa}
+                            prix_nuit_fcfa={bien.prix_nuit_fcfa}
+                            prix_vente_fcfa={bien.prix_vente_fcfa}
+                            surface_m2={bien.surface_m2}
+                            nb_pieces={bien.nb_pieces}
+                            photo_url={coverMap[bien.id] ?? null}
+                            is_verifie={bien.is_verifie}
+                            score_ia={bien.score_ia}
+                            url_visite_3d={bien.url_visite_3d}
+                            index={i}
+                          />
                           {currentUserId === bien.proprietaire_id && (
-                            <div className="absolute top-6 right-6 z-20">
+                            <div className="absolute top-4 left-4 z-20">
                               <Link 
                                 href={`/mes-biens/${bien.id}/modifier`}
-                                className="px-5 py-2.5 bg-secondary text-white rounded-xl text-[10px] font-bold uppercase tracking-wider shadow-2xl hover:scale-105 transition-transform border border-white/20"
+                                className="px-4 py-2 bg-black/60 backdrop-blur-md text-white rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-xl hover:scale-105 transition-transform border border-white/20"
                               >
                                 Modifier
                               </Link>

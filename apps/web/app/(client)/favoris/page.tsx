@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { BienCard } from '@/components/bien/BienCard'
+import { PremiumBienCard } from '@/components/bien/PremiumBienCard'
 
 export default async function FavorisPage() {
   const supabase = await createClient()
@@ -49,8 +49,8 @@ export default async function FavorisPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {biens.map((bien) => (
-              <BienCard
+            {biens.map((bien, i) => (
+              <PremiumBienCard
                 key={bien.id}
                 id={bien.id}
                 titre={bien.titre}
@@ -62,6 +62,7 @@ export default async function FavorisPage() {
                 surface_m2={bien.surface_m2}
                 nb_pieces={bien.nb_pieces}
                 photo_url={coverMap[bien.id] ?? null}
+                index={i}
               />
             ))}
           </div>

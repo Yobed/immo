@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { BienCard } from '@/components/bien/BienCard'
+import { PremiumBienCard } from '@/components/bien/PremiumBienCard'
 import { SearchBar } from '@/components/search/SearchBar'
 import { SearchFilters } from '@/components/search/SearchFilters'
 import { MobileFiltersDrawer } from '@/components/search/MobileFiltersDrawer'
@@ -151,9 +151,23 @@ export default async function RecherchePage({
             {bienRows.length === 0 ? (
               <EmptyResults hasFilters={hasFilters} />
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                {bienRows.map((bien) => (
-                  <BienCard key={bien.id} {...bienProps(bien, coverMap)} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+                {bienRows.map((bien, i) => (
+                  <PremiumBienCard
+                    key={bien.id}
+                    id={bien.id}
+                    titre={bien.titre}
+                    commune={bien.commune}
+                    quartier={bien.quartier}
+                    type_bien={bien.type_bien}
+                    prix_mois_fcfa={bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa}
+                    prix_nuit_fcfa={bien.prix_nuit_fcfa}
+                    prix_vente_fcfa={bien.prix_vente_fcfa}
+                    surface_m2={bien.surface_m2}
+                    nb_pieces={bien.nb_pieces}
+                    photo_url={coverMap[bien.id] ?? null}
+                    index={i}
+                  />
                 ))}
               </div>
             )}
@@ -246,18 +260,4 @@ async function getCoverMap(supabase: any, ids: string[]) {
   return map
 }
 
-function bienProps(bien: BienRow, coverMap: Record<string, string>) {
-  return {
-    id: bien.id,
-    titre: bien.titre,
-    commune: bien.commune,
-    quartier: bien.quartier,
-    type_bien: bien.type_bien,
-    prix_mois_fcfa: bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa,
-    prix_nuit_fcfa: bien.prix_nuit_fcfa,
-    prix_vente_fcfa: bien.prix_vente_fcfa,
-    surface_m2: bien.surface_m2,
-    nb_pieces: bien.nb_pieces,
-    photo_url: coverMap[bien.id] ?? null,
-  }
-}
+

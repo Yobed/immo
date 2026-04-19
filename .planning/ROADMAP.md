@@ -254,6 +254,16 @@ Plans:
 | 1004-02 | Calculs de Distance | Intégration Mapbox Matrix pour afficher le temps de trajet vers les points clés (Aéroport, Plateau). |
 | 1004-03 | Points d'Intérêt (POI) | Enrichissement des fiches avec les commodités proches (Supermarchés, Banques, Restaurants). |
 
+### Phase 1006: Refonte finale Map et Biens
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 1005
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 1006 to break down)
+
 ---
 
 ## Phase 1005: Spécialisation "Résidences Meublées"

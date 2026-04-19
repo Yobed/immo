@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { BienCard } from '@/components/bien/BienCard'
+import { PremiumBienCard } from '@/components/bien/PremiumBienCard'
 import { Button } from '@/components/ui'
 import { ToggleStatutButton } from '@/components/bien/ToggleStatutButton'
 import { BienAvailabilityToggle } from '@/components/bien/BienAvailabilityToggle'
@@ -72,9 +72,9 @@ export default async function MesAnnoncesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {bienRows.map((bien) => (
+            {bienRows.map((bien, i) => (
               <div key={bien.id} className="relative">
-                <BienCard
+                <PremiumBienCard
                   id={bien.id}
                   titre={bien.titre}
                   commune={bien.commune}
@@ -84,8 +84,8 @@ export default async function MesAnnoncesPage() {
                   prix_vente_fcfa={bien.prix_vente_fcfa}
                   surface_m2={bien.surface_m2}
                   nb_pieces={bien.nb_pieces}
-                  statut={bien.statut}
                   photo_url={coverMap[bien.id] ?? null}
+                  index={i}
                 />
                 {/* Actions propriétaire */}
                 <div className="mt-4 space-y-3">

@@ -4,9 +4,9 @@ import Link from 'next/link'
 import { MAPBOX_TOKEN, ABIDJAN_CENTER } from '@/lib/mapbox'
 import Map, { Marker, Source, Layer, GeolocateControl, NavigationControl, type MapRef } from 'react-map-gl/mapbox'
 import mapboxgl from 'mapbox-gl'
-import { MapPin, Car } from 'lucide-react'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
+// ── Types ────────────────────────────────────────────────────────────────────
 export interface BienMarker {
   id: string
   titre: string
@@ -21,464 +21,388 @@ export interface BienMarker {
   photo_url?: string | null
   est_disponible?: boolean
   is_verifie?: boolean
-  equipements?: string[]
+  equipements?: string[] | null
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  appartement: 'Appartement',
-  maison: 'Maison',
-  villa: 'Villa',
-  studio: 'Studio',
-  bureau: 'Bureau',
-  commerce: 'Commerce',
-  terrain: 'Terrain',
-  residence_meublee: 'Rés. meublée',
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function toNum(v: number | string | null | undefined): number {
+  if (v == null) return 0
+  return typeof v === 'string' ? Number(v.replace(',', '.')) : Number(v)
 }
 
-function formatPrice(b: BienMarker): { label: string; suffix: string } | null {
-  const p_nuit = Number(typeof b.prix_nuit_fcfa === 'string' ? b.prix_nuit_fcfa.replace(',', '.') : b.prix_nuit_fcfa);
-  const p_mois = Number(typeof b.prix_mois_fcfa === 'string' ? b.prix_mois_fcfa.replace(',', '.') : b.prix_mois_fcfa);
-  const p_vente = Number(typeof b.prix_vente_fcfa === 'string' ? b.prix_vente_fcfa.replace(',', '.') : b.prix_vente_fcfa);
-
-  if (p_nuit) {
-    const v = p_nuit
-    return { label: v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}M` : `${Math.round(v / 1_000)}k`, suffix: '/nuit' }
-  }
-  if (p_mois) {
-    const v = p_mois
-    return { label: v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}M` : `${Math.round(v / 1_000)}k`, suffix: '/mois' }
-  }
-  if (p_vente) {
-    const v = p_vente
-    return { label: v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}M` : `${Math.round(v / 1_000)}k`, suffix: '' }
-  }
-  return null
+function formatPrice(b: BienMarker): string {
+  const nuit = toNum(b.prix_nuit_fcfa)
+  const mois = toNum(b.prix_mois_fcfa)
+  const vente = toNum(b.prix_vente_fcfa)
+  const v = nuit || mois || vente
+  if (!v) return '—'
+  const label = v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}M` : `${Math.round(v / 1_000)}k`
+  const suffix = nuit ? '/nuit' : mois ? '/mois' : ''
+  return `${label}${suffix}`
 }
 
+// ── Inline CSS (injected once, avoids external CSS issues with Mapbox) ────────
+const MAP_STYLES = `
+  /* Shared pulse animation — used by both user dot and bien dots */
+  @keyframes gps-pulse {
+    0%   { transform: translate(-50%,-50%) scale(0.6); opacity: 0.9; }
+    100% { transform: translate(-50%,-50%) scale(3.0); opacity: 0; }
+  }
+
+  /* ── User GPS dot (blue) ── */
+  .user-dot {
+    width: 16px; height: 16px;
+    background: #3b82f6;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(59,130,246,0.8);
+    position: relative;
+    z-index: 2;
+  }
+  .user-ring {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 36px; height: 36px;
+    border: 2.5px solid #3b82f6;
+    border-radius: 50%;
+    animation: gps-pulse 2s ease-out infinite;
+    pointer-events: none;
+  }
+  .user-ring.delay { animation-delay: 0.9s; }
+
+  /* ── Bien marker dot (gold) — SAME structure as user dot ── */
+  .bien-dot {
+    width: 16px; height: 16px;
+    background: #D4AF37;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(212,175,55,0.9);
+    position: relative;
+    z-index: 2;
+    transition: transform 0.2s;
+  }
+  .bien-dot.selected {
+    width: 22px; height: 22px;
+    background: #fff;
+    border: 3px solid #D4AF37;
+    box-shadow: 0 0 20px rgba(212,175,55,1);
+  }
+  .bien-ring {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 36px; height: 36px;
+    border: 2.5px solid #D4AF37;
+    border-radius: 50%;
+    animation: gps-pulse 2s ease-out infinite;
+    pointer-events: none;
+  }
+  .bien-ring.delay { animation-delay: 0.9s; }
+
+  /* ── Price label above the dot ── */
+  .bien-price {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 9px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    background: rgba(10,10,18,0.88);
+    color: #D4AF37;
+    border: 1.5px solid rgba(212,175,55,0.5);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+    pointer-events: none;
+  }
+  .bien-price.selected {
+    background: #D4AF37;
+    color: #000;
+    border-color: #fff;
+    box-shadow: 0 0 20px rgba(212,175,55,0.8);
+  }
+`
+
+// ── Props ─────────────────────────────────────────────────────────────────────
 interface PropertiesMapProps {
   biens: BienMarker[]
   hauteur?: number
   mapTheme?: string
   targetCenter?: { lat: number; lng: number } | null
   highlightedId?: string | null
+  selectedId?: string | null
+  userLocation?: { lat: number; lng: number } | null
+  onSelect?: (id: string | null) => void
 }
 
+// ── Component ─────────────────────────────────────────────────────────────────
 export function PropertiesMap({
   biens,
-  hauteur = 500,
-  mapTheme = 'mapbox://styles/mapbox/streets-v12',
+  hauteur = 600,
+  mapTheme = 'mapbox://styles/mapbox/dark-v11',
   targetCenter = null,
   highlightedId = null,
+  selectedId: externalSelectedId = null,
+  userLocation: externalUserLocation = null,
+  onSelect,
 }: PropertiesMapProps) {
-  const [selectedBien, setSelectedBien] = useState<BienMarker | null>(null)
-  const [isMapLoaded, setIsMapLoaded] = useState(false)
-  const [userLocation, setUserLocation] = useState<{ lng: number; lat: number } | null>(null)
-  const [routeInfo, setRouteInfo] = useState<{ 
-    distance: number; 
-    duration: number; 
-    geometry: any;
-    isValid: boolean;
-  } | null>(null)
+
   const mapRef = useRef<MapRef>(null)
+  const [isMapLoaded, setIsMapLoaded] = useState(false)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [routeGeometry, setRouteGeometry] = useState<any>(null)
+  const [internalUserLoc, setInternalUserLoc] = useState<{ lat: number; lng: number } | null>(null)
 
-  const handleMarkerClick = useCallback((bien: BienMarker) => {
-    setSelectedBien((prev) => (prev?.id === bien.id ? null : bien))
-  }, [])
+  const userLocation = externalUserLocation || internalUserLoc
 
-  // ── Sync with highlightedId ─────────────────────────────────────────────
+  // ── Normalise coordinates ──────────────────────────────────────────────────
+  const markers = useMemo(() => {
+    return (biens || [])
+      .map(b => ({ ...b, lat: toNum(b.latitude), lng: toNum(b.longitude) }))
+      .filter(b => b.lat !== 0 && b.lng !== 0 && !isNaN(b.lat) && !isNaN(b.lng))
+  }, [biens])
+
+  // ── Sync external selectedId ───────────────────────────────────────────────
   useEffect(() => {
-    if (highlightedId) {
-      const bien = biens.find(b => b.id === highlightedId)
-      if (bien) setSelectedBien(bien)
-    }
-  }, [highlightedId, biens])
+    setSelectedId(externalSelectedId ?? null)
+  }, [externalSelectedId])
 
-  // ── Fly-to when commune/position changes ────────────────────────────────
+  // ── Fly to selected marker ─────────────────────────────────────────────────
   useEffect(() => {
-    if (!isMapLoaded) return
-    const map = mapRef.current?.getMap()
-    if (!map) return
-
-    const center = targetCenter 
-      ? [targetCenter.lng, targetCenter.lat] 
-      : [ABIDJAN_CENTER.longitude, ABIDJAN_CENTER.latitude]
-    
-    const zoom = targetCenter ? 13 : ABIDJAN_CENTER.zoom
-
-    if (targetCenter) {
-      setUserLocation({ lng: targetCenter.lng, lat: targetCenter.lat })
+    if (!selectedId || !isMapLoaded) return
+    const m = markers.find(b => b.id === selectedId)
+    if (m) {
+      mapRef.current?.flyTo({ center: [m.lng, m.lat], zoom: 14, duration: 1400 })
     }
+  }, [selectedId, markers, isMapLoaded])
 
-    // Validate center before flying
-    if (typeof center[0] === 'number' && typeof center[1] === 'number' && !isNaN(center[0]) && !isNaN(center[1])) {
-      map.flyTo({ 
-        center: center as [number, number], 
-        zoom, 
-        duration: 1300, 
-        essential: true 
-      })
-    }
-    
-    setSelectedBien(null)
-  }, [targetCenter, isMapLoaded])
-
-  // ── Routing Calculation ────────────────────────────────────────────────
+  // ── Fly to user position when GPS arrives ──────────────────────────────────
   useEffect(() => {
-    if (!selectedBien || !userLocation || !selectedBien.latitude || !selectedBien.longitude) {
-      setRouteInfo(null)
-      return
-    }
+    if (!userLocation || !isMapLoaded) return
+    mapRef.current?.flyTo({ center: [userLocation.lng, userLocation.lat], zoom: 13, duration: 1600 })
+  }, [userLocation, isMapLoaded])
 
-    const fetchRoute = async () => {
-      try {
-        const destLat = Number(typeof selectedBien.latitude === 'string' ? selectedBien.latitude.replace(',', '.') : selectedBien.latitude)
-        const destLng = Number(typeof selectedBien.longitude === 'string' ? selectedBien.longitude.replace(',', '.') : selectedBien.longitude)
-        
-        if (isNaN(destLat) || isNaN(destLng)) return
-
-        const query = await fetch(
-          `https://api.mapbox.com/directions/v5/mapbox/driving/${userLocation.lng},${userLocation.lat};${destLng},${destLat}?steps=true&geometries=geojson&access_token=${MAPBOX_TOKEN}`,
-          { method: 'GET' }
-        )
-        const json = await query.json()
-        if (json.code === 'Ok') {
-          const data = json.routes[0]
-          setRouteInfo({
-            distance: data.distance / 1000, 
-            duration: Math.round(data.duration / 60),
-            geometry: data.geometry,
-            isValid: true
-          })
-        }
-      } catch (err) {
-        console.error('Error fetching route:', err)
-      }
-    }
-
-    fetchRoute()
-  }, [selectedBien, userLocation, MAPBOX_TOKEN])
-
-  // Filtrage robuste des biens avec coordonnées valides
-  const biensWithCoords = useMemo(
-    () => (biens || []).filter((b) => {
-      if (!b) return false;
-      const latVal = typeof b.latitude === 'string' ? b.latitude.replace(',', '.') : b.latitude;
-      const lngVal = typeof b.longitude === 'string' ? b.longitude.replace(',', '.') : b.longitude;
-      const lat = Number(latVal);
-      const lng = Number(lngVal);
-      return !isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0;
-    }),
-    [biens]
-  )
-
-  // Auto-ajustement de la vue pour inclure tous les biens au chargement
+  // ── Fit all markers on first load (no GPS, no selection) ──────────────────
   useEffect(() => {
-    if (!isMapLoaded || biensWithCoords.length === 0 || targetCenter) return
-    
-    const map = mapRef.current?.getMap()
-    if (!map) return
-
+    if (!isMapLoaded || markers.length === 0 || userLocation) return
     try {
       const bounds = new mapboxgl.LngLatBounds()
-      biensWithCoords.forEach(b => {
-        const lat = Number(typeof b.latitude === 'string' ? b.latitude.replace(',', '.') : b.latitude);
-        const lng = Number(typeof b.longitude === 'string' ? b.longitude.replace(',', '.') : b.longitude);
-        bounds.extend([lng, lat])
+      markers.forEach(m => bounds.extend([m.lng, m.lat]))
+      mapRef.current?.getMap()?.fitBounds(bounds, { padding: 80, maxZoom: 14, duration: 1800 })
+    } catch {}
+  }, [isMapLoaded, markers.length, userLocation])
+
+  // ── Fly to targetCenter (commune filter) ──────────────────────────────────
+  useEffect(() => {
+    if (!isMapLoaded || !targetCenter) return
+    mapRef.current?.flyTo({ center: [targetCenter.lng, targetCenter.lat], zoom: 13, duration: 1300 })
+  }, [targetCenter, isMapLoaded])
+
+  // ── Fetch route when bien is selected ─────────────────────────────────────
+  useEffect(() => {
+    if (!selectedId || !userLocation) { setRouteGeometry(null); return }
+    const m = markers.find(b => b.id === selectedId)
+    if (!m) { setRouteGeometry(null); return }
+
+    const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${userLocation.lng.toFixed(6)},${userLocation.lat.toFixed(6)};${m.lng.toFixed(6)},${m.lat.toFixed(6)}?geometries=geojson&access_token=${MAPBOX_TOKEN}`
+    fetch(url)
+      .then(r => r.json())
+      .then(json => {
+        if (json.code === 'Ok' && json.routes?.[0]) {
+          setRouteGeometry(json.routes[0].geometry)
+        }
       })
-      
-      map.fitBounds(bounds, { padding: 100, maxZoom: 15, duration: 2000 })
-    } catch (e) {
-      console.warn('Error fitting bounds:', e)
-    }
-  }, [isMapLoaded, biensWithCoords.length, targetCenter])
+      .catch(() => {})
+  }, [selectedId, userLocation, markers])
 
-  // ── Zoom controls ────────────────────────────────────────────────────────
-  const zoomIn  = () => mapRef.current?.getMap()?.zoomIn({ duration: 300 })
-  const zoomOut = () => mapRef.current?.getMap()?.zoomOut({ duration: 300 })
+  // ── Handle marker click ────────────────────────────────────────────────────
+  const handleClick = useCallback((id: string) => {
+    const next = selectedId === id ? null : id
+    setSelectedId(next)
+    onSelect?.(next)
+  }, [selectedId, onSelect])
 
+  // ── Guard ──────────────────────────────────────────────────────────────────
   if (!MAPBOX_TOKEN) {
     return (
-      <div className="w-full rounded-card bg-surface flex items-center justify-center border border-border" style={{ height: hauteur }}>
-        <p className="text-muted font-sans text-sm">Token Mapbox manquant</p>
+      <div className="w-full rounded-2xl bg-gray-900 flex items-center justify-center" style={{ height: hauteur }}>
+        <p className="text-gray-400 text-sm">Token Mapbox manquant</p>
       </div>
     )
   }
 
-  const prix = selectedBien ? formatPrice(selectedBien) : null
-
   return (
-    <div className="w-full rounded-card overflow-hidden border border-border relative" style={{ height: hauteur }}>
+    <div className="w-full relative overflow-hidden rounded-[2rem]" style={{ height: hauteur }}>
+      {/* Inject CSS once */}
+      <style dangerouslySetInnerHTML={{ __html: MAP_STYLES }} />
 
-      <style>{`
-        @keyframes sonar-wave {
-          0% { transform: scale(0.6); opacity: 1; border-color: var(--accent-luxury); }
-          100% { transform: scale(2.5); opacity: 0; border-color: rgba(212, 175, 55, 0); }
-        }
-        .sonar-effect {
-          position: absolute;
-          width: 40px; height: 40px;
-          top: -20px; left: -20px;
-          background: var(--accent-luxury-muted);
-          border: 1px solid var(--accent-luxury);
-          border-radius: 50%;
-          animation: sonar-wave 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
-          z-index: -1;
-          pointer-events: none;
-        }
-        
-        @keyframes marker-pulse {
-          0%, 100% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.1); opacity: 0.9; }
-        }
-        .marker-selected {
-          animation: marker-pulse 2s infinite ease-in-out;
-          z-index: 100 !important;
-        }
-
-        .premium-glow {
-          box-shadow: 0 0 20px var(--accent-luxury-glow);
-        }
-
-        @keyframes marker-blink {
-          0%, 100% { opacity: 1; filter: drop-shadow(0 0 5px var(--accent-luxury-glow)); }
-          50% { opacity: 0.8; filter: drop-shadow(0 0 15px var(--accent-luxury-glow)); }
-        }
-        .marker-luxury-blink {
-          animation: marker-blink 3s infinite ease-in-out;
-        }
-
-        @keyframes user-pulse {
-          0% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.6); }
-          70% { box-shadow: 0 0 0 15px rgba(14, 165, 233, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
-        }
-        .user-dot-pulse {
-          position: relative;
-          width: 16px; height: 16px; background: #0ea5e9; border: 3px solid white;
-          border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-          animation: user-pulse 3s infinite;
-        }
-        .user-dot-pulse::after {
-          content: '';
-          position: absolute;
-          top: -12px; left: -12px; right: -12px; bottom: -12px;
-          border: 2px solid #0ea5e9;
-          border-radius: 50%;
-          animation: sonar-wave 2s infinite linear;
-          opacity: 0.4;
-        }
-      `}</style>
-
-      {/* ── Mapbox Map ─────────────────────────────────────────────────────── */}
       <Map
         ref={mapRef}
         mapboxAccessToken={MAPBOX_TOKEN}
         initialViewState={ABIDJAN_CENTER}
         style={{ width: '100%', height: '100%' }}
         mapStyle={mapTheme}
-        onClick={() => setSelectedBien(null)}
         onLoad={() => setIsMapLoaded(true)}
+        onClick={() => { setSelectedId(null); onSelect?.(null) }}
       >
-        {/* Route Source & Layer */}
-        {routeInfo?.geometry && (
-          <Source id="route" type="geojson" data={{ type: 'Feature', properties: {}, geometry: routeInfo.geometry }}>
-            <Layer
-              id="route-line-blur"
-              type="line"
+        {/* ── Gold route line ── */}
+        {routeGeometry && (
+          <Source id="route" type="geojson" data={{ type: 'Feature', properties: {}, geometry: routeGeometry }}>
+            {/* Glow */}
+            <Layer id="route-glow" type="line"
               layout={{ 'line-join': 'round', 'line-cap': 'round' }}
-              paint={{ 'line-color': 'var(--accent-luxury)', 'line-width': 10, 'line-opacity': 0.2, 'line-blur': 5 }}
+              paint={{ 'line-color': '#D4AF37', 'line-width': 14, 'line-opacity': 0.25, 'line-blur': 8 }}
             />
-            <Layer
-              id="route-line"
-              type="line"
+            {/* Core */}
+            <Layer id="route-core" type="line"
               layout={{ 'line-join': 'round', 'line-cap': 'round' }}
-              paint={{ 'line-color': 'var(--accent-luxury)', 'line-width': 4, 'line-opacity': 0.8 }}
+              paint={{ 'line-color': '#D4AF37', 'line-width': 5, 'line-opacity': 1 }}
             />
           </Source>
         )}
 
-        <NavigationControl position="bottom-right" />
-        <GeolocateControl 
-          position="bottom-right" 
-          trackUserLocation 
-          showUserHeading 
-          onGeolocate={(e) => setUserLocation({ lng: e.coords.longitude, lat: e.coords.latitude })}
+        {/* ── GPS / GeolocateControl ── */}
+        <GeolocateControl
+          position="bottom-right"
+          trackUserLocation
+          showUserHeading
+          onGeolocate={(e) => setInternalUserLoc({ lng: e.coords.longitude, lat: e.coords.latitude })}
         />
+        <NavigationControl position="bottom-right" />
 
-        {/* User Location Marker fallback if needed */}
+        {/* ── User position dot ── */}
         {userLocation && (
           <Marker longitude={userLocation.lng} latitude={userLocation.lat} anchor="center">
-            <div className="user-dot-pulse" />
+            <div style={{ position: 'relative', width: 14, height: 14 }}>
+              <div className="user-ring" />
+              <div className="user-ring delay" />
+              <div className="user-dot" />
+            </div>
           </Marker>
         )}
-        {biensWithCoords.map((bien, index) => {
-          const p = formatPrice(bien)
-          const isSelected = selectedBien?.id === bien.id
-          const isMeublee = bien.type_bien === 'residence_meublee'
-          
+
+        {/* ── Property markers — gold dot + pulsing rings, identical to GPS dot ── */}
+        {markers.map((bien) => {
+          const isSelected = selectedId === bien.id
+          const price = formatPrice(bien)
+
           return (
             <Marker
-              key={bien.id || index}
-              longitude={Number(typeof bien.longitude === 'string' ? bien.longitude.replace(',', '.') : bien.longitude)}
-              latitude={Number(typeof bien.latitude === 'string' ? bien.latitude.replace(',', '.') : bien.latitude)}
-              anchor="bottom"
-              style={{ zIndex: isSelected ? 100 : 1 }}
+              key={bien.id}
+              longitude={bien.lng}
+              latitude={bien.lat}
+              anchor="center"
+              onClick={(e) => { e.originalEvent.stopPropagation(); handleClick(bien.id) }}
             >
-              <button
-                onClick={(e) => { e.stopPropagation(); handleMarkerClick(bien) }}
-                className={`group relative flex flex-col items-center outline-none transition-all duration-300 ${isSelected ? 'marker-selected' : 'marker-luxury-blink'}`}
-                title={bien.titre}
-              >
-                {/* Energetic Pulsing Ring for "Clignotant" effect */}
-                {!isSelected && (
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                    <div className="sonar-effect" />
-                    <div className="sonar-effect" style={{ animationDelay: '0.6s' }} />
-                  </div>
-                )}
+              {/* Outer wrapper — positions price label above the dot */}
+              <div style={{ position: 'relative', width: 16, height: 16, cursor: 'pointer' }}>
 
-                {/* Price bubble / Icon */}
-                <div
-                  className={`relative transition-all duration-300 ${isSelected ? 'scale-110 -translate-y-2' : 'hover:scale-105'}`}
-                  style={{ marginBottom: '4px' }}
-                >
-                  {/* Availability Dot */}
-                  {bien.est_disponible && (
-                    <div className="absolute -top-1.5 -right-1.5 z-50 flex h-4 w-4">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-4 w-4 bg-green-500 border-2 border-white shadow-lg"></span>
-                    </div>
-                  )}
-
-                  {/* Icon for Meublée */}
-                  {isMeublee && (
-                    <div className="absolute -top-2 -left-2 z-50 text-[16px] drop-shadow-lg">
-                      💎
-                    </div>
-                  )}
-                  
-                  <div
-                    className={`${isSelected ? 'premium-glow' : ''}`}
-                    style={{
-                      background: isSelected 
-                        ? 'var(--accent-luxury)' 
-                        : isMeublee 
-                          ? 'linear-gradient(135deg, #D4AF37 0%, #B8860B 100%)'
-                          : '#F97316',
-                      color: isSelected ? 'var(--midnight)' : '#fff',
-                      fontSize: '12px',
-                      fontWeight: 800,
-                      padding: '6px 14px',
-                      borderRadius: '16px',
-                      boxShadow: isSelected 
-                        ? '0 12px 24px rgba(212,175,55,0.7)' 
-                        : '0 6px 16px rgba(0,0,0,0.3)',
-                      border: isSelected ? '2px solid white' : '1.5px solid white',
-                      whiteSpace: 'nowrap',
-                      backdropFilter: 'blur(8px)',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <span className="flex items-center gap-1">
-                      {p ? `${p.label} FCFA` : TYPE_LABELS[bien.type_bien] ?? bien.type_bien}
-                    </span>
-                  </div>
+                {/* Price label floating above */}
+                <div className={`bien-price${isSelected ? ' selected' : ''}`}>
+                  {price}
                 </div>
 
-                {/* Arrow indicator */}
-                <div className={`w-3 h-3 rotate-45 -mt-2.5 bg-current border-r border-b border-white ${isSelected ? 'text-[var(--accent-luxury)]' : isMeublee ? 'text-[#B8860B]' : 'text-[#F97316]'}`} />
-              </button>
+                {/* Gold pulsing rings — same animation as user-ring/user-dot */}
+                <div className="bien-ring" style={{ animationDelay: `${(bien.id.charCodeAt(0) % 5) * 0.3}s` }} />
+                <div className="bien-ring delay" />
+
+                {/* Solid gold dot — center anchor */}
+                <div className={`bien-dot${isSelected ? ' selected' : ''}`} />
+              </div>
             </Marker>
           )
         })}
       </Map>
 
-      {/* ── Custom info panel (Premium Design) ────────────────────────────────────────────────── */}
-      {selectedBien && (
-        <div
-          className="absolute top-4 right-4 z-20 bg-[var(--midnight-glow)] backdrop-blur-3xl rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden border border-[var(--border)] animate-in fade-in slide-in-from-right-4 duration-500"
-          style={{ width: 280, maxWidth: 'calc(100vw - 32px)' }}
-        >
-          {selectedBien.photo_url ? (
-            <div className="relative h-36 overflow-hidden">
-              <img src={selectedBien.photo_url} alt={selectedBien.titre} className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[var(--midnight)] to-transparent opacity-60" />
-              <div className="absolute top-3 left-3 flex gap-2">
-                <span className="bg-white/10 backdrop-blur-md text-white text-[9px] px-2.5 py-1 rounded-full font-bold tracking-widest uppercase border border-white/10">
-                  {TYPE_LABELS[selectedBien.type_bien] ?? selectedBien.type_bien}
-                </span>
-                {selectedBien.is_verifie && (
-                  <span className="bg-emerald-500/80 backdrop-blur-sm text-white text-[9px] px-2 py-1 rounded-full font-bold">✓</span>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="h-20 bg-[var(--surface)] flex items-center justify-center">
-              <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest">
-                {TYPE_LABELS[selectedBien.type_bien] ?? selectedBien.type_bien}
-              </span>
-            </div>
-          )}
+      {/* ── Stats overlay ── */}
+      <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+        {markers.length > 0 && (
+          <div style={{
+            padding: '6px 14px',
+            background: 'rgba(0,0,0,0.7)',
+            backdropFilter: 'blur(12px)',
+            borderRadius: 999,
+            border: '1px solid rgba(212,175,55,0.3)',
+            display: 'flex', alignItems: 'center', gap: 8
+          }}>
+            <span style={{ width: 8, height: 8, background: '#D4AF37', borderRadius: '50%', display: 'inline-block', animation: 'bobble 2s infinite' }} />
+            <span style={{ color: '#fff', fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em' }}>
+              {markers.length} bien{markers.length > 1 ? 's' : ''} sur la carte
+            </span>
+          </div>
+        )}
+        {userLocation && (
+          <div style={{
+            padding: '6px 14px',
+            background: 'rgba(0,0,0,0.7)',
+            backdropFilter: 'blur(12px)',
+            borderRadius: 999,
+            border: '1px solid rgba(59,130,246,0.4)',
+            display: 'flex', alignItems: 'center', gap: 8
+          }}>
+            <span style={{ width: 8, height: 8, background: '#3b82f6', borderRadius: '50%', display: 'inline-block' }} />
+            <span style={{ color: '#fff', fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em' }}>
+              Ma position · 10 km
+            </span>
+          </div>
+        )}
+      </div>
 
-          <div className="p-4">
-            <h4 className="font-display text-sm font-bold text-[var(--text)] mb-1.5 line-clamp-1">{selectedBien.titre}</h4>
-            <div className="flex items-center gap-1.5 text-[var(--text-muted)] text-[10px] mb-4">
-              <MapPin className="w-3 h-3 text-[var(--accent-luxury)]" />
-              <span>{selectedBien.quartier ? `${selectedBien.quartier}, ` : ''}{selectedBien.commune}</span>
-            </div>
-
-            {routeInfo && (
-              <div className="flex items-center justify-around py-3 px-1 mb-5 bg-[var(--white)]/5 rounded-2xl border border-white/5">
-                <div className="text-center">
-                  <p className="text-[9px] text-[var(--text-muted)] uppercase tracking-widest mb-0.5">Distance</p>
-                  <p className="text-xs font-bold text-[var(--text)]">{routeInfo.distance.toFixed(1)} km</p>
-                </div>
-                <div className="w-px h-6 bg-white/10" />
-                <div className="text-center">
-                  <p className="text-[9px] text-[var(--text-muted)] uppercase tracking-widest mb-0.5">Trajet</p>
-                  <div className="flex items-center justify-center gap-1.5">
-                    <Car className="w-3.5 h-3.5 text-blue-400" />
-                    <p className="text-xs font-bold text-[var(--text)]">{routeInfo.duration} min</p>
-                  </div>
-                </div>
-              </div>
+      {/* ── Selected bien info panel (top right) ── */}
+      {selectedId && (() => {
+        const bien = markers.find(b => b.id === selectedId)
+        if (!bien) return null
+        return (
+          <div style={{
+            position: 'absolute', top: 16, right: 16, zIndex: 20,
+            background: 'rgba(10,10,18,0.92)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(212,175,55,0.4)',
+            borderRadius: 20, padding: 16, minWidth: 220, maxWidth: 260,
+            boxShadow: '0 20px 50px rgba(0,0,0,0.6)'
+          }}>
+            <p style={{ color: '#D4AF37', fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 6 }}>
+              {bien.commune}{bien.quartier ? ` · ${bien.quartier}` : ''}
+            </p>
+            <p style={{ color: '#fff', fontSize: 13, fontWeight: 600, lineHeight: 1.4, marginBottom: 10 }}>{bien.titre}</p>
+            <p style={{ color: '#D4AF37', fontSize: 15, fontWeight: 800, marginBottom: 12 }}>{formatPrice(bien)}</p>
+            {routeGeometry && (
+              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 10 }}>
+                Itinéraire tracé en or sur la carte
+              </p>
             )}
-
-            <div className="grid grid-cols-2 gap-3">
+            <div style={{ display: 'flex', gap: 8 }}>
               <Link
-                href={`/biens/${selectedBien.id}`}
-                className="flex items-center justify-center bg-[var(--accent-luxury)] text-black text-[10px] font-bold py-2.5 rounded-xl hover:brightness-110 transition-all shadow-lg shadow-[var(--accent-luxury)]/20"
+                href={`/biens/${bien.id}`}
+                style={{
+                  flex: 1, textAlign: 'center',
+                  padding: '8px 0',
+                  background: '#D4AF37', color: '#000',
+                  borderRadius: 10, fontSize: 9, fontWeight: 800,
+                  textTransform: 'uppercase', letterSpacing: '0.15em',
+                  textDecoration: 'none'
+                }}
+                onClick={e => e.stopPropagation()}
               >
-                Consulter
+                Voir le bien
               </Link>
-              {userLocation && (
-                <a
-                  href={`https://www.google.com/maps/dir/?api=1&destination=${selectedBien.latitude},${selectedBien.longitude}&travelmode=driving`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center bg-[var(--surface-card)] text-[var(--text)] text-[10px] border border-[var(--border)] font-bold py-2.5 rounded-xl hover:bg-[var(--surface)] transition-all"
-                >
-                  Itinéraire
-                </a>
-              )}
+              <button
+                style={{
+                  padding: '8px 12px',
+                  background: 'rgba(255,255,255,0.08)',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  borderRadius: 10, color: '#fff', fontSize: 11, cursor: 'pointer'
+                }}
+                onClick={(e) => { e.stopPropagation(); setSelectedId(null); onSelect?.(null) }}
+              >
+                ✕
+              </button>
             </div>
           </div>
-          
-          <button
-            onClick={() => setSelectedBien(null)}
-            className="absolute top-2 right-2 w-7 h-7 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-all z-30"
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
-      )}
-
-      {/* Biens count badge */}
-      <div className="absolute bottom-3 left-3 z-10 bg-[var(--background)]/90 backdrop-blur-sm text-xs font-sans font-medium text-[var(--text)] px-3 py-1.5 rounded-full shadow-md border border-[var(--border)]">
-        📍 {biensWithCoords.length} bien{biensWithCoords.length !== 1 ? 's' : ''} sur la carte
-      </div>
+        )
+      })()}
     </div>
   )
 }

@@ -27,12 +27,14 @@ export default async function HomePage() {
     .select('id, titre, commune, quartier, type_bien, latitude, longitude, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, est_disponible')
     .eq('statut', 'publie')
 
-  const biensList = (biens ?? []) as {
-    id: string; titre: string; commune: string; quartier: string | null
-    type_bien: string; latitude: number | null; longitude: number | null
-    prix_mois_fcfa: number | null; prix_nuit_fcfa: number | null; prix_vente_fcfa: number | null
-    est_disponible: boolean
-  }[]
+  const biensList = (biens ?? []).map((b: any) => ({
+    ...b,
+    latitude: b.latitude ? Number(String(b.latitude).replace(',', '.')) : null,
+    longitude: b.longitude ? Number(String(b.longitude).replace(',', '.')) : null,
+    prix_mois_fcfa: b.prix_mois_fcfa ? Number(b.prix_mois_fcfa) : null,
+    prix_nuit_fcfa: b.prix_nuit_fcfa ? Number(b.prix_nuit_fcfa) : null,
+    prix_vente_fcfa: b.prix_vente_fcfa ? Number(b.prix_vente_fcfa) : null,
+  }))
 
   // Fetch cover photos for all biens
   let photoMap: Record<string, string> = {}
@@ -41,7 +43,7 @@ export default async function HomePage() {
     const { data: medias } = await (supabase as any)
       .from('biens_medias')
       .select('bien_id, url, est_couverture')
-      .in('bien_id', biensList.map((b) => b.id))
+      .in('bien_id', biensList.map((b: any) => b.id))
       .eq('type', 'photo')
       .order('ordre', { ascending: true })
 
@@ -52,7 +54,7 @@ export default async function HomePage() {
     }
   }
 
-  const biensWithPhoto = biensList.map((b) => ({
+  const biensWithPhoto = biensList.map((b: any) => ({
     ...b,
     photo_url: photoMap[b.id] ?? null,
   }))
@@ -70,12 +72,12 @@ export default async function HomePage() {
   const bgImages = heroBgImages.length >= 2 ? heroBgImages : FALLBACK_IMAGES
 
   // Bien vedettes pour la carte flottante du Hero (plusieurs pour le cycle)
-  const featuredBiens = biensWithPhoto.filter((b) => b.photo_url).slice(0, 8)
+  const featuredBiens = biensWithPhoto.filter((b: any) => b.photo_url).slice(0, 8)
 
   // Sélectionner les 3 biens les plus prestigieux (prix le plus élevé) pour le PremiumShowcase
   const premiumProperties = [...biensWithPhoto]
-    .filter(b => b.photo_url)
-    .sort((a, b) => {
+    .filter((b: any) => b.photo_url)
+    .sort((a: any, b: any) => {
       const priceA = a.prix_vente_fcfa || a.prix_mois_fcfa || 0;
       const priceB = b.prix_vente_fcfa || b.prix_mois_fcfa || 0;
       return priceB - priceA;
