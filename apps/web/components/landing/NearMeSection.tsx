@@ -43,6 +43,7 @@ export function NearMeSection() {
   const [coverMap, setCoverMap] = useState<Record<string, string>>({})
   const [viewMode, setViewMode] = useState<'grid' | 'split'>('grid')
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null)
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
   const { theme } = useTheme()
 
   const supabase = createClient()
@@ -203,25 +204,29 @@ export function NearMeSection() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
-              className={viewMode === 'split' ? 'grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-[700px]' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'}
+              className={viewMode === 'split' ? 'grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-[700px]' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8'}
             >
               <div className={viewMode === 'split' ? 'lg:col-span-5 h-[700px] overflow-y-auto pr-4 custom-scrollbar space-y-8' : 'contents'}>
                 {biens.map((b, i) => (
-                  <div key={b.id} className="relative group/card">
+                  <div 
+                    key={b.id} 
+                    className="relative group/card flex flex-col h-full"
+                    onMouseEnter={() => setHoveredId(b.id)}
+                    onMouseLeave={() => setHoveredId(null)}
+                  >
                     <PremiumBienCard
                       {...b}
                       photo_url={coverMap[b.id]}
                       index={i}
                     />
-                    {/* Badge de distance flottant */}
-                    <div className="absolute top-6 right-6 z-20 flex flex-col items-end gap-2">
-                      <div className="px-4 py-2 rounded-xl bg-[var(--midnight-glow)]/90 backdrop-blur-xl border border-[var(--border)] text-[10px] font-bold text-[var(--text)] shadow-2xl flex items-center gap-2 group-hover/card:bg-[var(--accent-luxury)] group-hover/card:text-white group-hover/card:border-[var(--accent-luxury)] transition-all duration-500">
-                        <MapPin className="w-3 h-3" />
-                        {(b.dist_meters / 1000).toFixed(1)} km
+                    {/* Badge de distance flottant - Repositionné de façon plus élégante et discrète */}
+                    <div className="absolute bottom-[130px] left-4 right-4 z-20 flex justify-between items-end pointer-events-none opacity-0 group-hover/card:opacity-100 translate-y-2 group-hover/card:translate-y-0 transition-all duration-500">
+                      <div className="px-3 py-1.5 rounded-lg bg-emerald-500/90 backdrop-blur-md text-[9px] font-bold text-white shadow-xl flex items-center gap-1.5 border border-white/20">
+                        <Car className="w-3 h-3" />
+                        {getTravelTime(b.dist_meters)}
                       </div>
-                      <div className="px-4 py-2 rounded-xl bg-[var(--surface)]/90 backdrop-blur-md border border-[var(--border)] text-[10px] font-bold text-[var(--text-muted)] flex items-center gap-2 transition-all">
-                        <Clock className="w-3 h-3 text-[var(--accent-luxury)]" />
-                        ~ {getTravelTime(b.dist_meters)}
+                      <div className="px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-md text-[9px] font-bold text-white shadow-xl border border-white/10">
+                        {(b.dist_meters / 1000).toFixed(1)} km
                       </div>
                     </div>
                   </div>
@@ -235,6 +240,7 @@ export function NearMeSection() {
                     hauteur={700}
                     mapTheme={theme === 'light' ? 'mapbox://styles/mapbox/light-v11' : 'mapbox://styles/mapbox/dark-v11'}
                     targetCenter={userPos}
+                    highlightedId={hoveredId}
                   />
                   {/* User location overlay marker on map (simulated as just the center) */}
                   <div className="absolute bottom-6 left-6 z-10 p-4 bg-[var(--midnight-glow)] backdrop-blur-xl rounded-2xl border border-[var(--border)] max-w-[200px]">
