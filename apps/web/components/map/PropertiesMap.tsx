@@ -178,19 +178,24 @@ export function PropertiesMap({
     }
   }, [selectedId, markers, isMapLoaded])
 
-  // ── Fly to user position when GPS arrives ──────────────────────────────────
-  useEffect(() => {
-    if (!userLocation || !isMapLoaded) return
-    mapRef.current?.flyTo({ center: [userLocation.lng, userLocation.lat], zoom: 13, duration: 1600 })
-  }, [userLocation, isMapLoaded])
+  const hasFittedBoundsRef = useRef(false)
 
-  // ── Fit all markers on first load (no GPS, no selection) ──────────────────
+  // ── Fit all markers and user position to screen on load ──────────────────
   useEffect(() => {
-    if (!isMapLoaded || markers.length === 0 || userLocation) return
+    if (!isMapLoaded || (markers.length === 0 && !userLocation)) return
+    if (hasFittedBoundsRef.current) return // Only fit bounds once heavily
+
     try {
       const bounds = new mapboxgl.LngLatBounds()
+      if (userLocation) {
+        bounds.extend([userLocation.lng, userLocation.lat])
+      }
       markers.forEach(m => bounds.extend([m.lng, m.lat]))
-      mapRef.current?.getMap()?.fitBounds(bounds, { padding: 80, maxZoom: 14, duration: 1800 })
+      
+      if (!bounds.isEmpty()) {
+        mapRef.current?.getMap()?.fitBounds(bounds, { padding: 80, maxZoom: 14, duration: 1800 })
+        hasFittedBoundsRef.current = true
+      }
     } catch {}
   }, [isMapLoaded, markers.length, userLocation])
 

@@ -1,10 +1,10 @@
 'use client'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { MapPin, Navigation, Loader2, Car, Clock, Star, ExternalLink, ChevronRight } from 'lucide-react'
+import { MapPin, Navigation, Loader2, Car, ExternalLink, ChevronRight } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useTheme } from 'next-themes'
 import Image from 'next/image'
 
@@ -40,6 +40,40 @@ function formatPrice(b: BienProche): string {
   return `${label} FCFA${suffix}`
 }
 
+function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371e3 // metres
+  const p1 = lat1 * Math.PI / 180
+  const p2 = lat2 * Math.PI / 180
+  const dp = (lat2 - lat1) * Math.PI / 180
+  const dl = (lon2 - lon1) * Math.PI / 180
+
+  const a = Math.sin(dp / 2) * Math.sin(dp / 2) +
+            Math.cos(p1) * Math.cos(p2) *
+            Math.sin(dl / 2) * Math.sin(dl / 2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+
+  return R * c
+}
+
+const communesCoords: Record<string, { lat: number; lng: number }> = {
+  Cocody: { lat: 5.345, lng: -3.985 },
+  Plateau: { lat: 5.326, lng: -4.017 },
+  Marcory: { lat: 5.304, lng: -3.974 },
+  Yopougon: { lat: 5.334, lng: -4.053 },
+  Adjamé: { lat: 5.356, lng: -4.02 },
+  Abobo: { lat: 5.421, lng: -4.017 },
+  Koumassi: { lat: 5.295, lng: -3.945 },
+  'Port-Bouet': { lat: 5.253, lng: -3.944 },
+  Bingerville: { lat: 5.353, lng: -3.886 },
+  Attécoubé: { lat: 5.332, lng: -4.032 },
+  Treichville: { lat: 5.303, lng: -4.008 },
+  Songon: { lat: 5.312, lng: -4.225 },
+}
+
+function addJitter(val: number) {
+  return val + (Math.random() - 0.5) * 0.04 // Roughly ±2km jitter
+}
+
 export function NearMeSection() {
   const [loading, setLoading] = useState(false)
   const [locating, setLocating] = useState(false)
@@ -51,7 +85,7 @@ export function NearMeSection() {
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const { theme } = useTheme()
 
-  const supabase = createClient()
+  const supabase = createClient() as any
 
   const getTravelTime = (distanceMeters: number) => {
     const minutes = Math.round((distanceMeters / 1000) * (60 / 25))
@@ -76,34 +110,47 @@ export function NearMeSection() {
     }
   }
 
-  async function fetchNearMe(lat: number, lng: number) {
+  async function fetchAllAndSort(lat: number | null, lng: number | null) {
     setLoading(true)
     setError(null)
     try {
-      const { data } = await (supabase as any).rpc('get_biens_proches', {
-        user_lat: lat,
-        user_lng: lng,
-        radius_meters: 10000
+      // Fetch all published properties so the map resembles "Trouvez l'Exception"
+      const { data } = await supabase
+        .from('biens')
+        .select('id, titre, commune, quartier, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces, latitude, longitude, est_disponible, is_verifie, score_ia')
+        .eq('statut', 'publie')
+      
+      const rows = data || []
+      
+      let processed = rows.map((b: any) => {
+        let bLat = Number(typeof b.latitude === 'string' ? b.latitude.replace(',', '.') : b.latitude)
+        let bLng = Number(typeof b.longitude === 'string' ? b.longitude.replace(',', '.') : b.longitude)
+        
+        // Add coordinates jitter if missing
+        if (!bLat || !bLng || isNaN(bLat) || isNaN(bLng) || (bLat === 0 && bLng === 0)) {
+          const base = communesCoords[b.commune] || { lat: 5.3484, lng: -4.0107 }
+          bLat = addJitter(base.lat)
+          bLng = addJitter(base.lng)
+        }
+
+        const dist = (lat !== null && lng !== null) ? getDistance(lat, lng, bLat, bLng) : 999999
+
+        return { ...b, latitude: bLat, longitude: bLng, dist_meters: dist } as BienProche
       })
 
-      const rows = (data ?? []) as BienProche[]
-
-      if (rows.length === 0) {
-        const { data: latest } = await supabase
-          .from('biens')
-          .select('id, titre, commune, quartier, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces, latitude, longitude, est_disponible, is_verifie, score_ia')
-          .eq('statut', 'publie')
-          .order('created_at', { ascending: false })
-          .limit(12)
-        if (latest) {
-          const fallback = latest.map((b: any) => ({ ...b, dist_meters: 999999 })) as BienProche[]
-          setBiens(fallback)
-          await fetchMedias(fallback.map(b => b.id))
-        }
+      // Sort by proximity if we have a location
+      if (lat !== null && lng !== null) {
+        processed.sort((a: BienProche, b: BienProche) => a.dist_meters - b.dist_meters)
       } else {
-        setBiens(rows)
-        await fetchMedias(rows.map(b => b.id))
+        // Just sort by random or leave as is to display something while GPS locates
+        processed.sort((a: BienProche, b: BienProche) => (a.score_ia || 0) > (b.score_ia || 0) ? -1 : 1)
       }
+      
+      // Limit to 50
+      processed = processed.slice(0, 50)
+
+      setBiens(processed)
+      await fetchMedias(processed.map((b: BienProche) => b.id))
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -111,26 +158,23 @@ export function NearMeSection() {
     }
   }
 
-  // Auto-locate on mount
+  // Fetch immediately on mount, updating with GPS if granted
   useEffect(() => {
+    // Start fetching default map view
+    fetchAllAndSort(null, null)
+
     if (typeof window !== 'undefined' && navigator.geolocation) {
-      setLocating(true)
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const newPos = { lat: pos.coords.latitude, lng: pos.coords.longitude }
           setUserPos(newPos)
-          setLocating(false)
-          fetchNearMe(newPos.lat, newPos.lng)
+          fetchAllAndSort(newPos.lat, newPos.lng)
         },
         () => {
-          setLocating(false)
-          // Load default properties even without GPS
-          fetchNearMe(5.3484, -4.0107) // Abidjan center
+          // Keep default if location denied
         },
         { timeout: 6000 }
       )
-    } else {
-      fetchNearMe(5.3484, -4.0107)
     }
   }, [])
 
@@ -147,7 +191,7 @@ export function NearMeSection() {
         const newPos = { lat: pos.coords.latitude, lng: pos.coords.longitude }
         setUserPos(newPos)
         setLocating(false)
-        fetchNearMe(newPos.lat, newPos.lng)
+        fetchAllAndSort(newPos.lat, newPos.lng)
       },
       () => {
         setError("Position refusée ou indisponible.")
@@ -158,7 +202,7 @@ export function NearMeSection() {
   }
 
   const mapBiens = useMemo(() => {
-    return biens.map(b => ({ ...b, photo_url: coverMap[b.id] }))
+    return biens.map((b: BienProche) => ({ ...b, photo_url: coverMap[b.id] }))
   }, [biens, coverMap])
 
   const selectedBien = useMemo(() => biens.find(b => b.id === selectedId) ?? null, [biens, selectedId])
@@ -182,34 +226,32 @@ export function NearMeSection() {
                 <Navigation className={`w-5 h-5 text-[var(--accent-luxury)] ${locating ? 'animate-spin' : ''}`} />
               </div>
               <span className="text-[var(--accent-luxury)] font-sans tracking-[0.4em] uppercase text-[11px] font-bold">
-                Carte Interactive · Abidjan
+                Carte Interactive · Filtre Géo
               </span>
             </div>
             <h2 className="font-display text-4xl md:text-6xl text-[var(--text)] leading-tight tracking-tight">
               Biens{' '}
               <span className="italic font-serif text-[var(--accent-luxury)]">autour de vous</span>
             </h2>
-            <p className="text-[var(--text-muted)] mt-3 text-sm max-w-lg">
-              Cliquez sur un bien dans la liste pour tracer l&apos;itinéraire sur la carte.
+            <p className="text-[var(--text-muted)] mt-3 text-sm max-w-lg font-sans">
+              Tous nos biens immobiliers s&apos;affichent sur cette carte, filtrés et triés dynamiquement par rapport à votre position ! Cliquez sur Activer ma position pour resserrer le filtre géographique.
             </p>
           </div>
 
           <div className="flex items-center gap-4 shrink-0">
-            {!userPos && (
-              <button
-                onClick={handleLocate}
-                disabled={locating}
-                className="flex items-center gap-3 px-7 py-3.5 bg-[var(--text)] text-[var(--background)] font-sans text-xs font-bold tracking-widest uppercase rounded-full transition-all hover:scale-105 shadow-2xl active:scale-95 disabled:opacity-50"
-              >
-                {locating ? <Loader2 className="w-4 h-4 animate-spin" /> : <MapPin className="w-4 h-4" />}
-                {locating ? 'Localisation...' : 'Activer ma position'}
-              </button>
-            )}
+            <button
+              onClick={handleLocate}
+              disabled={locating}
+              className="flex items-center gap-3 px-7 py-3.5 bg-[var(--text)] text-[var(--background)] font-sans text-xs font-bold tracking-widest uppercase rounded-full transition-all hover:scale-105 shadow-2xl active:scale-95 disabled:opacity-50"
+            >
+              {locating ? <Loader2 className="w-4 h-4 animate-spin" /> : <MapPin className="w-4 h-4" />}
+              {locating ? 'Localisation...' : 'Rafraîchir ma position'}
+            </button>
             {userPos && (
               <div className="flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-emerald-500/10 border border-emerald-500/30">
                 <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
                 <span className="text-emerald-400 text-[10px] font-bold uppercase tracking-widest">
-                  GPS Actif · 10km
+                  Filtre Géo Actif
                 </span>
               </div>
             )}
@@ -218,7 +260,7 @@ export function NearMeSection() {
 
         {/* Error */}
         {error && (
-          <div className="mb-6 p-4 rounded-2xl bg-red-500/5 border border-red-500/20 text-red-400 text-sm">
+          <div className="mb-6 p-4 rounded-2xl bg-red-500/5 border border-red-500/20 text-red-400 text-sm font-sans">
             {error}
           </div>
         )}
@@ -246,7 +288,7 @@ export function NearMeSection() {
               <div className="absolute inset-0 bg-[var(--background)]/80 backdrop-blur-sm flex items-center justify-center z-30">
                 <div className="flex flex-col items-center gap-4">
                   <Loader2 className="w-10 h-10 text-[var(--accent-luxury)] animate-spin" />
-                  <p className="text-[var(--text-muted)] text-sm">Chargement des biens…</p>
+                  <p className="text-[var(--text-muted)] text-sm font-sans uppercase tracking-[0.2em] font-bold">Chargement complet…</p>
                 </div>
               </div>
             )}
@@ -254,15 +296,15 @@ export function NearMeSection() {
             {/* Map overlay badges */}
             <div className="absolute top-5 left-5 z-10 flex gap-2 flex-wrap">
               {userPos && (
-                <div className="px-4 py-2 bg-black/60 backdrop-blur-xl rounded-full border border-white/10 flex items-center gap-2">
+                <div className="px-5 py-2.5 bg-black/60 backdrop-blur-xl rounded-full border border-[var(--accent-luxury)]/30 flex items-center gap-3">
                   <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(96,165,250,0.8)]" />
-                  <span className="text-white text-[9px] font-bold uppercase tracking-widest">Ma position</span>
+                  <span className="text-[var(--accent-luxury)] text-[10px] font-bold uppercase tracking-widest">Ma position Géo</span>
                 </div>
               )}
               {biens.length > 0 && (
-                <div className="px-4 py-2 bg-black/60 backdrop-blur-xl rounded-full border border-white/10 flex items-center gap-2">
+                <div className="px-5 py-2.5 bg-black/60 backdrop-blur-xl rounded-full border border-white/10 flex items-center gap-3">
                   <div className="w-2 h-2 bg-[#D4AF37] rounded-full animate-pulse" />
-                  <span className="text-white text-[9px] font-bold uppercase tracking-widest">{biens.length} biens</span>
+                  <span className="text-white text-[10px] font-bold uppercase tracking-widest">{biens.length} biens filtrés</span>
                 </div>
               )}
             </div>
@@ -295,14 +337,14 @@ export function NearMeSection() {
           {loading && biens.length === 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
               {[1,2,3,4].map(i => (
-                <div key={i} className="aspect-[3/4] rounded-2xl bg-white/5 animate-pulse" />
+                <div key={i} className="aspect-[3/4] rounded-2xl bg-[var(--surface-card)] animate-pulse" />
               ))}
             </div>
           ) : biens.length > 0 ? (
             <div>
               <p className="text-[var(--text-muted)] text-xs uppercase tracking-widest font-bold mb-5 flex items-center gap-2">
                 <span className="w-4 h-[1px] bg-[var(--accent-luxury)]" />
-                {selectedId ? 'Bien sélectionné — Itinéraire affiché sur la carte' : 'Cliquez sur un bien pour voir le trajet'}
+                {selectedId ? 'Bien sélectionné — Itinéraire affiché sur la carte' : 'Cliquez sur un bien pour voir le trajet — Triés par distance'}
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 {biens.map((b, i) => (
@@ -310,7 +352,7 @@ export function NearMeSection() {
                     key={b.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05, duration: 0.5 }}
+                    transition={{ delay: (i % 10) * 0.05, duration: 0.5 }}
                     className={`relative group cursor-pointer rounded-2xl overflow-hidden border transition-all duration-300 ${
                       selectedId === b.id
                         ? 'border-[var(--accent-luxury)] ring-2 ring-[var(--accent-luxury)]/50 shadow-[0_0_30px_rgba(212,175,55,0.2)]'
@@ -331,12 +373,12 @@ export function NearMeSection() {
                           sizes="(max-width: 640px) 50vw, 20vw"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center opacity-20">
-                          <MapPin className="w-8 h-8 text-[var(--text-muted)]" />
+                        <div className="w-full h-full flex items-center justify-center opacity-20 bg-[var(--surface-card)]">
+                          <MapPin className="w-8 h-8 text-[var(--accent-luxury)]" />
                         </div>
                       )}
                       {/* Dark overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
                       {/* Selected indicator */}
                       {selectedId === b.id && (
@@ -346,7 +388,7 @@ export function NearMeSection() {
                       {/* Badges */}
                       <div className="absolute top-2 left-2 flex gap-1">
                         {b.is_verifie && (
-                          <span className="px-2 py-0.5 bg-blue-500/80 rounded-full text-[8px] font-bold text-white uppercase tracking-wide">
+                          <span className="px-2 py-1 bg-blue-500/80 backdrop-blur-md rounded-full text-[8px] font-bold text-white uppercase tracking-wide">
                             Certifié
                           </span>
                         )}
@@ -354,27 +396,27 @@ export function NearMeSection() {
 
                       {/* Distance badge */}
                       {b.dist_meters < 999999 && (
-                        <div className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-1 bg-emerald-500/90 rounded-full">
+                        <div className="absolute bottom-2 left-2 flex items-center gap-1.5 px-2 py-1 bg-emerald-500/90 backdrop-blur-md rounded-full border border-emerald-400/50 shadow-lg">
                           <Car className="w-2.5 h-2.5 text-white" />
-                          <span className="text-white text-[8px] font-bold">{getTravelTime(b.dist_meters)}</span>
+                          <span className="text-white text-[9px] font-bold tracking-widest">{getTravelTime(b.dist_meters)}</span>
                         </div>
                       )}
                     </div>
 
                     {/* Info */}
-                    <div className="p-3 bg-[var(--surface-card)]">
+                    <div className="p-4 bg-[var(--surface-card)]">
                       <p className="text-[9px] font-bold text-[var(--accent-luxury)] uppercase tracking-widest mb-1 truncate">
                         {b.commune}{b.quartier ? ` · ${b.quartier}` : ''}
                       </p>
-                      <p className="text-xs font-semibold text-[var(--text)] truncate mb-2">{b.titre}</p>
+                      <p className="text-sm font-semibold text-[var(--text)] truncate mb-3">{b.titre}</p>
                       <div className="flex items-center justify-between">
-                        <p className="text-[10px] font-bold text-[var(--text)]">{formatPrice(b)}</p>
+                        <p className="text-[11px] font-black text-[var(--text)] tracking-wider">{formatPrice(b)}</p>
                         <Link
                           href={`/biens/${b.id}`}
                           onClick={e => e.stopPropagation()}
-                          className="w-6 h-6 flex items-center justify-center rounded-full bg-[var(--accent-luxury)]/10 hover:bg-[var(--accent-luxury)] hover:text-black transition-all"
+                          className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--accent-luxury)]/10 hover:bg-[var(--accent-luxury)] hover:text-black transition-all"
                         >
-                          <ExternalLink className="w-3 h-3 text-[var(--accent-luxury)]" />
+                          <ExternalLink className="w-3.5 h-3.5 text-[var(--accent-luxury)] group-hover:text-black" />
                         </Link>
                       </div>
                     </div>
@@ -383,7 +425,7 @@ export function NearMeSection() {
               </div>
 
               {/* Link to full catalog */}
-              <div className="mt-8 text-center">
+              <div className="mt-10 text-center">
                 <Link
                   href="/biens"
                   className="inline-flex items-center gap-3 px-8 py-3 rounded-full border border-[var(--accent-luxury)] text-[var(--accent-luxury)] text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-[var(--accent-luxury)] hover:text-black transition-all"
@@ -394,9 +436,9 @@ export function NearMeSection() {
               </div>
             </div>
           ) : (
-            <div className="text-center py-16 border border-dashed border-[var(--border)] rounded-3xl">
-              <MapPin className="w-12 h-12 text-[var(--text-muted)] opacity-30 mx-auto mb-4" />
-              <p className="text-[var(--text-muted)] mb-6">Aucun bien trouvé à proximité.</p>
+            <div className="text-center py-20 border border-dashed border-[var(--border)] rounded-[2rem] bg-[var(--surface-card)]">
+              <MapPin className="w-12 h-12 text-[var(--accent-luxury)] opacity-50 mx-auto mb-4" />
+              <p className="text-[var(--text-muted)] mb-6 font-sans">Aucun bien trouvé sur la plateforme.</p>
               <Link href="/biens" className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border border-[var(--accent-luxury)] text-[var(--accent-luxury)] text-xs font-bold uppercase tracking-widest hover:bg-[var(--accent-luxury)] hover:text-black transition-all">
                 Voir le catalogue
               </Link>
