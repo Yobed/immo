@@ -163,9 +163,9 @@ export function NearMeSection() {
 
   const selectedBien = useMemo(() => biens.find(b => b.id === selectedId) ?? null, [biens, selectedId])
 
-  const mapTheme = theme === 'dark'
-    ? 'mapbox://styles/mapbox/dark-v11'
-    : 'mapbox://styles/mapbox/streets-v12'
+  const mapTheme = theme === 'light'
+    ? 'mapbox://styles/mapbox/light-v11'
+    : 'mapbox://styles/mapbox/dark-v11'
 
   return (
     <section className="relative py-20 overflow-hidden bg-[var(--background)]">
@@ -227,7 +227,8 @@ export function NearMeSection() {
         <div className="flex flex-col gap-8">
 
           {/* BIG MAP — ALWAYS mounted, loading spinner overlays on top */}
-          <div className="relative w-full rounded-[2.5rem] overflow-hidden border border-[var(--border)] shadow-2xl" style={{ height: '560px' }}>
+          <div className="rounded-3xl overflow-hidden ring-1 ring-[var(--border)] p-1 bg-[var(--surface-card)] backdrop-blur-3xl transition-all duration-1000 ease-[0.16, 1, 0.3, 1] hover:ring-[var(--accent-luxury)]" style={{ height: '560px' }}>
+            <div className="rounded-[calc(1.5rem-4px)] overflow-hidden bg-[var(--background)] relative h-full">
             {/* Map is ALWAYS rendered — never unmounted */}
             <PropertiesMap
               biens={mapBiens}
@@ -287,6 +288,7 @@ export function NearMeSection() {
                 </button>
               </div>
             )}
+          </div>
           </div>
 
           {/* PROPERTY CARDS below the map */}
