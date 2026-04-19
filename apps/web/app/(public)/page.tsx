@@ -99,10 +99,10 @@ export default async function HomePage() {
       <CustomCursor />
       <Hero bgImages={bgImages} featuredBiens={featuredBiens} />
       <NearMeSection />
+      <FeaturedProperties />
       <LifestyleMatcher />
       <FurnishedRentalsSection />
       <HowItWorks />
-      <FeaturedProperties />
       <OwnerTeaser />
       <PremiumShowcase properties={premiumProperties} />
       <MapZones biens={biensWithPhoto} />

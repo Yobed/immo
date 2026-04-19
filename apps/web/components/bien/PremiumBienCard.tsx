@@ -99,17 +99,17 @@ export function PremiumBienCard({
           </div>
 
           {/* Content */}
-          <div className="p-8 bg-[var(--surface-card)]">
-            <div className="flex justify-between items-start mb-6">
+          <div className="p-5 bg-[var(--surface-card)]">
+            <div className="flex justify-between items-start mb-4">
               <div className="flex-1 min-w-0">
-                <div className="flex flex-col gap-1 mb-3">
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--accent-luxury)] uppercase tracking-[0.2em]">
-                    <MapPin className="w-3 h-3" />
+                <div className="flex flex-col gap-0.5 mb-2">
+                  <div className="flex items-center gap-1.5 text-[9px] font-bold text-[var(--accent-luxury)] uppercase tracking-[0.2em]">
+                    <MapPin className="w-2.5 h-2.5" />
                     <span className="truncate">{commune}{quartier ? ` • ${quartier}` : ''}</span>
                   </div>
                   {prix && (
-                    <p className="text-2xl font-display font-bold text-[var(--text)] tracking-tight">
-                      {prix.value} <span className="text-[10px] font-sans text-[var(--text-muted)] uppercase tracking-widest ml-1">{prix.suffix === '/nuit' ? 'nuit' : prix.suffix === '/mois' ? 'mois' : 'fcf'}</span>
+                    <p className="text-xl font-display font-bold text-[var(--text)] tracking-tight">
+                      {prix.value} <span className="text-[9px] font-sans text-[var(--text-muted)] uppercase tracking-widest ml-1">{prix.suffix === '/nuit' ? 'nuit' : prix.suffix === '/mois' ? 'mois' : 'fcf'}</span>
                     </p>
                   )}
                 </div>
@@ -123,24 +123,24 @@ export function PremiumBienCard({
                     </span>
                   </div>
                 )}
-                <h3 className="font-display text-2xl font-light text-[var(--text)] group-hover:text-[var(--accent-luxury)] transition-colors line-clamp-1 flex items-center gap-2">
+                <h3 className="font-display text-lg font-light text-[var(--text)] group-hover:text-[var(--accent-luxury)] transition-colors line-clamp-1 flex items-center gap-2">
                   {titre}
                   {is_verifie && (
-                    <span className="inline-flex items-center justify-center w-5 h-5 bg-blue-500 text-white rounded-full p-0.5" title="Bien vérifié par nos équipes">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3">
+                    <span className="inline-flex items-center justify-center w-4 h-4 bg-blue-500 text-white rounded-full p-0.5" title="Bien vérifié par nos équipes">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2.5 h-2.5">
                         <path d="M20 6L9 17L4 12" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </span>
                   )}
                 </h3>
               </div>
-              <div className="w-12 h-12 rounded-full border border-[var(--border)] flex items-center justify-center transition-all group-hover:bg-[var(--accent-luxury)] group-hover:border-[var(--accent-luxury)] group-hover:text-[var(--on-accent)] shrink-0 ml-4">
-                <ArrowUpRight className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-full border border-[var(--border)] flex items-center justify-center transition-all group-hover:bg-[var(--accent-luxury)] group-hover:border-[var(--accent-luxury)] group-hover:text-[var(--on-accent)] shrink-0 ml-3">
+                <ArrowUpRight className="w-4 h-4" />
               </div>
             </div>
 
             {/* Stats */}
-            <div className="flex items-center gap-8 pt-6 border-t border-[var(--border)]">
+            <div className="flex items-center gap-6 pt-5 border-t border-[var(--border)]">
               {surface_m2 && (
                 <div className="flex items-center gap-2.5">
                   <Ruler className="w-4 h-4 text-[var(--accent-luxury)] opacity-60" />
@@ -156,12 +156,12 @@ export function PremiumBienCard({
             </div>
             {/* Footnote Quality */}
             {score_ia ? (
-              <div className="mt-4 pt-4 border-t border-[var(--border)]/50 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Score Qualité IA</span>
+              <div className="mt-3 pt-3 border-t border-[var(--border)]/30 flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                  <span className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Score Qualité IA</span>
                 </div>
-                <span className="text-xs font-mono font-bold text-emerald-500">{score_ia}%</span>
+                <span className="text-[10px] font-mono font-bold text-emerald-500">{score_ia}%</span>
               </div>
             ) : null}
           </div>
