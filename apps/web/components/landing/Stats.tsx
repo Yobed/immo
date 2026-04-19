@@ -142,7 +142,7 @@ function StatItem({ target, label, suffix, desc, tenths, accent, index, onEnter,
         </p>
       </div>
        <div 
-        className="h-[1px] w-0 bg-gradient-to-r from-[#fafbfc]/20 to-transparent transition-all duration-1000 ease-[0.16, 1, 0.3, 1] group-hover:w-full"
+        className="h-[1px] w-0 bg-gradient-to-r from-[var(--accent-luxury)]/30 to-transparent transition-all duration-1000 ease-[0.16, 1, 0.3, 1] group-hover:w-full"
       />
     </motion.div>
   )

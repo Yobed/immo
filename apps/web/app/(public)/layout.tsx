@@ -12,11 +12,38 @@ export default async function PublicLayout({ children }: { children: React.React
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const navLinks = [
+  // Récupérer le rôle réel depuis le profil pour le menu utilisateur
+  let role: 'pro' | 'client' | 'public' = 'public'
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.role === 'proprietaire') role = 'pro'
+    else if (profile?.role === 'locataire') role = 'client'
+  }
+
+  // Navigation de base
+  let navLinks = [
     { href: '/biens', label: 'Annonces' },
     { href: '/recherche', label: 'Rechercher' },
     { href: '/recherche?type_bien=residence_meublee', label: 'Résidences meublées' },
   ]
+
+  // Si c'est un propriétaire, on lui affiche son menu complet pour ne pas qu'il soit "perdu"
+  if (role === 'pro') {
+    navLinks = [
+      { href: '/dashboard', label: 'Tableau de bord' },
+      { href: '/mes-biens', label: 'Mes annonces' },
+      { href: '/visites', label: 'Visites' },
+      { href: '/messages', label: 'Messages' },
+      { href: '/quittances', label: 'Quittances' },
+      { href: '/profil', label: 'Profil & KYC' },
+      { href: '/biens', label: 'Vue publique' },
+    ]
+  }
 
   const ctaLinks = user
     ? [{ href: '/dashboard', label: 'Mon espace', variant: 'primary' as const }]
@@ -77,7 +104,18 @@ export default async function PublicLayout({ children }: { children: React.React
             <div className="w-px h-5 bg-[var(--border)] mx-2" />
 
             {user ? (
-              <UserMenu email={user.email ?? ''} role="public" />
+              <div className="flex items-center gap-3">
+                {role === 'pro' && (
+                  <Link
+                    href="/mes-biens/nouveau"
+                    className="hidden lg:flex items-center gap-1.5 px-4 py-2 bg-[var(--secondary)] text-white text-[11px] font-sans font-bold uppercase tracking-wider rounded-btn hover:opacity-90 transition-opacity shadow-sm"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" fill="none"><path d="M12 5v14M5 12h14"/></svg>
+                    Annonce
+                  </Link>
+                )}
+                <UserMenu email={user.email ?? ''} role={role} />
+              </div>
             ) : (
               <div className="flex items-center gap-2">
                 <MagneticWrapper>
@@ -88,7 +126,7 @@ export default async function PublicLayout({ children }: { children: React.React
                 </MagneticWrapper>
                 <MagneticWrapper>
                   <Link href="/register"
-                    className="px-4 py-2 font-sans text-sm font-semibold bg-[var(--secondary)] text-white rounded-btn hover:opacity-90 transition-opacity">
+                    className="px-4 py-2 font-sans text-sm font-semibold bg-[var(--secondary)] text-[var(--on-accent)] rounded-btn hover:opacity-90 transition-opacity">
                     S&apos;inscrire
                   </Link>
                 </MagneticWrapper>

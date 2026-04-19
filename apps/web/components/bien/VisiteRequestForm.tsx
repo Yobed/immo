@@ -86,13 +86,13 @@ export function VisiteRequestForm({ bienId, proprietaireId, isPremium = false }:
         value={date}
         onChange={(e) => setDate(e.target.value)}
         required
-        className={isPremium ? 'bg-white/5 border-white/10 text-white' : ''}
+        className={isPremium ? 'bg-[var(--text)]/5 border-[var(--text)]/10 text-[var(--text)]' : ''}
       />
 
       <div>
         <label
           className={`block text-sm font-sans font-medium mb-2 ${
-            isPremium ? 'text-white/70' : 'text-[var(--text)]'
+            isPremium ? 'text-[var(--text)]/70' : 'text-[var(--text)]'
           }`}
         >
           Créneau horaire
@@ -109,7 +109,7 @@ export function VisiteRequestForm({ bienId, proprietaireId, isPremium = false }:
                     ? 'border-[var(--accent-luxury)] bg-[var(--accent-luxury)]/20 text-[var(--accent-luxury)] font-bold'
                     : 'border-primary bg-primary-light text-primary font-medium'
                   : isPremium
-                    ? 'border-white/10 text-white/50 hover:border-white/30'
+                    ? 'border-[var(--text)]/10 text-[var(--text)]/50 hover:border-[var(--text)]/30'
                     : 'border-[var(--border)] text-muted hover:border-primary/40'
               }`}
             >
@@ -122,7 +122,7 @@ export function VisiteRequestForm({ bienId, proprietaireId, isPremium = false }:
       <div>
         <label
           className={`block text-sm font-sans font-medium mb-2 ${
-            isPremium ? 'text-white/70' : 'text-[var(--text)]'
+            isPremium ? 'text-[var(--text)]/70' : 'text-[var(--text)]'
           }`}
         >
           Message (optionnel)
@@ -134,7 +134,7 @@ export function VisiteRequestForm({ bienId, proprietaireId, isPremium = false }:
           placeholder="Informations complémentaires pour le propriétaire..."
           className={`w-full rounded-btn px-3 py-2 text-sm font-sans resize-none focus:outline-none focus:ring-2 ${
             isPremium
-              ? 'bg-white/5 border-white/10 text-white focus:ring-white/20'
+              ? 'bg-[var(--text)]/5 border-[var(--text)]/10 text-[var(--text)] focus:ring-[var(--text)]/20'
               : 'bg-[var(--surface-card)] border border-[var(--border)] focus:ring-primary/30'
           }`}
         />
@@ -142,7 +142,7 @@ export function VisiteRequestForm({ bienId, proprietaireId, isPremium = false }:
 
       <Button
         type="submit"
-        className={`w-full ${isPremium ? 'bg-[var(--accent-luxury)] text-white hover:bg-[var(--accent-luxury)]/90 shadow-lg shadow-[var(--accent-luxury)]/20' : ''}`}
+        className={`w-full ${isPremium ? 'bg-[var(--accent-luxury)] text-[var(--midnight)] hover:bg-[var(--accent-luxury)]/90 shadow-lg shadow-[var(--accent-luxury)]/20' : ''}`}
         loading={submitting}
         disabled={!date || !creneau}
       >

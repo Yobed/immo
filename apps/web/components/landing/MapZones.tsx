@@ -48,8 +48,19 @@ const TYPE_CATEGORIES = [
   { value: 'terrain',          label: 'Terrain'         },
 ]
 
+const PREMIUM_EQUIPMENTS = [
+  { id: 'climatisation',      label: 'Climatisation', icon: '❄️' },
+  { id: 'wifi',               label: 'Wifi rapide',   icon: '📶' },
+  { id: 'piscine',            label: 'Piscine',       icon: '🏊' },
+  { id: 'parking',            label: 'Parking',       icon: '🚗' },
+  { id: 'gardien',            label: 'Gardien 24/7',  icon: '🛡️' },
+  { id: 'groupe_electrogene', label: 'Groupe Élec.',  icon: '⚡' },
+]
+
 function getBienPrice(b: BienMarker): number | null {
-  return b.prix_nuit_fcfa ?? b.prix_mois_fcfa ?? b.prix_vente_fcfa ?? null
+  const p = b.prix_nuit_fcfa ?? b.prix_mois_fcfa ?? b.prix_vente_fcfa
+  if (p === null || p === undefined) return null
+  return Number(typeof p === 'string' ? p.replace(',', '.') : p)
 }
 
 export function MapZones({ biens }: { biens: BienMarker[] }) {
@@ -58,11 +69,18 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
   const [searchQueryMinPrice, setSearchQueryMinPrice] = useState<number | ''>('')
   const [searchQueryMaxPrice, setSearchQueryMaxPrice] = useState<number | ''>('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [onlyAvailable, setOnlyAvailable] = useState(false)
+  const [selectedEquips, setSelectedEquips] = useState<string[]>([])
   const { theme } = useTheme()
   const containerRef = useRef<HTMLElement>(null)
   const inView = useInView(containerRef, { once: true, margin: "-100px" })
 
-  const biensWithCoords = useMemo(() => biens.filter((b) => b.latitude && b.longitude), [biens])
+  const biensWithCoords = useMemo(() => (biens || []).filter((b) => {
+    if (!b.latitude || !b.longitude) return false;
+    const lat = Number(typeof b.latitude === 'string' ? b.latitude.replace(',', '.') : b.latitude);
+    const lng = Number(typeof b.longitude === 'string' ? b.longitude.replace(',', '.') : b.longitude);
+    return !isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0;
+  }), [biens])
 
   // Count per commune
   const communeCounts = useMemo(() => {
@@ -80,6 +98,16 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
 
     if (activeType) {
       list = list.filter((b) => b.type_bien === activeType)
+    }
+
+    if (onlyAvailable) {
+      list = list.filter((b) => b.est_disponible)
+    }
+
+    if (selectedEquips.length > 0) {
+      list = list.filter((b) => 
+        selectedEquips.every(eq => b.equipements?.includes(eq))
+      )
     }
 
     // Min/Max Price filtering logic
@@ -106,7 +134,7 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
       )
     }
     return list
-  }, [biensWithCoords, activeCommune, activeType, searchQueryMinPrice, searchQueryMaxPrice, searchQuery])
+  }, [biensWithCoords, activeCommune, activeType, searchQueryMinPrice, searchQueryMaxPrice, searchQuery, onlyAvailable])
 
   const targetCenter = activeCommune ? communesCoords[activeCommune] : null
   const mapStyle = theme === 'light' ? 'mapbox://styles/mapbox/light-v11' : 'mapbox://styles/mapbox/dark-v11'
@@ -210,7 +238,43 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
                     </button>
                   )
                 })}
+                <div className="w-px h-6 bg-[var(--border)] mx-2 my-auto" />
+                <button
+                  onClick={() => setOnlyAvailable(!onlyAvailable)}
+                  className={`group flex items-center gap-2 px-4 py-2 rounded-lg border text-[9px] font-bold uppercase tracking-widest transition-all ${
+                    onlyAvailable
+                      ? 'bg-emerald-500 border-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.3)]'
+                      : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500 hover:border-emerald-500/50'
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full bg-emerald-400 ${onlyAvailable ? 'animate-pulse' : 'animate-ping-custom'}`} />
+                  Disponibles
+                </button>
               </div>
+
+               <div className="flex flex-wrap gap-2 pt-2">
+                 {PREMIUM_EQUIPMENTS.map((eq) => {
+                   const isActive = selectedEquips.includes(eq.id)
+                   return (
+                     <button
+                       key={eq.id}
+                       onClick={() => {
+                         setSelectedEquips(prev => 
+                           prev.includes(eq.id) ? prev.filter(i => i !== eq.id) : [...prev, eq.id]
+                         )
+                       }}
+                       className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[8px] font-bold uppercase tracking-widest transition-all ${
+                         isActive
+                           ? 'bg-[var(--accent-gold)]/20 border-[var(--accent-gold)] text-[var(--accent-gold)] shadow-[0_0_15px_rgba(197,160,89,0.2)]'
+                           : 'bg-[var(--background)]/30 border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--text-muted)]'
+                       }`}
+                     >
+                       <span>{eq.icon}</span>
+                       {eq.label}
+                     </button>
+                   )
+                 })}
+               </div>
 
                <div className="flex flex-wrap gap-2 border-t border-[var(--border)]/30 pt-4">
                  <button
@@ -261,7 +325,7 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
               </p>
             </div>
             
-            {(activeCommune || activeType || searchQueryMinPrice || searchQueryMaxPrice || searchQuery) && (
+            {(activeCommune || activeType || searchQueryMinPrice || searchQueryMaxPrice || searchQuery || onlyAvailable) && (
               <button 
                 onClick={() => {
                   setActiveCommune(null)
@@ -269,6 +333,8 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
                   setSearchQueryMinPrice('')
                   setSearchQueryMaxPrice('')
                   setSearchQuery('')
+                  setOnlyAvailable(false)
+                  setSelectedEquips([])
                 }}
                 className="text-[var(--accent-luxury)] hover:underline text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2"
               >

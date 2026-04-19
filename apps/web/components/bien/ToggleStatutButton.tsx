@@ -36,7 +36,7 @@ export function ToggleStatutButton({ bienId, statut }: ToggleStatutButtonProps) 
       loading={loading}
       onClick={handleToggle}
     >
-      {statut === 'publie' ? 'Dépublier' : 'Publier'}
+      {statut === 'publie' ? 'Retirer' : 'Publier'}
     </Button>
   )
 }

@@ -69,7 +69,7 @@ function FilterSection({
           <span className="opacity-70 group-hover:opacity-100 transition-opacity">{icon}</span>
           <span className="font-sans text-sm font-semibold text-[var(--text)] tracking-tight">{label}</span>
           {badge != null && badge > 0 && (
-            <span className="bg-[var(--primary)] text-white text-[10px] font-bold rounded-pill px-1.5 py-0.5 leading-none min-w-[18px] text-center">
+            <span className="bg-[var(--primary)] text-[var(--on-primary)] text-[10px] font-bold rounded-pill px-1.5 py-0.5 leading-none min-w-[18px] text-center">
               {badge}
             </span>
           )}
@@ -211,7 +211,7 @@ export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
             className={cn(
               'w-full flex items-center gap-2.5 px-3 py-2 rounded-btn text-sm font-sans transition-all duration-150',
               !typeBien
-                ? 'bg-[var(--accent-luxury)] text-white font-medium shadow-lg shadow-[var(--accent-luxury)]/20'
+                ? 'bg-[var(--accent-luxury)] text-[var(--on-accent)] font-medium shadow-lg shadow-[var(--accent-luxury)]/20'
                 : 'text-[var(--text-muted)] hover:bg-[var(--midnight-light)] hover:text-[var(--off-white)]'
             )}>
             <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
@@ -226,10 +226,10 @@ export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
               className={cn(
                 'w-full flex items-center gap-2.5 px-3 py-2 rounded-btn text-sm font-sans transition-all duration-150',
                 typeBien === t
-                  ? 'bg-[var(--primary)] text-white font-medium'
+                  ? 'bg-[var(--primary)] text-[var(--on-primary)] font-medium'
                   : 'text-[var(--text-muted)] hover:bg-[var(--surface)] hover:text-[var(--text)]'
               )}>
-              <span className={typeBien === t ? 'text-white/80' : 'text-[var(--primary)]/50'}>
+              <span className={typeBien === t ? 'text-[var(--on-primary)]/80' : 'text-[var(--primary)]/50'}>
                 {TYPE_ICONS[t]}
               </span>
               {TYPES_BIEN_LABELS[t]}
@@ -277,7 +277,7 @@ export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
                 className={cn(
                   'px-3 py-1.5 rounded-pill text-xs font-sans border transition-all duration-150 select-none',
                   equipements.includes(eq)
-                    ? 'bg-[var(--accent-luxury)] border-[var(--accent-luxury)] text-white font-medium shadow-lg shadow-[var(--accent-luxury)]/20'
+                    ? 'bg-[var(--accent-luxury)] border-[var(--accent-luxury)] text-[var(--midnight)] font-medium shadow-lg shadow-[var(--accent-luxury)]/20'
                     : 'border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--accent-luxury)]/50 hover:text-[var(--off-white)] bg-[var(--midnight-light)]'
                 )}>
                 {EQUIPEMENTS_LABELS[eq]}
@@ -290,7 +290,7 @@ export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
         <div className="px-5 py-4 bg-[var(--midnight-muted)] border-t border-[var(--border)]">
           <button
             onClick={applyFilters}
-            className="w-full flex items-center justify-center gap-2 py-3 bg-[var(--accent-luxury)] text-white text-sm font-sans font-semibold rounded-btn hover:opacity-90 transition-all shadow-xl shadow-[var(--accent-luxury)]/20 active:scale-[0.98]"
+            className="w-full flex items-center justify-center gap-2 py-3 bg-[var(--accent-luxury)] text-[var(--on-accent)] text-sm font-sans font-semibold rounded-btn hover:opacity-90 transition-all shadow-xl shadow-[var(--accent-luxury)]/20 active:scale-[0.98]"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" fill="none">
               <polyline points="20 6 9 17 4 12"/>

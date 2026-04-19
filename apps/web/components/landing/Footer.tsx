@@ -16,6 +16,7 @@ const columns = [
       { label: 'Location', href: '/biens?type=location' },
       { label: 'Vente', href: '/biens?type=vente' },
       { label: 'Résidences meublées', href: '/biens?type=meuble' },
+      { label: 'Propriétaires', href: '/proprietaires' },
       { label: 'Publier une annonce', href: '/register' },
     ],
   },

@@ -3,13 +3,14 @@ import { createClient } from '@/lib/supabase/client'
 import { BienCard } from '@/components/bien/BienCard'
 import { CardsCarousel } from '@/components/ui/CardsCarousel'
 import * as React from 'react'
-import { Home, Building2, Palmtree, Warehouse, Briefcase, Landmark, Shovel, ArrowRight, Filter, AlertCircle } from 'lucide-react'
+import { Home, Building2, Palmtree, Warehouse, Briefcase, Landmark, Shovel, ArrowRight, Filter, AlertCircle, MapPin } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useRef, useState, useCallback, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 
 const TYPE_FILTERS: { label: string; value: string; icon: LucideIcon }[] = [
+  { label: 'Proche de moi',    value: 'near_me',           icon: MapPin },
   { label: 'Tous',               value: '',                  icon: Home },
   { label: 'Appartements',       value: 'appartement',       icon: Building2 },
   { label: 'Villas de Luxe',     value: 'villa',             icon: Palmtree },
@@ -24,6 +25,8 @@ type BienRow = {
   id: string; titre: string; commune: string; quartier: string | null
   type_bien: string; prix_mois_fcfa: number | null; prix_nuit_fcfa: number | null
   prix_vente_fcfa: number | null; surface_m2: number | null; nb_pieces: number | null
+  is_verifie: boolean; score_ia: number; dist_meters?: number
+  url_visite_3d?: string | null; proprietaire_id: string
 }
 
 type TypeRow = { label: string; value: string; icon: LucideIcon; biens: BienRow[] }
@@ -44,7 +47,7 @@ export default function BiensListePage() {
       <div className="min-h-screen bg-midnight flex items-center justify-center">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-4xl px-4">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="aspect-[3/4] bg-white/5 animate-pulse rounded-[1.5rem]" />
+            <div key={i} className="aspect-[3/4] bg-off-white/5 animate-pulse rounded-[1.5rem]" />
           ))}
         </div>
       </div>
@@ -67,6 +70,8 @@ function BiensContent() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [count, setCount] = useState(0)
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
   // Instance Supabase stable — une seule fois, jamais recréée
   const supabaseRef = useRef(createClient())
@@ -101,13 +106,40 @@ function BiensContent() {
         const type = typeFromUrl
         if (!cancelled) setActiveType(type)
 
-        if (type) {
+        if (type === 'near_me') {
+          // Mode Proche de moi
+          let loc = userLocation
+          if (!loc) {
+            try {
+              const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 })
+              })
+              loc = { lat: pos.coords.latitude, lng: pos.coords.longitude }
+              if (!cancelled) setUserLocation(loc)
+            } catch (err) {
+              throw new Error("Impossible d'accéder à votre position. Vérifiez vos réglages navigateur.")
+            }
+          }
+
+          if (loc) {
+            const { data, error: err } = await (supabase as any).rpc('get_biens_proches', {
+              user_lat: loc.lat,
+              user_lng: loc.lng,
+              radius_meters: 10000 // 10km radius
+            })
+
+            if (err) throw new Error(err.message)
+            const rows = (data ?? []) as BienRow[]
+            const cMap = await getCoverMap(rows.map(b => b.id))
+            if (!cancelled) { setBiens(rows); setCoverMap(cMap); setCount(rows.length) }
+          }
+        } else if (type) {
           // Mode filtre actif — grille paginée
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const { data, count: c, error: err } = await (supabase as any)
             .from('biens')
             .select(
-              'id, titre, commune, quartier, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces',
+              'id, titre, commune, quartier, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces, is_verifie, score_ia, url_visite_3d, proprietaire_id',
               { count: 'exact' }
             )
             .eq('statut', 'publie')
@@ -127,7 +159,7 @@ function BiensContent() {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const { data } = await (supabase as any)
                 .from('biens')
-                .select('id, titre, commune, quartier, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces')
+                .select('id, titre, commune, quartier, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces, is_verifie, score_ia, url_visite_3d, proprietaire_id')
                 .eq('statut', 'publie')
                 .eq('type_bien', f.value)
                 .order('created_at', { ascending: false })
@@ -147,6 +179,12 @@ function BiensContent() {
     }
 
     loadData()
+
+    // Fetch user for quick edit
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user) setCurrentUserId(data.user.id)
+    })
+
     return () => { cancelled = true }
   }, [typeFromUrl, supabase, getCoverMap])
 
@@ -166,7 +204,7 @@ function BiensContent() {
               role="status" aria-label="Chargement des biens"
             >
               {[...Array(8)].map((_, i) => (
-                <div key={i} className="aspect-[3/4] bg-white/5 animate-pulse rounded-[1.5rem]" />
+                <div key={i} className="aspect-[3/4] bg-off-white/5 animate-pulse rounded-[1.5rem]" />
               ))}
             </motion.div>
           ) : error ? (
@@ -177,11 +215,11 @@ function BiensContent() {
               role="alert"
             >
               <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-6" />
-              <h3 className="font-display text-2xl font-bold text-white mb-3">Erreur de chargement</h3>
-              <p className="text-white/60 mb-8 max-w-md mx-auto">{error}</p>
+              <h3 className="font-display text-2xl font-bold text-off-white mb-3">Erreur de chargement</h3>
+              <p className="text-off-white/60 mb-8 max-w-md mx-auto">{error}</p>
               <button
                 onClick={() => window.location.reload()}
-                className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white rounded-full font-bold transition-colors"
+                className="px-8 py-3 bg-off-white/10 hover:bg-off-white/20 text-off-white rounded-full font-bold transition-colors"
               >
                 Réessayer
               </button>
@@ -194,13 +232,13 @@ function BiensContent() {
                   <span className="text-[var(--accent-luxury)] font-bold tracking-[0.4em] uppercase text-[9px] block mb-4">
                     Collection curatée
                   </span>
-                  <h2 className="font-display text-5xl md:text-7xl font-black text-white tracking-tight leading-none">
+                  <h2 className="font-display text-5xl md:text-7xl font-black text-[var(--text)] tracking-tight leading-none">
                     {activeLabel}
                   </h2>
                 </div>
-                <div className="text-right border-l border-white/10 pl-8 shrink-0">
-                  <p className="text-white/50 font-sans text-[10px] uppercase tracking-[0.2em] mb-1">Disponibles</p>
-                  <p className="text-white font-display text-4xl font-bold">{count}</p>
+                <div className="text-right border-l border-[var(--border)] pl-8 shrink-0">
+                  <p className="text-[var(--text-muted)] font-sans text-[10px] uppercase tracking-[0.2em] mb-1">Disponibles</p>
+                  <p className="text-[var(--text)] font-display text-4xl font-bold">{count}</p>
                 </div>
               </div>
 
@@ -209,8 +247,18 @@ function BiensContent() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {biens.map((bien) => (
-                    <motion.div key={bien.id} variants={itemVariants}>
+                    <motion.div key={bien.id} variants={itemVariants} className="relative group/card">
                       <BienCard {...bienProps(bien, coverMap)} />
+                      {currentUserId === bien.proprietaire_id && (
+                        <div className="absolute top-6 right-6 z-20">
+                          <Link 
+                            href={`/mes-biens/${bien.id}/modifier`}
+                            className="px-5 py-2.5 bg-secondary text-white rounded-xl text-[10px] font-bold uppercase tracking-wider shadow-2xl hover:scale-105 transition-transform border border-white/20"
+                          >
+                            Modifier
+                          </Link>
+                        </div>
+                      )}
                     </motion.div>
                   ))}
                 </div>
@@ -234,7 +282,7 @@ function BiensContent() {
                       </div>
                       <h2
                         id={`section-${row.value}`}
-                        className="font-display text-4xl md:text-6xl font-black text-white tracking-[0.01em] leading-[0.9]"
+                        className="font-display text-4xl md:text-6xl font-black text-off-white tracking-[0.01em] leading-[0.9]"
                       >
                         {row.label}
                       </h2>
@@ -242,12 +290,12 @@ function BiensContent() {
 
                     <a
                       href={`/biens?type_bien=${row.value}`}
-                      className="group/link inline-flex items-center gap-4 px-8 py-4 bg-[#050510]
-                        hover:bg-primary transition-all duration-500 rounded-2xl text-white
+                      className="group/link inline-flex items-center gap-4 px-8 py-4 bg-midnight
+                        hover:bg-primary transition-all duration-500 rounded-2xl text-off-white
                         shadow-[0_15px_30px_-10px_rgba(0,0,0,0.3)] hover:shadow-primary/20 shrink-0"
                     >
                       <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Voir tout</span>
-                      <div className="w-8 h-8 rounded-full bg-white/10 group-hover/link:bg-white/20
+                      <div className="w-8 h-8 rounded-full bg-off-white/10 group-hover/link:bg-off-white/20
                         flex items-center justify-center transition-colors">
                         <ArrowRight className="w-4 h-4 group-hover/link:translate-x-0.5 transition-transform" />
                       </div>
@@ -257,8 +305,18 @@ function BiensContent() {
                   <CardsCarousel cardWidth={340}>
                     <div className="flex gap-6">
                       {row.biens.map((bien: BienRow) => (
-                        <div key={bien.id} className="w-[300px] sm:w-[340px] lg:w-[380px] shrink-0">
+                        <div key={bien.id} className="w-[300px] sm:w-[340px] lg:w-[380px] shrink-0 relative group/card">
                           <BienCard {...bienProps(bien, coverMap)} isExclusive={idx === 0} />
+                          {currentUserId === bien.proprietaire_id && (
+                            <div className="absolute top-6 right-6 z-20">
+                              <Link 
+                                href={`/mes-biens/${bien.id}/modifier`}
+                                className="px-5 py-2.5 bg-secondary text-white rounded-xl text-[10px] font-bold uppercase tracking-wider shadow-2xl hover:scale-105 transition-transform border border-white/20"
+                              >
+                                Modifier
+                              </Link>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -282,6 +340,10 @@ function bienProps(bien: BienRow, coverMap: Record<string, string>) {
     prix_vente_fcfa: bien.prix_vente_fcfa,
     surface_m2: bien.surface_m2, nb_pieces: bien.nb_pieces,
     photo_url: coverMap[bien.id] ?? null,
+    isVerified: bien.is_verifie,
+    aiScore: bien.score_ia,
+    distMeters: bien.dist_meters,
+    url_visite_3d: bien.url_visite_3d,
   }
 }
 
@@ -295,7 +357,7 @@ function PageHeader({ activeType, count }: { activeType: string; count: number }
   }, [])
 
   return (
-    <header className="relative pt-28 pb-20 md:pt-48 md:pb-40 bg-[#0a0a0a] overflow-hidden">
+    <header className="relative pt-28 pb-20 md:pt-48 md:pb-40 bg-midnight overflow-hidden">
       {/* Fond décoratif */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/15 rounded-full
@@ -317,16 +379,16 @@ function PageHeader({ activeType, count }: { activeType: string; count: number }
             Archive Immobilière de Prestige
           </span>
 
-          <h1 className="font-display text-6xl md:text-[10rem] font-black text-white mb-8
+          <h1 className="font-display text-6xl md:text-[10rem] font-black text-off-white mb-8
             tracking-[-0.03em] leading-[0.88] uppercase">
             L&apos;Art de<br />Vivre.
           </h1>
 
-          <p className="text-white/65 text-base md:text-xl font-sans max-w-xl mx-auto mb-20 leading-relaxed font-light">
+          <p className="text-off-white/65 text-base md:text-xl font-sans max-w-xl mx-auto mb-20 leading-relaxed font-light">
             {count > 0 ? (
               <>
                 Une sélection de{' '}
-                <span className="text-white font-semibold">{count} adresses</span>
+                <span className="text-off-white font-semibold">{count} adresses</span>
                 {' '}pour les amateurs d&apos;espaces singuliers.
               </>
             ) : 'Chargement de la collection…'}
@@ -336,7 +398,7 @@ function PageHeader({ activeType, count }: { activeType: string; count: number }
         {/* Barre de filtres */}
         <div className={`sticky top-6 z-50 max-w-4xl mx-auto transition-all duration-500
           ${scrolled ? 'scale-[0.97]' : 'scale-100'}`}>
-          <div className="bg-[#050510]/85 backdrop-blur-2xl border border-white/10 p-1.5 rounded-full shadow-xl">
+          <div className="bg-midnight-muted/85 backdrop-blur-2xl border border-off-white/10 p-1.5 rounded-full shadow-xl">
             <nav className="flex gap-1 overflow-x-auto scrollbar-hide py-0.5 px-1"
               aria-label="Filtres de type de bien">
               {TYPE_FILTERS.map((f) => {
@@ -350,12 +412,12 @@ function PageHeader({ activeType, count }: { activeType: string; count: number }
                       flex items-center gap-2 shrink-0 px-5 py-3 rounded-full text-[10px] font-bold
                       transition-all duration-300 uppercase tracking-[0.15em]
                       ${isActive
-                        ? 'bg-primary text-white shadow-md shadow-primary/25'
-                        : 'text-white/70 hover:text-white hover:bg-white/6'
+                        ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-md shadow-primary/25'
+                        : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--text)]/5'
                       }
                     `}
                   >
-                    <f.icon className={`w-3 h-3 ${isActive ? 'text-white' : 'text-white/50'}`} aria-hidden="true" />
+                    <f.icon className={`w-3 h-3 ${isActive ? 'text-[var(--on-primary)]' : 'text-[var(--text-subtle)]'}`} aria-hidden="true" />
                     {f.label}
                   </a>
                 )
@@ -370,21 +432,21 @@ function PageHeader({ activeType, count }: { activeType: string; count: number }
 
 function EmptyState() {
   return (
-    <div className="text-center py-48 px-8 rounded-[2.5rem] bg-white/[0.02] border border-white/8">
-      <div className="w-20 h-20 bg-white/5 rounded-2xl mx-auto flex items-center justify-center
-        border border-white/10 mb-10">
-        <Filter className="w-7 h-7 text-white/20" aria-hidden="true" />
+    <div className="text-center py-48 px-8 rounded-[2.5rem] bg-off-white/[0.02] border border-off-white/8">
+      <div className="w-20 h-20 bg-off-white/5 rounded-2xl mx-auto flex items-center justify-center
+        border border-off-white/10 mb-10">
+        <Filter className="w-7 h-7 text-off-white/20" aria-hidden="true" />
       </div>
-      <h3 className="font-display text-3xl font-black text-white mb-5 tracking-tighter">
+      <h3 className="font-display text-3xl font-black text-off-white mb-5 tracking-tighter">
         Aucun bien trouvé
       </h3>
-      <p className="text-white/60 font-sans text-base max-w-md mx-auto mb-12 leading-relaxed">
+      <p className="text-off-white/60 font-sans text-base max-w-md mx-auto mb-12 leading-relaxed">
         Cette catégorie est en cours de curation. Explorez nos autres collections.
       </p>
       <a
         href="/biens"
-        className="inline-flex items-center gap-3 px-10 py-4 bg-white/8 hover:bg-white/15
-          text-white rounded-full font-bold transition-all duration-300 border border-white/10"
+        className="inline-flex items-center gap-3 px-10 py-4 bg-off-white/8 hover:bg-off-white/15
+          text-off-white rounded-full font-bold transition-all duration-300 border border-off-white/10"
       >
         Voir toutes les annonces
         <ArrowRight className="w-4 h-4" />

@@ -1,0 +1,11 @@
+everything-claude-code
+node_modules
+.next
+.turbo
+.gemini
+.agents
+.planning
+.claude
+n8n
+playwright-report
+test-results

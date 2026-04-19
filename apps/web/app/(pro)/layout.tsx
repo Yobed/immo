@@ -9,6 +9,7 @@ const navLinks = [
   { href: '/visites', label: 'Visites' },
   { href: '/quittances', label: 'Quittances' },
   { href: '/avis-recus', label: 'Avis reçus' },
+  { href: '/ambassadeur', label: 'Ambassadeur' },
   { href: '/profil', label: 'Profil & KYC' },
   { href: '/messages', label: 'Messages' },
 ]
@@ -18,14 +19,22 @@ export default async function ProLayout({ children }: { children: React.ReactNod
   const { data: { user } } = await supabase.auth.getUser()
 
   let unreadCount = 0
+  let role: 'pro' | 'client' | 'public' = 'pro' // Par défaut pro pour ce layout
+
   if (user) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { count } = await (supabase as any)
-      .from('notifications')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('lu', false)
+    const [{ count }, { data: profile }] = await Promise.all([
+      (supabase as any)
+        .from('notifications')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('lu', false),
+      supabase.from('profiles').select('role').eq('id', user.id).single()
+    ])
+    
     unreadCount = count ?? 0
+    if (profile?.role === 'proprietaire') role = 'pro'
+    else if (profile?.role === 'locataire') role = 'client'
   }
 
   return (
@@ -69,7 +78,7 @@ export default async function ProLayout({ children }: { children: React.ReactNod
             </Link>
 
             {user && <NotificationBell userId={user.id} initialUnreadCount={unreadCount} />}
-            {user && <UserMenu email={user.email ?? ''} role="pro" />}
+            {user && <UserMenu email={user.email ?? ''} role={role} />}
             <MobileMenu links={navLinks} ctaLinks={[{ href: '/mes-biens/nouveau', label: '+ Nouvelle annonce', variant: 'primary' }]} />
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useSearchParams } from 'next/navigation'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
@@ -18,11 +19,13 @@ const registerSchema = z.object({
 
 type RegisterFormData = z.infer<typeof registerSchema>
 
-export default function RegisterPage() {
+function RegisterContent() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
+  const searchParams = useSearchParams()
+  const referralCode = searchParams.get('ref')
 
   const {
     register,
@@ -43,6 +46,9 @@ export default function RegisterPage() {
       provider: 'google',
       options: {
         redirectTo: `${origin}/callback`,
+        queryParams: {
+          referral_code: referralCode || '',
+        }
       },
     })
     setGoogleLoading(false)
@@ -59,6 +65,7 @@ export default function RegisterPage() {
         data: {
           full_name: data.full_name,
           role: data.role,
+          referral_code: referralCode,
         },
       },
     })
@@ -267,5 +274,19 @@ export default function RegisterPage() {
         .
       </p>
     </div>
+  )
+}
+
+import { Suspense } from 'react'
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={
+      <div className="max-w-md w-full flex items-center justify-center p-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    }>
+      <RegisterContent />
+    </Suspense>
   )
 }

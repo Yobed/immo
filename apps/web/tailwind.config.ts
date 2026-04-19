@@ -43,6 +43,16 @@ const config: Config = {
           DEFAULT: 'oklch(92% 0.01 260)',
           hover: 'oklch(85% 0.02 260)',
         },
+        midnight: {
+          DEFAULT: 'var(--midnight)',
+          muted: 'var(--midnight-muted)',
+        },
+        'off-white': {
+          DEFAULT: 'var(--off-white)',
+          muted: 'var(--off-white-muted)',
+        },
+        'accent-luxury': 'var(--accent-luxury)',
+        'accent-gold':   'var(--accent-gold)',
       },
       fontFamily: {
         display: ['Unbounded', 'system-ui', 'sans-serif'],

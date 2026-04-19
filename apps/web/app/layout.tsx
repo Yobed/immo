@@ -48,6 +48,7 @@ export const metadata: Metadata = {
 }
 
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
+import { WhatsAppConcierge } from '@/components/ui/WhatsAppConcierge'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -59,6 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="font-sans bg-[var(--background)] text-[var(--text)] antialiased">
         <ThemeProvider>
           {children}
+          <WhatsAppConcierge />
         </ThemeProvider>
       </body>
     </html>

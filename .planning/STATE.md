@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Executing Phase 1000
-last_updated: "2026-04-18T16:41:43.078Z"
+status: Phase 1000 Complete
+last_updated: "2026-04-18T16:48:30Z"
 progress:
   total_phases: 9
-  completed_phases: 4
-  total_plans: 26
-  completed_plans: 24
+  completed_phases: 5
+  total_plans: 27
+  completed_plans: 26
 ---
 
 # State: Immo CI Platform
@@ -22,10 +22,10 @@ Voir : `.planning/PROJECT.md` (mis à jour 2026-04-05)
 
 ## Current Position
 
-Phase: 1000 (Améliorations disponibilités) — EXECUTING
-Plan: 1 of 1
-Plans complétés: 05-01, 05-02, 05-03, 05-04
-Phase 5 COMPLETE — en attente de vérification
+Phase: 1000 (Améliorations disponibilités) — COMPLETE
+Plan: 2 of 2
+Plans complétés: 05-01, 05-02, 05-03, 05-04, 1000-01, 1000-02
+Phase 5 COMPLETE — Phase 1000 COMPLETE
 
 ## Session Continuity
 
@@ -157,6 +157,8 @@ Phase 5 COMPLETE — en attente de vérification
 ### Roadmap Evolution
 
 - Phase 1000 added: Améliorations des disponibilités et plate-forme de référence
+- Plan 1000-01 complété : BienAvailabilityToggle (Pulse effect) + Intégration /mes-biens.
+- Plan 1000-02 complété : Automatisation via Trigger Postgres (statut confimee -> indisponible). Summary: .planning/phases/1000-am-liorations-des-disponibilit-s-et-plate-forme-de-r-f-rence/1000-02-SUMMARY.md
 
 ---
 *Créé : 2026-04-05 après initialisation*

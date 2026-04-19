@@ -49,8 +49,15 @@ export function UserMenu({ email, role = 'public' }: UserMenuProps) {
           style={{ boxShadow: 'var(--shadow-lg)' }}>
           {/* Email */}
           <div className="px-4 py-3 border-b border-[var(--border)] bg-[var(--surface)]">
-            <p className="text-xs text-[var(--text-muted)] font-sans">Connecté en tant que</p>
-            <p className="text-sm font-sans font-semibold text-[var(--text)] truncate mt-0.5">{email}</p>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xs text-[var(--text-muted)] font-sans">Connecté en tant que</p>
+              {role === 'pro' && (
+                <span className="text-[9px] font-bold uppercase tracking-wider text-secondary bg-secondary/10 px-2 py-0.5 rounded-full border border-secondary/20">
+                  Propriétaire
+                </span>
+              )}
+            </div>
+            <p className="text-sm font-sans font-semibold text-[var(--text)] truncate">{email}</p>
           </div>
 
           {/* Liens selon le rôle */}
@@ -64,6 +71,13 @@ export function UserMenu({ email, role = 'public' }: UserMenuProps) {
                     <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
                   </svg>
                   Tableau de bord
+                </Link>
+                <Link href="/mes-biens" onClick={() => setOpen(false)}
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans text-[var(--text)] hover:bg-[var(--surface)] hover:text-[var(--primary)] transition-colors">
+                  <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" className="text-[var(--primary)]/50">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                  </svg>
+                  Mes annonces
                 </Link>
                 <Link href="/profil" onClick={() => setOpen(false)}
                   className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans text-[var(--text)] hover:bg-[var(--surface)] hover:text-[var(--primary)] transition-colors">

@@ -14,6 +14,10 @@ type BienRow = {
   prix_vente_fcfa: number | null
   surface_m2: number | null
   nb_pieces: number | null
+  est_disponible: boolean
+  is_verifie?: boolean
+  score_ia?: number
+  url_visite_3d?: string | null
 }
 
 
@@ -23,7 +27,7 @@ export async function FeaturedProperties() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: biens } = await (supabase as any)
     .from('biens')
-    .select('id, titre, commune, quartier, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces')
+    .select('id, titre, commune, quartier, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces, est_disponible, is_verifie, score_ia, url_visite_3d')
     .eq('statut', 'publie')
     .order('created_at', { ascending: false })
     .limit(16)
@@ -93,11 +97,16 @@ export async function FeaturedProperties() {
               commune={bien.commune}
               quartier={bien.quartier}
               type_bien={bien.type_bien}
-              prix_mois_fcfa={bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa}
+              prix_mois_fcfa={bien.prix_mois_fcfa}
+              prix_nuit_fcfa={bien.prix_nuit_fcfa}
               prix_vente_fcfa={bien.prix_vente_fcfa}
               surface_m2={bien.surface_m2}
               nb_pieces={bien.nb_pieces}
               photo_url={coverMap[bien.id] ?? null}
+              est_disponible={bien.est_disponible}
+              is_verifie={bien.is_verifie}
+              score_ia={bien.score_ia}
+              url_visite_3d={bien.url_visite_3d}
               index={i}
             />
           ))}

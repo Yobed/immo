@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/server-auth'
-import { genererDescription } from '@/lib/claude'
+import { genererDescription } from '@/lib/ai'
 
 export async function POST(
   req: NextRequest,
@@ -9,7 +9,6 @@ export async function POST(
   const { id } = await params
   const { user, supabase } = await getServerUser(req)
   if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
-  if (!process.env.ANTHROPIC_API_KEY) return NextResponse.json({ error: 'Service IA non configuré' }, { status: 503 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: bien } = await (supabase.from('biens') as any)
@@ -19,6 +18,11 @@ export async function POST(
   if (!bien) return NextResponse.json({ error: 'Bien introuvable' }, { status: 404 })
   if (bien.proprietaire_id !== user.id) return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
 
-  const description = await genererDescription(bien)
-  return NextResponse.json({ description })
+  try {
+    const description = await genererDescription(bien)
+    return NextResponse.json({ description })
+  } catch (error: any) {
+    console.error("Generation Error:", error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
 }

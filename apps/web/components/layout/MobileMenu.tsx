@@ -34,14 +34,14 @@ export function MobileMenu({ links, ctaLinks }: MobileMenuProps) {
       {/* Backdrop */}
       {open && (
         <div
-          className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-[90] bg-black/20 backdrop-blur-sm md:hidden"
           onClick={() => setOpen(false)}
         />
       )}
 
       {/* Drawer */}
       <div className={cn(
-        'fixed top-0 right-0 bottom-0 z-50 w-72 bg-[var(--surface-card)] shadow-2xl flex flex-col transition-transform duration-300 md:hidden',
+        'fixed top-0 right-0 bottom-0 z-[100] w-72 bg-[var(--surface-card)] shadow-2xl flex flex-col transition-transform duration-300 md:hidden',
         open ? 'translate-x-0' : 'translate-x-full'
       )}>
         {/* Header */}

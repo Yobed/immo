@@ -134,12 +134,10 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
         {/* Overlays cinématiques — stables, jamais rechargés */}
         <div className="absolute inset-0 bg-[var(--background)]/35" />
         <div
-          className="absolute inset-0"
-          style={{ background: 'linear-gradient(to top, var(--background) 0%, rgba(2,6,23,0.08) 55%, transparent 100%)' }}
+          className="absolute inset-0 bg-gradient-to-t from-[var(--background)] via-transparent to-transparent"
         />
         <div
-          className="absolute inset-0"
-          style={{ background: 'linear-gradient(to right, var(--background)/60 0%, transparent 60%)' }}
+          className="absolute inset-x-0 top-0 h-full bg-gradient-to-r from-[var(--background)]/60 to-transparent"
         />
       </motion.div>
 
@@ -169,8 +167,8 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
             className="font-display font-bold leading-tight mb-6 text-[var(--text)]"
             style={{ fontSize: 'clamp(2.4rem, 6vw, 5.5rem)' }}
           >
-            Trouvez votre bien<br />
-            <span style={{ color: 'var(--accent-luxury)' }}>en Côte d&apos;Ivoire</span>
+            Résidences Meublées<br />
+            <span style={{ color: 'var(--accent-luxury)' }}>D&apos;Exception</span>
           </motion.h1>
 
           <motion.p
@@ -179,8 +177,8 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
             transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="font-sans text-lg text-[var(--text-muted)] mb-10 leading-relaxed max-w-md"
           >
-            Location, vente et résidences meublées à Abidjan.<br />
-            Réservation et paiement sécurisé en quelques clics.
+            Découvrez notre sélection exclusive de résidences meublées et appartements de luxe à Abidjan.<br />
+            Vivez l&apos;expérience du haut standing avec service premium inclus.
           </motion.p>
 
           {/* Barre de recherche */}
@@ -202,7 +200,7 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
             </div>
             <button
               onClick={handleSearch}
-              className="px-7 py-4 bg-[var(--accent-luxury)] text-white font-sans font-bold text-sm tracking-wide hover:opacity-90 transition-opacity"
+              className="px-7 py-4 bg-[var(--accent-luxury)] text-[var(--on-accent)] font-sans font-bold text-sm tracking-wide hover:opacity-90 transition-opacity"
             >
               Rechercher
             </button>

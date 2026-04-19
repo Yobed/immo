@@ -12,6 +12,8 @@ import { FavorisButton } from '@/components/bien/FavorisButton'
 import { VisiteRequestForm } from '@/components/bien/VisiteRequestForm'
 import { ContactProprietaireButton } from '@/components/bien/ContactProprietaireButton'
 import { ConciergerieLive } from '@/components/chat/ConciergerieLive'
+import { VIPConciergeButton } from '@/components/bien/VIPConciergeButton'
+import { VirtualTourViewer } from '@/components/bien/VirtualTourViewer'
 import { BienMap } from '@/components/bien/BienMap'
 import { 
   MapPin, 
@@ -31,9 +33,15 @@ import {
   LayoutGrid,
   ArrowLeft,
   Sparkles,
-  Award
+  Award,
+  Minimize2,
+  Maximize2,
+  Square,
+  Hash,
+  Building2
 } from 'lucide-react'
 import * as motion from 'framer-motion/client'
+import { PropertyHeroOverlay } from '@/components/bien/PropertyHeroOverlay'
 
 // generateMetadata — SEO dynamique par bien
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -58,8 +66,13 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const desc = `${bien.type_bien} à ${lieu}${prix ? ` — ${prix}` : ''}. Découvrez ce bien sur Immo CI, la plateforme immobilière N°1 en Côte d'Ivoire.`
 
   return {
-    title: `${bien.titre} — ${lieu} | Immo CI`,
+    title: `${bien.titre} — ${lieu} | Immo CI Prestige`,
     description: desc,
+    keywords: [`immobilier luxe Abidjan`, `location meublée ${bien.commune}`, `achat appartement ${bien.commune}`, `Immo CI prestige`, bien.titre],
+    authors: [{ name: 'Immo CI Prestige' }],
+    alternates: {
+      canonical: `https://immo-ci.com/biens/${id}`,
+    },
     openGraph: {
       title: bien.titre,
       description: desc,
@@ -116,6 +129,11 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
     { label: 'Niveau', value: bien.etage != null ? (bien.etage === 0 ? 'RDC' : `Étage ${bien.etage}`) : null, icon: Layers },
   ].filter(s => s.value != null)
 
+  const prix = prixValue ? {
+    value: formatFCFA(prixValue),
+    suffix: prixSuffix
+  } : null
+
   return (
     <main className="bg-[var(--midnight)] min-h-screen selection:bg-secondary/20 font-sans text-[var(--off-white)] antialiased">
       
@@ -126,7 +144,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             href="/biens"
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="pointer-events-auto flex items-center gap-6 px-8 py-4 bg-[var(--midnight-muted)]/80 backdrop-blur-2xl rounded-2xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] border border-white/10 group"
+            className="pointer-events-auto flex items-center gap-6 px-8 py-4 bg-midnight-muted/80 backdrop-blur-2xl rounded-2xl shadow-xl border border-off-white/10 group text-off-white"
           >
             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-2 transition-transform duration-500" />
             <span className="text-[11px] font-bold uppercase tracking-[0.3em] font-display">La Collection</span>
@@ -137,14 +155,14 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                initial={{ y: -20, opacity: 0 }}
                animate={{ y: 0, opacity: 1 }}
                transition={{ delay: 0.1 }}
-               className="p-5 bg-[var(--midnight-muted)]/80 backdrop-blur-2xl rounded-2xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] border border-white/10 hover:scale-105 transition-all"
+               className="p-5 bg-midnight-muted/80 backdrop-blur-2xl rounded-2xl shadow-xl border border-off-white/10 hover:scale-105 transition-all text-off-white"
              >
                <Share2 className="w-5 h-5" />
              </motion.button>
              <FavorisButton 
                bienId={bien.id} 
                userId={user?.id ?? null} 
-               className="p-5 bg-[var(--midnight-muted)]/80 backdrop-blur-2xl rounded-2xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] border border-white/10 hover:scale-105 transition-all text-white" 
+               className="p-5 bg-midnight-muted/80 backdrop-blur-2xl rounded-2xl shadow-xl border border-off-white/10 hover:scale-105 transition-all text-off-white" 
              />
           </div>
         </div>
@@ -166,72 +184,69 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             }))} isHero={true} />
           ) : (
             <div className="w-full h-full bg-[var(--midnight-muted)] flex items-center justify-center">
-              <Sparkles className="w-16 h-16 text-white/10" />
+              <Sparkles className="w-16 h-16 text-off-white/10" />
             </div>
           )}
           
-          <div className="absolute inset-0 bg-gradient-to-t from-[var(--midnight)] via-transparent to-transparent pointer-events-none" />
-          
-          {/* Hero Content */}
-          <div className="absolute inset-0 z-20 flex flex-col justify-end pb-24 px-8 pointer-events-none">
-            <div className="max-w-[1800px] mx-auto w-full">
-              <motion.div 
-                initial={{ y: 80, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.8, duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-                className="max-w-6xl"
-              >
-                <div className="flex items-center gap-6 mb-10">
-                  <Badge className="bg-[var(--accent-luxury)] text-[var(--midnight)] hover:bg-[var(--accent-luxury)] border-none py-2 px-8 text-[10px] font-bold uppercase tracking-[0.4em] font-display shadow-2xl">
-                    {TYPES_BIEN_LABELS[bien.type_bien] ?? bien.type_bien}
-                  </Badge>
-                  <span className="text-white/60 font-medium tracking-[0.5em] uppercase text-[10px]">Collection Immobilière d&apos;Élite</span>
-                </div>
-                
-                <h1 className="font-display text-7xl md:text-[9.5rem] font-bold text-white mb-12 tracking-tight leading-[0.85] [text-wrap:balance]">
-                  {bien.titre}
-                </h1>
-                
-                <div className="flex flex-wrap items-center gap-12 text-white/80">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-white/5 backdrop-blur-2xl border border-white/10 flex items-center justify-center">
-                      <MapPin className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Localisation</p>
-                      <p className="text-xl font-medium text-white tracking-tight font-display">
-                        {bien.commune}{bien.quartier ? ` • ${bien.quartier}` : ''}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-white/5 backdrop-blur-2xl border border-white/10 flex items-center justify-center">
-                      <Award className="w-6 h-6 text-[var(--accent-luxury)]" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Certification</p>
-                      <p className="text-xl font-medium text-white tracking-tight font-display">Propriété d&apos;Exception</p>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </motion.div>
-        
-        {/* Scroll Indicator */}
-        <motion.div 
-          animate={{ y: [0, 15, 0] }}
-          transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-          className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20"
-        >
-          <div className="w-[1px] h-20 bg-gradient-to-t from-white/30 to-transparent" />
+          <PropertyHeroOverlay />
         </motion.div>
       </section>
 
+      {/* Property Identity Section - Clean & High Contrast */}
+      <section className="bg-midnight pt-24 pb-12">
+        <div className="max-w-[1800px] mx-auto px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.2, delay: 0.5 }}
+          >
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 border-b border-off-white/5 pb-20">
+              <div className="flex-1">
+                <div className="flex items-center gap-4 mb-8">
+                  <span className="px-4 py-1.5 rounded-full bg-accent-luxury/10 border border-accent-luxury/20 text-[10px] font-bold uppercase tracking-[0.3em] text-accent-luxury">
+                    {TYPES_BIEN_LABELS[bien.type_bien] ?? bien.type_bien}
+                  </span>
+                  <div className="h-px w-12 bg-off-white/10" />
+                  <span className="text-off-white/40 text-[10px] font-bold uppercase tracking-[0.3em]">
+                    Ref. {bien.id.slice(0, 8).toUpperCase()}
+                  </span>
+                </div>
+                
+                <h1 className="font-display text-5xl md:text-[6.5rem] font-bold text-off-white leading-[0.9] tracking-tight mb-8">
+                  {bien.titre}
+                </h1>
+
+                <div className="flex items-center gap-3 text-off-white/60">
+                  <div className="w-10 h-10 rounded-full bg-off-white/5 flex items-center justify-center border border-off-white/10">
+                    <MapPin className="w-5 h-5 text-accent-luxury" />
+                  </div>
+                  <span className="text-2xl font-display font-light tracking-tight">
+                    {bien.commune}{bien.quartier ? ` • ${bien.quartier}` : ''}
+                  </span>
+                </div>
+              </div>
+
+              <div className="lg:text-right shrink-0">
+                <div className="inline-block p-10 rounded-[2.5rem] bg-off-white/5 backdrop-blur-3xl border border-off-white/10 shadow-2xl relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-accent-luxury/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                  <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-off-white/30 mb-4 relative z-10">Investissement</p>
+                  <p className="text-5xl md:text-6xl font-display font-bold text-off-white tracking-tighter relative z-10">
+                    {prix ? prix.value : 'Prix sur demande'}
+                    {prix?.suffix && (
+                      <span className="text-xl font-sans font-light text-off-white/40 ml-4 uppercase tracking-[0.2em]">
+                        {prix.suffix.replace('/', '')}
+                      </span>
+                    )}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Detail Content Section */}
-      <div className="max-w-[1800px] mx-auto px-8 py-48">
+      <div className="max-w-[1800px] mx-auto px-8 pb-48">
         <div className="flex flex-col lg:flex-row gap-32">
           
           {/* Main Content Column */}
@@ -242,13 +257,13 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="flex flex-wrap gap-x-20 gap-y-12 pb-24 border-b border-white/5 mb-32"
+              className="flex flex-wrap gap-x-20 gap-y-12 pb-24 border-b border-off-white/5 mb-32"
             >
               {stats.map((stat, idx) => (
                 <div key={idx} className="flex flex-col gap-3 min-w-[140px]">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.4em] text-white/70 font-display italic">— {stat.label}</p>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.4em] text-off-white/70 font-display italic">— {stat.label}</p>
                   <div className="flex items-baseline gap-3">
-                    <span className="text-4xl font-display font-bold text-white tracking-tighter">{stat.value}</span>
+                    <span className="text-4xl font-display font-bold text-off-white tracking-tighter">{stat.value}</span>
                   </div>
                 </div>
               ))}
@@ -265,7 +280,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                     transition={{ duration: 1.5 }}
                   >
                     <h2 className="text-[11px] font-bold uppercase tracking-[0.6em] text-[var(--accent-luxury)] mb-10 font-display">Narrative du Lieu</h2>
-                    <h3 className="font-display text-5xl font-bold text-white leading-[0.95] tracking-tight">
+                    <h3 className="font-display text-5xl font-bold text-off-white leading-[0.95] tracking-tight">
                       Une Vision <br /> de la <span className="italic font-light">Sérénité.</span>
                     </h3>
                   </motion.div>
@@ -276,7 +291,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                     whileInView={{ opacity: 1 }}
                     viewport={{ once: true, margin: "-100px" }}
                     transition={{ duration: 1.5, delay: 0.3 }}
-                    className="font-sans text-2xl md:text-3xl text-[var(--off-white-muted)] font-light leading-relaxed first-letter:text-8xl first-letter:float-left first-letter:mr-6 first-letter:text-white first-letter:font-display first-letter:leading-[0.8]"
+                    className="font-sans text-2xl md:text-3xl text-off-white/70 font-light leading-relaxed first-letter:text-8xl first-letter:float-left first-letter:mr-6 first-letter:text-off-white first-letter:font-display first-letter:leading-[0.8]"
                   >
                     {bien.description}
                   </motion.p>
@@ -297,11 +312,11 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                     className="md:w-[60%] rounded-[2.5rem] overflow-hidden shadow-2xl z-20 aspect-video md:aspect-square lg:aspect-[4/3] border border-white/10"
                   >
                     <Image 
-                      src={medias[1].url} 
+                      src={medias[1]?.url || '/images/lifestyle/lifestyle_calm_villa_1776370822601.png'}
                       alt="Lifestyle Detail 1" 
                       width={1200} 
                       height={900} 
-                      className="w-full h-full object-cover grayscale-[30%] hover:grayscale-0 transition-all duration-[3s] scale-105 hover:scale-100"
+                      className="w-full h-full object-cover grayscale-[20%] hover:grayscale-0 transition-all duration-[3s] scale-105 hover:scale-100"
                     />
                   </motion.div>
                   
@@ -310,13 +325,13 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: false, amount: 0.3 }}
                     transition={{ duration: 1.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="md:w-[40%] z-30 bg-[var(--midnight-muted)]/80 backdrop-blur-2xl p-12 md:p-16 rounded-[3rem] shadow-2xl border border-white/10"
+                    className="md:w-[40%] z-30 bg-[#020617]/90 backdrop-blur-3xl p-12 md:p-16 rounded-[3rem] shadow-2xl border border-white/10"
                   >
-                    <h4 className="text-[10px] font-bold uppercase tracking-[0.6em] text-white/50 mb-8 font-display">Lumière & Volume</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-[0.6em] text-white/50 mb-8 font-display">Confort Absolu</h4>
                     <p className="font-display text-4xl md:text-5xl font-bold text-white tracking-tight leading-[0.95] mb-8">
-                      La clarté <span className="italic font-light text-[var(--accent-luxury)]">comme horizon.</span>
+                      La clarté <span className="italic font-light text-[#C5A059]">comme horizon.</span>
                     </p>
-                    <p className="text-xl text-[var(--off-white-muted)] font-light leading-relaxed italic border-l-2 border-[var(--accent-luxury)]/40 pl-8">
+                    <p className="text-xl text-white/70 font-light leading-relaxed italic border-l-2 border-[#C5A059]/40 pl-8">
                       L&apos;architecture s&apos;efface devant la lumière, créant une fluidité entre intérieur et extérieur.
                     </p>
                   </motion.div>
@@ -332,11 +347,11 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                     className="md:w-[60%] rounded-[2.5rem] overflow-hidden shadow-2xl z-20 aspect-video md:aspect-square lg:aspect-[4/3] border border-white/10"
                   >
                     <Image 
-                      src={medias[medias.length > 2 ? 2 : 0].url} 
+                      src={medias[2]?.url || '/images/lifestyle/lifestyle_nature_residence_1776370841683.png'}
                       alt="Lifestyle Detail 2" 
                       width={1200} 
                       height={900} 
-                      className="w-full h-full object-cover grayscale-[30%] hover:grayscale-0 transition-all duration-[3s] scale-105 hover:scale-100"
+                      className="w-full h-full object-cover grayscale-[20%] hover:grayscale-0 transition-all duration-[3s] scale-105 hover:scale-100"
                     />
                   </motion.div>
                   
@@ -345,13 +360,13 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: false, amount: 0.3 }}
                     transition={{ duration: 1.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="md:w-[40%] z-30 bg-[var(--midnight-muted)]/90 backdrop-blur-3xl p-12 md:p-16 rounded-[3rem] shadow-2xl border border-white/10"
+                    className="md:w-[40%] z-30 bg-[#020617]/90 backdrop-blur-3xl p-12 md:p-16 rounded-[3rem] shadow-2xl border border-white/10"
                   >
-                    <h4 className="text-[10px] font-bold uppercase tracking-[0.6em] text-white/60 mb-8 font-display">Matières Nobles</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-[0.6em] text-white/50 mb-8 font-display">Matières Nobles</h4>
                     <p className="font-display text-4xl md:text-5xl font-bold text-white tracking-tight leading-[0.95] mb-8">
-                      Le luxe <span className="italic font-light text-[var(--accent-luxury)]">silencieux.</span>
+                      Le luxe <span className="italic font-light text-[#C5A059]">silencieux.</span>
                     </p>
-                    <p className="text-xl text-white/90 font-light leading-relaxed italic border-l-2 border-[var(--accent-luxury)]/40 pl-8">
+                    <p className="text-xl text-white/70 font-light leading-relaxed italic border-l-2 border-[#C5A059]/40 pl-8">
                       Une sélection de textures qui sollicitent les sens et célèbrent le vrai confort.
                     </p>
                   </motion.div>
@@ -362,7 +377,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             {/* Visual Specs Grid */}
             <section className="mb-48">
               <div className="flex flex-col gap-6 mb-24 items-center">
-                 <h3 className="text-[11px] font-bold uppercase tracking-[0.6em] text-white/40 font-display">Équipements Signatures</h3>
+                 <h3 className="text-[11px] font-bold uppercase tracking-[0.6em] text-off-white/40 font-display">Équipements Signatures</h3>
                  <div className="w-20 h-[2px] bg-[var(--accent-luxury)]/50" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
@@ -375,13 +390,13 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                     transition={{ delay: i * 0.1, duration: 1 }}
                     className="group"
                   >
-                    <div className="flex items-center gap-8 p-8 border border-white/10 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] transition-all duration-700">
-                      <div className="flex-shrink-0 text-white/60 group-hover:text-[var(--accent-luxury)] transition-colors">
+                    <div className="flex items-center gap-8 p-8 border border-off-white/10 rounded-2xl bg-off-white/[0.04] hover:bg-off-white/[0.08] transition-all duration-700">
+                      <div className="flex-shrink-0 text-off-white/60 group-hover:text-[var(--accent-luxury)] transition-colors">
                         {EQUIPEMENTS_ICONS[eq] || <Sparkles className="w-8 h-8" />}
                       </div>
                       <div>
-                        <h4 className="font-display font-medium text-lg text-white leading-tight">{EQUIPEMENTS_LABELS[eq] ?? eq}</h4>
-                        <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mt-1 italic">Élite Standard</p>
+                        <h4 className="font-display font-medium text-lg text-off-white leading-tight">{EQUIPEMENTS_LABELS[eq] ?? eq}</h4>
+                        <p className="text-[10px] font-bold text-off-white/20 uppercase tracking-widest mt-1 italic">Élite Standard</p>
                       </div>
                     </div>
                   </motion.div>
@@ -389,21 +404,32 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
               </div>
             </section>
 
+            {/* 3D Immersive Tour Reveal */}
+            {bien.url_visite_3d && (
+              <section className="mb-48">
+                <div className="flex flex-col gap-6 mb-16 items-center">
+                  <h3 className="text-[11px] font-bold uppercase tracking-[0.6em] text-off-white/40 font-display">Expérience Immersive</h3>
+                  <div className="w-20 h-[2px] bg-secondary/50" />
+                </div>
+                <VirtualTourViewer url={bien.url_visite_3d} title={bien.titre} />
+              </section>
+            )}
+
             {/* Geographical Context */}
             <section className="mb-24">
               <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-10">
                 <div className="max-w-2xl">
                   <h3 className="text-[11px] font-bold uppercase tracking-[0.6em] text-[var(--accent-luxury)] mb-8 font-display">Situation Géographique</h3>
-                  <h4 className="font-display text-5xl font-bold text-white tracking-tight leading-[1] mb-6">{bien.adresse_complete}</h4>
-                  <p className="text-white/60 text-xl font-light italic leading-relaxed">Une adresse de prestige, nichée au cœur des quartiers les plus exclusifs de {bien.commune}.</p>
+                  <h4 className="font-display text-5xl font-bold text-off-white tracking-tight leading-[1] mb-6">{bien.adresse_complete}</h4>
+                  <p className="text-off-white/60 text-xl font-light italic leading-relaxed">Une adresse de prestige, nichée au cœur des quartiers les plus exclusifs de {bien.commune}.</p>
                 </div>
-                <div className="px-8 py-4 bg-[var(--midnight-muted)] border border-white/10 rounded-full flex items-center gap-4 shadow-xl">
+                <div className="px-8 py-4 bg-midnight-muted border border-off-white/10 rounded-full flex items-center gap-4 shadow-xl">
                   <div className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-                  <span className="text-[9px] font-bold uppercase tracking-[0.4em] text-white">Sécurité Maximale</span>
+                  <span className="text-[9px] font-bold uppercase tracking-[0.4em] text-off-white">Sécurité Maximale</span>
                 </div>
               </div>
               
-              <div className="relative rounded-[3rem] overflow-hidden shadow-2xl border border-white/10 p-2 bg-white/5">
+              <div className="relative rounded-[3rem] overflow-hidden shadow-2xl border border-off-white/10 p-2 bg-off-white/5">
                 <div className="w-full grayscale contrast-[1.1] hover:grayscale-0 transition-all duration-[2000ms] rounded-[2.5rem] overflow-hidden">
                    <BienMap
                     latitude={bien.latitude as number | null}
@@ -424,30 +450,30 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                 initial={{ opacity: 0, x: 40 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                className="bg-[var(--midnight-muted)]/80 backdrop-blur-3xl rounded-[3rem] p-12 shadow-[0_40px_100px_-25px_rgba(0,0,0,0.5)] border border-white/10 relative overflow-hidden group/sidebar"
+                className="bg-[var(--midnight-muted)]/80 backdrop-blur-3xl rounded-[3rem] p-12 shadow-[0_40px_100px_-25px_rgba(0,0,0,0.5)] border border-off-white/10 relative overflow-hidden group/sidebar"
               >
                 <div className="relative z-10">
-                  <div className="flex justify-between items-start mb-16">
+                  <div className="flex justify-between items-start mb-16 border-b border-off-white/5 pb-8">
                     <div>
                       <div className="flex items-center gap-4 mb-6">
                         <span className="w-10 h-[1px] bg-[var(--accent-luxury)]" />
                         <p className="text-[10px] font-bold uppercase tracking-[0.5em] text-[var(--accent-luxury)] font-display">Prix de Présentation</p>
                       </div>
                       <div className="flex items-baseline gap-4">
-                        <span className="text-5xl md:text-6xl font-display font-bold tracking-tight text-white">{formatFCFA(prixValue!)}</span>
-                        <span className="text-white/20 font-bold uppercase text-[11px] tracking-[0.4em] font-display">{prixSuffix}</span>
+                        <span className="text-5xl md:text-6xl font-display font-bold tracking-tight text-off-white">{formatFCFA(prixValue!)}</span>
+                        <span className="text-off-white/20 font-bold uppercase text-[11px] tracking-[0.4em] font-display">{prixSuffix}</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-6 mb-16">
-                    <div className="flex items-center gap-6 p-8 bg-white/5 rounded-3xl border border-white/5 transition-colors hover:bg-white/10 hover:border-white/10">
-                      <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
-                        <Calendar className="w-6 h-6 text-white/50 group-hover/sidebar:text-[var(--accent-luxury)] transition-colors" />
+                    <div className="flex items-center gap-6 p-8 bg-off-white/5 rounded-3xl border border-off-white/5 transition-colors hover:bg-off-white/10 hover:border-off-white/10">
+                      <div className="w-14 h-14 rounded-2xl bg-off-white/5 flex items-center justify-center border border-off-white/10">
+                        <Calendar className="w-6 h-6 text-off-white/50 group-hover/sidebar:text-[var(--accent-luxury)] transition-colors" />
                       </div>
                       <div>
-                        <p className="text-[9px] uppercase font-bold tracking-[0.4em] text-white/50 mb-1 font-display">Disponibilité</p>
-                        <p className="text-lg font-bold tracking-tight text-white">Disponibilité Immédiate</p>
+                        <p className="text-[9px] uppercase font-bold tracking-[0.4em] text-off-white/50 mb-1 font-display">Disponibilité</p>
+                        <p className="text-lg font-bold tracking-tight text-off-white">Disponibilité Immédiate</p>
                       </div>
                     </div>
                     
@@ -462,11 +488,11 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                   {!isOwner ? (
                     <div className="space-y-6">
                       {isNuitee ? (
-                        <a href={`/reservations/nouvelle?bienId=${bien.id}`} className="flex items-center justify-center w-full py-7 bg-white text-black rounded-2xl font-bold text-[11px] uppercase tracking-[0.5em] font-display hover:bg-secondary transition-all duration-700 shadow-2xl shadow-black/20 active:scale-95">
+                        <a href={`/reservations/nouvelle?bienId=${bien.id}`} className="flex items-center justify-center w-full py-7 bg-off-white text-midnight rounded-2xl font-bold text-[11px] uppercase tracking-[0.5em] font-display hover:bg-secondary transition-all duration-700 shadow-2xl shadow-black/20 active:scale-95">
                           Réserver l&apos;Expérience
                         </a>
                       ) : (
-                        <div className="bg-white/5 p-8 rounded-[2.5rem] border border-white/5">
+                        <div className="bg-off-white/5 p-8 rounded-[2.5rem] border border-off-white/5">
                            <VisiteRequestForm bienId={bien.id} proprietaireId={bien.proprietaire_id as string} isPremium={true} />
                         </div>
                       )}
@@ -476,10 +502,17 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                           bienId={bien.id}
                           proprietaireId={bien.proprietaire_id as string}
                           userId={user?.id ?? null}
-                          className="w-full flex items-center justify-center gap-4 py-6 bg-transparent border border-white/10 rounded-2xl text-[10px] font-bold uppercase tracking-[0.4em] font-display hover:border-white/30 transition-all duration-500 hover:bg-white/5 text-white"
+                          className="w-full flex items-center justify-center gap-4 py-6 bg-transparent border border-off-white/10 rounded-2xl text-[10px] font-bold uppercase tracking-[0.4em] font-display hover:border-off-white/30 transition-all duration-500 hover:bg-off-white/5 text-off-white"
                         />
                         <ConciergerieLive 
-                          propertyContext={`Bien : ${bien.titre}\nCommune : ${bien.commune}\nQuartier : ${bien.quartier}\nPrix : ${formatFCFA(prixValue!)}${prixSuffix}\nType : ${bien.type_bien}\nDescription : ${bien.description}`}
+                          propertyContext={`Bien : ${bien.titre}\nCommune : ${bien.commune}\nQuartier : ${bien.quartier}\nPrix : ${formatFCFA(prixValue!)}${prixSuffix}\nType : ${bien.type_bien}\nDescription : ${bien.description}\n\n[PHOTOS DU BIEN] :\n${medias.filter((m: any) => m.type === 'photo').map((m: any) => m.url).join('\n')}`}
+                        />
+                        
+                        <VIPConciergeButton 
+                          bienTitre={bien.titre}
+                          bienLieu={`${bien.commune}${bien.quartier ? `, ${bien.quartier}` : ''}`}
+                          bienPrix={`${formatFCFA(prixValue!)}${prixSuffix}`}
+                          className="mt-4"
                         />
                       </div>
                     </div>
@@ -489,33 +522,33 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                         <ShieldCheck className="w-10 h-10 text-secondary mx-auto mb-4" />
                         <p className="text-[11px] uppercase font-bold text-secondary tracking-[0.5em] font-display">Commandes Administrateur</p>
                       </div>
-                      <a href={`/mes-biens/${bien.id}/modifier`} className="flex items-center justify-center w-full py-6 bg-white text-black rounded-2xl font-bold text-[11px] uppercase tracking-[0.5em] font-display hover:bg-secondary transition-all duration-700">
+                      <a href={`/mes-biens/${bien.id}/modifier`} className="flex items-center justify-center w-full py-6 bg-off-white text-midnight rounded-2xl font-bold text-[11px] uppercase tracking-[0.5em] font-display hover:bg-secondary transition-all duration-700">
                         Édition Diplomatique
                       </a>
-                      <a href={`/mes-biens/${bien.id}/modifier?step=medias`} className="flex items-center justify-center w-full py-6 bg-white/5 border border-white/10 text-white rounded-2xl font-bold text-[11px] uppercase tracking-[0.5em] font-display hover:bg-white/10 hover:border-white transition-all duration-700">
+                      <a href={`/mes-biens/${bien.id}/modifier?step=medias`} className="flex items-center justify-center w-full py-6 bg-off-white/5 border border-off-white/10 text-off-white rounded-2xl font-bold text-[11px] uppercase tracking-[0.5em] font-display hover:bg-off-white/10 hover:border-off-white transition-all duration-700">
                         Gestionnaire de Médias
                       </a>
                     </div>
                   )}
                   
                   {/* Curated Expert Card */}
-                  <div className="mt-16 pt-16 border-t border-white/5">
+                  <div className="mt-16 pt-16 border-t border-off-white/5">
                     <div className="flex items-center gap-8">
                       <div className="relative group/avatar">
                         <div className="absolute inset-0 bg-secondary/20 rounded-full blur-xl opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-1000" />
-                        <div className="relative w-20 h-20 rounded-full overflow-hidden bg-white/10 border-4 border-[var(--midnight-muted)] flex-shrink-0 transition-transform duration-1000 group-hover/avatar:rotate-3 group-hover/avatar:scale-110 shadow-lg">
+                        <div className="relative w-20 h-20 rounded-full overflow-hidden bg-off-white/10 border-4 border-midnight-muted flex-shrink-0 transition-transform duration-1000 group-hover/avatar:rotate-3 group-hover/avatar:scale-110 shadow-lg">
                           {proprio?.avatar_url ? (
                             <Image src={proprio.avatar_url} alt={proprio.full_name} width={80} height={80} className="w-full h-full object-cover" />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-white/5">
-                              <Sparkles className="w-8 h-8 text-white/10" />
+                            <div className="w-full h-full flex items-center justify-center bg-off-white/5">
+                              <Sparkles className="w-8 h-8 text-off-white/10" />
                             </div>
                           )}
                         </div>
                       </div>
                       <div className="flex-1">
-                        <p className="text-[10px] uppercase font-bold text-white/60 tracking-[0.5em] mb-2 font-display">Votre Curateur</p>
-                        <p className="font-display font-bold text-2xl tracking-tighter text-white group-hover/sidebar:text-[var(--accent-luxury)] transition-colors duration-700 leading-none">
+                        <p className="text-[10px] uppercase font-bold text-off-white/60 tracking-[0.5em] mb-2 font-display">Votre Curateur</p>
+                        <p className="font-display font-bold text-2xl tracking-tighter text-off-white group-hover/sidebar:text-[var(--accent-luxury)] transition-colors duration-700 leading-none">
                           {proprio?.full_name || 'Élite Immo CI'}
                         </p>
                         <div className="flex items-center gap-3 mt-3">
@@ -533,14 +566,14 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
       </div>
       
       {/* Editorial Footer Detail */}
-      <footer className="max-w-[1800px] mx-auto px-8 py-24 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-12 text-white/40">
+      <footer className="max-w-[1800px] mx-auto px-8 py-24 border-t border-off-white/5 flex flex-col md:flex-row justify-between items-center gap-12 text-off-white/40">
         <div className="flex flex-wrap items-center justify-center gap-12">
            <p className="text-[11px] font-bold uppercase tracking-[0.6em] font-display">© 2026 Immo CI Prestige</p>
-           <span className="hidden md:block w-12 h-[1px] bg-white/5" />
+           <span className="hidden md:block w-12 h-[1px] bg-off-white/5" />
            <p className="text-[11px] font-bold uppercase tracking-[0.6em] font-display">Archive Immobilière N°442</p>
         </div>
         <div className="flex items-center gap-8">
-           <div className="w-12 h-[1px] bg-white/5" />
+           <div className="w-12 h-[1px] bg-off-white/5" />
            <Sparkles className="w-6 h-6 opacity-20" />
         </div>
       </footer>

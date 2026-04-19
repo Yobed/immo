@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { TYPES_BIEN_LABELS } from '@immo-ci/shared/constants/biens'
-import { MapPin, Ruler, Layers, Star, ArrowUpRight } from 'lucide-react'
+import { MapPin, Ruler, Layers, Star, ArrowUpRight, Maximize2 } from 'lucide-react'
 
 interface PremiumBienCardProps {
   id: string
@@ -12,10 +12,17 @@ interface PremiumBienCardProps {
   quartier?: string | null
   type_bien: string
   prix_mois_fcfa: number | null
+  prix_nuit_fcfa?: number | null
   prix_vente_fcfa: number | null
   surface_m2: number | null
   nb_pieces: number | null
+  nb_salles_bain?: number
+  isMeublee?: boolean
+  is_verifie?: boolean
+  score_ia?: number
   photo_url?: string | null
+  est_disponible?: boolean
+  url_visite_3d?: string | null
   index?: number
 }
 
@@ -25,13 +32,19 @@ function formatFCFA(n: number): string {
 
 export function PremiumBienCard({
   id, titre, commune, quartier, type_bien,
-  prix_mois_fcfa, prix_vente_fcfa,
+  prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa,
   surface_m2, nb_pieces, photo_url,
+  est_disponible = true,
+  is_verifie,
+  score_ia,
+  url_visite_3d,
   index = 0
 }: PremiumBienCardProps) {
   
   const prix = prix_vente_fcfa
     ? { value: formatFCFA(prix_vente_fcfa), suffix: '' }
+    : prix_nuit_fcfa
+    ? { value: formatFCFA(prix_nuit_fcfa), suffix: '/nuit' }
     : prix_mois_fcfa
     ? { value: formatFCFA(prix_mois_fcfa), suffix: '/mois' }
     : null
@@ -62,39 +75,66 @@ export function PremiumBienCard({
               </div>
             )}
             
-            {/* Overlay Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[var(--background)] via-transparent to-transparent opacity-80" />
+            {/* Overlay Gradient - Darker and more elegant */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/10 to-transparent opacity-90 z-10" />
             
-            {/* Top Label */}
-            <div className="absolute top-4 left-4">
-              <span className="px-4 py-2 rounded-full bg-[var(--glass-surface)] backdrop-blur-md border border-[var(--glass-border)] text-[11px] font-bold uppercase tracking-wider text-[var(--text)]">
+            {/* Top Labels - Fades on hover for better image viewing */}
+            <div className="absolute top-4 left-4 flex flex-wrap gap-2 transition-opacity duration-500 group-hover:opacity-10 z-20">
+              <span className="px-3 py-1.5 rounded-full bg-black/80 backdrop-blur-md border border-white/20 text-[9px] font-bold uppercase tracking-widest text-white shadow-2xl">
                 {TYPES_BIEN_LABELS[type_bien] ?? type_bien.replace('_', ' ')}
               </span>
+              {type_bien === 'residence_meublee' && (
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#C5A059] text-black text-[9px] font-bold uppercase tracking-[0.2em] shadow-2xl border border-white/10">
+                  <Star className="w-2.5 h-2.5 fill-black stroke-black" />
+                  Prestige
+                </span>
+              )}
+              {url_visite_3d && (
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600/90 backdrop-blur-md border border-white/20 text-[9px] font-bold uppercase tracking-widest text-white shadow-2xl">
+                  <Maximize2 className="w-2.5 h-2.5" />
+                  Visite 3D
+                </span>
+              )}
             </div>
-
-            {/* Price tag */}
-            {prix && (
-              <div className="absolute bottom-6 left-6">
-                <p className="text-3xl font-display font-light text-[var(--text)] leading-none">
-                  {prix.value} <span className="text-sm font-sans align-top text-[var(--text-muted)] ml-1">FCFA{prix.suffix}</span>
-                </p>
-              </div>
-            )}
           </div>
 
           {/* Content */}
-          <div className="p-8">
+          <div className="p-8 bg-[var(--surface-card)]">
             <div className="flex justify-between items-start mb-6">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-[var(--accent-luxury)] uppercase tracking-[0.2em] mb-3">
-                  <MapPin className="w-3 h-3" />
-                  <span className="truncate">{commune}{quartier ? ` • ${quartier}` : ''}</span>
+                <div className="flex flex-col gap-1 mb-3">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--accent-luxury)] uppercase tracking-[0.2em]">
+                    <MapPin className="w-3 h-3" />
+                    <span className="truncate">{commune}{quartier ? ` • ${quartier}` : ''}</span>
+                  </div>
+                  {prix && (
+                    <p className="text-2xl font-display font-bold text-[var(--text)] tracking-tight">
+                      {prix.value} <span className="text-[10px] font-sans text-[var(--text-muted)] uppercase tracking-widest ml-1">{prix.suffix === '/nuit' ? 'nuit' : prix.suffix === '/mois' ? 'mois' : 'fcf'}</span>
+                    </p>
+                  )}
                 </div>
-                <h3 className="font-display text-2xl font-light text-[var(--text)] group-hover:text-[var(--accent-luxury)] transition-colors line-clamp-1">
+                {type_bien === 'residence_meublee' && (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-[#D4AF37] text-[#020617] shadow-lg">
+                      <span className="mr-1.5">💎</span> Prestige
+                    </span>
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-[#F97316] text-[#020617] shadow-lg">
+                      <span className="mr-1.5">🔥</span> Populaire
+                    </span>
+                  </div>
+                )}
+                <h3 className="font-display text-2xl font-light text-[var(--text)] group-hover:text-[var(--accent-luxury)] transition-colors line-clamp-1 flex items-center gap-2">
                   {titre}
+                  {is_verifie && (
+                    <span className="inline-flex items-center justify-center w-5 h-5 bg-blue-500 text-white rounded-full p-0.5" title="Bien vérifié par nos équipes">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-3 h-3">
+                        <path d="M20 6L9 17L4 12" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </span>
+                  )}
                 </h3>
               </div>
-              <div className="w-12 h-12 rounded-full border border-[var(--border)] flex items-center justify-center transition-all group-hover:bg-[var(--accent-luxury)] group-hover:border-[var(--accent-luxury)] group-hover:text-white shrink-0 ml-4">
+              <div className="w-12 h-12 rounded-full border border-[var(--border)] flex items-center justify-center transition-all group-hover:bg-[var(--accent-luxury)] group-hover:border-[var(--accent-luxury)] group-hover:text-[var(--on-accent)] shrink-0 ml-4">
                 <ArrowUpRight className="w-5 h-5" />
               </div>
             </div>
@@ -114,6 +154,16 @@ export function PremiumBienCard({
                 </div>
               )}
             </div>
+            {/* Footnote Quality */}
+            {score_ia ? (
+              <div className="mt-4 pt-4 border-t border-[var(--border)]/50 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Score Qualité IA</span>
+                </div>
+                <span className="text-xs font-mono font-bold text-emerald-500">{score_ia}%</span>
+              </div>
+            ) : null}
           </div>
         </div>
       </Link>

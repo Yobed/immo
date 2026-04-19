@@ -95,18 +95,31 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
             <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-[var(--midnight)] shadow-lg" />
           </div>
           <div>
-            <h3 className="text-white font-display font-bold text-base tracking-tight">Élite Immo CI</h3>
+            <h3 className="text-[var(--text)] font-display font-bold text-base tracking-tight">Élite Immo CI</h3>
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-secondary" />
-              <p className="text-[9px] uppercase font-bold tracking-[0.2em] text-white/40">Conseiller Dédié en Ligne</p>
+              <p className="text-[9px] uppercase font-bold tracking-[0.2em] text-[var(--text)]/40">Conseiller Dédié en Ligne</p>
             </div>
           </div>
         </div>
-        {onClose && (
-          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-            <X className="w-5 h-5 text-white/50" />
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          <a 
+            href="https://wa.me/2250102030405" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="p-2 hover:bg-green-500/20 text-green-500 rounded-full transition-all group relative"
+          >
+            <MessageCircle className="w-5 h-5" />
+            <span className="absolute -bottom-8 right-0 text-[8px] bg-green-500 text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              WhatsApp VIP
+            </span>
+          </a>
+          {onClose && (
+            <button onClick={onClose} className="p-2 hover:bg-[var(--text)]/10 rounded-full transition-colors">
+              <X className="w-5 h-5 text-[var(--text)]/50" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Messages */}
@@ -117,10 +130,10 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
               <ShieldCheck className="w-10 h-10 text-[var(--accent-luxury)] opacity-50" />
             </div>
             <div>
-              <p className="text-xl font-display font-light text-white mb-2 italic">
+              <p className="text-xl font-display font-light text-[var(--text)] mb-2 italic">
                 Bienvenue dans votre espace privilégié.
               </p>
-              <p className="text-sm text-white/40 max-w-[280px] leading-relaxed mx-auto uppercase tracking-widest text-[10px] font-bold">
+              <p className="text-sm text-[var(--text)]/40 max-w-[280px] leading-relaxed mx-auto uppercase tracking-widest text-[10px] font-bold">
                 Comment puis-je satisfaire votre recherche d&apos;exception ?
               </p>
             </div>
@@ -129,7 +142,7 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
                 <button
                   key={i}
                   onClick={() => sendMessage(s)}
-                  className="w-full text-center text-[10px] uppercase tracking-widest font-bold bg-white/5 border border-white/5 text-white/60 px-5 py-3 rounded-xl hover:bg-white/[0.08] hover:text-white hover:border-white/20 transition-all duration-500"
+                  className="w-full text-center text-[10px] uppercase tracking-widest font-bold bg-[var(--text)]/5 border border-[var(--text)]/5 text-[var(--text)]/60 px-5 py-3 rounded-xl hover:bg-[var(--text)]/[0.08] hover:text-[var(--text)] hover:border-[var(--text)]/20 transition-all duration-500"
                 >
                   {s}
                 </button>
@@ -147,7 +160,7 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
              <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
                 <div className="w-1.5 h-1.5 bg-[var(--accent-luxury)] rounded-full animate-pulse" />
              </div>
-             <p className="text-[10px] uppercase font-bold tracking-[0.3em] text-white/20">Analyse en cours...</p>
+             <p className="text-[10px] uppercase font-bold tracking-[0.3em] text-[var(--text)]/20">Analyse en cours...</p>
           </div>
         )}
         <div ref={bottomRef} className="h-4" />
@@ -163,7 +176,7 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }}
             placeholder="Échangez avec votre conseiller..."
             disabled={loading}
-            className="flex-1 bg-transparent px-4 py-2 text-sm text-white placeholder-white/20 focus:outline-none disabled:opacity-50"
+            className="flex-1 bg-transparent px-4 py-2 text-sm text-[var(--text)] placeholder-[var(--text)]/20 focus:outline-none disabled:opacity-50"
           />
           <button
             onClick={() => sendMessage()}
@@ -173,10 +186,18 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
             <Send className="w-4 h-4" />
           </button>
         </div>
-        <div className="flex justify-center gap-8 mt-4 opacity-20 hover:opacity-100 transition-opacity duration-1000">
-           <Mic className="w-3.5 h-3.5 text-white cursor-not-allowed" />
-           <Phone className="w-3.5 h-3.5 text-white cursor-not-allowed" />
-        </div>
+         <div className="flex justify-center gap-8 mt-4">
+            <Mic className="w-3.5 h-3.5 text-[var(--text)]/20 cursor-not-allowed" />
+            <a 
+              href="https://wa.me/2250102030405" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 opacity-30 hover:opacity-100 transition-all group"
+            >
+              <Phone className="w-3.5 h-3.5 text-green-500" />
+              <span className="text-[10px] text-[var(--text)]/50 group-hover:text-[var(--text)] uppercase tracking-tighter transition-colors">Contact Direct</span>
+            </a>
+         </div>
       </div>
     </div>
   )

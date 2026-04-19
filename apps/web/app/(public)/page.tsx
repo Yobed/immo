@@ -1,5 +1,3 @@
-export const revalidate = 300 // ISR: revalide toutes les 5 min
-
 import { createClient } from '@/lib/supabase/server'
 import { Hero } from '@/components/landing/Hero'
 import { HowItWorks } from '@/components/landing/HowItWorks'
@@ -14,6 +12,11 @@ import { Footer } from '@/components/landing/Footer'
 import { CustomCursor } from '@/components/landing/CustomCursor'
 import { LifestyleMatcher } from '@/components/landing/LifestyleMatcher'
 import { PremiumShowcase } from '@/components/landing/PremiumShowcase'
+import { NearMeSection } from '@/components/landing/NearMeSection'
+import { FurnishedRentalsSection } from '@/components/landing/FurnishedRentalsSection'
+import { OwnerTeaser } from '@/components/landing/OwnerTeaser'
+
+export const revalidate = 300 // ISR: revalide toutes les 5 min
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -21,13 +24,14 @@ export default async function HomePage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: biens } = await (supabase as any)
     .from('biens')
-    .select('id, titre, commune, quartier, type_bien, latitude, longitude, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa')
+    .select('id, titre, commune, quartier, type_bien, latitude, longitude, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, est_disponible')
     .eq('statut', 'publie')
 
   const biensList = (biens ?? []) as {
     id: string; titre: string; commune: string; quartier: string | null
     type_bien: string; latitude: number | null; longitude: number | null
     prix_mois_fcfa: number | null; prix_nuit_fcfa: number | null; prix_vente_fcfa: number | null
+    est_disponible: boolean
   }[]
 
   // Fetch cover photos for all biens
@@ -94,9 +98,12 @@ export default async function HomePage() {
     <main>
       <CustomCursor />
       <Hero bgImages={bgImages} featuredBiens={featuredBiens} />
+      <NearMeSection />
       <LifestyleMatcher />
+      <FurnishedRentalsSection />
       <HowItWorks />
       <FeaturedProperties />
+      <OwnerTeaser />
       <PremiumShowcase properties={premiumProperties} />
       <MapZones biens={biensWithPhoto} />
       <Features />

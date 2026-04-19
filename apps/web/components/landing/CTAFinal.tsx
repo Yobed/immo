@@ -70,7 +70,7 @@ export function CTAFinal() {
         {/* Editorial Trust Row */}
         <motion.div
            variants={itemVariants}
-           className="flex flex-wrap items-center justify-center gap-x-16 gap-y-8 border-t border-white/[0.05] pt-16"
+           className="flex flex-wrap items-center justify-center gap-x-16 gap-y-8 border-t border-[var(--border)] pt-16"
         >
           {[
             { 
@@ -98,7 +98,7 @@ export function CTAFinal() {
               text: 'Excellence 4.8/5' 
             },
           ].map((item, idx) => (
-            <div key={idx} className="flex items-center gap-4 text-[#fafbfc]/60 group hover:text-[#fafbfc]/90 transition-colors duration-500">
+            <div key={idx} className="flex items-center gap-4 text-[var(--text-muted)] group hover:text-[var(--text)] transition-colors duration-500">
               {item.icon}
               <span className="font-sans text-[10px] tracking-[0.2em] uppercase font-bold italic">{item.text}</span>
             </div>

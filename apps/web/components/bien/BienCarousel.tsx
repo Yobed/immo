@@ -1,9 +1,11 @@
 'use client'
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import Image from 'next/image'
 import { Bien360 } from './Bien360'
 import { cn } from '@/lib/utils'
+import { Camera, Play, Landmark, Map as MapIcon, Maximize2, X, ChevronLeft, ChevronRight, Eye, LayoutGrid } from 'lucide-react'
+import * as motion from 'framer-motion/client'
 
 type MediaType = 'photo' | 'video' | 'vue_360' | 'plan'
 type FilterType = 'all' | MediaType
@@ -24,11 +26,19 @@ interface BienCarouselProps {
 }
 
 const FILTER_LABELS: Record<FilterType, string> = {
-  all:     'Tout',
-  photo:   'Photos',
-  video:   'Vidéos',
-  vue_360: 'Vue 360°',
-  plan:    'Plans',
+  all:     'Explorer Tout',
+  photo:   'Photographies',
+  video:   'Visite Vidéo',
+  vue_360: 'Immersion 360°',
+  plan:    'Plans & Dimensions',
+}
+
+const FILTER_ICONS: Record<FilterType, any> = {
+  all:     LayoutGrid,
+  photo:   Camera,
+  video:   Play,
+  vue_360: Eye,
+  plan:    MapIcon,
 }
 
 const BADGE_CLASSES: Record<MediaType, string> = {
@@ -99,12 +109,12 @@ function MediaSlide({ media, isHero }: { media: BienMedia, isHero?: boolean }) {
 
   // Photo (type='photo')
   return (
-    <div className={cn("relative w-full bg-[var(--surface)] overflow-hidden", isHero ? "h-full" : "aspect-[4/3] rounded-card")}>
+    <div className={cn("relative w-full bg-[var(--midnight-muted)] overflow-hidden", isHero ? "h-full" : "aspect-[4/3] rounded-card")}>
       <Image
         src={media.url}
         alt={media.titre ?? 'Photo du bien'}
         fill
-        className="object-cover"
+        className="object-cover transition-transform duration-[20s] ease-linear group-hover:scale-110"
         sizes="100vw"
         priority
       />
@@ -153,30 +163,42 @@ export function BienCarousel({ medias, isHero = false }: BienCarouselProps) {
   const availableTypes = Array.from(new Set(medias.map((m) => m.type)))
   const filters: FilterType[] = ['all', ...availableTypes]
 
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
   return (
-    <div className={cn("w-full", !isHero && "space-y-3", isHero && "h-full")}>
-      {/* Filtres par type - Cachés en Hero */}
-      {!isHero && availableTypes.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-          {filters.map((filter) => (
-            <button
-              key={filter}
-              onClick={() => setActiveFilter(filter)}
-              className={cn(
-                'flex-shrink-0 px-3 py-1.5 rounded-pill text-sm font-sans border transition-colors',
-                activeFilter === filter
-                  ? 'bg-primary text-white border-primary'
-                  : 'border-[var(--border)] text-muted hover:border-primary/40'
-              )}
-            >
-              {FILTER_LABELS[filter]}
-              {filter !== 'all' && (
-                <span className="ml-1 text-xs opacity-70">
-                  ({medias.filter((m) => m.type === filter).length})
-                </span>
-              )}
-            </button>
-          ))}
+    <div className={cn("w-full relative", !isHero && "space-y-3", isHero && "h-full")}>
+      {/* Filtres par type - Nouveau design Premium */}
+      {availableTypes.length > 1 && (
+        <div className={cn(
+          "flex gap-3 scrollbar-hide z-40 transition-all duration-700",
+          isHero 
+            ? "absolute bottom-10 left-10 pt-4" 
+            : "overflow-x-auto pb-1"
+        )}>
+          {filters.map((filter) => {
+            const Icon = FILTER_ICONS[filter]
+            const count = medias.filter((m) => m.type === filter).length
+            if (filter !== 'all' && count === 0) return null
+            
+            return (
+              <button
+                key={filter}
+                onClick={() => setActiveFilter(filter)}
+                className={cn(
+                  'flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] uppercase tracking-[0.2em] font-bold font-display border transition-all duration-500 shadow-2xl backdrop-blur-3xl',
+                  activeFilter === filter
+                    ? 'bg-[#D4AF37] text-black border-[#D4AF37] scale-105 shadow-[0_0_20px_rgba(212,175,55,0.3)]'
+                    : 'bg-black/80 text-white border-white/20 hover:border-[#D4AF37]/50 hover:bg-black'
+                )}
+              >
+                <Icon size={14} className={cn("transition-transform duration-500", activeFilter === filter ? "scale-110" : "")} />
+                <span className="[text-shadow:_0_1px_2px_rgb(0_0_0_/_20%)]">{FILTER_LABELS[filter]}</span>
+                {filter !== 'all' && (
+                  <span className="opacity-60 font-mono text-[9px]">[{count}]</span>
+                )}
+              </button>
+            )
+          })}
         </div>
       )}
 
@@ -190,19 +212,16 @@ export function BienCarousel({ medias, isHero = false }: BienCarouselProps) {
                   <MediaSlide media={media} isHero={isHero} />
                   {/* Badge type */}
                   {!isHero && (
-                    <div className="absolute top-3 right-3 pointer-events-none">
-                      <span className={cn(
-                        'inline-flex items-center px-2 py-1 rounded-pill text-xs font-sans font-medium shadow-sm',
-                        BADGE_CLASSES[media.type]
-                      )}>
-                        {FILTER_LABELS[media.type]}
+                    <div className="absolute top-4 right-4 pointer-events-none">
+                      <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-[#020617]/90 text-white border border-white/20 backdrop-blur-xl shadow-2xl">
+                        {FILTER_LABELS[media.type] || media.type.toUpperCase()}
                       </span>
                     </div>
                   )}
                   {/* Titre du média */}
                   {media.titre && !isHero && (
-                    <div className="absolute bottom-3 left-3 right-3 pointer-events-none">
-                      <span className="bg-black/50 text-white text-xs font-sans px-2 py-1 rounded-pill backdrop-blur-sm">
+                    <div className="absolute bottom-4 left-4 right-4 pointer-events-none">
+                      <span className="inline-flex items-center px-4 py-2 rounded-xl text-[10px] font-medium tracking-wide bg-[#020617]/90 text-white border border-white/10 backdrop-blur-xl shadow-2xl">
                         {media.titre}
                       </span>
                     </div>
@@ -213,22 +232,22 @@ export function BienCarousel({ medias, isHero = false }: BienCarouselProps) {
           </div>
         </div>
 
-        {/* Flèches navigation */}
+        {/* Flèches navigation - Style Éditorial */}
         {filtered.length > 1 && (
           <>
             <button
               onClick={scrollPrev}
-              className="absolute left-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/10 backdrop-blur-3xl border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:scale-110 shadow-2xl z-30"
+              className="absolute left-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#020617]/40 hover:bg-[#020617]/80 backdrop-blur-xl border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 hover:scale-110 shadow-2xl z-40 pointer-events-auto"
               aria-label="Précédent"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M15 18l-6-6 6-6" /></svg>
+              <ChevronLeft size={24} className="text-white" strokeWidth={1.5} />
             </button>
             <button
               onClick={scrollNext}
-              className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-white/10 backdrop-blur-3xl border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:scale-110 shadow-2xl z-30"
+              className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#020617]/40 hover:bg-[#020617]/80 backdrop-blur-xl border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 hover:scale-110 shadow-2xl z-40 pointer-events-auto"
               aria-label="Suivant"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M9 18l6-6-6-6" /></svg>
+              <ChevronRight size={24} className="text-white" strokeWidth={1.5} />
             </button>
           </>
         )}

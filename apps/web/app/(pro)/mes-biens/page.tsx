@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { BienCard } from '@/components/bien/BienCard'
 import { Button } from '@/components/ui'
 import { ToggleStatutButton } from '@/components/bien/ToggleStatutButton'
+import { BienAvailabilityToggle } from '@/components/bien/BienAvailabilityToggle'
+import { DeleteBienButton } from '@/components/bien/DeleteBienButton'
 
 type BienRow = {
   id: string
@@ -27,11 +29,11 @@ export default async function MesAnnoncesPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: biens } = await (supabase as any)
     .from('biens')
-    .select('id, titre, commune, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces, statut, created_at')
+    .select('id, titre, commune, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces, statut, created_at, est_disponible')
     .eq('proprietaire_id', user.id)
     .order('created_at', { ascending: false })
 
-  const bienRows = (biens ?? []) as BienRow[]
+  const bienRows = (biens ?? []) as (BienRow & { est_disponible: boolean })[]
 
   // Requête séparée pour les photos — plus fiable que le nested select
   let coverMap: Record<string, string> = {}
@@ -86,16 +88,23 @@ export default async function MesAnnoncesPage() {
                   photo_url={coverMap[bien.id] ?? null}
                 />
                 {/* Actions propriétaire */}
-                <div className="flex gap-2 mt-2">
-                  <Link href={`/mes-biens/${bien.id}/modifier`} className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full">Modifier</Button>
-                  </Link>
-                  <Link href={`/mes-biens/${bien.id}/modifier?step=medias`} className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full">Médias</Button>
-                  </Link>
-                  <div className="flex-1">
-                    <ToggleStatutButton bienId={bien.id} statut={bien.statut} />
+                <div className="mt-4 space-y-3">
+                  <BienAvailabilityToggle 
+                    bienId={bien.id} 
+                    initialValue={bien.est_disponible} 
+                  />
+                  <div className="flex gap-2">
+                    <Link href={`/mes-biens/${bien.id}/modifier`} className="flex-1">
+                      <Button variant="outline" size="sm" className="w-full">Modifier</Button>
+                    </Link>
+                    <Link href={`/mes-biens/${bien.id}/modifier?step=medias`} className="flex-1">
+                      <Button variant="outline" size="sm" className="w-full">Médias</Button>
+                    </Link>
+                    <div className="flex-1">
+                      <ToggleStatutButton bienId={bien.id} statut={bien.statut} />
+                    </div>
                   </div>
+                  <DeleteBienButton bienId={bien.id} titre={bien.titre} />
                 </div>
               </div>
             ))}

@@ -91,7 +91,7 @@ export function SearchBar({
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             autoComplete="off"
-            className="w-full bg-transparent py-3 text-base md:text-lg font-display font-medium text-[var(--off-white)] placeholder:text-[var(--text-muted)] focus:outline-none"
+            className="w-full bg-transparent py-3 text-base md:text-lg font-display font-medium text-[var(--text)] placeholder:text-[var(--text-muted)] focus:outline-none"
           />
           {query && (
             <button 
@@ -141,7 +141,7 @@ export function SearchBar({
                     className={`w-full text-left px-4 py-3.5 flex items-center gap-4 rounded-xl transition-all duration-200 ${
                       idx === highlighted 
                         ? 'bg-[var(--accent-luxury)]/10 text-[var(--accent-luxury)] translate-x-1' 
-                        : 'text-[var(--off-white-muted)] hover:bg-[var(--midnight-light)]'
+                        : 'text-[var(--text)] hover:bg-[var(--midnight-light)]'
                     }`}
                   >
                     <div className={`p-2.5 rounded-xl transition-colors ${

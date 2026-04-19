@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/server-auth'
-import { scorerAnnonce } from '@/lib/claude'
+import { scorerAnnonce } from '@/lib/ai'
 
 export async function POST(
   req: NextRequest,
@@ -9,7 +9,6 @@ export async function POST(
   const { id } = await params
   const { user, supabase } = await getServerUser(req)
   if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
-  if (!process.env.ANTHROPIC_API_KEY) return NextResponse.json({ error: 'Service IA non configuré' }, { status: 503 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: bien } = await (supabase.from('biens') as any)
@@ -24,6 +23,11 @@ export async function POST(
     .select('id', { count: 'exact', head: true })
     .eq('bien_id', id).eq('type', 'photo')
 
-  const scoreResult = await scorerAnnonce({ ...bien, nb_photos: nbPhotos ?? 0 })
-  return NextResponse.json(scoreResult)
+  try {
+    const scoreResult = await scorerAnnonce({ ...bien, nb_photos: nbPhotos ?? 0 })
+    return NextResponse.json(scoreResult)
+  } catch (error: any) {
+    console.error("Scoring Error:", error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
 }

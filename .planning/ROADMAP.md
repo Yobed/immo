@@ -208,8 +208,62 @@ Plans:
 **Plans:** 0 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 1000 to break down)
+- [x] 1000-01-PLAN.md — BienAvailabilityToggle (Pulse effect, visual feedback)
+- [x] 1000-02-PLAN.md — Trigger Automatisation (availability lock on confirm)
 
 ---
-*Roadmap créée : 2026-04-05*
-*Mise à jour : 2026-04-07 — Phase 5 planifiée (4 plans, 2 vagues) — Maestro remplace Detox, StyleSheet natif RN (NativeWind v4 incompatible SDK 52 New Architecture)*
+
+## Phase 1001: Sécurité & Notifications WhatsApp
+
+**Goal:** Durcir la sécurité contre les abus et assurer une communication 100% fiable via WhatsApp (canal dominant en CI).
+
+| Plan | Titre | Description |
+|---|---|---|
+| 1001-01 | Rate Limiting | Configuration de Upstash ou logic interne pour limiter les OTP et webhooks |
+| 1001-02 | WhatsApp Bridge | Webhook n8n pour router toutes les notifications critiques (RESA, PAY) vers WhatsApp |
+
+---
+
+## Phase 1002: IA Marché & Intelligence Propriétaire
+
+**Goal:** Fournir des outils d'aide à la décision basés sur l'IA pour positionner Immo CI comme une plateforme d'expertise.
+
+| Plan | Titre | Description |
+|---|---|---|
+| 1002-01 | Market Index IA | Analyse des prix moyens par zone (Cocody vs Cocody-nord) et score de compétitivité |
+| 1002-02 | Smart Occupancy | Recommandations auto de baisse de prix ou promo flash quand inoccupé |
+
+---
+
+## Phase 1003: Programme Ambassadeur & Social Growth
+
+**Goal:** Croissance organique via un système de parrainage adapté au marché des apporteurs d'affaires.
+
+| Plan | Titre | Description |
+|---|---|---|
+| 1003-01 | Referral Engine | Tracking des parrains, calcul de commissions sur les réservations confirmées |
+| 1003-02 | Dynamic Social Sharing | Cartes de partage personnalisées pour les réseaux sociaux (Insta/WhatsApp) |
+
+## Phase 1004: Expérience Géolocalisée & "Proximité Élite"
+
+**Goal:** Placer le contexte géographique au cœur de l'expérience utilisateur pour les résidences meublées.
+
+| Plan | Titre | Description |
+|---|---|---|
+| 1004-01 | Mode "Proche de moi" | Géo-localisation utilisateur + PostGIS pour afficher les biens dans un rayon de 2-5km. |
+| 1004-02 | Calculs de Distance | Intégration Mapbox Matrix pour afficher le temps de trajet vers les points clés (Aéroport, Plateau). |
+| 1004-03 | Points d'Intérêt (POI) | Enrichissement des fiches avec les commodités proches (Supermarchés, Banques, Restaurants). |
+
+---
+
+## Phase 1005: Spécialisation "Résidences Meublées"
+
+**Goal:** Adapter le modèle de données et l'UI aux besoins spécifiques des locations de courte durée premium.
+
+| Plan | Titre | Description |
+|---|---|---|
+| 1005-01 | Amenities Premium | Champs techniques : Débit WiFi, Nettoyage professionnel, Conciergerie, Smart Home features. |
+| 1005-02 | Guides de Quartier IA | Utilisation de l'IA pour générer des guides "Vibe" par quartier pour rassurer les voyageurs. |
+| 1005-03 | Self Check-in UI | Interface de gestion de codes d'accès et instructions d'arrivée automatisées. |
+
+*Roadmap mise à jour : 2026-04-18 — Spécialisation Résidences Meublées & Géo.*

@@ -9,6 +9,8 @@ import { Step2Prix } from './Step2Prix'
 import { Step3Localisation } from './Step3Localisation'
 import { Step4Equipements } from './Step4Equipements'
 import { Button } from '@/components/ui'
+import { useAIListingAnalyzer } from '@/hooks/useAIListingAnalyzer'
+import { AIQualityMeter } from '../AIQualityMeter'
 
 // HTML number inputs with valueAsNumber:true produce NaN when empty — Zod 4 rejects NaN
 // so we preprocess NaN → undefined for all optional number fields
@@ -95,11 +97,13 @@ export function BienForm({ defaultValues, bienId }: BienFormProps) {
   const router = useRouter()
 
   const form = useForm<BienFormData>({
-    // Pas de zodResolver : la validation est faite manuellement étape par étape
-    // pour éviter que des erreurs invisibles bloquent le bouton final
     mode: 'onTouched',
     defaultValues: { equipements: [], ...defaultValues },
   })
+
+  // Surveillance en temps réel pour l'IA
+  const watchedData = form.watch()
+  const aiAnalysis = useAIListingAnalyzer(watchedData)
 
   // Validation manuelle des champs requis avant soumission finale
   const validateAll = (): boolean => {
@@ -115,20 +119,37 @@ export function BienForm({ defaultValues, bienId }: BienFormProps) {
   }
 
   const handleFinalSubmit = async () => {
-    if (!validateAll()) return
+    console.log('Final submit triggered');
+    if (!validateAll()) {
+      console.warn('Validation failed before final submit');
+      return
+    }
     setIsSubmitting(true)
     setSubmitError(null)
     try {
-      const data = form.getValues() as unknown as Record<string, unknown>
+      const data = {
+        ...form.getValues(),
+        score_ia: aiAnalysis.score
+      } as unknown as Record<string, unknown>
+      
+      console.log('Sending data to action:', data);
       const result = bienId
         ? await updateBien(bienId, data)
         : await createBien(data)
+      
+      console.log('Action result:', result);
+
       if ('error' in result) {
+        console.error('Server action error:', result.error);
         setSubmitError(result.error)
         return
       }
-      router.push(`/mes-biens/${result.id}/modifier?step=medias`)
+      
+      const targetUrl = `/mes-biens/${result.id}/modifier?step=medias`;
+      console.log('Redirecting to:', targetUrl);
+      window.location.href = targetUrl;
     } catch (err) {
+      console.error('Submission exception:', err);
       setSubmitError(String(err))
     } finally {
       setIsSubmitting(false)
@@ -142,66 +163,85 @@ export function BienForm({ defaultValues, bienId }: BienFormProps) {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      {/* Progress bar */}
-      <div className="flex items-center gap-2 mb-8">
-        {Array.from({ length: TOTAL_STEPS }, (_, i) => (
-          <div
-            key={i}
-            className={`h-2 flex-1 rounded-pill transition-colors ${
-              i + 1 <= step ? 'bg-primary' : 'bg-[var(--border)]'
-            }`}
-          />
-        ))}
-      </div>
+    <div className="max-w-6xl mx-auto px-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Colonne Formulaire (Main) */}
+        <div className="lg:col-span-8">
+          {/* Progress bar */}
+          <div className="flex items-center gap-2 mb-8">
+            {Array.from({ length: TOTAL_STEPS }, (_, i) => (
+              <div
+                key={i}
+                className={`h-2 flex-1 rounded-pill transition-colors ${
+                  i + 1 <= step ? 'bg-primary' : 'bg-[var(--border)]'
+                }`}
+              />
+            ))}
+          </div>
 
-      <div>
-        {step === 1 && <Step1Infos form={form} />}
-        {step === 2 && <Step2Prix form={form} />}
-        {step === 3 && <Step3Localisation form={form} />}
-        {step === 4 && <Step4Equipements form={form} />}
-        {step === 5 && (
-          <div className="text-center py-6">
-            <div className="flex justify-center mb-4">
-              <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-accent">
-                <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
-              </svg>
+          <div className="bg-surface p-6 rounded-3xl border border-[var(--border)] shadow-sm">
+            {step === 1 && <Step1Infos form={form} />}
+            {step === 2 && <Step2Prix form={form} />}
+            {step === 3 && <Step3Localisation form={form} />}
+            {step === 4 && <Step4Equipements form={form} />}
+            {step === 5 && (
+              <div className="text-center py-6">
+                <div className="flex justify-center mb-4">
+                  <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-accent">
+                    <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+                  </svg>
+                </div>
+                <p className="font-display text-xl text-[var(--text)] mb-2">Prêt à ajouter les médias ?</p>
+                <p className="font-sans text-muted text-sm">
+                  {bienId
+                    ? "Les informations seront mises à jour. Vous pourrez gérer photos, vidéos et vue 360° à l'étape suivante."
+                    : "L'annonce sera créée en brouillon. Vous pourrez ajouter photos, vidéos et vue 360° à l'étape suivante."}
+                </p>
+              </div>
+            )}
+
+            {submitError && (
+              <div className="mt-4 p-3 rounded-btn bg-red-50 border border-red-200 text-red-700 text-sm font-sans">
+                {submitError}
+              </div>
+            )}
+
+            <div className="flex justify-between mt-8">
+              {step > 1 && (
+                <Button type="button" variant="outline" onClick={() => setStep(s => s - 1)}>
+                  Précédent
+                </Button>
+              )}
+              {step < TOTAL_STEPS ? (
+                <Button type="button" className="ml-auto" onClick={handleNext}>
+                  Suivant
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  className="ml-auto"
+                  loading={isSubmitting}
+                  onClick={handleFinalSubmit}
+                >
+                  Continuer vers les médias
+                </Button>
+              )}
             </div>
-            <p className="font-display text-xl text-[var(--text)] mb-2">Prêt à ajouter les médias ?</p>
-            <p className="font-sans text-muted text-sm">
-              {bienId
-                ? "Les informations seront mises à jour. Vous pourrez gérer photos, vidéos et vue 360° à l'étape suivante."
-                : "L'annonce sera créée en brouillon. Vous pourrez ajouter photos, vidéos et vue 360° à l'étape suivante."}
-            </p>
           </div>
-        )}
+        </div>
 
-        {submitError && (
-          <div className="mt-4 p-3 rounded-btn bg-red-50 border border-red-200 text-red-700 text-sm font-sans">
-            {submitError}
+        {/* Colonne IA Sidebar */}
+        <div className="lg:col-span-4 space-y-6">
+          <AIQualityMeter analysis={aiAnalysis} />
+          
+          <div className="p-5 rounded-3xl bg-indigo-600/5 border border-indigo-200/50 hidden lg:block">
+            <h4 className="text-sm font-display font-semibold text-indigo-900 dark:text-indigo-100 mb-2">Pourquoi un score élevé ?</h4>
+            <ul className="text-[11px] text-indigo-700/80 dark:text-indigo-300/80 space-y-2 list-disc pl-4">
+              <li>Mise en avant prioritaire dans les recherches</li>
+              <li>Éligibilité aux campagnes WhatsApp Pro</li>
+              <li>Confiance accrue des locataires vérifiés</li>
+            </ul>
           </div>
-        )}
-
-        <div className="flex justify-between mt-8">
-          {step > 1 && (
-            <Button type="button" variant="outline" onClick={() => setStep(s => s - 1)}>
-              Précédent
-            </Button>
-          )}
-          {step < TOTAL_STEPS ? (
-            <Button type="button" className="ml-auto" onClick={handleNext}>
-              Suivant
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              className="ml-auto"
-              loading={isSubmitting}
-              onClick={handleFinalSubmit}
-            >
-              Continuer vers les médias
-            </Button>
-          )}
         </div>
       </div>
     </div>

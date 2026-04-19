@@ -17,12 +17,16 @@ export function ConciergerieLive({ propertyContext, isFloatingTrigger = false, c
     return (
       <>
         <motion.button
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          whileHover={{ 
+            scale: 1.05, 
+            y: -5,
+            boxShadow: '0 25px 50px -12px rgba(212, 175, 55, 0.4)'
+          }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => setIsOpen(true)}
-          className={`fixed bottom-8 right-8 z-[100] w-16 h-16 rounded-full bg-[var(--accent-luxury)] text-[var(--midnight)] shadow-[0_20px_40px_rgba(0,0,0,0.3)] flex items-center justify-center group overflow-hidden ${className}`}
+          className={`fixed bottom-36 right-6 z-50 w-16 h-16 rounded-full bg-[var(--accent-luxury)] text-[var(--midnight)] shadow-[0_20px_40px_rgba(0,0,0,0.3)] flex items-center justify-center group overflow-hidden ${className}`}
         >
           <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
           <MessageCircle className="w-7 h-7 relative z-10" />
@@ -46,7 +50,7 @@ export function ConciergerieLive({ propertyContext, isFloatingTrigger = false, c
       <div className={className || "flex flex-col gap-4"}>
         <button 
           onClick={() => setIsOpen(true)}
-          className="w-full flex items-center justify-center gap-4 py-6 bg-transparent border border-white/10 rounded-2xl text-[10px] font-bold uppercase tracking-[0.4em] font-display hover:border-white/30 transition-all duration-500 hover:bg-white/5 text-white"
+          className="w-full flex items-center justify-center gap-4 py-6 bg-transparent border border-[var(--off-white)]/10 rounded-2xl text-[10px] font-bold uppercase tracking-[0.4em] font-display hover:border-[var(--off-white)]/30 transition-all duration-500 hover:bg-[var(--off-white)]/5 text-[var(--text)]"
         >
           <MessageCircle className="w-4 h-4 text-[var(--accent-luxury)]" />
           Conciergerie Live

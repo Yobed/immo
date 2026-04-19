@@ -12,17 +12,17 @@ export default function ChatPage() {
         <div className="text-center mb-10">
           <div className="flex items-center justify-center gap-4 mb-4">
             <span className="w-12 h-[1px] bg-[var(--accent-luxury)]" />
-            <h1 className="font-display text-3xl md:text-4xl text-white font-bold tracking-tight">
+            <h1 className="font-display text-3xl md:text-4xl text-off-white font-bold tracking-tight">
               Élite Immo CI
             </h1>
             <span className="w-12 h-[1px] bg-[var(--accent-luxury)]" />
           </div>
-          <p className="text-white/40 text-xs font-bold uppercase tracking-[0.5em] font-display">
+          <p className="text-off-white/40 text-xs font-bold uppercase tracking-[0.5em] font-display">
             Conciergerie Live & Conseiller Dédié
           </p>
         </div>
         
-        <div className="flex-1 rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl bg-[var(--midnight-muted)]/50 backdrop-blur-xl" style={{ minHeight: '650px' }}>
+        <div className="flex-1 rounded-[2.5rem] overflow-hidden border border-off-white/10 shadow-2xl bg-[var(--midnight-muted)]/50 backdrop-blur-xl" style={{ minHeight: '650px' }}>
           <ChatBot />
         </div>
       </div>

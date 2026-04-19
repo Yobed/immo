@@ -2,6 +2,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
+const cleanNum = (v: any) => {
+  if (v === undefined || v === null || (typeof v === 'number' && isNaN(v))) return null
+  return Number(v)
+}
+
 const BIEN_FIELDS = (data: Record<string, unknown>) => ({
   titre: data.titre,
   type_bien: data.type_bien,
@@ -9,19 +14,21 @@ const BIEN_FIELDS = (data: Record<string, unknown>) => ({
   description: data.description ?? '',
   quartier: data.quartier ?? null,
   adresse_complete: data.adresse_complete ?? null,
-  surface_m2: data.surface_m2 ?? null,
-  nb_pieces: data.nb_pieces ?? null,
-  nb_chambres: data.nb_chambres ?? null,
-  nb_salles_bain: data.nb_salles_bain ?? null,
-  latitude: data.latitude ?? null,
-  longitude: data.longitude ?? null,
-  prix_mois_fcfa: data.prix_mois_fcfa ?? null,
-  prix_nuit_fcfa: data.prix_nuit_fcfa ?? null,
-  prix_vente_fcfa: data.prix_vente_fcfa ?? null,
-  charges_mois_fcfa: data.charges_mois_fcfa ?? null,
-  depot_garantie_fcfa: data.depot_garantie_fcfa ?? null,
+  surface_m2: cleanNum(data.surface_m2),
+  nb_pieces: cleanNum(data.nb_pieces),
+  nb_chambres: cleanNum(data.nb_chambres),
+  nb_salles_bain: cleanNum(data.nb_salles_bain),
+  latitude: cleanNum(data.latitude),
+  longitude: cleanNum(data.longitude),
+  prix_mois_fcfa: cleanNum(data.prix_mois_fcfa),
+  prix_nuit_fcfa: cleanNum(data.prix_nuit_fcfa),
+  prix_vente_fcfa: cleanNum(data.prix_vente_fcfa),
+  charges_mois_fcfa: cleanNum(data.charges_mois_fcfa),
+  depot_garantie_fcfa: cleanNum(data.depot_garantie_fcfa),
   equipements: data.equipements ?? [],
+  score_ia: data.score_ia ?? 0,
 })
+
 
 export async function createBien(data: Record<string, unknown>) {
   const supabase = await createClient()
