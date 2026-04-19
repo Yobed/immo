@@ -18,14 +18,21 @@ export default async function ClientLayout({ children }: { children: React.React
   const { data: { user } } = await supabase.auth.getUser()
 
   let unreadCount = 0
+  let role: 'pro' | 'client' | 'public' = 'client'
+
   if (user) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { count } = await (supabase as any)
-      .from('notifications')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('lu', false)
+    const [{ count }, { data: profile }] = await Promise.all([
+      (supabase as any)
+        .from('notifications')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('lu', false),
+      supabase.from('profiles').select('role').eq('id', user.id).single()
+    ])
+    
     unreadCount = count ?? 0
+    if (profile?.role === 'proprietaire') role = 'pro'
+    else if (profile?.role === 'locataire') role = 'client'
   }
 
   return (
@@ -58,7 +65,7 @@ export default async function ClientLayout({ children }: { children: React.React
           {/* Right side */}
           <div className="flex items-center gap-2">
             {user && <NotificationBell userId={user.id} initialUnreadCount={unreadCount} />}
-            {user && <UserMenu email={user.email ?? ''} role="client" />}
+            {user && <UserMenu email={user.email ?? ''} role={role} />}
             <MobileMenu links={navLinks} />
           </div>
         </div>

@@ -1,6 +1,7 @@
 // app/(pro)/dashboard/page.tsx — Server Component (pas de 'use client')
 import { createClient }   from '@/lib/supabase/server'
 import { redirect }       from 'next/navigation'
+import Link               from 'next/link'
 import dynamic            from 'next/dynamic'
 import { KPICard }        from '@/components/dashboard/KPICard'
 import { OccupancyGauge } from '@/components/dashboard/OccupancyGauge'
@@ -177,7 +178,7 @@ export default async function DashboardPage() {
         id:      `visite-${v.id}`,
         type:    'attention',
         message: 'Demande de visite sans reponse depuis plus de 24h',
-        lien:    '/pro/visites',
+        lien:    '/visites',
       })
     }
   })
@@ -188,7 +189,7 @@ export default async function DashboardPage() {
       id:      `contrat-${c.id}`,
       type:    'attention',
       message: `Contrat expirant le ${c.date_fin}`,
-      lien:    '/pro/contrats',
+      lien:    '/quittances', // Redirige vers quittances à défaut de page contrats
     })
   })
 
@@ -198,7 +199,7 @@ export default async function DashboardPage() {
       id:      'reservations-attente',
       type:    'urgent',
       message: `${(reservationsAttente ?? []).length} reservation(s) en attente de confirmation`,
-      lien:    '/pro/reservations',
+      lien:    '/reservations',
     })
   }
 
@@ -248,6 +249,34 @@ export default async function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Quick Actions */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <Link href="/publier" className="group bg-primary text-white p-6 rounded-card shadow-lg hover:shadow-primary/20 transition-all flex flex-col items-center justify-center gap-3 text-center">
+              <div className="p-3 bg-white/20 rounded-full group-hover:scale-110 transition-transform">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              </div>
+              <span className="font-display text-lg">Nouvelle annonce</span>
+            </Link>
+            <Link href="/mes-biens" className="group bg-white border border-[var(--border)] p-6 rounded-card shadow-card hover:border-primary/40 transition-all flex flex-col items-center justify-center gap-3 text-center">
+              <div className="p-3 bg-primary/5 rounded-full group-hover:scale-110 transition-transform text-primary">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              </div>
+              <span className="font-display text-lg text-[var(--text)]">Mes annonces</span>
+            </Link>
+            <Link href="/messages" className="group bg-white border border-[var(--border)] p-6 rounded-card shadow-card hover:border-primary/40 transition-all flex flex-col items-center justify-center gap-3 text-center">
+              <div className="p-3 bg-primary/5 rounded-full group-hover:scale-110 transition-transform text-primary">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </div>
+              <span className="font-display text-lg text-[var(--text)]">Messages</span>
+            </Link>
+            <Link href="/profil" className="group bg-white border border-[var(--border)] p-6 rounded-card shadow-card hover:border-primary/40 transition-all flex flex-col items-center justify-center gap-3 text-center">
+              <div className="p-3 bg-primary/5 rounded-full group-hover:scale-110 transition-transform text-primary">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <span className="font-display text-lg text-[var(--text)]">Profil & KYC</span>
+            </Link>
+          </div>
+
           {/* Donut paiements DASH-04 */}
           <PaymentDonut data={paymentData} />
 

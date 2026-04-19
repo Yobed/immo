@@ -15,6 +15,7 @@ import { ConciergerieLive } from '@/components/chat/ConciergerieLive'
 import { VIPConciergeButton } from '@/components/bien/VIPConciergeButton'
 import { VirtualTourViewer } from '@/components/bien/VirtualTourViewer'
 import { BienMap } from '@/components/bien/BienMap'
+import { DeleteBienButton } from '@/components/bien/DeleteBienButton'
 import { 
   MapPin, 
   Maximize, 
@@ -528,6 +529,9 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                       <a href={`/mes-biens/${bien.id}/modifier?step=medias`} className="flex items-center justify-center w-full py-6 bg-off-white/5 border border-off-white/10 text-off-white rounded-2xl font-bold text-[11px] uppercase tracking-[0.5em] font-display hover:bg-off-white/10 hover:border-off-white transition-all duration-700">
                         Gestionnaire de Médias
                       </a>
+                      <div className="pt-4 border-t border-off-white/5">
+                        <DeleteBienButton bienId={bien.id} titre={bien.titre} />
+                      </div>
                     </div>
                   )}
                   

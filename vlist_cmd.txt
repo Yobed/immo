@@ -1,0 +1,25 @@
+Fetching deployments in yobed-1745s-projects
+> Deployments for yobed-1745s-projects/immo [398ms]
+
+  Age     Project                       Deployment                                                 Status      Environment     Duration     Username       
+  45m     yobed-1745s-projects/immo     https://immo-ax0bjwdw6-yobed-1745s-projects.vercel.app     ● Ready     Production      2m           yobed-1745     
+  3h      yobed-1745s-projects/immo     https://immo-q2y143poi-yobed-1745s-projects.vercel.app     ● Error     Production      2m           yobed-1745     
+  4h      yobed-1745s-projects/immo     https://immo-4bykfr1o6-yobed-1745s-projects.vercel.app     ● Error     Production      2m           yobed-1745     
+  4h      yobed-1745s-projects/immo     https://immo-dgx5qhpx8-yobed-1745s-projects.vercel.app     ● Error     Production      2m           yobed-1745     
+  5h      yobed-1745s-projects/immo     https://immo-fwdhd6ja3-yobed-1745s-projects.vercel.app     ● Error     Production      2m           yobed-1745     
+  5h      yobed-1745s-projects/immo     https://immo-kk8hjoijc-yobed-1745s-projects.vercel.app     ● Error     Production      37s          yobed-1745     
+  5h      yobed-1745s-projects/immo     https://immo-7ylcbavlg-yobed-1745s-projects.vercel.app     ● Error     Production      33s          yobed-1745     
+  5h      yobed-1745s-projects/immo     https://immo-pkiouc8a9-yobed-1745s-projects.vercel.app     ● Error     Production      2m           yobed-1745     
+  5h      yobed-1745s-projects/immo     https://immo-j4ghocsse-yobed-1745s-projects.vercel.app     ● Error     Production      2m           yobed-1745     
+  5h      yobed-1745s-projects/immo     https://immo-46mfobso7-yobed-1745s-projects.vercel.app     ● Error     Production      1m           yobed-1745     
+
+https://immo-ax0bjwdw6-yobed-1745s-projects.vercel.app
+https://immo-q2y143poi-yobed-1745s-projects.vercel.app
+https://immo-4bykfr1o6-yobed-1745s-projects.vercel.app
+https://immo-dgx5qhpx8-yobed-1745s-projects.vercel.app
+https://immo-fwdhd6ja3-yobed-1745s-projects.vercel.app
+https://immo-kk8hjoijc-yobed-1745s-projects.vercel.app
+https://immo-7ylcbavlg-yobed-1745s-projects.vercel.app
+https://immo-pkiouc8a9-yobed-1745s-projects.vercel.app
+https://immo-j4ghocsse-yobed-1745s-projects.vercel.app
+https://immo-46mfobso7-yobed-1745s-projects.vercel.app

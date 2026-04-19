@@ -8,8 +8,8 @@ type KYCStatut = 'non_verifie' | 'en_cours' | 'verifie'
 
 type Profile = {
   id: string
-  nom_complet: string | null
-  telephone: string | null
+  full_name: string | null
+  phone: string | null
   email: string | null
   kyc_statut: KYCStatut
   kyc_cni_url: string | null
@@ -24,7 +24,7 @@ export default async function ProfilPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: profile } = await (supabase as any)
     .from('profiles')
-    .select('id, nom_complet, telephone, email, kyc_statut, kyc_cni_url, kyc_selfie_url')
+    .select('id, full_name, phone, email, kyc_statut, kyc_cni_url, kyc_selfie_url')
     .eq('id', user.id)
     .single()
 
@@ -47,8 +47,8 @@ export default async function ProfilPage() {
               <p className="text-xs text-muted font-sans mt-0.5">L&apos;email ne peut pas être modifié ici.</p>
             </div>
             <ProfileEditForm
-              initialNom={p?.nom_complet ?? ''}
-              initialTelephone={p?.telephone ?? ''}
+              initialNom={p?.full_name ?? ''}
+              initialTelephone={p?.phone ?? ''}
               userId={user.id}
             />
           </div>
