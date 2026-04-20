@@ -8,6 +8,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useVoiceSearch } from '@/hooks/useVoiceSearch'
 import { cn } from '@/lib/utils'
 
+// Version: 1.0.3 (Force mobile visibility)
+// Cache-bust: 2026-04-20_14-00
+
 const ALL_SUGGESTIONS = [
   ...COMMUNES_CI.map((c) => ({ label: c, category: 'Commune', icon: MapPin })),
   ...QUARTIERS_PREMIUM.map((q) => ({ label: q, category: 'Quartier', icon: MapPin })),
@@ -92,10 +95,16 @@ export function SearchBar({
   }
 
   return (
-    <div ref={containerRef} className={`relative ${className}`}>
-      <form onSubmit={handleSubmit} className="group flex items-center gap-3 p-1.5 bg-[var(--midnight-muted)] rounded-[1.5rem] border border-[var(--border)] shadow-2xl shadow-black/40 focus-within:border-[var(--accent-luxury)]/50 transition-all duration-300">
-        <div className="relative flex-1 flex items-center gap-3 pl-4">
-          <Search className={`w-5 h-5 transition-colors duration-300 ${query ? 'text-[var(--accent-luxury)]' : 'text-[var(--text-muted)]'}`} />
+    <div ref={containerRef} className={cn("relative w-full", className)}>
+      <form 
+        onSubmit={handleSubmit} 
+        className="group flex items-center gap-2 p-1.5 bg-[var(--midnight-muted)] rounded-2xl border border-[var(--border)] shadow-2xl focus-within:border-[var(--accent-luxury)]/50 transition-all duration-300"
+      >
+        <div className="flex-1 flex items-center gap-2 pl-3">
+          <Search className={cn(
+            "w-5 h-5 shrink-0 transition-colors duration-300",
+            query ? "text-[var(--accent-luxury)]" : "text-[var(--text-muted)]"
+          )} />
           <input
             ref={inputRef}
             type="text"
@@ -103,48 +112,39 @@ export function SearchBar({
             onChange={(e) => { setQuery(e.target.value); setHighlighted(0); setOpen(true) }}
             onFocus={() => setOpen(true)}
             onKeyDown={handleKeyDown}
-            placeholder={placeholder}
+            placeholder={placeholder || "Rechercher (v1.0.3)..."}
             autoComplete="off"
-            className="w-full bg-transparent py-3 text-base md:text-lg font-display font-medium text-[var(--text)] placeholder:text-[var(--text-muted)] focus:outline-none"
+            className="w-full bg-transparent py-2.5 text-sm md:text-base font-sans text-[var(--text)] placeholder:text-[var(--text-muted)] focus:outline-none min-w-0"
           />
-          {query && (
-            <button 
-              type="button" 
-              onClick={() => { setQuery(''); inputRef.current?.focus() }}
-              className="p-1.5 hover:bg-[var(--midnight-light)] rounded-full text-[var(--text-muted)] transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
         </div>
-        
-        <div className="flex items-center gap-2 pr-1.5">
-          {isSupported && (
-            <button
-              type="button"
-              onClick={() => isListening ? stopListening() : startListening()}
-              className={cn(
-                "flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300",
-                isListening
-                  ? "bg-red-500/20 text-red-500 animate-pulse"
-                  : "text-[var(--text-muted)] hover:text-[var(--accent-luxury)] hover:bg-[var(--midnight-light)]"
-              )}
-              title="Recherche vocale"
-            >
-              {isListening ? <MicOff size={18} /> : <Mic size={18} />}
-            </button>
-          )}
-          
+
+        <div className="flex items-center gap-1.5 pr-1 shrink-0">
+          <button
+            type="button"
+            disabled={!isSupported}
+            onClick={() => isListening ? stopListening() : startListening()}
+            className={cn(
+              "flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300",
+              isListening
+                ? "bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.6)] animate-[mic-blink_1s_infinite]"
+                : "text-[var(--accent-luxury)] bg-[var(--accent-luxury)]/10 hover:bg-[var(--accent-luxury)]/20 border border-transparent hover:border-[var(--accent-luxury)]/20",
+              !isSupported && "opacity-30 cursor-not-allowed grayscale"
+            )}
+            title={isSupported ? "Recherche vocale" : "Recherche vocale non supportée par votre navigateur"}
+          >
+            {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+          </button>
+
           <button 
             type="submit" 
-            disabled={isPending || !query.trim()}
-            className="flex items-center gap-2 px-6 py-3.5 bg-[var(--accent-luxury)] text-white rounded-2xl font-display font-bold text-sm tracking-wide disabled:opacity-50 hover:opacity-90 hover:shadow-lg hover:shadow-[var(--accent-luxury)]/20 transition-all active:scale-95 translate-all duration-300"
+            disabled={isPending}
+            className="flex items-center gap-2 px-4 md:px-6 py-2.5 bg-[var(--accent-luxury)] text-[var(--on-accent)] rounded-xl font-sans font-bold text-[10px] md:text-xs uppercase tracking-[0.2em] disabled:opacity-50 hover:shadow-xl hover:shadow-[var(--accent-luxury)]/20 transition-all active:scale-95 duration-300"
           >
             {isPending ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
             ) : (
               <>
-                Découvrir
+                <span className="hidden sm:inline">Rechercher</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}

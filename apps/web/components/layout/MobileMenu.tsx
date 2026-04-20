@@ -13,10 +13,23 @@ interface NavLink {
 interface MobileMenuProps {
   links: NavLink[]
   ctaLinks?: { href: string; label: string; variant: 'primary' | 'outline' }[]
+  user?: { email: string; role: 'pro' | 'client' | 'public' }
 }
 
-export function MobileMenu({ links, ctaLinks }: MobileMenuProps) {
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+
+export function MobileMenu({ links, ctaLinks, user }: MobileMenuProps) {
   const [open, setOpen] = useState(false)
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    setOpen(false)
+    router.push('/')
+    router.refresh()
+  }
 
   return (
     <>
@@ -41,7 +54,7 @@ export function MobileMenu({ links, ctaLinks }: MobileMenuProps) {
 
       {/* Drawer */}
       <div className={cn(
-        'fixed top-0 right-0 bottom-0 z-[100] w-72 bg-[var(--surface-card)] shadow-2xl flex flex-col transition-transform duration-300 md:hidden',
+        'fixed top-0 right-0 bottom-0 z-[100] w-72 bg-[var(--background)] shadow-2xl flex flex-col transition-transform duration-300 md:hidden',
         open ? 'translate-x-0' : 'translate-x-full'
       )}>
         {/* Header */}
@@ -70,26 +83,62 @@ export function MobileMenu({ links, ctaLinks }: MobileMenuProps) {
           ))}
         </nav>
 
-        {/* CTA buttons */}
-        {ctaLinks && ctaLinks.length > 0 && (
-          <div className="px-4 py-4 border-t border-[var(--border)] space-y-2">
-            {ctaLinks.map((cta) => (
-              <Link
-                key={cta.href}
-                href={cta.href}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  'block w-full text-center py-3 rounded-btn text-sm font-sans font-medium transition-colors',
-                  cta.variant === 'primary'
-                    ? 'bg-primary text-white hover:bg-primary/90'
-                    : 'border border-[var(--border)] text-[var(--text)] hover:border-primary/40'
-                )}
+        {/* CTA buttons / User info */}
+        <div className="border-t border-[var(--border)] p-4 space-y-4 bg-[var(--surface-card)] mt-auto">
+          {user ? (
+            <div className="space-y-4">
+              <div className="flex flex-col gap-1">
+                <span className="text-xs text-[var(--text-muted)] font-sans">Connecté en tant que</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-sans font-semibold text-[var(--text)] truncate max-w-[180px]">
+                    {user.email}
+                  </span>
+                  {user.role === 'pro' && (
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-secondary bg-secondary/10 px-2 py-0.5 rounded-full border border-secondary/20">
+                      Pro
+                    </span>
+                  )}
+                  {user.role === 'client' && (
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                      Locataire
+                    </span>
+                  )}
+                  {user.role === 'public' && (
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-green-500 bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/20">
+                      Visiteur
+                    </span>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="w-full border border-[var(--danger)] text-[var(--danger)] hover:bg-[var(--danger)] hover:text-white transition-colors block text-center py-2.5 rounded-btn text-sm font-sans font-medium"
               >
-                {cta.label}
-              </Link>
-            ))}
-          </div>
-        )}
+                Se déconnecter
+              </button>
+            </div>
+          ) : (
+            ctaLinks && ctaLinks.length > 0 && (
+              <div className="space-y-2">
+                {ctaLinks.map((cta) => (
+                  <Link
+                    key={cta.href}
+                    href={cta.href}
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      'block w-full text-center py-3 rounded-btn text-sm font-sans font-medium transition-colors',
+                      cta.variant === 'primary'
+                        ? 'bg-primary text-white hover:bg-primary/90'
+                        : 'border border-[var(--border)] text-[var(--text)] hover:border-primary/40'
+                    )}
+                  >
+                    {cta.label}
+                  </Link>
+                ))}
+              </div>
+            )
+          )}
+        </div>
       </div>
     </>
   )

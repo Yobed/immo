@@ -10,8 +10,10 @@ import {
 } from '@immo-ci/shared/constants/biens'
 import { cn } from '@/lib/utils'
 import { useVoiceSearch } from '@/hooks/useVoiceSearch'
-import { Mic, MicOff, Loader2 } from 'lucide-react'
+import { Mic, MicOff, Loader2, Search } from 'lucide-react'
 import { useEffect } from 'react'
+
+// Cache-bust: 2026-04-20T13:42:00Z
 
 /* ── Icônes SVG inline ── */
 const IconLocation = () => (
@@ -138,6 +140,7 @@ export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
+  const [query, setQuery] = useState(searchParams.get('q') ?? '')
   const [commune, setCommune] = useState(searchParams.get('commune') ?? '')
   const [prixMin, setPrixMin] = useState(searchParams.get('prix_min') ?? '')
   const [prixMax, setPrixMax] = useState(searchParams.get('prix_max') ?? '')
@@ -152,6 +155,9 @@ export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
     if (transcript) {
       const lower = transcript.toLowerCase()
       
+      // Update the main query
+      setQuery(transcript)
+
       // 1. Extract Price (Numbers > 1000)
       const priceMatch = lower.match(/\d+[\s\d]*/g)
       if (priceMatch) {
@@ -189,6 +195,7 @@ export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
   const applyFilters = useCallback(() => {
     const params = new URLSearchParams(searchParams.toString())
     params.set('page', '0')
+    if (query) params.set('q', query); else params.delete('q')
     if (commune) params.set('commune', commune); else params.delete('commune')
     if (prixMin) params.set('prix_min', prixMin); else params.delete('prix_min')
     if (prixMax) params.set('prix_max', prixMax); else params.delete('prix_max')
@@ -225,22 +232,22 @@ export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
         </div>
         
         <div className="flex items-center gap-3">
-          {/* Voice Search Button */}
-          {isSupported && (
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => isListening ? stopListening() : startListening()}
-                className={cn(
-                  "flex items-center justify-center w-8 h-8 rounded-lg border transition-all duration-300",
-                  isListening 
-                    ? "bg-red-500/20 border-red-500 text-red-500 animate-pulse" 
-                    : "bg-[var(--midnight-light)] border-[var(--border)] text-[var(--accent-luxury)] hover:border-[var(--accent-luxury)]"
-                )}
-                title="Filtrer par la voix"
-              >
-                {isListening ? <MicOff size={14} /> : <Mic size={14} />}
-              </button>
+          <div className="relative">
+            <button
+              type="button"
+              disabled={!isSupported}
+              onClick={() => isListening ? stopListening() : startListening()}
+              className={cn(
+                "flex items-center justify-center w-8 h-8 rounded-lg border transition-all duration-300",
+                isListening 
+                  ? "bg-red-500/20 border-red-500 text-red-500 animate-pulse" 
+                  : "bg-[var(--midnight-light)] border-[var(--border)] text-[var(--accent-luxury)] hover:border-[var(--accent-luxury)]",
+                !isSupported && "opacity-30 cursor-not-allowed grayscale"
+              )}
+              title={isSupported ? "Filtrer par la voix" : "Non supporté"}
+            >
+              {isListening ? <MicOff size={14} /> : <Mic size={14} />}
+            </button>
 
               {/* Listening Wave Interface Overlay */}
               {isListening && (
@@ -271,7 +278,6 @@ export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
                 </div>
               )}
             </div>
-          )}
 
           {hasActiveFilters && (
             <button onClick={clearFilters}
@@ -284,6 +290,39 @@ export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
       </div>
 
       {/* ── Sections accordéon ── */}
+      
+      {/* Recherche textuelle */}
+      <div className="px-5 py-4 border-b border-[var(--border)]">
+        <label className="block text-xs text-[var(--text-muted)] font-sans mb-1.5 uppercase tracking-widest font-bold">Recherche</label>
+        <div className="relative group flex items-center gap-2">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Mots-clés (ex: avec piscine...)"
+              className="w-full pl-10 pr-4 py-2.5 text-sm font-sans border border-[var(--border)] rounded-xl bg-[var(--surface)] text-[var(--text)] placeholder:text-[var(--text-subtle)] focus:border-[var(--accent-luxury)]/50 transition-all outline-none"
+            />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] group-focus-within:text-[var(--accent-luxury)] transition-colors" />
+          </div>
+          
+          <button
+            type="button"
+            disabled={!isSupported}
+            onClick={() => isListening ? stopListening() : startListening()}
+            className={cn(
+              "flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-300 shrink-0 border",
+              isListening
+                ? "bg-red-500 border-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.5)] animate-[mic-blink_1s_infinite]"
+                : "bg-[var(--midnight-light)] border-[var(--border)] text-[var(--accent-luxury)] hover:border-[var(--accent-luxury)]",
+              !isSupported && "opacity-30 cursor-not-allowed grayscale"
+            )}
+            title={isSupported ? "Recherche vocale" : "Non supporté"}
+          >
+            {isListening ? <MicOff size={14} /> : <Mic size={14} />}
+          </button>
+        </div>
+      </div>
 
       {/* Localisation */}
       <FilterSection icon={<IconLocation />} label="Localisation" badge={locBadge}>

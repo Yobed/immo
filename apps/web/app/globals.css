@@ -800,6 +800,11 @@ main {
    Sophisticated audio visualizers for the search overlay.
 ══════════════════════════════════════════════════════ */
 
+@keyframes mic-blink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.15); box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); }
+}
+
 @keyframes quiet {
   0%, 100% { height: 10%; opacity: 0.3; }
   50% { height: 40%; opacity: 0.6; }

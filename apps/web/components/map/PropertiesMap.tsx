@@ -378,7 +378,7 @@ export function PropertiesMap({
 
               {/* 1. Image Header - Adjusted for mobile to avoid hiding the route */}
               {/* 1. Header with Image (Desktop Only) */}
-              <div className="hidden sm:block h-44 w-full relative">
+              <div className="hidden lg:block h-44 w-full relative">
                 {bien.photo_url ? (
                   <img 
                     src={bien.photo_url} 

@@ -90,7 +90,7 @@ export function BienCard({
             transition-shadow duration-300 hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)]"
         >
           {/* ── Photo ── */}
-          <div className="relative aspect-[4/3] bg-[var(--midnight-muted)] overflow-hidden m-2 rounded-[1.7rem]">
+          <div className="relative aspect-[3/2] md:aspect-[4/3] bg-[var(--midnight-muted)] overflow-hidden m-2 rounded-[1.7rem]">
 
             {photo_url ? (
               <Image

@@ -7,16 +7,22 @@ export function useVoiceSearch() {
   const [error, setError] = useState<string | null>(null)
   const recognitionRef = useRef<any>(null)
 
+  const [isSupported, setIsSupported] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
+
   useEffect(() => {
-    // Check for global browser support
+    setIsMounted(true)
     const SpeechRecognition = 
       (window as any).SpeechRecognition || 
       (window as any).webkitSpeechRecognition
+
     if (!SpeechRecognition) {
       setError('RECOGNITION_NOT_SUPPORTED')
+      setIsSupported(false)
       return
     }
 
+    setIsSupported(true)
     const recognition = new SpeechRecognition()
     recognition.lang = 'fr-FR'
     recognition.interimResults = false
@@ -60,6 +66,6 @@ export function useVoiceSearch() {
     error,
     startListening,
     stopListening,
-    isSupported: !!recognitionRef.current
+    isSupported: isMounted && isSupported
   }
 }

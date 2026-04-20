@@ -5,6 +5,7 @@ import { MobileMenu } from '@/components/layout/MobileMenu'
 import { UserMenu } from '@/components/auth/UserMenu'
 
 const navLinks = [
+  { href: '/recherche', label: 'Rechercher' },
   { href: '/mes-biens', label: 'Mes annonces' },
   { href: '/visites', label: 'Visites' },
   { href: '/quittances', label: 'Quittances' },
@@ -79,7 +80,7 @@ export default async function ProLayout({ children }: { children: React.ReactNod
 
             {user && <NotificationBell userId={user.id} initialUnreadCount={unreadCount} />}
             {user && <UserMenu email={user.email ?? ''} role={role} />}
-            <MobileMenu links={navLinks} ctaLinks={[{ href: '/mes-biens/nouveau', label: '+ Nouvelle annonce', variant: 'primary' }]} />
+            <MobileMenu links={navLinks} ctaLinks={[{ href: '/mes-biens/nouveau', label: '+ Nouvelle annonce', variant: 'primary' }]} user={user ? { email: user.email ?? '', role } : undefined} />
           </div>
         </div>
       </header>

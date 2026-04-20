@@ -147,12 +147,12 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
         })}
 
         {/* Overlays cinématiques — stables, jamais rechargés */}
-        <div className="absolute inset-0 bg-[var(--background)]/35" />
+        <div className="absolute inset-0 bg-black/50" />
         <div
-          className="absolute inset-0 bg-gradient-to-t from-[var(--background)] via-transparent to-transparent"
+          className="absolute inset-0 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/50 to-transparent"
         />
         <div
-          className="absolute inset-x-0 top-0 h-full bg-gradient-to-r from-[var(--background)]/60 to-transparent"
+          className="absolute inset-x-0 top-0 h-full bg-gradient-to-r from-[var(--background)]/80 via-[var(--background)]/40 to-transparent"
         />
       </motion.div>
 
@@ -179,7 +179,7 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.2, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="font-display font-bold leading-tight mb-6 text-[var(--text)]"
+            className="font-display font-bold leading-tight mb-6 text-white"
             style={{ fontSize: 'clamp(2.4rem, 6vw, 5.5rem)' }}
           >
             Résidences Meublées<br />
@@ -190,7 +190,7 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
             initial={{ opacity: 0, x: -15 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="font-sans text-lg text-[var(--text-muted)] mb-10 leading-relaxed max-w-md"
+            className="font-sans text-lg text-zinc-300 mb-10 leading-relaxed max-w-md"
           >
             Découvrez notre sélection exclusive de résidences meublées et appartements de luxe à Abidjan.<br />
             Vivez l&apos;expérience du haut standing avec service premium inclus.
@@ -220,7 +220,7 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
               <Link
                 key={t.label}
                 href={t.href}
-                className="text-[10px] font-sans font-bold text-[var(--text-muted)] hover:text-[var(--accent-luxury)] uppercase tracking-[0.3em] transition-all duration-500 hover:tracking-[0.4em]"
+                className="text-[10px] font-sans font-bold text-zinc-300 hover:text-[var(--accent-luxury)] uppercase tracking-[0.3em] transition-all duration-500 hover:tracking-[0.4em]"
               >
                 {t.label}
               </Link>
@@ -254,17 +254,17 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
                 <span className="block text-[9px] font-bold text-[var(--accent-luxury)] uppercase tracking-[0.4em] mb-3">
                   La Collection du jour
                 </span>
-                <h3 className="text-3xl font-display font-light text-[var(--text)] mb-2 tracking-tighter leading-tight">
+                <h3 className="text-3xl font-display font-light text-white mb-2 tracking-tighter leading-tight">
                   {currentItem.titre}
                 </h3>
-                <p className="text-[11px] font-sans text-[var(--text-muted)] mb-8 uppercase tracking-[0.2em] font-medium border-l border-[var(--accent-luxury)]/30 pl-4">
+                <p className="text-[11px] font-sans text-zinc-300 mb-8 uppercase tracking-[0.2em] font-medium border-l border-[var(--accent-luxury)]/30 pl-4">
                   {currentItem.prix ? (
                     <>{currentItem.prix.value} FCFA{currentItem.prix.suffix}</>
                   ) : 'Prix Privé'}
                 </p>
                 <Link 
                   href={activeShowcase ? `/biens/${currentItem.id}` : '/biens'}
-                  className="inline-flex items-center gap-5 text-[10px] font-bold text-[var(--text)] border-b border-[var(--border)] pb-2 hover:border-[var(--accent-luxury)] transition-all uppercase tracking-[0.3em] group"
+                  className="inline-flex items-center gap-5 text-[10px] font-bold text-white border-b border-zinc-700 pb-2 hover:border-[var(--accent-luxury)] transition-all uppercase tracking-[0.3em] group"
                 >
                   Visionner le dossier
                   <motion.span 
@@ -282,7 +282,7 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1.2, delay: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute -right-8 top-16 p-10 bg-[var(--text)] text-[var(--background)] shadow-[0_25px_50px_rgba(0,0,0,0.2)] hidden xl:block"
+            className="absolute -right-8 top-16 p-10 bg-white text-black shadow-[0_25px_50px_rgba(0,0,0,0.2)] hidden xl:block"
           >
             <p className="font-serif italic text-3xl mb-2 leading-none">Elite</p>
             <p className="font-sans font-bold text-[9px] uppercase tracking-[0.4em] opacity-50">
@@ -299,8 +299,8 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
         transition={{ delay: 2.5, duration: 1 }}
         className="absolute bottom-10 left-10 flex items-center gap-8"
       >
-        <div className="w-16 h-px bg-[var(--border)]" />
-        <span className="font-sans text-[9px] text-[var(--text-muted)] uppercase tracking-[0.6em] font-bold">Défiler</span>
+        <div className="w-16 h-px bg-zinc-700" />
+        <span className="font-sans text-[9px] text-zinc-400 uppercase tracking-[0.6em] font-bold">Défiler</span>
       </motion.div>
     </section>
   )

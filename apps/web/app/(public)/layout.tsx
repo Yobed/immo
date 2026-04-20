@@ -8,6 +8,8 @@ import { ThemeToggle } from '@/components/layout/ThemeToggle'
 
 import { ConciergerieLive } from '@/components/chat/ConciergerieLive'
 
+// Cache-bust: 2026-04-20T13:42:00Z
+
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -35,6 +37,7 @@ export default async function PublicLayout({ children }: { children: React.React
   // Si c'est un propriétaire, on lui affiche son menu complet pour ne pas qu'il soit "perdu"
   if (role === 'pro') {
     navLinks = [
+      { href: '/recherche', label: 'Rechercher' },
       { href: '/dashboard', label: 'Tableau de bord' },
       { href: '/mes-biens', label: 'Mes annonces' },
       { href: '/visites', label: 'Visites' },
@@ -77,9 +80,9 @@ export default async function PublicLayout({ children }: { children: React.React
             </Link>
           </MagneticWrapper>
 
-          {/* Search bar — desktop */}
-          <div className="hidden md:block flex-1 max-w-md">
-            <SearchBar placeholder="Commune, quartier, type de bien..." />
+          {/* Search bar — always visible */}
+          <div className="flex-1 max-w-md">
+            <SearchBar placeholder="Rechercher (v1.0.4)..." />
           </div>
 
           {/* Nav desktop */}
@@ -133,7 +136,7 @@ export default async function PublicLayout({ children }: { children: React.React
           </nav>
 
           {/* Mobile menu */}
-          <MobileMenu links={navLinks} ctaLinks={ctaLinks} />
+          <MobileMenu links={navLinks} ctaLinks={ctaLinks} user={user ? { email: user.email ?? '', role } : undefined} />
         </div>
       </header>
 

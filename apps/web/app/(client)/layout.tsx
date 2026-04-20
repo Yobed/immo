@@ -5,6 +5,7 @@ import { MobileMenu } from '@/components/layout/MobileMenu'
 import { UserMenu } from '@/components/auth/UserMenu'
 
 const navLinks = [
+  { href: '/recherche', label: 'Rechercher' },
   { href: '/biens', label: 'Annonces' },
   { href: '/favoris', label: 'Favoris' },
   { href: '/mes-visites', label: 'Mes visites' },
@@ -66,7 +67,7 @@ export default async function ClientLayout({ children }: { children: React.React
           <div className="flex items-center gap-2">
             {user && <NotificationBell userId={user.id} initialUnreadCount={unreadCount} />}
             {user && <UserMenu email={user.email ?? ''} role={role} />}
-            <MobileMenu links={navLinks} />
+            <MobileMenu links={navLinks} user={user ? { email: user.email ?? '', role } : undefined} />
           </div>
         </div>
       </header>
