@@ -1,20 +1,33 @@
 'use client'
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Maximize2, Minimize2, ChevronDown } from 'lucide-react'
+import { Maximize2, Minimize2, ChevronDown, View } from 'lucide-react'
 
-export function PropertyHeroOverlay() {
+interface PropertyHeroOverlayProps {
+  urlVisite3d?: string | null;
+}
+
+export function PropertyHeroOverlay({ urlVisite3d }: PropertyHeroOverlayProps) {
   const [isFocused, setIsFocused] = useState(false)
 
-  // Inject focus state into body or a global state could be better, 
-  // but for now we'll just handle local visibility of this component's parent's siblings if needed.
-  // Actually, we'll just expose isFocused if we were using it elsewhere, but the user wants 
-  // 'permanent text' GONE from images. 
-  
   return (
     <div className="absolute inset-0 z-20 flex flex-col justify-between p-8 pointer-events-none">
       {/* Top controls */}
-      <div className="flex justify-end pointer-events-auto">
+      <div className="flex justify-between items-start pointer-events-auto w-full">
+        <div className="flex gap-4">
+          {urlVisite3d && (
+            <motion.a
+              href="#visite-3d"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-3 px-6 py-4 bg-secondary/80 backdrop-blur-3xl rounded-2xl border border-white/20 text-white shadow-2xl transition-all hover:bg-secondary"
+            >
+              <View size={18} className="text-white" />
+              <span className="text-[10px] uppercase font-bold tracking-widest text-white/90">Visite Virtuelle</span>
+            </motion.a>
+          )}
+        </div>
+
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}

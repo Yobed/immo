@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 
-type BadgeVariant = 'default' | 'success' | 'warning' | 'danger' | 'info' | 'photo' | 'video' | 'vue360' | 'plan'
+type BadgeVariant = 'default' | 'success' | 'warning' | 'danger' | 'info' | 'photo' | 'video' | 'vue360' | 'plan' | 'luxury' | 'premium' | 'exclusive'
 
 interface BadgeProps {
   variant?: BadgeVariant
@@ -18,6 +18,9 @@ const variants: Record<BadgeVariant, string> = {
   video:    'bg-secondary-light text-secondary',
   vue360:   'bg-purple-100 text-purple-700',
   plan:     'bg-primary-light text-primary',
+  luxury:   'bg-accent-luxury/10 text-accent-luxury border border-accent-luxury/20',
+  premium:  'bg-secondary/40 text-off-white border border-white/10 backdrop-blur-md',
+  exclusive: 'bg-black text-accent-luxury border border-accent-luxury/30 shadow-[0_0_15px_rgba(234,179,8,0.15)]',
 }
 
 export function Badge({ variant = 'default', children, className }: BadgeProps) {

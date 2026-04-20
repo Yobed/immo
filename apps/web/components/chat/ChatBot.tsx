@@ -95,10 +95,10 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
             <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-[var(--midnight)] shadow-lg" />
           </div>
           <div>
-            <h3 className="text-[var(--text)] font-display font-bold text-base tracking-tight">Élite Immo CI</h3>
+            <h3 className="text-[var(--text)] font-display font-bold text-base tracking-tight">Sapphire Intelligence</h3>
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-secondary" />
-              <p className="text-[9px] uppercase font-bold tracking-[0.2em] text-[var(--text)]/40">Conseiller Dédié en Ligne</p>
+              <p className="text-[9px] uppercase font-bold tracking-[0.2em] text-[var(--text)]/40">Majordome Digital & Concierge</p>
             </div>
           </div>
         </div>
@@ -131,10 +131,10 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
             </div>
             <div>
               <p className="text-xl font-display font-light text-[var(--text)] mb-2 italic">
-                Bienvenue dans votre espace privilégié.
+                Bienvenue dans votre résidence digitale, Excellence.
               </p>
               <p className="text-sm text-[var(--text)]/40 max-w-[280px] leading-relaxed mx-auto uppercase tracking-widest text-[10px] font-bold">
-                Comment puis-je satisfaire votre recherche d&apos;exception ?
+                Je suis Sapphire Intelligence. Comment puis-je sublimer votre recherche immobilière aujourd'hui ?
               </p>
             </div>
             <div className="grid grid-cols-1 gap-3 w-full max-w-[320px]">

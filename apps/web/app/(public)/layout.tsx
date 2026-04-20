@@ -30,6 +30,7 @@ export default async function PublicLayout({ children }: { children: React.React
   // Navigation de base
   let navLinks = [
     { href: '/biens', label: 'Annonces' },
+    { href: '/services', label: 'Services' },
     { href: '/recherche', label: 'Rechercher' },
     { href: '/recherche?type_bien=residence_meublee', label: 'Résidences meublées' },
   ]

@@ -68,10 +68,20 @@ export function SearchBar({
     }
   }, [transcript])
 
-  const navigate = (q: string) => {
+  const navigate = (textQuery: string) => {
     startTransition(() => {
-      router.push(`/recherche?q=${encodeURIComponent(q.trim())}`)
-      setOpen(false)
+      import('@/lib/searchParser').then(({ parseSearchQuery }) => {
+        const p = parseSearchQuery(textQuery)
+        const search = new URLSearchParams()
+        if (p.q) search.set('q', p.q)
+        if (p.commune) search.set('commune', p.commune)
+        if (p.type_bien) search.set('type_bien', p.type_bien)
+        if (p.equipements && p.equipements.length > 0) search.set('equipements', p.equipements.join(','))
+        if (p.prix_max) search.set('prix_max', p.prix_max)
+        
+        router.push(`/recherche?${search.toString()}`)
+        setOpen(false)
+      })
     })
   }
 

@@ -22,37 +22,17 @@ export function SmartFilter({ onFilterChange }: SmartFilterProps) {
   // ── Intelligent Voice Command Parser ──────────────────────────────────────
   useEffect(() => {
     if (transcript) {
-      const lower = transcript.toLowerCase()
-      let newPrix = prixMax
-      let newCommune = commune
-      let newType = typeBien
-
-      // 1. Extract Price (Numbers > 1000)
-      const priceMatch = lower.match(/\d+[\s\d]*/g)
-      if (priceMatch) {
-        const val = parseInt(priceMatch[0].replace(/\s/g, ''))
-        if (val >= 1000) newPrix = val.toString()
-      }
-
-      // 2. Extract Location (Keywords)
-      const locations = ['cocody', 'marcory', 'riviera', 'bassam', 'assam', 'plateau', 'treichville', 'yopougon', 'abobo', 'assinie']
-      for (const loc of locations) {
-        if (lower.includes(loc)) {
-          newCommune = loc.charAt(0).toUpperCase() + loc.slice(1)
-          break
-        }
-      }
-
-      // 3. Extract Type
-      if (lower.includes('villa')) newType = 'villa'
-      else if (lower.includes('appartement')) newType = 'appartement'
-      else if (lower.includes('studio')) newType = 'studio'
-      else if (lower.includes('meubl')) newType = 'residence_meublee'
-
-      setPrixMax(newPrix)
-      setCommune(newCommune)
-      setTypeBien(newType)
-      onFilterChange({ prixMax: newPrix, commune: newCommune, typeBien: newType })
+      import('@/lib/searchParser').then(({ parseSearchQuery }) => {
+        const p = parseSearchQuery(transcript)
+        const newPrix = p.prix_max || prixMax
+        const newCommune = p.commune || commune
+        const newType = p.type_bien || typeBien
+        
+        setPrixMax(newPrix)
+        setCommune(newCommune)
+        setTypeBien(newType)
+        onFilterChange({ prixMax: newPrix, commune: newCommune, typeBien: newType })
+      })
     }
   }, [transcript])
 
