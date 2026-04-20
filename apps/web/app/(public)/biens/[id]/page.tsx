@@ -342,7 +342,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       {vue360Medias.map((media: any, i: number) => (
                         <div key={media.id} className="group relative aspect-video bg-black rounded-[2.5rem] overflow-hidden border border-off-white/5">
-                          <Bien360 image_url={media.url} />
+                          <Bien360 panoramaUrl={media.url} />
                           <div className="absolute top-6 left-6 z-10 px-4 py-2 bg-midnight/80 backdrop-blur-md rounded-full border border-off-white/10 opacity-100 group-hover:opacity-0 transition-opacity">
                             <span className="text-[10px] font-bold text-off-white uppercase tracking-widest flex items-center gap-2">
                               <Eye className="w-3 h-3 text-[var(--accent-luxury)]" />
