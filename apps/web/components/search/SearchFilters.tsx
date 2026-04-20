@@ -9,6 +9,9 @@ import {
   EQUIPEMENTS_LABELS,
 } from '@immo-ci/shared/constants/biens'
 import { cn } from '@/lib/utils'
+import { useVoiceSearch } from '@/hooks/useVoiceSearch'
+import { Mic, MicOff, Loader2 } from 'lucide-react'
+import { useEffect } from 'react'
 
 /* ── Icônes SVG inline ── */
 const IconLocation = () => (
@@ -142,6 +145,43 @@ export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
   const [equipements, setEquipements] = useState<string[]>(
     searchParams.get('equipements')?.split(',').filter(Boolean) ?? []
   )
+  const { isListening, transcript, startListening, stopListening, isSupported } = useVoiceSearch()
+
+  // ── Intelligent Voice Command Parser ──────────────────────────────────────
+  useEffect(() => {
+    if (transcript) {
+      const lower = transcript.toLowerCase()
+      
+      // 1. Extract Price (Numbers > 1000)
+      const priceMatch = lower.match(/\d+[\s\d]*/g)
+      if (priceMatch) {
+        const val = parseInt(priceMatch[0].replace(/\s/g, ''))
+        if (val >= 1000) {
+          // If it sounds like a max price "moins de X" or just a number
+          setPrixMax(val.toString())
+        }
+      }
+
+      // 2. Extract Location (Keywords)
+      const locations = ['cocody', 'marcory', 'riviera', 'bassam', 'plateau', 'treichville', 'yopougon', 'abobo', 'assinie', 'bingerville', 'koumassi']
+      for (const loc of locations) {
+        if (lower.includes(loc)) {
+          setCommune(loc.charAt(0).toUpperCase() + loc.slice(1))
+          break
+        }
+      }
+
+      // 3. Extract Type
+      if (lower.includes('villa')) setTypeBien('villa')
+      else if (lower.includes('appartement')) setTypeBien('appartement')
+      else if (lower.includes('studio')) setTypeBien('studio')
+      else if (lower.includes('meubl')) setTypeBien('residence_meublee')
+      else if (lower.includes('maison')) setTypeBien('maison')
+      else if (lower.includes('bureau')) setTypeBien('bureau')
+      else if (lower.includes('commerce') || lower.includes('magasin')) setTypeBien('commerce')
+      else if (lower.includes('terrain')) setTypeBien('terrain')
+    }
+  }, [transcript])
 
   const toggleEquipement = (eq: string) =>
     setEquipements(prev => prev.includes(eq) ? prev.filter(e => e !== eq) : [...prev, eq])
@@ -183,13 +223,64 @@ export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
           </svg>
           <span className="font-sans font-semibold text-sm text-[var(--text)]">Filtres</span>
         </div>
-        {hasActiveFilters && (
-          <button onClick={clearFilters}
-            className="flex items-center gap-1 text-xs text-[var(--danger)] hover:text-[var(--danger)]/80 font-sans font-medium transition-colors duration-150">
-            <IconClose />
-            Effacer tout
-          </button>
-        )}
+        
+        <div className="flex items-center gap-3">
+          {/* Voice Search Button */}
+          {isSupported && (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => isListening ? stopListening() : startListening()}
+                className={cn(
+                  "flex items-center justify-center w-8 h-8 rounded-lg border transition-all duration-300",
+                  isListening 
+                    ? "bg-red-500/20 border-red-500 text-red-500 animate-pulse" 
+                    : "bg-[var(--midnight-light)] border-[var(--border)] text-[var(--accent-luxury)] hover:border-[var(--accent-luxury)]"
+                )}
+                title="Filtrer par la voix"
+              >
+                {isListening ? <MicOff size={14} /> : <Mic size={14} />}
+              </button>
+
+              {/* Listening Wave Interface Overlay */}
+              {isListening && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md pointer-events-none">
+                  <div className="bg-[#0a0a18]/95 border border-[var(--accent-luxury)]/30 p-10 rounded-[2.5rem] flex flex-col items-center gap-8 shadow-[0_0_120px_rgba(212,175,55,0.15)]">
+                    <div className="flex gap-2 h-16 items-center">
+                      {[1,2,3,4,5,6,5,4,3,2].map((h, i) => (
+                        <div 
+                          key={i} 
+                          className="w-2 bg-[var(--accent-luxury)] rounded-full shadow-[0_0_15px_rgba(212,175,55,0.5)]"
+                          style={{ 
+                            height: '25%',
+                            animation: `quiet 0.8s ease-in-out infinite h-${h}`,
+                            animationDelay: `${i * 0.05}s`
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[var(--accent-luxury)] text-sm font-bold uppercase tracking-[0.2em] mb-2 animate-pulse">
+                        À votre écoute...
+                      </p>
+                      <p className="text-[var(--text-muted)] text-xs font-sans italic">
+                        Dites par exemple : "Villa à Cocody moins de 500 000"
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {hasActiveFilters && (
+            <button onClick={clearFilters}
+              className="flex items-center gap-1 text-xs text-[var(--danger)] hover:text-[var(--danger)]/80 font-sans font-medium transition-colors duration-150">
+              <IconClose />
+              Effacer tout
+            </button>
+          )}
+        </div>
       </div>
 
       {/* ── Sections accordéon ── */}

@@ -261,28 +261,28 @@ export function PropertiesMap({
         onLoad={() => setIsMapLoaded(true)}
         onClick={() => { setSelectedId(null); onSelect?.(null) }}
       >
-        {/* ── Luxury Gold itinerary route ── */}
+        {/* ── Vibrancy Blue itinerary route ── */}
         {routeGeometry && (
           <Source id="route" type="geojson" data={{ type: 'Feature', properties: {}, geometry: routeGeometry }}>
             {/* Ultra Glow */}
             <Layer id="route-glow-outer" type="line"
               layout={{ 'line-join': 'round', 'line-cap': 'round' }}
-              paint={{ 'line-color': '#D4AF37', 'line-width': 26, 'line-opacity': 0.2, 'line-blur': 12 }}
+              paint={{ 'line-color': '#3b82f6', 'line-width': 26, 'line-opacity': 0.2, 'line-blur': 12 }}
             />
             {/* Inner Neon Glow */}
             <Layer id="route-glow-inner" type="line"
               layout={{ 'line-join': 'round', 'line-cap': 'round' }}
-              paint={{ 'line-color': '#E5C158', 'line-width': 10, 'line-opacity': 0.4, 'line-blur': 3 }}
+              paint={{ 'line-color': '#60a5fa', 'line-width': 10, 'line-opacity': 0.5, 'line-blur': 3 }}
             />
             {/* Solid Core */}
             <Layer id="route-core" type="line"
               layout={{ 'line-join': 'round', 'line-cap': 'round' }}
-              paint={{ 'line-color': '#D4AF37', 'line-width': 6, 'line-opacity': 1 }}
+              paint={{ 'line-color': '#0055ff', 'line-width': 6, 'line-opacity': 1 }}
             />
-            {/* Precise White Line */}
+            {/* Precise Center Line */}
             <Layer id="route-center" type="line"
               layout={{ 'line-join': 'round', 'line-cap': 'round' }}
-              paint={{ 'line-color': '#ffffff', 'line-width': 2, 'line-opacity': 0.7 }}
+              paint={{ 'line-color': '#ffffff', 'line-width': 2, 'line-opacity': 0.8 }}
             />
           </Source>
         )}
@@ -342,137 +342,115 @@ export function PropertiesMap({
       </Map>
 
       {/* ── Stats overlay (Top Left) ── */}
-      <div className="absolute top-4 left-4 z-10 flex flex-col gap-2.5">
-        <div style={{
-          padding: '8px 16px',
-          background: 'rgba(0,0,0,0.85)',
-          backdropFilter: 'blur(12px)',
-          borderRadius: 14,
-          border: '1px solid rgba(212,175,55,0.4)',
-          display: 'flex', alignItems: 'center', gap: 10,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
-        }}>
-          <div className="user-dot" style={{ width: 10, height: 10, border: '2px solid #fff' }} />
+      <div className="absolute top-4 left-4 z-10 flex flex-row sm:flex-col gap-2 sm:gap-2.5 max-w-[calc(100%-2rem)] overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-2.5 px-3 sm:px-4 py-2 sm:py-2 bg-black/85 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-[rgba(212,175,55,0.4)] shadow-2xl whitespace-nowrap">
+          <div className="user-dot shrink-0" style={{ width: 10, height: 10, border: '2px solid #fff' }} />
           <div className="flex flex-col">
-            <span style={{ color: '#fff', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-white leading-tight">
               Ma position
             </span>
-            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 8, fontWeight: 600 }}>GPS Actif · 10 km</span>
+            <span className="text-[8px] font-semibold text-white/50 leading-tight">GPS Actif</span>
           </div>
         </div>
 
         {markers.length > 0 && (
-          <div style={{
-            padding: '8px 16px',
-            background: 'rgba(0,0,0,0.85)',
-            backdropFilter: 'blur(12px)',
-            borderRadius: 14,
-            border: '1px solid rgba(255,255,255,0.1)',
-            display: 'flex', alignItems: 'center', gap: 10,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
-          }}>
-            <span style={{ width: 10, height: 10, background: '#D4AF37', borderRadius: '50%', display: 'inline-block' }} />
+          <div className="flex items-center gap-2.5 px-3 sm:px-4 py-2 sm:py-2 bg-black/85 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-white/10 shadow-2xl whitespace-nowrap">
+            <span className="w-2.5 h-2.5 bg-[#D4AF37] rounded-full shrink-0" />
             <div className="flex flex-col">
-              <span style={{ color: '#fff', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                {markers.length} Biens filtrés
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-white leading-tight">
+                {markers.length} Biens
               </span>
-              <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 8, fontWeight: 600 }}>Toutes communes</span>
+              <span className="text-[8px] font-semibold text-white/50 leading-tight">Filtrés</span>
             </div>
           </div>
         )}
       </div>
 
-      {/* ── Selected bien info panel (top right) ── */}
+      {/* ── Selected bien info panel (Bottom Sheet on Mobile, Top Right on Desktop) ── */}
       {selectedId && (() => {
         const bien = markers.find(b => b.id === selectedId)
         if (!bien) return null
         return (
-          <div style={{
-            position: 'absolute', top: 16, right: 16, zIndex: 20,
-            background: 'rgba(10,10,18,0.96)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(212,175,55,0.4)',
-            borderRadius: 24, padding: 0, width: 280,
-            boxShadow: '0 30px 60px rgba(0,0,0,0.8)',
-            overflow: 'hidden'
-          }}>
-            {/* 1. Image Header */}
-            <div style={{ height: 140, width: '100%', position: 'relative' }}>
-              {bien.photo_url ? (
-                <img 
-                  src={bien.photo_url} 
-                  alt={bien.titre}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              ) : (
-                <div style={{ width: '100%', height: '100%', background: '#1a1a2e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <MapPin className="text-[var(--accent-luxury)] opacity-20" size={40} />
-                </div>
-              )}
-              {/* Overlay Gradient */}
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,10,18,1), transparent)' }} />
-            </div>
+          <div className="absolute inset-x-0 bottom-0 sm:bottom-auto sm:top-16 sm:right-16 z-20 transition-all duration-500 ease-out sm:w-[320px]">
+            <div className="bg-[#0a0a12]/95 backdrop-blur-[20px] border-t sm:border border-[rgba(212,175,55,0.4)] rounded-t-[2.5rem] sm:rounded-3xl shadow-[0_-20px_40px_rgba(0,0,0,0.8)] sm:shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden">
+              {/* Mobile Grab Handle */}
+              <div className="w-12 h-1.5 bg-white/10 rounded-full mx-auto mt-3 mb-1 sm:hidden" />
 
-            {/* 2. Content */}
-            <div style={{ padding: '0 20px 24px 20px', marginTop: -20, position: 'relative' }}>
-              <p style={{ color: '#D4AF37', fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.25em', marginBottom: 6 }}>
-                {bien.commune}{bien.quartier ? ` · ${bien.quartier}` : ''}
-              </p>
-              <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 700, lineHeight: 1.3, marginBottom: 8, letterSpacing: '-0.02em' }}>
-                {bien.titre}
-              </h3>
-              <p style={{ color: '#D4AF37', fontSize: 18, fontWeight: 900, marginBottom: 16, display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                {formatPrice(bien).split('/')[0]}
-                <span style={{ fontSize: 10, fontWeight: 600, opacity: 0.6, textTransform: 'uppercase' }}>
-                  {formatPrice(bien).includes('/') ? `/ ${formatPrice(bien).split('/')[1]}` : 'FCFA'}
-                </span>
-              </p>
-              
-              {routeGeometry && (
-                <div style={{ 
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '10px 12px', background: 'rgba(212,175,55,0.08)',
-                  borderRadius: 12, border: '1px solid rgba(212,175,55,0.2)',
-                  marginBottom: 20
-                }}>
-                  <div style={{ width: 6, height: 6, background: '#D4AF37', borderRadius: '50%' }} />
-                  <p style={{ color: '#D4AF37', fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                    Itinéraire tracé en or sur la carte
-                  </p>
-                </div>
-              )}
-
-              <div style={{ display: 'flex', gap: 10 }}>
-                <Link
-                  href={`/biens/${bien.id}`}
-                  style={{
-                    flex: 1, textAlign: 'center',
-                    padding: '12px 0',
-                    background: '#D4AF37', color: '#000',
-                    borderRadius: 14, fontSize: 10, fontWeight: 800,
-                    textTransform: 'uppercase', letterSpacing: '0.1em',
-                    textDecoration: 'none', transition: 'all 0.3s'
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(212,175,55,0.3)' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none' }}
-                  onClick={e => e.stopPropagation()}
-                >
-                  Voir Détails
-                </Link>
+              {/* 1. Image Header - Adjusted for mobile to avoid hiding the route */}
+              {/* 1. Header with Image (Desktop Only) */}
+              <div className="hidden sm:block h-44 w-full relative">
+                {bien.photo_url ? (
+                  <img 
+                    src={bien.photo_url} 
+                    alt={bien.titre}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-[#1a1a2e] flex items-center justify-center">
+                    <MapPin className="text-[#D4AF37] opacity-20" size={32} />
+                  </div>
+                )}
+                {/* Overlay Gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a12] via-[#0a0a12]/20 to-transparent" />
+                
+                {/* Close button for desktop */}
                 <button
-                  style={{
-                    padding: '12px 16px',
-                    background: 'rgba(255,255,255,0.1)',
-                    border: '1px solid rgba(255,255,255,0.15)',
-                    borderRadius: 14, color: '#fff', fontSize: 12, cursor: 'pointer',
-                    transition: 'all 0.3s'
-                  }}
+                  className="absolute top-4 right-4 p-2.5 bg-black/40 backdrop-blur-md border border-white/10 rounded-full text-white/70 hover:text-white transition-colors"
                   onClick={(e) => { e.stopPropagation(); setSelectedId(null); onSelect?.(null) }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
                 >
                   ✕
                 </button>
+              </div>
+
+              {/* Close Button for Mobile (Standalone) */}
+              <button
+                className="sm:hidden absolute top-3 right-3 p-2 bg-white/5 border border-white/10 rounded-full text-white/40 z-50"
+                onClick={(e) => { e.stopPropagation(); setSelectedId(null); onSelect?.(null) }}
+              >
+                ✕
+              </button>
+
+              {/* 2. Content */}
+              <div className="px-6 py-8 sm:pb-10 sm:-mt-6 relative">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#D4AF37] mb-2">
+                  {bien.commune}{bien.quartier ? ` · ${bien.quartier}` : ''}
+                </p>
+                <h3 className="text-white text-xl sm:text-lg font-bold leading-tight mb-3 tracking-tight">
+                  {bien.titre}
+                </h3>
+                <p className="text-[#D4AF37] text-2xl sm:text-xl font-black mb-5 flex items-baseline gap-1.5">
+                  {formatPrice(bien).split('/')[0]}
+                  <span className="text-[11px] font-bold opacity-60 uppercase">
+                    {formatPrice(bien).includes('/') ? `/ ${formatPrice(bien).split('/')[1]}` : 'FCFA'}
+                  </span>
+                </p>
+                
+                {routeGeometry && (
+                  <div className="flex items-center gap-3 p-3.5 bg-blue-500/10 rounded-2xl border border-blue-500/20 mb-6 group">
+                    <div className="relative">
+                      <div className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse" />
+                      <div className="absolute inset-0 bg-blue-500 rounded-full animate-ping opacity-40 scale-150" />
+                    </div>
+                    <div className="flex flex-col">
+                      <p className="text-blue-400 text-[10px] font-black uppercase tracking-wider">
+                        Itinéraire Optimisé
+                      </p>
+                      <p className="text-blue-500/60 text-[9px] font-bold">
+                        Calculé depuis votre position
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <Link
+                    href={`/biens/${bien.id}`}
+                    className="flex-1 text-center py-4.5 bg-[#D4AF37] text-black rounded-2xl text-[12px] font-black uppercase tracking-[0.15em] shadow-lg shadow-[#D4AF37]/20 hover:scale-[1.02] active:scale-95 transition-all"
+                    onClick={e => e.stopPropagation()}
+                  >
+                    Consulter les détails
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

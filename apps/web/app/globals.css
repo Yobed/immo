@@ -794,3 +794,20 @@ main {
 .premium-glow:hover {
   box-shadow: 0 0 40px rgba(212, 175, 55, 0.8), 0 0 20px rgba(255, 255, 255, 0.4);
 }
+
+/* ══════════════════════════════════════════════════════
+   VOICE SEARCH WAVE ANIMATIONS
+   Sophisticated audio visualizers for the search overlay.
+══════════════════════════════════════════════════════ */
+
+@keyframes quiet {
+  0%, 100% { height: 10%; opacity: 0.3; }
+  50% { height: 40%; opacity: 0.6; }
+}
+
+@keyframes h-1 { 0%, 100% { height: 20%; } 50% { height: 50%; } }
+@keyframes h-2 { 0%, 100% { height: 30%; } 50% { height: 80%; } }
+@keyframes h-3 { 0%, 100% { height: 15%; } 50% { height: 60%; } }
+@keyframes h-4 { 0%, 100% { height: 40%; } 50% { height: 90%; } }
+@keyframes h-5 { 0%, 100% { height: 25%; } 50% { height: 70%; } }
+@keyframes h-6 { 0%, 100% { height: 10%; } 50% { height: 100%; } }

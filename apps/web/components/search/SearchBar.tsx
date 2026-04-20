@@ -3,8 +3,10 @@ import { useState, useRef, useEffect, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { COMMUNES_CI, QUARTIERS_PREMIUM } from '@immo-ci/shared/constants/communes'
 import { TYPES_BIEN_LABELS } from '@immo-ci/shared/constants/biens'
-import { Search, MapPin, Home, Building2, X, ArrowRight, Loader2 } from 'lucide-react'
+import { Search, MapPin, Home, Building2, X, ArrowRight, Loader2, Mic, MicOff } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useVoiceSearch } from '@/hooks/useVoiceSearch'
+import { cn } from '@/lib/utils'
 
 const ALL_SUGGESTIONS = [
   ...COMMUNES_CI.map((c) => ({ label: c, category: 'Commune', icon: MapPin })),
@@ -32,6 +34,7 @@ export function SearchBar({
   const [open, setOpen] = useState(false)
   const [highlighted, setHighlighted] = useState(0)
   const [isPending, startTransition] = useTransition()
+  const { isListening, transcript, startListening, stopListening, isSupported } = useVoiceSearch()
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -50,6 +53,17 @@ export function SearchBar({
     document.addEventListener('mousedown', onClickOutside)
     return () => document.removeEventListener('mousedown', onClickOutside)
   }, [])
+
+  useEffect(() => {
+    if (transcript) {
+      setQuery(transcript)
+      // Small timeout to allow the user to see the transcript before searching
+      const timer = setTimeout(() => {
+        navigate(transcript)
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [transcript])
 
   const navigate = (q: string) => {
     startTransition(() => {
@@ -104,21 +118,71 @@ export function SearchBar({
           )}
         </div>
         
-        <button 
-          type="submit" 
-          disabled={isPending || !query.trim()}
-          className="flex items-center gap-2 px-6 py-3.5 bg-[var(--accent-luxury)] text-white rounded-2xl font-display font-bold text-sm tracking-wide disabled:opacity-50 hover:opacity-90 hover:shadow-lg hover:shadow-[var(--accent-luxury)]/20 transition-all active:scale-95 translate-all duration-300"
-        >
-          {isPending ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <>
-              Découvrir
-              <ArrowRight className="w-4 h-4" />
-            </>
+        <div className="flex items-center gap-2 pr-1.5">
+          {isSupported && (
+            <button
+              type="button"
+              onClick={() => isListening ? stopListening() : startListening()}
+              className={cn(
+                "flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300",
+                isListening
+                  ? "bg-red-500/20 text-red-500 animate-pulse"
+                  : "text-[var(--text-muted)] hover:text-[var(--accent-luxury)] hover:bg-[var(--midnight-light)]"
+              )}
+              title="Recherche vocale"
+            >
+              {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+            </button>
           )}
-        </button>
+          
+          <button 
+            type="submit" 
+            disabled={isPending || !query.trim()}
+            className="flex items-center gap-2 px-6 py-3.5 bg-[var(--accent-luxury)] text-white rounded-2xl font-display font-bold text-sm tracking-wide disabled:opacity-50 hover:opacity-90 hover:shadow-lg hover:shadow-[var(--accent-luxury)]/20 transition-all active:scale-95 translate-all duration-300"
+          >
+            {isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <>
+                Découvrir
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
+          </button>
+        </div>
       </form>
+
+      {/* Listening Wave Overlay (Subtle) */}
+      <AnimatePresence>
+        {isListening && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="absolute z-[101] top-full left-0 right-0 mt-4 overflow-hidden bg-[var(--midnight-muted)]/95 backdrop-blur-xl rounded-[2rem] border border-[var(--accent-luxury)]/30 shadow-2xl p-6 text-center"
+          >
+            <div className="flex justify-center gap-1.5 h-8 items-center mb-4">
+              {[1, 2, 3, 4, 5, 4, 3, 2, 1].map((h, i) => (
+                <div
+                  key={i}
+                  className="w-1 bg-[var(--accent-luxury)] rounded-full"
+                  style={{
+                    height: '30%',
+                    animation: `quiet 0.8s ease-in-out infinite h-${h}`,
+                    animationDelay: `${i * 0.05}s`
+                  }}
+                />
+              ))}
+            </div>
+            <p className="text-[var(--accent-luxury)] text-xs font-bold uppercase tracking-widest animate-pulse mb-1">
+              À votre écoute...
+            </p>
+            <p className="text-[var(--text-muted)] text-[10px] italic">
+              "Appartement de luxe à Cocody"
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {open && suggestions.length > 0 && (

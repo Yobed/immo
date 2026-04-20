@@ -4,6 +4,10 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import { SearchBar } from '@/components/search/SearchBar'
+import { useVoiceSearch } from '@/hooks/useVoiceSearch'
+import { Mic, MicOff } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 const FALLBACK_BG = [
   'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2000&auto=format&fit=crop',
@@ -39,6 +43,7 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
   const showcaseBiens = featuredBiens && featuredBiens.length > 0 ? featuredBiens : []
   const [search, setSearch] = useState('')
   const [currentIdx, setCurrentIdx] = useState(0)
+  const { isListening, transcript, startListening, stopListening, isSupported } = useVoiceSearch()
   const router = useRouter()
   const sectionRef = useRef<HTMLElement>(null)
 
@@ -79,6 +84,16 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
     return () => clearInterval(timer)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slideCount])
+
+  useEffect(() => {
+    if (transcript) {
+      setSearch(transcript)
+      const timer = setTimeout(() => {
+        router.push(`/recherche?q=${encodeURIComponent(transcript)}`)
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [transcript, router])
 
   const handleSearch = () => {
     const q = search.trim()
@@ -181,29 +196,17 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
             Vivez l&apos;expérience du haut standing avec service premium inclus.
           </motion.p>
 
-          {/* Barre de recherche */}
+          {/* Barre de recherche unifiée */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col sm:flex-row gap-0 mb-8 md:mb-10 bg-[var(--surface-card)] border border-[var(--border)] backdrop-blur-xl overflow-hidden rounded-lg group focus-within:border-[var(--accent-luxury)] transition-all duration-500"
+            className="mb-8 md:mb-10"
           >
-            <div className="relative flex-1">
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                placeholder="Commune, quartier, type de bien..."
-                className="w-full px-5 py-4 bg-transparent text-[var(--text)] font-sans text-sm border-0 focus:outline-none placeholder-[var(--text-subtle)]"
-              />
-            </div>
-            <button
-              onClick={handleSearch}
-              className="px-7 py-4 bg-[var(--accent-luxury)] text-[var(--on-accent)] font-sans font-bold text-sm tracking-wide hover:opacity-90 transition-opacity"
-            >
-              Rechercher
-            </button>
+            <SearchBar 
+              initialQuery={search} 
+              placeholder="Commune, quartier, type de bien..." 
+            />
           </motion.div>
 
           {/* Quick Filters */}

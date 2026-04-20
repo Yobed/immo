@@ -1,8 +1,9 @@
-'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { CommuneAutocomplete } from '@/components/search/CommuneAutocomplete'
 import { TYPES_BIEN, TYPES_BIEN_LABELS } from '@immo-ci/shared/constants/biens'
+import { useVoiceSearch } from '@/hooks/useVoiceSearch'
+import { Mic, MicOff, Loader2 } from 'lucide-react'
 
 interface SmartFilterProps {
   onFilterChange: (filters: {
@@ -16,7 +17,44 @@ export function SmartFilter({ onFilterChange }: SmartFilterProps) {
   const [prixMax, setPrixMax] = useState('')
   const [commune, setCommune] = useState('')
   const [typeBien, setTypeBien] = useState('')
-  const [isOpen, setIsOpen] = useState(false)
+  const { isListening, transcript, startListening, stopListening, isSupported } = useVoiceSearch()
+
+  // ── Intelligent Voice Command Parser ──────────────────────────────────────
+  useEffect(() => {
+    if (transcript) {
+      const lower = transcript.toLowerCase()
+      let newPrix = prixMax
+      let newCommune = commune
+      let newType = typeBien
+
+      // 1. Extract Price (Numbers > 1000)
+      const priceMatch = lower.match(/\d+[\s\d]*/g)
+      if (priceMatch) {
+        const val = parseInt(priceMatch[0].replace(/\s/g, ''))
+        if (val >= 1000) newPrix = val.toString()
+      }
+
+      // 2. Extract Location (Keywords)
+      const locations = ['cocody', 'marcory', 'riviera', 'bassam', 'assam', 'plateau', 'treichville', 'yopougon', 'abobo', 'assinie']
+      for (const loc of locations) {
+        if (lower.includes(loc)) {
+          newCommune = loc.charAt(0).toUpperCase() + loc.slice(1)
+          break
+        }
+      }
+
+      // 3. Extract Type
+      if (lower.includes('villa')) newType = 'villa'
+      else if (lower.includes('appartement')) newType = 'appartement'
+      else if (lower.includes('studio')) newType = 'studio'
+      else if (lower.includes('meubl')) newType = 'residence_meublee'
+
+      setPrixMax(newPrix)
+      setCommune(newCommune)
+      setTypeBien(newType)
+      onFilterChange({ prixMax: newPrix, commune: newCommune, typeBien: newType })
+    }
+  }, [transcript])
 
   const handleApply = () => {
     onFilterChange({ prixMax, commune, typeBien })
@@ -113,6 +151,52 @@ export function SmartFilter({ onFilterChange }: SmartFilterProps) {
                 ))}
             </select>
         </div>
+
+        {/* Voice Search Component */}
+        {isSupported && (
+          <div className="relative">
+            <button
+              onClick={() => isListening ? stopListening() : startListening()}
+              className={cn(
+                "flex items-center justify-center w-10 h-10 rounded-xl border transition-all duration-300 animate-pulse",
+                isListening 
+                  ? "bg-red-500/20 border-red-500 text-red-500" 
+                  : "bg-[var(--midnight-light)]/40 border-[var(--accent-luxury)]/40 text-[var(--accent-luxury)] hover:border-[var(--accent-luxury)]"
+              )}
+              title="Recherche Vocale"
+            >
+              {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+              
+              {isListening && (
+                <div className="absolute -inset-1 rounded-xl border border-red-500/50 animate-ping opacity-20" />
+              )}
+            </button>
+            
+            {/* Listening Wave Interface Overlay */}
+            {isListening && (
+              <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm pointer-events-none">
+                 <div className="bg-[#0a0a18]/90 border border-[var(--accent-luxury)]/30 p-8 rounded-3xl flex flex-col items-center gap-6 shadow-[0_0_100px_rgba(212,175,55,0.1)]">
+                    <div className="flex gap-1.5 h-12 items-center">
+                       {[1,2,3,4,5,6,3,2,4,2].map((h, i) => (
+                         <div 
+                           key={i} 
+                           className="w-1.5 bg-[var(--accent-luxury)] rounded-full"
+                           style={{ 
+                             height: '20%',
+                             animation: `quiet 0.8s ease-in-out infinite h-${h}`,
+                             animationDelay: `${i * 0.05}s`
+                           }}
+                         />
+                       ))}
+                    </div>
+                    <p className="text-[var(--accent-luxury)] text-xs font-bold uppercase tracking-widest animate-pulse">
+                        À votre écoute...
+                    </p>
+                 </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Clear Button */}
         {activeCount > 0 && (
