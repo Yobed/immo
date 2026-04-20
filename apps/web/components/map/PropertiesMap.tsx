@@ -5,6 +5,7 @@ import { MAPBOX_TOKEN, ABIDJAN_CENTER } from '@/lib/mapbox'
 import Map, { Marker, Source, Layer, GeolocateControl, NavigationControl, type MapRef } from 'react-map-gl/mapbox'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
+import { MapPin } from 'lucide-react'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 export interface BienMarker {
@@ -260,28 +261,28 @@ export function PropertiesMap({
         onLoad={() => setIsMapLoaded(true)}
         onClick={() => { setSelectedId(null); onSelect?.(null) }}
       >
-        {/* ── Vibrancy Blue itinerary route ── */}
+        {/* ── Luxury Gold itinerary route ── */}
         {routeGeometry && (
           <Source id="route" type="geojson" data={{ type: 'Feature', properties: {}, geometry: routeGeometry }}>
             {/* Ultra Glow */}
             <Layer id="route-glow-outer" type="line"
               layout={{ 'line-join': 'round', 'line-cap': 'round' }}
-              paint={{ 'line-color': '#3b82f6', 'line-width': 26, 'line-opacity': 0.2, 'line-blur': 12 }}
+              paint={{ 'line-color': '#D4AF37', 'line-width': 26, 'line-opacity': 0.2, 'line-blur': 12 }}
             />
             {/* Inner Neon Glow */}
             <Layer id="route-glow-inner" type="line"
               layout={{ 'line-join': 'round', 'line-cap': 'round' }}
-              paint={{ 'line-color': '#60a5fa', 'line-width': 10, 'line-opacity': 0.5, 'line-blur': 3 }}
+              paint={{ 'line-color': '#E5C158', 'line-width': 10, 'line-opacity': 0.4, 'line-blur': 3 }}
             />
             {/* Solid Core */}
             <Layer id="route-core" type="line"
               layout={{ 'line-join': 'round', 'line-cap': 'round' }}
-              paint={{ 'line-color': '#0055ff', 'line-width': 6, 'line-opacity': 1 }}
+              paint={{ 'line-color': '#D4AF37', 'line-width': 6, 'line-opacity': 1 }}
             />
-            {/* Precise Center Line */}
+            {/* Precise White Line */}
             <Layer id="route-center" type="line"
               layout={{ 'line-join': 'round', 'line-cap': 'round' }}
-              paint={{ 'line-color': '#ffffff', 'line-width': 2, 'line-opacity': 0.8 }}
+              paint={{ 'line-color': '#ffffff', 'line-width': 2, 'line-opacity': 0.7 }}
             />
           </Source>
         )}
@@ -401,10 +402,10 @@ export function PropertiesMap({
                 <img 
                   src={bien.photo_url} 
                   alt={bien.titre}
-                  style={{ width: '100%', height: '100%', objectCover: 'cover' }}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
               ) : (
-                <div style={{ width: '100%', height: '100%', background: '#1a1a2e', display: 'flex', alignItems: 'center', justify: 'center' }}>
+                <div style={{ width: '100%', height: '100%', background: '#1a1a2e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <MapPin className="text-[var(--accent-luxury)] opacity-20" size={40} />
                 </div>
               )}
@@ -430,13 +431,13 @@ export function PropertiesMap({
               {routeGeometry && (
                 <div style={{ 
                   display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '10px 12px', background: 'rgba(59,130,246,0.1)',
-                  borderRadius: 12, border: '1px solid rgba(59,130,246,0.2)',
+                  padding: '10px 12px', background: 'rgba(212,175,55,0.08)',
+                  borderRadius: 12, border: '1px solid rgba(212,175,55,0.2)',
                   marginBottom: 20
                 }}>
-                  <div style={{ width: 6, height: 6, background: '#3b82f6', borderRadius: '50%' }} />
-                  <p style={{ color: '#60a5fa', fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                    Itinéraire tracé en bleu sur la carte
+                  <div style={{ width: 6, height: 6, background: '#D4AF37', borderRadius: '50%' }} />
+                  <p style={{ color: '#D4AF37', fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    Itinéraire tracé en or sur la carte
                   </p>
                 </div>
               )}
