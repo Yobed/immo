@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { TYPES_BIEN_LABELS } from '@immo-ci/shared/constants/biens'
-import { MapPin, Ruler, Layers, Star, ArrowUpRight, Maximize2 } from 'lucide-react'
+import { MapPin, Ruler, Layers, Star, ArrowUpRight, Maximize2, BedDouble, ShowerHead, Square } from 'lucide-react'
 
 interface PremiumBienCardProps {
   id: string
@@ -36,6 +36,7 @@ export function PremiumBienCard({
   id, titre, commune, quartier, type_bien,
   prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa,
   surface_m2, nb_pieces, photo_url,
+  nb_salles_bain,
   est_disponible = true,
   is_verifie,
   score_ia,
@@ -80,7 +81,7 @@ export function PremiumBienCard({
           }}
         >
         {/* Master Container: Pure White/Zinc card with diffusion shadow */}
-        <div className={`relative flex flex-col h-full bg-[var(--surface-card)] rounded-[2rem] overflow-hidden border transition-all duration-700 hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.12)] hover:-translate-y-2 group-active:scale-[0.98] ${isSelected ? 'border-[var(--accent-luxury)] ring-1 ring-[var(--accent-luxury)]' : 'border-[var(--border)]'}`}>
+        <div className={`relative flex flex-col h-full bg-[var(--surface-card)] rounded-[1.5rem] overflow-hidden border transition-all duration-700 hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.12)] hover:-translate-y-2 group-active:scale-[0.98] ${isSelected ? 'border-[var(--accent-luxury)] ring-1 ring-[var(--accent-luxury)]' : 'border-[var(--border)]'}`}>
           
           {/* 1. Image Architectural Section */}
           <div className="relative aspect-[4/5] overflow-hidden bg-[var(--midnight-muted)]">
@@ -138,52 +139,71 @@ export function PremiumBienCard({
           </div>
 
           {/* 2. Content Section - Gallery Style */}
-          <div className="flex-1 flex flex-col p-6 pt-5 bg-inherit">
+          <div className="flex-1 flex flex-col p-4 pt-3 bg-inherit">
             
-            {/* Context & Price Row */}
-            <div className="flex justify-between items-start gap-4 mb-4">
-              <div className="flex flex-col gap-1 min-w-0">
-                <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--accent-luxury)] uppercase tracking-[0.3em] opacity-80 mb-1">
-                  <MapPin className="w-3 h-3" strokeWidth={2.5} />
-                  <span className="truncate">{commune}</span>
-                  {quartier && <span className="opacity-40">• {quartier}</span>}
-                </div>
-                <h3 className="font-display text-lg font-medium text-[var(--text)] tracking-tight leading-snug line-clamp-1">
-                  {titre}
-                </h3>
+            {/* Context & Price Row - Stacked for better readability */}
+            <div className="flex flex-col gap-2.5 mb-3">
+              {/* Location - Bigger and clearer */}
+              <div className="flex items-center gap-1.5 text-[9px] font-bold text-[var(--accent-luxury)] uppercase tracking-wider opacity-90">
+                <MapPin className="w-2.5 h-2.5 shrink-0" strokeWidth={3} />
+                <span className="truncate">{commune}</span>
+                {quartier && <span className="opacity-50 truncate">• {quartier}</span>}
               </div>
               
-              <div className="flex flex-col items-end shrink-0">
+              {/* Title & Price - Clear distinction */}
+              <div className="flex flex-col gap-1.5">
+                <div className="flex justify-between items-start gap-2">
+                  <h3 className="font-display text-[16px] font-semibold text-[var(--text)] tracking-tight leading-snug line-clamp-2 flex-1">
+                    {titre}
+                  </h3>
+                  {prix && (
+                    <div className="bg-[var(--accent-luxury)]/10 px-2.5 py-1 rounded-lg border border-[var(--accent-luxury)]/20 shrink-0">
+                      <span className="text-[13px] font-display font-bold text-[var(--accent-luxury)] tracking-tight">
+                        {prix.value}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                
                 {prix && (
-                  <p className="text-xl font-display font-semibold text-[var(--text)] tracking-tighter">
-                    {prix.value} 
-                    <span className="text-[10px] font-sans text-[var(--text-muted)] uppercase tracking-widest ml-1 font-bold">
-                      {prix.suffix.includes('nuit') ? 'nuit' : prix.suffix.includes('mois') ? 'mois' : 'fcf'}
-                    </span>
-                  </p>
+                  <span className="text-[9px] font-sans text-[var(--text-muted)] uppercase tracking-[0.2em] font-bold mt-0.5">
+                    {prix.suffix ? `Prix ${prix.suffix}` : 'Prix Total (FCFA)'}
+                  </span>
                 )}
               </div>
             </div>
 
-            {/* Separator / Metrics */}
-            <div className="mt-auto pt-5 border-t border-[var(--border)]/50 flex items-center justify-between">
-              <div className="flex items-center gap-5">
-                {surface_m2 && (
-                  <div className="flex items-center gap-2 group/stat">
-                    <Ruler className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover/stat:text-[var(--accent-luxury)] transition-colors" />
-                    <span className="text-sm text-[var(--text)] font-medium tabular-nums">{surface_m2}m²</span>
-                  </div>
-                )}
-                {nb_pieces && (
-                  <div className="flex items-center gap-2 group/stat">
-                    <Layers className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover/stat:text-[var(--accent-luxury)] transition-colors" />
-                    <span className="text-sm text-[var(--text)] font-medium tabular-nums">{nb_pieces} Ch.</span>
-                  </div>
-                )}
+            {/* Icons & Features - Optimized for small size */}
+            <div className="grid grid-cols-2 gap-y-2.5 mt-auto">
+              <div className="flex items-center gap-2 group-hover:translate-x-0.5 transition-transform duration-300">
+                <BedDouble className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-[var(--accent-luxury)] transition-colors" />
+                <span className="text-[10px] font-medium text-[var(--text-muted)] tracking-wide">
+                  {nb_pieces || 0} Ch.
+                </span>
               </div>
+              <div className="flex items-center gap-2">
+                <ShowerHead className="w-3.5 h-3.5 text-[var(--text-muted)] mt-[-1px]" />
+                <span className="text-[10px] font-medium text-[var(--text-muted)]">
+                  {nb_salles_bain || 0} Sdb
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Maximize2 className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+                <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase">
+                  {surface_m2 ? `${surface_m2}m²` : 'N/A'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Square className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+                <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-tighter">
+                  {type_bien}
+                </span>
+              </div>
+            </div>
 
-              <div className="w-8 h-8 rounded-full bg-[var(--midnight-muted)] border border-[var(--border)] flex items-center justify-center transition-all duration-500 group-hover:bg-[var(--accent-luxury)] group-hover:text-[var(--on-accent)]">
-                <ArrowUpRight className="w-3.5 h-3.5" />
+            <div className="mt-4 pt-3 border-t border-[var(--border)]/50 flex items-center justify-end">
+              <div className="w-7 h-7 rounded-full bg-[var(--midnight-muted)] border border-[var(--border)] flex items-center justify-center transition-all duration-500 group-hover:bg-[var(--accent-luxury)] group-hover:text-[var(--on-accent)]">
+                <ArrowUpRight className="w-3 h-3" />
               </div>
             </div>
 

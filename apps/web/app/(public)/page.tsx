@@ -24,7 +24,7 @@ export default async function HomePage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: biens } = await (supabase as any)
     .from('biens')
-    .select('id, titre, commune, quartier, type_bien, latitude, longitude, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, est_disponible')
+    .select('id, titre, commune, quartier, type_bien, latitude, longitude, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces, est_disponible, is_verifie, score_ia, statut')
     .eq('statut', 'publie')
 
   const biensList = (biens ?? []).map((b: any) => ({
@@ -100,7 +100,7 @@ export default async function HomePage() {
     <main>
       <CustomCursor />
       <Hero bgImages={bgImages} featuredBiens={featuredBiens} />
-      <NearMeSection />
+      <NearMeSection initialBiens={biensWithPhoto} />
       <FeaturedProperties />
       <LifestyleMatcher />
       <FurnishedRentalsSection />

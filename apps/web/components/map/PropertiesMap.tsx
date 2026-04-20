@@ -72,56 +72,59 @@ const MAP_STYLES = `
 
   /* ── Bien marker dot (gold) — SAME structure as user dot ── */
   .bien-dot {
-    width: 16px; height: 16px;
+    width: 18px; height: 18px;
     background: #D4AF37;
     border: 3px solid #fff;
     border-radius: 50%;
-    box-shadow: 0 0 12px rgba(212,175,55,0.9);
+    box-shadow: 0 0 15px rgba(212,175,55,0.9), 0 0 30px rgba(212,175,55,0.4);
     position: relative;
-    z-index: 2;
-    transition: transform 0.2s;
+    z-index: 10;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .bien-dot.selected {
-    width: 22px; height: 22px;
+    width: 24px; height: 24px;
     background: #fff;
-    border: 3px solid #D4AF37;
-    box-shadow: 0 0 20px rgba(212,175,55,1);
+    border: 4px solid #D4AF37;
+    box-shadow: 0 0 30px rgba(212,175,55,1), 0 0 60px rgba(212,175,55,0.6);
   }
   .bien-ring {
     position: absolute;
     top: 50%; left: 50%;
-    width: 36px; height: 36px;
-    border: 2.5px solid #D4AF37;
+    width: 44px; height: 44px;
+    border: 3px solid #D4AF37;
     border-radius: 50%;
-    animation: gps-pulse 2s ease-out infinite;
+    animation: gps-pulse 2.5s ease-out infinite;
     pointer-events: none;
+    z-index: 5;
   }
-  .bien-ring.delay { animation-delay: 0.9s; }
+  .bien-ring.delay { animation-delay: 1.2s; }
 
   /* ── Price label above the dot ── */
   .bien-price {
     position: absolute;
-    bottom: calc(100% + 6px);
+    bottom: calc(100% + 10px);
     left: 50%;
     transform: translateX(-50%);
-    padding: 4px 9px;
-    border-radius: 8px;
+    padding: 5px 12px;
+    border-radius: 10px;
     font-size: 10px;
     font-weight: 800;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.05em;
     white-space: nowrap;
-    background: rgba(10,10,18,0.88);
+    background: rgba(10,10,25,0.95);
     color: #D4AF37;
-    border: 1.5px solid rgba(212,175,55,0.5);
-    box-shadow: 0 4px 14px rgba(0,0,0,0.5);
-    backdrop-filter: blur(10px);
+    border: 1.5px solid rgba(212,175,55,0.7);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+    backdrop-filter: blur(12px);
     pointer-events: none;
+    z-index: 15;
+    transition: all 0.3s;
   }
   .bien-price.selected {
     background: #D4AF37;
     color: #000;
     border-color: #fff;
-    box-shadow: 0 0 20px rgba(212,175,55,0.8);
+    box-shadow: 0 0 22px rgba(212,175,55,0.9);
   }
 `
 
@@ -179,11 +182,15 @@ export function PropertiesMap({
   }, [selectedId, markers, isMapLoaded])
 
   const hasFittedBoundsRef = useRef(false)
+  const lastMarkersCount = useRef(0)
 
   // ── Fit all markers and user position to screen on load ──────────────────
   useEffect(() => {
     if (!isMapLoaded || (markers.length === 0 && !userLocation)) return
-    if (hasFittedBoundsRef.current) return // Only fit bounds once heavily
+    
+    // Si on a déjà fit les bounds avec le même nombre de markers, on ne refait pas 
+    // à moins que ce soit le premier passage réussi.
+    if (hasFittedBoundsRef.current && markers.length === lastMarkersCount.current) return
 
     try {
       const bounds = new mapboxgl.LngLatBounds()
@@ -195,9 +202,10 @@ export function PropertiesMap({
       if (!bounds.isEmpty()) {
         mapRef.current?.getMap()?.fitBounds(bounds, { padding: 80, maxZoom: 14, duration: 1800 })
         hasFittedBoundsRef.current = true
+        lastMarkersCount.current = markers.length
       }
     } catch {}
-  }, [isMapLoaded, markers.length, userLocation])
+  }, [isMapLoaded, markers, userLocation])
 
   // ── Fly to targetCenter (commune filter) ──────────────────────────────────
   useEffect(() => {
@@ -252,18 +260,28 @@ export function PropertiesMap({
         onLoad={() => setIsMapLoaded(true)}
         onClick={() => { setSelectedId(null); onSelect?.(null) }}
       >
-        {/* ── Gold route line ── */}
+        {/* ── Vibrancy Blue itinerary route ── */}
         {routeGeometry && (
           <Source id="route" type="geojson" data={{ type: 'Feature', properties: {}, geometry: routeGeometry }}>
-            {/* Glow */}
-            <Layer id="route-glow" type="line"
+            {/* Ultra Glow */}
+            <Layer id="route-glow-outer" type="line"
               layout={{ 'line-join': 'round', 'line-cap': 'round' }}
-              paint={{ 'line-color': '#D4AF37', 'line-width': 14, 'line-opacity': 0.25, 'line-blur': 8 }}
+              paint={{ 'line-color': '#3b82f6', 'line-width': 26, 'line-opacity': 0.2, 'line-blur': 12 }}
             />
-            {/* Core */}
+            {/* Inner Neon Glow */}
+            <Layer id="route-glow-inner" type="line"
+              layout={{ 'line-join': 'round', 'line-cap': 'round' }}
+              paint={{ 'line-color': '#60a5fa', 'line-width': 10, 'line-opacity': 0.5, 'line-blur': 3 }}
+            />
+            {/* Solid Core */}
             <Layer id="route-core" type="line"
               layout={{ 'line-join': 'round', 'line-cap': 'round' }}
-              paint={{ 'line-color': '#D4AF37', 'line-width': 5, 'line-opacity': 1 }}
+              paint={{ 'line-color': '#0055ff', 'line-width': 6, 'line-opacity': 1 }}
+            />
+            {/* Precise Center Line */}
+            <Layer id="route-center" type="line"
+              layout={{ 'line-join': 'round', 'line-cap': 'round' }}
+              paint={{ 'line-color': '#ffffff', 'line-width': 2, 'line-opacity': 0.8 }}
             />
           </Source>
         )}
@@ -300,9 +318,10 @@ export function PropertiesMap({
               latitude={bien.lat}
               anchor="center"
               onClick={(e) => { e.originalEvent.stopPropagation(); handleClick(bien.id) }}
+              style={{ zIndex: isSelected ? 100 : 10 }}
             >
-              {/* Outer wrapper — positions price label above the dot */}
-              <div style={{ position: 'relative', width: 16, height: 16, cursor: 'pointer' }}>
+              {/* Outer wrapper */}
+              <div style={{ position: 'relative', cursor: 'pointer' }}>
 
                 {/* Price label floating above */}
                 <div className={`bien-price${isSelected ? ' selected' : ''}`}>

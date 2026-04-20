@@ -74,12 +74,53 @@ function addJitter(val: number) {
   return val + (Math.random() - 0.5) * 0.04 // Roughly ±2km jitter
 }
 
-export function NearMeSection() {
+export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
   const [loading, setLoading] = useState(false)
   const [locating, setLocating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  // Use initialBiens as default to avoid empty map on load
   const [biens, setBiens] = useState<BienProche[]>([])
-  const [coverMap, setCoverMap] = useState<Record<string, string>>({})
+
+  // Normalize and jitter biens helper
+  const normalizeBiens = useCallback((raw: any[]) => {
+    return raw.map(b => {
+      let bLat = Number(typeof b.latitude === 'string' ? b.latitude.replace(',', '.') : b.latitude)
+      let bLng = Number(typeof b.longitude === 'string' ? b.longitude.replace(',', '.') : b.longitude)
+      
+      // Jitter logic for markers without precise coordinates - Case-insensitive match
+      if (!bLat || !bLng || isNaN(bLat) || isNaN(bLng) || (bLat === 0 && bLng === 0)) {
+        // Find commune case-insensitively
+        const searchName = (b.commune || '').toLowerCase().trim()
+        const communeKey = Object.keys(communesCoords).find(k => k.toLowerCase().trim() === searchName)
+        const base = communeKey ? communesCoords[communeKey] : communesCoords['Cocody'] || { lat: 5.3484, lng: -4.0107 }
+        
+        bLat = addJitter(base.lat)
+        bLng = addJitter(base.lng)
+      }
+      return {
+        ...b,
+        latitude: bLat,
+        longitude: bLng,
+        dist_meters: b.dist_meters || 999999
+      }
+    }) as BienProche[]
+  }, [])
+
+  // Sync initialBiens to state
+  useEffect(() => {
+    if (initialBiens?.length > 0) {
+      setBiens(normalizeBiens(initialBiens))
+    }
+  }, [initialBiens, normalizeBiens])
+
+  // Pre-seed coverMap from initialBiens if photo_url is present
+  const [coverMap, setCoverMap] = useState<Record<string, string>>(() => {
+    const cMap: Record<string, string> = {}
+    initialBiens.forEach(b => { if (b.photo_url) cMap[b.id] = b.photo_url })
+    return cMap
+  })
+
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
@@ -122,21 +163,19 @@ export function NearMeSection() {
       
       const rows = data || []
       
-      let processed = rows.map((b: any) => {
-        let bLat = Number(typeof b.latitude === 'string' ? b.latitude.replace(',', '.') : b.latitude)
-        let bLng = Number(typeof b.longitude === 'string' ? b.longitude.replace(',', '.') : b.longitude)
-        
-        // Add coordinates jitter if missing
-        if (!bLat || !bLng || isNaN(bLat) || isNaN(bLng) || (bLat === 0 && bLng === 0)) {
-          const base = communesCoords[b.commune] || { lat: 5.3484, lng: -4.0107 }
-          bLat = addJitter(base.lat)
-          bLng = addJitter(base.lng)
-        }
-
-        const dist = (lat !== null && lng !== null) ? getDistance(lat, lng, bLat, bLng) : 999999
-
-        return { ...b, latitude: bLat, longitude: bLng, dist_meters: dist } as BienProche
-      })
+      let processed = normalizeBiens(rows)
+      
+      // Sort by proximity if we have a location
+      if (lat !== null && lng !== null) {
+        processed = processed.map(b => ({
+          ...b,
+          dist_meters: getDistance(lat, lng, b.latitude!, b.longitude!)
+        }))
+        processed.sort((a, b) => a.dist_meters - b.dist_meters)
+      } else {
+        // Just sort by random or leave as is to display something while GPS locates
+        processed.sort((a, b) => (a.score_ia || 0) > (b.score_ia || 0) ? -1 : 1)
+      }
 
       // Sort by proximity if we have a location
       if (lat !== null && lng !== null) {
@@ -160,8 +199,11 @@ export function NearMeSection() {
 
   // Fetch immediately on mount, updating with GPS if granted
   useEffect(() => {
-    // Start fetching default map view
-    fetchAllAndSort(null, null)
+    // If we have initialBiens from server, we skip the first fetch and just sort them as "far away" (999km)
+    // or we fetch immediately if list is empty.
+    if (biens.length === 0) {
+      fetchAllAndSort(null, null)
+    }
 
     if (typeof window !== 'undefined' && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -208,8 +250,8 @@ export function NearMeSection() {
   const selectedBien = useMemo(() => biens.find(b => b.id === selectedId) ?? null, [biens, selectedId])
 
   const mapTheme = theme === 'light'
-    ? 'mapbox://styles/mapbox/light-v11'
-    : 'mapbox://styles/mapbox/dark-v11'
+    ? 'mapbox://styles/mapbox/streets-v12'
+    : 'mapbox://styles/mapbox/satellite-streets-v12'
 
   return (
     <section className="relative py-20 overflow-hidden bg-[var(--background)]">
@@ -346,7 +388,11 @@ export function NearMeSection() {
                 <span className="w-4 h-[1px] bg-[var(--accent-luxury)]" />
                 {selectedId ? 'Bien sélectionné — Itinéraire affiché sur la carte' : 'Cliquez sur un bien pour voir le trajet — Triés par distance'}
               </p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              <div className={`grid gap-4 transition-all duration-700 ${
+                selectedId 
+                  ? 'grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8' 
+                  : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+              }`}>
                 {biens.map((b, i) => (
                   <motion.div
                     key={b.id}
@@ -409,8 +455,10 @@ export function NearMeSection() {
                         {b.commune}{b.quartier ? ` · ${b.quartier}` : ''}
                       </p>
                       <p className="text-sm font-semibold text-[var(--text)] truncate mb-3">{b.titre}</p>
-                      <div className="flex items-center justify-between">
-                        <p className="text-[11px] font-black text-[var(--text)] tracking-wider">{formatPrice(b)}</p>
+                      <div className="flex items-center justify-between mt-auto">
+                        <p className={`font-black text-[var(--text)] tracking-wider ${selectedId ? 'text-[9px]' : 'text-[11px]'}`}>
+                          {formatPrice(b)}
+                        </p>
                         <Link
                           href={`/biens/${b.id}`}
                           onClick={e => e.stopPropagation()}

@@ -1,0 +1,157 @@
+'use client'
+import { useState, useMemo } from 'react'
+import { cn } from '@/lib/utils'
+import { CommuneAutocomplete } from '@/components/search/CommuneAutocomplete'
+import { TYPES_BIEN, TYPES_BIEN_LABELS } from '@immo-ci/shared/constants/biens'
+
+interface SmartFilterProps {
+  onFilterChange: (filters: {
+    prixMax: string;
+    commune: string;
+    typeBien: string;
+  }) => void;
+}
+
+export function SmartFilter({ onFilterChange }: SmartFilterProps) {
+  const [prixMax, setPrixMax] = useState('')
+  const [commune, setCommune] = useState('')
+  const [typeBien, setTypeBien] = useState('')
+  const [isOpen, setIsOpen] = useState(false)
+
+  const handleApply = () => {
+    onFilterChange({ prixMax, commune, typeBien })
+  }
+
+  const activeCount = useMemo(() => {
+    let count = 0
+    if (prixMax) count++
+    if (commune) count++
+    if (typeBien) count++
+    return count
+  }, [prixMax, commune, typeBien])
+
+  return (
+    <div className="w-full mb-10">
+      <div className="flex flex-wrap items-center gap-4 bg-[var(--midnight-muted)]/50 border border-[var(--border)] p-2 rounded-2xl backdrop-blur-md">
+        
+        {/* Quick Range / Budget */}
+        <div className="flex-1 min-w-[200px] relative group">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--accent-luxury)] opacity-50 group-focus-within:opacity-100 transition-opacity">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+            </svg>
+          </div>
+          <input
+            type="number"
+            value={prixMax}
+            onChange={(e) => {
+              setPrixMax(e.target.value)
+              onFilterChange({ prixMax: e.target.value, commune, typeBien })
+            }}
+            placeholder="Budget max (FCFA)..."
+            className="w-full bg-[var(--midnight-light)]/40 border-none rounded-xl py-3.5 pl-12 pr-4 text-sm font-sans focus:ring-1 focus:ring-[var(--accent-luxury)]/30 transition-all placeholder:text-[var(--text-muted)]"
+          />
+        </div>
+
+        {/* Location Dropdown (Smart Search) */}
+        <div className="flex-[1.5] min-w-[280px]">
+          <CommuneAutocomplete
+            value={commune}
+            onChange={(val) => {
+              setCommune(val)
+              onFilterChange({ prixMax, commune: val, typeBien })
+            }}
+            className="!bg-transparent"
+          />
+        </div>
+
+        {/* Type Filter */}
+        <div className="hidden lg:flex items-center gap-1 bg-[var(--background)] px-2 py-1 rounded-xl border border-[var(--border)]">
+          <button 
+            onClick={() => {
+              setTypeBien('')
+              onFilterChange({ prixMax, commune, typeBien: '' })
+            }}
+            className={cn(
+              "px-3 py-1.5 rounded-lg text-[11px] font-bold tracking-wider uppercase transition-all",
+              !typeBien ? "bg-[var(--accent-luxury)] text-[var(--midnight)]" : "text-[var(--text-muted)] hover:text-[var(--off-white)]"
+            )}
+          >
+            Tous
+          </button>
+          {['villa', 'appartement', 'studio', 'residence_meublee'].map((t) => (
+            <button 
+              key={t}
+              onClick={() => {
+                const newVal = typeBien === t ? '' : t
+                setTypeBien(newVal)
+                onFilterChange({ prixMax, commune, typeBien: newVal })
+              }}
+              className={cn(
+                "px-3 py-1.5 rounded-lg text-[11px] font-bold tracking-wider uppercase transition-all whitespace-nowrap",
+                typeBien === t ? "bg-[var(--accent-luxury)] text-[var(--midnight)]" : "text-[var(--text-muted)] hover:text-[var(--off-white)]"
+              )}
+            >
+              {TYPES_BIEN_LABELS[t as keyof typeof TYPES_BIEN_LABELS] || t}
+            </button>
+          ))}
+        </div>
+
+        {/* Mobile Type Trigger */}
+        <div className="lg:hidden">
+            <select 
+                value={typeBien}
+                onChange={(e) => {
+                    setTypeBien(e.target.value)
+                    onFilterChange({ prixMax, commune, typeBien: e.target.value })
+                }}
+                className="bg-[var(--midnight-light)] border border-[var(--border)] rounded-xl py-3 px-4 text-sm font-sans text-[var(--text)]"
+            >
+                <option value="">Tous les types</option>
+                {TYPES_BIEN.map(t => (
+                    <option key={t} value={t}>{TYPES_BIEN_LABELS[t as keyof typeof TYPES_BIEN_LABELS] || t}</option>
+                ))}
+            </select>
+        </div>
+
+        {/* Clear Button */}
+        {activeCount > 0 && (
+          <button 
+            onClick={() => {
+              setPrixMax('')
+              setCommune('')
+              setTypeBien('')
+              onFilterChange({ prixMax: '', commune: '', typeBien: '' })
+            }}
+            className="flex items-center justify-center w-10 h-10 rounded-xl border border-[var(--danger)]/30 text-[var(--danger)] hover:bg-[var(--danger)]/10 transition-colors"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        )}
+      </div>
+
+      <div className="mt-4 flex items-center gap-3">
+        <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-[0.2em] font-bold">Suggestions :</span>
+        {['Cocody', 'Riviera', 'Assinie', 'Villa avec Piscine'].map((s) => (
+           <button 
+            key={s}
+            onClick={() => {
+              if (s === 'Villa avec Piscine') {
+                setTypeBien('villa')
+                onFilterChange({ prixMax, commune, typeBien: 'villa' })
+              } else {
+                setCommune(s)
+                onFilterChange({ prixMax, commune: s, typeBien })
+              }
+            }}
+            className="text-[10px] text-[var(--accent-luxury)]/70 hover:text-[var(--accent-luxury)] transition-colors border-b border-transparent hover:border-[var(--accent-luxury)] pb-0.5"
+           >
+             {s}
+           </button>
+        ))}
+      </div>
+    </div>
+  )
+}
