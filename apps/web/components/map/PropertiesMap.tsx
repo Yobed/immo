@@ -340,36 +340,43 @@ export function PropertiesMap({
         })}
       </Map>
 
-      {/* ── Stats overlay ── */}
-      <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+      {/* ── Stats overlay (Top Left) ── */}
+      <div className="absolute top-4 left-4 z-10 flex flex-col gap-2.5">
+        <div style={{
+          padding: '8px 16px',
+          background: 'rgba(0,0,0,0.85)',
+          backdropFilter: 'blur(12px)',
+          borderRadius: 14,
+          border: '1px solid rgba(212,175,55,0.4)',
+          display: 'flex', alignItems: 'center', gap: 10,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
+        }}>
+          <div className="user-dot" style={{ width: 10, height: 10, border: '2px solid #fff' }} />
+          <div className="flex flex-col">
+            <span style={{ color: '#fff', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              Ma position
+            </span>
+            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 8, fontWeight: 600 }}>GPS Actif · 10 km</span>
+          </div>
+        </div>
+
         {markers.length > 0 && (
           <div style={{
-            padding: '6px 14px',
-            background: 'rgba(0,0,0,0.7)',
+            padding: '8px 16px',
+            background: 'rgba(0,0,0,0.85)',
             backdropFilter: 'blur(12px)',
-            borderRadius: 999,
-            border: '1px solid rgba(212,175,55,0.3)',
-            display: 'flex', alignItems: 'center', gap: 8
+            borderRadius: 14,
+            border: '1px solid rgba(255,255,255,0.1)',
+            display: 'flex', alignItems: 'center', gap: 10,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
           }}>
-            <span style={{ width: 8, height: 8, background: '#D4AF37', borderRadius: '50%', display: 'inline-block', animation: 'bobble 2s infinite' }} />
-            <span style={{ color: '#fff', fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em' }}>
-              {markers.length} bien{markers.length > 1 ? 's' : ''} sur la carte
-            </span>
-          </div>
-        )}
-        {userLocation && (
-          <div style={{
-            padding: '6px 14px',
-            background: 'rgba(0,0,0,0.7)',
-            backdropFilter: 'blur(12px)',
-            borderRadius: 999,
-            border: '1px solid rgba(59,130,246,0.4)',
-            display: 'flex', alignItems: 'center', gap: 8
-          }}>
-            <span style={{ width: 8, height: 8, background: '#3b82f6', borderRadius: '50%', display: 'inline-block' }} />
-            <span style={{ color: '#fff', fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em' }}>
-              Ma position · 10 km
-            </span>
+            <span style={{ width: 10, height: 10, background: '#D4AF37', borderRadius: '50%', display: 'inline-block' }} />
+            <div className="flex flex-col">
+              <span style={{ color: '#fff', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                {markers.length} Biens filtrés
+              </span>
+              <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 8, fontWeight: 600 }}>Toutes communes</span>
+            </div>
           </div>
         )}
       </div>
@@ -381,48 +388,91 @@ export function PropertiesMap({
         return (
           <div style={{
             position: 'absolute', top: 16, right: 16, zIndex: 20,
-            background: 'rgba(10,10,18,0.92)',
+            background: 'rgba(10,10,18,0.96)',
             backdropFilter: 'blur(20px)',
             border: '1px solid rgba(212,175,55,0.4)',
-            borderRadius: 20, padding: 16, minWidth: 220, maxWidth: 260,
-            boxShadow: '0 20px 50px rgba(0,0,0,0.6)'
+            borderRadius: 24, padding: 0, width: 280,
+            boxShadow: '0 30px 60px rgba(0,0,0,0.8)',
+            overflow: 'hidden'
           }}>
-            <p style={{ color: '#D4AF37', fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 6 }}>
-              {bien.commune}{bien.quartier ? ` · ${bien.quartier}` : ''}
-            </p>
-            <p style={{ color: '#fff', fontSize: 13, fontWeight: 600, lineHeight: 1.4, marginBottom: 10 }}>{bien.titre}</p>
-            <p style={{ color: '#D4AF37', fontSize: 15, fontWeight: 800, marginBottom: 12 }}>{formatPrice(bien)}</p>
-            {routeGeometry && (
-              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 10 }}>
-                Itinéraire tracé en or sur la carte
+            {/* 1. Image Header */}
+            <div style={{ height: 140, width: '100%', position: 'relative' }}>
+              {bien.photo_url ? (
+                <img 
+                  src={bien.photo_url} 
+                  alt={bien.titre}
+                  style={{ width: '100%', height: '100%', objectCover: 'cover' }}
+                />
+              ) : (
+                <div style={{ width: '100%', height: '100%', background: '#1a1a2e', display: 'flex', alignItems: 'center', justify: 'center' }}>
+                  <MapPin className="text-[var(--accent-luxury)] opacity-20" size={40} />
+                </div>
+              )}
+              {/* Overlay Gradient */}
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,10,18,1), transparent)' }} />
+            </div>
+
+            {/* 2. Content */}
+            <div style={{ padding: '0 20px 24px 20px', marginTop: -20, position: 'relative' }}>
+              <p style={{ color: '#D4AF37', fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.25em', marginBottom: 6 }}>
+                {bien.commune}{bien.quartier ? ` · ${bien.quartier}` : ''}
               </p>
-            )}
-            <div style={{ display: 'flex', gap: 8 }}>
-              <Link
-                href={`/biens/${bien.id}`}
-                style={{
-                  flex: 1, textAlign: 'center',
-                  padding: '8px 0',
-                  background: '#D4AF37', color: '#000',
-                  borderRadius: 10, fontSize: 9, fontWeight: 800,
-                  textTransform: 'uppercase', letterSpacing: '0.15em',
-                  textDecoration: 'none'
-                }}
-                onClick={e => e.stopPropagation()}
-              >
-                Voir le bien
-              </Link>
-              <button
-                style={{
-                  padding: '8px 12px',
-                  background: 'rgba(255,255,255,0.08)',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  borderRadius: 10, color: '#fff', fontSize: 11, cursor: 'pointer'
-                }}
-                onClick={(e) => { e.stopPropagation(); setSelectedId(null); onSelect?.(null) }}
-              >
-                ✕
-              </button>
+              <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 700, lineHeight: 1.3, marginBottom: 8, letterSpacing: '-0.02em' }}>
+                {bien.titre}
+              </h3>
+              <p style={{ color: '#D4AF37', fontSize: 18, fontWeight: 900, marginBottom: 16, display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                {formatPrice(bien).split('/')[0]}
+                <span style={{ fontSize: 10, fontWeight: 600, opacity: 0.6, textTransform: 'uppercase' }}>
+                  {formatPrice(bien).includes('/') ? `/ ${formatPrice(bien).split('/')[1]}` : 'FCFA'}
+                </span>
+              </p>
+              
+              {routeGeometry && (
+                <div style={{ 
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: '10px 12px', background: 'rgba(59,130,246,0.1)',
+                  borderRadius: 12, border: '1px solid rgba(59,130,246,0.2)',
+                  marginBottom: 20
+                }}>
+                  <div style={{ width: 6, height: 6, background: '#3b82f6', borderRadius: '50%' }} />
+                  <p style={{ color: '#60a5fa', fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    Itinéraire tracé en bleu sur la carte
+                  </p>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: 10 }}>
+                <Link
+                  href={`/biens/${bien.id}`}
+                  style={{
+                    flex: 1, textAlign: 'center',
+                    padding: '12px 0',
+                    background: '#D4AF37', color: '#000',
+                    borderRadius: 14, fontSize: 10, fontWeight: 800,
+                    textTransform: 'uppercase', letterSpacing: '0.1em',
+                    textDecoration: 'none', transition: 'all 0.3s'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 8px 20px rgba(212,175,55,0.3)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none' }}
+                  onClick={e => e.stopPropagation()}
+                >
+                  Voir Détails
+                </Link>
+                <button
+                  style={{
+                    padding: '12px 16px',
+                    background: 'rgba(255,255,255,0.1)',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    borderRadius: 14, color: '#fff', fontSize: 12, cursor: 'pointer',
+                    transition: 'all 0.3s'
+                  }}
+                  onClick={(e) => { e.stopPropagation(); setSelectedId(null); onSelect?.(null) }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                >
+                  ✕
+                </button>
+              </div>
             </div>
           </div>
         )
