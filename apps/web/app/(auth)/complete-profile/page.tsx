@@ -9,7 +9,7 @@ export default function CompleteProfilePage() {
   const supabase = createClient()
 
   const [fullName, setFullName] = useState('')
-  const [role, setRole] = useState<'locataire' | 'proprietaire'>('locataire')
+  const [role, setRole] = useState<'visiteur' | 'locataire' | 'proprietaire'>('visiteur')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [checking, setChecking] = useState(true)
@@ -104,7 +104,27 @@ export default function CompleteProfilePage() {
           <label className="block text-sm font-medium text-[var(--text)] mb-2">
             Je suis un(e)
           </label>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <button
+              type="button"
+              onClick={() => setRole('visiteur')}
+              className={`flex items-center justify-center p-4 border-2 rounded-card transition-colors ${
+                role === 'visiteur'
+                  ? 'border-primary bg-primary/5'
+                  : 'border-[var(--border)] hover:border-primary/40'
+              }`}
+            >
+              <div className="text-center">
+                <div className="flex justify-center mb-1">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                    <path d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12z"/>
+                    <path d="M12 16v-4"/>
+                    <path d="M12 8h.01"/>
+                  </svg>
+                </div>
+                <span className="text-sm font-medium text-[var(--text)]">Visiteur</span>
+              </div>
+            </button>
             <button
               type="button"
               onClick={() => setRole('locataire')}
