@@ -26,7 +26,7 @@ export function ConciergerieLive({ propertyContext, isFloatingTrigger = false, c
           }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsOpen(true)}
-          className={`fixed bottom-8 right-8 z-50 w-20 h-20 rounded-[2rem] bg-gradient-to-br from-slate-900 via-slate-950 to-black border border-accent-luxury/20 text-accent-luxury shadow-[0_20px_60px_rgba(0,0,0,0.8)] flex items-center justify-center group overflow-hidden ${className}`}
+          className={`fixed bottom-8 right-8 z-50 w-20 h-20 rounded-[2.2rem] bg-gradient-to-br from-slate-900 via-slate-950 to-black border border-accent-luxury/30 text-accent-luxury shadow-[0_25px_70px_rgba(0,0,0,0.9)] flex items-center justify-center group overflow-hidden ${className}`}
         >
           {/* Animated Background Glow */}
           <div className="absolute inset-0 bg-gradient-to-tr from-accent-luxury/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
@@ -57,10 +57,14 @@ export function ConciergerieLive({ propertyContext, isFloatingTrigger = false, c
       <div className={className || "flex flex-col gap-4"}>
         <button 
           onClick={() => setIsOpen(true)}
-          className="w-full flex items-center justify-center gap-4 py-8 bg-gradient-to-br from-slate-900 to-black border border-accent-luxury/20 rounded-[2rem] text-[10px] font-bold uppercase tracking-[0.4em] font-display hover:border-accent-luxury/40 transition-all duration-500 hover:bg-accent-luxury/5 text-white group shadow-2xl"
+          className="w-full flex flex-col items-center justify-center gap-2 py-10 bg-gradient-to-br from-slate-900 to-black border border-accent-luxury/20 rounded-[2.5rem] hover:border-accent-luxury/50 transition-all duration-500 hover:bg-accent-luxury/5 text-white group shadow-2xl relative overflow-hidden"
         >
-          <MessageCircle className="w-5 h-5 text-accent-luxury transition-transform group-hover:scale-110" />
-          <span className="group-hover:text-accent-luxury transition-colors">Sapphire Interne 5.0</span>
+          <div className="absolute top-0 right-0 w-24 h-24 bg-accent-luxury/5 blur-2xl rounded-full translate-x-1/2 -translate-y-1/2 group-hover:bg-accent-luxury/10 transition-colors" />
+          <div className="p-3 bg-accent-luxury/10 rounded-2xl mb-2 group-hover:scale-110 group-hover:bg-accent-luxury/20 transition-all duration-500">
+            <Sparkles className="w-6 h-6 text-accent-luxury" />
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-[0.4em] font-display group-hover:text-accent-luxury transition-colors">Sapphire Interne 5.0</span>
+          <span className="text-[8px] font-bold text-white/40 uppercase tracking-[0.2em]">Assistant Privé de Luxe</span>
         </button>
       </div>
 

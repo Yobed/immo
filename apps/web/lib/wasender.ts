@@ -5,7 +5,8 @@
  */
 
 const WASSENDER_API_KEY = process.env.WASSENDER_API_KEY || '5bad69e29793e748f2fea9043435cd4844aadd6b0947b650b2efb82c86c34017';
-const BASE_URL = 'https://wasenderapi.com/api';
+const WASSENDER_WEBHOOK_SECRET = process.env.WASSENDER_WEBHOOK_SECRET || 'f86d09168461f558d119318034466d90';
+const BASE_URL = 'https://www.wasenderapi.com/api';
 
 export type WasenderMessageType = 'text' | 'image' | 'video' | 'document' | 'audio';
 
@@ -13,6 +14,21 @@ export interface WasenderSendResponse {
   status: boolean;
   message: string;
   data?: any;
+}
+
+/**
+ * Vérifie la signature du webhook Wasender
+ */
+export function verifyWasenderSignature(payload: string, signature: string): boolean {
+  if (!WASSENDER_WEBHOOK_SECRET) return true; // Skip if no secret configured
+  
+  const crypto = require('crypto');
+  const expectedSignature = crypto
+    .createHmac('sha256', WASSENDER_WEBHOOK_SECRET)
+    .update(payload)
+    .digest('hex');
+    
+  return expectedSignature === signature;
 }
 
 /**
@@ -24,6 +40,7 @@ async function wasenderFetch(endpoint: string, options: RequestInit = {}) {
   const headers = {
     'Authorization': `Bearer ${WASSENDER_API_KEY}`,
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
     ...(options.headers || {}),
   };
 
@@ -53,7 +70,9 @@ export async function wasenderSendMessage(
   mediaUrl?: string
 ): Promise<WasenderSendResponse> {
   // Format the phone number to ensure it has the plus sign if needed
-  const cleanTo = to.startsWith('+') ? to : `+${to.replace(/\D/g, '')}`;
+  // Wasender expects international format without '+' or with it? 
+  // Research says E.164.
+  const cleanTo = to.includes('@') ? to : (to.startsWith('+') ? to : `+${to.replace(/\D/g, '')}`);
 
   let payload: any = {
     to: cleanTo,
@@ -64,6 +83,10 @@ export async function wasenderSendMessage(
     payload.imageUrl = mediaUrl;
   } else if (type === 'video' && mediaUrl) {
     payload.videoUrl = mediaUrl;
+  } else if (type === 'document' && mediaUrl) {
+    payload.documentUrl = mediaUrl;
+  } else if (type === 'audio' && mediaUrl) {
+    payload.audioUrl = mediaUrl;
   }
 
   return wasenderFetch('/send-message', {
@@ -96,3 +119,4 @@ export async function wasenderCheckNumber(phone: string) {
 export async function wasenderGetStatus() {
   return wasenderFetch('/status');
 }
+

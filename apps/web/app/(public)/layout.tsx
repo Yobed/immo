@@ -143,7 +143,6 @@ export default async function PublicLayout({ children }: { children: React.React
 
       {children}
 
-      <ConciergerieLive isFloatingTrigger={true} />
     </>
   )
 }

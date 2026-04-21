@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { wasenderSendMessage } from '@/lib/wasender';
+import { wasenderSendMessage, verifyWasenderSignature } from '@/lib/wasender';
 import { chatImmobilier } from '@/lib/ai';
 import { getAIBienContext } from '@/lib/ai/tools';
 
@@ -13,7 +13,16 @@ const getSupabase = () => createClient(
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const rawBody = await req.text();
+    const signature = req.headers.get('x-webhook-signature');
+
+    // Vérification de la signature si configurée
+    if (signature && !verifyWasenderSignature(rawBody, signature)) {
+        console.error('Invalid WhatsApp Webhook Signature');
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = JSON.parse(rawBody);
 
     // Wasender standard payload
     const { event, data } = body;
@@ -35,13 +44,19 @@ export async function POST(req: NextRequest) {
     }
 
     const jid = msg.key?.remoteJid;
-    // remoteJid format: 1234567890@s.whatsapp.net, WasenderSendMessage expects e.g. +1234567890 or 1234567890. Use cleanedSenderPn if available
+    // remoteJid format: 1234567890@s.whatsapp.net
     const senderPn = msg.key?.cleanedSenderPn || jid?.split('@')[0];
     const contactName = msg.pushName || 'Client';
 
-    const userMessage = msg.messageBody;
+    // Extract message content safely
+    const userMessage = msg.messageBody || 
+                       msg.message?.conversation || 
+                       msg.message?.extendedTextMessage?.text ||
+                       msg.text || 
+                       '';
 
     if (!senderPn || !userMessage) {
+      console.log('Ignoring message: missing senderPn or userMessage', { senderPn, userMessage });
       return NextResponse.json({ status: 'ignored' });
     }
 
