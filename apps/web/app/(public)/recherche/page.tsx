@@ -1,10 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { PremiumBienCard } from '@/components/bien/PremiumBienCard'
+import { PremiumBienListCard } from '@/components/bien/PremiumBienListCard'
 import { SearchBar } from '@/components/search/SearchBar'
 import { SearchFilters } from '@/components/search/SearchFilters'
 import { MobileFiltersDrawer } from '@/components/search/MobileFiltersDrawer'
 import { PropertiesMap } from '@/components/map/PropertiesMap'
-import { Compass, Grid, Map as MapIcon, SlidersHorizontal } from 'lucide-react'
+import { Compass, Grid, Map as MapIcon, SlidersHorizontal, List } from 'lucide-react'
 
 const PAGE_SIZE = 12
 
@@ -42,7 +43,7 @@ export default async function RecherchePage({
   const params = await searchParams
   const supabase = await createClient()
   const page = Math.max(0, parseInt(params.page ?? '0', 10))
-  const vue = params.vue === 'carte' ? 'carte' : 'grille'
+  const vue = ['carte', 'grille', 'liste'].includes(params.vue as string) ? params.vue : 'grille'
 
   let dbQuery = (supabase as any)
     .from('biens')
@@ -105,6 +106,7 @@ export default async function RecherchePage({
             <div className="h-12 w-px bg-off-white/10" />
             <div className="flex gap-1.5 p-1.5 bg-[var(--midnight-muted)] rounded-2xl border border-[var(--border)] shadow-sm">
               <ViewToggle active={vue === 'grille'} href={`/recherche?${new URLSearchParams({ ...params, vue: 'grille' }).toString()}`} icon={Grid} label="Grille" />
+              <ViewToggle active={vue === 'liste'} href={`/recherche?${new URLSearchParams({ ...params, vue: 'liste' }).toString()}`} icon={List} label="Liste" />
               <ViewToggle active={vue === 'carte'} href={`/recherche?${new URLSearchParams({ ...params, vue: 'carte' }).toString()}`} icon={MapIcon} label="Carte" />
             </div>
           </div>
@@ -150,6 +152,26 @@ export default async function RecherchePage({
 
             {bienRows.length === 0 ? (
               <EmptyResults hasFilters={hasFilters} />
+            ) : vue === 'liste' ? (
+              <div className="flex flex-col gap-6">
+                {bienRows.map((bien, i) => (
+                  <PremiumBienListCard
+                    key={bien.id}
+                    id={bien.id}
+                    titre={bien.titre}
+                    commune={bien.commune}
+                    quartier={bien.quartier}
+                    type_bien={bien.type_bien}
+                    prix_mois_fcfa={bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa}
+                    prix_nuit_fcfa={bien.prix_nuit_fcfa}
+                    prix_vente_fcfa={bien.prix_vente_fcfa}
+                    surface_m2={bien.surface_m2}
+                    nb_pieces={bien.nb_pieces}
+                    photo_url={coverMap[bien.id] ?? null}
+                    index={i}
+                  />
+                ))}
+              </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
                 {bienRows.map((bien, i) => (
