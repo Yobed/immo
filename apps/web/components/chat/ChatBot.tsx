@@ -98,7 +98,7 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
             <h3 className="text-[var(--text)] font-display font-bold text-base tracking-tight">Sapphire Intelligence</h3>
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-secondary" />
-              <p className="text-[9px] uppercase font-bold tracking-[0.2em] text-[var(--text)]/40">Majordome Digital & Concierge</p>
+              <p className="text-[9px] uppercase font-bold tracking-[0.2em] text-[var(--text)]/40">Sapphire Intelligence</p>
             </div>
           </div>
         </div>
@@ -111,7 +111,7 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
           >
             <MessageCircle className="w-5 h-5" />
             <span className="absolute -bottom-8 right-0 text-[8px] bg-green-500 text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-              WhatsApp VIP
+              Sapphire WhatsApp
             </span>
           </a>
           {onClose && (

@@ -18,7 +18,7 @@ export const WhatsAppConcierge = () => {
         <div className="bg-[var(--midnight)]/90 backdrop-blur-xl border border-emerald-500/20 px-4 py-2 rounded-2xl shadow-2xl text-xs font-bold text-emerald-400 whitespace-nowrap uppercase tracking-widest">
           <span className="flex items-center">
             <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-            Conciergerie VIP
+            Sapphire WhatsApp
           </span>
         </div>
       </div>
@@ -36,12 +36,16 @@ export const WhatsAppConcierge = () => {
           boxShadow: '0 20px 40px -12px rgba(16, 185, 129, 0.4)'
         }}
         whileTap={{ scale: 0.9 }}
-        className="flex items-center justify-center w-14 h-14 bg-gradient-to-tr from-emerald-600 to-emerald-400 text-white rounded-full shadow-2xl relative overflow-hidden group/btn"
+        className="flex items-center justify-center w-16 h-16 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-2xl shadow-2xl relative overflow-hidden group/btn"
       >
         {/* Shine effect */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000" />
         
-        <MessageSquare className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+        <img 
+          src="/whatsapp-3d.png" 
+          alt="WhatsApp" 
+          className="w-12 h-12 object-contain group-hover:scale-110 transition-transform duration-500" 
+        />
       </motion.a>
       
       {/* Pulse effect */}

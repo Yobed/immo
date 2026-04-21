@@ -132,6 +132,10 @@ body {
   font-family: 'Playfair Display', serif;
 }
 
+.font-display {
+  font-family: 'Playfair Display', serif;
+}
+
 ::selection {
   background: var(--secondary);
   color: #fff;
@@ -301,6 +305,14 @@ body {
   background: linear-gradient(-45deg, #0C2D5E, #1A4D8F, #0C3D78, #152B54);
   background-size: 400% 400%;
   animation: gradientPan 10s ease infinite;
+}
+
+.bg-midnight {
+  background-color: var(--midnight);
+}
+
+.text-accent-luxury {
+  color: var(--accent-luxury);
 }
 
 /* Dot grid pattern */

@@ -20,7 +20,7 @@ export function ChatMessage({ role, content }: Props) {
           {isUser ? <User className="w-3.5 h-3.5 text-[var(--text)]/40" /> : <Sparkles className="w-3.5 h-3.5 text-[var(--accent-luxury)]" />}
         </div>
         <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--text)]/20">
-          {isUser ? 'Client Privilégié' : 'Conciergerie Élite'}
+          {isUser ? 'Client Privilégié' : 'Sapphire Intelligence'}
         </span>
       </div>
       

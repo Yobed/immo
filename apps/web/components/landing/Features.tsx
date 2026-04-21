@@ -37,7 +37,7 @@ const features = [
   },
   {
     id: 'ia',
-    title: 'Intelligence Concierge',
+    title: 'Sapphire Intelligence',
     description: 'Un assistant IA dédié pour orchestrer vos visites et répondre à vos exigences 24h/24.',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
@@ -58,7 +58,7 @@ const features = [
   },
   {
     id: 'notif',
-    title: 'Canal WhatsApp',
+    title: 'Sapphire WhatsApp',
     description: 'Une communication directe et instantanée pour ne jamais manquer l\'exceptionnel.',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1" fill="none"><path d="M22 16.92v3a2 2 0 01-2.18 2A19.79 19.79 0 0112 19a19.5 19.5 0 01-6-6 19.79 19.79 0 01-2-8.72A2 2 0 015.09 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L9.91 9.09a16 16 0 006 6l1.45-1.45a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>

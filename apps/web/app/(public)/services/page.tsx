@@ -52,7 +52,7 @@ const ServicesPage = () => {
             Des services façonnés pour <span className="text-[var(--accent-luxury)] italic font-serif">l'Exception.</span>
           </h1>
           <p className="text-xl text-white/60 leading-relaxed max-w-2xl font-light">
-            De la gestion de patrimoine à la conciergerie privée, nous redéfinissons les standards de l'immobilier premium en Côte d'Ivoire.
+            De la gestion de patrimoine à la Sapphire Intelligence, nous redéfinissons les standards de l'immobilier premium en Côte d'Ivoire.
           </p>
         </div>
       </section>
@@ -104,9 +104,9 @@ const ServicesPage = () => {
               <Sparkles className="w-10 h-10 text-[var(--accent-luxury)]" />
             </div>
             <div>
-              <h2 className="text-4xl lg:text-6xl font-display font-medium mb-6">Conciergerie <br/><span className="text-[var(--accent-luxury)] underline decoration-1 underline-offset-8">Intelligente 24/7</span></h2>
+              <h2 className="text-4xl lg:text-6xl font-display font-medium mb-6">Sapphire <br/><span className="text-[var(--accent-luxury)] underline decoration-1 underline-offset-8">Intelligence 24/7</span></h2>
               <p className="text-xl text-white/50 leading-relaxed font-light">
-                Oubliez les recherches fastidieuses. Notre Majordome Digital, <span className="text-white font-medium">Sapphire Intelligence</span>, connaît chaque bien sur le bout des doigts. 
+                Oubliez les recherches fastidieuses. Votre Assistant de Prestige, <span className="text-white font-medium">Sapphire Intelligence</span>, connaît chaque bien sur le bout des doigts. 
                 Une recherche par critères, une recommandation de quartier ou une planification de visite : votre assistant personnel est toujours disponible.
               </p>
             </div>

@@ -96,7 +96,7 @@ export function FurnishedRentalsSection() {
                 <span className="italic font-serif text-[var(--accent-luxury)]">Résidence Meublée.</span>
               </h2>
               <p className="text-[var(--text-muted)] text-lg mb-12 font-light leading-relaxed">
-                Nos résidences meublées sont sélectionnées pour leur confort absolu, leur emplacement stratégique et leurs services de conciergerie.
+                Nos résidences meublées sont sélectionnées pour leur confort absolu, leur emplacement stratégique et l'accompagnement Sapphire Intelligence.
               </p>
 
               <div className="space-y-6">

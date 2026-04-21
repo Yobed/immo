@@ -33,7 +33,7 @@ const columns = [
     title: 'Contact',
     links: [
       { label: 'Support', href: '/support' },
-      { label: 'WhatsApp', href: 'https://wa.me/2250700000000' },
+      { label: 'WhatsApp', href: 'https://wa.me/2250574243752' },
       { label: 'Email', href: 'mailto:contact@immo-ci.com' },
       { label: 'Partenariats', href: '/partenariats' },
     ],
