@@ -4,7 +4,9 @@ import { wasenderSendMessage } from '@/lib/wasender';
 import { chatImmobilier } from '@/lib/ai';
 import { getAIBienContext } from '@/lib/ai/tools';
 
-const supabase = createClient(
+// Supabase client will be created inside the route handler to avoid top-level env var build errors
+// or using a getter
+const getSupabase = () => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
@@ -44,7 +46,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Sauvegarder le message entrant dans Supabase
-    await supabase.from('whatsapp_messages').insert({
+    await getSupabase().from('whatsapp_messages').insert({
       jid,
       direction: 'inbound',
       body: userMessage,
@@ -52,14 +54,14 @@ export async function POST(req: NextRequest) {
     });
 
     // 2. Récupérer l'historique récent pour la conversation
-    const { data: history } = await supabase
+    const { data: history } = await getSupabase()
       .from('whatsapp_messages')
       .select('direction, body')
       .eq('jid', jid)
       .order('created_at', { ascending: false })
       .limit(10);
 
-    const formattedHistory = (history || [])
+    const formattedHistory = ((history as any[]) || [])
       .reverse()
       .map(msg => ({
         role: msg.direction === 'inbound' ? 'user' : 'assistant' as 'user' | 'assistant',
@@ -97,7 +99,7 @@ export async function POST(req: NextRequest) {
       );
 
       // 7. Sauvegarder la réponse sortante
-      await supabase.from('whatsapp_messages').insert({
+      await getSupabase().from('whatsapp_messages').insert({
         jid,
         direction: 'outbound',
         body: finalSpeech,
