@@ -25,13 +25,11 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import * as motion from 'framer-motion/client'
-import { ShortsTrigger } from '@/components/bien/ShortsTrigger'
 import { DiscoveryBar } from '@/components/bien/DiscoveryBar'
 import { BroadcastButton } from '@/components/bien/BroadcastButton'
 import { StickyMobileCTA } from '@/components/bien/StickyMobileCTA'
 import { BienMediaGallery } from '@/components/bien/BienMediaGallery'
-
-const formatPropertyId = (id: string) => `ID-${id.slice(0, 4).toUpperCase()}`
+import { MediaNavBar } from '@/components/bien/MediaNavBar'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
@@ -133,7 +131,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
   }))
 
   return (
-    <main className="bg-[#020617] min-h-screen selection:bg-accent-luxury/20 font-sans text-slate-200 antialiased overflow-x-hidden pb-20 lg:pb-0">
+    <main className="bg-white min-h-screen selection:bg-accent-luxury/20 font-sans text-slate-800 antialiased overflow-x-hidden pb-20 lg:pb-0">
 
       {/* Discovery Bar — desktop only */}
       <div className="hidden md:block">
@@ -160,6 +158,21 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
 
       {/* ─── MAIN CONTENT ─── */}
       <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-8 md:py-14">
+
+        {/* Media quick nav */}
+        <div className="mb-8">
+          <MediaNavBar
+            photoCount={medias.filter((m: any) => m.type === 'photo').length}
+            videoMedias={videoMedias.map((v: any) => ({ id: v.id, url: v.url, titre: v.titre }))}
+            has360={vue360Medias.length > 0}
+            has3D={!!bien.url_visite_3d}
+            bienTitre={bien.titre}
+            bienCommune={bien.commune}
+            prixFormatted={prix ? prix.value + prix.suffix : ''}
+            bienId={bien.id}
+          />
+        </div>
+
         <div className="flex flex-col lg:flex-row gap-8 xl:gap-14">
 
           {/* Left column */}
@@ -167,9 +180,9 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
 
             {/* DESCRIPTION */}
             {bien.description && (
-              <section className="mb-8 pl-4 border-l-2 border-accent-luxury/40">
-                <h2 className="text-[10px] font-bold uppercase tracking-[0.4em] text-white/30 mb-3">Description</h2>
-                <p className="text-base md:text-lg font-light text-white/70 leading-[1.7] break-words whitespace-pre-wrap">
+              <section className="mb-8 pl-4 border-l-2 border-accent-luxury/50">
+                <h2 className="text-[10px] font-bold uppercase tracking-[0.4em] text-slate-400 mb-3">Description</h2>
+                <p className="text-base md:text-lg font-light text-slate-700 leading-[1.7] break-words whitespace-pre-wrap">
                   {bien.description}
                 </p>
               </section>
@@ -178,10 +191,10 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             {/* ÉQUIPEMENTS */}
             {bien.equipements?.length > 0 && (
               <section className="mb-8">
-                <h2 className="text-[10px] font-bold uppercase tracking-[0.4em] text-white/30 mb-3">Équipements</h2>
+                <h2 className="text-[10px] font-bold uppercase tracking-[0.4em] text-slate-400 mb-3">Équipements</h2>
                 <div className="flex flex-wrap gap-2">
                   {bien.equipements.map((eq: string) => (
-                    <span key={eq} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/60 font-medium">
+                    <span key={eq} className="px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-xs text-slate-600 font-medium">
                       {EQUIPEMENTS_LABELS[eq] ?? eq}
                     </span>
                   ))}
@@ -194,20 +207,20 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
               <section id="visite-3d" className="mb-8 scroll-mt-20">
                 <div className="flex items-center gap-3 mb-4">
                   <Eye className="w-4 h-4 text-accent-luxury/60" />
-                  <h2 className="text-base font-bold text-white">Visite 3D / 360°</h2>
+                  <h2 className="text-base font-bold text-slate-800">Visite 3D / 360°</h2>
                 </div>
                 <div className="space-y-4">
                   {bien.url_visite_3d && (
-                    <div className="rounded-2xl overflow-hidden border border-white/10 bg-slate-950">
+                    <div className="rounded-2xl overflow-hidden border border-slate-200">
                       <VirtualTourViewer url={bien.url_visite_3d} title={bien.titre} />
                     </div>
                   )}
                   {vue360Medias.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {vue360Medias.map((media: any, i: number) => (
-                        <div key={media.id} className="relative aspect-[16/10] bg-black rounded-2xl overflow-hidden border border-white/5">
+                        <div key={media.id} className="relative aspect-[16/10] bg-slate-900 rounded-2xl overflow-hidden border border-slate-200">
                           <Bien360 panoramaUrl={media.url} />
-                          <div className="absolute bottom-3 left-3 z-10 px-3 py-1 bg-slate-950/80 backdrop-blur-md rounded-full border border-white/10">
+                          <div className="absolute bottom-3 left-3 z-10 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full">
                             <span className="text-[8px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-1.5">
                               <Sparkles className="w-2.5 h-2.5 text-accent-luxury" />
                               {media.titre || `Vue ${i + 1}`}
@@ -225,9 +238,9 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             <section className="mb-8">
               <div className="flex items-center gap-3 mb-3">
                 <MapPin className="w-4 h-4 text-accent-luxury/60" />
-                <h3 className="text-base font-bold text-white">Localisation</h3>
+                <h3 className="text-base font-bold text-slate-800">Localisation</h3>
               </div>
-              <div className="aspect-video relative rounded-2xl overflow-hidden border border-white/10 hover:border-accent-luxury/20 transition-colors duration-500">
+              <div className="aspect-video relative rounded-2xl overflow-hidden border border-slate-200 hover:border-accent-luxury/40 transition-colors duration-500">
                 <BienMap
                   latitude={bien.latitude}
                   longitude={bien.longitude}
@@ -241,15 +254,15 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             {/* Owner management (desktop only — mobile shown above) */}
             {isOwner && (
               <section className="mb-8 space-y-2.5 hidden lg:block">
-                <p className="text-[10px] text-white/30 uppercase tracking-widest font-medium mb-3">Gestion de l&apos;annonce</p>
-                <Link href={`/mes-biens/${bien.id}/modifier`} className="flex items-center justify-center w-full py-3.5 bg-white text-slate-950 rounded-xl font-bold text-sm hover:bg-accent-luxury transition-all">
+                <p className="text-[10px] text-slate-400 uppercase tracking-widest font-medium mb-3">Gestion de l&apos;annonce</p>
+                <Link href={`/mes-biens/${bien.id}/modifier`} className="flex items-center justify-center w-full py-3.5 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-accent-luxury transition-all">
                   Modifier l&apos;annonce
                 </Link>
-                <Link href={`/mes-biens/${bien.id}/modifier?step=medias`} className="flex items-center justify-center w-full py-3.5 bg-white/5 border border-white/10 text-white rounded-xl font-bold text-sm hover:bg-white/10 transition-all">
+                <Link href={`/mes-biens/${bien.id}/modifier?step=medias`} className="flex items-center justify-center w-full py-3.5 bg-slate-100 border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all">
                   Gérer les médias
                 </Link>
                 <BroadcastButton bienId={bien.id} statut={bien.statut} />
-                <div className="pt-3 border-t border-white/5">
+                <div className="pt-3 border-t border-slate-100">
                   <DeleteBienButton bienId={bien.id} titre={bien.titre} />
                 </div>
               </section>
@@ -263,25 +276,24 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="bg-slate-900/80 backdrop-blur-3xl rounded-2xl p-6 shadow-2xl border border-white/10 relative overflow-hidden"
+                className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200 relative overflow-hidden"
               >
-                <div className="absolute top-0 right-0 w-48 h-48 bg-accent-luxury/5 blur-[80px] pointer-events-none" />
                 <div className="relative z-10">
 
                   {/* PRIX */}
-                  <div className="mb-5 pb-5 border-b border-white/5">
+                  <div className="mb-5 pb-5 border-b border-slate-100">
                     <div className="flex items-baseline gap-2 mb-1">
-                      <span className="text-3xl font-display font-bold tracking-tighter text-white">
+                      <span className="text-3xl font-display font-bold tracking-tighter text-slate-900">
                         {prixValue ? formatFCFA(prixValue) : 'Sur Demande'}
                       </span>
-                      {prixSuffix && <span className="text-white/30 text-sm">{prixSuffix}</span>}
+                      {prixSuffix && <span className="text-slate-400 text-sm">{prixSuffix}</span>}
                     </div>
                     {bien.charges_mois_fcfa > 0 && (
-                      <p className="text-white/30 text-xs mt-1">+ {formatFCFA(bien.charges_mois_fcfa)} charges/mois</p>
+                      <p className="text-slate-400 text-xs mt-1">+ {formatFCFA(bien.charges_mois_fcfa)} charges/mois</p>
                     )}
                     <div className="flex items-center gap-2 mt-2">
                       <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="text-emerald-400 text-xs font-medium">Disponible</span>
+                      <span className="text-emerald-600 text-xs font-medium">Disponible</span>
                     </div>
                   </div>
 
@@ -290,7 +302,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                       {isNuitee ? (
                         <Link
                           href={`/reservations/nouvelle?bienId=${bien.id}`}
-                          className="flex items-center justify-center w-full py-4 bg-white text-slate-900 rounded-xl font-bold text-sm hover:bg-accent-luxury transition-all duration-300 active:scale-[0.98]"
+                          className="flex items-center justify-center w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-accent-luxury transition-all duration-300 active:scale-[0.98]"
                         >
                           Réserver maintenant
                         </Link>
@@ -302,9 +314,9 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                             bienPrix={`${formatFCFA(prixValue!)}${prixSuffix}`}
                           />
                           <div className="flex items-center gap-3">
-                            <div className="flex-1 h-px bg-white/5" />
-                            <span className="text-[10px] text-white/20 uppercase tracking-widest">ou</span>
-                            <div className="flex-1 h-px bg-white/5" />
+                            <div className="flex-1 h-px bg-slate-100" />
+                            <span className="text-[10px] text-slate-300 uppercase tracking-widest">ou</span>
+                            <div className="flex-1 h-px bg-slate-100" />
                           </div>
                           <VisiteRequestForm bienId={bien.id} proprietaireId={bien.proprietaire_id as string} isPremium={true} />
                         </>
@@ -312,38 +324,38 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                     </div>
                   ) : (
                     <div className="space-y-2.5">
-                      <p className="text-[10px] text-white/30 uppercase tracking-widest font-medium mb-3">Gestion</p>
-                      <Link href={`/mes-biens/${bien.id}/modifier`} className="flex items-center justify-center w-full py-3.5 bg-white text-slate-950 rounded-xl font-bold text-sm hover:bg-accent-luxury transition-all">
+                      <p className="text-[10px] text-slate-400 uppercase tracking-widest font-medium mb-3">Gestion</p>
+                      <Link href={`/mes-biens/${bien.id}/modifier`} className="flex items-center justify-center w-full py-3.5 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-accent-luxury transition-all">
                         Modifier l&apos;annonce
                       </Link>
-                      <Link href={`/mes-biens/${bien.id}/modifier?step=medias`} className="flex items-center justify-center w-full py-3.5 bg-white/5 border border-white/10 text-white rounded-xl font-bold text-sm hover:bg-white/10 transition-all">
+                      <Link href={`/mes-biens/${bien.id}/modifier?step=medias`} className="flex items-center justify-center w-full py-3.5 bg-slate-100 border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all">
                         Gérer les médias
                       </Link>
                       <BroadcastButton bienId={bien.id} statut={bien.statut} />
-                      <div className="pt-3 border-t border-white/5">
+                      <div className="pt-3 border-t border-slate-100">
                         <DeleteBienButton bienId={bien.id} titre={bien.titre} />
                       </div>
                     </div>
                   )}
 
                   {/* PROPRIÉTAIRE */}
-                  <div className="mt-5 pt-5 border-t border-white/5">
+                  <div className="mt-5 pt-5 border-t border-slate-100">
                     <div className="flex items-center gap-3">
-                      <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-slate-800 border border-white/10 shrink-0">
+                      <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
                         {proprio?.avatar_url ? (
                           <Image src={proprio.avatar_url} alt={proprio.full_name || ''} fill className="object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <Sparkles className="w-4 h-4 text-white/10" />
+                            <Sparkles className="w-4 h-4 text-slate-300" />
                           </div>
                         )}
                       </div>
                       <div>
-                        <p className="text-[9px] text-white/30 uppercase tracking-widest mb-0.5">Propriétaire</p>
-                        <p className="font-bold text-white text-sm">{proprio?.full_name || 'Immo CI'}</p>
+                        <p className="text-[9px] text-slate-400 uppercase tracking-widest mb-0.5">Propriétaire</p>
+                        <p className="font-bold text-slate-800 text-sm">{proprio?.full_name || 'Immo CI'}</p>
                         <div className="flex items-center gap-1.5 mt-0.5">
                           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                          <span className="text-[9px] text-emerald-400">Disponible</span>
+                          <span className="text-[9px] text-emerald-600">Disponible</span>
                         </div>
                       </div>
                     </div>
@@ -356,12 +368,12 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
 
         {/* ─── BIENS SIMILAIRES ─── */}
         {similarBiens && similarBiens.length > 0 && (
-          <section className="mt-10 border-t border-white/5 pt-8">
+          <section className="mt-10 border-t border-slate-100 pt-8">
             <div className="flex items-center justify-between gap-4 mb-5">
-              <h2 className="text-xl md:text-2xl font-display font-bold text-white">
+              <h2 className="text-xl md:text-2xl font-display font-bold text-slate-800">
                 Similaires à <span className="text-accent-luxury">{bien.commune}</span>
               </h2>
-              <Link href={`/recherche?commune=${bien.commune}`} className="flex items-center gap-1.5 text-white/40 hover:text-white text-xs font-medium transition-colors shrink-0">
+              <Link href={`/recherche?commune=${bien.commune}`} className="flex items-center gap-1.5 text-slate-400 hover:text-slate-700 text-xs font-medium transition-colors shrink-0">
                 Voir tout <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
@@ -392,7 +404,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
         )}
       </div>
 
-      <footer className="border-t border-white/5 py-8 text-center text-white/20 text-xs">
+      <footer className="border-t border-slate-100 py-8 text-center text-slate-400 text-xs">
         © 2026 Immo CI — Tous droits réservés
       </footer>
 
