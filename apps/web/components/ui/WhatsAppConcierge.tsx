@@ -12,7 +12,7 @@ export const WhatsAppConcierge = () => {
   const MESSAGE = encodeURIComponent("Bonjour Élite Immo CI, je souhaiterais obtenir des informations sur une résidence de prestige.");
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 group">
+    <div className="hidden lg:block fixed bottom-6 right-6 z-50 group">
       {/* Tooltip */}
       <div className="absolute bottom-full right-0 mb-4 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none transform translate-y-2 group-hover:translate-y-0">
         <div className="bg-[var(--midnight)]/90 backdrop-blur-xl border border-emerald-500/20 px-4 py-2 rounded-2xl shadow-2xl text-xs font-bold text-emerald-400 whitespace-nowrap uppercase tracking-widest">

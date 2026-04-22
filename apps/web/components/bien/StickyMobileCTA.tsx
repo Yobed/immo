@@ -19,11 +19,7 @@ export function StickyMobileCTA({ bienTitre, bienLieu, prix, prixSuffix, bienId,
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    const handler = () => {
-      const y = window.scrollY
-      const max = document.documentElement.scrollHeight - window.innerHeight - 120
-      setVisible(y > 400 && y < max)
-    }
+    const handler = () => setVisible(window.scrollY > 300)
     window.addEventListener('scroll', handler, { passive: true })
     handler()
     return () => window.removeEventListener('scroll', handler)
