@@ -423,9 +423,9 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
               )}
             </div>
 
-            {/* Route info badge */}
+            {/* Route info badge — desktop only (mobile handled by PropertiesMap compact bar) */}
             {selectedBien && (
-              <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 px-5 py-3 bg-black/80 backdrop-blur-xl rounded-full border border-[var(--accent-luxury)]/40 flex items-center gap-4 shadow-2xl">
+              <div className="hidden sm:flex absolute bottom-5 left-1/2 -translate-x-1/2 z-10 px-5 py-3 bg-black/80 backdrop-blur-xl rounded-full border border-[var(--accent-luxury)]/40 items-center gap-4 shadow-2xl">
                 <div className="w-2 h-2 rounded-full bg-[var(--accent-luxury)] animate-pulse" />
                 <span className="text-white text-[10px] font-bold uppercase tracking-widest">
                   Itinéraire vers : {selectedBien.titre}

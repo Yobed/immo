@@ -30,6 +30,7 @@ import { BroadcastButton } from '@/components/bien/BroadcastButton'
 import { StickyMobileCTA } from '@/components/bien/StickyMobileCTA'
 import { BienMediaGallery } from '@/components/bien/BienMediaGallery'
 import { MediaNavBar } from '@/components/bien/MediaNavBar'
+import { ScrollToTop } from '@/components/bien/ScrollToTop'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
@@ -132,6 +133,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
 
   return (
     <main className="bg-white min-h-screen selection:bg-accent-luxury/20 font-sans text-slate-800 antialiased overflow-x-hidden pb-20 lg:pb-0">
+      <ScrollToTop />
 
       {/* Discovery Bar — desktop only */}
       <div className="hidden md:block">
@@ -414,6 +416,8 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
           bienLieu={`${bien.commune}${bien.quartier ? `, ${bien.quartier}` : ''}`}
           prix={formatFCFA(prixValue)}
           prixSuffix={prixSuffix}
+          bienId={bien.id}
+          isNuitee={isNuitee}
         />
       )}
     </main>
