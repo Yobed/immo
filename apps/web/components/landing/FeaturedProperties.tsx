@@ -108,13 +108,21 @@ export function FeaturedProperties({ initialBiens = [] }: FeaturedPropertiesProp
             <div className="md:hidden space-y-8">
               {byCategory.map(cat => (
                 <div key={cat.key}>
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-display font-bold text-base text-[var(--text)] tracking-tight">
-                      {cat.label}
-                    </h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-1 h-7 rounded-full bg-[var(--accent-luxury)]" />
+                      <div>
+                        <h3 className="font-display font-bold text-xl text-[var(--text)] leading-tight tracking-tight">
+                          {cat.label}
+                        </h3>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--accent-luxury)]/70 leading-none mt-0.5">
+                          {cat.items.length} bien{cat.items.length > 1 ? 's' : ''} disponible{cat.items.length > 1 ? 's' : ''}
+                        </p>
+                      </div>
+                    </div>
                     <Link
                       href={`/biens?type_bien=${cat.key}`}
-                      className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--accent-luxury)]"
+                      className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--accent-luxury)] border-b border-[var(--accent-luxury)]/40 pb-0.5"
                     >
                       Voir tout <ArrowRight className="w-3 h-3" />
                     </Link>

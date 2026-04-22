@@ -88,36 +88,54 @@ export function StickyMobileCTA({ bienTitre, bienLieu, prix, prixSuffix, bienId,
     )
   }
 
-  /* ── Autres types : barre sticky basse classique ── */
+  /* ── Autres types : barre sticky — même design que nuitée ── */
   return (
     <AnimatePresence>
       {visible && (
         <motion.div
-          initial={{ y: 100, opacity: 0 }}
+          initial={{ y: 80, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 100, opacity: 0 }}
+          exit={{ y: 80, opacity: 0 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed bottom-0 left-0 right-0 z-[95] lg:hidden bg-white border-t border-slate-200 px-4 pt-3 shadow-2xl"
-          style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
+          className="fixed left-4 right-4 z-[95] lg:hidden flex items-center gap-3 pointer-events-none"
+          style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
         >
-          <div className="flex items-center gap-3">
+          {/* Bouton principal — carte sombre */}
+          <a
+            href={`https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="pointer-events-auto flex-1 flex items-center gap-4 h-[62px] pl-5 pr-4 bg-slate-900 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.35)] active:scale-[0.97] transition-transform overflow-hidden"
+          >
+            <div className="w-[3px] h-8 rounded-full bg-accent-luxury shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-slate-400 text-[10px] font-medium truncate">{bienLieu}</p>
-              <p className="text-slate-900 font-bold text-base leading-tight">
-                {prix}
-                {prixSuffix && <span className="text-slate-400 text-xs font-normal ml-1">{prixSuffix}</span>}
+              <p className="text-[9px] uppercase tracking-[0.18em] font-bold text-white/40 leading-none mb-1 truncate">
+                {bienLieu}
               </p>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-[18px] font-black text-accent-luxury leading-none tracking-tight">
+                  {prix}
+                </span>
+                {prixSuffix && (
+                  <span className="text-white/35 text-[10px] font-medium">{prixSuffix}</span>
+                )}
+              </div>
             </div>
-            <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-5 py-3 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.97] rounded-xl transition-all shadow-lg shadow-emerald-900/20 shrink-0"
-            >
+            <div className="w-9 h-9 rounded-xl bg-accent-luxury/15 flex items-center justify-center shrink-0">
               <img src="/whatsapp-3d.png" alt="" className="w-5 h-5 object-contain" />
-              <span className="text-white font-bold text-sm">Contacter</span>
-            </a>
-          </div>
+            </div>
+          </a>
+
+          {/* Bouton WhatsApp secondaire */}
+          <a
+            href={`https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="pointer-events-auto w-[62px] h-[62px] flex items-center justify-center rounded-2xl bg-[#25D366] shadow-[0_8px_24px_rgba(37,211,102,0.35)] active:scale-95 transition-transform shrink-0"
+            aria-label="WhatsApp"
+          >
+            <img src="/whatsapp-3d.png" alt="" className="w-7 h-7 object-contain" />
+          </a>
         </motion.div>
       )}
     </AnimatePresence>
