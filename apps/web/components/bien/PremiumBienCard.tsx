@@ -26,6 +26,7 @@ interface PremiumBienCardProps {
   index?: number
   onSelect?: (id: string) => void
   isSelected?: boolean
+  isCompact?: boolean
 }
 
 function formatFCFA(n: number): string {
@@ -43,7 +44,8 @@ export function PremiumBienCard({
   url_visite_3d,
   index = 0,
   onSelect,
-  isSelected
+  isSelected,
+  isCompact = false
 }: PremiumBienCardProps) {
   
   const prix = prix_vente_fcfa
@@ -84,7 +86,7 @@ export function PremiumBienCard({
         <div className={`relative flex flex-col h-full bg-[var(--surface-card)] rounded-[1.5rem] overflow-hidden border transition-all duration-700 hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.12)] hover:-translate-y-2 group-active:scale-[0.98] ${isSelected ? 'border-[var(--accent-luxury)] ring-1 ring-[var(--accent-luxury)]' : 'border-[var(--border)]'}`}>
           
           {/* 1. Image Architectural Section */}
-          <div className="relative aspect-[4/5] overflow-hidden bg-[var(--midnight-muted)]">
+          <div className={`relative ${isCompact ? 'aspect-video' : 'aspect-[4/5]'} overflow-hidden bg-[var(--midnight-muted)]`}>
             {photo_url ? (
               <Image
                 src={photo_url}
@@ -139,7 +141,7 @@ export function PremiumBienCard({
           </div>
 
           {/* 2. Content Section - Gallery Style */}
-          <div className="flex-1 flex flex-col p-4 pt-3 bg-inherit">
+          <div className={`flex-1 flex flex-col ${isCompact ? 'p-3 pt-2' : 'p-4 pt-3'} bg-inherit`}>
             
             {/* Context & Price Row - Stacked for better readability */}
             <div className="flex flex-col gap-2.5 mb-3">
@@ -153,7 +155,7 @@ export function PremiumBienCard({
               {/* Title & Price - Clear distinction */}
               <div className="flex flex-col gap-1.5">
                 <div className="flex justify-between items-start gap-2">
-                  <h3 className="font-display text-[16px] font-semibold text-[var(--text)] tracking-tight leading-snug line-clamp-2 flex-1">
+                  <h3 className={`font-display ${isCompact ? 'text-[14px]' : 'text-[16px]'} font-semibold text-[var(--text)] tracking-tight leading-snug line-clamp-2 flex-1`}>
                     {titre}
                   </h3>
                   {prix && (
@@ -165,7 +167,7 @@ export function PremiumBienCard({
                   )}
                 </div>
                 
-                {prix && (
+                {prix && !isCompact && (
                   <span className="text-[9px] font-sans text-[var(--text-muted)] uppercase tracking-[0.2em] font-bold mt-0.5">
                     {prix.suffix ? `Prix ${prix.suffix}` : 'Prix Total (FCFA)'}
                   </span>
@@ -201,14 +203,16 @@ export function PremiumBienCard({
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-[var(--border)]/50 flex items-center justify-end">
-              <div className="w-7 h-7 rounded-full bg-[var(--midnight-muted)] border border-[var(--border)] flex items-center justify-center transition-all duration-500 group-hover:bg-[var(--accent-luxury)] group-hover:text-[var(--on-accent)]">
-                <ArrowUpRight className="w-3 h-3" />
+            {!isCompact && (
+              <div className="mt-4 pt-3 border-t border-[var(--border)]/50 flex items-center justify-end">
+                <div className="w-7 h-7 rounded-full bg-[var(--midnight-muted)] border border-[var(--border)] flex items-center justify-center transition-all duration-500 group-hover:bg-[var(--accent-luxury)] group-hover:text-[var(--on-accent)]">
+                  <ArrowUpRight className="w-3 h-3" />
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Quality Indicator (Micro-Interaction) */}
-            {score_ia && (
+            {score_ia && !isCompact && (
               <div className="mt-4 flex items-center gap-3">
                 <div className="flex-1 h-[2px] bg-[var(--border)] rounded-full overflow-hidden">
                   <motion.div 

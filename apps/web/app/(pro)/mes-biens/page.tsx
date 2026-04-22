@@ -71,7 +71,7 @@ export default async function MesAnnoncesPage() {
             <Link href="/mes-biens/nouveau"><Button>Créer ma première annonce</Button></Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {bienRows.map((bien, i) => (
               <div key={bien.id} className="relative">
                 <PremiumBienCard
@@ -86,9 +86,10 @@ export default async function MesAnnoncesPage() {
                   nb_pieces={bien.nb_pieces}
                   photo_url={coverMap[bien.id] ?? null}
                   index={i}
+                  isCompact={true}
                 />
                 {/* Actions propriétaire */}
-                <div className="mt-4 space-y-3">
+                <div className="mt-3 space-y-2">
                   <BienAvailabilityToggle 
                     bienId={bien.id} 
                     initialValue={bien.est_disponible} 

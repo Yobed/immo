@@ -136,32 +136,19 @@ export function SapphireHub({ bien, videoMedias }: SapphireHubProps) {
         onClick={() => setIsOpen(!isOpen)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="relative group p-1 bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600 rounded-full shadow-[0_20px_50px_rgba(16,185,129,0.4)] flex items-center justify-center overflow-visible"
+        className="relative group p-4 bg-[#075E54] rounded-full shadow-[0_20px_50px_rgba(37,211,102,0.3)] flex items-center justify-center overflow-visible border border-white/10"
       >
-        <div className="bg-[#020617] rounded-full p-5 flex items-center gap-4 border border-white/10">
-          <div className="relative">
-            {isOpen ? <X className="w-7 h-7 text-white" /> : (
-              <div className="relative">
-                <img src="/whatsapp-3d.png" alt="WA" className="w-8 h-8 relative z-10" />
-                <div className="absolute inset-0 bg-emerald-500 blur-lg opacity-40 animate-pulse" />
-              </div>
-            )}
-          </div>
-          
-          {!isOpen && (
-            <div className="flex flex-col items-start pr-4">
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-400">Expérience 5.0</span>
-              <span className="text-[10px] font-bold text-white uppercase tracking-[0.2em]">Sapphire WhatsApp</span>
+        <div className="relative">
+          {isOpen ? <X className="w-6 h-6 text-white" /> : (
+            <div className="relative">
+              <img src="/whatsapp-3d.png" alt="WA" className="w-8 h-8 relative z-10" />
             </div>
           )}
         </div>
         
-        {/* Dynamic Glow Rings */}
+        {/* Simple Sonar Pulse */}
         {!isOpen && (
-          <>
-            <div className="absolute inset-0 -z-10 rounded-full bg-emerald-500 blur-2xl opacity-20 animate-pulse scale-150" />
-            <div className="absolute inset-0 -z-20 rounded-full border border-emerald-500/20 animate-ping opacity-10 scale-150" />
-          </>
+          <div className="absolute inset-0 -z-10 rounded-full bg-[#25D366] animate-ping opacity-20 scale-125" />
         )}
       </motion.button>
     </div>

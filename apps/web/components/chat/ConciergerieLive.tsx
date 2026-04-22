@@ -19,14 +19,10 @@ export function ConciergerieLive({ propertyContext, isFloatingTrigger = false, c
         <motion.button
           initial={{ opacity: 0, scale: 0.8, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          whileHover={{ 
-            scale: 1.05, 
-            y: -5,
-            boxShadow: '0 25px 50px -12px rgba(212, 175, 55, 0.4)'
-          }}
+          whileHover={{ scale: 1.05, y: -5 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsOpen(true)}
-          className={`fixed bottom-8 right-8 z-50 w-20 h-20 rounded-[2.2rem] bg-gradient-to-br from-slate-900 via-slate-950 to-black border border-accent-luxury/30 text-accent-luxury shadow-[0_25px_70px_rgba(0,0,0,0.9)] flex items-center justify-center group overflow-hidden ${className}`}
+          className={`fixed bottom-[110px] right-12 z-50 w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-950 to-black border border-accent-luxury/30 text-accent-luxury shadow-[0_25px_70px_rgba(0,0,0,0.9)] flex items-center justify-center group overflow-hidden ${className}`}
         >
           {/* Animated Background Glow */}
           <div className="absolute inset-0 bg-gradient-to-tr from-accent-luxury/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
@@ -98,7 +94,7 @@ function ConciergeModal({ isOpen, setIsOpen, propertyContext }: { isOpen: boolea
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className="fixed inset-4 md:inset-auto md:right-8 md:bottom-8 md:w-[450px] md:h-[700px] z-[201] pointer-events-auto"
+        className="fixed inset-4 md:inset-auto md:right-12 md:bottom-[190px] md:w-[450px] md:h-[700px] z-[201] pointer-events-auto"
       >
         <ChatBot 
           context={propertyContext} 

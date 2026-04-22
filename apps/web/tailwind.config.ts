@@ -55,9 +55,9 @@ const config: Config = {
         'accent-gold':   'var(--accent-gold)',
       },
       fontFamily: {
-        display: ['Unbounded', 'system-ui', 'sans-serif'],
-        sans: ['Public Sans', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        display: ['var(--font-playfair)', 'serif'],
+        sans: ['var(--font-dm-sans)', 'sans-serif'],
+        mono: ['var(--font-jetbrains)', 'monospace'],
       },
       borderRadius: {
         card: '16px',

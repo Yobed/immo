@@ -104,15 +104,12 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
         </div>
         <div className="flex items-center gap-2">
           <a 
-            href="https://wa.me/2250102030405" 
+            href="https://wa.me/2250574243752" 
             target="_blank" 
             rel="noopener noreferrer"
             className="p-2 hover:bg-green-500/20 text-green-500 rounded-full transition-all group relative"
           >
             <MessageCircle className="w-5 h-5" />
-            <span className="absolute -bottom-8 right-0 text-[8px] bg-green-500 text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-              Sapphire WhatsApp
-            </span>
           </a>
           {onClose && (
             <button onClick={onClose} className="p-2 hover:bg-[var(--text)]/10 rounded-full transition-colors">
@@ -189,13 +186,13 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
          <div className="flex justify-center gap-8 mt-4">
             <Mic className="w-3.5 h-3.5 text-[var(--text)]/20 cursor-not-allowed" />
             <a 
-              href="https://wa.me/2250102030405" 
+              href="https://wa.me/2250574243752" 
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center gap-2 opacity-30 hover:opacity-100 transition-all group"
             >
               <Phone className="w-3.5 h-3.5 text-green-500" />
-              <span className="text-[10px] text-[var(--text)]/50 group-hover:text-[var(--text)] uppercase tracking-tighter transition-colors">Contact Direct</span>
+              <span className="text-[10px] text-[var(--text)]/50 group-hover:text-[var(--text)] uppercase tracking-tighter transition-colors">WhatsApp 5.0</span>
             </a>
          </div>
       </div>

@@ -188,12 +188,12 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
         userId={user?.id ?? null} 
       />
 
-      {/* HERO SECTION - REFINED FOR IMPACT */}
-      <section className="relative h-[110vh] overflow-hidden group">
+      {/* HERO SECTION - REFINED FOR AIRBNB-INSPIRED BALANCE */}
+      <section className="relative h-[85vh] md:h-[90vh] overflow-hidden group">
         <motion.div 
-          initial={{ scale: 1.1, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 2.5, ease: [0.16, 1, 0.3, 1] }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.5 }}
           className="w-full h-full relative"
         >
           {medias.length > 0 ? (
@@ -204,92 +204,92 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             }))} isHero={true} />
           ) : (
             <div className="w-full h-full bg-slate-950 flex items-center justify-center">
-              <Sparkles className="w-16 h-16 text-accent-luxury/20" />
+              <Sparkles className="w-12 h-12 text-accent-luxury/20" />
             </div>
           )}
           
           <PropertyHeroOverlay urlVisite3d={bien.url_visite_3d} videoMedias={videoMedias} />
 
-          {/* Editorial Scroll Indicator */}
-          <div className="absolute bottom-12 left-12 flex flex-col items-center gap-8 z-50">
+          {/* Minimalist Scroll Indicator */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 z-50">
              <motion.div 
-               animate={{ height: [0, 80, 0], opacity: [0, 1, 0] }}
-               transition={{ repeat: Infinity, duration: 3 }}
-               className="w-[1px] bg-accent-luxury" 
-             />
-             <span className="text-[9px] uppercase font-bold tracking-[0.8em] text-accent-luxury opacity-60 rotate-90 origin-left ml-2 whitespace-nowrap font-display">Scroll to explore</span>
+               animate={{ y: [0, 10, 0], opacity: [0.3, 1, 0.3] }}
+               transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+               className="flex flex-col items-center gap-2"
+             >
+                <div className="w-px h-12 bg-gradient-to-b from-transparent via-accent-luxury to-transparent" />
+                <span className="text-[8px] uppercase font-bold tracking-[0.4em] text-accent-luxury/80 font-sans">Découvrir l&apos;exception</span>
+             </motion.div>
           </div>
         </motion.div>
       </section>
 
-      {/* HEADER SECTION - EDITORIAL IMPACT */}
-      <section className="relative pt-60 pb-60 bg-[#020617] border-b border-white/5 overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-accent-luxury/5 blur-[200px] pointer-events-none" />
-        <div className="max-w-[1800px] mx-auto px-8">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-32">
+      {/* HEADER SECTION - EDITORIAL ELEGANCE */}
+      <section className="relative pt-32 pb-24 bg-[#020617] overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-accent-luxury/5 blur-[120px] pointer-events-none" />
+        <div className="max-w-[1400px] mx-auto px-6">
+          <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-16 lg:gap-24">
             <motion.div
-               initial={{ opacity: 0, x: -50 }}
-               whileInView={{ opacity: 1, x: 0 }}
+               initial={{ opacity: 0, y: 30 }}
+               whileInView={{ opacity: 1, y: 0 }}
                viewport={{ once: true }}
-               transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+               transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                className="flex-1"
             >
-              <div className="flex items-center gap-12 mb-20">
-                <div className="px-10 py-3 rounded-full bg-accent-luxury/20 border border-accent-luxury/40 backdrop-blur-2xl">
-                  <span className="text-[10px] font-black uppercase tracking-[0.6em] text-accent-luxury">The Sapphire Collection</span>
-                </div>
-                <div className="h-[1px] w-32 bg-white/10" />
-                <span className="text-[11px] font-bold uppercase tracking-[0.6em] text-white/20 font-mono">
+              <div className="flex items-center gap-6 mb-12">
+                <span className="text-[9px] font-black uppercase tracking-[0.5em] text-accent-luxury">The Sapphire Collection</span>
+                <div className="h-px w-12 bg-white/10" />
+                <span className="text-[9px] font-bold uppercase tracking-[0.4em] text-white/20 font-mono">
                   REF. {bien.id.slice(0, 8).toUpperCase()}
                 </span>
               </div>
               
-              <h1 className="font-display text-[12vw] lg:text-[14rem] font-bold text-white leading-[0.7] tracking-tighter mb-24 italic mix-blend-exclusion">
+              <h1 className="font-display text-6xl md:text-7xl lg:text-8xl font-bold text-white leading-[1.1] tracking-tight mb-12">
                 {bien.titre}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-20">
-                <div className="flex items-center gap-10">
-                  <div className="w-24 h-24 rounded-full border border-accent-luxury/30 flex items-center justify-center bg-accent-luxury/5 shadow-3xl group">
-                    <MapPin className="w-10 h-10 text-accent-luxury group-hover:scale-110 transition-transform duration-700" />
+              <div className="flex flex-wrap items-center gap-12">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full border border-accent-luxury/30 flex items-center justify-center bg-accent-luxury/5">
+                    <MapPin className="w-5 h-5 text-accent-luxury" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[11px] font-black uppercase tracking-[0.4em] text-accent-luxury mb-1">Localisation Initiale</span>
-                    <span className="text-7xl font-display font-light text-white/90">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-accent-luxury/60">Localisation</span>
+                    <span className="text-2xl font-display font-light text-white/90">
                       {bien.commune}{bien.quartier ? ` · ${bien.quartier}` : ''}
                     </span>
                   </div>
                 </div>
 
-                <div className="hidden xl:block w-[1px] h-20 bg-white/10 mx-10" />
+                <div className="h-10 w-px bg-white/10 hidden md:block" />
 
-                <div className="flex items-center gap-6 py-6 px-12 rounded-[2.5rem] bg-slate-900 border border-white/10 backdrop-blur-3xl">
-                  <Badge variant="luxury" className="bg-accent-luxury text-slate-950 px-6 py-2 border-none">Expertise Sapphire</Badge>
-                  <span className="text-[11px] font-black uppercase tracking-[0.4em] text-white/40">{TYPES_BIEN_LABELS[bien.type_bien] || bien.type_bien}</span>
+                <div className="flex items-center gap-4 px-6 py-3 rounded-full bg-white/5 border border-white/10">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/60">{TYPES_BIEN_LABELS[bien.type_bien] || bien.type_bien}</span>
                 </div>
               </div>
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 1.2, delay: 0.3 }}
-              className="lg:w-[600px]"
+              transition={{ duration: 1.2, delay: 0.2 }}
+              className="lg:w-[450px]"
             >
-              <div className="relative p-20 md:p-24 rounded-[6rem] bg-gradient-to-br from-slate-900 to-slate-950 border border-white/10 shadow-[0_100px_150px_-50px_rgba(0,0,0,0.8)] overflow-hidden group">
-                <div className="absolute -top-20 -right-20 w-64 h-64 bg-accent-luxury/20 blur-[80px] group-hover:bg-accent-luxury/30 transition-colors duration-1000" />
-                <span className="text-[12px] font-black uppercase tracking-[0.8em] text-accent-luxury mb-10 block opacity-60">Estimation Exclusive</span>
-                <p className="text-8xl md:text-[10rem] font-display font-bold text-white tracking-tighter leading-none mb-12">
+              <div className="relative p-12 rounded-[3.5rem] bg-gradient-to-br from-slate-900 to-slate-950 border border-white/10 shadow-2xl overflow-hidden group">
+                <div className="absolute -top-10 -right-10 w-48 h-48 bg-accent-luxury/10 blur-[80px] group-hover:bg-accent-luxury/20 transition-colors duration-1000" />
+                <span className="text-[10px] font-black uppercase tracking-[0.6em] text-accent-luxury/60 mb-6 block">Investissement Estimé</span>
+                <p className="text-6xl md:text-7xl font-display font-bold text-white tracking-tighter leading-none mb-10">
                   {prix ? prix.value : (prixValue ? formatFCFA(prixValue) : 'Sur Demande')}
                 </p>
-                <div className="flex items-center justify-between border-t border-white/5 pt-10">
-                   <div className="flex items-center gap-4">
-                      <ShieldCheck className="w-5 h-5 text-emerald-500" />
-                      <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">Certifié Deep Estate</span>
+                <div className="flex items-center justify-between border-t border-white/5 pt-8">
+                   <div className="flex items-center gap-3">
+                      <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                      <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-white/40">Certifié Deep Estate</span>
                    </div>
-                   <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center">
-                      <ArrowRight className="w-5 h-5 text-accent-luxury group-hover:translate-x-1 transition-transform" />
+                   <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center">
+                      <ArrowRight className="w-4 h-4 text-accent-luxury group-hover:translate-x-1 transition-transform" />
                    </div>
                 </div>
               </div>
@@ -310,71 +310,71 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
           />
         </div>
 
-        {/* IMMERSIVE SHORTS SECTION */}
+        {/* IMMERSIVE SHORTS SECTION - REFINED */}
         {videoMedias.length > 0 && (
-          <section id="shorts" className="py-60 bg-slate-950 overflow-hidden relative">
-            <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-accent-luxury/5 to-transparent" />
-            <div className="max-w-[1800px] mx-auto px-8 relative z-10">
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-12 mb-40">
-                <div className="max-w-4xl">
-                  <div className="flex items-center gap-8 mb-12">
-                    <div className="w-20 h-[1px] bg-accent-luxury" />
-                    <span className="text-[12px] font-black uppercase tracking-[0.8em] text-accent-luxury">Marketing 5.0</span>
+          <section id="shorts" className="py-32 bg-slate-950 overflow-hidden relative">
+            <div className="absolute top-0 left-0 w-full h-[300px] bg-gradient-to-b from-accent-luxury/5 to-transparent" />
+            <div className="max-w-[1400px] mx-auto px-6 relative z-10">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-12 mb-20">
+                <div className="max-w-3xl">
+                  <div className="flex items-center gap-6 mb-8">
+                    <div className="w-12 h-px bg-accent-luxury" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.5em] text-accent-luxury">Marketing 5.0</span>
                   </div>
-                  <h2 className="text-7xl md:text-[8rem] lg:text-[10rem] font-display font-bold text-white tracking-tighter leading-[0.85] italic mb-12">
-                    Le Luxe en <span className="text-accent-luxury">Mouvement.</span>
+                  <h2 className="text-5xl md:text-6xl font-display font-bold text-white tracking-tight leading-[1.1] mb-8">
+                    Le Luxe en <span className="text-accent-luxury italic">Mouvement.</span>
                   </h2>
-                  <p className="text-white/40 text-xl font-light max-w-2xl leading-relaxed">
-                    Découvrez une immersion cinématographique sans précédent. Nos shorts Marketing 5.0 capturent l'âme de chaque propriété Deep Estate.
+                  <p className="text-white/50 text-base font-light leading-relaxed max-w-xl">
+                    Découvrez une immersion cinématographique. Nos shorts Marketing 5.0 capturent l&apos;âme et l&apos;essence de cette propriété d&apos;exception.
                   </p>
                 </div>
                 
-                <div className="flex flex-col items-center gap-10">
+                <div className="flex flex-col items-center gap-5">
                   <ShortsTrigger 
                     videos={videoMedias.map(v => ({
                       id: v.id, url: v.url, title: bien.titre,
                       price: formatFCFA(prixValue!), location: bien.commune, propertyId: bien.id
                     }))}
-                    className="!px-20 !py-8 !rounded-[3rem] !bg-white !text-slate-950 !shadow-[0_40px_100px_-20px_rgba(212,175,55,0.5)]"
+                    className="!px-10 !py-5 !rounded-2xl !bg-white !text-slate-950 !shadow-xl"
                   />
-                  <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.4em] text-accent-luxury/60">
+                  <div className="flex items-center gap-3 text-[9px] font-bold uppercase tracking-[0.3em] text-accent-luxury/50">
                     <div className="w-1.5 h-1.5 rounded-full bg-accent-luxury animate-pulse" />
-                    Disponible en Full 4K
+                    Disponible en Ultra 4K
                   </div>
                 </div>
               </div>
 
-              {/* The Carousel Grid */}
-              <div className="flex gap-12 overflow-x-auto pb-24 no-scrollbar px-4 -mx-4 group/shorts">
+              {/* Shorts Carousel */}
+              <div className="flex gap-6 overflow-x-auto pb-8 no-scrollbar -mx-6 px-6">
                 {videoMedias.map((v, i) => (
                   <motion.div
                     key={v.id}
-                    initial={{ opacity: 0, x: 100 }}
+                    initial={{ opacity: 0, x: 60 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: i * 0.1, duration: 0.8 }}
-                    className="relative aspect-[9/16] group cursor-pointer overflow-hidden rounded-[4rem] border-2 border-white/10 shadow-3xl min-w-[320px] transition-all duration-700 hover:border-accent-luxury/50 hover:scale-[1.02]"
+                    transition={{ delay: i * 0.1, duration: 0.6 }}
+                    className="relative aspect-[9/16] group cursor-pointer overflow-hidden rounded-3xl border border-white/10 min-w-[260px] md:min-w-[300px] transition-all duration-500 hover:border-accent-luxury/40 hover:scale-[1.02] shrink-0"
                   >
                     <video 
                       src={v.url} 
-                      className="w-full h-full object-cover transition-transform duration-[15s] group-hover:scale-125"
+                      className="w-full h-full object-cover transition-transform duration-[12s] group-hover:scale-110"
                       muted
                       autoPlay
                       loop
                       playsInline
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-80" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
                     
                     {/* Play Overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500">
-                      <div className="w-24 h-24 rounded-full bg-accent-luxury/90 backdrop-blur-3xl border border-white/20 flex items-center justify-center shadow-[0_0_50px_rgba(212,175,55,0.4)]">
-                        <Play className="w-10 h-10 text-slate-950 fill-slate-950 ml-1" />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                      <div className="w-16 h-16 rounded-full bg-accent-luxury/90 backdrop-blur flex items-center justify-center">
+                        <Play className="w-7 h-7 text-slate-950 fill-slate-950 ml-0.5" />
                       </div>
                     </div>
 
-                    <div className="absolute bottom-10 left-8 right-8">
-                      <span className="text-accent-luxury text-[10px] font-black uppercase tracking-[0.6em] mb-4 block">Sequence #{i+1}</span>
-                      <p className="text-white font-display font-bold text-3xl tracking-tighter leading-none">{bien.titre}</p>
+                    <div className="absolute bottom-6 left-5 right-5">
+                      <span className="text-accent-luxury text-[9px] font-black uppercase tracking-[0.4em] mb-2 block">#{i+1}</span>
+                      <p className="text-white font-display font-bold text-xl tracking-tight leading-tight">{bien.titre}</p>
                     </div>
                     
                     <div className="absolute inset-0 z-20">
@@ -395,93 +395,93 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
       </div>
 
 
-      {/* MAIN GRID CONTENT */}
-      <div className="max-w-[1800px] mx-auto px-8 py-40">
-        <div className="flex flex-col lg:flex-row gap-40">
-          <div className="flex-1">
+      {/* MAIN GRID CONTENT - AIRY & ELEGANT */}
+      <div className="max-w-[1400px] mx-auto px-6 py-24">
+        <div className="flex flex-col lg:flex-row gap-20 xl:gap-32">
+          <div className="flex-1 min-w-0">
             
-            {/* Specs Grid - Enhanced Visibility */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-48">
+            {/* Specs Grid - Balanced for Readability */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-32">
               {stats.map((stat, i) => (
                 <motion.div 
                   key={i}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.15 }}
-                  className="flex flex-col gap-10 p-12 rounded-[2.5rem] bg-slate-900/40 border border-white/5 hover:border-accent-luxury/30 transition-all duration-700 group hover:shadow-[0_20px_80px_-20px_rgba(212,175,55,0.15)]"
+                  transition={{ delay: i * 0.1 }}
+                  className="flex flex-col gap-6 p-10 rounded-3xl bg-slate-900/40 border border-white/5 hover:border-accent-luxury/20 transition-all duration-500 group"
                 >
-                  <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center group-hover:bg-accent-luxury/10 group-hover:border-accent-luxury/20 transition-all">
-                    <stat.icon className="w-7 h-7 text-white/20 group-hover:text-accent-luxury group-hover:scale-110 transition-all duration-500" />
+                  <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center group-hover:bg-accent-luxury/10 transition-colors">
+                    <stat.icon className="w-5 h-5 text-white/30 group-hover:text-accent-luxury transition-colors" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.5em] text-white/30 mb-3 font-display">{stat.label}</p>
-                    <p className="text-4xl font-display font-bold text-white tracking-tighter">{stat.value}</p>
+                    <p className="text-[9px] font-bold uppercase tracking-[0.4em] text-white/20 mb-2 font-sans">{stat.label}</p>
+                    <p className="text-3xl font-display font-medium text-white tracking-tight">{stat.value}</p>
                   </div>
                 </motion.div>
               ))}
             </div>
 
             {/* TECHNICAL NOTES SECTION */}
-            <section className="mb-48 pl-12 border-l-2 border-accent-luxury/20">
-              <div className="flex items-center gap-4 mb-12">
-                <Sparkles className="w-5 h-5 text-accent-luxury/40" />
-                <h2 className="text-[12px] font-bold uppercase tracking-[0.6em] text-white/40 font-display">Détails de l&apos;Édifice</h2>
+            <section className="mb-32 pl-10 border-l border-accent-luxury/30">
+              <div className="flex items-center gap-4 mb-8">
+                <Sparkles className="w-4 h-4 text-accent-luxury/40" />
+                <h2 className="text-[10px] font-bold uppercase tracking-[0.5em] text-white/40 font-sans">Description de l&apos;Édifice</h2>
               </div>
-              <div className="max-w-5xl">
-                <p className="text-3xl font-light text-white/70 leading-[1.6] tracking-tight">
+              <div className="max-w-4xl">
+                <p className="text-2xl md:text-3xl font-light text-white/70 leading-[1.6] tracking-tight">
                   {bien.description}
                 </p>
               </div>
             </section>
 
             {/* LIFESTYLE PREMIUM SECTION */}
-            <section className="mb-48 relative rounded-[4rem] overflow-hidden group">
+            <section className="mb-24 relative rounded-3xl overflow-hidden group">
               <div className="grid grid-cols-1 lg:grid-cols-2 bg-slate-900/40 border border-white/5">
-                <div className="p-16 lg:p-24 flex flex-col justify-center">
-                  <div className="flex items-center gap-6 mb-12">
-                    <div className="w-12 h-12 rounded-full bg-accent-luxury/10 flex items-center justify-center">
-                       <Trophy size={20} className="text-accent-luxury" />
+                <div className="p-10 lg:p-16 flex flex-col justify-center">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="w-10 h-10 rounded-full bg-accent-luxury/10 flex items-center justify-center">
+                       <Trophy size={16} className="text-accent-luxury" />
                     </div>
-                    <span className="text-[11px] font-black uppercase tracking-[0.5em] text-accent-luxury">Expérience 5.0</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-accent-luxury">Expérience 5.0</span>
                   </div>
                   
-                  <h2 className="text-5xl md:text-6xl font-display font-bold text-white mb-12 leading-tight">
+                  <h2 className="text-4xl md:text-5xl font-display font-bold text-white mb-10 leading-tight">
                     L&apos;Art de Vivre <br/><span className="text-accent-luxury italic">Redéfini.</span>
                   </h2>
 
-                  <div className="grid grid-cols-2 gap-12">
+                  <div className="grid grid-cols-2 gap-8">
                     {[
                       { icon: Gem, title: "Prestige", desc: "Matériaux d'exception" },
                       { icon: ShieldCheck, title: "Sérénité", desc: "Service de veille 24/7" },
                       { icon: Waves, title: "Loisir", desc: "Espaces aquatiques" },
                       { icon: LayoutGrid, title: "Smart", desc: "Connectivité avancée" }
                     ].map((item, i) => (
-                      <div key={i} className="space-y-3">
-                        <item.icon className="w-6 h-6 text-accent-luxury/40" />
-                        <h4 className="text-white font-bold text-sm uppercase tracking-widest">{item.title}</h4>
+                      <div key={i} className="space-y-2">
+                        <item.icon className="w-5 h-5 text-accent-luxury/40" />
+                        <h4 className="text-white font-bold text-xs uppercase tracking-widest">{item.title}</h4>
                         <p className="text-[10px] text-white/30 uppercase font-bold tracking-widest">{item.desc}</p>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="relative aspect-square lg:aspect-auto min-h-[600px] overflow-hidden">
+                <div className="relative aspect-square lg:aspect-auto min-h-[400px] overflow-hidden">
                    <Image 
                      src={medias[0]?.url || "/assets/placeholders/luxury.jpg"} 
                      alt="Lifestyle"
                      fill
-                     className="object-cover transition-transform duration-[30s] group-hover:scale-125"
+                     className="object-cover transition-transform duration-[20s] group-hover:scale-110"
                    />
-                   <div className="absolute inset-0 bg-gradient-to-l from-slate-950/80 via-transparent to-transparent hidden lg:block" />
-                   <div className="absolute bottom-16 left-16 right-16 p-10 bg-slate-950/60 backdrop-blur-2xl rounded-3xl border border-white/10">
-                      <div className="flex items-center gap-6">
-                        <div className="w-16 h-16 rounded-2xl bg-accent-luxury flex items-center justify-center shadow-2xl">
-                           <Sparkles className="text-slate-950 w-8 h-8" />
+                   <div className="absolute inset-0 bg-gradient-to-l from-slate-950/60 via-transparent to-transparent hidden lg:block" />
+                   <div className="absolute bottom-8 left-8 right-8 p-6 bg-slate-950/70 backdrop-blur-xl rounded-2xl border border-white/10">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-accent-luxury flex items-center justify-center">
+                           <Sparkles className="text-slate-950 w-5 h-5" />
                         </div>
                         <div>
-                          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-accent-luxury mb-1">Status Report</p>
-                          <p className="text-xl font-display font-bold text-white tracking-tight">Vérifié Sapphire Intelligence</p>
+                          <p className="text-[9px] font-black uppercase tracking-[0.3em] text-accent-luxury mb-0.5">Status Report</p>
+                          <p className="text-sm font-display font-bold text-white">Vérifié Sapphire Intelligence</p>
                         </div>
                       </div>
                    </div>
@@ -491,36 +491,36 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
 
             {/* IMMERSIVE MEDIA SECTION (Visite 3D / 360) */}
             {(bien.url_visite_3d || vue360Medias.length > 0) && (
-              <section id="visite-3d" className="mb-48 scroll-mt-32">
-                <div className="flex items-center justify-between mb-16">
+              <section id="visite-3d" className="mb-24 scroll-mt-32">
+                <div className="flex items-center justify-between mb-10">
                   <div>
-                    <h2 className="text-5xl font-display font-bold text-white mb-4 italic">Le Jumeau Numérique</h2>
-                    <p className="text-white/40 text-sm uppercase tracking-[0.4em] font-bold">Exploration Immersive 3D & 360°</p>
+                    <h2 className="text-3xl font-display font-bold text-white mb-2">Le Jumeau Numérique</h2>
+                    <p className="text-white/40 text-xs uppercase tracking-[0.4em] font-bold">Exploration Immersive 3D &amp; 360°</p>
                   </div>
                   <div className="flex gap-4">
-                     <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center">
-                        <Eye className="text-accent-luxury w-5 h-5 animate-pulse" />
+                     <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center">
+                        <Eye className="text-accent-luxury w-4 h-4 animate-pulse" />
                      </div>
                   </div>
                 </div>
                 
-                <div className="space-y-16">
+                <div className="space-y-10">
                   {bien.url_visite_3d && (
-                    <div className="rounded-[4rem] overflow-hidden border border-white/10 shadow-3xl bg-slate-950">
+                    <div className="rounded-3xl overflow-hidden border border-white/10 bg-slate-950">
                       <VirtualTourViewer url={bien.url_visite_3d} title={bien.titre} />
                     </div>
                   )}
                   
                   {vue360Medias.length > 0 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {vue360Medias.map((media: any, i: number) => (
-                        <div key={media.id} className="group relative aspect-[16/10] bg-black rounded-[3rem] overflow-hidden border border-white/5 shadow-2xl">
+                        <div key={media.id} className="group relative aspect-[16/10] bg-black rounded-2xl overflow-hidden border border-white/5">
                           <Bien360 panoramaUrl={media.url} />
-                          <div className="absolute inset-0 pointer-events-none border border-white/10 rounded-[3rem] transition-colors group-hover:border-accent-luxury/20" />
-                          <div className="absolute bottom-8 left-8 z-10 px-6 py-3 bg-slate-950/80 backdrop-blur-md rounded-full border border-white/10">
-                            <span className="text-[10px] font-black text-white uppercase tracking-[0.4em] flex items-center gap-3">
+                          <div className="absolute inset-0 pointer-events-none border border-white/10 rounded-2xl transition-colors group-hover:border-accent-luxury/20" />
+                          <div className="absolute bottom-4 left-4 z-10 px-4 py-2 bg-slate-950/80 backdrop-blur-md rounded-full border border-white/10">
+                            <span className="text-[9px] font-black text-white uppercase tracking-[0.4em] flex items-center gap-2">
                               <Sparkles className="w-3 h-3 text-accent-luxury" />
-                              Point de Vue {i + 1} · {media.titre || "Vue 360°"}
+                              Vue {i + 1} · {media.titre || "Vue 360°"}
                             </span>
                           </div>
                         </div>
@@ -532,83 +532,83 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             )}
 
             {/* LOCATION FOOTPRINT */}
-            <section className="mb-48">
-              <div className="flex items-center gap-6 mb-16">
-                <div className="h-[1px] w-12 bg-white/10" />
-                <h3 className="text-[12px] font-bold uppercase tracking-[0.6em] text-white/40 font-display italic">Géographie du Bien</h3>
+            <section className="mb-24">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="h-px w-8 bg-white/10" />
+                <h3 className="text-[11px] font-bold uppercase tracking-[0.5em] text-white/40 font-sans">Géographie du Bien</h3>
               </div>
-              <div className="aspect-video relative rounded-[4rem] overflow-hidden border border-white/10 shadow-3xl grayscale-[0.5] hover:grayscale-0 transition-all duration-1000">
+              <div className="aspect-video relative rounded-3xl overflow-hidden border border-white/10 hover:border-accent-luxury/20 transition-all duration-700">
                 <BienMap 
                   latitude={bien.latitude} 
                   longitude={bien.longitude} 
                   titre={bien.titre}
                   commune={bien.commune}
-                  hauteur={800}
+                  hauteur={600}
                 />
-                <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/10 rounded-[4rem]" />
+                <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/10 rounded-3xl" />
               </div>
             </section>
           </div>
 
-          {/* SIDEBAR CONCIERGE */}
-          <aside className="w-full lg:w-[500px] shrink-0">
+          {/* SIDEBAR CONCIERGE - REFINED FOR AIRBNB-STYLE FOCUS */}
+          <aside className="w-full lg:w-[450px] xl:w-[500px] shrink-0">
             <div className="sticky top-40">
               <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="bg-slate-900/60 backdrop-blur-3xl rounded-[4rem] p-16 shadow-3xl border border-white/10 relative overflow-hidden group/sidebar"
+                className="bg-slate-900/80 backdrop-blur-3xl rounded-[3rem] p-10 xl:p-12 shadow-3xl border border-white/10 relative overflow-hidden group/sidebar"
               >
-                <div className="absolute top-0 right-0 w-64 h-64 bg-accent-luxury/10 blur-[100px] opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-1000" />
+                <div className="absolute top-0 right-0 w-64 h-64 bg-accent-luxury/5 blur-[100px] pointer-events-none" />
                 
                 <div className="relative z-10">
-                  <div className="flex justify-between items-start mb-20 border-b border-white/5 pb-10">
+                  <div className="flex justify-between items-start mb-12 border-b border-white/5 pb-8">
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.6em] text-accent-luxury mb-6">Investissement</p>
-                      <div className="flex items-baseline gap-5">
-                        <span className="text-6xl md:text-7xl font-display font-bold tracking-tighter text-white">{formatFCFA(prixValue!)}</span>
-                        <span className="text-white/20 font-black uppercase text-[12px] tracking-[0.4em]">{prixSuffix}</span>
+                      <p className="text-[9px] font-black uppercase tracking-[0.5em] text-accent-luxury/60 mb-4">Tarification Privilege</p>
+                      <div className="flex items-baseline gap-4">
+                        <span className="text-5xl xl:text-6xl font-display font-bold tracking-tighter text-white">{formatFCFA(prixValue!)}</span>
+                        <span className="text-white/20 font-bold uppercase text-[10px] tracking-[0.3em]">{prixSuffix}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="space-y-8 mb-20">
-                    <div className="flex items-center gap-8 p-10 bg-white/5 rounded-[2.5rem] border border-white/5 hover:border-accent-luxury/20 transition-all group/card">
-                      <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 group-hover/card:scale-110 transition-transform">
-                        <Clock className="w-7 h-7 text-white/20 group-hover/card:text-accent-luxury" />
+                  <div className="space-y-6 mb-12">
+                    <div className="flex items-center gap-6 p-6 bg-white/5 rounded-2xl border border-white/5 hover:border-accent-luxury/20 transition-all group/card">
+                      <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center border border-white/10">
+                        <Clock className="w-6 h-6 text-white/20 group-hover/card:text-accent-luxury transition-colors" />
                       </div>
                       <div>
-                        <p className="text-[10px] uppercase font-bold tracking-[0.4em] text-white/30 mb-2">Disponibilité</p>
-                        <p className="text-xl font-bold tracking-tight text-white whitespace-nowrap">Immédiate Sapphire</p>
+                        <p className="text-[8px] uppercase font-bold tracking-[0.3em] text-white/30 mb-1">Disponibilité</p>
+                        <p className="text-lg font-bold tracking-tight text-white uppercase italic">Immédiate Sapphire</p>
                       </div>
                     </div>
                     
                     {bien.charges_mois_fcfa > 0 && (
-                      <div className="flex items-center justify-between px-10 py-6 bg-accent-luxury/5 rounded-3xl border border-accent-luxury/10">
-                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-accent-luxury">Services VIP</span>
+                      <div className="flex items-center justify-between px-8 py-5 bg-accent-luxury/5 rounded-2xl border border-accent-luxury/10">
+                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-accent-luxury/60">Services VIP</span>
                         <span className="text-white font-display font-bold text-lg tracking-widest">{formatFCFA(bien.charges_mois_fcfa)}</span>
                       </div>
                     )}
                   </div>
 
                   {!isOwner ? (
-                    <div className="space-y-8">
+                    <div className="space-y-6">
                       {isNuitee ? (
-                        <Link href={`/reservations/nouvelle?bienId=${bien.id}`} className="flex items-center justify-center w-full py-8 bg-white text-[#020617] rounded-[2rem] font-black text-[12px] uppercase tracking-[0.5em] font-display hover:bg-accent-luxury transition-all duration-700 shadow-2xl shadow-accent-luxury/20 active:scale-95 group/btn">
+                        <Link href={`/reservations/nouvelle?bienId=${bien.id}`} className="flex items-center justify-center w-full py-6 bg-white text-[#020617] rounded-2xl font-black text-[11px] uppercase tracking-[0.5em] font-sans hover:bg-accent-luxury transition-all duration-500 shadow-xl active:scale-95">
                           Réserver l&apos;Expérience
                         </Link>
                       ) : (
-                        <div className="bg-white/5 p-2 rounded-[3.5rem] border border-white/5">
+                        <div className="bg-white/[0.03] p-1.5 rounded-[2.5rem] border border-white/5">
                            <VisiteRequestForm bienId={bien.id} proprietaireId={bien.proprietaire_id as string} isPremium={true} />
                         </div>
                       )}
                       
-                      <div className="grid grid-cols-1 gap-6 pt-6">
+                      <div className="grid grid-cols-1 gap-6 pt-4">
                         <ContactProprietaireButton
                           bienId={bien.id}
                           proprietaireId={bien.proprietaire_id as string}
                           userId={user?.id ?? null}
-                          className="w-full h-24 flex items-center justify-center gap-6 bg-transparent border border-white/10 rounded-[2rem] text-[11px] font-black uppercase tracking-[0.5em] font-display hover:border-white/40 transition-all duration-700 hover:bg-white/5 text-white"
+                          className="w-full h-20 flex items-center justify-center gap-4 bg-transparent border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-[0.4em] font-sans hover:border-white/30 transition-all duration-500 hover:bg-white/5 text-white"
                         />
                         
                          <VIPConciergeButton 
