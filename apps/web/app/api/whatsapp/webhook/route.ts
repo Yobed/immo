@@ -21,6 +21,28 @@ function extractMediaTags(text: string): { cleanText: string; mediaUrls: string[
   return { cleanText, mediaUrls };
 }
 
+// Détecte si le client veut prendre un RDV visite
+function detectVisiteIntent(text: string): boolean {
+  return /\b(visiter?|visit[ae]|rdv|rendez.?vous|voir (le|la|les|un|une)?bien|planifier|fixer (une|un)|réserver (une|un)? ?visite|disponible quand|quelle date|quel jour|vendredi|samedi|dimanche|lundi|mardi|mercredi|jeudi)\b/i.test(text);
+}
+
+// Détecte une date/heure dans le message client
+function extractDateFromMessage(text: string): string | null {
+  // Matches: "vendredi 25 avril", "le 26/04", "demain", "samedi prochain", etc.
+  const dateRegex = /\b(demain|après.?demain|lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\b|\b(\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?)\b|\b(\d{1,2}\s+(?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre))\b/i;
+  const m = dateRegex.exec(text);
+  return m ? m[0] : null;
+}
+
+// Détecte si l'AI a confirmé un RDV dans sa réponse
+function detectRdvConfirmation(aiText: string): { confirmed: boolean; bienId?: string; date?: string } {
+  const rdvTag = /\[RDV_CONFIRME bien_id=([a-f0-9-]+) date=([^\]]+)\]/i.exec(aiText);
+  if (rdvTag) {
+    return { confirmed: true, bienId: rdvTag[1], date: rdvTag[2] };
+  }
+  return { confirmed: false };
+}
+
 export async function POST(req: NextRequest) {
   try {
     const rawBody = await req.text();
@@ -62,8 +84,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: 'ignored' });
     }
 
+    const supabase = getSupabase();
+
     // 1. Sauvegarder le message entrant
-    await getSupabase().from('whatsapp_messages').insert({
+    await supabase.from('whatsapp_messages').insert({
       jid,
       direction: 'inbound',
       body: userMessage,
@@ -71,7 +95,7 @@ export async function POST(req: NextRequest) {
     });
 
     // 2. Historique de conversation (10 derniers messages)
-    const { data: history } = await getSupabase()
+    const { data: history } = await supabase
       .from('whatsapp_messages')
       .select('direction, body')
       .eq('jid', jid)
@@ -88,22 +112,53 @@ export async function POST(req: NextRequest) {
     // 3. Contexte immobilier (biens + médias)
     const context = await getAIBienContext(userMessage);
 
-    // 4. Réponse Sapphire via Groq
-    const aiResponse = await chatImmobilier(formattedHistory, context || undefined);
+    // 4. Enrichir le contexte avec instructions RDV si intent détecté
+    const hasVisiteIntent = detectVisiteIntent(userMessage);
+    const detectedDate = extractDateFromMessage(userMessage);
+
+    let enrichedContext = context || undefined;
+    if (hasVisiteIntent) {
+      const rdvInstructions = `\n\nINSTRUCTION RDV: Le client veut visiter un bien.${detectedDate ? ` Il a mentionné la date/heure : "${detectedDate}".` : ''}
+- Si tu connais le bien dont il parle (depuis le catalogue), confirme le RDV et ajoute EXACTEMENT ce tag en fin de réponse :
+  [RDV_CONFIRME bien_id=<ID_DU_BIEN> date=<date_proposée>]
+- Si plusieurs biens correspondent, demande lequel il souhaite visiter.
+- Si tu n'as pas de date, demande-lui sa disponibilité.
+- Rassure le client : "Je transmets votre demande à notre équipe qui vous recontactera pour confirmer."`;
+      enrichedContext = (enrichedContext || '') + rdvInstructions;
+    }
+
+    // 5. Réponse Sapphire via Groq
+    const aiResponse = await chatImmobilier(formattedHistory, enrichedContext);
 
     if (!aiResponse) {
       return NextResponse.json({ status: 'ok' });
     }
 
-    // 5. Extraire les balises [MEDIA: URL]
-    const { cleanText, mediaUrls } = extractMediaTags(aiResponse);
+    // 6. Détecter confirmation RDV et sauvegarder la visite
+    const rdvCheck = detectRdvConfirmation(aiResponse);
+    if (rdvCheck.confirmed && rdvCheck.bienId) {
+      await supabase.from('visites').insert({
+        bien_id: rdvCheck.bienId,
+        client_jid: jid,
+        client_name: contactName,
+        client_phone: senderPn,
+        date_souhaitee: rdvCheck.date || new Date().toISOString().slice(0, 10),
+        statut: 'en_attente',
+        source: 'whatsapp',
+        notes: `Demande via WhatsApp. Message : "${userMessage.slice(0, 200)}"`,
+      }).select('id').single();
+    }
 
-    // 6. Envoyer le texte principal
+    // 7. Extraire les balises [MEDIA: URL] et nettoyer les tags RDV
+    const cleanedAi = aiResponse.replace(/\[RDV_CONFIRME[^\]]*\]/gi, '').trim();
+    const { cleanText, mediaUrls } = extractMediaTags(cleanedAi);
+
+    // 8. Envoyer le texte principal
     if (cleanText) {
       await wasenderSendMessage(senderPn, cleanText, 'text');
     }
 
-    // 7. Envoyer les médias (max 3) en séquence
+    // 9. Envoyer les médias (max 3) en séquence
     for (const url of mediaUrls.slice(0, 3)) {
       const isVideo = /\.(mp4|mov|avi|webm)$/i.test(url);
       await wasenderSendMessage(
@@ -114,8 +169,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 8. Sauvegarder la réponse sortante
-    await getSupabase().from('whatsapp_messages').insert({
+    // 10. Sauvegarder la réponse sortante
+    await supabase.from('whatsapp_messages').insert({
       jid,
       direction: 'outbound',
       body: cleanText || aiResponse,

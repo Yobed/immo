@@ -14,14 +14,12 @@ import { Bien360 } from '@/components/bien/Bien360'
 import { FavorisButton } from '@/components/bien/FavorisButton'
 import { VisiteRequestForm } from '@/components/bien/VisiteRequestForm'
 import { ContactProprietaireButton } from '@/components/bien/ContactProprietaireButton'
-import { ConciergerieLive } from '@/components/chat/ConciergerieLive'
 import { VIPConciergeButton } from '@/components/bien/VIPConciergeButton'
 import { PremiumBienCard } from '@/components/bien/PremiumBienCard'
 import { VirtualTourViewer } from '@/components/bien/VirtualTourViewer'
 import { BienMap } from '@/components/bien/BienMap'
 import { DeleteBienButton } from '@/components/bien/DeleteBienButton'
-import { NarrativeSignature } from '@/components/bien/NarrativeSignature'
-import { 
+import {
   MapPin, 
   Maximize, 
   BedDouble, 
@@ -55,8 +53,8 @@ import {
 import * as motion from 'framer-motion/client'
 import { PropertyHeroOverlay } from '@/components/bien/PropertyHeroOverlay'
 import { ShortsTrigger } from '@/components/bien/ShortsTrigger'
-import { SapphireHub } from '@/components/bien/SapphireHub'
 import { DiscoveryBar } from '@/components/bien/DiscoveryBar'
+import { BroadcastButton } from '@/components/bien/BroadcastButton'
 
 // Helper to get formatted ID
 const formatPropertyId = (id: string) => {
@@ -298,18 +296,8 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
         </div>
       </section>
 
-      {/* MARKETING 5.0 CONTENT: MOVED UP FOR VISIBILITY */}
+      {/* SHORTS & VIDEO SECTION */}
       <div id="signature" className="relative border-t border-white/5 bg-[#020617]">
-         {/* THE NARRATIVE SIGNATURE */}
-        <div className="bg-gradient-to-b from-[#020617] to-slate-950">
-          <NarrativeSignature 
-            description={bien.description}
-            bienType={TYPES_BIEN_LABELS[bien.type_bien] ?? bien.type_bien}
-            commune={bien.commune}
-            rarityScore={Math.floor(85 + (bien.surface_m2 ? bien.surface_m2 / 100 : 5) + (bien.nb_pieces ? bien.nb_pieces : 2))}
-          />
-        </div>
-
         {/* IMMERSIVE SHORTS SECTION - REFINED */}
         {videoMedias.length > 0 && (
           <section id="shorts" className="py-32 bg-slate-950 overflow-hidden relative">
@@ -618,12 +606,6 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                           className="w-full"
                         />
 
-                        {/* Hidden context for SapphireHub but available for background systems */}
-                        <div className="hidden">
-                           <ConciergerieLive 
-                             propertyContext={`Bien : ${bien.titre}\nCommune : ${bien.commune}\nQuartier : ${bien.quartier}\nPrix : ${formatFCFA(prixValue!)}${prixSuffix}\nType : ${bien.type_bien}\nDescription : ${bien.description}\n\n[PHOTOS DU BIEN] :\n${medias.filter((m: any) => m.type === 'photo').map((m: any) => m.url).join('\n')}`}
-                           />
-                        </div>
                       </div>
                     </div>
                   ) : (
@@ -638,6 +620,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                       <Link href={`/mes-biens/${bien.id}/modifier?step=medias`} className="flex items-center justify-center w-full py-7 bg-white/5 border border-white/10 text-white rounded-[2rem] font-black text-[12px] uppercase tracking-[0.5em] font-display hover:bg-white/10 transition-all duration-700">
                         Médiathèque Sapphire
                       </Link>
+                      <BroadcastButton bienId={bien.id} statut={bien.statut} />
                       <div className="pt-8 border-t border-white/5">
                         <DeleteBienButton bienId={bien.id} titre={bien.titre} />
                       </div>
@@ -740,13 +723,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
         </div>
       </footer>
 
-      {/* MARKETING 5.0 HUB: Persistent Access */}
-      {/* SAPPHIRE HUB - ENHANCED VISIBILITY */}
-      <div className="relative group">
-        <SapphireHub bien={bien} videoMedias={videoMedias} />
-      </div>
-
-      <Link 
+      <Link
         href="/"
         className="fixed bottom-12 left-12 z-[100] p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all backdrop-blur-xl group"
       >

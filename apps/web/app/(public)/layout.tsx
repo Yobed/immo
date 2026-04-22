@@ -6,8 +6,6 @@ import { UserMenu } from '@/components/auth/UserMenu'
 import { MagneticWrapper } from '@/components/landing/MagneticWrapper'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
 
-import { ConciergerieLive } from '@/components/chat/ConciergerieLive'
-
 // Cache-bust: 2026-04-20T13:42:00Z
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {

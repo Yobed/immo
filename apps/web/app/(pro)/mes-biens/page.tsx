@@ -6,6 +6,7 @@ import { Button } from '@/components/ui'
 import { ToggleStatutButton } from '@/components/bien/ToggleStatutButton'
 import { BienAvailabilityToggle } from '@/components/bien/BienAvailabilityToggle'
 import { DeleteBienButton } from '@/components/bien/DeleteBienButton'
+import { BroadcastButton } from '@/components/bien/BroadcastButton'
 
 type BienRow = {
   id: string
@@ -108,6 +109,7 @@ export default async function MesAnnoncesPage() {
                       <ToggleStatutButton bienId={bien.id} statut={bien.statut} />
                     </div>
                   </div>
+                  <BroadcastButton bienId={bien.id} statut={bien.statut} />
                   <DeleteBienButton bienId={bien.id} titre={bien.titre} />
                 </div>
               </div>
