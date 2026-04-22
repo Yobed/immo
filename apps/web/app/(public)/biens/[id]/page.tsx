@@ -37,6 +37,7 @@ import { PropertyHeroOverlay } from '@/components/bien/PropertyHeroOverlay'
 import { ShortsTrigger } from '@/components/bien/ShortsTrigger'
 import { DiscoveryBar } from '@/components/bien/DiscoveryBar'
 import { BroadcastButton } from '@/components/bien/BroadcastButton'
+import { StickyMobileCTA } from '@/components/bien/StickyMobileCTA'
 
 // Helper to get formatted ID
 const formatPropertyId = (id: string) => {
@@ -159,7 +160,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
   }))
 
   return (
-    <main className="bg-[#020617] min-h-screen selection:bg-accent-luxury/20 font-sans text-slate-200 antialiased overflow-x-hidden">
+    <main className="bg-[#020617] min-h-screen selection:bg-accent-luxury/20 font-sans text-slate-200 antialiased overflow-x-hidden pb-20 lg:pb-0">
       
       {/* MARKETING 5.0 - DISCOVERY BAR (Premium Sticky) */}
       <DiscoveryBar 
@@ -168,8 +169,8 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
         userId={user?.id ?? null} 
       />
 
-      {/* HERO SECTION - REFINED FOR AIRBNB-INSPIRED BALANCE */}
-      <section className="relative h-[85vh] md:h-[90vh] overflow-hidden group">
+      {/* HERO SECTION */}
+      <section className="relative h-[55vh] md:h-[85vh] overflow-hidden group">
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -190,16 +191,13 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
           
           <PropertyHeroOverlay urlVisite3d={bien.url_visite_3d} videoMedias={videoMedias} />
 
-          {/* Minimalist Scroll Indicator */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 z-50">
-             <motion.div 
-               animate={{ y: [0, 10, 0], opacity: [0.3, 1, 0.3] }}
-               transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-               className="flex flex-col items-center gap-2"
-             >
-                <div className="w-px h-12 bg-gradient-to-b from-transparent via-accent-luxury to-transparent" />
-                <span className="text-[8px] uppercase font-bold tracking-[0.4em] text-accent-luxury/80 font-sans">Découvrir l&apos;exception</span>
-             </motion.div>
+          {/* Scroll indicator */}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 hidden md:flex">
+            <motion.div
+              animate={{ y: [0, 8, 0], opacity: [0.3, 0.8, 0.3] }}
+              transition={{ repeat: Infinity, duration: 2.5, ease: 'easeInOut' }}
+              className="w-px h-10 bg-gradient-to-b from-transparent via-white/40 to-transparent"
+            />
           </div>
         </motion.div>
       </section>
@@ -579,11 +577,20 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
 
       <Link
         href="/biens"
-        className="fixed bottom-8 left-8 z-[100] flex items-center gap-2 px-4 py-3 bg-slate-900/90 border border-white/10 rounded-xl hover:bg-slate-800 transition-all backdrop-blur-xl text-white/50 hover:text-white text-sm font-medium"
+        className="fixed bottom-8 left-8 z-[100] lg:flex hidden items-center gap-2 px-4 py-3 bg-slate-900/90 border border-white/10 rounded-xl hover:bg-slate-800 transition-all backdrop-blur-xl text-white/50 hover:text-white text-sm font-medium"
       >
         <ArrowLeft className="w-4 h-4" />
         Retour aux annonces
       </Link>
+
+      {!isOwner && prixValue && (
+        <StickyMobileCTA
+          bienTitre={bien.titre}
+          bienLieu={`${bien.commune}${bien.quartier ? `, ${bien.quartier}` : ''}`}
+          prix={formatFCFA(prixValue)}
+          prixSuffix={prixSuffix}
+        />
+      )}
     </main>
   )
 }

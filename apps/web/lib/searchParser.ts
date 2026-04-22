@@ -22,7 +22,23 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
     isMeuble = true
   }
 
-  // We sort by length DESC to match 'residence_meublee' before 'residence' etc. (though types_bien doesn't have overlapping like that)
+  // French aliases not covered by TYPES_BIEN raw strings
+  const TYPE_ALIASES: Record<string, string> = {
+    'résidence': 'residence_meublee',
+    'residence': 'residence_meublee',
+    'appart ': 'appartement',
+    'appart,': 'appartement',
+    'appart.': 'appartement',
+  }
+  for (const [alias, mapped] of Object.entries(TYPE_ALIASES)) {
+    if (lower.includes(alias) && !result.type_bien) {
+      result.type_bien = mapped
+      lower = lower.replace(alias, '')
+      break
+    }
+  }
+
+  // We sort by length DESC to match 'residence_meublee' before 'residence' etc.
   const types = [...TYPES_BIEN].sort((a, b) => b.length - a.length)
   for (const t of types) {
     const tSpaced = t.replace('_', ' ')
@@ -92,20 +108,37 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
     result.equipements = foundEq
   }
 
-  // 4. prix_max e.g. "500000", "500 000"
-  let match;
-  const priceRegex = /(?:budget|prix|moins de|max|maximum|a)?\s*(\d{1,3}(?:[ .]*\d{3})+)\s*(?:fcfa|f|cfa|francs)?/gi;
-  // Let's use a simpler extraction for any large numbers
-  const priceMatches = lower.match(/\d+[\s\d]*/g)
+  // 4. prix_max — handles CI shorthand: "25 mil", "500k", "25 000", "500000"
+  const priceVals: number[] = []
+
+  // "25 mil" / "25million" / "1.5 mil" → multiply by 1_000_000
+  const milMatches = [...lower.matchAll(/(\d+(?:[.,]\d+)?)\s*mil(?:lion)?s?/gi)]
+  for (const m of milMatches) {
+    priceVals.push(Math.round(parseFloat(m[1].replace(',', '.')) * 1_000_000))
+    lower = lower.replace(m[0], '')
+  }
+
+  // "500k" / "25k" → multiply by 1_000
+  const kMatches = [...lower.matchAll(/(\d+(?:[.,]\d+)?)\s*k\b/gi)]
+  for (const m of kMatches) {
+    priceVals.push(Math.round(parseFloat(m[1].replace(',', '.')) * 1_000))
+    lower = lower.replace(m[0], '')
+  }
+
+  // Standard large numbers: "500 000", "500000"
+  const priceMatches = lower.match(/\d[\d\s]*/g)
   if (priceMatches) {
-    const vals = priceMatches.map(p => parseInt(p.replace(/\s/g, ''))).filter(v => v >= 1000)
-    if (vals.length > 0) {
-      result.prix_max = Math.max(...vals).toString()
-      // Remove the numbers from remaining query
-      priceMatches.forEach(pm => {
+    priceMatches.forEach(pm => {
+      const v = parseInt(pm.replace(/\s/g, ''))
+      if (v >= 1000) {
+        priceVals.push(v)
         lower = lower.replace(pm, '')
-      })
-    }
+      }
+    })
+  }
+
+  if (priceVals.length > 0) {
+    result.prix_max = Math.max(...priceVals).toString()
   }
   
   // Clean up remaining query words like "je", "cherche", "un", "a", "avec", "de", "pour"

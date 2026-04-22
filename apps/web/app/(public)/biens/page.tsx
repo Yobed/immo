@@ -2,7 +2,6 @@
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { PremiumBienCard } from '@/components/bien/PremiumBienCard'
-import { CardsCarousel } from '@/components/ui/CardsCarousel'
 import * as React from 'react'
 import { Home, Building2, Palmtree, Warehouse, Briefcase, Landmark, Shovel, ArrowRight, Filter, AlertCircle, MapPin } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -30,7 +29,6 @@ type BienRow = {
   url_visite_3d?: string | null; proprietaire_id: string
 }
 
-type TypeRow = { label: string; value: string; icon: LucideIcon; biens: BienRow[] }
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -66,7 +64,7 @@ function BiensContent() {
 
   const [activeType, setActiveType] = useState<string>(typeFromUrl)
   const [biens, setBiens] = useState<BienRow[]>([])
-  const [typeResults, setTypeResults] = useState<TypeRow[]>([])
+
   const [coverMap, setCoverMap] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -154,23 +152,22 @@ function BiensContent() {
           if (!cancelled) { setBiens(rows); setCoverMap(cMap); setCount(c ?? 0) }
 
         } else {
-          // Mode magazine — carousels par catégorie
-          const results = await Promise.all(
-            TYPE_FILTERS.filter(f => f.value !== '').map(async (f) => {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const { data } = await (supabase as any)
-                .from('biens')
-                .select('id, titre, commune, quartier, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces, is_verifie, score_ia, url_visite_3d, proprietaire_id')
-                .eq('statut', 'publie')
-                .eq('type_bien', f.value)
-                .order('created_at', { ascending: false })
-                .limit(8)
-              return { ...f, biens: (data ?? []) as BienRow[] }
-            })
-          )
-          const allIds = results.flatMap(r => r.biens.map(b => b.id))
-          const cMap = await getCoverMap(allIds)
-          if (!cancelled) { setTypeResults(results); setCoverMap(cMap); setCount(allIds.length) }
+          // Mode grille — tous les biens
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data, count: c, error: err } = await (supabase as any)
+            .from('biens')
+            .select(
+              'id, titre, commune, quartier, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces, is_verifie, score_ia, url_visite_3d, proprietaire_id',
+              { count: 'exact' }
+            )
+            .eq('statut', 'publie')
+            .order('created_at', { ascending: false })
+            .limit(24)
+
+          if (err) throw new Error(err.message)
+          const rows = (data ?? []) as BienRow[]
+          const cMap = await getCoverMap(rows.map(b => b.id))
+          if (!cancelled) { setBiens(rows); setCoverMap(cMap); setCount(c ?? 0) }
         }
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : 'Erreur de chargement')
@@ -195,7 +192,7 @@ function BiensContent() {
     <div className="min-h-screen bg-midnight">
       <PageHeader activeType={activeType} count={count} />
 
-      <main className="max-w-7xl mx-auto px-4 py-16" aria-live="polite" aria-busy={loading}>
+      <main className="max-w-7xl mx-auto px-4 pt-6 pb-16" aria-live="polite" aria-busy={loading}>
         <AnimatePresence mode="wait">
           {loading ? (
             <motion.div
@@ -225,28 +222,12 @@ function BiensContent() {
                 Réessayer
               </button>
             </motion.div>
-          ) : activeType ? (
+          ) : (
             <motion.div key="grid" variants={containerVariants} initial="hidden" animate="visible">
-              {/* Header de section */}
-              <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
-                <div>
-                  <span className="text-[var(--accent-luxury)] font-bold tracking-[0.4em] uppercase text-[9px] block mb-4">
-                    Collection curatée
-                  </span>
-                  <h2 className="font-display text-5xl md:text-7xl font-black text-[var(--text)] tracking-tight leading-none">
-                    {activeLabel}
-                  </h2>
-                </div>
-                <div className="text-right border-l border-[var(--border)] pl-8 shrink-0">
-                  <p className="text-[var(--text-muted)] font-sans text-[10px] uppercase tracking-[0.2em] mb-1">Disponibles</p>
-                  <p className="text-[var(--text)] font-display text-4xl font-bold">{count}</p>
-                </div>
-              </div>
-
               {biens.length === 0 ? (
                 <EmptyState />
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   {biens.map((bien, i) => (
                     <motion.div key={bien.id} variants={itemVariants} className="relative group/card">
                       <PremiumBienCard
@@ -268,9 +249,9 @@ function BiensContent() {
                       />
                       {currentUserId === bien.proprietaire_id && (
                         <div className="absolute top-4 left-4 z-20">
-                          <Link 
+                          <Link
                             href={`/mes-biens/${bien.id}/modifier`}
-                            className="px-4 py-2 bg-black/60 backdrop-blur-md text-white rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-xl hover:scale-105 transition-transform border border-white/20"
+                            className="px-3 py-1.5 bg-black/60 backdrop-blur-md text-white rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-xl hover:scale-105 transition-transform border border-white/20"
                           >
                             Modifier
                           </Link>
@@ -281,82 +262,6 @@ function BiensContent() {
                 </div>
               )}
             </motion.div>
-          ) : (
-            <motion.div key="magazine" variants={containerVariants} initial="hidden" animate="visible" className="space-y-32">
-              {typeResults.filter(r => r.biens.length > 0).map((row, idx) => (
-                <section key={row.value} aria-labelledby={`section-${row.value}`}>
-                  {/* Header catégorie */}
-                  <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
-                    <div className="max-w-2xl">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 rounded-xl bg-[var(--accent-luxury)]/8 flex items-center justify-center
-                          text-[var(--accent-luxury)] border border-[var(--accent-luxury)]/15">
-                          <row.icon className="w-5 h-5" />
-                        </div>
-                        <span className="text-[var(--accent-luxury)] font-bold tracking-[0.3em] uppercase text-[9px]">
-                          La Collection
-                        </span>
-                      </div>
-                      <h2
-                        id={`section-${row.value}`}
-                        className="font-display text-4xl md:text-6xl font-black text-off-white tracking-[0.01em] leading-[0.9]"
-                      >
-                        {row.label}
-                      </h2>
-                    </div>
-
-                    <a
-                      href={`/biens?type_bien=${row.value}`}
-                      className="group/link inline-flex items-center gap-4 px-8 py-4 bg-midnight
-                        hover:bg-primary transition-all duration-500 rounded-2xl text-off-white
-                        shadow-[0_15px_30px_-10px_rgba(0,0,0,0.3)] hover:shadow-primary/20 shrink-0"
-                    >
-                      <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Voir tout</span>
-                      <div className="w-8 h-8 rounded-full bg-off-white/10 group-hover/link:bg-off-white/20
-                        flex items-center justify-center transition-colors">
-                        <ArrowRight className="w-4 h-4 group-hover/link:translate-x-0.5 transition-transform" />
-                      </div>
-                    </a>
-                  </div>
-
-                  <CardsCarousel cardWidth={340}>
-                    <div className="flex gap-6">
-                      {row.biens.map((bien: BienRow, i: number) => (
-                        <div key={bien.id} className="w-[280px] sm:w-[320px] shrink-0 relative group/card">
-                          <PremiumBienCard
-                            id={bien.id}
-                            titre={bien.titre}
-                            commune={bien.commune}
-                            quartier={bien.quartier}
-                            type_bien={bien.type_bien}
-                            prix_mois_fcfa={bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa}
-                            prix_nuit_fcfa={bien.prix_nuit_fcfa}
-                            prix_vente_fcfa={bien.prix_vente_fcfa}
-                            surface_m2={bien.surface_m2}
-                            nb_pieces={bien.nb_pieces}
-                            photo_url={coverMap[bien.id] ?? null}
-                            is_verifie={bien.is_verifie}
-                            score_ia={bien.score_ia}
-                            url_visite_3d={bien.url_visite_3d}
-                            index={i}
-                          />
-                          {currentUserId === bien.proprietaire_id && (
-                            <div className="absolute top-4 left-4 z-20">
-                              <Link 
-                                href={`/mes-biens/${bien.id}/modifier`}
-                                className="px-4 py-2 bg-black/60 backdrop-blur-md text-white rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-xl hover:scale-105 transition-transform border border-white/20"
-                              >
-                                Modifier
-                              </Link>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </CardsCarousel>
-                </section>
-              ))}
-            </motion.div>
           )}
         </AnimatePresence>
       </main>
@@ -364,21 +269,6 @@ function BiensContent() {
   )
 }
 
-function bienProps(bien: BienRow, coverMap: Record<string, string>) {
-  return {
-    id: bien.id, titre: bien.titre, commune: bien.commune, quartier: bien.quartier,
-    type_bien: bien.type_bien,
-    prix_mois_fcfa: bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa,
-    prix_nuit_fcfa: bien.prix_nuit_fcfa,
-    prix_vente_fcfa: bien.prix_vente_fcfa,
-    surface_m2: bien.surface_m2, nb_pieces: bien.nb_pieces,
-    photo_url: coverMap[bien.id] ?? null,
-    isVerified: bien.is_verifie,
-    aiScore: bien.score_ia,
-    distMeters: bien.dist_meters,
-    url_visite_3d: bien.url_visite_3d,
-  }
-}
 
 function PageHeader({ activeType, count }: { activeType: string; count: number }) {
   const [scrolled, setScrolled] = useState(false)
@@ -390,50 +280,32 @@ function PageHeader({ activeType, count }: { activeType: string; count: number }
   }, [])
 
   return (
-    <header className="relative pt-28 pb-20 md:pt-48 md:pb-40 bg-midnight overflow-hidden">
-      {/* Fond décoratif */}
+    <header className="relative pt-16 pb-4 md:pt-24 md:pb-6 bg-midnight overflow-hidden">
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/15 rounded-full
-          blur-[120px] -translate-y-1/2 translate-x-1/4 opacity-50" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[var(--secondary)]/8 rounded-full
-          blur-[100px] translate-y-1/2 -translate-x-1/4 opacity-40" />
-        <div className="absolute inset-0 bg-dots opacity-4" />
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/4 opacity-40" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 text-center">
+      <div className="relative z-10 max-w-7xl mx-auto px-4">
         <motion.div
-          initial={{ opacity: 0, y: 32 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="mb-6 md:mb-8"
         >
-          <span className="inline-flex items-center gap-2 text-[var(--accent-luxury)] font-bold
-            tracking-[0.5em] uppercase text-[9px] mb-10 py-2.5 px-6 rounded-full
-            border border-[var(--accent-luxury)]/25 bg-[var(--accent-luxury)]/8 backdrop-blur-md">
-            Archive Immobilière de Prestige
-          </span>
-
-          <h1 className="font-display text-6xl md:text-[10rem] font-black text-off-white mb-8
-            tracking-[-0.03em] leading-[0.88] uppercase">
-            L&apos;Art de<br />Vivre.
+          <h1 className="font-display text-3xl md:text-5xl font-bold text-off-white tracking-tight">
+            Annonces immobilières
           </h1>
-
-          <p className="text-off-white/65 text-base md:text-xl font-sans max-w-xl mx-auto mb-20 leading-relaxed font-light">
-            {count > 0 ? (
-              <>
-                Une sélection de{' '}
-                <span className="text-off-white font-semibold">{count} adresses</span>
-                {' '}pour les amateurs d&apos;espaces singuliers.
-              </>
-            ) : 'Chargement de la collection…'}
-          </p>
+          {count > 0 && (
+            <p className="text-off-white/40 text-sm mt-1">
+              {count} bien{count > 1 ? 's' : ''} disponible{count > 1 ? 's' : ''}
+            </p>
+          )}
         </motion.div>
 
         {/* Barre de filtres */}
-        <div className={`sticky top-6 z-50 max-w-4xl mx-auto transition-all duration-500
-          ${scrolled ? 'scale-[0.97]' : 'scale-100'}`}>
-          <div className="bg-midnight-muted/85 backdrop-blur-2xl border border-off-white/10 p-1.5 rounded-full shadow-xl">
-            <nav className="flex gap-1 overflow-x-auto scrollbar-hide py-0.5 px-1"
-              aria-label="Filtres de type de bien">
+        <div className={`sticky top-4 z-50 transition-all duration-300 ${scrolled ? 'scale-[0.98]' : 'scale-100'}`}>
+          <div className="bg-midnight-muted/90 backdrop-blur-2xl border border-off-white/10 p-1 rounded-full shadow-xl">
+            <nav className="flex gap-1 overflow-x-auto scrollbar-hide py-0.5 px-1" aria-label="Filtres de type de bien">
               {TYPE_FILTERS.map((f) => {
                 const isActive = f.value === activeType
                 return (
@@ -442,16 +314,17 @@ function PageHeader({ activeType, count }: { activeType: string; count: number }
                     href={f.value ? `/biens?type_bien=${f.value}` : '/biens'}
                     aria-current={isActive ? 'page' : undefined}
                     className={`
-                      flex items-center gap-2 shrink-0 px-5 py-3 rounded-full text-[10px] font-bold
-                      transition-all duration-300 uppercase tracking-[0.15em]
+                      flex items-center gap-1.5 shrink-0 px-4 py-2.5 rounded-full text-[10px] font-bold
+                      transition-all duration-200 uppercase tracking-[0.12em]
                       ${isActive
-                        ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-md shadow-primary/25'
+                        ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-md'
                         : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--text)]/5'
                       }
                     `}
                   >
-                    <f.icon className={`w-3 h-3 ${isActive ? 'text-[var(--on-primary)]' : 'text-[var(--text-subtle)]'}`} aria-hidden="true" />
-                    {f.label}
+                    <f.icon className={`w-3 h-3 shrink-0 ${isActive ? 'text-[var(--on-primary)]' : 'text-[var(--text-subtle)]'}`} aria-hidden="true" />
+                    <span className="hidden sm:inline">{f.label}</span>
+                    <span className="sm:hidden">{f.label.split(' ')[0]}</span>
                   </a>
                 )
               })}

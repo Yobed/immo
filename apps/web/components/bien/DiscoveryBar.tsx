@@ -2,16 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  ArrowLeft, 
-  Sparkles, 
-  Share2, 
-  Heart,
-  Play,
-  Zap,
-  MapPin,
-  Clock
-} from 'lucide-react'
+import { ArrowLeft, Share2 } from 'lucide-react'
 import { FavorisButton } from './FavorisButton'
 import { formatFCFA } from '@/lib/format'
 
@@ -62,10 +53,7 @@ export function DiscoveryBar({ bien, prix, userId }: DiscoveryBarProps) {
 
                {/* Property Title & Context */}
                <div className="flex flex-col gap-0.5 min-w-0">
-                  <div className="flex items-center gap-2">
-                     <Sparkles className="w-3 h-3 text-accent-luxury animate-pulse" />
-                     <span className="text-[8px] font-black uppercase tracking-[0.4em] text-accent-luxury/80">Sapphire 5.0</span>
-                  </div>
+                  <p className="text-[9px] font-medium uppercase tracking-widest text-white/30">{bien.commune}</p>
                   <h2 className="text-base font-display font-bold text-white truncate max-w-[200px] lg:max-w-[400px]">{bien.titre}</h2>
                </div>
             </div>
@@ -95,14 +83,14 @@ export function DiscoveryBar({ bien, prix, userId }: DiscoveryBarProps) {
 
                {/* Primary CTA */}
                <div className="flex items-center gap-3">
-                  <a 
-                    href={`https://wa.me/2250574243752?text=${encodeURIComponent(`Bonjour Sapphire Intelligence, je sollicite une assistance pour : ${bien.titre}`)}`}
+                  <a
+                    href={`https://wa.me/2250574243752?text=${encodeURIComponent(`Bonjour, je suis intéressé(e) par ce bien : *${bien.titre}* — ${bien.commune}. Pouvez-vous me donner plus d'informations ?`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-5 lg:px-8 py-3 bg-emerald-500 rounded-full hover:bg-emerald-400 transition-all group overflow-hidden shadow-[0_10px_30px_rgba(16,185,129,0.3)] shrink-0"
+                    className="flex items-center gap-3 px-5 lg:px-8 py-3 bg-emerald-600 rounded-full hover:bg-emerald-500 transition-all shadow-[0_10px_30px_rgba(16,185,129,0.3)] shrink-0"
                   >
-                     <img src="/whatsapp-3d.png" alt="WA" className="w-5 h-5 relative z-10 brightness-110" />
-                     <span className="text-[10px] font-black uppercase tracking-widest text-[#020617] hidden sm:inline">Sapphire WhatsApp</span>
+                    <img src="/whatsapp-3d.png" alt="WA" className="w-5 h-5" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-white hidden sm:inline">Contacter</span>
                   </a>
 
                   <div className="flex items-center gap-2">

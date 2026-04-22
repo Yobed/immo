@@ -1,20 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { Hero } from '@/components/landing/Hero'
-import { HowItWorks } from '@/components/landing/HowItWorks'
 import { FeaturedProperties } from '@/components/landing/FeaturedProperties'
-import { Features } from '@/components/landing/Features'
 import { MapZones } from '@/components/landing/MapZones'
-import { Testimonials } from '@/components/landing/Testimonials'
-import { Stats } from '@/components/landing/Stats'
-import { Partners } from '@/components/landing/Partners'
-import { CTAFinal } from '@/components/landing/CTAFinal'
-import { Footer } from '@/components/landing/Footer'
-import { CustomCursor } from '@/components/landing/CustomCursor'
-import { LifestyleMatcher } from '@/components/landing/LifestyleMatcher'
-import { PremiumShowcase } from '@/components/landing/PremiumShowcase'
 import { NearMeSection } from '@/components/landing/NearMeSection'
-import { FurnishedRentalsSection } from '@/components/landing/FurnishedRentalsSection'
 import { OwnerTeaser } from '@/components/landing/OwnerTeaser'
+import { Footer } from '@/components/landing/Footer'
 
 export const revalidate = 300 // ISR: revalide toutes les 5 min
 
@@ -98,21 +88,11 @@ export default async function HomePage() {
 
   return (
     <main>
-      <CustomCursor />
       <Hero bgImages={bgImages} featuredBiens={featuredBiens} />
-      <NearMeSection initialBiens={biensWithPhoto} />
       <FeaturedProperties />
-      <LifestyleMatcher />
-      <FurnishedRentalsSection />
-      <HowItWorks />
-      <OwnerTeaser />
-      <PremiumShowcase properties={premiumProperties} />
+      <NearMeSection initialBiens={biensWithPhoto} />
       <MapZones biens={biensWithPhoto} />
-      <Features />
-      <Testimonials />
-      <Stats />
-      <Partners />
-      <CTAFinal />
+      <OwnerTeaser />
       <Footer />
     </main>
   )
