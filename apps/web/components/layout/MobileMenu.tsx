@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
@@ -22,6 +22,22 @@ import { createClient } from '@/lib/supabase/client'
 export function MobileMenu({ links, ctaLinks, user }: MobileMenuProps) {
   const [open, setOpen] = useState(false)
   const router = useRouter()
+
+  // Bloque le scroll du body quand le menu est ouvert (évite le décalage)
+  useEffect(() => {
+    if (open) {
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+      document.body.style.overflow = 'hidden'
+      document.body.style.paddingRight = `${scrollbarWidth}px`
+    } else {
+      document.body.style.overflow = ''
+      document.body.style.paddingRight = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+      document.body.style.paddingRight = ''
+    }
+  }, [open])
 
   const handleLogout = async () => {
     const supabase = createClient()
@@ -47,7 +63,7 @@ export function MobileMenu({ links, ctaLinks, user }: MobileMenuProps) {
       {/* Backdrop */}
       {open && (
         <div
-          className="fixed inset-0 z-[90] bg-black/20 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-[90] bg-black/70 md:hidden"
           onClick={() => setOpen(false)}
         />
       )}

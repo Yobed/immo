@@ -43,12 +43,12 @@ export function StickyMobileCTA({ bienTitre, bienLieu, prix, prixSuffix, bienId,
       <AnimatePresence>
         {visible && (
           <motion.div
-            style={{ y: floatY }}
+            style={{ y: floatY, bottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))' }}
             initial={{ y: 60, opacity: 0, scale: 0.9 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 60, opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed bottom-[calc(2rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-[95] lg:hidden flex items-center gap-3 pointer-events-none"
+            className="fixed left-1/2 -translate-x-1/2 z-[95] lg:hidden flex items-center gap-3 pointer-events-none"
           >
             {/* Bouton principal Réserver */}
             <div className="relative pointer-events-auto">
@@ -95,7 +95,8 @@ export function StickyMobileCTA({ bienTitre, bienLieu, prix, prixSuffix, bienId,
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed bottom-0 left-0 right-0 z-[95] lg:hidden bg-white border-t border-slate-200 px-4 pt-3 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] shadow-2xl"
+          className="fixed bottom-0 left-0 right-0 z-[95] lg:hidden bg-white border-t border-slate-200 px-4 pt-3 shadow-2xl"
+          style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
         >
           <div className="flex items-center gap-3">
             <div className="flex-1 min-w-0">
