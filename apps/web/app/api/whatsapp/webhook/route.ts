@@ -109,8 +109,8 @@ export async function POST(req: NextRequest) {
         content: m.body,
       }));
 
-    // 3. Contexte immobilier (biens + médias)
-    const context = await getAIBienContext(userMessage);
+    // 3. Contexte immobilier (biens + médias) — historique passé pour retrouver commune/type des échanges précédents
+    const context = await getAIBienContext(userMessage, formattedHistory);
 
     // 4. Enrichir le contexte avec instructions RDV si intent détecté
     const hasVisiteIntent = detectVisiteIntent(userMessage);

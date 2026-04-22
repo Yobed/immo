@@ -1,14 +1,31 @@
 import { createClient } from '@/lib/supabase/server'
 import { parseSearchQuery } from '../searchParser'
 
-export async function getAIBienContext(userMessage: string) {
+export async function getAIBienContext(
+  userMessage: string,
+  history?: { role: string; content: string }[]
+) {
   const supabase = await createClient()
-  const p = parseSearchQuery(userMessage)
+  let p = parseSearchQuery(userMessage)
 
   // Détecter si le client demande des images/photos/vidéos
   const demandeMedia = /photo|image|voir|envoie|montre|aperçu|visu|vid[eé]o/i.test(userMessage)
 
-  // Si aucun critère immobilier détecté et pas de demande de média, pas de recherche
+  // Si aucun critère dans le message courant, chercher dans l'historique récent
+  if (!p.commune && !p.type_bien && !p.prix_max && !p.q && history && history.length > 0) {
+    const recentContent = history
+      .slice(-8)
+      .map((m) => m.content)
+      .join(' ')
+    const pFromHistory = parseSearchQuery(recentContent)
+    if (pFromHistory.commune) p.commune = pFromHistory.commune
+    if (pFromHistory.type_bien) p.type_bien = pFromHistory.type_bien
+    if (pFromHistory.prix_max) p.prix_max = pFromHistory.prix_max
+    if (pFromHistory.q) p.q = pFromHistory.q
+    if (pFromHistory.equipements?.length) p.equipements = pFromHistory.equipements
+  }
+
+  // Si toujours aucun critère et pas de demande de média, pas de recherche
   if (!p.commune && !p.type_bien && !p.prix_max && !p.q && !demandeMedia) {
     return null
   }
@@ -70,13 +87,19 @@ Dis au client que tu vas faire une recherche manuelle et que tu le recontactes r
     if (b.description) context += `Description: ${b.description.slice(0, 200)}\n`
     if (photos.length > 0) context += `Photos disponibles (${photos.length}): ${photos.slice(0, 5).join(' | ')}\n`
     if (videos.length > 0) context += `Vidéos disponibles (${videos.length}): ${videos.slice(0, 2).join(' | ')}\n`
-    if (photos.length === 0 && videos.length === 0) context += `Pas encore de médias pour ce bien.\n`
+    if (photos.length === 0 && videos.length === 0) context += `Pas de photos dans le catalogue pour ce bien.\n`
     context += `Lien fiche: https://immo-sigma.vercel.app/biens/${b.id}\n`
     context += '\n'
   })
 
   if (demandeMedia) {
-    context += `IMPORTANT: Le client demande des photos/vidéos. Envoie-lui UNE photo réelle depuis les URLs ci-dessus en utilisant le format [MEDIA: URL] à la fin de ton message. N'invente aucune URL.\n`
+    context += `INSTRUCTION MÉDIA OBLIGATOIRE:
+Le client demande des photos/vidéos.
+- Vérifie si "Photos disponibles" est listé pour le bien concerné ci-dessus.
+- Si oui : prends la PREMIÈRE URL et ajoute EXACTEMENT [MEDIA: <URL>] à la FIN de ta réponse. Rien après.
+- Si "Pas de photos dans le catalogue" : dis "Je n'ai pas encore de photos pour ce bien dans notre système."
+- NE DIS JAMAIS "Voici une photo" sans mettre le tag [MEDIA: URL] avec une vraie URL du catalogue.
+- N'invente AUCUNE URL.\n`
   }
 
   return context
