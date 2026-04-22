@@ -271,26 +271,14 @@ function BiensContent() {
 
 
 function PageHeader({ activeType, count }: { activeType: string; count: number }) {
-  const [scrolled, setScrolled] = useState(false)
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 180)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
   return (
-    <header className="relative pt-16 pb-4 md:pt-24 md:pb-6 bg-midnight overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/4 opacity-40" />
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto px-4">
+    <header className="relative bg-midnight">
+      {/* Titre */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 pt-16 pb-4 md:pt-24 md:pb-5">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-6 md:mb-8"
         >
           <h1 className="font-display text-3xl md:text-5xl font-bold text-off-white tracking-tight">
             Annonces immobilières
@@ -301,35 +289,35 @@ function PageHeader({ activeType, count }: { activeType: string; count: number }
             </p>
           )}
         </motion.div>
+      </div>
 
-        {/* Barre de filtres */}
-        <div className={`sticky top-4 z-50 transition-all duration-300 ${scrolled ? 'scale-[0.98]' : 'scale-100'}`}>
-          <div className="bg-midnight-muted/90 backdrop-blur-2xl border border-off-white/10 p-1 rounded-full shadow-xl">
-            <nav className="flex gap-1 overflow-x-auto scrollbar-hide py-0.5 px-1" aria-label="Filtres de type de bien">
-              {TYPE_FILTERS.map((f) => {
-                const isActive = f.value === activeType
-                return (
-                  <a
-                    key={f.value}
-                    href={f.value ? `/biens?type_bien=${f.value}` : '/biens'}
-                    aria-current={isActive ? 'page' : undefined}
-                    className={`
-                      flex items-center gap-1.5 shrink-0 px-4 py-2.5 rounded-full text-[10px] font-bold
-                      transition-all duration-200 uppercase tracking-[0.12em]
-                      ${isActive
-                        ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-md'
-                        : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--text)]/5'
-                      }
-                    `}
-                  >
-                    <f.icon className={`w-3 h-3 shrink-0 ${isActive ? 'text-[var(--on-primary)]' : 'text-[var(--text-subtle)]'}`} aria-hidden="true" />
-                    <span className="hidden sm:inline">{f.label}</span>
-                    <span className="sm:hidden">{f.label.split(' ')[0]}</span>
-                  </a>
-                )
-              })}
-            </nav>
-          </div>
+      {/* Barre de filtres — pleine largeur + fond opaque pour éviter le bleed */}
+      <div className="sticky top-0 z-50 bg-midnight border-b border-off-white/8">
+        <div className="max-w-7xl mx-auto px-4 py-2">
+          <nav className="flex gap-1 overflow-x-auto scrollbar-hide" aria-label="Filtres de type de bien">
+            {TYPE_FILTERS.map((f) => {
+              const isActive = f.value === activeType
+              return (
+                <a
+                  key={f.value}
+                  href={f.value ? `/biens?type_bien=${f.value}` : '/biens'}
+                  aria-current={isActive ? 'page' : undefined}
+                  className={`
+                    flex items-center gap-1.5 shrink-0 px-4 py-2 rounded-full text-[10px] font-bold
+                    transition-all duration-200 uppercase tracking-[0.12em] whitespace-nowrap
+                    ${isActive
+                      ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-md'
+                      : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-off-white/8'
+                    }
+                  `}
+                >
+                  <f.icon className={`w-3 h-3 shrink-0 ${isActive ? 'text-[var(--on-primary)]' : 'text-[var(--text-subtle)]'}`} aria-hidden="true" />
+                  <span className="hidden sm:inline">{f.label}</span>
+                  <span className="sm:hidden">{f.label.split(' ')[0]}</span>
+                </a>
+              )
+            })}
+          </nav>
         </div>
       </div>
     </header>

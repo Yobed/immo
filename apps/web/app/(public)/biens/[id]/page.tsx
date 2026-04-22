@@ -202,8 +202,8 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
         </motion.div>
       </section>
 
-      {/* HEADER SECTION - EDITORIAL ELEGANCE */}
-      <section className="relative pt-32 pb-24 bg-[#020617] overflow-hidden">
+      {/* HEADER SECTION */}
+      <section className="relative pt-8 pb-10 md:pt-24 md:pb-20 bg-[#020617] overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-accent-luxury/5 blur-[120px] pointer-events-none" />
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-16 lg:gap-24">
