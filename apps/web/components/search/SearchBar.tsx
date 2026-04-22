@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useVoiceSearch } from '@/hooks/useVoiceSearch'
 import { cn } from '@/lib/utils'
 
-const ANIMATED_PLACEHOLDERS = [
+const TYPEWRITER_PLACEHOLDERS = [
   'Studio meublé à Cocody...',
   'Villa avec piscine à Riviera...',
   'Appartement 2 pièces au Plateau...',
@@ -16,6 +16,12 @@ const ANIMATED_PLACEHOLDERS = [
   'Bureau climatisé Zone 4...',
   'Moins de 300k/mois à Yopougon...',
 ]
+
+// Délais machine à écrire (ms)
+const TYPING_SPEED  = 55   // par caractère
+const ERASING_SPEED = 28   // par caractère (effacement plus rapide)
+const PAUSE_AFTER_TYPED  = 1800
+const PAUSE_AFTER_ERASED = 350
 
 // Version: 1.0.3 (Force mobile visibility)
 // Cache-bust: 2026-04-20_14-00
@@ -47,8 +53,10 @@ export function SearchBar({
   const [highlighted, setHighlighted] = useState(0)
   const [isPending, startTransition] = useTransition()
   const { isListening, transcript, startListening, stopListening, isSupported } = useVoiceSearch()
-  const [placeholderIdx, setPlaceholderIdx] = useState(0)
   const [focused, setFocused] = useState(false)
+  const [displayed, setDisplayed]     = useState('')
+  const [phraseIdx, setPhraseIdx]     = useState(0)
+  const [phase, setPhase]             = useState<'typing' | 'pausing' | 'erasing' | 'waiting'>('typing')
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -80,11 +88,31 @@ export function SearchBar({
   }, [transcript])
 
   useEffect(() => {
-    const t = setInterval(() => {
-      setPlaceholderIdx(i => (i + 1) % ANIMATED_PLACEHOLDERS.length)
-    }, 2800)
-    return () => clearInterval(t)
-  }, [])
+    const target = TYPEWRITER_PLACEHOLDERS[phraseIdx]
+    let timer: ReturnType<typeof setTimeout>
+
+    if (phase === 'typing') {
+      if (displayed.length < target.length) {
+        timer = setTimeout(() => setDisplayed(target.slice(0, displayed.length + 1)), TYPING_SPEED)
+      } else {
+        timer = setTimeout(() => setPhase('pausing'), PAUSE_AFTER_TYPED)
+      }
+    } else if (phase === 'pausing') {
+      timer = setTimeout(() => setPhase('erasing'), 0)
+    } else if (phase === 'erasing') {
+      if (displayed.length > 0) {
+        timer = setTimeout(() => setDisplayed(d => d.slice(0, -1)), ERASING_SPEED)
+      } else {
+        timer = setTimeout(() => setPhase('waiting'), PAUSE_AFTER_ERASED)
+      }
+    } else {
+      // waiting → passe à la phrase suivante
+      setPhraseIdx(i => (i + 1) % TYPEWRITER_PLACEHOLDERS.length)
+      setPhase('typing')
+    }
+
+    return () => clearTimeout(timer)
+  }, [phase, displayed, phraseIdx])
 
   const navigate = (textQuery: string) => {
     startTransition(() => {
@@ -145,21 +173,13 @@ export function SearchBar({
               autoComplete="off"
               className="w-full bg-transparent py-2.5 text-sm md:text-base font-sans text-[var(--text)] focus:outline-none min-w-0 placeholder:text-transparent"
             />
-            {/* Placeholder animé — visible seulement si vide et non focalisé */}
+            {/* Placeholder machine à écrire — visible si vide et non focalisé */}
             {!query && !focused && (
-              <div className="absolute inset-0 flex items-center pointer-events-none overflow-hidden">
-                <AnimatePresence mode="wait">
-                  <motion.span
-                    key={placeholderIdx}
-                    initial={{ y: '100%', opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: '-100%', opacity: 0 }}
-                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                    className="text-sm md:text-base font-sans text-[var(--text-muted)] whitespace-nowrap"
-                  >
-                    {ANIMATED_PLACEHOLDERS[placeholderIdx]}
-                  </motion.span>
-                </AnimatePresence>
+              <div className="absolute inset-0 flex items-center pointer-events-none select-none">
+                <span className="text-sm md:text-base font-sans text-[var(--text-muted)]">
+                  {displayed}
+                  <span className="inline-block w-[2px] h-[1em] bg-[var(--accent-luxury)] ml-[1px] align-middle animate-[caret_1s_step-end_infinite]" />
+                </span>
               </div>
             )}
           </div>
