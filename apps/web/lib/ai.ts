@@ -1,29 +1,41 @@
-// lib/ai.ts
-// OpenRouter API — chatbot immobilier CI, scoring annonces, generation descriptions
-// Modèle : google/gemma-4-26b-a4b-it:free
+// lib/ai.ts — Groq API (llama-3.3-70b-versatile)
 
-export const SYSTEM_PROMPT_IMMOBILIER_CI = `Tu es "Sapphire Intelligence", l'IA de conciergerie ultra-luxe de Deep Estate Sapphire.
-Ton rôle est d'offrir une expérience digitale 5.0 à nos clients fortunés.
+const GROQ_API_KEY = process.env.GROQ_API_KEY || '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';
+const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+const GROQ_BASE_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
-1. TON PERSONNAGE : Tu es raffiné, discret, extrêmement cultivé sur le marché immobilier de luxe en Côte d'Ivoire (Assinie, Cocody Ambassades, Beverly Hills d'Abidjan) et doté d'une intelligence prédictive.
-2. TA MISSION : Répondre aux questions sur les biens, conseiller sur les investissements et faciliter la mise en relation premium.
-3. SAPPHIRE WHATSAPP : Tu peux proposer des services haut de gamme (Chef privé, Chauffeur de luxe, Sécurité rapprochée).
-4. TON STYLE : Phrases courtes, vocabulaire élégant, utilisation d'emojis de luxe (💎, ✨, 🏛️).
-5. RECHERCHE : Si tu ne trouves pas de bien exact dans le catalogue fourni, propose une recherche globale : [Lancer une recherche complète](/recherche).
-6. MÉDIAS WHATSAPP (CRITIQUE) : Si tu communiques via WhatsApp (indiqué par le contexte) et que le client demande des photos ou vidéos :
-   - Regarde dans le [CONTEXTE DES MÉDIAS] ou [CONTEXTE DU BIEN].
-   - Si tu as une URL de média, ajoute-la EXCLUSIVEMENT sous la forme [MEDIA: URL] à la TOUTE FIN de ton message.
-   - Exemple : "Bien sûr, voici l'aperçu.\n\n[MEDIA: https://...]"
-   - Le système détectera cette balise et l'enverra comme image/vidéo WhatsApp. Ne mets qu'une seule balise MEDIA par message.
+export const SYSTEM_PROMPT_IMMOBILIER_CI = `Tu es Sapphire, l'assistante WhatsApp de Deep Estate, une agence immobilière sérieuse à Abidjan, Côte d'Ivoire.
 
-VOS RÉPONSES :
-- Salutations distinguées (Ex: "Excellence", "Monsieur/Madame").
-- Toujours mentionner Abidjan avec amour et expertise.
-- Structurez vos réponses avec élégance.
-- Si un client demande "quelque chose sur Cocody", regarde dans le contexte fourni s'il y a des biens à Cocody.
+== TON COMPORTEMENT ==
+- Tu te comportes comme un(e) conseiller(ère) immobilier humain(e) : chaleureux(se), direct(e), efficace.
+- Tu NE DIS JAMAIS "Excellence", "sublimer votre journée", "art de vivre raffiné" ou tout autre formule pompeuse.
+- Tu réponds TOUJOURS et DIRECTEMENT à ce que le client demande. Si le client dit "je cherche un studio", tu cherches un studio — tu ne réponds pas avec une présentation générale de l'agence.
+- Tu adaptes ton ton : si le client écrit en nouchi ou informel, tu restes professionnel mais détendu.
+- Tu utilises des emojis avec parcimonie (1-2 max par message, jamais en excès).
+- Tu poses UNE SEULE question à la fois pour recueillir les critères manquants.
+- Tes messages sont courts et clairs (max 5 phrases). Pas de listes à puces inutiles.
 
-CONTACT PRIVILÉGIÉ :
-Si le client semble prêt à visiter ou a besoin d'une assistance humaine immédiate, propose le WhatsApp Conciergerie : https://wa.me/2250574243752`;
+== TA MISSION ==
+1. Aider le client à trouver le bien qui lui convient (location, vente, studio, villa, appartement...).
+2. Lui présenter les biens disponibles dans le catalogue fourni en contexte.
+3. Envoyer des photos ou vidéos réelles des biens quand il le demande.
+4. Répondre aux questions sur les prix, quartiers, disponibilités.
+5. Proposer des visites et prendre les coordonnées si le client est intéressé.
+
+== ENVOYER DES IMAGES ==
+Quand le client demande des photos ou images d'un bien :
+1. Vérifie le [CATALOGUE] fourni — les URLs des photos y sont listées.
+2. Pour envoyer une image, ajoute EXACTEMENT ce format à la FIN de ton message (rien après) :
+   [MEDIA: https://url-de-limage.jpg]
+3. Pour envoyer plusieurs images, envoie UNE image par message. Dis au client "Voici la première, je peux vous en envoyer d'autres."
+4. Si tu n'as PAS d'image pour le bien demandé, dis-le clairement : "Je n'ai pas encore de photos pour ce bien, je vais en demander au propriétaire."
+5. N'invente JAMAIS une URL. Utilise UNIQUEMENT les URLs présentes dans le catalogue.
+
+== RÈGLES IMPORTANTES ==
+- Si le catalogue ne contient aucun bien, dis honnêtement que tu vas chercher et propose de rappeler.
+- Ne redirige JAMAIS le client vers un lien "/recherche" — tu fais la recherche toi-même.
+- Le site web pour plus de détails : https://immo-sigma.vercel.app/biens/[ID_DU_BIEN]
+- Pour une prise en charge humaine immédiate : https://wa.me/2250574243752`;
 
 export const SYSTEM_PROMPT_SCORING = `Tu es un expert en marketing immobilier CI.
 Analyse cette annonce et retourne UNIQUEMENT un objet JSON valide, sans texte autour.
@@ -51,135 +63,91 @@ Redige une description attractive et professionnelle pour cette annonce.
 
 export type ChatMessage = { role: 'user' | 'assistant' | 'system'; content: string };
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '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';
-const MODELS = [
-  'google/gemma-4-26b-a4b-it:free',
-  'openai/gpt-oss-120b:free',
-  'qwen/qwen3-next-80b-a3b-instruct:free',
-];
-
-/**
- * Chatbot streaming avec OpenRouter (essaie plusieurs modèles en cas de rate limit)
- */
-export async function chatImmobilierStream(messages: ChatMessage[], context?: string) {
-  const systemMessage = context
-    ? `${SYSTEM_PROMPT_IMMOBILIER_CI}\n\n[CONTEXTE DU BIEN ACTUEL] :\n${context}\nSert-toi de ces infos pour répondre aux questions sur ce bien.`
-    : SYSTEM_PROMPT_IMMOBILIER_CI;
-
-  for (const model of MODELS) {
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://immodash.ci",
-        "X-Title": "ImmoDash Pro",
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: 'system', content: systemMessage },
-          ...messages
-        ],
-        stream: true,
-      })
-    });
-
-    if (response.ok) return response.body;
-
-    const errorText = await response.text();
-    console.error(`OpenRouter Stream Error (model: ${model}):`, errorText);
-  }
-
-  throw new Error("Tous les modèles OpenRouter sont indisponibles.");
-}
-
-/**
- * Chatbot standard (non-streaming) with model fallback
- */
-export async function chatImmobilier(messages: ChatMessage[], context?: string) {
-  const systemMessage = context
-    ? `${SYSTEM_PROMPT_IMMOBILIER_CI}\n\n[CONTEXTE DU BIEN ACTUEL] :\n${context}\nSert-toi de ces infos pour répondre aux questions sur ce bien.`
-    : SYSTEM_PROMPT_IMMOBILIER_CI;
-
-  for (const model of MODELS) {
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://immodash.ci",
-        "X-Title": "ImmoDash Pro",
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: 'system', content: systemMessage },
-          ...messages
-        ],
-      })
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      const content = data.choices?.[0]?.message?.content;
-      if (content) return content;
-    } else {
-      const error = await response.text();
-      console.error(`OpenRouter Error (model: ${model}):`, error);
-    }
-  }
-
-  return "Désolé, Sapphire Intelligence rencontre une petite difficulté technique. Veuillez réessayer dans quelques instants. 💎";
-}
-
-/** Scoring d'une annonce */
-export async function scorerAnnonce(bienData: Record<string, unknown>) {
-  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
+async function groqFetch(messages: ChatMessage[], system: string): Promise<string | null> {
+  const response = await fetch(GROQ_BASE_URL, {
+    method: 'POST',
     headers: {
-      "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-      "Content-Type": "application/json",
-      "HTTP-Referer": "https://immodash.ci",
-      "X-Title": "ImmoDash Pro",
+      'Authorization': `Bearer ${GROQ_API_KEY}`,
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: MODELS[0],
+      model: GROQ_MODEL,
       messages: [
-        { role: 'system', content: SYSTEM_PROMPT_SCORING },
-        { role: 'user', content: JSON.stringify(bienData) }
+        { role: 'system', content: system },
+        ...messages,
       ],
-    })
+      temperature: 0.7,
+      max_tokens: 512,
+    }),
   });
 
+  if (!response.ok) {
+    const err = await response.text();
+    console.error('Groq API Error:', err);
+    return null;
+  }
+
   const data = await response.json();
-  const text = data.choices?.[0]?.message?.content || '{}';
+  return data.choices?.[0]?.message?.content || null;
+}
+
+export async function chatImmobilier(messages: ChatMessage[], context?: string): Promise<string> {
+  const system = context
+    ? `${SYSTEM_PROMPT_IMMOBILIER_CI}\n\n== CATALOGUE DES BIENS DISPONIBLES ==\n${context}`
+    : SYSTEM_PROMPT_IMMOBILIER_CI;
+
+  const result = await groqFetch(messages, system);
+  return result ?? 'Désolé, je rencontre un problème technique. Réessayez dans un instant. 🙏';
+}
+
+export async function chatImmobilierStream(messages: ChatMessage[], context?: string): Promise<ReadableStream | null> {
+  const system = context
+    ? `${SYSTEM_PROMPT_IMMOBILIER_CI}\n\n== CATALOGUE DES BIENS DISPONIBLES ==\n${context}`
+    : SYSTEM_PROMPT_IMMOBILIER_CI;
+
+  const response = await fetch(GROQ_BASE_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${GROQ_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: GROQ_MODEL,
+      messages: [
+        { role: 'system', content: system },
+        ...messages,
+      ],
+      temperature: 0.7,
+      max_tokens: 512,
+      stream: true,
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.text();
+    console.error('Groq Stream Error:', err);
+    throw new Error(`Groq API error: ${response.status}`);
+  }
+
+  return response.body;
+}
+
+export async function scorerAnnonce(bienData: Record<string, unknown>) {
+  const result = await groqFetch(
+    [{ role: 'user', content: JSON.stringify(bienData) }],
+    SYSTEM_PROMPT_SCORING
+  );
   try {
-    return JSON.parse(text);
+    return JSON.parse(result || '{}');
   } catch {
     return { score: 0, niveau: 'inconnu', points_forts: [], recommandations: ['Erreur analyse'], resume: '' };
   }
 }
 
-/** Génération de description */
-export async function genererDescription(caracteristiques: Record<string, unknown>) {
-  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-      "Content-Type": "application/json",
-      "HTTP-Referer": "https://immodash.ci",
-      "X-Title": "ImmoDash Pro",
-    },
-    body: JSON.stringify({
-      model: MODELS[0],
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT_DESCRIPTION },
-        { role: 'user', content: JSON.stringify(caracteristiques) }
-      ],
-    })
-  });
-
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content || '';
+export async function genererDescription(caracteristiques: Record<string, unknown>): Promise<string> {
+  const result = await groqFetch(
+    [{ role: 'user', content: JSON.stringify(caracteristiques) }],
+    SYSTEM_PROMPT_DESCRIPTION
+  );
+  return result || '';
 }
