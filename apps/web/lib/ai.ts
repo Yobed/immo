@@ -52,81 +52,85 @@ Redige une description attractive et professionnelle pour cette annonce.
 export type ChatMessage = { role: 'user' | 'assistant' | 'system'; content: string };
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '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';
-const MODEL = 'qwen/qwen3-next-80b-a3b-instruct:free';
+const MODELS = [
+  'google/gemma-4-26b-a4b-it:free',
+  'openai/gpt-oss-120b:free',
+  'qwen/qwen3-next-80b-a3b-instruct:free',
+];
 
 /**
- * Chatbot streaming avec OpenRouter
+ * Chatbot streaming avec OpenRouter (essaie plusieurs modèles en cas de rate limit)
  */
 export async function chatImmobilierStream(messages: ChatMessage[], context?: string) {
-  const systemMessage = context 
+  const systemMessage = context
     ? `${SYSTEM_PROMPT_IMMOBILIER_CI}\n\n[CONTEXTE DU BIEN ACTUEL] :\n${context}\nSert-toi de ces infos pour répondre aux questions sur ce bien.`
     : SYSTEM_PROMPT_IMMOBILIER_CI;
 
-  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-      "Content-Type": "application/json",
-      "HTTP-Referer": "https://immodash.ci",
-      "X-Title": "ImmoDash Pro",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [
-        { role: 'system', content: systemMessage },
-        ...messages
-      ],
-      stream: true,
-    })
-  });
+  for (const model of MODELS) {
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://immodash.ci",
+        "X-Title": "ImmoDash Pro",
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: systemMessage },
+          ...messages
+        ],
+        stream: true,
+      })
+    });
 
-  if (!response.ok) {
+    if (response.ok) return response.body;
+
     const errorText = await response.text();
-    console.error("OpenRouter Error Response:", errorText);
-    try {
-      const errorJson = JSON.parse(errorText);
-      throw new Error(errorJson.error?.message || "Erreur OpenRouter API");
-    } catch {
-      throw new Error(`Erreur OpenRouter (${response.status}): ${errorText}`);
-    }
+    console.error(`OpenRouter Stream Error (model: ${model}):`, errorText);
   }
 
-  return response.body; // Retourne le ReadableStream direct d'OpenRouter
+  throw new Error("Tous les modèles OpenRouter sont indisponibles.");
 }
 
 /**
- * Chatbot standard (non-streaming)
+ * Chatbot standard (non-streaming) with model fallback
  */
 export async function chatImmobilier(messages: ChatMessage[], context?: string) {
-  const systemMessage = context 
+  const systemMessage = context
     ? `${SYSTEM_PROMPT_IMMOBILIER_CI}\n\n[CONTEXTE DU BIEN ACTUEL] :\n${context}\nSert-toi de ces infos pour répondre aux questions sur ce bien.`
     : SYSTEM_PROMPT_IMMOBILIER_CI;
 
-  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-      "Content-Type": "application/json",
-      "HTTP-Referer": "https://immodash.ci",
-      "X-Title": "ImmoDash Pro",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [
-        { role: 'system', content: systemMessage },
-        ...messages
-      ],
-    })
-  });
+  for (const model of MODELS) {
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://immodash.ci",
+        "X-Title": "ImmoDash Pro",
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: systemMessage },
+          ...messages
+        ],
+      })
+    });
 
-  if (!response.ok) {
-    const error = await response.text();
-    console.error("OpenRouter Error:", error);
-    return "Désolé, Sapphire Intelligence rencontre une petite difficulté technique. Veuillez réessayer dans quelques instants.";
+    if (response.ok) {
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content;
+      if (content) return content;
+    } else {
+      const error = await response.text();
+      console.error(`OpenRouter Error (model: ${model}):`, error);
+    }
   }
 
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content || "Je n'ai pas pu générer de réponse.";
+  return "Désolé, Sapphire Intelligence rencontre une petite difficulté technique. Veuillez réessayer dans quelques instants. 💎";
 }
 
 /** Scoring d'une annonce */
@@ -140,7 +144,7 @@ export async function scorerAnnonce(bienData: Record<string, unknown>) {
       "X-Title": "ImmoDash Pro",
     },
     body: JSON.stringify({
-      model: MODEL,
+      model: MODELS[0],
       messages: [
         { role: 'system', content: SYSTEM_PROMPT_SCORING },
         { role: 'user', content: JSON.stringify(bienData) }
@@ -168,7 +172,7 @@ export async function genererDescription(caracteristiques: Record<string, unknow
       "X-Title": "ImmoDash Pro",
     },
     body: JSON.stringify({
-      model: MODEL,
+      model: MODELS[0],
       messages: [
         { role: 'system', content: SYSTEM_PROMPT_DESCRIPTION },
         { role: 'user', content: JSON.stringify(caracteristiques) }

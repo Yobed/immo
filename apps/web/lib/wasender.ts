@@ -5,7 +5,7 @@
  */
 
 const WASSENDER_API_KEY = process.env.WASSENDER_API_KEY || '5bad69e29793e748f2fea9043435cd4844aadd6b0947b650b2efb82c86c34017';
-const WASSENDER_WEBHOOK_SECRET = process.env.WASSENDER_WEBHOOK_SECRET || 'f86d09168461f558d119318034466d90';
+const WASSENDER_WEBHOOK_SECRET = process.env.WASSENDER_WEBHOOK_SECRET || '';
 const BASE_URL = 'https://www.wasenderapi.com/api';
 
 export type WasenderMessageType = 'text' | 'image' | 'video' | 'document' | 'audio';
