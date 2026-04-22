@@ -366,86 +366,89 @@ export function PropertiesMap({
         )}
       </div>
 
-      {/* ── Selected bien info panel (Bottom Sheet on Mobile, Top Right on Desktop) ── */}
+      {/* ── Selected bien info panel ── */}
       {selectedId && (() => {
         const bien = markers.find(b => b.id === selectedId)
         if (!bien) return null
+        const close = (e: React.MouseEvent) => { e.stopPropagation(); setSelectedId(null); onSelect?.(null) }
         return (
-          <div className="absolute inset-x-0 bottom-0 sm:bottom-auto sm:top-16 sm:right-16 z-20 transition-all duration-500 ease-out sm:w-[320px]">
-            <div className="bg-[#0a0a12]/95 backdrop-blur-[20px] border-t sm:border border-[rgba(212,175,55,0.4)] rounded-t-[2.5rem] sm:rounded-3xl shadow-[0_-20px_40px_rgba(0,0,0,0.8)] sm:shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden">
-              {/* Mobile Grab Handle */}
-              <div className="w-12 h-1.5 bg-white/10 rounded-full mx-auto mt-3 mb-1 sm:hidden" />
-
-              {/* 1. Image Header - Adjusted for mobile to avoid hiding the route */}
-              {/* 1. Header with Image (Desktop Only) */}
-              <div className="hidden lg:block h-44 w-full relative">
-                {bien.photo_url ? (
-                  <img 
-                    src={bien.photo_url} 
-                    alt={bien.titre}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-[#1a1a2e] flex items-center justify-center">
-                    <MapPin className="text-[#D4AF37] opacity-20" size={32} />
-                  </div>
+          <>
+            {/* ── MOBILE: barre compacte en bas (ne masque pas la route) ── */}
+            <div className="sm:hidden absolute inset-x-2 bottom-2 z-20">
+              <div className="bg-[#0a0a12]/95 backdrop-blur-xl border border-[rgba(212,175,55,0.4)] rounded-2xl shadow-2xl p-3 flex items-center gap-3">
+                {bien.photo_url && (
+                  <img src={bien.photo_url} alt="" className="w-12 h-12 rounded-xl object-cover shrink-0" />
                 )}
-                {/* Overlay Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a12] via-[#0a0a12]/20 to-transparent" />
-                
-                {/* Close button for desktop */}
-                <button
-                  className="absolute top-4 right-4 p-2.5 bg-black/40 backdrop-blur-md border border-white/10 rounded-full text-white/70 hover:text-white transition-colors"
-                  onClick={(e) => { e.stopPropagation(); setSelectedId(null); onSelect?.(null) }}
-                >
-                  ✕
-                </button>
-              </div>
-
-              {/* Close Button for Mobile (Standalone) */}
-              <button
-                className="sm:hidden absolute top-3 right-3 p-2 bg-white/5 border border-white/10 rounded-full text-white/40 z-50"
-                onClick={(e) => { e.stopPropagation(); setSelectedId(null); onSelect?.(null) }}
-              >
-                ✕
-              </button>
-
-              {/* 2. Content */}
-              <div className="px-6 py-8 sm:pb-10 sm:-mt-6 relative">
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#D4AF37] mb-2">
-                  {bien.commune}{bien.quartier ? ` · ${bien.quartier}` : ''}
-                </p>
-                <h3 className="text-white text-xl sm:text-lg font-bold leading-tight mb-3 tracking-tight">
-                  {bien.titre}
-                </h3>
-                <p className="text-[#D4AF37] text-2xl sm:text-xl font-black mb-5 flex items-baseline gap-1.5">
-                  {formatPrice(bien).split('/')[0]}
-                  <span className="text-[11px] font-bold opacity-60 uppercase">
-                    {formatPrice(bien).includes('/') ? `/ ${formatPrice(bien).split('/')[1]}` : 'FCFA'}
-                  </span>
-                </p>
-                
-                {routeGeometry && (
-                  <div className="flex items-center gap-3 p-3.5 bg-blue-500/10 rounded-2xl border border-blue-500/20 mb-6 group">
-                    <div className="relative">
-                      <div className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-pulse" />
-                      <div className="absolute inset-0 bg-blue-500 rounded-full animate-ping opacity-40 scale-150" />
-                    </div>
-                    <div className="flex flex-col">
-                      <p className="text-blue-400 text-[10px] font-black uppercase tracking-wider">
-                        Itinéraire Optimisé
-                      </p>
-                      <p className="text-blue-500/60 text-[9px] font-bold">
-                        Calculé depuis votre position
-                      </p>
-                    </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[9px] font-bold text-[#D4AF37] uppercase tracking-wider truncate">
+                    {bien.commune}{bien.quartier ? ` · ${bien.quartier}` : ''}
+                  </p>
+                  <p className="text-white text-[13px] font-bold truncate leading-tight">{bien.titre}</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <p className="text-[#D4AF37] text-xs font-black">{formatPrice(bien)}</p>
+                    {routeGeometry && (
+                      <span className="flex items-center gap-1 text-blue-400 text-[9px] font-bold">
+                        <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
+                        Itinéraire actif
+                      </span>
+                    )}
                   </div>
-                )}
-
-                <div className="flex gap-3">
+                </div>
+                <div className="flex flex-col gap-1.5 shrink-0">
                   <Link
                     href={`/biens/${bien.id}`}
-                    className="flex-1 text-center py-4.5 bg-[#D4AF37] text-black rounded-2xl text-[12px] font-black uppercase tracking-[0.15em] shadow-lg shadow-[#D4AF37]/20 hover:scale-[1.02] active:scale-95 transition-all"
+                    className="px-3 py-1.5 bg-[#D4AF37] text-black rounded-xl text-[10px] font-black uppercase tracking-wide text-center"
+                    onClick={e => e.stopPropagation()}
+                  >
+                    Voir
+                  </Link>
+                  <button
+                    onClick={close}
+                    className="px-3 py-1 bg-white/5 border border-white/10 rounded-xl text-white/40 text-[10px] text-center"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* ── DESKTOP: panneau en haut à droite ── */}
+            <div className="hidden sm:block absolute top-16 right-4 z-20 w-[300px]">
+              <div className="bg-[#0a0a12]/95 backdrop-blur-[20px] border border-[rgba(212,175,55,0.4)] rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden">
+                <div className="h-40 w-full relative">
+                  {bien.photo_url ? (
+                    <img src={bien.photo_url} alt={bien.titre} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-[#1a1a2e] flex items-center justify-center">
+                      <MapPin className="text-[#D4AF37] opacity-20" size={32} />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a12] via-[#0a0a12]/20 to-transparent" />
+                  <button
+                    className="absolute top-3 right-3 p-2 bg-black/40 backdrop-blur-md border border-white/10 rounded-full text-white/70 hover:text-white transition-colors"
+                    onClick={close}
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="px-5 py-5 -mt-4 relative">
+                  <p className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-[#D4AF37] mb-1">
+                    {bien.commune}{bien.quartier ? ` · ${bien.quartier}` : ''}
+                  </p>
+                  <h3 className="text-white text-base font-bold leading-tight mb-2">{bien.titre}</h3>
+                  <p className="text-[#D4AF37] text-lg font-black mb-4">{formatPrice(bien)}</p>
+                  {routeGeometry && (
+                    <div className="flex items-center gap-2.5 p-3 bg-blue-500/10 rounded-xl border border-blue-500/20 mb-4">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shrink-0" />
+                      <div>
+                        <p className="text-blue-400 text-[9px] font-black uppercase tracking-wider">Itinéraire Optimisé</p>
+                        <p className="text-blue-500/60 text-[8px]">Calculé depuis votre position</p>
+                      </div>
+                    </div>
+                  )}
+                  <Link
+                    href={`/biens/${bien.id}`}
+                    className="flex items-center justify-center w-full py-3 bg-[#D4AF37] text-black rounded-xl text-[11px] font-black uppercase tracking-[0.15em] hover:scale-[1.02] active:scale-95 transition-all"
                     onClick={e => e.stopPropagation()}
                   >
                     Consulter les détails
@@ -453,7 +456,7 @@ export function PropertiesMap({
                 </div>
               </div>
             </div>
-          </div>
+          </>
         )
       })()}
     </div>

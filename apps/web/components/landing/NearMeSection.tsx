@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { MapPin, Navigation, Loader2, Car, ExternalLink, ChevronRight } from 'lucide-react'
 import dynamic from 'next/dynamic'
@@ -189,6 +189,14 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const { theme } = useTheme()
+  const mapContainerRef = useRef<HTMLDivElement>(null)
+
+  // Scroll vers la carte quand un bien est sélectionné depuis la liste
+  useEffect(() => {
+    if (selectedId && mapContainerRef.current) {
+      mapContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [selectedId])
 
   const supabase = createClient() as any
 
@@ -375,7 +383,7 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
         <div className="flex flex-col gap-8">
 
           {/* BIG MAP — ALWAYS mounted, loading spinner overlays on top */}
-          <div className="rounded-3xl overflow-hidden ring-1 ring-[var(--border)] p-1 bg-[var(--surface-card)] backdrop-blur-3xl transition-all duration-1000 ease-[0.16, 1, 0.3, 1] hover:ring-[var(--accent-luxury)]" style={{ height: '560px' }}>
+          <div ref={mapContainerRef} className="rounded-3xl overflow-hidden ring-1 ring-[var(--border)] p-1 bg-[var(--surface-card)] backdrop-blur-3xl transition-all duration-1000 ease-[0.16, 1, 0.3, 1] hover:ring-[var(--accent-luxury)]" style={{ height: '560px' }}>
             <div className="rounded-[calc(1.5rem-4px)] overflow-hidden bg-[var(--background)] relative h-full">
             {/* Map is ALWAYS rendered — never unmounted */}
             <PropertiesMap
