@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 interface NavLink {
   href: string
@@ -16,27 +18,17 @@ interface MobileMenuProps {
   user?: { email: string; role: 'pro' | 'client' | 'public' }
 }
 
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
-
 export function MobileMenu({ links, ctaLinks, user }: MobileMenuProps) {
   const [open, setOpen] = useState(false)
   const router = useRouter()
 
-  // Bloque le scroll du body quand le menu est ouvert (évite le décalage)
   useEffect(() => {
     if (open) {
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
       document.body.style.overflow = 'hidden'
-      document.body.style.paddingRight = `${scrollbarWidth}px`
     } else {
       document.body.style.overflow = ''
-      document.body.style.paddingRight = ''
     }
-    return () => {
-      document.body.style.overflow = ''
-      document.body.style.paddingRight = ''
-    }
+    return () => { document.body.style.overflow = '' }
   }, [open])
 
   const handleLogout = async () => {
@@ -47,9 +39,11 @@ export function MobileMenu({ links, ctaLinks, user }: MobileMenuProps) {
     router.refresh()
   }
 
+  const close = () => setOpen(false)
+
   return (
     <>
-      {/* Hamburger button */}
+      {/* Hamburger */}
       <button
         onClick={() => setOpen(!open)}
         className="flex flex-col gap-1.5 p-2 rounded-btn hover:bg-[var(--surface)] transition-colors md:hidden"
@@ -60,27 +54,27 @@ export function MobileMenu({ links, ctaLinks, user }: MobileMenuProps) {
         <span className={cn('block w-5 h-0.5 bg-[var(--text)] transition-transform duration-200', open && '-translate-y-2 -rotate-45')} />
       </button>
 
-      {/* Backdrop (couvre le fond pendant l'animation d'ouverture) */}
-      {open && (
-        <div
-          className="fixed inset-0 z-[90] md:hidden"
-          onClick={() => setOpen(false)}
-        />
-      )}
-
-      {/* Drawer — pleine largeur sur mobile */}
-      <div className={cn(
-        'fixed top-0 right-0 bottom-0 z-[100] w-full bg-[var(--background)] shadow-2xl flex flex-col transition-transform duration-300 md:hidden',
-        open ? 'translate-x-0' : 'translate-x-full'
-      )}>
+      {/* Overlay plein écran — fond blanc fixe, fondu, aucun gap */}
+      <div
+        className={cn(
+          'fixed inset-0 z-[100] bg-white flex flex-col md:hidden transition-opacity duration-250',
+          open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        )}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
           <div className="flex items-center gap-4">
-             <span className="font-display text-lg text-primary">Menu</span>
-             <ThemeToggle />
+            <span className="font-display text-lg text-slate-900">Menu</span>
+            <ThemeToggle />
           </div>
-          <button onClick={() => setOpen(false)} className="p-1.5 rounded-btn hover:bg-[var(--surface)] transition-colors">
-            <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none"><path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" /></svg>
+          <button
+            onClick={close}
+            className="p-1.5 rounded-btn hover:bg-slate-100 transition-colors text-slate-700"
+            aria-label="Fermer"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
+              <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+            </svg>
           </button>
         </div>
 
@@ -90,8 +84,8 @@ export function MobileMenu({ links, ctaLinks, user }: MobileMenuProps) {
             <Link
               key={link.href}
               href={link.href}
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-3 py-3 rounded-card text-sm font-sans text-[var(--text)] hover:bg-[var(--surface)] hover:text-primary transition-colors"
+              onClick={close}
+              className="flex items-center gap-3 px-3 py-3.5 rounded-xl text-sm font-sans text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors"
             >
               {link.icon && <span className="text-base">{link.icon}</span>}
               {link.label}
@@ -99,36 +93,30 @@ export function MobileMenu({ links, ctaLinks, user }: MobileMenuProps) {
           ))}
         </nav>
 
-        {/* CTA buttons / User info */}
-        <div className="border-t border-[var(--border)] p-4 space-y-4 bg-[var(--surface-card)] mt-auto">
+        {/* CTA / User */}
+        <div className="border-t border-slate-200 p-4 space-y-3 bg-slate-50">
           {user ? (
             <div className="space-y-4">
-              <div className="flex flex-col gap-1">
-                <span className="text-xs text-[var(--text-muted)] font-sans">Connecté en tant que</span>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs text-slate-400 font-sans">Connecté en tant que</span>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-sans font-semibold text-[var(--text)] truncate max-w-[180px]">
+                  <span className="text-sm font-sans font-semibold text-slate-800 truncate max-w-[180px]">
                     {user.email}
                   </span>
                   {user.role === 'pro' && (
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-secondary bg-secondary/10 px-2 py-0.5 rounded-full border border-secondary/20">
-                      Pro
-                    </span>
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">Pro</span>
                   )}
                   {user.role === 'client' && (
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
-                      Locataire
-                    </span>
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">Locataire</span>
                   )}
                   {user.role === 'public' && (
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-green-500 bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/20">
-                      Visiteur
-                    </span>
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-green-600 bg-green-50 px-2 py-0.5 rounded-full border border-green-200">Visiteur</span>
                   )}
                 </div>
               </div>
               <button
                 onClick={handleLogout}
-                className="w-full border border-[var(--danger)] text-[var(--danger)] hover:bg-[var(--danger)] hover:text-white transition-colors block text-center py-2.5 rounded-btn text-sm font-sans font-medium"
+                className="w-full border border-red-300 text-red-600 hover:bg-red-50 transition-colors block text-center py-2.5 rounded-xl text-sm font-sans font-medium"
               >
                 Se déconnecter
               </button>
@@ -140,12 +128,12 @@ export function MobileMenu({ links, ctaLinks, user }: MobileMenuProps) {
                   <Link
                     key={cta.href}
                     href={cta.href}
-                    onClick={() => setOpen(false)}
+                    onClick={close}
                     className={cn(
-                      'block w-full text-center py-3 rounded-btn text-sm font-sans font-medium transition-colors',
+                      'block w-full text-center py-3 rounded-xl text-sm font-sans font-medium transition-colors',
                       cta.variant === 'primary'
-                        ? 'bg-primary text-white hover:bg-primary/90'
-                        : 'border border-[var(--border)] text-[var(--text)] hover:border-primary/40'
+                        ? 'bg-slate-900 text-white hover:bg-slate-700'
+                        : 'border border-slate-300 text-slate-700 hover:border-slate-400'
                     )}
                   >
                     {cta.label}
