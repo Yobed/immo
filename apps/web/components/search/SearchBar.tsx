@@ -202,7 +202,10 @@ export function SearchBar({
             )}
             title={isSupported ? "Recherche vocale" : "Recherche vocale non supportée par votre navigateur"}
           >
-            {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+            {isListening
+              ? <MicOff size={18} />
+              : <Mic size={18} className="animate-pulse" />
+            }
           </button>
 
           <button 
