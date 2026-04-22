@@ -189,6 +189,7 @@ export default async function RecherchePage({
                     nb_pieces={bien.nb_pieces}
                     photo_url={coverMap[bien.id] ?? null}
                     index={i}
+                    isCompact={true}
                   />
                 ))}
               </div>

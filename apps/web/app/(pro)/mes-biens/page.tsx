@@ -88,7 +88,7 @@ export default async function MesAnnoncesPage() {
                     nb_pieces={bien.nb_pieces}
                     photo_url={coverMap[bien.id] ?? null}
                     index={i}
-                    isCompact={true}
+                    isUltraCompact={true}
                   />
                 </div>
                 {/* Actions propriétaire - Intégrées proprement en bas de la carte */}
