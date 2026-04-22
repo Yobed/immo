@@ -48,7 +48,7 @@ export function StickyMobileCTA({ bienTitre, bienLieu, prix, prixSuffix, bienId,
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 60, opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[90] lg:hidden flex items-center gap-3 pointer-events-none"
+            className="fixed bottom-[calc(2rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-[95] lg:hidden flex items-center gap-3 pointer-events-none"
           >
             {/* Bouton principal Réserver */}
             <div className="relative pointer-events-auto">
@@ -64,7 +64,6 @@ export function StickyMobileCTA({ bienTitre, bienLieu, prix, prixSuffix, bienId,
                   href={`/reservations/nouvelle?bienId=${bienId}`}
                   className="relative flex items-center gap-2.5 px-8 py-4 bg-accent-luxury text-slate-900 rounded-full font-black text-[15px] shadow-[0_8px_32px_rgba(212,175,55,0.45)] active:scale-95 transition-transform"
                 >
-                  <span>🏠</span>
                   <span>Réserver · {prix}</span>
                   {prixSuffix && <span className="text-slate-700 text-xs font-semibold">{prixSuffix}</span>}
                 </Link>
@@ -96,7 +95,7 @@ export function StickyMobileCTA({ bienTitre, bienLieu, prix, prixSuffix, bienId,
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed bottom-0 left-0 right-0 z-[90] lg:hidden bg-white border-t border-slate-200 px-4 pt-3 pb-6 shadow-2xl"
+          className="fixed bottom-0 left-0 right-0 z-[95] lg:hidden bg-white border-t border-slate-200 px-4 pt-3 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] shadow-2xl"
         >
           <div className="flex items-center gap-3">
             <div className="flex-1 min-w-0">
