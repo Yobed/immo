@@ -8,6 +8,15 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useVoiceSearch } from '@/hooks/useVoiceSearch'
 import { cn } from '@/lib/utils'
 
+const ANIMATED_PLACEHOLDERS = [
+  'Studio meublé à Cocody...',
+  'Villa avec piscine à Riviera...',
+  'Appartement 2 pièces au Plateau...',
+  'Maison à Bingerville...',
+  'Bureau climatisé Zone 4...',
+  'Moins de 300k/mois à Yopougon...',
+]
+
 // Version: 1.0.3 (Force mobile visibility)
 // Cache-bust: 2026-04-20_14-00
 
@@ -38,6 +47,8 @@ export function SearchBar({
   const [highlighted, setHighlighted] = useState(0)
   const [isPending, startTransition] = useTransition()
   const { isListening, transcript, startListening, stopListening, isSupported } = useVoiceSearch()
+  const [placeholderIdx, setPlaceholderIdx] = useState(0)
+  const [focused, setFocused] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -67,6 +78,13 @@ export function SearchBar({
       return () => clearTimeout(timer)
     }
   }, [transcript])
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setPlaceholderIdx(i => (i + 1) % ANIMATED_PLACEHOLDERS.length)
+    }, 2800)
+    return () => clearInterval(t)
+  }, [])
 
   const navigate = (textQuery: string) => {
     startTransition(() => {
@@ -110,22 +128,41 @@ export function SearchBar({
         onSubmit={handleSubmit} 
         className="group flex items-center gap-2 p-1.5 bg-[var(--midnight-muted)] rounded-2xl border border-[var(--border)] shadow-2xl focus-within:border-[var(--accent-luxury)]/50 transition-all duration-300"
       >
-        <div className="flex-1 flex items-center gap-2 pl-3">
+        <div className="flex-1 flex items-center gap-2 pl-3 relative overflow-hidden">
           <Search className={cn(
             "w-5 h-5 shrink-0 transition-colors duration-300",
             query ? "text-[var(--accent-luxury)]" : "text-[var(--text-muted)]"
           )} />
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            onChange={(e) => { setQuery(e.target.value); setHighlighted(0); setOpen(true) }}
-            onFocus={() => setOpen(true)}
-            onKeyDown={handleKeyDown}
-            placeholder={placeholder || "Rechercher (v1.0.3)..."}
-            autoComplete="off"
-            className="w-full bg-transparent py-2.5 text-sm md:text-base font-sans text-[var(--text)] placeholder:text-[var(--text-muted)] focus:outline-none min-w-0"
-          />
+          <div className="relative flex-1 min-w-0">
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={(e) => { setQuery(e.target.value); setHighlighted(0); setOpen(true) }}
+              onFocus={() => { setFocused(true); setOpen(true) }}
+              onBlur={() => setFocused(false)}
+              onKeyDown={handleKeyDown}
+              autoComplete="off"
+              className="w-full bg-transparent py-2.5 text-sm md:text-base font-sans text-[var(--text)] focus:outline-none min-w-0 placeholder:text-transparent"
+            />
+            {/* Placeholder animé — visible seulement si vide et non focalisé */}
+            {!query && !focused && (
+              <div className="absolute inset-0 flex items-center pointer-events-none overflow-hidden">
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={placeholderIdx}
+                    initial={{ y: '100%', opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: '-100%', opacity: 0 }}
+                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                    className="text-sm md:text-base font-sans text-[var(--text-muted)] whitespace-nowrap"
+                  >
+                    {ANIMATED_PLACEHOLDERS[placeholderIdx]}
+                  </motion.span>
+                </AnimatePresence>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-1.5 pr-1 shrink-0">
