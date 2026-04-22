@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 
 interface StickyMobileCTAProps {
@@ -17,10 +17,6 @@ const WHATSAPP_NUMBER = '2250574243752'
 
 export function StickyMobileCTA({ bienTitre, bienLieu, prix, prixSuffix, bienId, isNuitee }: StickyMobileCTAProps) {
   const [visible, setVisible] = useState(false)
-  const { scrollY } = useScroll()
-
-  // Légère translation verticale au scroll — donne l'impression que le bouton flotte
-  const floatY = useTransform(scrollY, [400, 3000], [0, -24])
 
   useEffect(() => {
     const handler = () => {
@@ -37,46 +33,55 @@ export function StickyMobileCTA({ bienTitre, bienLieu, prix, prixSuffix, bienId,
     `Bonjour, je suis intéressé(e) par ce bien :\n\n🏠 *${bienTitre}*\n📍 ${bienLieu}\n💰 ${prix}${prixSuffix}\n\nPouvez-vous me donner plus d'informations ?`
   )
 
-  /* ── Résidence meublée : bouton Réserver centré flottant ── */
+  /* ── Résidence meublée : barre flottante centrée ── */
   if (isNuitee && bienId) {
     return (
       <AnimatePresence>
         {visible && (
           <motion.div
-            style={{ y: floatY, bottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))' }}
-            initial={{ y: 60, opacity: 0, scale: 0.9 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: 60, opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed left-1/2 -translate-x-1/2 z-[95] lg:hidden flex items-center gap-3 pointer-events-none"
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 80, opacity: 0 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed left-4 right-4 z-[95] lg:hidden flex items-center gap-3 pointer-events-none"
+            style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
           >
-            {/* Bouton principal Réserver */}
-            <div className="relative pointer-events-auto">
-              <span className="absolute inset-0 rounded-full bg-accent-luxury animate-ping opacity-30" />
-              <span className="absolute inset-0 rounded-full bg-accent-luxury animate-ping opacity-20 [animation-delay:0.4s]" />
+            {/* Bouton Réserver — carte sombre premium */}
+            <Link
+              href={`/reservations/nouvelle?bienId=${bienId}`}
+              className="pointer-events-auto flex-1 flex items-center gap-4 h-[62px] pl-5 pr-4 bg-slate-900 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.35)] active:scale-[0.97] transition-transform overflow-hidden"
+            >
+              {/* Barre dorée gauche */}
+              <div className="w-[3px] h-8 rounded-full bg-accent-luxury shrink-0" />
 
-              <motion.div
-                animate={{ scale: [1, 1.03, 1] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                <Link
-                  href={`/reservations/nouvelle?bienId=${bienId}`}
-                  className="relative h-14 flex items-center gap-2 px-6 bg-accent-luxury text-slate-900 rounded-full font-black text-sm shadow-[0_8px_32px_rgba(212,175,55,0.45)] active:scale-95 transition-transform whitespace-nowrap"
-                >
-                  <span>Réserver</span>
-                  <span className="opacity-50">·</span>
-                  <span>{prix}</span>
-                  {prixSuffix && <span className="text-slate-600 text-xs font-semibold">{prixSuffix}</span>}
-                </Link>
-              </motion.div>
-            </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[9px] uppercase tracking-[0.18em] font-bold text-white/40 leading-none mb-1">
+                  Réserver maintenant
+                </p>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-[18px] font-black text-accent-luxury leading-none tracking-tight">
+                    {prix}
+                  </span>
+                  {prixSuffix && (
+                    <span className="text-white/35 text-[10px] font-medium">{prixSuffix}</span>
+                  )}
+                </div>
+              </div>
 
-            {/* Bouton WhatsApp — même hauteur que Réserver */}
+              {/* Flèche */}
+              <div className="w-9 h-9 rounded-xl bg-accent-luxury/15 flex items-center justify-center shrink-0">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-accent-luxury">
+                  <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+            </Link>
+
+            {/* Bouton WhatsApp */}
             <a
               href={`https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="pointer-events-auto h-14 w-14 flex items-center justify-center rounded-full bg-emerald-600 shadow-lg active:scale-95 transition-transform shrink-0"
+              className="pointer-events-auto w-[62px] h-[62px] flex items-center justify-center rounded-2xl bg-[#25D366] shadow-[0_8px_24px_rgba(37,211,102,0.35)] active:scale-95 transition-transform shrink-0"
               aria-label="Contacter via WhatsApp"
             >
               <img src="/whatsapp-3d.png" alt="" className="w-7 h-7 object-contain" />
