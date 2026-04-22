@@ -83,10 +83,10 @@ export function PremiumBienCard({
           }}
         >
         {/* Master Container: Pure White/Zinc card with diffusion shadow */}
-        <div className={`relative flex flex-col h-full bg-[var(--surface-card)] rounded-[1.5rem] overflow-hidden border transition-all duration-700 hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.12)] hover:-translate-y-2 group-active:scale-[0.98] ${isSelected ? 'border-[var(--accent-luxury)] ring-1 ring-[var(--accent-luxury)]' : 'border-[var(--border)]'}`}>
+        <div className={`relative flex flex-col h-full bg-[var(--surface-card)] rounded-[1.5rem] overflow-hidden transition-all duration-700 ${!isCompact ? 'border hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.12)] hover:-translate-y-2' : ''} group-active:scale-[0.98] ${isSelected ? 'border-[var(--accent-luxury)] ring-1 ring-[var(--accent-luxury)]' : 'border-[var(--border)]'}`}>
           
           {/* 1. Image Architectural Section */}
-          <div className={`relative ${isCompact ? 'aspect-video' : 'aspect-[4/5]'} overflow-hidden bg-[var(--midnight-muted)]`}>
+          <div className={`relative ${isCompact ? 'aspect-[2.4/1]' : 'aspect-[4/5]'} overflow-hidden bg-[var(--midnight-muted)]`}>
             {photo_url ? (
               <Image
                 src={photo_url}
@@ -141,7 +141,7 @@ export function PremiumBienCard({
           </div>
 
           {/* 2. Content Section - Gallery Style */}
-          <div className={`flex-1 flex flex-col ${isCompact ? 'p-3 pt-2' : 'p-4 pt-3'} bg-inherit`}>
+          <div className={`flex flex-col ${isCompact ? 'p-3 pt-1.5' : 'p-4 pt-3'} bg-inherit`}>
             
             {/* Context & Price Row - Stacked for better readability */}
             <div className="flex flex-col gap-2.5 mb-3">

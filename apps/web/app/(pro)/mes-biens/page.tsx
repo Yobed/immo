@@ -71,25 +71,28 @@ export default async function MesAnnoncesPage() {
             <Link href="/mes-biens/nouveau"><Button>Créer ma première annonce</Button></Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {bienRows.map((bien, i) => (
-              <div key={bien.id} className="relative">
-                <PremiumBienCard
-                  id={bien.id}
-                  titre={bien.titre}
-                  commune={bien.commune}
-                  type_bien={bien.type_bien}
-                  prix_mois_fcfa={bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa}
-                  prix_nuit_fcfa={bien.prix_nuit_fcfa}
-                  prix_vente_fcfa={bien.prix_vente_fcfa}
-                  surface_m2={bien.surface_m2}
-                  nb_pieces={bien.nb_pieces}
-                  photo_url={coverMap[bien.id] ?? null}
-                  index={i}
-                  isCompact={true}
-                />
-                {/* Actions propriétaire */}
-                <div className="mt-3 space-y-2">
+              <div key={bien.id} className="group relative flex flex-col h-full bg-[var(--surface-card)] rounded-[1.5rem] border border-[var(--border)] overflow-hidden transition-all duration-700 hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.12)] hover:-translate-y-2">
+                <div className="flex-1">
+                  <PremiumBienCard
+                    id={bien.id}
+                    titre={bien.titre}
+                    commune={bien.commune}
+                    type_bien={bien.type_bien}
+                    prix_mois_fcfa={bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa}
+                    prix_nuit_fcfa={bien.prix_nuit_fcfa}
+                    prix_vente_fcfa={bien.prix_vente_fcfa}
+                    surface_m2={bien.surface_m2}
+                    nb_pieces={bien.nb_pieces}
+                    photo_url={coverMap[bien.id] ?? null}
+                    index={i}
+                    isCompact={true}
+                  />
+                </div>
+                {/* Actions propriétaire - Intégrées proprement en bas de la carte */}
+                <div className="p-4 pt-0 pb-5 mt-auto space-y-4 bg-inherit">
+                  <div className="h-px w-full bg-[var(--border)] opacity-20 mb-4" />
                   <BienAvailabilityToggle 
                     bienId={bien.id} 
                     initialValue={bien.est_disponible} 
