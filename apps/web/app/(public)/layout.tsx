@@ -81,7 +81,7 @@ export default async function PublicLayout({ children }: { children: React.React
 
           {/* Search bar — always visible */}
           <div className="flex-1 max-w-md">
-            <SearchBar placeholder="Rechercher (v1.0.4)..." />
+            <SearchBar placeholder="Commune, quartier, type de bien..." disableTypewriter />
           </div>
 
           {/* Nav desktop */}

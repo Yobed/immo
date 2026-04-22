@@ -40,12 +40,14 @@ interface SearchBarProps {
   placeholder?: string
   className?: string
   initialQuery?: string
+  disableTypewriter?: boolean
 }
 
 export function SearchBar({
   placeholder = 'Où souhaitez-vous habiter ?',
   className = '',
   initialQuery = '',
+  disableTypewriter = false,
 }: SearchBarProps) {
   const router = useRouter()
   const [query, setQuery] = useState(initialQuery)
@@ -171,10 +173,11 @@ export function SearchBar({
               onBlur={() => setFocused(false)}
               onKeyDown={handleKeyDown}
               autoComplete="off"
-              className="w-full bg-transparent py-2.5 text-sm md:text-base font-sans text-[var(--text)] focus:outline-none min-w-0 placeholder:text-transparent"
+              placeholder={disableTypewriter ? (placeholder || 'Rechercher...') : undefined}
+              className="w-full bg-transparent py-2.5 text-sm md:text-base font-sans text-[var(--text)] focus:outline-none min-w-0 placeholder:text-[var(--text-muted)]"
             />
-            {/* Placeholder machine à écrire — visible si vide et non focalisé */}
-            {!query && !focused && (
+            {/* Placeholder machine à écrire — visible si vide, non focalisé, et activé */}
+            {!query && !focused && !disableTypewriter && (
               <div className="absolute inset-0 flex items-center pointer-events-none select-none">
                 <span className="text-sm md:text-base font-sans text-[var(--text-muted)]">
                   {displayed}
