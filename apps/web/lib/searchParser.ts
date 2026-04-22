@@ -108,13 +108,20 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
     result.equipements = foundEq
   }
 
-  // 4. prix_max — handles CI shorthand: "25 mil", "500k", "25 000", "500000"
+  // 4. prix_max — handles CI shorthand: "25 mil"=25 000, "2 millions"=2 000 000, "500k", "25 000"
   const priceVals: number[] = []
 
-  // "25 mil" / "25million" / "1.5 mil" → multiply by 1_000_000
-  const milMatches = [...lower.matchAll(/(\d+(?:[.,]\d+)?)\s*mil(?:lion)?s?/gi)]
-  for (const m of milMatches) {
+  // "2 millions" / "1.5million" → ×1_000_000 (must be before "mil" to avoid conflict)
+  const millionMatches = [...lower.matchAll(/(\d+(?:[.,]\d+)?)\s*millions?/gi)]
+  for (const m of millionMatches) {
     priceVals.push(Math.round(parseFloat(m[1].replace(',', '.')) * 1_000_000))
+    lower = lower.replace(m[0], '')
+  }
+
+  // "25 mil" / "500mil" → ×1_000 (en ivoirien "mil" = mille = 1000)
+  const milMatches = [...lower.matchAll(/(\d+(?:[.,]\d+)?)\s*mil\b/gi)]
+  for (const m of milMatches) {
+    priceVals.push(Math.round(parseFloat(m[1].replace(',', '.')) * 1_000))
     lower = lower.replace(m[0], '')
   }
 

@@ -2,8 +2,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { PremiumBienCard } from '@/components/bien/PremiumBienCard'
-import { ScrollReveal } from '@/components/ui/ScrollReveal'
 import { SmartFilter } from './SmartFilter'
+import { ArrowRight } from 'lucide-react'
 
 type BienRow = {
   id: string
@@ -27,12 +27,21 @@ interface FeaturedPropertiesProps {
   initialBiens?: BienRow[]
 }
 
+const CATEGORIES = [
+  { key: 'villa',             label: 'Villas de Luxe' },
+  { key: 'appartement',       label: 'Appartements' },
+  { key: 'residence_meublee', label: 'Résidences meublées' },
+  { key: 'studio',            label: 'Studios' },
+  { key: 'maison',            label: 'Maisons' },
+  { key: 'bureau',            label: 'Bureaux' },
+  { key: 'terrain',           label: 'Terrains' },
+]
+
 export function FeaturedProperties({ initialBiens = [] }: FeaturedPropertiesProps) {
   const [filteredRows, setFilteredRows] = useState<BienRow[]>(initialBiens)
 
   const handleFilter = (filters: { prixMax: string; commune: string; typeBien: string }) => {
     let result = [...initialBiens]
-
     if (filters.prixMax) {
       const max = parseInt(filters.prixMax)
       result = result.filter(b => {
@@ -40,27 +49,32 @@ export function FeaturedProperties({ initialBiens = [] }: FeaturedPropertiesProp
         return p <= max
       })
     }
-
     if (filters.commune) {
       const search = filters.commune.toLowerCase()
-      result = result.filter(b => 
-        b.commune.toLowerCase().includes(search) || 
+      result = result.filter(b =>
+        b.commune.toLowerCase().includes(search) ||
         (b.quartier && b.quartier.toLowerCase().includes(search))
       )
     }
-
     if (filters.typeBien) {
       result = result.filter(b => b.type_bien === filters.typeBien)
     }
-
     setFilteredRows(result)
   }
 
   if (initialBiens.length === 0) return null
 
+  // Groupement par catégorie (mobile)
+  const byCategory = CATEGORIES.map(cat => ({
+    ...cat,
+    items: filteredRows.filter(b => b.type_bien === cat.key),
+  })).filter(cat => cat.items.length > 0)
+
   return (
     <section className="relative py-10 md:py-20 overflow-hidden bg-[var(--background)]">
-      <div className="container relative z-10 mx-auto px-4 md:px-6 max-w-7xl">
+      <div className="relative z-10 mx-auto px-4 md:px-6 max-w-7xl">
+
+        {/* En-tête */}
         <div className="flex items-end justify-between mb-6 gap-4">
           <h2 className="font-display text-2xl md:text-4xl font-bold text-[var(--text)] leading-tight tracking-tight">
             Dernières annonces
@@ -73,36 +87,12 @@ export function FeaturedProperties({ initialBiens = [] }: FeaturedPropertiesProp
           </Link>
         </div>
 
-        {/* Smart Filter Bar */}
+        {/* Filtres */}
         <div className="mb-6">
           <SmartFilter onFilterChange={handleFilter} />
         </div>
 
-        {filteredRows.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-5">
-            {filteredRows.map((bien, i) => (
-              <PremiumBienCard
-                key={bien.id}
-                id={bien.id}
-                titre={bien.titre}
-                commune={bien.commune}
-                quartier={bien.quartier}
-                type_bien={bien.type_bien}
-                prix_mois_fcfa={bien.prix_mois_fcfa}
-                prix_nuit_fcfa={bien.prix_nuit_fcfa}
-                prix_vente_fcfa={bien.prix_vente_fcfa}
-                surface_m2={bien.surface_m2}
-                nb_pieces={bien.nb_pieces}
-                photo_url={bien.photo_url ?? null}
-                est_disponible={bien.est_disponible}
-                is_verifie={bien.is_verifie}
-                score_ia={bien.score_ia}
-                url_visite_3d={bien.url_visite_3d}
-                index={i}
-              />
-            ))}
-          </div>
-        ) : (
+        {filteredRows.length === 0 ? (
           <div className="py-16 text-center border border-dashed border-[var(--border)] rounded-3xl">
             <p className="text-[var(--text-muted)] mb-4">Aucun bien ne correspond à ces critères.</p>
             <button
@@ -112,8 +102,78 @@ export function FeaturedProperties({ initialBiens = [] }: FeaturedPropertiesProp
               Réinitialiser
             </button>
           </div>
-        )}
+        ) : (
+          <>
+            {/* ── MOBILE : rangées par catégorie avec scroll horizontal ── */}
+            <div className="md:hidden space-y-8">
+              {byCategory.map(cat => (
+                <div key={cat.key}>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-display font-bold text-base text-[var(--text)] tracking-tight">
+                      {cat.label}
+                    </h3>
+                    <Link
+                      href={`/biens?type_bien=${cat.key}`}
+                      className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--accent-luxury)]"
+                    >
+                      Voir tout <ArrowRight className="w-3 h-3" />
+                    </Link>
+                  </div>
+                  {/* Scroll horizontal — déborde du padding parent sur les bords */}
+                  <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar -mx-4 px-4">
+                    {cat.items.map((bien, i) => (
+                      <div key={bien.id} className="w-[168px] shrink-0">
+                        <PremiumBienCard
+                          id={bien.id}
+                          titre={bien.titre}
+                          commune={bien.commune}
+                          quartier={bien.quartier}
+                          type_bien={bien.type_bien}
+                          prix_mois_fcfa={bien.prix_mois_fcfa}
+                          prix_nuit_fcfa={bien.prix_nuit_fcfa}
+                          prix_vente_fcfa={bien.prix_vente_fcfa}
+                          surface_m2={bien.surface_m2}
+                          nb_pieces={bien.nb_pieces}
+                          photo_url={bien.photo_url ?? null}
+                          est_disponible={bien.est_disponible}
+                          is_verifie={bien.is_verifie}
+                          score_ia={bien.score_ia}
+                          url_visite_3d={bien.url_visite_3d}
+                          index={i}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
 
+            {/* ── DESKTOP : grille plate ── */}
+            <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+              {filteredRows.map((bien, i) => (
+                <PremiumBienCard
+                  key={bien.id}
+                  id={bien.id}
+                  titre={bien.titre}
+                  commune={bien.commune}
+                  quartier={bien.quartier}
+                  type_bien={bien.type_bien}
+                  prix_mois_fcfa={bien.prix_mois_fcfa}
+                  prix_nuit_fcfa={bien.prix_nuit_fcfa}
+                  prix_vente_fcfa={bien.prix_vente_fcfa}
+                  surface_m2={bien.surface_m2}
+                  nb_pieces={bien.nb_pieces}
+                  photo_url={bien.photo_url ?? null}
+                  est_disponible={bien.est_disponible}
+                  is_verifie={bien.is_verifie}
+                  score_ia={bien.score_ia}
+                  url_visite_3d={bien.url_visite_3d}
+                  index={i}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </section>
   )

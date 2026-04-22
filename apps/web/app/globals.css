@@ -476,6 +476,8 @@ input:focus, select:focus, textarea:focus {
   -ms-overflow-style: none;
 }
 .carousel-scroll::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
 .carousel-scroll > * {
   scroll-snap-align: start;
   flex: 0 0 auto;

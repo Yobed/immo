@@ -46,7 +46,10 @@ export async function getAIBienContext(
   }
   if (p.commune) dbQuery = dbQuery.ilike('commune', `%${p.commune}%`)
   if (p.type_bien) dbQuery = dbQuery.eq('type_bien', p.type_bien)
-  if (p.prix_max) dbQuery = dbQuery.lte('prix_mois_fcfa', parseInt(p.prix_max))
+  if (p.prix_max) {
+    const max = parseInt(p.prix_max)
+    dbQuery = dbQuery.or(`prix_mois_fcfa.lte.${max},prix_nuit_fcfa.lte.${max},prix_vente_fcfa.lte.${max}`)
+  }
   if (p.equipements && p.equipements.length > 0) dbQuery = dbQuery.contains('equipements', p.equipements)
 
   const { data: biens } = await dbQuery

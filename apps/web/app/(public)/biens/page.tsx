@@ -3,7 +3,8 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { PremiumBienCard } from '@/components/bien/PremiumBienCard'
 import * as React from 'react'
-import { Home, Building2, Palmtree, Warehouse, Briefcase, Landmark, Shovel, ArrowRight, Filter, AlertCircle, MapPin } from 'lucide-react'
+import { Home, Building2, Palmtree, Warehouse, Briefcase, Landmark, Shovel, ArrowRight, Filter, AlertCircle, MapPin, MessageCircle } from 'lucide-react'
+import { FeaturedCard } from '@/components/bien/FeaturedCard'
 import type { LucideIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useRef, useState, useCallback, Suspense } from 'react'
@@ -192,17 +193,18 @@ function BiensContent() {
     <div className="min-h-screen bg-midnight">
       <PageHeader activeType={activeType} count={count} />
 
-      <main className="max-w-7xl mx-auto px-4 pt-6 pb-16" aria-live="polite" aria-busy={loading}>
+      <main className="max-w-7xl mx-auto px-3 pt-4 pb-28 lg:pb-16" aria-live="polite" aria-busy={loading}>
         <AnimatePresence mode="wait">
           {loading ? (
             <motion.div
               key="loading"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
+              className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-5"
               role="status" aria-label="Chargement des biens"
             >
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="aspect-[3/4] bg-off-white/5 animate-pulse rounded-[1.5rem]" />
+              <div className="col-span-2 aspect-video bg-off-white/5 animate-pulse rounded-2xl" />
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="aspect-[4/3] bg-off-white/5 animate-pulse rounded-xl" />
               ))}
             </motion.div>
           ) : error ? (
@@ -227,93 +229,156 @@ function BiensContent() {
               {biens.length === 0 ? (
                 <EmptyState />
               ) : (
-                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-                  {biens.map((bien, i) => (
-                    <motion.div key={bien.id} variants={itemVariants} className="relative group/card">
-                      <PremiumBienCard
-                        id={bien.id}
-                        titre={bien.titre}
-                        commune={bien.commune}
-                        quartier={bien.quartier}
-                        type_bien={bien.type_bien}
-                        prix_mois_fcfa={bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa}
-                        prix_nuit_fcfa={bien.prix_nuit_fcfa}
-                        prix_vente_fcfa={bien.prix_vente_fcfa}
-                        surface_m2={bien.surface_m2}
-                        nb_pieces={bien.nb_pieces}
-                        photo_url={coverMap[bien.id] ?? null}
-                        is_verifie={bien.is_verifie}
-                        score_ia={bien.score_ia}
-                        url_visite_3d={bien.url_visite_3d}
-                        index={i}
-                      />
-                      {currentUserId === bien.proprietaire_id && (
-                        <div className="absolute top-4 left-4 z-20">
-                          <Link
-                            href={`/mes-biens/${bien.id}/modifier`}
-                            className="px-3 py-1.5 bg-black/60 backdrop-blur-md text-white rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-xl hover:scale-105 transition-transform border border-white/20"
-                          >
-                            Modifier
-                          </Link>
-                        </div>
-                      )}
-                    </motion.div>
-                  ))}
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-5">
+                  {biens.map((bien, i) => {
+                    const photo = coverMap[bien.id] ?? null
+                    if (i === 0) {
+                      return (
+                        <FeaturedCard
+                          key={bien.id}
+                          id={bien.id}
+                          titre={bien.titre}
+                          commune={bien.commune}
+                          quartier={bien.quartier}
+                          type_bien={bien.type_bien}
+                          prix_mois_fcfa={bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa}
+                          prix_nuit_fcfa={bien.prix_nuit_fcfa}
+                          prix_vente_fcfa={bien.prix_vente_fcfa}
+                          photo_url={photo}
+                          is_verifie={bien.is_verifie}
+                        />
+                      )
+                    }
+                    return (
+                      <motion.div key={bien.id} variants={itemVariants} className="relative group/card">
+                        <PremiumBienCard
+                          id={bien.id}
+                          titre={bien.titre}
+                          commune={bien.commune}
+                          quartier={bien.quartier}
+                          type_bien={bien.type_bien}
+                          prix_mois_fcfa={bien.prix_nuit_fcfa ? null : bien.prix_mois_fcfa}
+                          prix_nuit_fcfa={bien.prix_nuit_fcfa}
+                          prix_vente_fcfa={bien.prix_vente_fcfa}
+                          surface_m2={bien.surface_m2}
+                          nb_pieces={bien.nb_pieces}
+                          photo_url={photo}
+                          is_verifie={bien.is_verifie}
+                          score_ia={bien.score_ia}
+                          url_visite_3d={bien.url_visite_3d}
+                          index={i}
+                        />
+                        {currentUserId === bien.proprietaire_id && (
+                          <div className="absolute top-2 left-2 z-20">
+                            <Link
+                              href={`/mes-biens/${bien.id}/modifier`}
+                              className="px-2.5 py-1 bg-black/60 backdrop-blur-md text-white rounded-lg text-[9px] font-bold uppercase tracking-wider border border-white/20"
+                            >
+                              Modifier
+                            </Link>
+                          </div>
+                        )}
+                      </motion.div>
+                    )
+                  })}
                 </div>
               )}
             </motion.div>
           )}
         </AnimatePresence>
       </main>
+
+      {/* CTA WhatsApp flottant — mobile uniquement */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden px-4 pb-6 pt-4 pointer-events-none"
+        style={{ background: 'linear-gradient(to top, var(--background) 40%, transparent)' }}
+      >
+        <a
+          href="https://wa.me/2250574243752?text=Bonjour%2C%20je%20cherche%20un%20bien%20%C3%A0%20Abidjan"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="pointer-events-auto flex items-center gap-3 px-5 py-3.5 bg-emerald-600 rounded-2xl shadow-2xl shadow-emerald-950/50 w-full active:scale-95 transition-transform duration-150"
+        >
+          <MessageCircle className="w-5 h-5 text-white shrink-0" />
+          <div className="flex-1">
+            <p className="text-[13px] font-bold text-white leading-tight">Parler à Sapphire</p>
+            <p className="text-[10px] text-white/70 leading-tight">Trouvez votre bien idéal</p>
+          </div>
+          <ArrowRight className="w-4 h-4 text-white/60 shrink-0" />
+        </a>
+      </div>
     </div>
   )
 }
 
 
+const COLLECTION_LABELS: Record<string, string> = {
+  '': 'Abidjan',
+  'appartement': 'Appartements',
+  'villa': 'Villas de Luxe',
+  'studio': 'Studios',
+  'residence_meublee': 'Résidences',
+  'maison': 'Maisons',
+  'bureau': 'Bureaux',
+  'terrain': 'Terrains',
+  'near_me': 'Autour de moi',
+}
+
 function PageHeader({ activeType, count }: { activeType: string; count: number }) {
+  const collectionTitle = COLLECTION_LABELS[activeType] ?? 'Abidjan'
+
   return (
-    <header className="relative bg-midnight">
-      {/* Titre */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 pt-16 pb-4 md:pt-24 md:pb-5">
+    <header className="relative bg-midnight overflow-hidden">
+      {/* Glow décoratif haut-gauche — identique landing */}
+      <div
+        className="absolute -top-24 -left-24 w-96 h-96 pointer-events-none"
+        style={{ background: 'radial-gradient(circle, oklch(65% 0.18 45 / 0.13) 0%, transparent 65%)' }}
+      />
+
+      {/* Titre éditorial */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 pt-10 pb-4 md:pt-20 md:pb-6">
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
-          <h1 className="font-display text-3xl md:text-5xl font-bold text-off-white tracking-tight">
-            Annonces immobilières
+          <p className="font-display italic text-[var(--accent-luxury)] text-[13px] tracking-wide mb-0.5">
+            La Collection
+          </p>
+          <h1 className="font-display font-bold text-[28px] md:text-5xl text-white tracking-tight leading-none">
+            {collectionTitle}
           </h1>
           {count > 0 && (
-            <p className="text-off-white/40 text-sm mt-1">
+            <p className="text-white/35 text-[11px] font-sans mt-2 uppercase tracking-[0.2em]">
               {count} bien{count > 1 ? 's' : ''} disponible{count > 1 ? 's' : ''}
             </p>
           )}
         </motion.div>
       </div>
 
-      {/* Barre de filtres — pleine largeur + fond opaque pour éviter le bleed */}
-      <div className="sticky top-0 z-50 bg-midnight border-b border-off-white/8">
-        <div className="max-w-7xl mx-auto px-4 py-2">
-          <nav className="flex gap-1 overflow-x-auto scrollbar-hide" aria-label="Filtres de type de bien">
+      {/* Filter pills — icône + label court, scroll horizontal */}
+      <div className="sticky top-0 z-50 bg-midnight/95 backdrop-blur-md border-b border-white/8">
+        <div className="max-w-7xl mx-auto px-3 py-2">
+          <nav className="flex gap-1.5 overflow-x-auto scrollbar-hide" aria-label="Filtres de type de bien">
             {TYPE_FILTERS.map((f) => {
               const isActive = f.value === activeType
+              const shortLabel = f.label === 'Résidences meublées' ? 'Meublés'
+                : f.label === 'Villas de Luxe' ? 'Villas'
+                : f.label === 'Appartements' ? 'Appt.'
+                : f.label === 'Proche de moi' ? 'Proche'
+                : f.label
               return (
                 <a
                   key={f.value}
                   href={f.value ? `/biens?type_bien=${f.value}` : '/biens'}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`
-                    flex items-center gap-1.5 shrink-0 px-4 py-2 rounded-full text-[10px] font-bold
-                    transition-all duration-200 uppercase tracking-[0.12em] whitespace-nowrap
-                    ${isActive
-                      ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-md'
-                      : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-off-white/8'
-                    }
-                  `}
+                  className={`flex flex-col items-center gap-0.5 shrink-0 px-3 py-2 rounded-xl min-w-[48px] transition-all duration-200 ${
+                    isActive
+                      ? 'bg-[var(--accent-luxury)] text-black'
+                      : 'bg-white/6 text-white/55 hover:bg-white/12 hover:text-white'
+                  }`}
                 >
-                  <f.icon className={`w-3 h-3 shrink-0 ${isActive ? 'text-[var(--on-primary)]' : 'text-[var(--text-subtle)]'}`} aria-hidden="true" />
-                  <span className="hidden sm:inline">{f.label}</span>
-                  <span className="sm:hidden">{f.label.split(' ')[0]}</span>
+                  <f.icon className={`w-4 h-4 ${isActive ? 'text-black' : 'text-white/50'}`} aria-hidden="true" />
+                  <span className="text-[8px] font-bold uppercase tracking-wide whitespace-nowrap">{shortLabel}</span>
                 </a>
               )
             })}
@@ -326,24 +391,20 @@ function PageHeader({ activeType, count }: { activeType: string; count: number }
 
 function EmptyState() {
   return (
-    <div className="text-center py-48 px-8 rounded-[2.5rem] bg-off-white/[0.02] border border-off-white/8">
-      <div className="w-20 h-20 bg-off-white/5 rounded-2xl mx-auto flex items-center justify-center
-        border border-off-white/10 mb-10">
-        <Filter className="w-7 h-7 text-off-white/20" aria-hidden="true" />
-      </div>
-      <h3 className="font-display text-3xl font-black text-off-white mb-5 tracking-tighter">
-        Aucun bien trouvé
+    <div className="col-span-2 text-center py-24 px-6">
+      <p className="font-display italic text-[var(--accent-luxury)] text-sm mb-1">La Collection</p>
+      <h3 className="font-display text-2xl font-bold text-white mb-3 tracking-tight">
+        Aucun bien pour l'instant
       </h3>
-      <p className="text-off-white/60 font-sans text-base max-w-md mx-auto mb-12 leading-relaxed">
-        Cette catégorie est en cours de curation. Explorez nos autres collections.
+      <p className="text-white/40 font-sans text-[13px] max-w-xs mx-auto mb-8 leading-relaxed">
+        Cette catégorie est en cours de curation. Découvrez nos autres collections.
       </p>
       <a
         href="/biens"
-        className="inline-flex items-center gap-3 px-10 py-4 bg-off-white/8 hover:bg-off-white/15
-          text-off-white rounded-full font-bold transition-all duration-300 border border-off-white/10"
+        className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--accent-luxury)] text-black rounded-full text-[12px] font-bold uppercase tracking-widest transition-transform active:scale-95"
       >
-        Voir toutes les annonces
-        <ArrowRight className="w-4 h-4" />
+        Voir tout
+        <ArrowRight className="w-3.5 h-3.5" />
       </a>
     </div>
   )

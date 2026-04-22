@@ -23,6 +23,7 @@ interface BienMedia {
 interface BienCarouselProps {
   medias: BienMedia[]
   isHero?: boolean
+  externalFilter?: FilterType
 }
 
 const FILTER_LABELS: Record<FilterType, string> = {
@@ -122,8 +123,10 @@ function MediaSlide({ media, isHero }: { media: BienMedia, isHero?: boolean }) {
   )
 }
 
-export function BienCarousel({ medias, isHero = false }: BienCarouselProps) {
-  const [activeFilter, setActiveFilter] = useState<FilterType>('all')
+export function BienCarousel({ medias, isHero = false, externalFilter }: BienCarouselProps) {
+  const [internalFilter, setInternalFilter] = useState<FilterType>('all')
+  const activeFilter: FilterType = externalFilter ?? internalFilter
+  const setActiveFilter = (f: FilterType) => { if (!externalFilter) setInternalFilter(f) }
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: 'start' })
 
@@ -170,10 +173,10 @@ export function BienCarousel({ medias, isHero = false }: BienCarouselProps) {
       {/* Filtres par type - Nouveau design Premium */}
       {availableTypes.length > 1 && (
         <div className={cn(
-          "flex gap-3 scrollbar-hide z-40 transition-all duration-700",
-          isHero 
-            ? "absolute bottom-10 left-10 pt-4" 
-            : "overflow-x-auto pb-1"
+          "gap-3 scrollbar-hide z-40 transition-all duration-700",
+          isHero
+            ? "hidden md:flex absolute bottom-10 left-10 pt-4"
+            : "flex overflow-x-auto pb-1"
         )}>
           {filters.map((filter) => {
             const Icon = FILTER_ICONS[filter]

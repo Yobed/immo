@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Play, Sparkles } from 'lucide-react'
+import { Play } from 'lucide-react'
 import { PropertyVideoShorts } from '@/components/property/PropertyVideoShorts'
 
 interface ShortsTriggerProps {
@@ -34,23 +34,11 @@ export function ShortsTrigger({ videos, className, children }: ShortsTriggerProp
         <div className="absolute inset-0 bg-gradient-to-r from-accent-luxury/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
         
         {children || (
-          <div className="relative z-10 flex items-center gap-4">
-            <div className="p-3 bg-midnight/5 rounded-xl group-hover:bg-accent-luxury transition-colors duration-500 shadow-inner">
-              <Play className="w-5 h-5 fill-current group-hover:text-white" />
+          <div className="relative z-10 flex items-center gap-3">
+            <div className="p-2.5 bg-midnight/5 rounded-xl group-hover:bg-accent-luxury transition-colors duration-500">
+              <Play className="w-4 h-4 fill-current group-hover:text-white" />
             </div>
-            <div className="flex flex-col items-start leading-tight">
-              <span className="text-[10px] text-midnight/40 font-bold tracking-widest mb-1">Marketing 5.0</span>
-              <span className="relative">
-                Regarder les Shorts
-                <motion.span 
-                  className="absolute -top-3 -right-6"
-                  animate={{ rotate: [0, 20, 0], scale: [1, 1.3, 1] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                >
-                  <Sparkles className="w-4 h-4 text-accent-luxury" />
-                </motion.span>
-              </span>
-            </div>
+            <span>Voir les vidéos</span>
           </div>
         )}
       </motion.button>

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { TYPES_BIEN_LABELS } from '@immo-ci/shared/constants/biens'
-import { MapPin, Ruler, Layers, Star, ArrowUpRight, Maximize2, BedDouble, ShowerHead, Square } from 'lucide-react'
+import { MapPin, Maximize2, BedDouble } from 'lucide-react'
 
 interface PremiumBienCardProps {
   id: string
@@ -85,10 +85,10 @@ export function PremiumBienCard({
           }}
         >
         {/* Master Container: Pure White/Zinc card with diffusion shadow */}
-        <div className={`relative flex flex-col h-full bg-[var(--surface-card)] rounded-[1.5rem] overflow-hidden transition-all duration-700 ${!isCompact ? 'border hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.12)] hover:-translate-y-2' : ''} group-active:scale-[0.98] ${isSelected ? 'border-[var(--accent-luxury)] ring-1 ring-[var(--accent-luxury)]' : 'border-[var(--border)]'}`}>
+        <div className={`relative flex flex-col h-full bg-[var(--surface-card)] rounded-xl md:rounded-[1.5rem] overflow-hidden transition-all duration-700 ${!isCompact ? 'border hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.12)] hover:-translate-y-2' : ''} group-active:scale-[0.98] ${isSelected ? 'border-[var(--accent-luxury)] ring-1 ring-[var(--accent-luxury)]' : 'border-[var(--border)]'}`}>
           
           {/* 1. Image Architectural Section */}
-          <div className={`relative ${isUltraCompact ? 'aspect-[2.4/1]' : isCompact ? 'aspect-video' : 'aspect-[4/5]'} overflow-hidden bg-[var(--midnight-muted)]`}>
+          <div className={`relative ${isUltraCompact ? 'aspect-[2.4/1]' : isCompact ? 'aspect-video' : 'aspect-[4/3]'} overflow-hidden bg-[var(--midnight-muted)]`}>
             {photo_url ? (
               <Image
                 src={photo_url}
@@ -106,26 +106,18 @@ export function PremiumBienCard({
             {/* Subtle Vignette - Purely for readability of floating badges if needed, but very thin */}
             <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
             
-            {/* Floating Status Badges - Repositioned and Minimalist */}
-            <div className="absolute top-5 left-5 right-5 flex justify-between items-start pointer-events-none">
-              <div className="flex flex-col gap-2">
-                <span className="px-3 py-1 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 text-[9px] font-bold uppercase tracking-[0.2em] text-white">
-                  {TYPES_BIEN_LABELS[type_bien] ?? type_bien.replace('_', ' ')}
+            {/* Floating Status Badges */}
+            <div className="absolute top-2 left-2 right-2 flex justify-between items-start pointer-events-none">
+              <span className="px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-xl border border-white/10 text-[8px] font-bold uppercase tracking-[0.15em] text-white">
+                {TYPES_BIEN_LABELS[type_bien] ?? type_bien.replace('_', ' ')}
+              </span>
+              {is_verifie && (
+                <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/80 backdrop-blur-md text-white text-[8px] font-bold uppercase tracking-widest border border-white/20">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-2 h-2">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                  </svg>
+                  Certifié
                 </span>
-                {is_verifie && (
-                  <span className="w-fit flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/80 backdrop-blur-md text-white text-[8px] font-bold uppercase tracking-widest border border-white/20">
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-2.5 h-2.5">
-                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-                    </svg>
-                    Certifié
-                  </span>
-                )}
-              </div>
-              
-              {score_ia && score_ia > 90 && (
-                <div className="bg-[var(--accent-luxury)]/90 backdrop-blur-md px-2 py-2 rounded-full border border-white/20 shadow-xl">
-                  <Star className="w-3 h-3 fill-black stroke-black" />
-                </div>
               )}
             </div>
 
@@ -142,92 +134,49 @@ export function PremiumBienCard({
             )}
           </div>
 
-          {/* 2. Content Section - Gallery Style */}
-          <div className={`flex flex-col ${(isCompact || isUltraCompact) ? 'p-3 pt-1.5' : 'p-4 pt-3'} bg-inherit`}>
-            
-            {/* Context & Price Row - Stacked for better readability */}
-            <div className="flex flex-col gap-2.5 mb-3">
-              {/* Location - Bigger and clearer */}
-              <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--accent-luxury)] uppercase tracking-[0.15em]">
-                <MapPin className="w-2.5 h-2.5 shrink-0" strokeWidth={3} />
-                <span className="truncate">{commune}</span>
-                {quartier && <span className="opacity-60 truncate"> <span className="mx-1">•</span> {quartier}</span>}
+          {/* 2. Content Section */}
+          <div className={`flex flex-col ${(isCompact || isUltraCompact) ? 'p-2 pt-1.5' : 'p-2.5 pt-2'} bg-inherit`}>
+
+            {/* Commune + Prix sur une seule ligne */}
+            <div className="flex items-center justify-between gap-1 mb-1">
+              <div className="flex items-center gap-1 min-w-0">
+                <MapPin className="w-2 h-2 shrink-0 text-[var(--accent-luxury)]" strokeWidth={3} />
+                <span className="text-[9px] font-bold text-[var(--accent-luxury)] uppercase tracking-[0.12em] truncate">
+                  {commune}
+                </span>
               </div>
-              
-              {/* Title & Price - Clear distinction */}
-              <div className="flex flex-col gap-1.5">
-                <div className="flex justify-between items-start gap-2">
-                  <h3 className={`font-display ${(isCompact || isUltraCompact) ? 'text-[14px]' : 'text-[16px]'} font-semibold text-[var(--text)] tracking-tight leading-snug line-clamp-2 flex-1`}>
-                    {titre}
-                  </h3>
-                  {prix && (
-                    <div className="bg-[var(--accent-luxury)]/10 px-3 py-1.5 rounded-xl border border-[var(--accent-luxury)]/20 shrink-0 shadow-sm backdrop-blur-sm">
-                      <span className="text-[15px] font-sans font-extrabold text-[var(--accent-luxury)] tracking-tight">
-                        {prix.value}
-                      </span>
-                    </div>
+              {prix && (
+                <span className="text-[11px] font-extrabold text-[var(--accent-luxury)] tracking-tight shrink-0 whitespace-nowrap">
+                  {prix.value}
+                  {prix.suffix && (
+                    <span className="text-[8px] font-bold opacity-60">{prix.suffix}</span>
                   )}
-                </div>
-                
-                {prix && !(isCompact || isUltraCompact) && (
-                  <span className="text-[9px] font-sans text-[var(--text-muted)] uppercase tracking-[0.2em] font-bold mt-0.5">
-                    {prix.suffix ? `Prix ${prix.suffix}` : 'Prix Total (FCFA)'}
-                  </span>
-                )}
-              </div>
+                </span>
+              )}
             </div>
 
-            {/* Icons & Features - Optimized for small size */}
-            <div className="grid grid-cols-2 gap-y-2.5 mt-auto">
-              <div className="flex items-center gap-2.5 group-hover:translate-x-0.5 transition-transform duration-300">
-                <BedDouble className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--accent-luxury)] transition-colors" />
-                <span className="text-[11px] font-semibold text-[var(--text)] tracking-wide">
-                  {nb_pieces || 0} Ch.
-                </span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <ShowerHead className="w-4 h-4 text-[var(--text-muted)] mt-[-1px]" />
-                <span className="text-[11px] font-semibold text-[var(--text)]">
-                  {nb_salles_bain || 0} Sdb
-                </span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Maximize2 className="w-4 h-4 text-[var(--text-muted)]" />
-                <span className="text-[11px] font-semibold text-[var(--text)] uppercase">
-                  {surface_m2 ? `${surface_m2}m²` : 'N/A'}
-                </span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Square className="w-4 h-4 text-[var(--text-muted)]" />
-                <span className="text-[11px] font-semibold text-[var(--text)] uppercase tracking-tighter">
-                  {type_bien}
-                </span>
-              </div>
-            </div>
+            {/* Titre — 1 ligne mobile, 2 lignes desktop */}
+            <h3 className={`font-display ${(isCompact || isUltraCompact) ? 'text-[11px]' : 'text-[12px]'} font-semibold text-[var(--text)] tracking-tight leading-snug line-clamp-1 md:line-clamp-2 mb-1.5`}>
+              {titre}
+            </h3>
 
-            {!isCompact && !isUltraCompact && (
-              <div className="mt-4 pt-3 border-t border-[var(--border)]/50 flex items-center justify-end">
-                <div className="w-7 h-7 rounded-full bg-[var(--midnight-muted)] border border-[var(--border)] flex items-center justify-center transition-all duration-500 group-hover:bg-[var(--accent-luxury)] group-hover:text-[var(--on-accent)]">
-                  <ArrowUpRight className="w-3 h-3" />
-                </div>
+            {/* Stats — masquées si valeur nulle */}
+            {(nb_pieces || surface_m2) ? (
+              <div className="flex items-center gap-2.5 mt-auto">
+                {nb_pieces ? (
+                  <div className="flex items-center gap-1">
+                    <BedDouble className="w-3 h-3 text-[var(--text-muted)]" />
+                    <span className="text-[10px] font-semibold text-[var(--text)]">{nb_pieces} Ch.</span>
+                  </div>
+                ) : null}
+                {surface_m2 ? (
+                  <div className="flex items-center gap-1">
+                    <Maximize2 className="w-3 h-3 text-[var(--text-muted)]" />
+                    <span className="text-[10px] font-semibold text-[var(--text)]">{surface_m2}m²</span>
+                  </div>
+                ) : null}
               </div>
-            )}
-
-            {/* Quality Indicator (Micro-Interaction) */}
-            {score_ia && !isCompact && !isUltraCompact && (
-              <div className="mt-4 flex items-center gap-3">
-                <div className="flex-1 h-[2px] bg-[var(--border)] rounded-full overflow-hidden">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    whileInView={{ width: `${score_ia}%` }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1.5, ease: "circOut", delay: 0.5 }}
-                    className="h-full bg-emerald-500/60"
-                  />
-                </div>
-                <span className="text-[9px] font-mono text-[var(--text-muted)] font-bold tracking-tighter uppercase">High Rating</span>
-              </div>
-            )}
+            ) : null}
           </div>
         </div>
         </Link>

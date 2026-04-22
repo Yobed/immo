@@ -135,7 +135,7 @@ export const PropertyVideoShorts: React.FC<PropertyVideoShortsProps> = ({
         className="fixed inset-0 z-[100] bg-black flex items-center justify-center overflow-hidden"
       >
         {/* Mobile-centric Video Player (TikTok Style) */}
-        <div className="relative w-full max-w-[450px] h-full sm:h-[90vh] sm:rounded-[30px] overflow-hidden bg-[var(--midnight)] shadow-[0_0_100px_rgba(0,0,0,0.8)]">
+        <div className="relative w-full max-w-[430px] h-[100dvh] sm:h-[90vh] sm:rounded-[30px] overflow-hidden bg-[var(--midnight)] shadow-[0_0_100px_rgba(0,0,0,0.8)]">
           
           {/* Main Video */}
           <video
