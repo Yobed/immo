@@ -169,7 +169,7 @@ export function SearchBar({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="absolute z-[101] top-full left-0 right-0 mt-4 overflow-hidden bg-[var(--midnight-muted)]/95 backdrop-blur-xl rounded-[2rem] border border-[var(--accent-luxury)]/30 shadow-2xl p-6 text-center"
+            className="absolute z-[200] top-full left-0 right-0 mt-2 overflow-hidden bg-slate-900 border border-[var(--accent-luxury)]/30 rounded-2xl shadow-2xl p-6 text-center"
           >
             <div className="flex justify-center gap-1.5 h-8 items-center mb-4">
               {[1, 2, 3, 4, 5, 4, 3, 2, 1].map((h, i) => (
@@ -200,7 +200,7 @@ export function SearchBar({
             initial={{ opacity: 0, y: 10, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
-            className="absolute z-[100] top-full left-0 right-0 mt-4 overflow-hidden bg-[var(--midnight-muted)]/90 backdrop-blur-xl rounded-[2rem] border border-[var(--border)] shadow-2xl p-2"
+            className="absolute z-[200] top-full left-0 right-0 mt-2 overflow-hidden bg-slate-900 border border-white/10 rounded-2xl shadow-2xl p-2"
           >
             <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] px-4 py-3 mb-1">
               Suggestions de recherche
