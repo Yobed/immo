@@ -52,33 +52,34 @@ export function StickyMobileCTA({ bienTitre, bienLieu, prix, prixSuffix, bienId,
           >
             {/* Bouton principal Réserver */}
             <div className="relative pointer-events-auto">
-              {/* Anneau pulsant pour attirer l'attention */}
               <span className="absolute inset-0 rounded-full bg-accent-luxury animate-ping opacity-30" />
               <span className="absolute inset-0 rounded-full bg-accent-luxury animate-ping opacity-20 [animation-delay:0.4s]" />
 
               <motion.div
-                animate={{ scale: [1, 1.04, 1] }}
+                animate={{ scale: [1, 1.03, 1] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
               >
                 <Link
                   href={`/reservations/nouvelle?bienId=${bienId}`}
-                  className="relative flex items-center gap-2.5 px-8 py-4 bg-accent-luxury text-slate-900 rounded-full font-black text-[15px] shadow-[0_8px_32px_rgba(212,175,55,0.45)] active:scale-95 transition-transform"
+                  className="relative h-14 flex items-center gap-2 px-6 bg-accent-luxury text-slate-900 rounded-full font-black text-sm shadow-[0_8px_32px_rgba(212,175,55,0.45)] active:scale-95 transition-transform whitespace-nowrap"
                 >
-                  <span>Réserver · {prix}</span>
-                  {prixSuffix && <span className="text-slate-700 text-xs font-semibold">{prixSuffix}</span>}
+                  <span>Réserver</span>
+                  <span className="opacity-50">·</span>
+                  <span>{prix}</span>
+                  {prixSuffix && <span className="text-slate-600 text-xs font-semibold">{prixSuffix}</span>}
                 </Link>
               </motion.div>
             </div>
 
-            {/* Icône WhatsApp secondaire */}
+            {/* Bouton WhatsApp — même hauteur que Réserver */}
             <a
               href={`https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="pointer-events-auto w-12 h-12 flex items-center justify-center rounded-full bg-emerald-600 shadow-lg active:scale-95 transition-transform shrink-0"
+              className="pointer-events-auto h-14 w-14 flex items-center justify-center rounded-full bg-emerald-600 shadow-lg active:scale-95 transition-transform shrink-0"
               aria-label="Contacter via WhatsApp"
             >
-              <img src="/whatsapp-3d.png" alt="" className="w-6 h-6 object-contain" />
+              <img src="/whatsapp-3d.png" alt="" className="w-7 h-7 object-contain" />
             </a>
           </motion.div>
         )}
