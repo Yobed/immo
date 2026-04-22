@@ -148,10 +148,10 @@ export function PremiumBienCard({
             {/* Context & Price Row - Stacked for better readability */}
             <div className="flex flex-col gap-2.5 mb-3">
               {/* Location - Bigger and clearer */}
-              <div className="flex items-center gap-1.5 text-[9px] font-bold text-[var(--accent-luxury)] uppercase tracking-wider opacity-90">
+              <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--accent-luxury)] uppercase tracking-[0.15em]">
                 <MapPin className="w-2.5 h-2.5 shrink-0" strokeWidth={3} />
                 <span className="truncate">{commune}</span>
-                {quartier && <span className="opacity-50 truncate">• {quartier}</span>}
+                {quartier && <span className="opacity-60 truncate"> <span className="mx-1">•</span> {quartier}</span>}
               </div>
               
               {/* Title & Price - Clear distinction */}
@@ -161,8 +161,8 @@ export function PremiumBienCard({
                     {titre}
                   </h3>
                   {prix && (
-                    <div className="bg-[var(--accent-luxury)]/10 px-2.5 py-1 rounded-lg border border-[var(--accent-luxury)]/20 shrink-0">
-                      <span className="text-[13px] font-display font-bold text-[var(--accent-luxury)] tracking-tight">
+                    <div className="bg-[var(--accent-luxury)]/10 px-3 py-1.5 rounded-xl border border-[var(--accent-luxury)]/20 shrink-0 shadow-sm backdrop-blur-sm">
+                      <span className="text-[15px] font-sans font-extrabold text-[var(--accent-luxury)] tracking-tight">
                         {prix.value}
                       </span>
                     </div>
@@ -179,27 +179,27 @@ export function PremiumBienCard({
 
             {/* Icons & Features - Optimized for small size */}
             <div className="grid grid-cols-2 gap-y-2.5 mt-auto">
-              <div className="flex items-center gap-2 group-hover:translate-x-0.5 transition-transform duration-300">
-                <BedDouble className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-[var(--accent-luxury)] transition-colors" />
-                <span className="text-[10px] font-medium text-[var(--text-muted)] tracking-wide">
+              <div className="flex items-center gap-2.5 group-hover:translate-x-0.5 transition-transform duration-300">
+                <BedDouble className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--accent-luxury)] transition-colors" />
+                <span className="text-[11px] font-semibold text-[var(--text)] tracking-wide">
                   {nb_pieces || 0} Ch.
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <ShowerHead className="w-3.5 h-3.5 text-[var(--text-muted)] mt-[-1px]" />
-                <span className="text-[10px] font-medium text-[var(--text-muted)]">
+              <div className="flex items-center gap-2.5">
+                <ShowerHead className="w-4 h-4 text-[var(--text-muted)] mt-[-1px]" />
+                <span className="text-[11px] font-semibold text-[var(--text)]">
                   {nb_salles_bain || 0} Sdb
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <Maximize2 className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-                <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase">
+              <div className="flex items-center gap-2.5">
+                <Maximize2 className="w-4 h-4 text-[var(--text-muted)]" />
+                <span className="text-[11px] font-semibold text-[var(--text)] uppercase">
                   {surface_m2 ? `${surface_m2}m²` : 'N/A'}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <Square className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-                <span className="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-tighter">
+              <div className="flex items-center gap-2.5">
+                <Square className="w-4 h-4 text-[var(--text-muted)]" />
+                <span className="text-[11px] font-semibold text-[var(--text)] uppercase tracking-tighter">
                   {type_bien}
                 </span>
               </div>
