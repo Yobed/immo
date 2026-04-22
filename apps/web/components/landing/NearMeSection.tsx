@@ -33,6 +33,70 @@ type BienProche = {
   dist_meters: number
 }
 
+const NEAR_CATEGORIES = [
+  { key: 'villa',             label: 'Villas de Luxe' },
+  { key: 'appartement',       label: 'Appartements' },
+  { key: 'residence_meublee', label: 'Résidences meublées' },
+  { key: 'studio',            label: 'Studios' },
+  { key: 'maison',            label: 'Maisons' },
+  { key: 'bureau',            label: 'Bureaux' },
+  { key: 'terrain',           label: 'Terrains' },
+]
+
+function NearCard({
+  b, coverUrl, isSelected, onSelect, onHover, getTravelTime,
+}: {
+  b: BienProche
+  coverUrl?: string
+  isSelected: boolean
+  onSelect: () => void
+  onHover: (id: string | null) => void
+  getTravelTime: (d: number) => string
+}) {
+  return (
+    <div
+      className={`w-[168px] shrink-0 rounded-2xl overflow-hidden border cursor-pointer transition-all duration-300 ${
+        isSelected
+          ? 'border-[var(--accent-luxury)] ring-2 ring-[var(--accent-luxury)]/50'
+          : 'border-[var(--border)] hover:border-[var(--accent-luxury)]/40'
+      }`}
+      onClick={onSelect}
+      onMouseEnter={() => onHover(b.id)}
+      onMouseLeave={() => onHover(null)}
+    >
+      <div className="aspect-[4/3] relative overflow-hidden bg-[var(--surface-card)]">
+        {coverUrl ? (
+          <Image src={coverUrl} alt={b.titre} fill className="object-cover transition-transform duration-500 hover:scale-105" sizes="168px" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center opacity-20">
+            <MapPin className="w-6 h-6 text-[var(--accent-luxury)]" />
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+        {b.is_verifie && (
+          <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-blue-500/80 backdrop-blur-md rounded-full text-[7px] font-bold text-white uppercase tracking-wide">Certifié</span>
+        )}
+        {b.dist_meters < 999999 && (
+          <div className="absolute bottom-2 left-2 flex items-center gap-1 px-1.5 py-0.5 bg-emerald-500/90 backdrop-blur-md rounded-full">
+            <Car className="w-2 h-2 text-white" />
+            <span className="text-white text-[8px] font-bold">{getTravelTime(b.dist_meters)}</span>
+          </div>
+        )}
+      </div>
+      <div className="p-2.5 bg-[var(--surface-card)]">
+        <p className="text-[8px] font-bold text-[var(--accent-luxury)] uppercase tracking-widest mb-0.5 truncate">{b.commune}{b.quartier ? ` · ${b.quartier}` : ''}</p>
+        <p className="text-[12px] font-semibold text-[var(--text)] truncate mb-1.5 leading-tight">{b.titre}</p>
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] font-black text-[var(--text)]">{formatPrice(b)}</p>
+          <Link href={`/biens/${b.id}`} onClick={e => e.stopPropagation()} className="w-6 h-6 flex items-center justify-center rounded-full bg-[var(--accent-luxury)]/10 hover:bg-[var(--accent-luxury)] transition-all">
+            <ExternalLink className="w-3 h-3 text-[var(--accent-luxury)]" />
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function formatPrice(b: BienProche): string {
   const v = b.prix_nuit_fcfa || b.prix_mois_fcfa || b.prix_vente_fcfa || 0
   const suffix = b.prix_nuit_fcfa ? '/nuit' : b.prix_mois_fcfa ? '/mois' : ''
@@ -377,21 +441,57 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
 
           {/* PROPERTY CARDS below the map */}
           {loading && biens.length === 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
-              {[1,2,3,4].map(i => (
-                <div key={i} className="aspect-[3/4] rounded-2xl bg-[var(--surface-card)] animate-pulse" />
+            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+              {[1,2,3,4,5].map(i => (
+                <div key={i} className="w-[168px] shrink-0 aspect-[3/4] rounded-2xl bg-[var(--surface-card)] animate-pulse" />
               ))}
             </div>
           ) : biens.length > 0 ? (
-            <div>
+            <div className="space-y-1">
               <p className="text-[var(--text-muted)] text-xs uppercase tracking-widest font-bold mb-5 flex items-center gap-2">
                 <span className="w-4 h-[1px] bg-[var(--accent-luxury)]" />
-                {selectedId ? 'Bien sélectionné — Itinéraire affiché sur la carte' : 'Cliquez sur un bien pour voir le trajet — Triés par distance'}
+                {selectedId ? 'Bien sélectionné — Itinéraire affiché sur la carte' : 'Triés par distance · Cliquez pour voir le trajet'}
               </p>
-              <div className={`grid gap-4 transition-all duration-700 ${
-                selectedId 
-                  ? 'grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8' 
-                  : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
+
+              {/* ── MOBILE : rangées par catégorie ── */}
+              <div className="md:hidden space-y-8">
+                {NEAR_CATEGORIES.map(cat => {
+                  const items = biens.filter(b => b.type_bien === cat.key)
+                  if (items.length === 0) return null
+                  return (
+                    <div key={cat.key}>
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-display font-bold text-base text-[var(--text)] tracking-tight">{cat.label}</h3>
+                        <Link
+                          href={`/biens?type_bien=${cat.key}`}
+                          className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--accent-luxury)]"
+                        >
+                          Voir tout <ChevronRight className="w-3 h-3" />
+                        </Link>
+                      </div>
+                      <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar -mx-6 px-6">
+                        {items.map((b, i) => (
+                          <NearCard
+                            key={b.id}
+                            b={b}
+                            coverUrl={coverMap[b.id]}
+                            isSelected={selectedId === b.id}
+                            onSelect={() => setSelectedId(selectedId === b.id ? null : b.id)}
+                            onHover={setHoveredId}
+                            getTravelTime={getTravelTime}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* ── DESKTOP : grille plate ── */}
+              <div className={`hidden md:grid gap-4 transition-all duration-700 ${
+                selectedId
+                  ? 'grid-cols-4 lg:grid-cols-6 xl:grid-cols-8'
+                  : 'grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
               }`}>
                 {biens.map((b, i) => (
                   <motion.div
@@ -408,63 +508,31 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
                     onMouseEnter={() => setHoveredId(b.id)}
                     onMouseLeave={() => setHoveredId(null)}
                   >
-                    {/* Cover image */}
                     <div className="aspect-[4/3] bg-[var(--surface-card)] relative overflow-hidden">
                       {coverMap[b.id] ? (
-                        <Image
-                          src={coverMap[b.id]}
-                          alt={b.titre}
-                          fill
-                          className="object-cover transition-transform duration-700 group-hover:scale-110"
-                          sizes="(max-width: 640px) 50vw, 20vw"
-                        />
+                        <Image src={coverMap[b.id]} alt={b.titre} fill className="object-cover transition-transform duration-700 group-hover:scale-110" sizes="20vw" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center opacity-20 bg-[var(--surface-card)]">
-                          <MapPin className="w-8 h-8 text-[var(--accent-luxury)]" />
-                        </div>
+                        <div className="w-full h-full flex items-center justify-center opacity-20"><MapPin className="w-8 h-8 text-[var(--accent-luxury)]" /></div>
                       )}
-                      {/* Dark overlay */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-                      {/* Selected indicator */}
-                      {selectedId === b.id && (
-                        <div className="absolute inset-0 bg-[var(--accent-luxury)]/10 border-2 border-[var(--accent-luxury)] rounded-2xl" />
+                      {selectedId === b.id && <div className="absolute inset-0 bg-[var(--accent-luxury)]/10 border-2 border-[var(--accent-luxury)] rounded-2xl" />}
+                      {b.is_verifie && (
+                        <span className="absolute top-2 left-2 px-2 py-1 bg-blue-500/80 backdrop-blur-md rounded-full text-[8px] font-bold text-white uppercase tracking-wide">Certifié</span>
                       )}
-
-                      {/* Badges */}
-                      <div className="absolute top-2 left-2 flex gap-1">
-                        {b.is_verifie && (
-                          <span className="px-2 py-1 bg-blue-500/80 backdrop-blur-md rounded-full text-[8px] font-bold text-white uppercase tracking-wide">
-                            Certifié
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Distance badge */}
                       {b.dist_meters < 999999 && (
-                        <div className="absolute bottom-2 left-2 flex items-center gap-1.5 px-2 py-1 bg-emerald-500/90 backdrop-blur-md rounded-full border border-emerald-400/50 shadow-lg">
+                        <div className="absolute bottom-2 left-2 flex items-center gap-1.5 px-2 py-1 bg-emerald-500/90 backdrop-blur-md rounded-full">
                           <Car className="w-2.5 h-2.5 text-white" />
-                          <span className="text-white text-[9px] font-bold tracking-widest">{getTravelTime(b.dist_meters)}</span>
+                          <span className="text-white text-[9px] font-bold">{getTravelTime(b.dist_meters)}</span>
                         </div>
                       )}
                     </div>
-
-                    {/* Info */}
-                    <div className="p-4 bg-[var(--surface-card)]">
-                      <p className="text-[9px] font-bold text-[var(--accent-luxury)] uppercase tracking-widest mb-1 truncate">
-                        {b.commune}{b.quartier ? ` · ${b.quartier}` : ''}
-                      </p>
-                      <p className="text-sm font-semibold text-[var(--text)] truncate mb-3">{b.titre}</p>
-                      <div className="flex items-center justify-between mt-auto">
-                        <p className={`font-black text-[var(--text)] tracking-wider ${selectedId ? 'text-[9px]' : 'text-[11px]'}`}>
-                          {formatPrice(b)}
-                        </p>
-                        <Link
-                          href={`/biens/${b.id}`}
-                          onClick={e => e.stopPropagation()}
-                          className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--accent-luxury)]/10 hover:bg-[var(--accent-luxury)] hover:text-black transition-all"
-                        >
-                          <ExternalLink className="w-3.5 h-3.5 text-[var(--accent-luxury)] group-hover:text-black" />
+                    <div className="p-3 bg-[var(--surface-card)]">
+                      <p className="text-[9px] font-bold text-[var(--accent-luxury)] uppercase tracking-widest mb-0.5 truncate">{b.commune}{b.quartier ? ` · ${b.quartier}` : ''}</p>
+                      <p className="text-sm font-semibold text-[var(--text)] truncate mb-2">{b.titre}</p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-[11px] font-black text-[var(--text)]">{formatPrice(b)}</p>
+                        <Link href={`/biens/${b.id}`} onClick={e => e.stopPropagation()} className="w-7 h-7 flex items-center justify-center rounded-full bg-[var(--accent-luxury)]/10 hover:bg-[var(--accent-luxury)] transition-all">
+                          <ExternalLink className="w-3 h-3 text-[var(--accent-luxury)]" />
                         </Link>
                       </div>
                     </div>
@@ -472,14 +540,9 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
                 ))}
               </div>
 
-              {/* Link to full catalog */}
               <div className="mt-10 text-center">
-                <Link
-                  href="/biens"
-                  className="inline-flex items-center gap-3 px-8 py-3 rounded-full border border-[var(--accent-luxury)] text-[var(--accent-luxury)] text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-[var(--accent-luxury)] hover:text-black transition-all"
-                >
-                  Explorer tout le catalogue
-                  <ChevronRight className="w-4 h-4" />
+                <Link href="/biens" className="inline-flex items-center gap-3 px-8 py-3 rounded-full border border-[var(--accent-luxury)] text-[var(--accent-luxury)] text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-[var(--accent-luxury)] hover:text-black transition-all">
+                  Explorer tout le catalogue <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>
