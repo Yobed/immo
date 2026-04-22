@@ -109,7 +109,7 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
   ]
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden bg-[var(--background)]" style={{ minHeight: '90svh' }}>
+    <section ref={sectionRef} className="relative overflow-hidden bg-[var(--background)]" style={{ minHeight: 'clamp(520px, 75svh, 90svh)' }}>
 
       {/* ── Background Slideshow ─────────────────────────────────────────── */}
       {/* Toutes les images empilées + transition CSS opacity pure = zéro CLS */}
@@ -156,7 +156,7 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
         />
       </motion.div>
 
-      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center justify-between min-h-[90svh] gap-12 pt-12 pb-16">
+      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center justify-between" style={{ minHeight: 'clamp(520px, 75svh, 90svh)', gap: '3rem', paddingTop: '3rem', paddingBottom: '4rem' }}>
 
         {/* ── LEFT CONTENT ─────────────────────────────────────────── */}
         <div className="flex-1 max-w-2xl z-20">

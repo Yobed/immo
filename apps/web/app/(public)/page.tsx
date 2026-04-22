@@ -89,7 +89,7 @@ export default async function HomePage() {
   return (
     <main>
       <Hero bgImages={bgImages} featuredBiens={featuredBiens} />
-      <FeaturedProperties />
+      <FeaturedProperties initialBiens={biensWithPhoto} />
       <NearMeSection initialBiens={biensWithPhoto} />
       <MapZones biens={biensWithPhoto} />
       <OwnerTeaser />
