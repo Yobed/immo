@@ -1,19 +1,40 @@
 'use client'
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { SearchBar } from '@/components/search/SearchBar'
-import { useVoiceSearch } from '@/hooks/useVoiceSearch'
-import { Mic, MicOff } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Sparkles, TrendingUp, MapPin, Clock, ChevronRight } from 'lucide-react'
 
 const FALLBACK_BG = [
   'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2000&auto=format&fit=crop',
   'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2000&auto=format&fit=crop',
   'https://images.unsplash.com/photo-1600607687920-4e2a09be1587?q=80&w=2000&auto=format&fit=crop',
   'https://images.unsplash.com/photo-1613490900233-08145a3b2b8b?q=80&w=2000&auto=format&fit=crop',
+]
+
+// Phrases qui rotent dans le titre
+const HEADLINE_WORDS = [
+  { top: 'Trouvez votre', accent: 'appartement idéal' },
+  { top: 'Villas, studios,', accent: 'meublés premium' },
+  { top: 'Abidjan comme', accent: 'vous le méritez' },
+]
+
+// Activité récente simulée (social proof)
+const RECENT_ACTIVITY = [
+  { icon: '🏠', text: 'Kofi vient de visiter une villa à Cocody', time: '2 min' },
+  { icon: '🔑', text: 'Nouveau studio disponible à Plateau', time: '5 min' },
+  { icon: '⭐', text: 'Ama a loué un appartement à Marcory', time: '8 min' },
+  { icon: '🏢', text: 'Bureau moderne disponible à Zone 4', time: '12 min' },
+]
+
+const CATEGORIES = [
+  { label: 'Appartements', href: '/biens?type_bien=appartement', color: 'from-blue-500/20' },
+  { label: 'Villas',       href: '/biens?type_bien=villa',       color: 'from-amber-500/20' },
+  { label: 'Meublés',      href: '/biens?type_bien=residence_meublee', color: 'from-emerald-500/20' },
+  { label: 'Studios',      href: '/biens?type_bien=studio',      color: 'from-purple-500/20' },
+  { label: 'Bureaux',      href: '/biens?type_bien=bureau',      color: 'from-rose-500/20' },
 ]
 
 interface FeaturedBien {
@@ -28,280 +49,266 @@ interface FeaturedBien {
   photo_url?: string | null
 }
 
-function fmtPrice(b: FeaturedBien): { value: string; suffix: string } | null {
-  const fmt = (n: number) => n >= 1_000_000
-    ? `${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`
-    : `${Math.round(n / 1_000)}k`
-  if (b.prix_nuit_fcfa)  return { value: fmt(b.prix_nuit_fcfa),  suffix: '/nuit' }
-  if (b.prix_mois_fcfa)  return { value: fmt(b.prix_mois_fcfa),  suffix: '/mois' }
-  if (b.prix_vente_fcfa) return { value: fmt(b.prix_vente_fcfa), suffix: '' }
-  return null
-}
-
 export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; featuredBiens?: FeaturedBien[] }) {
   const images = (bgImages && bgImages.length >= 2) ? bgImages : FALLBACK_BG
-  const showcaseBiens = featuredBiens && featuredBiens.length > 0 ? featuredBiens : []
-  const [search, setSearch] = useState('')
-  const [currentIdx, setCurrentIdx] = useState(0)
-  const { isListening, transcript, startListening, stopListening, isSupported } = useVoiceSearch()
-  const router = useRouter()
+  const [bgIdx, setBgIdx] = useState(0)
+  const [headlineIdx, setHeadlineIdx] = useState(0)
+  const [activityIdx, setActivityIdx] = useState(0)
+  const [showActivity, setShowActivity] = useState(false)
   const sectionRef = useRef<HTMLElement>(null)
 
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end start"]
-  })
-
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "20%"])
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0])
-
-  const activeShowcase = (showcaseBiens && showcaseBiens.length > 0) ? showcaseBiens : null;
-
-  const carouselData = useMemo(() => {
-    if (activeShowcase && activeShowcase.length > 0) {
-      return activeShowcase.map((b: FeaturedBien, i: number) => ({
-        id: b.id,
-        titre: b.titre,
-        photo_url: b.photo_url || images[i % images.length],
-        prix: fmtPrice(b)
-      }))
-    }
-    return images.map((url, i) => ({
-      id: `bk-${i}`,
-      titre: 'Panorama Signature',
-      photo_url: url,
-      prix: null
-    }))
-  }, [activeShowcase, images])
-
-  const slideCount = carouselData.length
-  const currentItem = carouselData[currentIdx % slideCount]
-
+  // Rotation du background toutes les 6s
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentIdx((prev) => (prev + 1) % slideCount)
-    }, 8000)
-    return () => clearInterval(timer)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slideCount])
+    const t = setInterval(() => setBgIdx(i => (i + 1) % images.length), 6000)
+    return () => clearInterval(t)
+  }, [images.length])
 
+  // Rotation du titre toutes les 3s
   useEffect(() => {
-    if (transcript) {
-      setSearch(transcript)
-      const timer = setTimeout(() => {
-        router.push(`/recherche?q=${encodeURIComponent(transcript)}`)
-      }, 500)
-      return () => clearTimeout(timer)
-    }
-  }, [transcript, router])
+    const t = setInterval(() => {
+      setHeadlineIdx(i => (i + 1) % HEADLINE_WORDS.length)
+    }, 3500)
+    return () => clearInterval(t)
+  }, [])
 
-  const handleSearch = () => {
-    const q = search.trim()
-    router.push(q ? `/recherche?q=${encodeURIComponent(q)}` : '/biens')
-  }
+  // Activité sociale : apparaît après 2s, tourne toutes les 4s
+  useEffect(() => {
+    const t1 = setTimeout(() => setShowActivity(true), 2000)
+    const t2 = setInterval(() => setActivityIdx(i => (i + 1) % RECENT_ACTIVITY.length), 4000)
+    return () => { clearTimeout(t1); clearInterval(t2) }
+  }, [])
 
-  const TYPES = [
-    { label: 'Appartements', href: '/recherche?type_bien=appartement' },
-    { label: 'Villas',       href: '/recherche?type_bien=villa' },
-    { label: 'Meublés',      href: '/recherche?type_bien=residence_meublee' },
-    { label: 'Studios',      href: '/recherche?type_bien=studio' },
-    { label: 'Bureaux',      href: '/recherche?type_bien=bureau' },
-  ]
+  const current = HEADLINE_WORDS[headlineIdx]
+  const activity = RECENT_ACTIVITY[activityIdx]
+
+  // Stats dynamiques basées sur les biens réels
+  const totalBiens = featuredBiens?.length ?? 0
+  const communes = featuredBiens
+    ? Array.from(new Set(featuredBiens.map(b => b.commune))).length
+    : 0
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden bg-[var(--background)]" style={{ minHeight: 'clamp(520px, 75svh, 90svh)' }}>
-
-      {/* ── Background Slideshow ─────────────────────────────────────────── */}
-      {/* Toutes les images empilées + transition CSS opacity pure = zéro CLS */}
-      <motion.div
-        style={{ y, opacity }}
-        className="absolute inset-0 pointer-events-none"
-        aria-hidden="true"
-      >
-        {carouselData.map((item, idx) => {
-          const isActive = idx === currentIdx
-          return (
-            <div
-              key={item.photo_url}
-              className="absolute inset-0 overflow-hidden"
-              style={{
-                opacity: isActive ? 1 : 0,
-                transition: 'opacity 1.4s cubic-bezier(0.4, 0, 0.2, 1)',
-              }}
-            >
-              {/* Ken Burns : zoom synchronisé avec l'intervalle de 8s */}
-              <div className={isActive ? 'kb-active' : 'kb-idle'} style={{ width: '100%', height: '100%' }}>
-                <Image
-                  src={item.photo_url!}
-                  alt=""
-                  fill
-                  className="object-cover object-center"
-                  priority={idx === 0}
-                  loading={idx === 0 ? 'eager' : 'lazy'}
-                  sizes="100vw"
-                  quality={85}
-                />
-              </div>
-            </div>
-          )
-        })}
-
-        {/* Overlays cinématiques — stables, jamais rechargés */}
-        <div className="absolute inset-0 bg-black/50" />
-        <div
-          className="absolute inset-0 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/50 to-transparent"
-        />
-        <div
-          className="absolute inset-x-0 top-0 h-full bg-gradient-to-r from-[var(--background)]/80 via-[var(--background)]/40 to-transparent"
-        />
-      </motion.div>
-
-      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center justify-between" style={{ minHeight: 'clamp(520px, 75svh, 90svh)', gap: '3rem', paddingTop: '3rem', paddingBottom: '4rem' }}>
-
-        {/* ── LEFT CONTENT ─────────────────────────────────────────── */}
-        <div className="flex-1 max-w-2xl z-20">
-
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="inline-flex items-center gap-2 mb-6 px-3 py-1.5 rounded-full border border-[var(--accent-luxury)]/30 bg-[var(--accent-luxury)]/8"
+    <section
+      ref={sectionRef}
+      className="relative overflow-hidden bg-[#020617]"
+      style={{ minHeight: 'clamp(560px, 88svh, 95svh)' }}
+    >
+      {/* ── BACKGROUND SLIDESHOW ─────────────────────── */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+        {images.map((src, idx) => (
+          <div
+            key={src}
+            className="absolute inset-0"
+            style={{
+              opacity: idx === bgIdx ? 1 : 0,
+              transition: 'opacity 1.8s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-luxury)]" />
-            <span className="font-sans text-[11px] text-[var(--accent-luxury)] font-semibold tracking-[0.3em] uppercase">
-              Plateforme immobilière N°1 en Côte d&apos;Ivoire
-            </span>
-          </motion.div>
-
-          {/* Titre principal */}
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="font-display font-bold leading-tight mb-6 text-white"
-            style={{ fontSize: 'clamp(2.4rem, 6vw, 5.5rem)' }}
-          >
-            Résidences Meublées<br />
-            <span style={{ color: 'var(--accent-luxury)' }}>D&apos;Exception</span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, x: -15 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="font-sans text-lg text-zinc-300 mb-10 leading-relaxed max-w-md"
-          >
-            Découvrez notre sélection exclusive de résidences meublées et appartements de luxe à Abidjan.<br />
-            Vivez l&apos;expérience du haut standing avec service premium inclus.
-          </motion.p>
-
-          {/* Barre de recherche unifiée */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="mb-8 md:mb-10"
-          >
-            <SearchBar 
-              initialQuery={search} 
-              placeholder="Commune, quartier, type de bien..." 
+            <Image
+              src={src}
+              alt=""
+              fill
+              className="object-cover object-center scale-105"
+              priority={idx === 0}
+              loading={idx === 0 ? 'eager' : 'lazy'}
+              sizes="100vw"
+              quality={85}
             />
-          </motion.div>
-
-          {/* Quick Filters */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1.2, delay: 0.7 }}
-            className="flex flex-wrap gap-x-10 gap-y-3"
-          >
-            {TYPES.map((t) => (
-              <Link
-                key={t.label}
-                href={t.href}
-                className="text-[10px] font-sans font-bold text-zinc-300 hover:text-[var(--accent-luxury)] uppercase tracking-[0.3em] transition-all duration-500 hover:tracking-[0.4em]"
-              >
-                {t.label}
-              </Link>
-            ))}
-          </motion.div>
-        </div>
-
-        {/* ── RIGHT — Cinematic Side ───────────────────────────── */}
-        <div className="hidden lg:block relative flex-1 max-w-md xl:max-w-lg z-20">
-          {/* Conteneur taille fixe : évite que AnimatePresence double la hauteur = zéro saut */}
-          <div className="relative aspect-[3/4] rounded-sm overflow-hidden border border-[var(--border)] shadow-[0_40px_80px_rgba(0,0,0,0.3)] bg-[var(--midnight-muted)]">
-          <AnimatePresence>
-            <motion.div
-              key={currentItem.photo_url}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute inset-0 overflow-hidden"
-            >
-              <Image
-                src={currentItem.photo_url}
-                alt={currentItem.titre}
-                fill
-                className="object-cover transition-all duration-[3000ms] ease-out"
-                priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[var(--background)]/80 via-transparent to-transparent" />
-              
-              <div className="absolute bottom-10 left-10 right-10">
-                <span className="block text-[9px] font-bold text-[var(--accent-luxury)] uppercase tracking-[0.4em] mb-3">
-                  La Collection du jour
-                </span>
-                <h3 className="text-3xl font-display font-light text-white mb-2 tracking-tighter leading-tight">
-                  {currentItem.titre}
-                </h3>
-                <p className="text-[11px] font-sans text-zinc-300 mb-8 uppercase tracking-[0.2em] font-medium border-l border-[var(--accent-luxury)]/30 pl-4">
-                  {currentItem.prix ? (
-                    <>{currentItem.prix.value} FCFA{currentItem.prix.suffix}</>
-                  ) : 'Prix Privé'}
-                </p>
-                <Link 
-                  href={activeShowcase ? `/biens/${currentItem.id}` : '/biens'}
-                  className="inline-flex items-center gap-5 text-[10px] font-bold text-white border-b border-zinc-700 pb-2 hover:border-[var(--accent-luxury)] transition-all uppercase tracking-[0.3em] group"
-                >
-                  Visionner le dossier
-                  <motion.span 
-                    animate={{ x: [0, 4, 0] }}
-                    transition={{ repeat: Infinity, duration: 2 }}
-                  >→</motion.span>
-                </Link>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-          </div>{/* fin conteneur fixe aspect-[3/4] */}
-
-          {/* Floating Detail Overlay */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1.2, delay: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute -right-8 top-16 p-10 bg-white text-black shadow-[0_25px_50px_rgba(0,0,0,0.2)] hidden xl:block"
-          >
-            <p className="font-serif italic text-3xl mb-2 leading-none">Elite</p>
-            <p className="font-sans font-bold text-[9px] uppercase tracking-[0.4em] opacity-50">
-              Curated Excellence
-            </p>
-          </motion.div>
-        </div>
+          </div>
+        ))}
+        {/* Overlay plus léger — laisse les images respirer */}
+        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/30 to-transparent" />
       </div>
 
-      {/* ── Scroll indicator ───────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2.5, duration: 1 }}
-        className="absolute bottom-10 left-10 flex items-center gap-8"
+      {/* ── CONTENU ─────────────────────────────────── */}
+      <div
+        className="relative z-10 flex flex-col justify-between px-4 md:px-12 max-w-[1400px] mx-auto"
+        style={{ minHeight: 'clamp(560px, 88svh, 95svh)', paddingTop: 'clamp(4rem, 10svh, 7rem)', paddingBottom: '2rem' }}
       >
-        <div className="w-16 h-px bg-zinc-700" />
-        <span className="font-sans text-[9px] text-zinc-400 uppercase tracking-[0.6em] font-bold">Défiler</span>
-      </motion.div>
+        <div className="flex flex-col lg:flex-row gap-10 lg:gap-16 items-start lg:items-center">
+
+          {/* ── COLONNE GAUCHE ─── */}
+          <div className="flex-1 max-w-xl">
+
+            {/* Badge live */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+              className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+              <span className="text-[11px] font-bold text-white/80 tracking-wider uppercase">
+                {totalBiens > 0 ? `${totalBiens} biens disponibles maintenant` : 'Biens disponibles maintenant'}
+              </span>
+            </motion.div>
+
+            {/* Titre animé */}
+            <div className="mb-5 overflow-hidden">
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.1 }}
+                className="font-display font-bold text-white leading-tight"
+                style={{ fontSize: 'clamp(2rem, 5vw, 4.2rem)' }}
+              >
+                {current.top}
+              </motion.p>
+              <div className="h-[1.2em] overflow-hidden" style={{ fontSize: 'clamp(2rem, 5vw, 4.2rem)' }}>
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={headlineIdx}
+                    initial={{ y: '100%', opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: '-100%', opacity: 0 }}
+                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                    className="block font-display font-bold"
+                    style={{ color: 'var(--accent-luxury)' }}
+                  >
+                    {current.accent}
+                  </motion.span>
+                </AnimatePresence>
+              </div>
+            </div>
+
+            {/* Stats rapides — remplace le long paragraphe */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="flex items-center gap-5 mb-7"
+            >
+              <div className="flex items-center gap-1.5 text-white/60">
+                <MapPin className="w-3.5 h-3.5 text-[var(--accent-luxury)]" />
+                <span className="text-[13px] font-medium">{communes > 0 ? `${communes} communes` : 'Abidjan'}</span>
+              </div>
+              <div className="w-px h-4 bg-white/15" />
+              <div className="flex items-center gap-1.5 text-white/60">
+                <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-[13px] font-medium">Réponse en 5 min</span>
+              </div>
+              <div className="w-px h-4 bg-white/15" />
+              <div className="flex items-center gap-1.5 text-white/60">
+                <Sparkles className="w-3.5 h-3.5 text-[var(--accent-luxury)]" />
+                <span className="text-[13px] font-medium">100% gratuit</span>
+              </div>
+            </motion.div>
+
+            {/* Barre de recherche */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.45 }}
+              className="mb-6"
+            >
+              <SearchBar
+                initialQuery=""
+                placeholder="Commune, quartier, type de bien..."
+              />
+            </motion.div>
+
+            {/* Catégories — pill buttons bien visibles */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              className="flex flex-wrap gap-2"
+            >
+              {CATEGORIES.map((cat) => (
+                <Link
+                  key={cat.label}
+                  href={cat.href}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/15 text-white text-[12px] font-semibold transition-all duration-200 active:scale-95"
+                >
+                  {cat.label}
+                  <ChevronRight className="w-3 h-3 opacity-50" />
+                </Link>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* ── COLONNE DROITE — Card biens (desktop) ─── */}
+          <div className="hidden lg:flex flex-col gap-4 w-[340px] xl:w-[380px] shrink-0">
+            {featuredBiens && featuredBiens.length > 0 && (
+              <FeaturedBienCards biens={featuredBiens.slice(0, 3)} />
+            )}
+          </div>
+        </div>
+
+        {/* ── SOCIAL PROOF TICKER (bottom) ─── */}
+        <div className="mt-auto pt-6">
+          <AnimatePresence mode="wait">
+            {showActivity && (
+              <motion.div
+                key={activityIdx}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.4 }}
+                className="inline-flex items-center gap-2.5 px-3 py-2 rounded-xl bg-black/40 backdrop-blur-md border border-white/10"
+              >
+                <span className="text-base leading-none">{activity.icon}</span>
+                <span className="text-[12px] text-white/70 font-medium">{activity.text}</span>
+                <div className="flex items-center gap-1 text-white/30 shrink-0">
+                  <Clock className="w-3 h-3" />
+                  <span className="text-[10px]">{activity.time}</span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
     </section>
+  )
+}
+
+// Cartes compactes sur desktop
+function FeaturedBienCards({ biens }: { biens: FeaturedBien[] }) {
+  return (
+    <>
+      {biens.map((bien, i) => {
+        const prix = bien.prix_nuit_fcfa ?? bien.prix_mois_fcfa ?? bien.prix_vente_fcfa
+        const suffix = bien.prix_nuit_fcfa ? '/nuit' : bien.prix_mois_fcfa ? '/mois' : ''
+        const fmtPrix = prix
+          ? prix >= 1_000_000
+            ? `${(prix / 1_000_000).toFixed(1)}M FCFA`
+            : `${Math.round(prix / 1_000)}k FCFA`
+          : null
+
+        return (
+          <motion.div
+            key={bien.id}
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.5 + i * 0.12 }}
+          >
+            <Link
+              href={`/biens/${bien.id}`}
+              className="flex items-center gap-3 p-3 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 hover:border-[var(--accent-luxury)]/40 transition-all duration-300 group"
+            >
+              <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-white/5">
+                {bien.photo_url && (
+                  <Image src={bien.photo_url} alt={bien.titre} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="64px" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white text-[13px] font-semibold truncate">{bien.titre}</p>
+                <p className="text-white/40 text-[11px] flex items-center gap-1 mt-0.5">
+                  <MapPin className="w-2.5 h-2.5" />
+                  {bien.commune}{bien.quartier ? `, ${bien.quartier}` : ''}
+                </p>
+                {fmtPrix && (
+                  <p className="text-[var(--accent-luxury)] text-[12px] font-bold mt-1">
+                    {fmtPrix}<span className="text-white/30 font-normal">{suffix}</span>
+                  </p>
+                )}
+              </div>
+              <ChevronRight className="w-4 h-4 text-white/20 group-hover:text-[var(--accent-luxury)] transition-colors shrink-0" />
+            </Link>
+          </motion.div>
+        )
+      })}
+    </>
   )
 }
