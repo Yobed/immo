@@ -130,7 +130,7 @@ export function FeaturedProperties({ initialBiens = [] }: FeaturedPropertiesProp
                   {/* Scroll horizontal — déborde du padding parent sur les bords */}
                   <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar -mx-4 px-4">
                     {cat.items.map((bien, i) => (
-                      <div key={bien.id} className="w-[168px] shrink-0">
+                      <div key={bien.id} className="w-[192px] shrink-0">
                         <PremiumBienCard
                           id={bien.id}
                           titre={bien.titre}

@@ -384,7 +384,7 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
 
           {/* BIG MAP — ALWAYS mounted, loading spinner overlays on top */}
           <div ref={mapContainerRef} className="group rounded-3xl overflow-hidden ring-1 ring-[var(--border)] p-1 bg-[var(--surface-card)] backdrop-blur-3xl transition-all duration-1000 hover:ring-[var(--accent-luxury)]" style={{ height: '560px' }}>
-            <div className="rounded-[calc(1.5rem-4px)] overflow-hidden bg-[var(--background)] relative h-full grayscale group-hover:grayscale-0 transition-all duration-700">
+            <div className="rounded-[calc(1.5rem-4px)] overflow-hidden bg-[var(--background)] relative h-full transition-all duration-700">
             {/* Map is ALWAYS rendered — never unmounted */}
             <PropertiesMap
               biens={mapBiens}

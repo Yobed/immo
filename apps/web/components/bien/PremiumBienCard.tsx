@@ -135,28 +135,28 @@ export function PremiumBienCard({
           </div>
 
           {/* 2. Content Section */}
-          <div className={`flex flex-col ${(isCompact || isUltraCompact) ? 'p-2 pt-1.5' : 'p-2.5 pt-2'} bg-inherit`}>
+          <div className={`flex flex-col ${(isCompact || isUltraCompact) ? 'p-2 pt-1.5' : 'p-3 pt-2.5'} bg-inherit`}>
 
             {/* Commune + Prix sur une seule ligne */}
-            <div className="flex items-center justify-between gap-1 mb-1">
+            <div className="flex items-center justify-between gap-1 mb-1.5">
               <div className="flex items-center gap-1 min-w-0">
-                <MapPin className="w-2 h-2 shrink-0 text-[var(--accent-luxury)]" strokeWidth={3} />
-                <span className="text-[9px] font-bold text-[var(--accent-luxury)] uppercase tracking-[0.12em] truncate">
+                <MapPin className="w-2.5 h-2.5 shrink-0 text-[var(--accent-luxury)]" strokeWidth={3} />
+                <span className="text-[10px] font-bold text-[var(--accent-luxury)] uppercase tracking-[0.12em] truncate">
                   {commune}
                 </span>
               </div>
               {prix && (
-                <span className="text-[11px] font-extrabold text-[var(--accent-luxury)] tracking-tight shrink-0 whitespace-nowrap">
+                <span className="text-[12px] font-extrabold text-[var(--accent-luxury)] tracking-tight shrink-0 whitespace-nowrap">
                   {prix.value}
                   {prix.suffix && (
-                    <span className="text-[8px] font-bold opacity-60">{prix.suffix}</span>
+                    <span className="text-[9px] font-bold opacity-60">{prix.suffix}</span>
                   )}
                 </span>
               )}
             </div>
 
-            {/* Titre — 1 ligne mobile, 2 lignes desktop */}
-            <h3 className={`font-display ${(isCompact || isUltraCompact) ? 'text-[11px]' : 'text-[12px]'} font-semibold text-[var(--text)] tracking-tight leading-snug line-clamp-1 md:line-clamp-2 mb-1.5`}>
+            {/* Titre */}
+            <h3 className={`font-display ${(isCompact || isUltraCompact) ? 'text-[11px]' : 'text-[13px]'} font-semibold text-[var(--text)] tracking-tight leading-snug line-clamp-2 mb-2`}>
               {titre}
             </h3>
 
@@ -165,13 +165,13 @@ export function PremiumBienCard({
               <div className="flex items-center gap-2.5 mt-auto">
                 {nb_pieces ? (
                   <div className="flex items-center gap-1">
-                    <BedDouble className="w-3 h-3 text-[var(--text-muted)]" />
+                    <BedDouble className="w-3.5 h-3.5 text-[var(--text-muted)]" />
                     <span className="text-[10px] font-semibold text-[var(--text)]">{nb_pieces} Ch.</span>
                   </div>
                 ) : null}
                 {surface_m2 ? (
                   <div className="flex items-center gap-1">
-                    <Maximize2 className="w-3 h-3 text-[var(--text-muted)]" />
+                    <Maximize2 className="w-3.5 h-3.5 text-[var(--text-muted)]" />
                     <span className="text-[10px] font-semibold text-[var(--text)]">{surface_m2}m²</span>
                   </div>
                 ) : null}
