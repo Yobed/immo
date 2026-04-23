@@ -98,6 +98,8 @@ export function BienMediaGallery({
           animate={{ opacity: 1 }}
           transition={{ duration: 1.2 }}
           className="w-full h-full relative"
+          onClick={() => photos.length > 0 && setShowAllPhotos(true)}
+          style={{ cursor: photos.length > 0 ? 'pointer' : 'default' }}
         >
           {medias.length > 0 ? (
             <BienCarousel
@@ -150,6 +152,7 @@ export function BienMediaGallery({
           {/* Back button */}
           <Link
             href="/biens"
+            onClick={e => e.stopPropagation()}
             className="absolute top-4 left-4 z-30 flex items-center gap-1.5 px-3 py-2 bg-black/40 backdrop-blur-md rounded-xl border border-white/10 text-white/70 text-xs font-medium hover:text-white transition-all"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
@@ -157,14 +160,14 @@ export function BienMediaGallery({
           </Link>
 
           {/* Favorites */}
-          <div className="absolute top-4 right-4 z-30">
+          <div className="absolute top-4 right-4 z-30" onClick={e => e.stopPropagation()}>
             <FavorisButton bienId={bien.id} userId={userId ?? null} />
           </div>
 
           {/* Bouton Toutes les photos */}
           {photos.length > 0 && (
             <button
-              onClick={() => setShowAllPhotos(true)}
+              onClick={e => { e.stopPropagation(); setShowAllPhotos(true) }}
               className="absolute bottom-4 right-4 z-30 flex items-center gap-2 px-4 py-2.5 bg-white text-slate-900 rounded-xl font-bold text-xs shadow-lg hover:bg-slate-100 active:scale-95 transition-all"
             >
               <LayoutGrid className="w-3.5 h-3.5" />
