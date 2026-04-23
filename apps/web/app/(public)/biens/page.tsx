@@ -44,7 +44,7 @@ const itemVariants = {
 export default function BiensListePage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-midnight flex items-center justify-center">
+      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-4xl px-4">
           {[...Array(8)].map((_, i) => (
             <div key={i} className="aspect-[3/4] bg-off-white/5 animate-pulse rounded-[1.5rem]" />
@@ -190,7 +190,7 @@ function BiensContent() {
   const activeLabel = TYPE_FILTERS.find(f => f.value === activeType)?.label ?? activeType
 
   return (
-    <div className="min-h-screen bg-midnight">
+    <div className="min-h-screen bg-[#020617]">
       <PageHeader activeType={activeType} count={count} />
 
       <main className="max-w-7xl mx-auto px-3 pt-4 pb-28 lg:pb-16" aria-live="polite" aria-busy={loading}>
@@ -327,7 +327,7 @@ function PageHeader({ activeType, count }: { activeType: string; count: number }
   const collectionTitle = COLLECTION_LABELS[activeType] ?? 'Abidjan'
 
   return (
-    <header className="relative bg-midnight overflow-hidden">
+    <header className="relative bg-[#020617] overflow-hidden" data-theme="dark">
       {/* Glow décoratif haut-gauche — identique landing */}
       <div
         className="absolute -top-24 -left-24 w-96 h-96 pointer-events-none"
@@ -356,7 +356,7 @@ function PageHeader({ activeType, count }: { activeType: string; count: number }
       </div>
 
       {/* Filter pills — icône + label court, scroll horizontal */}
-      <div className="sticky top-0 z-50 bg-midnight/95 backdrop-blur-md border-b border-white/8">
+      <div className="sticky top-0 z-50 bg-[#020617]/95 backdrop-blur-md border-b border-white/8">
         <div className="max-w-7xl mx-auto px-3 py-2">
           <nav className="flex gap-1.5 overflow-x-auto scrollbar-hide" aria-label="Filtres de type de bien">
             {TYPE_FILTERS.map((f) => {

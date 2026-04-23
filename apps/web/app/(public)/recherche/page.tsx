@@ -82,7 +82,7 @@ export default async function RecherchePage({
   const activeFilterCount = [params.commune, params.prix_min, params.prix_max, params.type_bien, params.equipements].filter(Boolean).length
 
   return (
-    <main className="bg-midnight min-h-screen pt-24 pb-16">
+    <main className="bg-[#020617] min-h-screen pt-24 pb-16">
       <div className="max-w-[1600px] mx-auto px-4 lg:px-8">
         
         {/* Superior Search & Stats Header */}
