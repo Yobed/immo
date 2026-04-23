@@ -51,6 +51,7 @@ export const metadata: Metadata = {
 
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { ConditionalWhatsApp } from '@/components/ui/ConditionalWhatsApp'
+import { TapFeedback } from '@/components/ui/TapFeedback'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -63,6 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           {children}
           <ConditionalWhatsApp />
+          <TapFeedback />
         </ThemeProvider>
       </body>
     </html>

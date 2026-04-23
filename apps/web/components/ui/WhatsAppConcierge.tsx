@@ -36,13 +36,13 @@ export const WhatsAppConcierge = () => {
           boxShadow: '0 20px 40px -12px rgba(16, 185, 129, 0.4)'
         }}
         whileTap={{ scale: 0.9 }}
-        className="flex items-center justify-center w-16 h-16 bg-[#25D366] border-0 text-white rounded-2xl shadow-2xl relative overflow-hidden group/btn"
+        className="flex items-center justify-center w-16 h-16 bg-transparent border-0 rounded-2xl shadow-2xl relative overflow-hidden group/btn"
       >
         {/* Shine effect */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000" />
         
         <img 
-          src="/whatsapp-3d.png" 
+          src="/whatsapp-icon.svg" 
           alt="WhatsApp" 
           className="w-12 h-12 object-contain group-hover:scale-110 transition-transform duration-500" 
         />

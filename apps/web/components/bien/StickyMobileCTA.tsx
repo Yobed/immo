@@ -80,7 +80,7 @@ export function StickyMobileCTA({ bienTitre, bienLieu, prix, prixSuffix, bienId,
               className="pointer-events-auto w-[62px] h-[62px] flex items-center justify-center rounded-2xl bg-[#25D366] shadow-[0_8px_24px_rgba(37,211,102,0.35)] active:scale-95 transition-transform shrink-0"
               aria-label="Contacter via WhatsApp"
             >
-              <img src="/whatsapp-3d.png" alt="" className="w-7 h-7 object-contain" />
+              <img src="/whatsapp-icon.svg" alt="" className="w-7 h-7 object-contain" />
             </a>
           </motion.div>
         )}
@@ -122,7 +122,7 @@ export function StickyMobileCTA({ bienTitre, bienLieu, prix, prixSuffix, bienId,
               </div>
             </div>
             <div className="w-9 h-9 rounded-xl bg-accent-luxury/15 flex items-center justify-center shrink-0">
-              <img src="/whatsapp-3d.png" alt="" className="w-5 h-5 object-contain" />
+              <img src="/whatsapp-icon.svg" alt="" className="w-5 h-5 object-contain" />
             </div>
           </a>
 
@@ -134,7 +134,7 @@ export function StickyMobileCTA({ bienTitre, bienLieu, prix, prixSuffix, bienId,
             className="pointer-events-auto w-[62px] h-[62px] flex items-center justify-center rounded-2xl bg-[#25D366] shadow-[0_8px_24px_rgba(37,211,102,0.35)] active:scale-95 transition-transform shrink-0"
             aria-label="WhatsApp"
           >
-            <img src="/whatsapp-3d.png" alt="" className="w-7 h-7 object-contain" />
+            <img src="/whatsapp-icon.svg" alt="" className="w-7 h-7 object-contain" />
           </a>
         </motion.div>
       )}

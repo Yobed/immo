@@ -67,7 +67,7 @@ export function SapphireHub({ bien, videoMedias }: SapphireHubProps) {
               >
                 <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="w-14 h-14 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg relative z-10 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                  <img src="/whatsapp-3d.png" alt="WhatsApp" className="w-9 h-9 object-contain brightness-110" />
+                  <img src="/whatsapp-icon.svg" alt="WhatsApp" className="w-9 h-9 object-contain brightness-110" />
                 </div>
                 <div className="flex-1 text-left relative z-10">
                   <p className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em] mb-1">Direct Access</p>
@@ -141,7 +141,7 @@ export function SapphireHub({ bien, videoMedias }: SapphireHubProps) {
         <div className="relative">
           {isOpen ? <X className="w-6 h-6 text-white" /> : (
             <div className="relative">
-              <img src="/whatsapp-3d.png" alt="WA" className="w-8 h-8 relative z-10" />
+              <img src="/whatsapp-icon.svg" alt="WA" className="w-8 h-8 relative z-10" />
             </div>
           )}
         </div>
