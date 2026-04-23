@@ -1,16 +1,17 @@
 'use client'
 
-import { useState, type ComponentType } from 'react'
+import { useState, useEffect, type ComponentType } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { BienCarousel } from './BienCarousel'
 import { ShortsTrigger } from './ShortsTrigger'
 import { FavorisButton } from './FavorisButton'
 import {
   MapPin, ArrowLeft, ShieldCheck, Sparkles,
   Camera, Play, RotateCcw, Map as MapIcon, LayoutGrid,
-  Maximize, Layers, BedDouble, Bath,
+  Maximize, Layers, BedDouble, Bath, X, ChevronLeft, ChevronRight,
 } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
 type FilterType = 'all' | 'photo' | 'video' | 'vue_360' | 'plan'
@@ -59,6 +60,24 @@ export function BienMediaGallery({
   medias, bien, prix, stats, typeLabel, userId,
 }: BienMediaGalleryProps) {
   const [filter, setFilter] = useState<FilterType>('all')
+  const [showAllPhotos, setShowAllPhotos] = useState(false)
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+
+  const photos = medias.filter(m => m.type === 'photo')
+
+  // Fermeture au clavier
+  useEffect(() => {
+    if (!showAllPhotos && lightboxIndex === null) return
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setShowAllPhotos(false); setLightboxIndex(null) }
+      if (lightboxIndex !== null) {
+        if (e.key === 'ArrowRight') setLightboxIndex(i => i !== null ? Math.min(i + 1, photos.length - 1) : 0)
+        if (e.key === 'ArrowLeft') setLightboxIndex(i => i !== null ? Math.max(i - 1, 0) : 0)
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [showAllPhotos, lightboxIndex, photos.length])
 
   const availableTypes = Array.from(new Set(medias.map(m => m.type))) as FilterType[]
   const hasMultipleTypes = availableTypes.length > 1
@@ -141,8 +160,119 @@ export function BienMediaGallery({
           <div className="absolute top-4 right-4 z-30">
             <FavorisButton bienId={bien.id} userId={userId ?? null} />
           </div>
+
+          {/* Bouton Toutes les photos */}
+          {photos.length > 0 && (
+            <button
+              onClick={() => setShowAllPhotos(true)}
+              className="absolute bottom-4 right-4 z-30 flex items-center gap-2 px-4 py-2.5 bg-white text-slate-900 rounded-xl font-bold text-xs shadow-lg hover:bg-slate-100 active:scale-95 transition-all"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              Voir les {photos.length} photos
+            </button>
+          )}
         </motion.div>
       </section>
+
+      {/* ── GALERIE PLEIN ÉCRAN ── */}
+      <AnimatePresence>
+        {showAllPhotos && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[200] bg-white overflow-y-auto"
+          >
+            {/* Header sticky */}
+            <div className="sticky top-0 bg-white/95 backdrop-blur-sm border-b border-slate-200 px-4 py-3.5 flex items-center gap-4 z-10">
+              <button
+                onClick={() => setShowAllPhotos(false)}
+                className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors"
+              >
+                <X className="w-5 h-5 text-slate-700" />
+              </button>
+              <div>
+                <h2 className="font-bold text-slate-900 text-sm leading-none">{bien.titre}</h2>
+                <p className="text-slate-400 text-xs mt-0.5">{photos.length} photos</p>
+              </div>
+            </div>
+
+            {/* Grille 2 colonnes */}
+            <div className="columns-2 gap-1.5 p-1.5 pb-8">
+              {photos.map((photo, idx) => (
+                <button
+                  key={photo.id}
+                  onClick={() => setLightboxIndex(idx)}
+                  className="relative w-full mb-1.5 rounded-xl overflow-hidden block focus:outline-none"
+                >
+                  <img
+                    src={photo.url}
+                    alt={photo.titre ?? `Photo ${idx + 1}`}
+                    className="w-full h-auto object-cover"
+                    loading={idx < 4 ? 'eager' : 'lazy'}
+                  />
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── LIGHTBOX ── */}
+      <AnimatePresence>
+        {lightboxIndex !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-[210] bg-black flex items-center justify-center"
+            onClick={() => setLightboxIndex(null)}
+          >
+            {/* Image */}
+            <img
+              src={photos[lightboxIndex]?.url}
+              alt=""
+              className="max-w-full max-h-full object-contain"
+              onClick={e => e.stopPropagation()}
+            />
+
+            {/* Fermer */}
+            <button
+              onClick={() => setLightboxIndex(null)}
+              className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Précédent */}
+            {lightboxIndex > 0 && (
+              <button
+                onClick={e => { e.stopPropagation(); setLightboxIndex(i => i !== null ? i - 1 : 0) }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+            )}
+
+            {/* Suivant */}
+            {lightboxIndex < photos.length - 1 && (
+              <button
+                onClick={e => { e.stopPropagation(); setLightboxIndex(i => i !== null ? i + 1 : 0) }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            )}
+
+            {/* Compteur */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-black/60 rounded-full text-white text-xs font-bold">
+              {lightboxIndex + 1} / {photos.length}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ─── ONGLETS MÉDIAS ─── */}
       {tabKeys.length > 0 && (
