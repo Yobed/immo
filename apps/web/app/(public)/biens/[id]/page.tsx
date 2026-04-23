@@ -159,7 +159,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
       />
 
       {/* ─── MAIN CONTENT ─── */}
-      <div className="relative z-10 bg-white rounded-t-[2rem] -mt-6 shadow-[0_-6px_32px_rgba(0,0,0,0.10)] md:rounded-none md:mt-0 md:shadow-none">
+      <div className="relative z-10 bg-white md:rounded-none md:mt-0 md:shadow-none">
       <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-8 md:py-14">
 
         {/* Media quick nav */}
