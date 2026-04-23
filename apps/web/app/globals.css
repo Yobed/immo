@@ -59,9 +59,9 @@ html, body {
   --glass-border:    rgba(255, 255, 255, 0.08);
   --glass-blur:      32px;
 
-  --accent-luxury:   #3B82F6;
-  --accent-luxury-glow:  rgba(59, 130, 246, 0.4);
-  --accent-luxury-muted: rgba(59, 130, 246, 0.15);
+  --accent-luxury:   #1A4D8F;
+  --accent-luxury-glow:  rgba(26, 77, 143, 0.4);
+  --accent-luxury-muted: rgba(26, 77, 143, 0.15);
   --on-primary:      #f8fafc;   /* Light text on dark primary */
   --on-accent:       #020617;   /* Dark text on gold accent */
 }
@@ -99,7 +99,7 @@ html, body {
   --midnight-light:      #e2e8f0;   /* slate-200 for inputs/hover bg */
   --midnight-glow:       rgba(255, 255, 255, 0.6);
 
-  --accent-luxury:   #2563EB;   /* blue-600 — readable on white */
+  --accent-luxury:   #0C2D5E;   /* bleu logo IC */
   --on-primary:      #f8fafc;   /* Light text on dark primary */
   --on-accent:       #0f172a;   /* Dark text on accent elements for better readability */
 }
@@ -785,7 +785,7 @@ main {
   position: absolute;
   width: 40px;
   height: 40px;
-  border: 2px solid #3B82F6;
+  border: 2px solid #1A4D8F;
   border-radius: 50%;
   animation: luxury-sonar 2s infinite;
   pointer-events: none;
@@ -815,12 +815,12 @@ main {
 }
 
 .premium-glow {
-  box-shadow: 0 0 25px rgba(59, 130, 246, 0.5), 0 0 10px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 25px rgba(26, 77, 143, 0.5), 0 0 10px rgba(255, 255, 255, 0.2);
   transition: box-shadow 0.4s ease;
 }
 
 .premium-glow:hover {
-  box-shadow: 0 0 40px rgba(59, 130, 246, 0.8), 0 0 20px rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 40px rgba(26, 77, 143, 0.8), 0 0 20px rgba(255, 255, 255, 0.4);
 }
 
 /* ══════════════════════════════════════════════════════
