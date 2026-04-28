@@ -4,7 +4,6 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { extractBienFromWhatsApp } from '@/lib/extractors/whatsapp-bien-extractor'
 import { signMagicLinkToken } from '@/lib/auth/magic-link-token'
 import { wasenderSendMessage } from '@/lib/wasender'
-import { cloudinary } from '@/lib/cloudinary'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -120,19 +119,48 @@ async function findOrCreateUserByPhone(phone: string): Promise<string> {
   return created.user.id
 }
 
+const STORAGE_BUCKET = 'biens-medias'
+
+let bucketEnsured = false
+async function ensureBucket(): Promise<void> {
+  if (bucketEnsured) return
+  const admin = createAdminClient()
+  await admin.storage.createBucket(STORAGE_BUCKET, {
+    public: true,
+    fileSizeLimit: 15 * 1024 * 1024,
+    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'],
+  }).catch(() => {})
+  bucketEnsured = true
+}
+
 async function uploadImageFromUrl(
   bienId: string,
   sourceUrl: string,
   index: number
 ): Promise<{ url: string | null; error?: string }> {
   try {
-    const result = await cloudinary.uploader.upload(sourceUrl, {
-      folder: `biens/${bienId}`,
-      public_id: `tally-${Date.now()}-${index}`,
-      resource_type: 'image',
-      timeout: 30000,
-    })
-    return { url: result.secure_url }
+    await ensureBucket()
+    const res = await fetch(sourceUrl)
+    if (!res.ok) return { url: null, error: `fetch_${res.status}` }
+    const arrayBuffer = await res.arrayBuffer()
+    if (arrayBuffer.byteLength > 15 * 1024 * 1024) return { url: null, error: 'too_large' }
+
+    let contentType = res.headers.get('content-type') || 'image/jpeg'
+    if (!contentType.startsWith('image/')) contentType = 'image/jpeg'
+    const ext = contentType.includes('png') ? 'png'
+      : contentType.includes('webp') ? 'webp'
+      : contentType.includes('heic') ? 'heic'
+      : 'jpg'
+    const path = `${bienId}/tally-${Date.now()}-${index}.${ext}`
+
+    const admin = createAdminClient()
+    const { error } = await admin.storage
+      .from(STORAGE_BUCKET)
+      .upload(path, arrayBuffer, { contentType, upsert: false })
+    if (error) return { url: null, error: `upload:${error.message?.slice(0, 80)}` }
+
+    const { data } = admin.storage.from(STORAGE_BUCKET).getPublicUrl(path)
+    return { url: data.publicUrl }
   } catch (e) {
     return { url: null, error: (e as Error).message?.slice(0, 120) || 'unknown' }
   }
