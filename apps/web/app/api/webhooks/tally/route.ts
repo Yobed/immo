@@ -124,7 +124,7 @@ async function uploadImageFromUrl(
   bienId: string,
   sourceUrl: string,
   index: number
-): Promise<string | null> {
+): Promise<{ url: string | null; error?: string }> {
   try {
     const result = await cloudinary.uploader.upload(sourceUrl, {
       folder: `biens/${bienId}`,
@@ -132,9 +132,9 @@ async function uploadImageFromUrl(
       resource_type: 'image',
       timeout: 30000,
     })
-    return result.secure_url
-  } catch {
-    return null
+    return { url: result.secure_url }
+  } catch (e) {
+    return { url: null, error: (e as Error).message?.slice(0, 120) || 'unknown' }
   }
 }
 
@@ -215,12 +215,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'bien_insert_failed', detail: bienErr?.message }, { status: 500 })
   }
 
+  const uploadTrace: string[] = []
+  let uploadedCount = 0
   if (imageUrls.length > 0) {
     const uploaded: string[] = []
     for (let i = 0; i < imageUrls.length; i++) {
-      const url = await uploadImageFromUrl(bien.id, imageUrls[i], i)
-      if (url) uploaded.push(url)
+      const r = await uploadImageFromUrl(bien.id, imageUrls[i], i)
+      if (r.url) {
+        uploaded.push(r.url)
+        uploadTrace.push(`img${i}:ok`)
+      } else {
+        uploadTrace.push(`img${i}:fail:${r.error}`)
+      }
     }
+    uploadedCount = uploaded.length
     if (uploaded.length > 0) {
       const mediasRows = uploaded.map((url, i) => ({
         bien_id: bien.id,
@@ -229,7 +237,8 @@ export async function POST(req: NextRequest) {
         ordre: i,
         est_couverture: i === 0,
       }))
-      await admin.from('biens_medias').insert(mediasRows)
+      const { error: medErr } = await admin.from('biens_medias').insert(mediasRows)
+      if (medErr) uploadTrace.push(`db_insert_fail:${medErr.message?.slice(0, 80)}`)
     }
   }
 
@@ -241,7 +250,9 @@ export async function POST(req: NextRequest) {
     user_id: userId,
     extraction_confidence: extracted?.confidence ?? 0,
     low_confidence: lowConfidence,
-    images_uploaded: imageUrls.length,
+    images_received: imageUrls.length,
+    images_uploaded: uploadedCount,
+    upload_trace: uploadTrace,
     trace: extResult.trace,
   })
 }
