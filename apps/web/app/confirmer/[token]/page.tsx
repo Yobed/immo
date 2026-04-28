@@ -1,9 +1,10 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircle2, XCircle } from 'lucide-react'
+import { XCircle } from 'lucide-react'
 import { verifyMagicLinkToken } from '@/lib/auth/magic-link-token'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient as createServerClient } from '@/lib/supabase/server'
+import { wasenderSendMessage } from '@/lib/wasender'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -42,7 +43,7 @@ export default async function ConfirmerPage({ params }: PageProps) {
 
   const { data: bien } = await admin
     .from('biens')
-    .select('id, titre, statut, proprietaire_id')
+    .select('id, titre, statut, commune, quartier, proprietaire_id')
     .eq('id', payload.bien_id)
     .maybeSingle()
 
@@ -54,8 +55,25 @@ export default async function ConfirmerPage({ params }: PageProps) {
     return ErrorScreen({ message: 'Ce lien ne correspond pas à cette annonce.' })
   }
 
-  if (bien.statut === 'brouillon') {
+  const wasDraft = bien.statut === 'brouillon'
+  if (wasDraft) {
     await admin.from('biens').update({ statut: 'publie' }).eq('id', bien.id)
+
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/^﻿/, '') || 'https://immo-sigma.vercel.app'
+    const lieu = [bien.quartier, bien.commune].filter(Boolean).join(', ')
+    const text = `✅ *Immo CI* — Votre annonce est publiée !
+
+🏠 *${bien.titre}*${lieu ? `\n📍 ${lieu}` : ''}
+
+Voir votre annonce en ligne :
+${baseUrl}/biens/${bien.id}
+
+Gérer / modifier vos biens :
+${baseUrl}/mes-biens
+
+Merci de faire confiance à Immo CI Saphire 💎`
+
+    await wasenderSendMessage(payload.phone, text, 'text').catch(() => null)
   }
 
   const { data: linkData } = await admin.auth.admin.generateLink({
