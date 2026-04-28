@@ -14,6 +14,7 @@ export default async function PublicLayout({ children }: { children: React.React
 
   // Récupérer le rôle réel depuis le profil pour le menu utilisateur
   let role: 'pro' | 'client' | 'public' = 'public'
+  let isAdmin = false
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
@@ -23,6 +24,7 @@ export default async function PublicLayout({ children }: { children: React.React
 
     if (profile?.role === 'proprietaire') role = 'pro'
     else if (profile?.role === 'locataire') role = 'client'
+    else if (profile?.role === 'admin') { role = 'pro'; isAdmin = true }
   }
 
   // Navigation de base
@@ -114,7 +116,7 @@ export default async function PublicLayout({ children }: { children: React.React
                     Annonce
                   </Link>
                 )}
-                <UserMenu email={user.email ?? ''} role={role} />
+                <UserMenu email={user.email ?? ''} role={role} isAdmin={isAdmin} />
               </div>
             ) : (
               <div className="flex items-center gap-2">
@@ -135,7 +137,7 @@ export default async function PublicLayout({ children }: { children: React.React
           </nav>
 
           {/* Mobile menu */}
-          <MobileMenu links={navLinks} ctaLinks={ctaLinks} user={user ? { email: user.email ?? '', role } : undefined} />
+          <MobileMenu links={navLinks} ctaLinks={ctaLinks} user={user ? { email: user.email ?? '', role, isAdmin } : undefined} />
         </div>
       </header>
 

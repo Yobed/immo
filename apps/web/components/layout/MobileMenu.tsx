@@ -15,7 +15,7 @@ interface NavLink {
 interface MobileMenuProps {
   links: NavLink[]
   ctaLinks?: { href: string; label: string; variant: 'primary' | 'outline' }[]
-  user?: { email: string; role: 'pro' | 'client' | 'public' }
+  user?: { email: string; role: 'pro' | 'client' | 'public'; isAdmin?: boolean }
 }
 
 export function MobileMenu({ links, ctaLinks, user }: MobileMenuProps) {
@@ -112,8 +112,23 @@ export function MobileMenu({ links, ctaLinks, user }: MobileMenuProps) {
                   {user.role === 'public' && (
                     <span className="text-[9px] font-bold uppercase tracking-wider text-green-600 bg-green-50 px-2 py-0.5 rounded-full border border-green-200">Visiteur</span>
                   )}
+                  {user.isAdmin && (
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-red-700 bg-red-100 px-2 py-0.5 rounded-full border border-red-200">Admin</span>
+                  )}
                 </div>
               </div>
+              {user.isAdmin && (
+                <Link
+                  href="/admin/moderation"
+                  onClick={close}
+                  className="w-full bg-red-50 border border-red-200 text-red-700 hover:bg-red-100 transition-colors flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-sans font-bold"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                  Modération
+                </Link>
+              )}
               <button
                 onClick={handleLogout}
                 className="w-full border border-red-300 text-red-600 hover:bg-red-50 transition-colors block text-center py-2.5 rounded-xl text-sm font-sans font-medium"

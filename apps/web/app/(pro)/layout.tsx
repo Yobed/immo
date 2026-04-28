@@ -21,6 +21,7 @@ export default async function ProLayout({ children }: { children: React.ReactNod
 
   let unreadCount = 0
   let role: 'pro' | 'client' | 'public' = 'pro' // Par défaut pro pour ce layout
+  let isAdmin = false
 
   if (user) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,10 +33,11 @@ export default async function ProLayout({ children }: { children: React.ReactNod
         .eq('lu', false),
       supabase.from('profiles').select('role').eq('id', user.id).single()
     ])
-    
+
     unreadCount = count ?? 0
     if (profile?.role === 'proprietaire') role = 'pro'
     else if (profile?.role === 'locataire') role = 'client'
+    else if (profile?.role === 'admin') { role = 'pro'; isAdmin = true }
   }
 
   return (
@@ -79,8 +81,8 @@ export default async function ProLayout({ children }: { children: React.ReactNod
             </Link>
 
             {user && <NotificationBell userId={user.id} initialUnreadCount={unreadCount} />}
-            {user && <UserMenu email={user.email ?? ''} role={role} />}
-            <MobileMenu links={navLinks} ctaLinks={[{ href: '/mes-biens/nouveau', label: '+ Nouvelle annonce', variant: 'primary' }]} user={user ? { email: user.email ?? '', role } : undefined} />
+            {user && <UserMenu email={user.email ?? ''} role={role} isAdmin={isAdmin} />}
+            <MobileMenu links={navLinks} ctaLinks={[{ href: '/mes-biens/nouveau', label: '+ Nouvelle annonce', variant: 'primary' }]} user={user ? { email: user.email ?? '', role, isAdmin } : undefined} />
           </div>
         </div>
       </header>

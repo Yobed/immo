@@ -7,9 +7,10 @@ import { createClient } from '@/lib/supabase/client'
 interface UserMenuProps {
   email: string
   role?: 'pro' | 'client' | 'public'
+  isAdmin?: boolean
 }
 
-export function UserMenu({ email, role = 'public' }: UserMenuProps) {
+export function UserMenu({ email, role = 'public', isAdmin = false }: UserMenuProps) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const router = useRouter()
@@ -49,16 +50,36 @@ export function UserMenu({ email, role = 'public' }: UserMenuProps) {
           style={{ boxShadow: 'var(--shadow-lg)' }}>
           {/* Email */}
           <div className="px-4 py-3 border-b border-[var(--border)] bg-[var(--surface)]">
-            <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center justify-between mb-1 gap-2">
               <p className="text-xs text-[var(--text-muted)] font-sans">Connecté en tant que</p>
-              {role === 'pro' && (
-                <span className="text-[9px] font-bold uppercase tracking-wider text-secondary bg-secondary/10 px-2 py-0.5 rounded-full border border-secondary/20">
-                  Propriétaire
-                </span>
-              )}
+              <div className="flex items-center gap-1">
+                {isAdmin && (
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-red-700 bg-red-100 px-2 py-0.5 rounded-full border border-red-200">
+                    Admin
+                  </span>
+                )}
+                {role === 'pro' && (
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-secondary bg-secondary/10 px-2 py-0.5 rounded-full border border-secondary/20">
+                    Propriétaire
+                  </span>
+                )}
+              </div>
             </div>
             <p className="text-sm font-sans font-semibold text-[var(--text)] truncate">{email}</p>
           </div>
+
+          {/* Lien admin (visible uniquement pour admins) */}
+          {isAdmin && (
+            <div className="py-1 border-b border-[var(--border)]">
+              <Link href="/admin/moderation" onClick={() => setOpen(false)}
+                className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans font-semibold text-red-700 hover:bg-red-50 transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                Modération
+              </Link>
+            </div>
+          )}
 
           {/* Liens selon le rôle */}
           <div className="py-1">

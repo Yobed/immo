@@ -20,6 +20,7 @@ export default async function ClientLayout({ children }: { children: React.React
 
   let unreadCount = 0
   let role: 'pro' | 'client' | 'public' = 'client'
+  let isAdmin = false
 
   if (user) {
     const [{ count }, { data: profile }] = await Promise.all([
@@ -30,10 +31,11 @@ export default async function ClientLayout({ children }: { children: React.React
         .eq('lu', false),
       supabase.from('profiles').select('role').eq('id', user.id).single()
     ])
-    
+
     unreadCount = count ?? 0
     if (profile?.role === 'proprietaire') role = 'pro'
     else if (profile?.role === 'locataire') role = 'client'
+    else if (profile?.role === 'admin') { role = 'pro'; isAdmin = true }
   }
 
   return (
@@ -66,8 +68,8 @@ export default async function ClientLayout({ children }: { children: React.React
           {/* Right side */}
           <div className="flex items-center gap-2">
             {user && <NotificationBell userId={user.id} initialUnreadCount={unreadCount} />}
-            {user && <UserMenu email={user.email ?? ''} role={role} />}
-            <MobileMenu links={navLinks} user={user ? { email: user.email ?? '', role } : undefined} />
+            {user && <UserMenu email={user.email ?? ''} role={role} isAdmin={isAdmin} />}
+            <MobileMenu links={navLinks} user={user ? { email: user.email ?? '', role, isAdmin } : undefined} />
           </div>
         </div>
       </header>

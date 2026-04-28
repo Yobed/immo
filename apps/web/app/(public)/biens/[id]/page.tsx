@@ -158,8 +158,8 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
         userId={user?.id ?? null}
       />
 
-      {/* ─── MAIN CONTENT ─── */}
-      <div className="relative z-10 bg-white md:rounded-none md:mt-0 md:shadow-none">
+      {/* ─── MAIN CONTENT — carte blanche arrondie style Airbnb ─── */}
+      <div className="bg-white rounded-t-[28px] -mt-3 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] relative z-10">
       <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-8 md:py-14">
 
         {/* Media quick nav */}
@@ -243,15 +243,13 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                 <MapPin className="w-4 h-4 text-accent-luxury/60" />
                 <h3 className="text-base font-bold text-slate-800">Localisation</h3>
               </div>
-              <div className="aspect-video relative rounded-2xl overflow-hidden border border-slate-200 hover:border-accent-luxury/40 transition-colors duration-500">
-                <BienMap
-                  latitude={bien.latitude}
-                  longitude={bien.longitude}
-                  titre={bien.titre}
-                  commune={bien.commune}
-                  hauteur={400}
-                />
-              </div>
+              <BienMap
+                latitude={bien.latitude}
+                longitude={bien.longitude}
+                titre={bien.titre}
+                commune={bien.commune}
+                hauteur={400}
+              />
             </section>
 
             {/* Owner management (desktop only — mobile shown above) */}
@@ -410,6 +408,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
       <footer className="border-t border-slate-100 py-8 text-center text-slate-400 text-xs">
         © 2026 Immo CI — Tous droits réservés
       </footer>
+      </div>{/* /white-card */}
 
       {!isOwner && prixValue && (
         <StickyMobileCTA
@@ -421,7 +420,6 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
           isNuitee={isNuitee}
         />
       )}
-      </div>{/* /rounded-card */}
     </main>
   )
 }
