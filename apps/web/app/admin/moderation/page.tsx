@@ -60,7 +60,7 @@ function priceDisplay(b: BienRow): string {
 export default async function AdminModerationPage({ searchParams }: PageProps) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/connexion?next=/admin/moderation')
+  if (!user) redirect('/login?next=/admin/moderation')
 
   const { data: profile } = await supabase
     .from('profiles')
