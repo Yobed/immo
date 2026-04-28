@@ -23,12 +23,14 @@ interface TallyFile {
 }
 
 function verifyTallySignature(rawBody: string, signature: string | null): boolean {
-  const secret = process.env.TALLY_WEBHOOK_SECRET
+  const rawSecret = process.env.TALLY_WEBHOOK_SECRET
+  const secret = rawSecret?.trim().replace(/^﻿/, '') || ''
   if (!secret) return process.env.NODE_ENV !== 'production'
   if (!signature) return false
+  const cleanSig = signature.trim()
   const expected = crypto.createHmac('sha256', secret).update(rawBody).digest('base64')
   try {
-    return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature))
+    return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(cleanSig))
   } catch {
     return false
   }
@@ -138,7 +140,8 @@ async function uploadImageFromUrl(
 
 async function sendConfirmationWhatsApp(phone: string, bien_id: string, user_id: string, titre: string) {
   const token = await signMagicLinkToken({ bien_id, user_id, phone })
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://immo-sigma.vercel.app'
+  const rawUrl = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/^﻿/, '')
+  const baseUrl = rawUrl || 'https://immo-sigma.vercel.app'
   const link = `${baseUrl}/confirmer/${token}`
   const text = `🏠 *Immo CI* — Votre annonce a été reçue !
 

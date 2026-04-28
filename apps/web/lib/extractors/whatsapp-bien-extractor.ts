@@ -111,7 +111,8 @@ async function callOpenRouter(
 }
 
 export async function extractBienFromWhatsApp(rawMessage: string): Promise<ExtractedBien | null> {
-  const apiKey = process.env.OPENROUTER_API_KEY
+  const rawKey = process.env.OPENROUTER_API_KEY
+  const apiKey = rawKey?.trim().replace(/^﻿/, '') || ''
   if (!apiKey) throw new Error('OPENROUTER_API_KEY missing')
 
   const messages: OpenRouterMessage[] = [

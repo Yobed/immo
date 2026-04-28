@@ -3,7 +3,8 @@ import { SignJWT, jwtVerify } from 'jose'
 const TTL_DAYS = 7
 
 function getSecret(): Uint8Array {
-  const secret = process.env.JWT_SIGNING_SECRET
+  const raw = process.env.JWT_SIGNING_SECRET
+  const secret = raw?.trim().replace(/^﻿/, '') || ''
   if (!secret || secret.length < 32) {
     throw new Error('JWT_SIGNING_SECRET missing or too short (>=32 chars required)')
   }
