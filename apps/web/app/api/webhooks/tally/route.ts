@@ -177,7 +177,11 @@ export async function POST(req: NextRequest) {
   if (!phone) return NextResponse.json({ error: 'missing_phone' }, { status: 400 })
   if (!rawText) return NextResponse.json({ error: 'missing_raw_text' }, { status: 400 })
 
-  const extracted = await extractBienFromWhatsApp(rawText).catch(() => null)
+  const extResult = await extractBienFromWhatsApp(rawText).catch((e: Error) => ({
+    data: null,
+    trace: [`fatal:${e.message?.slice(0, 100)}`],
+  }))
+  const extracted = extResult.data
   const lowConfidence = !extracted || extracted.confidence < 0.5
 
   const userId = await findOrCreateUserByPhone(phone)
@@ -238,6 +242,7 @@ export async function POST(req: NextRequest) {
     extraction_confidence: extracted?.confidence ?? 0,
     low_confidence: lowConfidence,
     images_uploaded: imageUrls.length,
+    trace: extResult.trace,
   })
 }
 

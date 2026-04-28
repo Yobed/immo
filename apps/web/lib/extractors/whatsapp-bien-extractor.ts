@@ -93,27 +93,40 @@ async function callOpenRouter(
     headers: {
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'https://immo-sigma.vercel.app',
+      'HTTP-Referer': 'https://immo-sigma.vercel.app',
       'X-Title': 'Immo CI Tally Webhook',
     },
     body: JSON.stringify({
       model,
       messages,
       temperature: 0.1,
-      max_tokens: 1024,
+      max_tokens: 2048,
       response_format: { type: 'json_object' },
     }),
   })
 
-  if (!res.ok) return null
+  if (!res.ok) {
+    const errBody = await res.text().catch(() => '')
+    throw new Error(`http_${res.status}:${errBody.slice(0, 100)}`)
+  }
   const data = (await res.json()) as OpenRouterResponse
   return data.choices?.[0]?.message?.content?.trim() ?? null
 }
 
-export async function extractBienFromWhatsApp(rawMessage: string): Promise<ExtractedBien | null> {
-  const rawKey = process.env.OPENROUTER_API_KEY
-  const apiKey = rawKey?.trim().replace(/^﻿/, '') || ''
-  if (!apiKey) throw new Error('OPENROUTER_API_KEY missing')
+export interface ExtractionResult {
+  data: ExtractedBien | null
+  trace: string[]
+}
+
+export async function extractBienFromWhatsApp(rawMessage: string): Promise<ExtractionResult> {
+  const trace: string[] = []
+  const rawKey = process.env.OPENROUTER_API_KEY ?? ''
+  const apiKey = rawKey.replace(/[\s﻿​]+/g, '')
+  if (!apiKey) {
+    trace.push('NO_API_KEY')
+    return { data: null, trace }
+  }
+  trace.push(`key_len=${apiKey.length}`)
 
   const messages: OpenRouterMessage[] = [
     { role: 'system', content: SYSTEM_PROMPT },
@@ -121,19 +134,31 @@ export async function extractBienFromWhatsApp(rawMessage: string): Promise<Extra
   ]
 
   for (const model of FREE_MODELS) {
-    const text = await callOpenRouter(apiKey, model, messages).catch(() => null)
-    if (!text) continue
-
+    let text: string | null = null
+    try {
+      text = await callOpenRouter(apiKey, model, messages)
+    } catch (e) {
+      trace.push(`${model}:throw:${(e as Error).message?.slice(0, 80)}`)
+      continue
+    }
+    if (!text) {
+      trace.push(`${model}:empty`)
+      continue
+    }
     const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (!jsonMatch) continue
-
+    if (!jsonMatch) {
+      trace.push(`${model}:no_json`)
+      continue
+    }
     try {
       const parsed = JSON.parse(jsonMatch[0])
-      return ExtractedBienSchema.parse(parsed)
-    } catch {
+      const validated = ExtractedBienSchema.parse(parsed)
+      trace.push(`${model}:ok`)
+      return { data: validated, trace }
+    } catch (e) {
+      trace.push(`${model}:parse_fail:${(e as Error).message?.slice(0, 60)}`)
       continue
     }
   }
-
-  return null
+  return { data: null, trace }
 }
