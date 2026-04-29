@@ -1,9 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { Hero } from '@/components/landing/Hero'
 import { FeaturedProperties } from '@/components/landing/FeaturedProperties'
+import { FlashOffersSection } from '@/components/landing/FlashOffersSection'
+import { PublishChoiceTeaser } from '@/components/landing/PublishChoiceTeaser'
 import { MapZones } from '@/components/landing/MapZones'
 import { NearMeSection } from '@/components/landing/NearMeSection'
-import { OwnerTeaser } from '@/components/landing/OwnerTeaser'
 import { Footer } from '@/components/landing/Footer'
 
 export const revalidate = 300 // ISR: revalide toutes les 5 min
@@ -90,9 +91,10 @@ export default async function HomePage() {
     <main>
       <Hero bgImages={bgImages} featuredBiens={featuredBiens} />
       <FeaturedProperties initialBiens={biensWithPhoto} />
+      <FlashOffersSection />
       <NearMeSection initialBiens={biensWithPhoto} />
       <MapZones biens={biensWithPhoto} />
-      <OwnerTeaser />
+      <PublishChoiceTeaser />
       <Footer />
     </main>
   )
