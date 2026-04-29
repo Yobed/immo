@@ -42,8 +42,8 @@ const CONFIG: Record<MediaType, {
   hint: string
   size: string
 }> = {
-  photo:   { resourceType: 'image', accept: 'image/jpg,image/jpeg,image/png,image/webp', multiple: true,  hint: 'Cliquer pour ajouter des photos',          size: 'JPG, PNG, WEBP — max 10 MB' },
-  video:   { resourceType: 'video', accept: 'video/mp4,video/quicktime,video/webm',      multiple: false, hint: 'Cliquer pour ajouter une vidéo',            size: 'MP4, MOV, WEBM — max 500 MB' },
+  photo:   { resourceType: 'image', accept: 'image/jpg,image/jpeg,image/png,image/webp', multiple: true,  hint: 'Cliquer pour ajouter des photos',          size: 'JPG, PNG, WEBP — max 15 MB' },
+  video:   { resourceType: 'video', accept: 'video/mp4,video/quicktime,video/webm',      multiple: false, hint: 'Cliquer pour ajouter une vidéo',            size: 'MP4, MOV, WEBM — max 50 MB' },
   vue_360: { resourceType: 'image', accept: 'image/jpg,image/jpeg,image/png',            multiple: false, hint: 'Image panoramique équirectangulaire',        size: 'JPG, PNG — max 50 MB' },
   plan:    { resourceType: 'auto',  accept: 'application/pdf,image/jpg,image/jpeg,image/png', multiple: false, hint: 'Plan du bien (PDF ou image)',          size: 'PDF, JPG, PNG — max 20 MB' },
 }
