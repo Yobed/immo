@@ -1,11 +1,11 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { redirect, notFound } from 'next/navigation'
-import { Search, Trash2, Eye, ShieldCheck, ShieldAlert, RotateCcw, Phone, Calendar } from 'lucide-react'
+import { Search, Trash2, Eye, ShieldCheck, ShieldAlert, RotateCcw, Phone, Calendar, Pencil, Undo2, AlertTriangle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { formatFCFA } from '@/lib/format'
-import { deleteBienAction, suspendreBienAction, republierBienAction } from './actions'
+import { deleteBienAction, restoreBienAction, purgeBienAction, suspendreBienAction, republierBienAction } from './actions'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -119,7 +119,9 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
     publie: biens.filter(b => b.statut === 'publie').length,
     brouillon: biens.filter(b => b.statut === 'brouillon').length,
     suspendu: biens.filter(b => b.statut === 'suspendu').length,
+    archive: biens.filter(b => b.statut === 'archive').length,
   }
+  const isTrashView = statut === 'archive'
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -129,8 +131,10 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
           <div className="flex items-center gap-3">
             <ShieldCheck className="w-6 h-6 text-slate-700" />
             <div>
-              <h1 className="font-bold text-slate-900 text-lg leading-none">Modération</h1>
-              <p className="text-slate-400 text-xs mt-1">{stats.total} bien{stats.total > 1 ? 's' : ''} affiché{stats.total > 1 ? 's' : ''} · {stats.publie} publiés · {stats.brouillon} brouillons · {stats.suspendu} suspendus</p>
+              <h1 className="font-bold text-slate-900 text-lg leading-none">{isTrashView ? 'Corbeille' : 'Modération'}</h1>
+              <p className="text-slate-400 text-xs mt-1">
+                {stats.total} bien{stats.total > 1 ? 's' : ''} · {stats.publie} publiés · {stats.brouillon} brouillons · {stats.suspendu} suspendus · {stats.archive} corbeille
+              </p>
             </div>
           </div>
           <Link href="/" className="text-slate-400 hover:text-slate-700 text-xs font-medium">← Retour app</Link>
@@ -157,7 +161,7 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
             <option value="publie">Publiés</option>
             <option value="brouillon">Brouillons</option>
             <option value="suspendu">Suspendus</option>
-            <option value="archive">Archivés</option>
+            <option value="archive">🗑️ Corbeille</option>
           </select>
           <button type="submit" className="px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-colors">
             Rechercher
@@ -230,6 +234,17 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
                         Voir
                       </Link>
 
+                      {bien.statut !== 'archive' && (
+                        <Link
+                          href={`/mes-biens/${bien.id}/modifier`}
+                          target="_blank"
+                          className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-bold transition-colors"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                          Modifier
+                        </Link>
+                      )}
+
                       {bien.statut === 'publie' && (
                         <form action={suspendreBienAction}>
                           <input type="hidden" name="bienId" value={bien.id} />
@@ -240,7 +255,7 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
                         </form>
                       )}
 
-                      {bien.statut !== 'publie' && bien.statut !== 'archive' && (
+                      {(bien.statut === 'suspendu' || bien.statut === 'brouillon') && (
                         <form action={republierBienAction}>
                           <input type="hidden" name="bienId" value={bien.id} />
                           <button type="submit" className="flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold transition-colors">
@@ -250,16 +265,44 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
                         </form>
                       )}
 
-                      <form action={deleteBienAction} className="ml-auto">
-                        <input type="hidden" name="bienId" value={bien.id} />
-                        <button
-                          type="submit"
-                          className="flex items-center gap-1 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg text-xs font-bold transition-colors"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                          Supprimer
-                        </button>
-                      </form>
+                      {bien.statut !== 'archive' ? (
+                        <form action={deleteBienAction} className="ml-auto">
+                          <input type="hidden" name="bienId" value={bien.id} />
+                          <button
+                            type="submit"
+                            className="flex items-center gap-1 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg text-xs font-bold transition-colors"
+                            title="Envoyer à la corbeille (récupérable)"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            Corbeille
+                          </button>
+                        </form>
+                      ) : (
+                        <>
+                          <form action={restoreBienAction}>
+                            <input type="hidden" name="bienId" value={bien.id} />
+                            <button
+                              type="submit"
+                              className="flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold transition-colors"
+                              title="Restaurer (republier)"
+                            >
+                              <Undo2 className="w-3.5 h-3.5" />
+                              Restaurer
+                            </button>
+                          </form>
+                          <form action={purgeBienAction} className="ml-auto">
+                            <input type="hidden" name="bienId" value={bien.id} />
+                            <button
+                              type="submit"
+                              className="flex items-center gap-1 px-3 py-1.5 bg-red-700 hover:bg-red-800 text-white rounded-lg text-xs font-bold transition-colors"
+                              title="Suppression DÉFINITIVE (Storage + DB)"
+                            >
+                              <AlertTriangle className="w-3.5 h-3.5" />
+                              Purger
+                            </button>
+                          </form>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>

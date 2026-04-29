@@ -16,7 +16,30 @@ async function assertAdmin(): Promise<void> {
   if (profile?.role !== 'admin') throw new Error('not_admin')
 }
 
+/** Soft delete : envoie le bien à la corbeille (statut=archive). Photos conservées. */
 export async function deleteBienAction(formData: FormData): Promise<void> {
+  await assertAdmin()
+  const bienId = formData.get('bienId') as string
+  if (!bienId) return
+
+  const admin = createAdminClient()
+  await admin.from('biens').update({ statut: 'archive' }).eq('id', bienId)
+  revalidatePath('/admin/moderation')
+}
+
+/** Restaure depuis la corbeille → publie le bien. */
+export async function restoreBienAction(formData: FormData): Promise<void> {
+  await assertAdmin()
+  const bienId = formData.get('bienId') as string
+  if (!bienId) return
+
+  const admin = createAdminClient()
+  await admin.from('biens').update({ statut: 'publie' }).eq('id', bienId)
+  revalidatePath('/admin/moderation')
+}
+
+/** Suppression DÉFINITIVE : Storage + DB. Irréversible. */
+export async function purgeBienAction(formData: FormData): Promise<void> {
   await assertAdmin()
   const bienId = formData.get('bienId') as string
   if (!bienId) return

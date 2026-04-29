@@ -1,5 +1,6 @@
 'use server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 
 const cleanNum = (v: any) => {
@@ -50,11 +51,19 @@ export async function updateBien(id: string, data: Record<string, unknown>) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+  const isAdmin = profile?.role === 'admin'
+
+  // Admin: bypass owner check via service-role. Owner: limité par RLS.
+  const client = isAdmin ? createAdminClient() : supabase
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase.from('biens') as any)
-    .update(BIEN_FIELDS(data))
-    .eq('id', id)
-    .eq('proprietaire_id', user.id)
+  let q = (client.from('biens') as any).update(BIEN_FIELDS(data)).eq('id', id)
+  if (!isAdmin) q = q.eq('proprietaire_id', user.id)
+  const { error } = await q
 
   if (error) return { error: error.message }
   return { id }

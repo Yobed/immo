@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect, notFound } from 'next/navigation'
 import { BienForm } from '@/components/bien/BienForm'
 import type { BienFormData } from '@/components/bien/BienForm'
@@ -17,13 +18,20 @@ export default async function ModifierBienPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: bien } = await (supabase as any)
-    .from('biens')
-    .select('*')
-    .eq('id', id)
-    .eq('proprietaire_id', user.id)
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
     .single()
+  const isAdmin = profile?.role === 'admin'
+
+  // Admin: accès à n'importe quel bien via service-role.
+  // Owner: limité à ses propres biens (RLS).
+  const client = isAdmin ? createAdminClient() : supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let q = (client as any).from('biens').select('*').eq('id', id)
+  if (!isAdmin) q = q.eq('proprietaire_id', user.id)
+  const { data: bien } = await q.single()
 
   if (!bien) notFound()
 
