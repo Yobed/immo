@@ -6,6 +6,7 @@ import { SearchFilters } from '@/components/search/SearchFilters'
 import { MobileFiltersDrawer } from '@/components/search/MobileFiltersDrawer'
 import { PropertiesMap } from '@/components/map/PropertiesMap'
 import { Compass, Grid, Map as MapIcon, SlidersHorizontal, List } from 'lucide-react'
+import { FlashOffersBanner } from '@/components/search/FlashOffersBanner'
 
 const PAGE_SIZE = 12
 
@@ -111,6 +112,9 @@ export default async function RecherchePage({
             </div>
           </div>
         </div>
+
+        {/* Bannière Offres Flash WhatsApp si correspondances */}
+        <FlashOffersBanner filters={{ q: params.q, commune: params.commune, type_bien: params.type_bien }} />
 
         <div className="flex flex-col lg:flex-row gap-10">
           {/* Side Filters (Editorial Style) */}
