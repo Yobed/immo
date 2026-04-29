@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import { Hero } from '@/components/landing/Hero'
+import { HeroEditorial } from '@/components/landing/HeroEditorial'
+import { JourneyShortcuts } from '@/components/landing/JourneyShortcuts'
 import { FeaturedProperties } from '@/components/landing/FeaturedProperties'
 import { PrestigeCommunes } from '@/components/landing/PrestigeCommunes'
 import { FlashOffersSection } from '@/components/landing/FlashOffersSection'
@@ -91,31 +92,34 @@ export default async function HomePage() {
 
   return (
     <main className="bg-[#020617]">
-      {/* 1. Hero cinématique */}
-      <Hero bgImages={bgImages} featuredBiens={featuredBiens} />
+      {/* 1. Hero éditorial — image fixe, typo serif, recherche minimaliste */}
+      <HeroEditorial bgImage={bgImages[0]} />
 
-      {/* 2. Sélection éditoriale (catalogue vérifié) */}
+      {/* 2. Parcours utilisateurs — 5 personas explicites */}
+      <JourneyShortcuts />
+
+      {/* 3. Sélection éditoriale */}
       <FeaturedProperties initialBiens={biensWithPhoto} />
 
-      {/* 3. Destinations de prestige */}
+      {/* 4. Destinations de prestige */}
       <PrestigeCommunes />
 
-      {/* 4. Veille en direct (réseau WhatsApp) */}
+      {/* 5. Veille en direct (réseau WhatsApp) */}
       <FlashOffersSection />
 
-      {/* 5. Près de chez moi (géoloc) */}
+      {/* 6. Près de chez moi */}
       <NearMeSection initialBiens={biensWithPhoto} />
 
-      {/* 6. Carte interactive des zones */}
+      {/* 7. Carte des zones */}
       <MapZones biens={biensWithPhoto} />
 
-      {/* 7. Les 4 piliers de l'expérience */}
+      {/* 8. Les 4 piliers */}
       <ServicesPillars />
 
-      {/* 8. Publier votre bien (double voie) */}
+      {/* 9. Publier votre bien */}
       <PublishChoiceTeaser />
 
-      {/* 9. Footer */}
+      {/* 10. Footer */}
       <Footer />
     </main>
   )
