@@ -12,6 +12,9 @@ const nextConfig = {
       { protocol: 'https', hostname: 'res.cloudinary.com' },
       { protocol: 'https', hostname: '*.supabase.co' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'www.wasenderapi.com' },
+      { protocol: 'https', hostname: 'wasenderapi.com' },
+      { protocol: 'https', hostname: 'storage.tally.so' },
     ],
   },
 }
