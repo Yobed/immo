@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Flame, ArrowRight, AlertTriangle, MapPin, Tag } from 'lucide-react'
+import { Radio, ArrowUpRight, MapPin } from 'lucide-react'
 import { createLocauxClient } from '@/lib/supabase/locaux'
 import { mapLocauxRow, type LocauxRow, type BienExterne } from '@/lib/locaux/mapper'
 import { formatFCFA } from '@/lib/format'
@@ -32,99 +32,117 @@ export async function FlashOffersSection() {
     .neq('lien_image', '')
     .not('lien_image', 'is', null)
     .order('date_publication', { ascending: false, nullsFirst: false })
-    .limit(8)
+    .limit(6)
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const biens = ((rows ?? []) as any as LocauxRow[]).map(mapLocauxRow)
-
   if (biens.length === 0) return null
 
   return (
-    <section className="relative py-10 md:py-16 bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 overflow-hidden">
-      {/* Background flames pattern */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
-        <div className="absolute top-10 left-10 w-32 h-32 bg-red-500 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 right-10 w-40 h-40 bg-orange-500 rounded-full blur-3xl" />
+    <section className="relative py-16 md:py-24 bg-[#020617] overflow-hidden">
+      {/* Subtle ambient glow */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.05]">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-500 rounded-full blur-[140px]" />
       </div>
 
       <div className="relative z-10 mx-auto px-4 md:px-6 max-w-7xl">
-        {/* Header */}
-        <div className="flex items-end justify-between mb-6 gap-4 flex-wrap">
-          <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-600 text-white text-[10px] font-bold uppercase tracking-[0.2em] rounded-full mb-2">
-              <Flame className="w-3 h-3" />
-              En direct
+        <div className="flex items-end justify-between gap-6 mb-10 md:mb-12 flex-wrap">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 mb-4">
+              <span className="relative flex w-2 h-2">
+                <span className="animate-ping absolute inline-flex w-full h-full rounded-full bg-[#D97706] opacity-75" />
+                <span className="relative rounded-full w-2 h-2 bg-[#D97706]" />
+              </span>
+              <p className="text-[10px] font-bold uppercase tracking-[0.5em] text-[#D97706]">
+                Notre veille en direct
+              </p>
             </div>
-            <h2 className="font-display text-2xl md:text-4xl font-bold text-slate-900 leading-tight tracking-tight">
-              Offres flash WhatsApp
+            <h2 className="font-display text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.05] tracking-tight">
+              Offres fraîches<br />
+              <span className="italic font-light text-[#D97706]">de notre réseau</span>
             </h2>
-            <p className="text-slate-500 text-sm mt-1 max-w-xl">
-              Annonces fraîches scrappées en temps réel des groupes WhatsApp d&apos;agents et propriétaires.
+            <p className="text-slate-400 text-sm md:text-base mt-5 max-w-xl leading-relaxed">
+              Annonces remontées en continu de notre réseau d&apos;agents et propriétaires partenaires sur WhatsApp.
             </p>
           </div>
           <Link
             href="/offre-flash"
-            className="shrink-0 flex items-center gap-1 text-[11px] font-bold tracking-[0.2em] uppercase text-red-600 border-b border-red-600/40 pb-0.5 hover:border-red-600 transition-colors"
+            className="hidden md:inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.25em] uppercase text-[#D97706] border-b border-[#D97706]/40 pb-1 hover:border-[#D97706] transition-colors"
           >
-            Toutes les offres flash <ArrowRight className="w-3 h-3" />
+            Voir toutes les offres <ArrowUpRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
-        {/* Disclaimer */}
-        <div className="flex items-center gap-2 mb-5 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900">
-          <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-          <p>
-            Ces annonces ne sont <strong>pas vérifiées</strong> par Immo CI. Vérifiez l&apos;identité du vendeur avant toute transaction.
-          </p>
-        </div>
-
         {/* Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-          {biens.map((b) => (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 md:gap-5">
+          {biens.map((b, i) => (
             <Link
               key={b.id}
               href={`/offre-flash/${b.id}`}
-              className="group bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
+              className={`group relative rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 hover:border-[#D97706]/40 transition-all duration-500 bg-[#0f172a] ${
+                i === 0 ? 'col-span-2 md:col-span-2 row-span-2 aspect-[16/13] md:aspect-auto' : 'aspect-[4/5]'
+              }`}
             >
-              <div className="aspect-[4/3] relative bg-slate-100 overflow-hidden">
+              <div className="relative h-full">
                 {b.image_url && (
                   <Image
                     src={b.image_url}
                     alt={b.titre}
                     fill
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    sizes={i === 0 ? '(max-width: 768px) 100vw, 60vw' : '(max-width: 768px) 50vw, 30vw'}
+                    className="object-cover group-hover:scale-105 transition-transform duration-[1.2s] ease-[cubic-bezier(0.16,1,0.3,1)]"
                     unoptimized
                   />
                 )}
+
+                {/* Gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+
+                {/* Live badge */}
                 {b.is_recent && (
-                  <span className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 bg-red-600 text-white text-[9px] font-bold uppercase tracking-wider rounded-full shadow-md">
-                    <Flame className="w-2.5 h-2.5" />
+                  <span className="absolute top-3 left-3 inline-flex items-center gap-1 px-2.5 py-1 bg-[#D97706] text-white text-[9px] font-bold uppercase tracking-[0.2em] rounded-full">
+                    <Radio className="w-2.5 h-2.5" />
                     Nouveau
                   </span>
                 )}
-                <span className="absolute top-2 right-2 px-2 py-0.5 bg-white/90 backdrop-blur text-slate-700 text-[9px] font-bold uppercase rounded-full">
-                  {b.type_offre === 'location' ? 'Location' : b.type_offre === 'vente' ? 'Vente' : 'Offre'}
+                <span className="absolute top-3 right-3 px-2.5 py-1 bg-white/95 backdrop-blur text-slate-900 text-[9px] font-bold uppercase tracking-wide rounded-full">
+                  {b.type_offre === 'location' ? 'Location' : b.type_offre === 'vente' ? 'Vente' : '—'}
                 </span>
-              </div>
-              <div className="p-3">
-                <p className="text-orange-600 font-display font-bold text-sm leading-tight mb-1 line-clamp-1">
-                  {priceLine(b)}
-                </p>
-                <p className="text-[11px] font-semibold text-slate-900 capitalize line-clamp-1 mb-1">
-                  {b.type_bien} · {b.commune}
-                </p>
-                <div className="flex items-center justify-between text-[10px] text-slate-400">
-                  <span className="flex items-center gap-1 truncate">
+
+                {/* Body */}
+                <div className={`absolute inset-x-0 bottom-0 p-4 md:p-${i === 0 ? '6' : '5'}`}>
+                  <p className="text-[10px] font-medium text-white/60 uppercase tracking-wider mb-1">
+                    {timeBadge(b.date_publication)}
+                  </p>
+                  <p className={`font-display font-bold text-[#D97706] mb-1 ${i === 0 ? 'text-2xl md:text-3xl' : 'text-base md:text-lg'}`}>
+                    {priceLine(b)}
+                  </p>
+                  <h3 className={`font-bold text-white capitalize line-clamp-1 mb-1.5 ${i === 0 ? 'text-lg md:text-xl' : 'text-sm'}`}>
+                    {b.type_bien} · {b.commune}
+                  </h3>
+                  <p className="flex items-center gap-1 text-xs text-white/50 truncate">
                     <MapPin className="w-3 h-3 shrink-0" />
                     {b.quartier || b.commune}
-                  </span>
-                  <span className="shrink-0 ml-2">{timeBadge(b.date_publication)}</span>
+                  </p>
                 </div>
               </div>
             </Link>
           ))}
         </div>
+
+        <div className="md:hidden mt-6 text-center">
+          <Link
+            href="/offre-flash"
+            className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.25em] uppercase text-[#D97706] border-b border-[#D97706]/40 pb-1"
+          >
+            Voir toutes les offres <ArrowUpRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        {/* Subtle disclaimer */}
+        <p className="mt-8 text-center text-[10px] text-white/30 max-w-xl mx-auto leading-relaxed">
+          Annonces réseau — vérifiez l&apos;identité du vendeur avant toute transaction. Pour des biens 100% vérifiés, consultez nos <Link href="/biens" className="text-white/60 underline hover:text-white">Résidences Premium</Link>.
+        </p>
       </div>
     </section>
   )
