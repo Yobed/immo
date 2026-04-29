@@ -336,17 +336,15 @@ export function BienMediaGallery({
 
       {/* ─── STATS INLINE ─── */}
       {stats.length > 0 && (
-        <div className="bg-white border-b border-slate-100 px-4 py-4 md:px-6">
-          <div className="flex flex-wrap gap-3 max-w-[1400px] mx-auto">
+        <div className="bg-[#020617] px-4 py-4 md:px-6 border-b border-white/5">
+          <div className="flex flex-wrap gap-x-5 gap-y-2 max-w-[1400px] mx-auto">
             {stats.map((stat, i) => {
               const Icon = STAT_ICONS[stat.key]
               return (
-                <div key={i} className="flex items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
-                  {Icon && <Icon className="w-5 h-5 text-accent-luxury shrink-0" />}
-                  <div>
-                    <div className="font-bold text-slate-900 text-base leading-none">{stat.value}</div>
-                    <div className="text-slate-400 text-[10px] font-medium mt-0.5 uppercase tracking-wide">{stat.label}</div>
-                  </div>
+                <div key={i} className="flex items-center gap-1.5 text-sm">
+                  {Icon && <Icon className="w-3.5 h-3.5 text-accent-luxury" />}
+                  <span className="font-semibold text-white">{stat.value}</span>
+                  <span className="text-white/60 text-xs">{stat.label}</span>
                 </div>
               )
             })}
