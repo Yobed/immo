@@ -22,6 +22,15 @@ interface TallyFile {
   mimeType?: string
 }
 
+/**
+ * Dérive un UUID v4-style stable depuis une string (submissionId Tally).
+ * Le même submissionId renverra toujours le même UUID → idempotence DB.
+ */
+function deriveBienId(submissionKey: string): string {
+  const hash = crypto.createHash('sha256').update(`tally:bien:${submissionKey}`).digest('hex')
+  return `${hash.slice(0, 8)}-${hash.slice(8, 12)}-4${hash.slice(13, 16)}-8${hash.slice(17, 20)}-${hash.slice(20, 32)}`
+}
+
 function verifyTallySignature(rawBody: string, signature: string | null): boolean {
   const rawSecret = process.env.TALLY_WEBHOOK_SECRET
   const secret = rawSecret?.trim().replace(/^﻿/, '') || ''
@@ -223,7 +232,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'invalid_signature' }, { status: 401 })
   }
 
-  let payload: { data?: { fields?: TallyField[] } }
+  let payload: { eventId?: string; data?: { fields?: TallyField[]; submissionId?: string; responseId?: string } }
   try {
     payload = JSON.parse(rawBody)
   } catch {
@@ -238,6 +247,15 @@ export async function POST(req: NextRequest) {
   if (!phone) return NextResponse.json({ error: 'missing_phone' }, { status: 400 })
   if (!rawText) return NextResponse.json({ error: 'missing_raw_text' }, { status: 400 })
 
+  // Idempotence: dérive un UUID stable depuis submissionId/responseId/eventId.
+  // Si Tally retry le même webhook → même bien.id → INSERT conflict → no-op.
+  const submissionKey =
+    payload.data?.submissionId ||
+    payload.data?.responseId ||
+    payload.eventId ||
+    null
+  const stableBienId = submissionKey ? deriveBienId(submissionKey) : null
+
   const extResult = await extractBienFromWhatsApp(rawText).catch((e: Error) => ({
     data: null,
     trace: [`fatal:${e.message?.slice(0, 100)}`],
@@ -248,7 +266,26 @@ export async function POST(req: NextRequest) {
   const userId = await findOrCreateUserByPhone(phone)
   const admin = createAdminClient()
 
+  // Idempotence: si on a déjà un bien avec cet ID stable, c'est un retry Tally.
+  // On retourne le bien existant sans rien refaire (pas de re-upload, pas de re-WhatsApp).
+  if (stableBienId) {
+    const { data: existing } = await admin
+      .from('biens')
+      .select('id, titre')
+      .eq('id', stableBienId)
+      .maybeSingle()
+    if (existing) {
+      return NextResponse.json({
+        ok: true,
+        bien_id: existing.id,
+        dedup: 'tally_retry_detected',
+        submission_key: submissionKey,
+      })
+    }
+  }
+
   const bienInsert = {
+    ...(stableBienId && { id: stableBienId }),
     proprietaire_id: userId,
     statut: 'brouillon' as const,
     titre: extracted?.titre || 'Annonce en attente de validation',
@@ -271,6 +308,21 @@ export async function POST(req: NextRequest) {
     .insert(bienInsert)
     .select('id, titre')
     .single()
+
+  // Race condition: 2e webhook arrive entre le SELECT et le INSERT → conflit PK
+  if (bienErr?.code === '23505' && stableBienId) {
+    const { data: existing } = await admin
+      .from('biens')
+      .select('id, titre')
+      .eq('id', stableBienId)
+      .single()
+    return NextResponse.json({
+      ok: true,
+      bien_id: existing?.id ?? stableBienId,
+      dedup: 'tally_retry_race_detected',
+      submission_key: submissionKey,
+    })
+  }
 
   if (bienErr || !bien) {
     return NextResponse.json({ error: 'bien_insert_failed', detail: bienErr?.message }, { status: 500 })
