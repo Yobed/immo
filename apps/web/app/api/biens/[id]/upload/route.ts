@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/server-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { v2 as cloudinary } from 'cloudinary'
 
 export const runtime = 'nodejs'
 export const maxDuration = 300
@@ -99,24 +100,66 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }, { status: 415 })
   }
 
-  await ensureBucket()
-  const admin = createAdminClient()
-
+  const arrayBuffer = await file.arrayBuffer()
+  const buffer = Buffer.from(arrayBuffer)
   const ext = extFromMime(type, mime)
-  const path = `${bienId}/${type}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+  const publicId = `${type}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 
-  const buffer = await file.arrayBuffer()
-  const { error: upErr } = await admin.storage
-    .from(STORAGE_BUCKET)
-    .upload(path, buffer, { contentType: mime, upsert: false })
-  if (upErr) {
-    return NextResponse.json({ error: `Upload: ${upErr.message}` }, { status: 500 })
+  let url: string | null = null
+  let provider: 'cloudinary' | 'supabase' = 'supabase'
+  let cloudinaryError: string | null = null
+
+  // 1. Tentative Cloudinary (priorité si creds dispos)
+  const cn = process.env.CLOUDINARY_CLOUD_NAME?.trim().replace(/^﻿/, '')
+  const ck = process.env.CLOUDINARY_API_KEY?.trim().replace(/^﻿/, '')
+  const cs = process.env.CLOUDINARY_API_SECRET?.trim().replace(/^﻿/, '')
+  if (cn && ck && cs) {
+    cloudinary.config({ cloud_name: cn, api_key: ck, api_secret: cs })
+    const isVideo = mime.startsWith('video/')
+    const isPdf = mime === 'application/pdf'
+    try {
+      const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          {
+            folder: `biens/${bienId}`,
+            public_id: publicId,
+            resource_type: isVideo ? 'video' : isPdf ? 'raw' : 'image',
+            timeout: 120000,
+          },
+          (err, res) => {
+            if (err || !res) reject(err || new Error('no_response'))
+            else resolve(res as { secure_url: string })
+          }
+        ).end(buffer)
+      })
+      url = result.secure_url
+      provider = 'cloudinary'
+    } catch (e) {
+      cloudinaryError = (e as Error).message?.slice(0, 120) || 'unknown'
+    }
   }
 
-  const { data: pub } = admin.storage.from(STORAGE_BUCKET).getPublicUrl(path)
-  const url = pub.publicUrl
+  // 2. Fallback Supabase Storage si Cloudinary indispo ou en échec
+  if (!url) {
+    await ensureBucket()
+    const admin = createAdminClient()
+    const path = `${bienId}/${publicId}.${ext}`
+    const { error: upErr } = await admin.storage
+      .from(STORAGE_BUCKET)
+      .upload(path, buffer, { contentType: mime, upsert: false })
+    if (upErr) {
+      return NextResponse.json({
+        error: `Upload échoué — Cloudinary: ${cloudinaryError ?? 'non configuré'} | Supabase: ${upErr.message}`,
+      }, { status: 500 })
+    }
+    const { data: pub } = admin.storage.from(STORAGE_BUCKET).getPublicUrl(path)
+    url = pub.publicUrl
+    provider = 'supabase'
+  }
 
-  const { data: media, error: mErr } = await admin
+  // 3. Insert dans biens_medias (admin client pour bypass RLS)
+  const adminDB = createAdminClient()
+  const { data: media, error: mErr } = await adminDB
     .from('biens_medias')
     .insert({ bien_id: bienId, type, url, ordre: 99 })
     .select()
@@ -125,5 +168,5 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: `DB: ${mErr.message}`, url }, { status: 500 })
   }
 
-  return NextResponse.json({ url, media }, { status: 201 })
+  return NextResponse.json({ url, media, provider }, { status: 201 })
 }

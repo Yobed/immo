@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { extractBienFromWhatsApp } from '@/lib/extractors/whatsapp-bien-extractor'
 import { signMagicLinkToken } from '@/lib/auth/magic-link-token'
 import { wasenderSendMessage } from '@/lib/wasender'
+import { v2 as cloudinary } from 'cloudinary'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -137,13 +138,45 @@ async function uploadImageFromUrl(
   bienId: string,
   sourceUrl: string,
   index: number
-): Promise<{ url: string | null; error?: string }> {
+): Promise<{ url: string | null; error?: string; provider?: string }> {
+  // 1. Cloudinary en priorité si creds dispos
+  const cn = process.env.CLOUDINARY_CLOUD_NAME?.trim().replace(/^﻿/, '')
+  const ck = process.env.CLOUDINARY_API_KEY?.trim().replace(/^﻿/, '')
+  const cs = process.env.CLOUDINARY_API_SECRET?.trim().replace(/^﻿/, '')
+  if (cn && ck && cs) {
+    cloudinary.config({ cloud_name: cn, api_key: ck, api_secret: cs })
+    try {
+      const result = await cloudinary.uploader.upload(sourceUrl, {
+        folder: `biens/${bienId}`,
+        public_id: `tally-${Date.now()}-${index}`,
+        resource_type: 'image',
+        timeout: 60000,
+      })
+      return { url: result.secure_url, provider: 'cloudinary' }
+    } catch (e) {
+      // Fallback Supabase si Cloudinary échoue
+      const cloudinaryErr = (e as Error).message?.slice(0, 80) || 'unknown'
+      const fallback = await uploadToSupabase(bienId, sourceUrl, index)
+      return fallback.url
+        ? { ...fallback, provider: `supabase(after_cloudinary_fail:${cloudinaryErr})` }
+        : { url: null, error: `cloudinary:${cloudinaryErr} | ${fallback.error}` }
+    }
+  }
+  // 2. Pas de creds Cloudinary → Supabase direct
+  return uploadToSupabase(bienId, sourceUrl, index)
+}
+
+async function uploadToSupabase(
+  bienId: string,
+  sourceUrl: string,
+  index: number
+): Promise<{ url: string | null; error?: string; provider?: string }> {
   try {
     await ensureBucket()
     const res = await fetch(sourceUrl)
     if (!res.ok) return { url: null, error: `fetch_${res.status}` }
     const arrayBuffer = await res.arrayBuffer()
-    if (arrayBuffer.byteLength > 15 * 1024 * 1024) return { url: null, error: 'too_large' }
+    if (arrayBuffer.byteLength > 50 * 1024 * 1024) return { url: null, error: 'too_large' }
 
     let contentType = res.headers.get('content-type') || 'image/jpeg'
     if (!contentType.startsWith('image/')) contentType = 'image/jpeg'
@@ -157,10 +190,10 @@ async function uploadImageFromUrl(
     const { error } = await admin.storage
       .from(STORAGE_BUCKET)
       .upload(path, arrayBuffer, { contentType, upsert: false })
-    if (error) return { url: null, error: `upload:${error.message?.slice(0, 80)}` }
+    if (error) return { url: null, error: `supabase:${error.message?.slice(0, 80)}` }
 
     const { data } = admin.storage.from(STORAGE_BUCKET).getPublicUrl(path)
-    return { url: data.publicUrl }
+    return { url: data.publicUrl, provider: 'supabase' }
   } catch (e) {
     return { url: null, error: (e as Error).message?.slice(0, 120) || 'unknown' }
   }
