@@ -10,8 +10,6 @@ interface MediaUploaderProps {
   onUploadComplete: (url: string, type: MediaType) => void
 }
 
-const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!
-
 const MEDIA_ICONS: Record<MediaType, React.ReactNode> = {
   photo: (
     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary/40">
@@ -64,20 +62,22 @@ export function MediaUploader({ bienId, type, onUploadComplete }: MediaUploaderP
 
   const cfg = CONFIG[type]
 
-  const uploadFile = async (file: File) => {
+  const uploadFile = async (file: File, auth: Record<string, string>) => {
     const fd = new FormData()
     fd.append('file', file)
-    fd.append('upload_preset', 'immo-ci-media')
-    fd.append('folder', `biens/${bienId}`)
-    fd.append('tags', `${type},${bienId}`)
+    fd.append('type', type)
 
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/${cfg.resourceType}/upload`,
-      { method: 'POST', body: fd }
-    )
-    if (!res.ok) throw new Error(`Cloudinary: ${res.status}`)
-    const data = await res.json()
-    return data.secure_url as string
+    const res = await fetch(`/api/biens/${bienId}/upload`, {
+      method: 'POST',
+      headers: auth,
+      body: fd,
+    })
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '')
+      throw new Error(`Upload ${res.status}: ${errText.slice(0, 120)}`)
+    }
+    const data = await res.json() as { url: string }
+    return data.url
   }
 
   const handleFiles = async (files: FileList | null) => {
@@ -91,12 +91,7 @@ export function MediaUploader({ bienId, type, onUploadComplete }: MediaUploaderP
 
     for (let i = 0; i < arr.length; i++) {
       try {
-        const url = await uploadFile(arr[i])
-        await fetch(`/api/biens/${bienId}/medias`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...auth },
-          body: JSON.stringify({ type, url, ordre: 99 }),
-        })
+        const url = await uploadFile(arr[i], auth)
         onUploadComplete(url, type)
         setProgress(Math.round(((i + 1) / arr.length) * 100))
       } catch (e) {
