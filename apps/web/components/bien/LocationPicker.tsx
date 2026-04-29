@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Map, { Marker, MapRef } from 'react-map-gl/mapbox'
-import { Search, Loader2, Crosshair, MapPin, X } from 'lucide-react'
+import { Search, Loader2, Crosshair, MapPin, X, Maximize2, Minimize2 } from 'lucide-react'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
@@ -39,6 +39,7 @@ export function LocationPicker({ latitude, longitude, onChange }: LocationPicker
   const [searchOpen, setSearchOpen] = useState(false)
   const [searching, setSearching] = useState(false)
   const [locating, setLocating] = useState(false)
+  const [fullscreen, setFullscreen] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const mapRef = useRef<MapRef | null>(null)
 
@@ -100,6 +101,79 @@ export function LocationPicker({ latitude, longitude, onChange }: LocationPicker
     onChange({ latitude: NaN, longitude: NaN })
   }
 
+  // Echap pour quitter plein écran
+  useEffect(() => {
+    if (!fullscreen) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setFullscreen(false) }
+    document.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [fullscreen])
+
+  const mapJSX = (wrapperCls: string) => (
+    <div className={`w-full relative overflow-hidden ${wrapperCls}`}>
+      <Map
+        ref={mapRef}
+        {...viewState}
+        onMove={(e) => setViewState(e.viewState)}
+        onClick={handleMapClick}
+        mapboxAccessToken={MAPBOX_TOKEN}
+        style={{ width: '100%', height: '100%' }}
+        mapStyle="mapbox://styles/mapbox/streets-v12"
+        attributionControl={false}
+        cursor="crosshair"
+      >
+        {marker && (
+          <Marker
+            longitude={marker.lng}
+            latitude={marker.lat}
+            anchor="bottom"
+            draggable
+            onDragEnd={(e) => setCoords(e.lngLat.lat, e.lngLat.lng)}
+          >
+            <div className="relative cursor-grab active:cursor-grabbing">
+              <div className="absolute -inset-3 bg-[#D97706] rounded-full animate-ping opacity-30" />
+              <div className="relative w-10 h-10 bg-[#D97706] rounded-full border-2 border-white shadow-xl flex items-center justify-center text-white">
+                <MapPin className="w-5 h-5" />
+              </div>
+            </div>
+          </Marker>
+        )}
+      </Map>
+
+      {/* Bouton géoloc */}
+      <button
+        type="button"
+        onClick={handleLocateMe}
+        disabled={locating}
+        className="absolute top-3 right-3 w-10 h-10 flex items-center justify-center bg-white rounded-xl shadow-lg border border-slate-200 text-slate-600 hover:text-slate-900 active:scale-95 transition-all disabled:opacity-60"
+        title="Utiliser ma position GPS"
+      >
+        {locating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crosshair className="w-4 h-4" />}
+      </button>
+
+      {/* Bouton plein écran / réduire */}
+      <button
+        type="button"
+        onClick={() => setFullscreen(f => !f)}
+        className="absolute top-3 right-15 w-10 h-10 flex items-center justify-center bg-white rounded-xl shadow-lg border border-slate-200 text-slate-600 hover:text-slate-900 active:scale-95 transition-all"
+        style={{ right: '60px' }}
+        title={fullscreen ? 'Quitter le plein écran' : 'Plein écran'}
+      >
+        {fullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+      </button>
+
+      {!marker && (
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur px-4 py-2 rounded-xl shadow-lg border border-slate-200 pointer-events-none">
+          <p className="text-xs font-bold text-slate-700">Cliquez sur la carte pour placer un marqueur</p>
+        </div>
+      )}
+    </div>
+  )
+
   return (
     <div className="space-y-3">
       {/* Recherche d'adresse */}
@@ -133,55 +207,62 @@ export function LocationPicker({ latitude, longitude, onChange }: LocationPicker
         )}
       </div>
 
-      {/* Carte interactive */}
-      <div className="w-full h-[360px] rounded-2xl overflow-hidden border border-slate-200 relative shadow-md">
-        <Map
-          ref={mapRef}
-          {...viewState}
-          onMove={(e) => setViewState(e.viewState)}
-          onClick={handleMapClick}
-          mapboxAccessToken={MAPBOX_TOKEN}
-          style={{ width: '100%', height: '100%' }}
-          mapStyle="mapbox://styles/mapbox/streets-v12"
-          attributionControl={false}
-          cursor="crosshair"
-        >
-          {marker && (
-            <Marker
-              longitude={marker.lng}
-              latitude={marker.lat}
-              anchor="bottom"
-              draggable
-              onDragEnd={(e) => setCoords(e.lngLat.lat, e.lngLat.lng)}
+      {/* Carte inline (cachée si plein écran) */}
+      {!fullscreen && mapJSX('h-[360px] rounded-2xl border border-slate-200 shadow-md')}
+
+      {/* Plein écran modal */}
+      {fullscreen && (
+        <div className="fixed inset-0 z-[500] bg-black flex flex-col">
+          <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200 shrink-0">
+            <div>
+              <p className="font-bold text-slate-900 text-sm leading-none">Choisir l'emplacement</p>
+              <p className="text-slate-400 text-xs mt-0.5">Cliquez ou recherchez une adresse</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setFullscreen(false)}
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition-colors"
             >
-              <div className="relative cursor-grab active:cursor-grabbing">
-                <div className="absolute -inset-3 bg-[#D97706] rounded-full animate-ping opacity-30" />
-                <div className="relative w-10 h-10 bg-[#D97706] rounded-full border-2 border-white shadow-xl flex items-center justify-center text-white">
-                  <MapPin className="w-5 h-5" />
-                </div>
-              </div>
-            </Marker>
-          )}
-        </Map>
-
-        {/* Bouton géolocalisation */}
-        <button
-          type="button"
-          onClick={handleLocateMe}
-          disabled={locating}
-          className="absolute top-3 right-3 w-10 h-10 flex items-center justify-center bg-white rounded-xl shadow-lg border border-slate-200 text-slate-600 hover:text-slate-900 active:scale-95 transition-all disabled:opacity-60"
-          title="Utiliser ma position GPS"
-        >
-          {locating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crosshair className="w-4 h-4" />}
-        </button>
-
-        {/* Indication clic */}
-        {!marker && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur px-4 py-2 rounded-xl shadow-lg border border-slate-200 pointer-events-none">
-            <p className="text-xs font-bold text-slate-700">Cliquez sur la carte pour placer un marqueur</p>
+              <X className="w-5 h-5 text-slate-700" />
+            </button>
           </div>
-        )}
-      </div>
+
+          {/* Search dans le modal */}
+          <div className="px-4 py-3 bg-white border-b border-slate-100 relative shrink-0">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              {searching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 animate-spin" />}
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); setSearchOpen(true) }}
+                onFocus={() => setSearchOpen(true)}
+                placeholder="Rechercher une adresse, un quartier..."
+                className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+            </div>
+            {searchOpen && results.length > 0 && (
+              <div className="absolute top-full left-4 right-4 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-30 overflow-hidden max-h-[260px] overflow-y-auto">
+                {results.map((f) => (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => handleResultClick(f)}
+                    className="w-full flex items-start gap-2 px-3 py-2.5 text-left hover:bg-slate-50 border-b border-slate-100 last:border-0 transition-colors"
+                  >
+                    <MapPin className="w-3.5 h-3.5 mt-0.5 text-accent-luxury shrink-0" />
+                    <span className="text-xs text-slate-700 leading-snug">{f.place_name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="flex-1 relative">
+            {mapJSX('h-full')}
+          </div>
+        </div>
+      )}
 
       {/* Coords + clear */}
       {marker && (
