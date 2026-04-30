@@ -68,9 +68,17 @@ export function UserMenu({ email, role = 'public', isAdmin = false }: UserMenuPr
             <p className="text-sm font-sans font-semibold text-[var(--text)] truncate">{email}</p>
           </div>
 
-          {/* Lien admin (visible uniquement pour admins) */}
+          {/* Liens admin (visibles uniquement pour admins) */}
           {isAdmin && (
             <div className="py-1 border-b border-[var(--border)]">
+              <Link href="/admin/suivi" onClick={() => setOpen(false)}
+                className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans font-semibold text-red-700 hover:bg-red-50 transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
+                  <path d="M9 11l3 3L22 4"/>
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                </svg>
+                Suivi & Intermédiation
+              </Link>
               <Link href="/admin/moderation" onClick={() => setOpen(false)}
                 className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans font-semibold text-red-700 hover:bg-red-50 transition-colors">
                 <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">

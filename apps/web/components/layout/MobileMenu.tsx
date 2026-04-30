@@ -118,16 +118,29 @@ export function MobileMenu({ links, ctaLinks, user }: MobileMenuProps) {
                 </div>
               </div>
               {user.isAdmin && (
-                <Link
-                  href="/admin/moderation"
-                  onClick={close}
-                  className="w-full bg-red-50 border border-red-200 text-red-700 hover:bg-red-100 transition-colors flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-sans font-bold"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                  </svg>
-                  Modération
-                </Link>
+                <>
+                  <Link
+                    href="/admin/suivi"
+                    onClick={close}
+                    className="w-full bg-red-50 border border-red-200 text-red-700 hover:bg-red-100 transition-colors flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-sans font-bold"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
+                      <path d="M9 11l3 3L22 4"/>
+                      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                    </svg>
+                    Suivi & Intermédiation
+                  </Link>
+                  <Link
+                    href="/admin/moderation"
+                    onClick={close}
+                    className="w-full bg-red-50 border border-red-200 text-red-700 hover:bg-red-100 transition-colors flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-sans font-bold"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                    Modération
+                  </Link>
+                </>
               )}
               <button
                 onClick={handleLogout}
