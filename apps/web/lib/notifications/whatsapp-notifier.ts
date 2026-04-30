@@ -65,11 +65,15 @@ function getAdminNumbers(): string[] {
 }
 
 function getBaseUrl(): string {
-  return (
+  const raw =
     process.env.NEXT_PUBLIC_APP_URL ||
     process.env.APP_BASE_URL ||
     'http://localhost:3000'
-  )
+  // Strip whitespace AND literal \r\n / \n / \r suffixes injected by Vercel CLI
+  return raw
+    .replace(/(\\r\\n|\\n|\\r)+/g, '')
+    .replace(/[\r\n\s]+$/g, '')
+    .trim()
 }
 
 function formatDateFR(iso: string): string {
