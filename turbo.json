@@ -1,5 +1,25 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "LOCAUX_SUPABASE_SERVICE_ROLE_KEY",
+    "OPENROUTER_API_KEY",
+    "JWT_SIGNING_SECRET",
+    "CLOUDINARY_CLOUD_NAME",
+    "CLOUDINARY_API_KEY",
+    "CLOUDINARY_API_SECRET",
+    "TALLY_WEBHOOK_SECRET",
+    "CRON_SECRET",
+    "GROQ_API_KEY",
+    "WASSENDER_API_KEY",
+    "WASSENDER_WEBHOOK_SECRET",
+    "ADMIN_WHATSAPP_NUMBERS",
+    "ANTHROPIC_API_KEY",
+    "N8N_WEBHOOK_BASE_URL",
+    "FIREBASE_PROJECT_ID",
+    "FIREBASE_CLIENT_EMAIL",
+    "FIREBASE_PRIVATE_KEY"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -9,7 +29,9 @@
         "NEXT_PUBLIC_SUPABASE_ANON_KEY",
         "NEXT_PUBLIC_MAPBOX_TOKEN",
         "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME",
-        "NEXT_PUBLIC_URL"
+        "NEXT_PUBLIC_URL",
+        "NEXT_PUBLIC_APP_URL",
+        "NEXT_PUBLIC_APP_NAME"
       ]
     },
     "dev": { "cache": false, "persistent": true },

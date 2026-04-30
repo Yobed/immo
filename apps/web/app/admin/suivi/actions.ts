@@ -14,10 +14,10 @@ import {
   type ReservationContext,
 } from '@/lib/notifications/whatsapp-notifier'
 
-async function ensureAdmin(): Promise<{ userId: string } | { error: string }> {
+async function ensureAdmin(): Promise<{ userId: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Non authentifié' }
+  if (!user) throw new Error('Non authentifié')
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -25,22 +25,21 @@ async function ensureAdmin(): Promise<{ userId: string } | { error: string }> {
     .eq('id', user.id)
     .single()
 
-  if (profile?.role !== 'admin') return { error: 'Accès admin requis' }
+  if (profile?.role !== 'admin') throw new Error('Accès admin requis')
   return { userId: user.id }
 }
 
 // ---------------- VISITES ----------------
 
-export async function validateVisiteAction(formData: FormData) {
+export async function validateVisiteAction(formData: FormData): Promise<void> {
   const guard = await ensureAdmin()
-  if ('error' in guard) return { error: guard.error }
 
   const visiteId = String(formData.get('visiteId') || '')
   const action = String(formData.get('action') || '') as 'approve' | 'reject'
   const note = (formData.get('note') as string) || null
 
   if (!visiteId || !['approve', 'reject'].includes(action)) {
-    return { error: 'Payload invalide' }
+    throw new Error('Payload invalide')
   }
 
   const admin = createAdminClient()
@@ -56,9 +55,9 @@ export async function validateVisiteAction(formData: FormData) {
     .eq('id', visiteId)
     .single()
 
-  if (fetchErr || !visite) return { error: 'Visite introuvable' }
+  if (fetchErr || !visite) throw new Error('Visite introuvable')
   if (visite.admin_validation_status !== 'pending') {
-    return { error: `Déjà ${visite.admin_validation_status}` }
+    throw new Error(`Déjà ${visite.admin_validation_status}`)
   }
 
   const ids = [visite.locataire_id, visite.proprietaire_id].filter(Boolean) as string[]
@@ -101,7 +100,7 @@ export async function validateVisiteAction(formData: FormData) {
     })
     .eq('id', visiteId)
 
-  if (updateErr) return { error: updateErr.message }
+  if (updateErr) throw new Error(updateErr.message)
 
   if (action === 'approve') {
     if (ctx.ownerPhone) await notifyOwnerVisitApproved(admin, ctx)
@@ -112,21 +111,19 @@ export async function validateVisiteAction(formData: FormData) {
 
   revalidatePath('/admin/suivi')
   revalidatePath(`/admin/suivi/visites/${visiteId}`)
-  return { ok: true, status: newStatus }
 }
 
 // ---------------- RESERVATIONS ----------------
 
-export async function validateReservationAction(formData: FormData) {
+export async function validateReservationAction(formData: FormData): Promise<void> {
   const guard = await ensureAdmin()
-  if ('error' in guard) return { error: guard.error }
 
   const reservationId = String(formData.get('reservationId') || '')
   const action = String(formData.get('action') || '') as 'approve' | 'reject'
   const note = (formData.get('note') as string) || null
 
   if (!reservationId || !['approve', 'reject'].includes(action)) {
-    return { error: 'Payload invalide' }
+    throw new Error('Payload invalide')
   }
 
   const admin = createAdminClient()
@@ -142,9 +139,9 @@ export async function validateReservationAction(formData: FormData) {
     .eq('id', reservationId)
     .single()
 
-  if (fetchErr || !reservation) return { error: 'Réservation introuvable' }
+  if (fetchErr || !reservation) throw new Error('Réservation introuvable')
   if (reservation.admin_validation_status !== 'pending') {
-    return { error: `Déjà ${reservation.admin_validation_status}` }
+    throw new Error(`Déjà ${reservation.admin_validation_status}`)
   }
 
   const ids = [reservation.locataire_id, reservation.proprietaire_id].filter(Boolean) as string[]
@@ -183,7 +180,7 @@ export async function validateReservationAction(formData: FormData) {
     })
     .eq('id', reservationId)
 
-  if (updateErr) return { error: updateErr.message }
+  if (updateErr) throw new Error(updateErr.message)
 
   if (action === 'approve') {
     if (ctx.ownerPhone) await notifyOwnerReservationApproved(admin, ctx)
@@ -196,5 +193,4 @@ export async function validateReservationAction(formData: FormData) {
 
   revalidatePath('/admin/suivi')
   revalidatePath(`/admin/suivi/reservations/${reservationId}`)
-  return { ok: true, status: newStatus }
 }
