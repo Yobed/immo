@@ -103,14 +103,18 @@ export async function POST(req: NextRequest) {
     visitorPhone: visitor?.phone || '—',
   }
 
-  // Notif équipe admin uniquement (proprio attendra la validation)
-  notifyAdminReservationRequest(supabase, ctx).catch((err) => {
+  // Notif équipe admin uniquement (proprio attend la validation).
+  // ⚠ Vercel serverless : await obligatoire avant fin de la requête.
+  let notif: { sent: number; total: number } = { sent: 0, total: 0 }
+  try {
+    notif = await notifyAdminReservationRequest(supabase, ctx)
+  } catch (err) {
     // eslint-disable-next-line no-console
     console.error('[reservations] notifyAdmin failed', err)
-  })
+  }
 
   return NextResponse.json(
-    { ...reservation, admin_validation_status: 'pending' },
+    { ...reservation, admin_validation_status: 'pending', notified: notif },
     { status: 201 }
   )
 }

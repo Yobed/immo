@@ -77,14 +77,21 @@ export async function POST(request: Request) {
     notes: message ?? null,
   }
 
-  // Notif équipe admin uniquement (le proprio attendra la validation)
-  // Fire-and-forget pour ne pas bloquer la réponse HTTP
-  notifyAdminVisitRequest(supabase, ctx).catch((err) => {
+  // Notif équipe admin uniquement (proprio attend la validation).
+  // ⚠ Vercel serverless : les fonctions sont gelées dès la réponse HTTP.
+  // On AWAIT pour garantir l'envoi avant fin de la requête.
+  let notif: { sent: number; total: number } = { sent: 0, total: 0 }
+  try {
+    notif = await notifyAdminVisitRequest(supabase, ctx)
+  } catch (err) {
     // eslint-disable-next-line no-console
     console.error('[visites] notifyAdmin failed', err)
-  })
+  }
 
-  return NextResponse.json({ id: data.id, admin_validation_status: 'pending' }, { status: 201 })
+  return NextResponse.json(
+    { id: data.id, admin_validation_status: 'pending', notified: notif },
+    { status: 201 }
+  )
 }
 
 // PATCH — propriétaire confirme ou annule
