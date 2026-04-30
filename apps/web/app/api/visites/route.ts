@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/server-auth'
+import { notifyAdminVisitRequest, type VisitContext } from '@/lib/notifications/whatsapp-notifier'
 
-// POST — créer une demande de visite
+// POST — créer une demande de visite (workflow admin-first)
+// Le propriétaire N'EST PAS notifié à ce stade. L'admin valide d'abord.
 export async function POST(request: Request) {
   const { user, supabase } = await getServerUser(request)
   if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
@@ -17,7 +19,7 @@ export async function POST(request: Request) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: bien, error: bienError } = await (supabase as any)
     .from('biens')
-    .select('proprietaire_id, statut')
+    .select('proprietaire_id, statut, titre, commune')
     .eq('id', bien_id)
     .single()
 
@@ -47,15 +49,46 @@ export async function POST(request: Request) {
       heure_fin,
       notes: message ?? null,
       statut: 'en_attente',
+      admin_validation_status: 'pending',
+      source: 'web',
     })
     .select('id')
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
-  return NextResponse.json({ id: data.id }, { status: 201 })
+
+  // Récupérer les infos visiteur pour la notif admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: visitor } = await (supabase as any)
+    .from('profiles')
+    .select('full_name, phone')
+    .eq('id', user.id)
+    .single()
+
+  const ctx: VisitContext = {
+    id: data.id,
+    bienTitre: bien.titre || 'Bien sans titre',
+    bienCommune: bien.commune ?? null,
+    dateSouhaitee: date_souhaitee,
+    heureDebut: heure_debut,
+    heureFin: heure_fin,
+    visitorName: visitor?.full_name || 'Visiteur',
+    visitorPhone: visitor?.phone || '—',
+    notes: message ?? null,
+  }
+
+  // Notif équipe admin uniquement (le proprio attendra la validation)
+  // Fire-and-forget pour ne pas bloquer la réponse HTTP
+  notifyAdminVisitRequest(supabase, ctx).catch((err) => {
+    // eslint-disable-next-line no-console
+    console.error('[visites] notifyAdmin failed', err)
+  })
+
+  return NextResponse.json({ id: data.id, admin_validation_status: 'pending' }, { status: 201 })
 }
 
 // PATCH — propriétaire confirme ou annule
+// BLOQUÉ tant que l'admin n'a pas approuvé.
 export async function PATCH(request: Request) {
   const { user, supabase } = await getServerUser(request)
   if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
@@ -65,12 +98,33 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Payload invalide' }, { status: 400 })
   }
 
+  // Vérifier que l'admin a déjà validé
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: visite, error: fetchErr } = await (supabase as any)
+    .from('visites')
+    .select('id, proprietaire_id, admin_validation_status')
+    .eq('id', visite_id)
+    .single()
+
+  if (fetchErr || !visite) {
+    return NextResponse.json({ error: 'Visite introuvable' }, { status: 404 })
+  }
+  if (visite.proprietaire_id !== user.id) {
+    return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
+  }
+  if (visite.admin_validation_status !== 'approved') {
+    return NextResponse.json(
+      { error: 'Cette demande est en cours de validation par notre équipe' },
+      { status: 409 }
+    )
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any)
     .from('visites')
     .update({ statut })
     .eq('id', visite_id)
-    .eq('proprietaire_id', user.id) // RLS: seul le proprio peut confirmer/annuler
+    .eq('proprietaire_id', user.id)
     .select('id, statut')
     .single()
 

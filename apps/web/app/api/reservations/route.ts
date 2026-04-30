@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/server-auth'
+import {
+  notifyAdminReservationRequest,
+  type ReservationContext,
+} from '@/lib/notifications/whatsapp-notifier'
 
 export async function POST(req: NextRequest) {
   const { user, supabase } = await getServerUser(req)
@@ -38,7 +42,7 @@ export async function POST(req: NextRequest) {
   // Recuperer le prix et le proprietaire_id du bien
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: bien } = await (supabase.from('biens') as any)
-    .select('type_bien, prix_mois_fcfa, prix_nuit_fcfa, charges_mois_fcfa, depot_garantie_fcfa, proprietaire_id')
+    .select('type_bien, prix_mois_fcfa, prix_nuit_fcfa, charges_mois_fcfa, depot_garantie_fcfa, proprietaire_id, titre, commune')
     .eq('id', body.bienId)
     .single()
 
@@ -73,13 +77,42 @@ export async function POST(req: NextRequest) {
       depot_garantie_fcfa:  depot,
       commission_fcfa:      commission,
       statut:               'en_attente',
+      admin_validation_status: 'pending',
       notes:                body.notes ?? '',
     })
     .select('id, bien_id, date_debut, date_fin, montant_loyer_fcfa, montant_total_fcfa, statut')
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
-  return NextResponse.json(reservation, { status: 201 })
+
+  // Récupérer le visiteur pour la notif admin
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: visitor } = await (supabase.from('profiles') as any)
+    .select('full_name, phone')
+    .eq('id', user.id)
+    .single()
+
+  const ctx: ReservationContext = {
+    id: reservation.id,
+    bienTitre: bien.titre || 'Bien sans titre',
+    bienCommune: bien.commune ?? null,
+    dateDebut: body.dateDebut,
+    dateFin: body.dateFin,
+    montantTotal: total,
+    visitorName: visitor?.full_name || 'Visiteur',
+    visitorPhone: visitor?.phone || '—',
+  }
+
+  // Notif équipe admin uniquement (proprio attendra la validation)
+  notifyAdminReservationRequest(supabase, ctx).catch((err) => {
+    // eslint-disable-next-line no-console
+    console.error('[reservations] notifyAdmin failed', err)
+  })
+
+  return NextResponse.json(
+    { ...reservation, admin_validation_status: 'pending' },
+    { status: 201 }
+  )
 }
 
 export async function GET(req: NextRequest) {
