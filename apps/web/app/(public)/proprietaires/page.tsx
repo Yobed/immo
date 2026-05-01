@@ -128,7 +128,7 @@ export default function ProprietairesPage() {
                     <p className="text-2xl font-display font-medium text-off-white tracking-tight italic">
                         &quot;Grâce à leur gestion, mon duplex à Cocody génère 40% de revenus supplémentaires en location meublée.&quot;
                     </p>
-                    <p className="mt-4 text-off-white/40 text-[9px] uppercase tracking-[0.2em]">— Dr. Koffi, Propriétaire</p>
+                    <p className="mt-4 text-off-white/60 text-[9px] uppercase tracking-[0.2em]">— Dr. Koffi, Propriétaire</p>
                 </div>
             </motionClient.div>
 
@@ -166,20 +166,23 @@ export default function ProprietairesPage() {
                   <form className="space-y-4">
                     <input 
                       type="text" 
-                      placeholder="Nom complet" 
+                      placeholder="Nom complet"
+                      aria-label="Nom complet"
                       className="w-full px-6 py-4 bg-transparent border border-[var(--border)] rounded-xl text-sm focus:border-[var(--accent-luxury)] transition-all outline-none"
                     />
                     <input 
                       type="email" 
-                      placeholder="Email" 
+                      placeholder="Email"
+                      aria-label="Adresse email"
                       className="w-full px-6 py-4 bg-transparent border border-[var(--border)] rounded-xl text-sm focus:border-[var(--accent-luxury)] transition-all outline-none"
                     />
                     <input 
                       type="tel" 
-                      placeholder="Téléphone (WhatsApp)" 
+                      placeholder="Téléphone (WhatsApp)"
+                      aria-label="Numéro de téléphone WhatsApp"
                       className="w-full px-6 py-4 bg-transparent border border-[var(--border)] rounded-xl text-sm focus:border-[var(--accent-luxury)] transition-all outline-none"
                     />
-                    <button className="w-full py-5 bg-[var(--text)] text-[var(--background)] rounded-xl font-bold text-[10px] uppercase tracking-[0.4em] hover:bg-[var(--accent-luxury)] hover:text-off-white transition-all">
+                    <button type="submit" className="w-full py-5 bg-[var(--text)] text-[var(--background)] rounded-xl font-bold text-[10px] uppercase tracking-[0.4em] hover:bg-[var(--accent-luxury)] hover:text-off-white transition-all">
                       Envoyer ma demande
                     </button>
                   </form>
@@ -213,9 +216,9 @@ export default function ProprietairesPage() {
               <a href="/register" className="inline-block px-14 py-6 bg-[var(--text)] text-[var(--background)] rounded-sm font-bold text-[12px] uppercase tracking-[0.5em] hover:bg-[var(--accent-luxury)] hover:text-off-white transition-all shadow-2xl">
                   Créer mon compte Propriétaire
               </a>
-              <button className="px-14 py-6 border border-[var(--border)] text-[var(--text)] rounded-sm font-bold text-[12px] uppercase tracking-[0.5em] hover:bg-[var(--surface-card)] transition-all">
+              <a href="#calculator" className="px-14 py-6 border border-[var(--border)] text-[var(--text)] rounded-sm font-bold text-[12px] uppercase tracking-[0.5em] hover:bg-[var(--surface-card)] transition-all">
                   Prendre Rendez-vous
-              </button>
+              </a>
             </div>
         </div>
       </section>

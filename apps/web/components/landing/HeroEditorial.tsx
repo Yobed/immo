@@ -1,14 +1,45 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Search, ArrowRight } from 'lucide-react'
+import { Search, ArrowRight, MapPin, ChevronRight } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { SearchBar } from '@/components/search/SearchBar'
+
+interface FeaturedBien {
+  id: string
+  title: string
+  location: string
+  price: string
+  tags: string[]
+  image: string
+}
 
 interface HeroEditorialProps {
   bgImage?: string
+  featuredBiens?: FeaturedBien[]
 }
 
 const DEFAULT_BG = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2400&auto=format&fit=crop'
 
-export function HeroEditorial({ bgImage = DEFAULT_BG }: HeroEditorialProps) {
+const HEADLINE_WORDS = [
+  "d'exception",
+  "de prestige",
+  "exclusif",
+  "sur-mesure"
+]
+
+export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: HeroEditorialProps) {
+  const [headlineIdx, setHeadlineIdx] = useState(0)
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setHeadlineIdx(i => (i + 1) % HEADLINE_WORDS.length)
+    }, 3500)
+    return () => clearInterval(t)
+  }, [])
+
   return (
     <section className="relative w-full h-[100svh] min-h-[640px] max-h-[920px] bg-[#0a0e1a] overflow-hidden">
       {/* Single image — no rotation, calm */}
@@ -25,7 +56,7 @@ export function HeroEditorial({ bgImage = DEFAULT_BG }: HeroEditorialProps) {
 
       {/* Refined dark gradient — preserves image visibility */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/75" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/70 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/90 via-[#020617]/40 to-transparent" />
 
       {/* Subtle vignette */}
       <div className="absolute inset-0 bg-radial-vignette pointer-events-none" style={{
@@ -46,37 +77,48 @@ export function HeroEditorial({ bgImage = DEFAULT_BG }: HeroEditorialProps) {
 
         {/* Centered content */}
         <div className="flex-1 flex flex-col justify-center px-6 md:px-12">
-          <div className="max-w-7xl mx-auto w-full">
-            <div className="max-w-4xl">
-              <h1 className="font-display text-[42px] sm:text-6xl md:text-7xl lg:text-[88px] xl:text-[104px] leading-[1.02] text-white tracking-tight mb-6 md:mb-8">
-                <span className="block">L&apos;immobilier</span>
-                <span className="block font-editorial text-[#C5A059]">d&apos;exception</span>
-                <span className="block">en Côte d&apos;Ivoire</span>
+          <div className="max-w-7xl mx-auto w-full flex flex-col lg:flex-row gap-10 lg:gap-16 items-start lg:items-center">
+            
+            {/* Left Column: Text and Search */}
+            <div className="flex-1 max-w-3xl">
+              <h1 className="font-display text-[42px] sm:text-6xl md:text-7xl lg:text-[88px] xl:text-[104px] leading-[1.02] text-white tracking-tighter mb-6 md:mb-8">
+                <span className="block uppercase">L&apos;immobilier</span>
+                <span className="block font-editorial text-[#C5A059] lowercase text-[1.1em] -mt-2 -mb-2 h-[1.2em] overflow-hidden">
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={headlineIdx}
+                      initial={{ y: '100%', opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      exit={{ y: '-100%', opacity: 0 }}
+                      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                      className="block"
+                    >
+                      {HEADLINE_WORDS[headlineIdx]}
+                    </motion.span>
+                  </AnimatePresence>
+                </span>
+                <span className="block uppercase">en Côte d&apos;Ivoire</span>
               </h1>
               <p className="font-sans text-base md:text-lg text-white/80 max-w-xl leading-relaxed mb-10">
                 Résidences vérifiées, conciergerie premium et veille de marché en direct. Toutes les voies vers votre prochain bien réunies en un seul lieu.
               </p>
 
-              {/* Inline search — minimaliste */}
-              <form action="/recherche" method="get" className="flex flex-col sm:flex-row gap-3 max-w-2xl">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-                  <input
-                    type="text"
-                    name="q"
-                    placeholder="Cocody, villa avec piscine, 4 chambres..."
-                    className="w-full pl-11 pr-4 py-4 bg-white/95 backdrop-blur text-slate-900 rounded-full text-sm font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C5A059] shadow-2xl"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="px-7 py-4 bg-[#C5A059] hover:bg-[#b08e4d] text-white rounded-full font-semibold text-sm transition-colors shadow-2xl flex items-center justify-center gap-2 whitespace-nowrap"
-                >
-                  Rechercher
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </form>
+              {/* Inline search — unifié avec animation */}
+              <div className="max-w-2xl">
+                <SearchBar 
+                  placeholder="Cocody, villa avec piscine, 4 chambres..." 
+                  className="shadow-2xl"
+                />
+              </div>
             </div>
+
+            {/* Right Column: Animated Cards */}
+            <div className="hidden lg:flex flex-col gap-4 w-[340px] xl:w-[380px] shrink-0">
+              {featuredBiens && featuredBiens.length > 0 && (
+                <FeaturedBienCards biens={featuredBiens.slice(0, 3)} />
+              )}
+            </div>
+
           </div>
         </div>
 
@@ -122,5 +164,42 @@ export function HeroEditorial({ bgImage = DEFAULT_BG }: HeroEditorialProps) {
         </div>
       </div>
     </section>
+  )
+}
+
+function FeaturedBienCards({ biens }: { biens: FeaturedBien[] }) {
+  return (
+    <>
+      {biens.map((bien, i) => (
+        <motion.div
+          key={bien.id}
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.7, delay: 0.5 + i * 0.12 }}
+        >
+          <Link
+            href={`/biens/${bien.id}`}
+            className="flex items-center gap-3 p-3 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 hover:border-[#C5A059]/40 transition-all duration-300 group"
+          >
+            <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-white/5">
+              {bien.image && (
+                <Image src={bien.image} alt={bien.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="64px" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-white text-[13px] font-semibold truncate">{bien.title}</p>
+              <p className="text-white/40 text-[11px] flex items-center gap-1 mt-0.5 truncate">
+                <MapPin className="w-2.5 h-2.5 shrink-0" />
+                <span className="truncate">{bien.location}</span>
+              </p>
+              <p className="text-[#C5A059] text-[12px] font-bold mt-1 truncate">
+                {bien.price}
+              </p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-white/20 group-hover:text-[#C5A059] transition-colors shrink-0" />
+          </Link>
+        </motion.div>
+      ))}
+    </>
   )
 }

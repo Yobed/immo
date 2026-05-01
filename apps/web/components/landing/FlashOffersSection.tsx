@@ -39,7 +39,7 @@ export async function FlashOffersSection() {
   if (biens.length === 0) return null
 
   return (
-    <section className="relative py-16 md:py-24 bg-[#020617] overflow-hidden">
+    <section className="relative py-16 md:py-24 bg-[var(--background)] overflow-hidden">
       {/* Subtle ambient glow */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.05]">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-500 rounded-full blur-[140px]" />
@@ -50,24 +50,24 @@ export async function FlashOffersSection() {
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 mb-4">
               <span className="relative flex w-2 h-2">
-                <span className="animate-ping absolute inline-flex w-full h-full rounded-full bg-[#D97706] opacity-75" />
-                <span className="relative rounded-full w-2 h-2 bg-[#D97706]" />
+                <span className="animate-ping absolute inline-flex w-full h-full rounded-full bg-[var(--accent-luxury)] opacity-75" />
+                <span className="relative rounded-full w-2 h-2 bg-[var(--accent-luxury)]" />
               </span>
-              <p className="text-[10px] font-bold uppercase tracking-[0.5em] text-[#D97706]">
+              <p className="text-[10px] font-bold uppercase tracking-[0.5em] text-[var(--accent-luxury)]">
                 Notre veille en direct
               </p>
             </div>
-            <h2 className="font-display text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.05] tracking-tight">
+            <h2 className="font-display text-3xl md:text-5xl lg:text-6xl font-bold text-[var(--text)] leading-[1.05] tracking-tight">
               Offres fraîches<br />
-              <span className="italic font-light text-[#D97706]">de notre réseau</span>
+              <span className="italic font-light text-[var(--accent-luxury)]">de notre réseau</span>
             </h2>
-            <p className="text-slate-400 text-sm md:text-base mt-5 max-w-xl leading-relaxed">
+            <p className="text-[var(--text-muted)] text-sm md:text-base mt-5 max-w-xl leading-relaxed">
               Annonces remontées en continu de notre réseau d&apos;agents et propriétaires partenaires sur WhatsApp.
             </p>
           </div>
           <Link
             href="/offre-flash"
-            className="hidden md:inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.25em] uppercase text-[#D97706] border-b border-[#D97706]/40 pb-1 hover:border-[#D97706] transition-colors"
+            className="hidden md:inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.25em] uppercase text-[var(--accent-luxury)] border-b border-[var(--accent-luxury)]/40 pb-1 hover:border-[var(--accent-luxury)] transition-colors"
           >
             Voir toutes les offres <ArrowUpRight className="w-3.5 h-3.5" />
           </Link>
@@ -79,7 +79,7 @@ export async function FlashOffersSection() {
             <Link
               key={b.id}
               href={`/offre-flash/${b.id}`}
-              className={`group relative rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 hover:border-[#D97706]/40 transition-all duration-500 bg-[#0f172a] ${
+              className={`group relative rounded-2xl md:rounded-3xl overflow-hidden border border-[var(--border)] hover:border-[var(--accent-luxury)]/40 transition-all duration-500 bg-[var(--surface-card)] ${
                 i === 0 ? 'col-span-2 md:col-span-2 row-span-2 aspect-[16/13] md:aspect-auto' : 'aspect-[4/5]'
               }`}
             >
@@ -100,7 +100,7 @@ export async function FlashOffersSection() {
 
                 {/* Live badge */}
                 {b.is_recent && (
-                  <span className="absolute top-3 left-3 inline-flex items-center gap-1 px-2.5 py-1 bg-[#D97706] text-white text-[9px] font-bold uppercase tracking-[0.2em] rounded-full">
+                  <span className="absolute top-3 left-3 inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--accent-luxury)] text-white text-[9px] font-bold uppercase tracking-[0.2em] rounded-full">
                     <Radio className="w-2.5 h-2.5" />
                     Nouveau
                   </span>
@@ -114,7 +114,7 @@ export async function FlashOffersSection() {
                   <p className="text-[10px] font-medium text-white/60 uppercase tracking-wider mb-1">
                     {timeBadge(b.date_publication)}
                   </p>
-                  <p className={`font-display font-bold text-[#D97706] mb-1 ${i === 0 ? 'text-2xl md:text-3xl' : 'text-base md:text-lg'}`}>
+                  <p className={`font-display font-bold text-[var(--accent-luxury)] mb-1 ${i === 0 ? 'text-2xl md:text-3xl' : 'text-base md:text-lg'}`}>
                     {priceLine(b)}
                   </p>
                   <h3 className={`font-bold text-white capitalize line-clamp-1 mb-1.5 ${i === 0 ? 'text-lg md:text-xl' : 'text-sm'}`}>
@@ -133,7 +133,7 @@ export async function FlashOffersSection() {
         <div className="md:hidden mt-6 text-center">
           <Link
             href="/offre-flash"
-            className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.25em] uppercase text-[#D97706] border-b border-[#D97706]/40 pb-1"
+            className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.25em] uppercase text-[var(--accent-luxury)] border-b border-[var(--accent-luxury)]/40 pb-1"
           >
             Voir toutes les offres <ArrowUpRight className="w-3.5 h-3.5" />
           </Link>

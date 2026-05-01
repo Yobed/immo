@@ -156,11 +156,11 @@ export function SearchBar({
     <div ref={containerRef} className={cn("relative w-full", className)}>
       <form 
         onSubmit={handleSubmit} 
-        className="group flex items-center gap-2 p-1.5 bg-[var(--midnight-muted)] rounded-2xl border border-[var(--border)] shadow-2xl focus-within:border-[var(--accent-luxury)]/50 transition-all duration-300"
+        className="group flex items-center gap-2 p-2 bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] shadow-2xl focus-within:border-[var(--accent-luxury)] transition-all duration-300"
       >
-        <div className="flex-1 flex items-center gap-2 pl-3 relative overflow-hidden">
+        <div className="flex-1 flex items-center gap-1.5 pl-2 relative overflow-hidden">
           <Search className={cn(
-            "w-5 h-5 shrink-0 transition-colors duration-300",
+            "w-4 h-4 shrink-0 transition-colors duration-300",
             query ? "text-[var(--accent-luxury)]" : "text-[var(--text-muted)]"
           )} />
           <div className="relative flex-1 min-w-0">
@@ -174,12 +174,12 @@ export function SearchBar({
               onKeyDown={handleKeyDown}
               autoComplete="off"
               placeholder={disableTypewriter ? (placeholder || 'Rechercher...') : undefined}
-              className="w-full bg-transparent py-2.5 text-sm md:text-base font-sans text-[var(--text)] focus:outline-none min-w-0 placeholder:text-[var(--text-muted)]"
+              className="w-full bg-transparent py-3 text-base font-sans text-[var(--text)] focus:outline-none min-w-0 placeholder:text-[var(--text-muted)]"
             />
             {/* Placeholder machine à écrire — visible si vide, non focalisé, et activé */}
             {!query && !focused && !disableTypewriter && (
               <div className="absolute inset-0 flex items-center pointer-events-none select-none">
-                <span className="text-sm md:text-base font-sans text-[var(--text-muted)]">
+                <span className="text-base font-sans text-[var(--text-muted)] truncate max-w-full pr-4">
                   {displayed}
                   <span className="inline-block w-[2px] h-[1em] bg-[var(--accent-luxury)] ml-[1px] align-middle animate-[caret_1s_step-end_infinite]" />
                 </span>
@@ -188,7 +188,7 @@ export function SearchBar({
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 pr-1 shrink-0">
+        <div className="flex items-center gap-2 pr-1 shrink-0">
           <button
             type="button"
             disabled={!isSupported}
@@ -198,7 +198,7 @@ export function SearchBar({
               isListening
                 ? "bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.6)] animate-[mic-blink_1s_infinite]"
                 : "text-[var(--accent-luxury)] bg-[var(--accent-luxury)]/10 hover:bg-[var(--accent-luxury)]/20 border border-transparent hover:border-[var(--accent-luxury)]/20",
-              !isSupported && "opacity-30 cursor-not-allowed grayscale"
+              !isSupported && "hidden"
             )}
             title={isSupported ? "Recherche vocale" : "Recherche vocale non supportée par votre navigateur"}
           >
@@ -211,14 +211,14 @@ export function SearchBar({
           <button 
             type="submit" 
             disabled={isPending}
-            className="flex items-center gap-2 px-4 md:px-6 py-2.5 bg-[var(--accent-luxury)] text-[var(--on-accent)] rounded-xl font-sans font-bold text-[10px] md:text-xs uppercase tracking-[0.2em] disabled:opacity-50 hover:shadow-xl hover:shadow-[var(--accent-luxury)]/20 transition-all active:scale-95 duration-300"
+            className="flex items-center justify-center w-10 h-10 sm:w-auto sm:px-7 sm:py-3 bg-[var(--accent-luxury)] text-[var(--on-accent)] rounded-xl font-sans font-black text-[11px] md:text-xs uppercase tracking-[0.25em] shadow-lg shadow-[var(--accent-luxury)]/20 active:scale-95 transition-all duration-300"
           >
             {isPending ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <>
-                <span className="hidden sm:inline">Rechercher</span>
-                <ArrowRight className="w-4 h-4" />
+                <span className="hidden sm:inline">Explorer</span>
+                <ArrowRight className="w-5 h-5 sm:w-4 sm:h-4" strokeWidth={3} />
               </>
             )}
           </button>
@@ -232,7 +232,7 @@ export function SearchBar({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="absolute z-[200] top-full left-0 right-0 mt-2 overflow-hidden bg-slate-900 border border-[var(--accent-luxury)]/30 rounded-2xl shadow-2xl p-6 text-center"
+            className="absolute z-[200] top-full left-0 right-0 mt-2 overflow-hidden bg-[var(--surface-card)] border border-[var(--accent-luxury)]/30 rounded-2xl shadow-2xl p-6 text-center"
           >
             <div className="flex justify-center gap-1.5 h-8 items-center mb-4">
               {[1, 2, 3, 4, 5, 4, 3, 2, 1].map((h, i) => (

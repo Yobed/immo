@@ -15,6 +15,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'www.wasenderapi.com' },
       { protocol: 'https', hostname: 'wasenderapi.com' },
       { protocol: 'https', hostname: 'storage.tally.so' },
+      { protocol: 'https', hostname: 'i.pravatar.cc' },
     ],
   },
 }

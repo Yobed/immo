@@ -14,6 +14,7 @@ import { Bien360 } from '@/components/bien/Bien360'
 import { FavorisButton } from '@/components/bien/FavorisButton'
 import { VisiteRequestForm } from '@/components/bien/VisiteRequestForm'
 import { VIPConciergeButton } from '@/components/bien/VIPConciergeButton'
+import { DemanderContactWhatsAppButton } from '@/components/bien/DemanderContactWhatsAppButton'
 import { PremiumBienCard } from '@/components/bien/PremiumBienCard'
 import { VirtualTourViewer } from '@/components/bien/VirtualTourViewer'
 import { BienMap } from '@/components/bien/BienMap'
@@ -23,6 +24,7 @@ import {
   Sparkles,
   Eye,
   ArrowRight,
+  Flame,
 } from 'lucide-react'
 import * as motion from 'framer-motion/client'
 import { DiscoveryBar } from '@/components/bien/DiscoveryBar'
@@ -30,6 +32,7 @@ import { BroadcastButton } from '@/components/bien/BroadcastButton'
 import { StickyMobileCTA } from '@/components/bien/StickyMobileCTA'
 import { BienMediaGallery } from '@/components/bien/BienMediaGallery'
 import { MediaNavBar } from '@/components/bien/MediaNavBar'
+import { ExpandableText } from '@/components/bien/ExpandableText'
 import { ScrollToTop } from '@/components/bien/ScrollToTop'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -135,6 +138,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
     <main className="bg-white min-h-screen selection:bg-accent-luxury/20 font-sans text-slate-800 antialiased overflow-x-hidden pb-20 lg:pb-0">
       <ScrollToTop />
 
+
       {/* Discovery Bar — desktop only */}
       <div className="hidden md:block">
         <DiscoveryBar bien={bien} prix={prix} userId={user?.id ?? null} />
@@ -185,9 +189,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             {bien.description && (
               <section className="mb-8 pl-4 border-l-2 border-accent-luxury/50">
                 <h2 className="text-[10px] font-bold uppercase tracking-[0.4em] text-slate-400 mb-3">Description</h2>
-                <p className="text-base md:text-lg font-light text-slate-700 leading-[1.7] break-words whitespace-pre-wrap">
-                  {bien.description}
-                </p>
+                <ExpandableText text={bien.description} />
               </section>
             )}
 
@@ -314,12 +316,26 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                             bienLieu={`${bien.commune}${bien.quartier ? `, ${bien.quartier}` : ''}`}
                             bienPrix={`${formatFCFA(prixValue!)}${prixSuffix}`}
                           />
+                          {/* Trust strip */}
+                          <div className="flex items-center gap-2 py-2.5 px-3 rounded-xl bg-slate-50 border border-slate-200">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                            <span className="text-[11px] text-slate-600 leading-tight">
+                              Un conseiller vous rappelle{' '}
+                              <strong className="text-slate-900">dans l&apos;heure</strong> — service gratuit
+                            </span>
+                          </div>
                           <div className="flex items-center gap-3">
                             <div className="flex-1 h-px bg-slate-100" />
                             <span className="text-[10px] text-slate-300 uppercase tracking-widest">ou</span>
                             <div className="flex-1 h-px bg-slate-100" />
                           </div>
                           <VisiteRequestForm bienId={bien.id} proprietaireId={bien.proprietaire_id as string} isPremium={true} />
+                          <div className="flex items-center gap-3 pt-1">
+                            <div className="flex-1 h-px bg-slate-100" />
+                            <span className="text-[10px] text-slate-300 uppercase tracking-widest">ou</span>
+                            <div className="flex-1 h-px bg-slate-100" />
+                          </div>
+                          <DemanderContactWhatsAppButton bienId={bien.id} isAuthenticated={!!user} />
                         </>
                       )}
                     </div>
@@ -403,6 +419,27 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             </div>
           </section>
         )}
+
+        {/* ── CROSS-PROMO Flash — persona Recherche large ── */}
+        <div className="mt-12 py-6 px-6 rounded-3xl bg-[var(--accent-luxury)]/[0.03] border border-[var(--accent-luxury)]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm overflow-hidden relative group">
+          {/* Subtle background glow */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--accent-luxury)]/5 blur-3xl -mr-16 -mt-16 rounded-full" />
+          
+          <div className="relative">
+            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--accent-luxury)] mb-2">Aussi disponible</p>
+            <p className="text-sm md:text-base text-[var(--text)] leading-relaxed">
+              Des offres exclusives circulent dans{' '}
+              <span className="font-bold border-b-2 border-[var(--accent-luxury)]/20 text-[var(--text)]">notre réseau privé WhatsApp</span>.
+            </p>
+          </div>
+          <Link
+            href="/offre-flash"
+            className="relative shrink-0 flex items-center justify-center gap-2.5 px-6 py-3.5 bg-[var(--accent-luxury)] hover:bg-[var(--accent-luxury)]/90 text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all shadow-xl shadow-[var(--accent-glow)]/20 active:scale-95"
+          >
+            <Flame className="w-4 h-4" />
+            Voir les Offres flash
+          </Link>
+        </div>
       </div>
 
       <footer className="border-t border-slate-100 py-8 text-center text-slate-400 text-xs">
@@ -418,6 +455,8 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
           prixSuffix={prixSuffix}
           bienId={bien.id}
           isNuitee={isNuitee}
+          proprietaireId={bien.proprietaire_id as string}
+          isAuthenticated={!!user}
         />
       )}
     </main>

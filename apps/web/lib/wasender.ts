@@ -11,9 +11,17 @@ const BASE_URL = 'https://www.wasenderapi.com/api';
 export type WasenderMessageType = 'text' | 'image' | 'video' | 'document' | 'audio';
 
 export interface WasenderSendResponse {
-  status: boolean;
-  message: string;
-  data?: any;
+  /** true si l'API a accepté l'envoi (correspond au champ `success` de l'API Wasender) */
+  success: boolean;
+  message?: string;
+  data?: {
+    msgId?: number;
+    jid?: string;
+    messageId?: string;
+    id?: string;
+    status?: string;
+    [key: string]: any;
+  };
 }
 
 /**
@@ -47,16 +55,22 @@ async function wasenderFetch(endpoint: string, options: RequestInit = {}) {
   try {
     const response = await fetch(url, { ...options, headers });
     const data = await response.json();
-    
+
     if (!response.ok) {
       console.error(`Wasender API Error [${endpoint}]:`, data);
-      return { status: false, message: data.message || 'API Error' };
+      // Normalise en WasenderSendResponse pour les erreurs HTTP
+      return { success: false, message: data.message || 'API Error' } as WasenderSendResponse;
     }
-    
-    return data;
+
+    // L'API Wasender retourne { success: boolean, data: {...} }
+    // On s'assure que `success` est bien présent (fallback si l'API change)
+    if (typeof data.success === 'undefined') {
+      data.success = true;
+    }
+    return data as WasenderSendResponse;
   } catch (err: any) {
     console.error(`Wasender Network Error [${endpoint}]:`, err);
-    return { status: false, message: err.message };
+    return { success: false, message: err.message } as WasenderSendResponse;
   }
 }
 
@@ -89,10 +103,14 @@ export async function wasenderSendMessage(
     payload.audioUrl = mediaUrl;
   }
 
-  return wasenderFetch('/send-message', {
+  const result = await wasenderFetch('/send-message', {
     method: 'POST',
     body: JSON.stringify(payload)
   });
+
+  // eslint-disable-next-line no-console
+  console.log(`[Wasender] Send to ${cleanTo}: ${result.success ? 'SUCCESS' : 'FAILED'}`);
+  return result;
 }
 
 /**

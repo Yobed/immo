@@ -226,6 +226,26 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
                 </Link>
               ))}
             </motion.div>
+
+            {/* Routing rapide — Flash + Pro */}
+            <div className="flex items-center gap-4 mt-2 flex-wrap">
+              <Link
+                href="/offre-flash"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[var(--accent-luxury)]/30 text-[var(--accent-luxury)] text-[11px] font-bold hover:bg-[var(--accent-luxury)]/10 transition-colors"
+              >
+                <span className="relative flex w-1.5 h-1.5">
+                  <span className="animate-ping absolute w-full h-full rounded-full bg-[var(--accent-luxury)] opacity-75" />
+                  <span className="relative w-1.5 h-1.5 rounded-full bg-[var(--accent-luxury)]" />
+                </span>
+                Offres flash du réseau
+              </Link>
+              <Link
+                href="/register?role=pro"
+                className="text-[11px] text-white/40 hover:text-white/70 transition-colors underline-offset-2 hover:underline"
+              >
+                Publier un bien
+              </Link>
+            </div>
           </div>
 
           {/* ── COLONNE DROITE — Card biens (desktop) ─── */}

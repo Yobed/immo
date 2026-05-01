@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
 import { ArrowLeft, Share2 } from 'lucide-react'
 import { FavorisButton } from './FavorisButton'
 import { formatFCFA } from '@/lib/format'
@@ -89,7 +90,7 @@ export function DiscoveryBar({ bien, prix, userId }: DiscoveryBarProps) {
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 px-5 lg:px-8 py-3 bg-emerald-600 rounded-full hover:bg-emerald-500 transition-all shadow-[0_10px_30px_rgba(16,185,129,0.3)] shrink-0"
                   >
-                    <img src="/whatsapp-icon.svg" alt="WA" className="w-5 h-5" />
+                    <Image src="/whatsapp-icon.svg" alt="WA" width={20} height={20} className="w-5 h-5" />
                     <span className="text-[10px] font-bold uppercase tracking-widest text-white hidden sm:inline">Contacter</span>
                   </a>
 

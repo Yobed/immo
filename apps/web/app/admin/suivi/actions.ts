@@ -10,8 +10,12 @@ import {
   notifyOwnerReservationApproved,
   notifyVisitorReservationApproved,
   notifyVisitorReservationRejected,
+  notifyVisitorContactApproved,
+  notifyVisitorContactRejected,
+  notifyOwnerContactShared,
   type VisitContext,
   type ReservationContext,
+  type ContactRequestContext,
 } from '@/lib/notifications/whatsapp-notifier'
 
 async function ensureAdmin(): Promise<{ userId: string }> {
@@ -193,4 +197,81 @@ export async function validateReservationAction(formData: FormData): Promise<voi
 
   revalidatePath('/admin/suivi')
   revalidatePath(`/admin/suivi/reservations/${reservationId}`)
+}
+
+// ---------------- CONTACT REQUESTS ----------------
+
+export async function validateContactAction(formData: FormData): Promise<void> {
+  const guard = await ensureAdmin()
+
+  const contactId = String(formData.get('contactId') || '')
+  const action = String(formData.get('action') || '') as 'approve' | 'reject'
+  const note = (formData.get('note') as string) || null
+
+  if (!contactId || !['approve', 'reject'].includes(action)) {
+    throw new Error('Payload invalide')
+  }
+
+  const admin = createAdminClient()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: req, error: fetchErr } = await (admin as any)
+    .from('contact_requests')
+    .select(`
+      id, admin_validation_status, reason,
+      visitor_id, visitor_name, visitor_phone, visitor_email,
+      proprietaire_id,
+      biens ( titre, commune )
+    `)
+    .eq('id', contactId)
+    .single()
+
+  if (fetchErr || !req) throw new Error('Demande introuvable')
+  if (req.admin_validation_status !== 'pending') {
+    throw new Error(`Déjà ${req.admin_validation_status}`)
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: owner } = await (admin as any)
+    .from('profiles')
+    .select('id, full_name, phone')
+    .eq('id', req.proprietaire_id)
+    .single()
+
+  const ctx: ContactRequestContext = {
+    id: req.id,
+    bienTitre: req.biens?.titre || 'Bien',
+    bienCommune: req.biens?.commune ?? null,
+    visitorName: req.visitor_name || 'Visiteur',
+    visitorPhone: req.visitor_phone || '',
+    visitorEmail: req.visitor_email,
+    reason: req.reason,
+    ownerName: owner?.full_name ?? null,
+    ownerPhone: owner?.phone ?? null,
+  }
+
+  const newStatus = action === 'approve' ? 'approved' : 'rejected'
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error: updateErr } = await (admin as any)
+    .from('contact_requests')
+    .update({
+      admin_validation_status: newStatus,
+      admin_validated_at: new Date().toISOString(),
+      admin_validated_by: guard.userId,
+      admin_note: note,
+    })
+    .eq('id', contactId)
+
+  if (updateErr) throw new Error(updateErr.message)
+
+  if (action === 'approve') {
+    if (ctx.visitorPhone) await notifyVisitorContactApproved(admin, ctx)
+    if (ctx.ownerPhone) await notifyOwnerContactShared(admin, ctx)
+  } else {
+    if (ctx.visitorPhone) await notifyVisitorContactRejected(admin, ctx, note ?? undefined)
+  }
+
+  revalidatePath('/admin/suivi')
+  revalidatePath(`/admin/suivi/contacts/${contactId}`)
 }

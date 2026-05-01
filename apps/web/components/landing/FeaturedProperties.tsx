@@ -64,11 +64,8 @@ export function FeaturedProperties({ initialBiens = [] }: FeaturedPropertiesProp
 
   if (initialBiens.length === 0) return null
 
-  // Groupement par catégorie (mobile)
-  const byCategory = CATEGORIES.map(cat => ({
-    ...cat,
-    items: filteredRows.filter(b => b.type_bien === cat.key),
-  })).filter(cat => cat.items.length > 0)
+  // Les 15 plus récents (ou simplement la liste filtrée)
+  const latestProperties = filteredRows.slice(0, 15)
 
   return (
     <section className="relative py-10 md:py-20 overflow-hidden bg-[var(--background)]">
@@ -104,83 +101,58 @@ export function FeaturedProperties({ initialBiens = [] }: FeaturedPropertiesProp
           </div>
         ) : (
           <>
-            {/* ── MOBILE : rangées par catégorie avec scroll horizontal ── */}
-            <div className="md:hidden space-y-8">
-              {byCategory.map(cat => (
-                <div key={cat.key}>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-1 h-7 rounded-full bg-[var(--accent-luxury)]" />
-                      <div>
-                        <h3 className="font-display font-bold text-xl text-[var(--text)] leading-tight tracking-tight">
-                          {cat.label}
-                        </h3>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--accent-luxury)]/70 leading-none mt-0.5">
-                          {cat.items.length} bien{cat.items.length > 1 ? 's' : ''} disponible{cat.items.length > 1 ? 's' : ''}
-                        </p>
-                      </div>
+            {/* ── SINGLE ROW FOR LATEST PROPERTIES ── */}
+            <div className="space-y-8">
+              <div>
+                {/* Scroll horizontal — déborde du padding parent sur les bords */}
+                <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 md:-mx-6 md:px-6 snap-x snap-mandatory">
+                  {latestProperties.map((bien, i) => (
+                    <div key={bien.id} className="w-[192px] md:w-[240px] shrink-0 snap-start">
+                      <PremiumBienCard
+                        id={bien.id}
+                        titre={bien.titre}
+                        commune={bien.commune}
+                        quartier={bien.quartier}
+                        type_bien={bien.type_bien}
+                        prix_mois_fcfa={bien.prix_mois_fcfa}
+                        prix_nuit_fcfa={bien.prix_nuit_fcfa}
+                        prix_vente_fcfa={bien.prix_vente_fcfa}
+                        surface_m2={bien.surface_m2}
+                        nb_pieces={bien.nb_pieces}
+                        photo_url={bien.photo_url ?? null}
+                        est_disponible={bien.est_disponible}
+                        is_verifie={bien.is_verifie}
+                        score_ia={bien.score_ia}
+                        url_visite_3d={bien.url_visite_3d}
+                        index={i}
+                      />
                     </div>
-                    <Link
-                      href={`/biens?type_bien=${cat.key}`}
-                      className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--accent-luxury)] border-b border-[var(--accent-luxury)]/40 pb-0.5"
-                    >
-                      Voir tout <ArrowRight className="w-3 h-3" />
-                    </Link>
-                  </div>
-                  {/* Scroll horizontal — déborde du padding parent sur les bords */}
-                  <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar -mx-4 px-4">
-                    {cat.items.map((bien, i) => (
-                      <div key={bien.id} className="w-[192px] shrink-0">
-                        <PremiumBienCard
-                          id={bien.id}
-                          titre={bien.titre}
-                          commune={bien.commune}
-                          quartier={bien.quartier}
-                          type_bien={bien.type_bien}
-                          prix_mois_fcfa={bien.prix_mois_fcfa}
-                          prix_nuit_fcfa={bien.prix_nuit_fcfa}
-                          prix_vente_fcfa={bien.prix_vente_fcfa}
-                          surface_m2={bien.surface_m2}
-                          nb_pieces={bien.nb_pieces}
-                          photo_url={bien.photo_url ?? null}
-                          est_disponible={bien.est_disponible}
-                          is_verifie={bien.is_verifie}
-                          score_ia={bien.score_ia}
-                          url_visite_3d={bien.url_visite_3d}
-                          index={i}
-                        />
-                      </div>
-                    ))}
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-
-            {/* ── DESKTOP : grille plate ── */}
-            <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-              {filteredRows.map((bien, i) => (
-                <PremiumBienCard
-                  key={bien.id}
-                  id={bien.id}
-                  titre={bien.titre}
-                  commune={bien.commune}
-                  quartier={bien.quartier}
-                  type_bien={bien.type_bien}
-                  prix_mois_fcfa={bien.prix_mois_fcfa}
-                  prix_nuit_fcfa={bien.prix_nuit_fcfa}
-                  prix_vente_fcfa={bien.prix_vente_fcfa}
-                  surface_m2={bien.surface_m2}
-                  nb_pieces={bien.nb_pieces}
-                  photo_url={bien.photo_url ?? null}
-                  est_disponible={bien.est_disponible}
-                  is_verifie={bien.is_verifie}
-                  score_ia={bien.score_ia}
-                  url_visite_3d={bien.url_visite_3d}
-                  index={i}
-                />
-              ))}
+              </div>
             </div>
           </>
+        )}
+
+        {/* ── CROSS-PROMO — persona "Recherche large" ── */}
+        {initialBiens.length > 0 && (
+          <div className="mt-10 pt-8 border-t border-[var(--border)] flex items-center justify-between gap-4 flex-wrap">
+            <p className="text-[var(--text-muted)] text-sm leading-relaxed max-w-md">
+              Ces annonces sont{' '}
+              <span className="font-semibold text-[var(--text)]">vérifiées par notre équipe</span>.
+              {' '}Des offres moins formelles circulent aussi dans notre réseau.
+            </p>
+            <Link
+              href="/offre-flash"
+              className="shrink-0 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.25em] text-[var(--accent-luxury)] border-b border-[var(--accent-luxury)]/40 pb-0.5 hover:border-[var(--accent-luxury)] transition-colors"
+            >
+              <span className="relative flex w-1.5 h-1.5">
+                <span className="animate-ping absolute w-full h-full rounded-full bg-[var(--accent-luxury)] opacity-75" />
+                <span className="relative w-1.5 h-1.5 rounded-full bg-[var(--accent-luxury)]" />
+              </span>
+              Offres flash du réseau
+            </Link>
+          </div>
         )}
       </div>
     </section>

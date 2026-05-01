@@ -55,7 +55,7 @@ function NearCard({
 }) {
   return (
     <div
-      className={`w-[168px] shrink-0 rounded-2xl overflow-hidden border cursor-pointer transition-all duration-300 ${
+      className={`w-[192px] md:w-[240px] shrink-0 rounded-2xl md:rounded-[1.5rem] overflow-hidden border cursor-pointer transition-all duration-300 flex flex-col ${
         isSelected
           ? 'border-[var(--accent-luxury)] ring-2 ring-[var(--accent-luxury)]/50'
           : 'border-[var(--border)] hover:border-[var(--accent-luxury)]/40'
@@ -66,7 +66,7 @@ function NearCard({
     >
       <div className="aspect-[4/3] relative overflow-hidden bg-[var(--surface-card)]">
         {coverUrl ? (
-          <Image src={coverUrl} alt={b.titre} fill className="object-cover transition-transform duration-500 hover:scale-105" sizes="168px" />
+          <Image src={coverUrl} alt={b.titre} fill className="object-cover transition-transform duration-500 hover:scale-105" sizes="(max-width: 768px) 192px, 240px" />
         ) : (
           <div className="w-full h-full flex items-center justify-center opacity-20">
             <MapPin className="w-6 h-6 text-[var(--accent-luxury)]" />
@@ -451,7 +451,7 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
           {loading && biens.length === 0 ? (
             <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
               {[1,2,3,4,5].map(i => (
-                <div key={i} className="w-[168px] shrink-0 aspect-[3/4] rounded-2xl bg-[var(--surface-card)] animate-pulse" />
+                <div key={i} className="w-[192px] md:w-[240px] shrink-0 aspect-[3/4] rounded-2xl md:rounded-[1.5rem] bg-[var(--surface-card)] animate-pulse" />
               ))}
             </div>
           ) : biens.length > 0 ? (
@@ -461,91 +461,42 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
                 {selectedId ? 'Bien sélectionné — Itinéraire affiché sur la carte' : 'Triés par distance · Cliquez pour voir le trajet'}
               </p>
 
-              {/* ── MOBILE : rangées par catégorie ── */}
-              <div className="md:hidden space-y-8">
+              {/* ── TOUS LES ECRANS : rangées par catégorie avec scroll horizontal ── */}
+              <div className="space-y-8">
                 {NEAR_CATEGORIES.map(cat => {
                   const items = biens.filter(b => b.type_bien === cat.key)
                   if (items.length === 0) return null
                   return (
                     <div key={cat.key}>
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-display font-bold text-base text-[var(--text)] tracking-tight">{cat.label}</h3>
+                        <div className="flex items-center gap-3">
+                          <div className="w-1 h-6 rounded-full bg-[var(--accent-luxury)]" />
+                          <h3 className="font-display font-bold text-lg text-[var(--text)] tracking-tight">{cat.label}</h3>
+                        </div>
                         <Link
                           href={`/biens?type_bien=${cat.key}`}
-                          className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--accent-luxury)]"
+                          className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--accent-luxury)] border-b border-[var(--accent-luxury)]/40 pb-0.5 hover:border-[var(--accent-luxury)] transition-colors"
                         >
                           Voir tout <ChevronRight className="w-3 h-3" />
                         </Link>
                       </div>
-                      <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar -mx-6 px-6">
+                      <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 md:-mx-6 md:px-6 snap-x snap-mandatory">
                         {items.map((b, i) => (
-                          <NearCard
-                            key={b.id}
-                            b={b}
-                            coverUrl={coverMap[b.id]}
-                            isSelected={selectedId === b.id}
-                            onSelect={() => setSelectedId(selectedId === b.id ? null : b.id)}
-                            onHover={setHoveredId}
-                            getTravelTime={getTravelTime}
-                          />
+                          <div key={b.id} className="snap-start">
+                            <NearCard
+                              b={b}
+                              coverUrl={coverMap[b.id]}
+                              isSelected={selectedId === b.id}
+                              onSelect={() => setSelectedId(selectedId === b.id ? null : b.id)}
+                              onHover={setHoveredId}
+                              getTravelTime={getTravelTime}
+                            />
+                          </div>
                         ))}
                       </div>
                     </div>
                   )
                 })}
-              </div>
-
-              {/* ── DESKTOP : grille plate ── */}
-              <div className={`hidden md:grid gap-4 transition-all duration-700 ${
-                selectedId
-                  ? 'grid-cols-4 lg:grid-cols-6 xl:grid-cols-8'
-                  : 'grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'
-              }`}>
-                {biens.map((b, i) => (
-                  <motion.div
-                    key={b.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: (i % 10) * 0.05, duration: 0.5 }}
-                    className={`relative group cursor-pointer rounded-2xl overflow-hidden border transition-all duration-300 ${
-                      selectedId === b.id
-                        ? 'border-[var(--accent-luxury)] ring-2 ring-[var(--accent-luxury)]/50 shadow-[0_0_30px_rgba(212,175,55,0.2)]'
-                        : 'border-[var(--border)] hover:border-[var(--accent-luxury)]/40'
-                    }`}
-                    onClick={() => setSelectedId(selectedId === b.id ? null : b.id)}
-                    onMouseEnter={() => setHoveredId(b.id)}
-                    onMouseLeave={() => setHoveredId(null)}
-                  >
-                    <div className="aspect-[4/3] bg-[var(--surface-card)] relative overflow-hidden">
-                      {coverMap[b.id] ? (
-                        <Image src={coverMap[b.id]} alt={b.titre} fill className="object-cover transition-transform duration-700 group-hover:scale-110" sizes="20vw" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center opacity-20"><MapPin className="w-8 h-8 text-[var(--accent-luxury)]" /></div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      {selectedId === b.id && <div className="absolute inset-0 bg-[var(--accent-luxury)]/10 border-2 border-[var(--accent-luxury)] rounded-2xl" />}
-                      {b.is_verifie && (
-                        <span className="absolute top-2 left-2 px-2 py-1 bg-blue-500/80 backdrop-blur-md rounded-full text-[8px] font-bold text-white uppercase tracking-wide">Certifié</span>
-                      )}
-                      {b.dist_meters < 999999 && (
-                        <div className="absolute bottom-2 left-2 flex items-center gap-1.5 px-2 py-1 bg-emerald-500/90 backdrop-blur-md rounded-full">
-                          <Car className="w-2.5 h-2.5 text-white" />
-                          <span className="text-white text-[9px] font-bold">{getTravelTime(b.dist_meters)}</span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-3 bg-[var(--surface-card)]">
-                      <p className="text-[9px] font-bold text-[var(--accent-luxury)] uppercase tracking-widest mb-0.5 truncate">{b.commune}{b.quartier ? ` · ${b.quartier}` : ''}</p>
-                      <p className="text-sm font-semibold text-[var(--text)] truncate mb-2">{b.titre}</p>
-                      <div className="flex items-center justify-between">
-                        <p className="text-[11px] font-black text-[var(--text)]">{formatPrice(b)}</p>
-                        <Link href={`/biens/${b.id}`} onClick={e => e.stopPropagation()} className="w-7 h-7 flex items-center justify-center rounded-full bg-[var(--accent-luxury)]/10 hover:bg-[var(--accent-luxury)] transition-all">
-                          <ExternalLink className="w-3 h-3 text-[var(--accent-luxury)]" />
-                        </Link>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
               </div>
 
               <div className="mt-10 text-center">

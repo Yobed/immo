@@ -44,6 +44,18 @@ export interface ReservationContext {
   ownerPhone?: string | null
 }
 
+export interface ContactRequestContext {
+  id: string
+  bienTitre: string
+  bienCommune: string | null
+  visitorName: string
+  visitorPhone: string
+  visitorEmail?: string | null
+  reason?: string | null
+  ownerName?: string | null
+  ownerPhone?: string | null
+}
+
 interface SendResult {
   success: boolean
   externalId?: string
@@ -134,12 +146,13 @@ async function send(
 ): Promise<SendResult> {
   try {
     const res = await wasenderSendMessage(to, message)
-    if (!res.status) {
+    if (!res.success) {
       return { success: false, error: res.message || 'Wasender error' }
     }
     return {
       success: true,
-      externalId: res.data?.messageId ?? res.data?.id ?? undefined,
+      // L'API retourne data.msgId (pas messageId)
+      externalId: res.data?.msgId?.toString() ?? res.data?.messageId ?? res.data?.id ?? undefined,
     }
   } catch (err) {
     return {
@@ -330,6 +343,9 @@ export async function notifyAdminVisitRequest(
   const admins = getAdminNumbers()
   const message = tplAdminVisitRequest(ctx)
   let sent = 0
+
+  // eslint-disable-next-line no-console
+  console.log(`[whatsapp-notifier] Sending to ${admins.length} admins: ${admins.join(', ')}`)
 
   for (const phone of admins) {
     const result = await send(phone, message)
@@ -534,6 +550,191 @@ export async function notifyVisitorReservationRejected(
     role: 'visitor',
     template: 'reservation_rejected_visitor',
     relatedType: 'reservation',
+    relatedId: ctx.id,
+    payload: { reason: reason ?? null },
+    result,
+  })
+  return result
+}
+
+// ---------------- Templates CONTACT REQUEST ----------------
+
+function tplAdminContactRequest(ctx: ContactRequestContext): string {
+  const baseUrl = getBaseUrl()
+  return [
+    '📞 *DEMANDE DE CONTACT PROPRIÉTAIRE*',
+    '',
+    `*Bien :* ${ctx.bienTitre}`,
+    ctx.bienCommune ? `*Commune :* ${ctx.bienCommune}` : null,
+    `*Réf :* #${ctx.id.slice(0, 8)}`,
+    '',
+    `*Visiteur :* ${ctx.visitorName}`,
+    `*Tél :* ${ctx.visitorPhone}`,
+    ctx.visitorEmail ? `*Email :* ${ctx.visitorEmail}` : null,
+    ctx.reason ? `*Motif :* ${ctx.reason}` : null,
+    '',
+    `📋 Voir et valider : ${baseUrl}/admin/suivi/contacts/${ctx.id}`,
+  ]
+    .filter(Boolean)
+    .join('\n')
+}
+
+function tplVisitorContactApproved(ctx: ContactRequestContext): string {
+  const ownerWa = ctx.ownerPhone
+    ? `https://wa.me/${ctx.ownerPhone.replace(/\D/g, '')}`
+    : null
+  return [
+    `Bonjour ${ctx.visitorName} 👋`,
+    '',
+    `Voici les coordonnées du propriétaire pour le bien *« ${ctx.bienTitre} »* :`,
+    '',
+    `*Nom :* ${ctx.ownerName || '—'}`,
+    `*WhatsApp :* ${ctx.ownerPhone || '—'}`,
+    ownerWa ? `${ownerWa}` : null,
+    '',
+    'Le propriétaire est informé de votre démarche.',
+    '',
+    '— *Immo CI*',
+  ]
+    .filter(Boolean)
+    .join('\n')
+}
+
+function tplOwnerContactShared(ctx: ContactRequestContext): string {
+  return [
+    `Bonjour ${ctx.ownerName || ''} 👋`,
+    '',
+    `J'ai partagé votre numéro WhatsApp avec un client intéressé par votre bien *« ${ctx.bienTitre} »*${
+      ctx.bienCommune ? ` à *${ctx.bienCommune}*` : ''
+    }.`,
+    '',
+    `*Client :* ${ctx.visitorName}`,
+    `*Son tél :* ${ctx.visitorPhone}`,
+    '',
+    'Il devrait vous contacter sous peu.',
+    '',
+    '— *Immo CI*',
+  ].join('\n')
+}
+
+function tplVisitorContactRejected(ctx: ContactRequestContext, reason?: string): string {
+  return [
+    `Bonjour ${ctx.visitorName},`,
+    '',
+    `Nous ne pouvons malheureusement pas partager les coordonnées du propriétaire pour *« ${ctx.bienTitre} »*.`,
+    reason ? `\nRaison : ${reason}` : null,
+    '',
+    'Vous pouvez en revanche réserver une visite via la plateforme.',
+    '',
+    '— *Immo CI*',
+  ]
+    .filter((x) => x !== null)
+    .join('\n')
+}
+
+// ---------------- API CONTACT REQUEST ----------------
+
+export async function notifyAdminContactRequest(
+  supabase: SupabaseClient,
+  ctx: ContactRequestContext
+): Promise<{ sent: number; total: number }> {
+  const admins = getAdminNumbers()
+  const message = tplAdminContactRequest(ctx)
+  let sent = 0
+
+  for (const phone of admins) {
+    const result = await send(phone, message)
+    if (result.success) sent++
+    await logNotification(supabase, {
+      toPhone: phone,
+      role: 'admin',
+      template: 'contact_request_admin',
+      relatedType: 'contact_request',
+      relatedId: ctx.id,
+      payload: { bienTitre: ctx.bienTitre, visitorName: ctx.visitorName },
+      result,
+    })
+  }
+
+  if (sent > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase.from('contact_requests') as any)
+      .update({ admin_notified_at: new Date().toISOString() })
+      .eq('id', ctx.id)
+  }
+
+  return { sent, total: admins.length }
+}
+
+export async function notifyVisitorContactApproved(
+  supabase: SupabaseClient,
+  ctx: ContactRequestContext
+): Promise<SendResult> {
+  if (!ctx.visitorPhone) {
+    return { success: false, error: 'visitor phone missing' }
+  }
+  const result = await send(ctx.visitorPhone, tplVisitorContactApproved(ctx))
+  await logNotification(supabase, {
+    toPhone: ctx.visitorPhone,
+    role: 'visitor',
+    template: 'contact_approved_visitor',
+    relatedType: 'contact_request',
+    relatedId: ctx.id,
+    payload: { bienTitre: ctx.bienTitre },
+    result,
+  })
+  if (result.success) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase.from('contact_requests') as any)
+      .update({ visitor_notified_at: new Date().toISOString() })
+      .eq('id', ctx.id)
+  }
+  return result
+}
+
+export async function notifyOwnerContactShared(
+  supabase: SupabaseClient,
+  ctx: ContactRequestContext
+): Promise<SendResult> {
+  if (!ctx.ownerPhone) {
+    return { success: false, error: 'owner phone missing' }
+  }
+  const result = await send(ctx.ownerPhone, tplOwnerContactShared(ctx))
+  await logNotification(supabase, {
+    toPhone: ctx.ownerPhone,
+    role: 'owner',
+    template: 'contact_shared_owner',
+    relatedType: 'contact_request',
+    relatedId: ctx.id,
+    payload: { bienTitre: ctx.bienTitre, visitorName: ctx.visitorName },
+    result,
+  })
+  if (result.success) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase.from('contact_requests') as any)
+      .update({ owner_notified_at: new Date().toISOString() })
+      .eq('id', ctx.id)
+  }
+  return result
+}
+
+export async function notifyVisitorContactRejected(
+  supabase: SupabaseClient,
+  ctx: ContactRequestContext,
+  reason?: string
+): Promise<SendResult> {
+  if (!ctx.visitorPhone) {
+    return { success: false, error: 'visitor phone missing' }
+  }
+  const result = await send(
+    ctx.visitorPhone,
+    tplVisitorContactRejected(ctx, reason)
+  )
+  await logNotification(supabase, {
+    toPhone: ctx.visitorPhone,
+    role: 'visitor',
+    template: 'contact_rejected_visitor',
+    relatedType: 'contact_request',
     relatedId: ctx.id,
     payload: { reason: reason ?? null },
     result,

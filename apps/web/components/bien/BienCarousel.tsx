@@ -279,8 +279,9 @@ export function BienCarousel({ medias, isHero = false, externalFilter }: BienCar
               )}
             >
               {(media.type === 'photo' || media.type === 'vue_360') ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={media.url} alt="" className="w-full h-full object-cover" />
+                <div className="relative w-full h-full">
+                  <Image src={media.url} alt="" fill className="object-cover" sizes="64px" />
+                </div>
               ) : (
                 <div className={cn('w-full h-full flex items-center justify-center text-xs font-sans', BADGE_CLASSES[media.type])}>
                   {FILTER_LABELS[media.type]}

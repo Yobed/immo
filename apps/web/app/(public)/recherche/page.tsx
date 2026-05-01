@@ -5,8 +5,11 @@ import { SearchBar } from '@/components/search/SearchBar'
 import { SearchFilters } from '@/components/search/SearchFilters'
 import { MobileFiltersDrawer } from '@/components/search/MobileFiltersDrawer'
 import { PropertiesMap } from '@/components/map/PropertiesMap'
-import { Compass, Grid, Map as MapIcon, SlidersHorizontal, List } from 'lucide-react'
+import { Compass, Grid, Map as MapIcon, SlidersHorizontal, List, X } from 'lucide-react'
 import { FlashOffersBanner } from '@/components/search/FlashOffersBanner'
+import { QuickFilters } from '@/components/search/QuickFilters'
+import Link from 'next/link'
+import * as motion from 'framer-motion/client'
 
 const PAGE_SIZE = 12
 
@@ -83,7 +86,7 @@ export default async function RecherchePage({
   const activeFilterCount = [params.commune, params.prix_min, params.prix_max, params.type_bien, params.equipements].filter(Boolean).length
 
   return (
-    <main className="bg-[#020617] min-h-screen pt-24 pb-16">
+    <main className="bg-[var(--background)] min-h-screen pt-24 pb-16">
       <div className="max-w-[1600px] mx-auto px-4 lg:px-8">
         
         {/* Superior Search & Stats Header */}
@@ -93,19 +96,22 @@ export default async function RecherchePage({
               Trouvez votre résidence
             </h1>
             <SearchBar className="w-full" initialQuery={params.q ?? ''} />
+            <div className="mt-4 lg:hidden">
+              <QuickFilters />
+            </div>
           </div>
           
           <div className="flex items-center gap-6 self-end lg:self-center">
             <div className="text-right">
-            <p className="text-3xl font-display font-bold text-[var(--accent-luxury)] tabular-nums">
+              <p className="text-4xl font-display font-black text-[var(--accent-luxury)] tabular-nums leading-none">
                 {totalResults}
               </p>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
-                Propriétés trouvées
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] mt-1">
+                Résultats trouvés
               </p>
             </div>
-            <div className="h-12 w-px bg-off-white/10" />
-            <div className="flex gap-1.5 p-1.5 bg-[var(--midnight-muted)] rounded-2xl border border-[var(--border)] shadow-sm">
+            <div className="h-10 w-px bg-[var(--border)]" />
+            <div className="flex gap-1 p-1 bg-[var(--midnight-muted)]/50 backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-inner">
               <ViewToggle active={vue === 'grille'} href={`/recherche?${new URLSearchParams({ ...params, vue: 'grille' }).toString()}`} icon={Grid} label="Grille" />
               <ViewToggle active={vue === 'liste'} href={`/recherche?${new URLSearchParams({ ...params, vue: 'liste' }).toString()}`} icon={List} label="Liste" />
               <ViewToggle active={vue === 'carte'} href={`/recherche?${new URLSearchParams({ ...params, vue: 'carte' }).toString()}`} icon={MapIcon} label="Carte" />
@@ -214,30 +220,39 @@ export default async function RecherchePage({
 
 function ViewToggle({ active, href, icon: Icon, label }: { active: boolean; href: string; icon: any; label: string }) {
   return (
-    <a href={href} className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-      active ? 'bg-[var(--primary)] text-[var(--on-primary)] shadow-lg shadow-[var(--primary)]/20' : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface)]'
-    }`}>
-      <Icon className="w-4 h-4" />
-      {label}
-    </a>
+    <Link 
+      href={href} 
+      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all duration-300 ${
+        active 
+          ? 'bg-[var(--accent-luxury)] text-[var(--on-accent)] shadow-lg shadow-[var(--accent-luxury)]/20' 
+          : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-white/5'
+      }`}
+    >
+      <Icon className="w-3.5 h-3.5" />
+      <span className="hidden sm:inline">{label}</span>
+    </Link>
   )
 }
 
 function PaginationGroup({ params, page, totalPages }: { params: any; page: number; totalPages: number }) {
   return (
-    <nav className="flex items-center gap-1.5 p-1.5 bg-[var(--midnight-muted)] rounded-2xl border border-[var(--border)] shadow-sm">
+    <nav className="flex items-center gap-2 p-2 bg-[var(--midnight-muted)]/50 backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-inner">
       {page > 0 && <PageLink href={`/recherche?${new URLSearchParams({ ...params, page: String(page - 1) }).toString()}`} icon="←" />}
-      {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
-        <a 
-          key={i}
-          href={`/recherche?${new URLSearchParams({ ...params, page: String(i) }).toString()}`}
-          className={`w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold transition-all ${
-            i === page ? 'bg-[var(--primary)] text-[var(--on-primary)]' : 'text-[var(--text-muted)] hover:bg-[var(--surface)] hover:text-[var(--off-white)]'
-          }`}
-        >
-          {i + 1}
-        </a>
-      ))}
+      <div className="flex gap-1 px-2">
+        {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
+          <Link 
+            key={i}
+            href={`/recherche?${new URLSearchParams({ ...params, page: String(i) }).toString()}`}
+            className={`w-10 h-10 flex items-center justify-center rounded-xl text-[11px] font-black transition-all duration-300 ${
+              i === page 
+                ? 'bg-[var(--accent-luxury)] text-[var(--on-accent)] shadow-lg shadow-[var(--accent-luxury)]/20' 
+                : 'text-[var(--text-muted)] hover:bg-white/5 hover:text-[var(--text)]'
+            }`}
+          >
+            {i + 1}
+          </Link>
+        ))}
+      </div>
       {page < totalPages - 1 && <PageLink href={`/recherche?${new URLSearchParams({ ...params, page: String(page + 1) }).toString()}`} icon="→" />}
     </nav>
   )
@@ -245,28 +260,41 @@ function PaginationGroup({ params, page, totalPages }: { params: any; page: numb
 
 function PageLink({ href, icon }: { href: string; icon: string }) {
   return (
-    <a href={href} className="w-10 h-10 flex items-center justify-center rounded-xl bg-[var(--surface)] border border-[var(--border)] text-[var(--text)] transition-all hover:bg-[var(--midnight-light)]">
+    <Link 
+      href={href} 
+      className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-[var(--border)] text-[var(--text)] transition-all duration-300 hover:bg-[var(--accent-luxury)] hover:text-[var(--on-accent)] hover:border-transparent active:scale-90"
+    >
       <span className="text-lg leading-none mt-[-2px]">{icon}</span>
-    </a>
+    </Link>
   )
 }
 
 function EmptyResults({ hasFilters }: { hasFilters: boolean }) {
   return (
-    <div className="text-center py-32 bg-off-white/5 rounded-[3rem] border border-dashed border-off-white/10">
-      <div className="w-20 h-20 bg-off-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
-        <Compass className="w-8 h-8 text-off-white/40" />
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="text-center py-24 bg-[var(--midnight-muted)] rounded-[3rem] border border-dashed border-[var(--border)] px-6"
+    >
+      <div className="w-24 h-24 bg-[var(--accent-luxury)]/10 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
+        <Compass className="w-10 h-10 text-[var(--accent-luxury)] animate-pulse" />
       </div>
-      <h3 className="font-display text-2xl font-bold text-off-white mb-2">Aucun résultat trouvé</h3>
-      <p className="text-off-white/80 font-sans max-w-sm mx-auto mb-8">
-        Nous n&apos;avons pas trouvé de propriétés correspondant à vos critères actuels.
+      <h3 className="font-display text-3xl font-black text-[var(--text)] mb-4 tracking-tight uppercase italic">
+        Aucun bien trouvé
+      </h3>
+      <p className="text-[var(--text-muted)] font-medium max-w-sm mx-auto mb-10 leading-relaxed">
+        Nous n&apos;avons pas trouvé de propriétés correspondant à vos critères actuels. Essayez d&apos;élargir votre zone de recherche.
       </p>
       {hasFilters && (
-        <a href="/recherche" className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary text-off-white rounded-full font-bold shadow-xl shadow-primary/20 hover:scale-105 transition-transform">
-          Réinitialiser tous les filtres
-        </a>
+        <Link 
+          href="/recherche" 
+          className="inline-flex items-center gap-3 px-10 py-4 bg-[var(--accent-luxury)] text-[var(--on-accent)] rounded-2xl font-black text-[13px] uppercase tracking-[0.2em] shadow-2xl shadow-[var(--accent-luxury)]/20 active:scale-95 transition-all"
+        >
+          <X className="w-4 h-4" />
+          Réinitialiser les filtres
+        </Link>
       )}
-    </div>
+    </motion.div>
   )
 }
 

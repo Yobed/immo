@@ -1,19 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useForm } from 'react-hook-form'
 import { useSearchParams } from 'next/navigation'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { motion } from 'framer-motion'
+import { UserPlus, Mail, Lock, User, CheckCircle2, ArrowRight } from 'lucide-react'
 
 const registerSchema = z.object({
   full_name: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
   email: z.string().email('Adresse e-mail invalide'),
-  password: z
-    .string()
-    .min(8, 'Le mot de passe doit contenir au moins 8 caractères'),
+  password: z.string().min(8, 'Le mot de passe doit contenir au moins 8 caractères'),
   role: z.enum(['locataire', 'proprietaire']),
 })
 
@@ -46,12 +46,9 @@ function RegisterContent() {
       provider: 'google',
       options: {
         redirectTo: `${origin}/callback`,
-        queryParams: {
-          referral_code: referralCode || '',
-        }
+        queryParams: { referral_code: referralCode || '' }
       },
     })
-    setGoogleLoading(false)
   }
 
   const onSubmit = async (data: RegisterFormData) => {
@@ -71,221 +68,181 @@ function RegisterContent() {
     })
 
     if (error) {
-      if (error.message.includes('already registered')) {
-        setError('Cette adresse e-mail est déjà utilisée.')
-      } else {
-        setError("Une erreur est survenue lors de l'inscription. Veuillez réessayer.")
-      }
+      setError(error.message.includes('already registered') 
+        ? 'Cette adresse e-mail est déjà utilisée.' 
+        : "Une erreur est survenue lors de l'inscription.")
     } else {
       setSuccess(true)
     }
-
     setLoading(false)
   }
 
   if (success) {
     return (
-      <div className="max-w-md w-full text-center space-y-4">
-        <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto">
-          <svg className="w-8 h-8 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
+      <div className="text-center space-y-6 py-8">
+        <div className="w-20 h-20 mx-auto rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
+          <CheckCircle2 className="w-10 h-10 text-emerald-500" strokeWidth={2.5} />
         </div>
-        <h2 className="text-2xl font-bold text-[var(--text)]">Inscription réussie !</h2>
-        <p className="text-muted">
-          Un e-mail de confirmation a été envoyé à votre adresse. Veuillez cliquer
-          sur le lien pour activer votre compte.
+        <h2 className="text-2xl font-black text-[var(--text)] font-display tracking-tight uppercase italic">
+          Bienvenue !
+        </h2>
+        <p className="text-[13px] text-[var(--text-muted)] font-medium max-w-[280px] mx-auto leading-relaxed">
+          Un e-mail de confirmation a été envoyé. Veuillez activer votre compte pour commencer l&apos;expérience Immo CI.
         </p>
         <Link
           href="/login"
-          className="inline-block mt-4 text-primary hover:underline font-medium"
+          className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-[var(--accent-luxury)] border-b border-[var(--accent-luxury)]/20 pb-0.5 hover:border-[var(--accent-luxury)] transition-all"
         >
-          Retour à la connexion
+          Retourner à la connexion <ArrowRight size={14} />
         </Link>
       </div>
     )
   }
 
   return (
-    <div className="max-w-md w-full space-y-8">
-      {/* En-tête */}
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-primary font-display">
-          Immo CI
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className="w-full space-y-10"
+    >
+      {/* Header */}
+      <div className="text-center space-y-3">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-[var(--accent-luxury)]/10 text-[var(--accent-luxury)] mb-2 shadow-inner border border-[var(--accent-luxury)]/20">
+          <UserPlus size={28} strokeWidth={2.5} />
+        </div>
+        <h1 className="text-3xl md:text-4xl font-black text-[var(--text)] font-display tracking-tight uppercase italic leading-none">
+          Inscription
         </h1>
-        <h2 className="mt-4 text-2xl font-semibold text-[var(--text)]">
-          S&apos;inscrire
-        </h2>
-        <p className="mt-2 text-sm text-muted">
-          Déjà un compte ?{' '}
-          <Link href="/login" className="text-secondary hover:underline font-medium">
-            Se connecter
-          </Link>
+        <p className="text-[13px] text-[var(--text-muted)] font-medium tracking-wide">
+          Rejoignez la première plateforme immobilière de CI
         </p>
       </div>
 
-      {/* Message d'erreur */}
-      {error && (
-        <div className="bg-danger/5 border border-danger/20 text-danger px-4 py-3 rounded-card text-sm">
-          {error}
-        </div>
-      )}
+      {/* Social */}
+      <div className="space-y-4">
+        <button
+          type="button"
+          onClick={handleGoogleSignUp}
+          disabled={googleLoading}
+          className="w-full flex items-center justify-center gap-4 px-6 py-4 border border-[var(--border)] rounded-2xl bg-[var(--surface)] text-[var(--text)] font-black text-[11px] uppercase tracking-[0.2em] hover:border-[var(--accent-luxury)] transition-all active:scale-[0.98] shadow-sm group"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+          </svg>
+          {googleLoading ? 'Chargement...' : 'Inscription via Google'}
+        </button>
 
-      {/* Bouton Google */}
-      <button
-        type="button"
-        onClick={handleGoogleSignUp}
-        disabled={googleLoading}
-        className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-[var(--border)] rounded-btn bg-white text-[var(--text)] font-medium hover:bg-[var(--surface)] transition-colors disabled:opacity-50"
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-        </svg>
-        {googleLoading ? 'Redirection...' : 'Continuer avec Google'}
-      </button>
-
-      {/* Séparateur */}
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-[var(--border)]" />
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-surface text-muted">ou</span>
+        <div className="relative flex items-center gap-4 py-2">
+          <div className="flex-1 h-px bg-[var(--border)]" />
+          <span className="text-[9px] font-black text-[var(--text-subtle)] uppercase tracking-widest">ou par e-mail</span>
+          <div className="flex-1 h-px bg-[var(--border)]" />
         </div>
       </div>
 
-      {/* Formulaire */}
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        <div>
-          <label htmlFor="full_name" className="block text-sm font-medium text-[var(--text)] mb-1">
-            Nom complet
-          </label>
-          <input
-            id="full_name"
-            type="text"
-            autoComplete="name"
-            {...register('full_name')}
-            className="w-full px-4 py-3 border border-[var(--border)] rounded-btn focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-transparent"
-            placeholder="Kouassi Jean-Baptiste"
-          />
-          {errors.full_name && (
-            <p className="mt-1 text-sm text-danger">{errors.full_name.message}</p>
-          )}
-        </div>
-
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-[var(--text)] mb-1">
-            Adresse e-mail
-          </label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            {...register('email')}
-            className="w-full px-4 py-3 border border-[var(--border)] rounded-btn focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-transparent"
-            placeholder="vous@exemple.com"
-          />
-          {errors.email && (
-            <p className="mt-1 text-sm text-danger">{errors.email.message}</p>
-          )}
-        </div>
-
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-[var(--text)] mb-1">
-            Mot de passe
-          </label>
-          <input
-            id="password"
-            type="password"
-            autoComplete="new-password"
-            {...register('password')}
-            className="w-full px-4 py-3 border border-[var(--border)] rounded-btn focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-transparent"
-            placeholder="Au moins 8 caractères"
-          />
-          {errors.password && (
-            <p className="mt-1 text-sm text-danger">{errors.password.message}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-[var(--text)] mb-2">
-            Je suis un(e)
-          </label>
-          <div className="grid grid-cols-2 gap-3">
-            <label className="relative flex items-center justify-center p-4 border-2 rounded-card cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary/5 border-[var(--border)]">
-              <input
-                type="radio"
-                value="locataire"
-                {...register('role')}
-                className="sr-only"
-              />
-              <div className="text-center">
-                <div className="flex justify-center mb-1">
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-                    <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/>
-                    <path d="M9 21V12h6v9"/>
-                  </svg>
-                </div>
-                <span className="text-sm font-medium text-[var(--text)]">Locataire</span>
-              </div>
-            </label>
-            <label className="relative flex items-center justify-center p-4 border-2 rounded-card cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary/5 border-[var(--border)]">
-              <input
-                type="radio"
-                value="proprietaire"
-                {...register('role')}
-                className="sr-only"
-              />
-              <div className="text-center">
-                <div className="flex justify-center mb-1">
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-                    <circle cx="7.5" cy="15.5" r="5.5"/>
-                    <path d="M10.5 12.5 L19 4"/>
-                    <path d="M19 4 l2 2"/>
-                    <path d="M17 6 l2 2"/>
-                  </svg>
-                </div>
-                <span className="text-sm font-medium text-[var(--text)]">Propriétaire</span>
-              </div>
-            </label>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {error && (
+          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-[11px] font-black text-center uppercase tracking-wider">
+            {error}
           </div>
-          {errors.role && (
-            <p className="mt-1 text-sm text-danger">{errors.role.message}</p>
-          )}
+        )}
+
+        <div className="space-y-5">
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] ml-1">
+              <User size={12} className="text-[var(--accent-luxury)]" /> Nom complet
+            </label>
+            <input
+              {...register('full_name')}
+              placeholder="Ex: Jean Kouassi"
+              className="w-full px-6 py-4 bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-[var(--text-muted)]/20"
+            />
+            {errors.full_name && (
+              <p className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.full_name.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] ml-1">
+              <Mail size={12} className="text-[var(--accent-luxury)]" /> Adresse e-mail
+            </label>
+            <input
+              {...register('email')}
+              placeholder="votre@email.com"
+              className="w-full px-6 py-4 bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-[var(--text-muted)]/20"
+            />
+            {errors.email && (
+              <p className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.email.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] ml-1">
+              <Lock size={12} className="text-[var(--accent-luxury)]" /> Mot de passe
+            </label>
+            <input
+              {...register('password')}
+              type="password"
+              placeholder="••••••••"
+              className="w-full px-6 py-4 bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-[var(--text-muted)]/20"
+            />
+            {errors.password && (
+              <p className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.password.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] ml-1">
+              Votre profil
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <label className="relative group cursor-pointer">
+                <input type="radio" value="locataire" {...register('role')} className="sr-only peer" />
+                <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-center peer-checked:border-[var(--accent-luxury)] peer-checked:bg-[var(--accent-luxury)]/5 transition-all">
+                  <span className="text-[11px] font-black uppercase tracking-widest text-[var(--text-muted)] peer-checked:text-[var(--accent-luxury)]">Locataire</span>
+                </div>
+              </label>
+              <label className="relative group cursor-pointer">
+                <input type="radio" value="proprietaire" {...register('role')} className="sr-only peer" />
+                <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-center peer-checked:border-[var(--accent-luxury)] peer-checked:bg-[var(--accent-luxury)]/5 transition-all">
+                  <span className="text-[11px] font-black uppercase tracking-widest text-[var(--text-muted)] peer-checked:text-[var(--accent-luxury)]">Propriétaire</span>
+                </div>
+              </label>
+            </div>
+          </div>
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 px-4 bg-secondary text-white font-semibold rounded-btn hover:bg-secondary/90 transition-colors disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-3 py-5 bg-[var(--accent-luxury)] hover:bg-[var(--accent-luxury)]/90 text-[var(--on-accent)] font-black uppercase tracking-[0.3em] text-[11px] rounded-2xl shadow-xl shadow-[var(--accent-glow)] transition-all active:scale-[0.98] disabled:opacity-50 border border-white/20"
         >
-          {loading ? 'Inscription en cours...' : "S'inscrire"}
+          {loading ? 'Création...' : (
+            <>
+              Créer mon compte <ArrowRight size={14} />
+            </>
+          )}
         </button>
       </form>
 
-      <p className="text-xs text-center text-muted">
-        En vous inscrivant, vous acceptez nos{' '}
-        <Link href="/mentions-legales" className="underline">
-          conditions d&apos;utilisation
-        </Link>
-        .
-      </p>
-    </div>
+      <div className="text-center pt-2">
+        <p className="text-[12px] text-[var(--text-muted)] font-medium">
+          Déjà un compte ?{' '}
+          <Link href="/login" className="text-[var(--accent-luxury)] font-black hover:underline underline-offset-4 ml-1">
+            Se connecter
+          </Link>
+        </p>
+      </div>
+    </motion.div>
   )
 }
 
-import { Suspense } from 'react'
-
 export default function RegisterPage() {
   return (
-    <Suspense fallback={
-      <div className="max-w-md w-full flex items-center justify-center p-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    }>
+    <Suspense fallback={<div className="h-40 flex items-center justify-center"><div className="w-8 h-8 border-4 border-[var(--accent-luxury)] border-t-transparent rounded-full animate-spin" /></div>}>
       <RegisterContent />
     </Suspense>
   )

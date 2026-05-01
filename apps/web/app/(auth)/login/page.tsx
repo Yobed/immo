@@ -7,6 +7,8 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { motion } from 'framer-motion'
+import { LogIn, Mail, Lock, ArrowRight } from 'lucide-react'
 
 const loginSchema = z.object({
   email: z.string().email('Adresse e-mail invalide'),
@@ -60,127 +62,122 @@ export default function LoginPage() {
         redirectTo: `${origin}/callback`,
       },
     })
-
-    setGoogleLoading(false)
   }
 
   return (
-    <div className="max-w-md w-full space-y-8">
-      {/* En-tête */}
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-primary font-display">
-          Immo CI
-        </h1>
-        <h2 className="mt-4 text-2xl font-semibold text-[var(--text)]">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className="w-full space-y-10"
+    >
+      {/* Header — Editorial Style */}
+      <div className="text-center space-y-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-[var(--accent-luxury)]/10 text-[var(--accent-luxury)] mb-2 shadow-inner border border-[var(--accent-luxury)]/20">
+          <LogIn size={28} strokeWidth={2.5} />
+        </div>
+        <h1 className="text-3xl md:text-4xl font-black text-[var(--text)] font-display tracking-tight uppercase italic leading-none">
           Connexion
-        </h2>
-        <p className="mt-2 text-sm text-muted">
-          Pas encore de compte ?{' '}
-          <Link href="/register" className="text-secondary hover:underline font-medium">
-            S&apos;inscrire
-          </Link>
+        </h1>
+        <p className="text-[13px] text-[var(--text-muted)] font-medium tracking-wide max-w-[260px] mx-auto leading-relaxed">
+          Accédez à votre espace privilégié et gérez vos biens immobiliers.
         </p>
       </div>
 
-      {/* Message d'erreur */}
-      {error && (
-        <div className="bg-danger/5 border border-danger/20 text-danger px-4 py-3 rounded-card text-sm">
-          {error}
-        </div>
-      )}
+      {/* Social Login */}
+      <div className="space-y-4">
+        <button
+          type="button"
+          onClick={handleGoogleLogin}
+          disabled={googleLoading}
+          className="w-full flex items-center justify-center gap-4 px-6 py-4 border border-[var(--border)] rounded-2xl bg-[var(--surface)] text-[var(--text)] font-black text-[11px] uppercase tracking-[0.2em] hover:border-[var(--accent-luxury)] transition-all active:scale-[0.98] shadow-sm group"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" className="group-hover:scale-110 transition-transform">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+          </svg>
+          {googleLoading ? 'Chargement...' : 'Continuer avec Google'}
+        </button>
 
-      {/* Bouton Google */}
-      <button
-        type="button"
-        onClick={handleGoogleLogin}
-        disabled={googleLoading}
-        className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-[var(--border)] rounded-btn bg-white text-[var(--text)] font-medium hover:bg-[var(--surface)] transition-colors disabled:opacity-50"
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            fill="#4285F4"
-            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-          />
-          <path
-            fill="#34A853"
-            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-          />
-          <path
-            fill="#FBBC05"
-            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-          />
-          <path
-            fill="#EA4335"
-            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-          />
-        </svg>
-        {googleLoading ? 'Redirection...' : 'Continuer avec Google'}
-      </button>
-
-      {/* Séparateur */}
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-[var(--border)]" />
-        </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-surface text-muted">ou</span>
+        <div className="relative flex items-center gap-4 py-2">
+          <div className="flex-1 h-px bg-[var(--border)]" />
+          <span className="text-[9px] font-black text-[var(--text-subtle)] uppercase tracking-widest">ou par e-mail</span>
+          <div className="flex-1 h-px bg-[var(--border)]" />
         </div>
       </div>
 
-      {/* Formulaire email/mot de passe */}
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-[var(--text)] mb-1">
-            Adresse e-mail
-          </label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            {...register('email')}
-            className="w-full px-4 py-3 border border-[var(--border)] rounded-btn focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-transparent"
-            placeholder="vous@exemple.com"
-          />
-          {errors.email && (
-            <p className="mt-1 text-sm text-danger">{errors.email.message}</p>
-          )}
-        </div>
+      {/* Main Form */}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {error && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-[11px] font-black text-center uppercase tracking-wider"
+          >
+            {error}
+          </motion.div>
+        )}
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-[var(--text)] mb-1">
-            Mot de passe
-          </label>
-          <input
-            id="password"
-            type="password"
-            autoComplete="current-password"
-            {...register('password')}
-            className="w-full px-4 py-3 border border-[var(--border)] rounded-btn focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-transparent"
-            placeholder="••••••••"
-          />
-          {errors.password && (
-            <p className="mt-1 text-sm text-danger">{errors.password.message}</p>
-          )}
+        <div className="space-y-5">
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] ml-1">
+              <Mail size={12} className="text-[var(--accent-luxury)]" /> Adresse e-mail
+            </label>
+            <input
+              {...register('email')}
+              type="email"
+              placeholder="votre@email.com"
+              className="w-full px-6 py-4 bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-[var(--text-muted)]/20"
+            />
+            {errors.email && (
+              <p className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.email.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex justify-between items-center ml-1">
+              <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">
+                <Lock size={12} className="text-[var(--accent-luxury)]" /> Mot de passe
+              </label>
+              <Link href="/forgot-password" size={12} className="text-[10px] font-black text-[var(--accent-luxury)] uppercase tracking-widest hover:underline">
+                Oublié ?
+              </Link>
+            </div>
+            <input
+              {...register('password')}
+              type="password"
+              placeholder="••••••••"
+              className="w-full px-6 py-4 bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-[var(--text-muted)]/20"
+            />
+            {errors.password && (
+              <p className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.password.message}</p>
+            )}
+          </div>
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 px-4 bg-primary text-white font-semibold rounded-btn hover:bg-primary/90 transition-colors disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-3 py-5 bg-[var(--accent-luxury)] hover:bg-[var(--accent-luxury)]/90 text-[var(--on-accent)] font-black uppercase tracking-[0.3em] text-[11px] rounded-2xl shadow-xl shadow-[var(--accent-glow)] transition-all active:scale-[0.98] disabled:opacity-50 border border-white/20"
         >
-          {loading ? 'Connexion en cours...' : 'Se connecter'}
+          {loading ? 'Authentification...' : (
+            <>
+              Se connecter <ArrowRight size={14} />
+            </>
+          )}
         </button>
       </form>
 
-      {/* Connexion par téléphone */}
-      <div className="text-center">
-        <Link
-          href="/verify-otp"
-          className="text-sm text-primary hover:underline"
-        >
-          Se connecter par téléphone (OTP)
-        </Link>
+      <div className="text-center pt-6">
+        <p className="text-[13px] text-[var(--text-muted)] font-medium">
+          Pas encore membre ?{' '}
+          <Link href="/register" className="text-[var(--text)] hover:text-[var(--accent-luxury)] font-black uppercase tracking-widest text-[11px] transition-colors border-b border-[var(--text)]/20 ml-1 pb-0.5">
+            Créer un compte
+          </Link>
+        </p>
       </div>
-    </div>
+    </motion.div>
   )
 }

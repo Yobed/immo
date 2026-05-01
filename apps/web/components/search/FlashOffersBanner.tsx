@@ -55,7 +55,7 @@ export async function FlashOffersBanner({ filters }: { filters: Filters }) {
             offre{count > 1 ? 's' : ''} flash WhatsApp correspond{count > 1 ? 'ent' : ''} aussi
           </p>
           <p className="text-white/50 text-xs leading-tight mt-0.5 truncate">
-            Annonces non vérifiées scrappées en direct des groupes WhatsApp
+            Offres de notre réseau d&apos;agents et propriétaires WhatsApp
           </p>
         </div>
       </div>

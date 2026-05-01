@@ -151,12 +151,12 @@ export function BienMediaGallery({
 
           {/* Back button */}
           <Link
-            href="/biens"
+            href="/"
             onClick={e => e.stopPropagation()}
-            className="absolute top-4 left-4 z-30 flex items-center gap-1.5 px-3 py-2 bg-black/40 backdrop-blur-md rounded-xl border border-white/10 text-white/70 text-xs font-medium hover:text-white transition-all"
+            className="absolute top-4 left-4 z-30 flex items-center gap-1.5 px-3 py-2 bg-black/50 backdrop-blur-md rounded-xl border border-white/15 text-white text-xs font-semibold hover:bg-black/70 transition-all active:scale-95"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Retour</span>
+            <ArrowLeft className="w-3.5 h-3.5 shrink-0" />
+            <span>Accueil</span>
           </Link>
 
           {/* Favorites */}
@@ -209,11 +209,13 @@ export function BienMediaGallery({
                   onClick={() => setLightboxIndex(idx)}
                   className="relative w-full mb-1.5 rounded-xl overflow-hidden block focus:outline-none"
                 >
-                  <img
+                  <Image
                     src={photo.url}
                     alt={photo.titre ?? `Photo ${idx + 1}`}
+                    width={800}
+                    height={600}
                     className="w-full h-auto object-cover"
-                    loading={idx < 4 ? 'eager' : 'lazy'}
+                    priority={idx < 4}
                   />
                 </button>
               ))}
@@ -234,9 +236,11 @@ export function BienMediaGallery({
             onClick={() => setLightboxIndex(null)}
           >
             {/* Image */}
-            <img
-              src={photos[lightboxIndex]?.url}
+            <Image
+              src={photos[lightboxIndex]?.url || ''}
               alt=""
+              width={1920}
+              height={1080}
               className="max-w-full max-h-full object-contain"
               onClick={e => e.stopPropagation()}
             />

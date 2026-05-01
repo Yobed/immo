@@ -139,7 +139,7 @@ const ServicesPage = () => {
                      Certainement, Excellence. J'ai identifié 3 propriétés répondant à vos exigences de standing. <br/><br/>
                      <div className="p-3 bg-white/5 border border-white/5 rounded-xl flex items-center gap-3 hover:bg-white/10 transition-colors cursor-pointer group/item">
                        <div className="w-12 h-12 rounded-lg bg-gray-500/20 overflow-hidden">
-                         <img src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=200&auto=format" alt="bien" className="w-full h-full object-cover" />
+                        <img src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=200&auto=format" alt="" aria-hidden="true" className="w-full h-full object-cover" />
                        </div>
                        <div className="flex-1">
                          <div className="text-[10px] font-bold text-[var(--accent-luxury)]">DISPONIBLE</div>
@@ -167,9 +167,12 @@ const ServicesPage = () => {
           <Link href="/recherche" className="px-10 py-5 rounded-full bg-[var(--accent-luxury)] text-[var(--midnight)] font-bold uppercase tracking-widest hover:scale-105 transition-transform">
             Explorer les biens
           </Link>
-          <button className="px-10 py-5 rounded-full bg-white/5 border border-white/10 font-bold uppercase tracking-widest hover:bg-white/10 transition-colors">
+          <Link
+            href="/proprietaires"
+            className="px-10 py-5 rounded-full bg-white/5 border border-white/10 font-bold uppercase tracking-widest hover:bg-white/10 transition-colors"
+          >
             Prendre Rendez-vous
-          </button>
+          </Link>
         </div>
       </section>
     </div>

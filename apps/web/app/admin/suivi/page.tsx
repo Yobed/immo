@@ -3,7 +3,7 @@ import { redirect, notFound } from 'next/navigation'
 import {
   ShieldCheck, Phone, Calendar, Clock, MapPin, User,
   CheckCircle2, XCircle, Hourglass, Home, BedDouble,
-  LayoutGrid, List as ListIcon,
+  LayoutGrid, List as ListIcon, MessageCircle,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -12,7 +12,7 @@ import { formatFCFA } from '@/lib/format'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-type Tab = 'visites' | 'reservations'
+type Tab = 'visites' | 'reservations' | 'contacts'
 type View = 'kanban' | 'list'
 type AdminStatus = 'pending' | 'approved' | 'rejected'
 
@@ -60,6 +60,22 @@ interface ReservationRow {
   created_at: string
   biens: { titre: string; commune: string | null } | null
   locataire: { full_name: string; phone: string | null } | null
+  proprietaire: { full_name: string; phone: string | null } | null
+}
+
+interface ContactRow {
+  id: string
+  visitor_name: string | null
+  visitor_phone: string | null
+  visitor_email: string | null
+  reason: string | null
+  admin_validation_status: AdminStatus
+  admin_validated_at: string | null
+  owner_notified_at: string | null
+  visitor_notified_at: string | null
+  source: string
+  created_at: string
+  biens: { titre: string; commune: string | null } | null
   proprietaire: { full_name: string; phone: string | null } | null
 }
 
@@ -130,10 +146,15 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
   const { count: reservationsPending } = await (admin as any)
     .from('reservations').select('id', { count: 'exact', head: true })
     .eq('admin_validation_status', 'pending')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { count: contactsPending } = await (admin as any)
+    .from('contact_requests').select('id', { count: 'exact', head: true })
+    .eq('admin_validation_status', 'pending')
 
   // Données : en kanban on prend tout (3 colonnes), en liste on filtre par status
   let visites: VisiteRow[] = []
   let reservations: ReservationRow[] = []
+  let contacts: ContactRow[] = []
 
   if (tab === 'visites') {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

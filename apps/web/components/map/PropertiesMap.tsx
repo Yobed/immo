@@ -1,6 +1,7 @@
 'use client'
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { MAPBOX_TOKEN, ABIDJAN_CENTER } from '@/lib/mapbox'
 import Map, { Marker, Source, Layer, GeolocateControl, NavigationControl, type MapRef } from 'react-map-gl/mapbox'
 import mapboxgl from 'mapbox-gl'
@@ -377,7 +378,9 @@ export function PropertiesMap({
             <div className="sm:hidden absolute inset-x-2 bottom-2 z-20">
               <div className="bg-[#0a0a12]/95 backdrop-blur-xl border border-[rgba(212,175,55,0.4)] rounded-2xl shadow-2xl p-3 flex items-center gap-3">
                 {bien.photo_url && (
-                  <img src={bien.photo_url} alt="" className="w-12 h-12 rounded-xl object-cover shrink-0" />
+                  <div className="relative w-12 h-12 shrink-0">
+                    <Image src={bien.photo_url} alt="" fill className="rounded-xl object-cover" sizes="48px" />
+                  </div>
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-[9px] font-bold text-[#D4AF37] uppercase tracking-wider truncate">
@@ -417,7 +420,7 @@ export function PropertiesMap({
               <div className="bg-[#0a0a12]/95 backdrop-blur-[20px] border border-[rgba(212,175,55,0.4)] rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden">
                 <div className="h-40 w-full relative">
                   {bien.photo_url ? (
-                    <img src={bien.photo_url} alt={bien.titre} className="w-full h-full object-cover" />
+                    <Image src={bien.photo_url} alt={bien.titre} fill className="object-cover" sizes="(max-width: 640px) 100vw, 300px" />
                   ) : (
                     <div className="w-full h-full bg-[#1a1a2e] flex items-center justify-center">
                       <MapPin className="text-[#D4AF37] opacity-20" size={32} />

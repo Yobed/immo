@@ -91,35 +91,23 @@ export default async function HomePage() {
     }))
 
   return (
-    <main className="bg-[#020617]">
+    <main className="bg-[var(--background)]">
       {/* 1. Hero éditorial — image fixe, typo serif, recherche minimaliste */}
-      <HeroEditorial bgImage={bgImages[0]} />
+      <HeroEditorial bgImage={bgImages[0]} featuredBiens={premiumProperties} />
 
       {/* 2. Parcours utilisateurs — 5 personas explicites */}
       <JourneyShortcuts />
 
-      {/* 3. Sélection éditoriale */}
-      <FeaturedProperties initialBiens={biensWithPhoto} />
+      {/* 3. Près de chez moi (Coup de coeur de l'utilisateur) */}
+      <NearMeSection initialBiens={biensWithPhoto} />
 
-      {/* 4. Destinations de prestige */}
-      <PrestigeCommunes />
+      {/* 4. Sélection éditoriale */}
+      <FeaturedProperties initialBiens={biensWithPhoto} />
 
       {/* 5. Veille en direct (réseau WhatsApp) */}
       <FlashOffersSection />
 
-      {/* 6. Près de chez moi */}
-      <NearMeSection initialBiens={biensWithPhoto} />
-
-      {/* 7. Carte des zones */}
-      <MapZones biens={biensWithPhoto} />
-
-      {/* 8. Les 4 piliers */}
-      <ServicesPillars />
-
-      {/* 9. Publier votre bien */}
-      <PublishChoiceTeaser />
-
-      {/* 10. Footer */}
+      {/* 6. Footer */}
       <Footer />
     </main>
   )

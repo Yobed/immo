@@ -1,13 +1,19 @@
 import type { Metadata, Viewport } from 'next'
-import { Cormorant_Garamond, Outfit, JetBrains_Mono } from 'next/font/google'
+import { Unbounded, Playfair_Display, Outfit, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 
-const cormorant = Cormorant_Garamond({
+const unbounded = Unbounded({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['300', '400', '500', '600', '700', '800'],
   variable: '--font-display',
   display: 'swap',
+})
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
   style: ['normal', 'italic'],
+  variable: '--font-serif',
+  display: 'swap',
 })
 const outfit = Outfit({
   subsets: ['latin'],
@@ -52,16 +58,18 @@ export const metadata: Metadata = {
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { ConditionalWhatsApp } from '@/components/ui/ConditionalWhatsApp'
 import { TapFeedback } from '@/components/ui/TapFeedback'
+import { AnalyticsProvider } from '@/components/providers/AnalyticsProvider'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="fr"
-      className={`${cormorant.variable} ${outfit.variable} ${jetbrainsMono.variable}`}
+      className={`${unbounded.variable} ${playfair.variable} ${outfit.variable} ${jetbrainsMono.variable}`}
       suppressHydrationWarning
     >
       <body className="font-sans bg-[var(--background)] text-[var(--text)] antialiased">
         <ThemeProvider>
+          <AnalyticsProvider />
           {children}
           <ConditionalWhatsApp />
           <TapFeedback />

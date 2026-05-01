@@ -126,7 +126,8 @@ export default async function OffreFlashPage({ searchParams }: PageProps) {
             Annonces fraîches du terrain
           </h1>
           <p className="text-white/85 text-sm md:text-base max-w-2xl">
-            Biens scrappés en temps réel depuis les groupes WhatsApp d&apos;agents et propriétaires de Côte d&apos;Ivoire. {total.toLocaleString('fr-FR')} annonces actives.
+            Annonces fraîches de notre réseau d&apos;agents et propriétaires de Côte d&apos;Ivoire.{' '}
+            {total.toLocaleString('fr-FR')} offres actives.
           </p>
         </div>
       </section>
@@ -272,7 +273,7 @@ export default async function OffreFlashPage({ searchParams }: PageProps) {
         <div className="mt-10 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3 text-xs text-amber-900">
           <Phone className="w-4 h-4 mt-0.5 shrink-0" />
           <p>
-            Les annonces affichées proviennent de groupes WhatsApp publics et sont mises à jour en temps réel. Vérifiez toujours l&apos;authenticité de l&apos;offre avant tout paiement. Immo CI ne valide pas individuellement chaque annonce flash.
+            Les annonces affichées proviennent de notre réseau de groupes WhatsApp d&apos;agents et propriétaires. Vérifiez toujours l&apos;authenticité de l&apos;offre avant tout paiement. Immo CI ne valide pas individuellement chaque annonce flash.
           </p>
         </div>
       </div>

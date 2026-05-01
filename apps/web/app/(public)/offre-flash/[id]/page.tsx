@@ -201,9 +201,14 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
                     href={buildWhatsAppUrl(bien.telephone, bien.ref, bien.titre)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full py-3 bg-green-600 text-white rounded-xl font-bold text-sm hover:bg-green-700 transition-colors"
+                    className="relative flex items-center justify-center gap-2 w-full py-3.5 bg-green-600 text-white rounded-xl font-bold text-sm hover:bg-green-700 transition-colors overflow-hidden group"
                   >
-                    <MessageCircle className="w-4 h-4" />
+                    {/* Pulse ring */}
+                    <span className="absolute left-5 flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-40" />
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-white/80" />
+                    </span>
+                    <MessageCircle className="w-4 h-4 ml-4" />
                     Contacter sur WhatsApp
                   </a>
                   <a
@@ -238,6 +243,20 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
                   Cette offre provient d&apos;un groupe WhatsApp public. Vérifiez l&apos;identité du vendeur et la conformité du bien avant tout engagement financier.
                 </div>
               </div>
+            </div>
+
+            {/* Cross-promo — Biens vérifiés */}
+            <div className="bg-white rounded-2xl p-4 border border-slate-200">
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-2">Cherchez-vous une annonce vérifiée ?</p>
+              <p className="text-xs text-slate-600 mb-3 leading-relaxed">
+                Notre catalogue de biens <strong className="text-slate-800">contrôlés par l&apos;équipe Immo CI</strong> avec visite et contrat sécurisé.
+              </p>
+              <Link
+                href="/biens"
+                className="flex items-center justify-center gap-1.5 w-full py-2.5 bg-slate-900 hover:bg-slate-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-colors"
+              >
+                Voir les biens vérifiés →
+              </Link>
             </div>
           </aside>
         </div>

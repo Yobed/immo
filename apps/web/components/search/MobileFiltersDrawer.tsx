@@ -1,55 +1,88 @@
 'use client'
 import { useState } from 'react'
 import { SearchFilters } from './SearchFilters'
+import { motion, AnimatePresence } from 'framer-motion'
+import { X, SlidersHorizontal, ChevronUp } from 'lucide-react'
 
 export function MobileFiltersDrawer({ activeCount }: { activeCount: number }) {
   const [open, setOpen] = useState(false)
 
   return (
     <>
-      {/* Trigger button */}
+      {/* Trigger button — plus premium */}
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="lg:hidden flex items-center gap-2 px-4 py-2 rounded-btn border border-[var(--border)] bg-[var(--surface-card)] font-sans text-sm text-[var(--text)] hover:border-primary/40 transition-colors"
+        className="lg:hidden flex items-center justify-between w-full px-5 py-4 rounded-2xl border border-[var(--border)] bg-[var(--midnight-muted)] shadow-xl active:scale-[0.98] transition-all"
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
-          <line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="12" x2="16" y2="12" /><line x1="4" y1="18" x2="12" y2="18" />
-        </svg>
-        Filtres
-        {activeCount > 0 && (
-          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary text-white text-xs font-mono">
-            {activeCount}
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-[var(--accent-luxury)]/10 text-[var(--accent-luxury)]">
+            <SlidersHorizontal size={18} strokeWidth={2.5} />
+          </div>
+          <span className="font-black text-xs uppercase tracking-[0.2em] text-[var(--text)]">Filtres de recherche</span>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          {activeCount > 0 && (
+            <span className="flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-[var(--accent-luxury)] text-[var(--on-accent)] text-[10px] font-black shadow-lg shadow-[var(--accent-luxury)]/20">
+              {activeCount}
+            </span>
+          )}
+          <ChevronUp size={16} className="text-[var(--text-muted)]" />
+        </div>
       </button>
 
-      {/* Backdrop */}
-      {open && (
-        <div
-          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
-          onClick={() => setOpen(false)}
-        />
-      )}
+      <AnimatePresence>
+        {open && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] lg:hidden"
+            />
 
-      {/* Drawer */}
-      <div className={`fixed inset-y-0 left-0 w-80 max-w-[90vw] bg-[var(--surface-card)] z-50 shadow-xl transform transition-transform duration-300 lg:hidden overflow-y-auto ${open ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex items-center justify-between p-4 border-b border-[var(--border)]">
-          <h2 className="font-display text-lg text-[var(--text)]">Filtres</h2>
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            className="w-8 h-8 flex items-center justify-center rounded-btn hover:bg-[var(--surface)] transition-colors text-muted"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
-              <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/>
-            </svg>
-          </button>
-        </div>
-        <div className="p-4">
-          <SearchFilters onApply={() => setOpen(false)} />
-        </div>
-      </div>
+            {/* Bottom Sheet */}
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed inset-x-0 bottom-0 z-[201] lg:hidden"
+            >
+              <div className="bg-[var(--surface-card)] rounded-t-[2.5rem] shadow-[0_-12px_40px_rgba(0,0,0,0.3)] border-t border-white/5 overflow-hidden flex flex-col max-h-[92vh]">
+                {/* Handle bar */}
+                <div className="flex justify-center pt-3 pb-1">
+                  <div className="w-12 h-1.5 rounded-full bg-[var(--border)] opacity-50" />
+                </div>
+
+                <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)]">
+                  <div className="flex items-center gap-3">
+                    <SlidersHorizontal size={18} className="text-[var(--accent-luxury)]" />
+                    <h2 className="font-black text-sm uppercase tracking-widest text-[var(--text)]">Affinage</h2>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setOpen(false)}
+                    className="w-10 h-10 flex items-center justify-center rounded-full bg-[var(--surface)] text-[var(--text-muted)] active:scale-90 transition-transform"
+                  >
+                    <X size={20} strokeWidth={2.5} />
+                  </button>
+                </div>
+
+                <div className="p-6 overflow-y-auto">
+                  <SearchFilters onApply={() => setOpen(false)} />
+                </div>
+
+                {/* Safe area spacer */}
+                <div className="h-[env(safe-area-inset-bottom,2rem)] bg-[var(--surface-card)]" />
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   )
 }

@@ -16,6 +16,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import Image from 'next/image'
 import { MediaTypeBadge } from './MediaTypeIcon'
 import { Button } from '@/components/ui'
 import { cn } from '@/lib/utils'
@@ -57,10 +58,10 @@ function SortableMediaItem({
         </svg>
       </div>
 
-      {/* Thumbnail */}
       {media.type === 'photo' || media.type === 'vue_360' ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={media.url} alt="" className="w-16 h-12 object-cover rounded-btn flex-shrink-0" />
+        <div className="relative w-16 h-12 flex-shrink-0">
+          <Image src={media.url} alt="" fill className="object-cover rounded-btn" sizes="64px" />
+        </div>
       ) : (
         <div className="w-16 h-12 bg-[var(--surface)] rounded-btn flex items-center justify-center flex-shrink-0">
           <MediaTypeBadge type={media.type} />

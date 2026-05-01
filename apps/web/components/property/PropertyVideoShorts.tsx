@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Badge } from '@/components/ui';
 
 interface PropertyVideo {
@@ -171,8 +172,8 @@ export const PropertyVideoShorts: React.FC<PropertyVideoShortsProps> = ({
           {/* Overlays - Side Actions */}
           <div className="absolute right-4 bottom-32 flex flex-col items-center gap-6 z-20">
             <div className="flex flex-col items-center gap-1 group">
-               <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-xl mb-2">
-                  <img src="https://i.pravatar.cc/100?u=proprietaire" alt="L'Agent" className="w-full h-full object-cover" />
+               <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-xl mb-2">
+                  <Image src="https://i.pravatar.cc/100?u=proprietaire" alt="L'Agent" fill className="object-cover" sizes="40px" />
                </div>
                <div className="w-5 h-5 rounded-full bg-[var(--accent-luxury)] flex items-center justify-center -mt-5 z-10">
                   <span className="text-[10px] text-white font-bold">+</span>

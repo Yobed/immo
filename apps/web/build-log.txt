@@ -1,0 +1,92 @@
+  ▲ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (215kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/52) ...
+   Generating static pages (13/52) 
+   Generating static pages (26/52) 
+   Generating static pages (39/52) 
+ ✓ Generating static pages (52/52)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+┌ ƒ /                                    15.5 kB         233 kB
+├ ○ /_not-found                          880 B            89 kB
+├ ƒ /admin/moderation                    878 B           103 kB
+├ ƒ /ambassadeur                         5.46 kB         208 kB
+├ ƒ /api/auth/complete-profile           0 B                0 B
+├ ƒ /api/auth/logout                     0 B                0 B
+├ ƒ /api/avis                            0 B                0 B
+├ ƒ /api/avis/[id]/reponse               0 B                0 B
+├ ƒ /api/biens                           0 B                0 B
+├ ƒ /api/biens/[id]                      0 B                0 B
+├ ƒ /api/biens/[id]/broadcast            0 B                0 B
+├ ƒ /api/biens/[id]/description          0 B                0 B
+├ ƒ /api/biens/[id]/medias               0 B                0 B
+├ ƒ /api/biens/[id]/score                0 B                0 B
+├ ƒ /api/biens/[id]/upload               0 B                0 B
+├ ƒ /api/chat                            0 B                0 B
+├ ƒ /api/contrats/[id]                   0 B                0 B
+├ ƒ /api/contrats/generer                0 B                0 B
+├ ƒ /api/cron/dedup-locaux               0 B                0 B
+├ ƒ /api/kyc                             0 B                0 B
+├ ƒ /api/notifications                   0 B                0 B
+├ ƒ /api/notifications/[id]              0 B                0 B
+├ ƒ /api/paiements/initier               0 B                0 B
+├ ƒ /api/paiements/webhook               0 B                0 B
+├ ƒ /api/quittances/generer              0 B                0 B
+├ ƒ /api/quittances/webhook              0 B                0 B
+├ ƒ /api/reservations                    0 B                0 B
+├ ƒ /api/upload/sign                     0 B                0 B
+├ ƒ /api/visites                         0 B                0 B
+├ ƒ /api/webhooks/tally                  0 B                0 B
+├ ƒ /api/whatsapp/webhook                0 B                0 B
+├ ƒ /avis-recus                          3.08 kB         160 kB
+├ ƒ /biens                               8.33 kB         218 kB
+├ ƒ /biens/[id]                          27.1 kB         255 kB
+├ ƒ /callback                            0 B                0 B
+├ ƒ /chat                                6.05 kB         137 kB
+├ ○ /complete-profile                    2.18 kB         152 kB
+├ ƒ /confirmer/[token]                   867 B          97.7 kB
+├ ƒ /dashboard                           131 kB          242 kB
+├ ƒ /favoris                             4.72 kB         149 kB
+├ ○ /login                               3.01 kB         197 kB
+├ ƒ /mes-avis                            2.76 kB         160 kB
+├ ƒ /mes-biens                           3.12 kB         221 kB
+├ ƒ /mes-biens/[id]/modifier             20.4 kB         279 kB
+├ ƒ /mes-biens/nouveau                   1.83 kB         194 kB
+├ ƒ /mes-visites                         194 B          97.1 kB
+├ ƒ /messages                            7.02 kB         177 kB
+├ ƒ /notifications                       1.74 kB         164 kB
+├ ƒ /offre-flash                         878 B           103 kB
+├ ƒ /offre-flash/[id]                    878 B           103 kB
+├ ƒ /paiement/retour                     194 B          97.1 kB
+├ ƒ /profil                              19.9 kB         177 kB
+├ ƒ /proprietaires                       6.06 kB         137 kB
+├ ƒ /quittances                          194 B          97.1 kB
+├ ƒ /recherche                           478 kB          647 kB
+├ ○ /register                            3.88 kB         198 kB
+├ ƒ /reservations                        194 B          97.1 kB
+├ ƒ /reservations/[id]                   1.22 kB         160 kB
+├ ƒ /reservations/nouvelle               2.49 kB         153 kB
+├ ○ /robots.txt                          0 B                0 B
+├ ƒ /services                            867 B          97.7 kB
+├ ○ /sitemap.xml                         0 B                0 B
+├ ○ /verify-otp                          2.05 kB         161 kB
+└ ƒ /visites                             2.49 kB         160 kB
++ First Load JS shared by all            88.1 kB
+  ├ chunks/1528-6d329a00c76ffabe.js      31.9 kB
+  ├ chunks/1dd3208c-0028c17dc4ef8c38.js  53.6 kB
+  └ other shared chunks (total)          2.63 kB
+
+
+ƒ Middleware                             79.6 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

@@ -28,7 +28,7 @@ const JOURNEYS: Journey[] = [
     accent: 'Vérifié',
     borderColor: 'border-[#C5A059]/30 hover:border-[#C5A059]',
     iconBg: 'bg-[#C5A059]/10 border-[#C5A059]/30',
-    iconColor: 'text-[#C5A059]',
+    iconColor: 'text-amber-700',
   },
   {
     icon: <Flame className="w-5 h-5" strokeWidth={1.5} />,
@@ -40,7 +40,7 @@ const JOURNEYS: Journey[] = [
     accent: 'Live',
     borderColor: 'border-orange-500/30 hover:border-orange-500',
     iconBg: 'bg-orange-500/10 border-orange-500/30',
-    iconColor: 'text-orange-400',
+    iconColor: 'text-orange-600',
   },
   {
     icon: <Compass className="w-5 h-5" strokeWidth={1.5} />,
@@ -52,7 +52,7 @@ const JOURNEYS: Journey[] = [
     accent: 'Outils',
     borderColor: 'border-blue-500/30 hover:border-blue-400',
     iconBg: 'bg-blue-500/10 border-blue-500/30',
-    iconColor: 'text-blue-400',
+    iconColor: 'text-blue-700',
   },
   {
     icon: <Crown className="w-5 h-5" strokeWidth={1.5} />,
@@ -62,9 +62,9 @@ const JOURNEYS: Journey[] = [
     cta: 'Créer un compte',
     href: '/login?next=/mes-biens/nouveau',
     accent: 'Premium',
-    borderColor: 'border-amber-500/30 hover:border-[#D97706]',
+    borderColor: 'border-amber-500/30 hover:border-[var(--accent-luxury)]',
     iconBg: 'bg-amber-500/10 border-amber-500/30',
-    iconColor: 'text-amber-400',
+    iconColor: 'text-amber-700',
   },
   {
     icon: <MessageCircle className="w-5 h-5" strokeWidth={1.5} />,
@@ -77,13 +77,13 @@ const JOURNEYS: Journey[] = [
     accent: 'Express',
     borderColor: 'border-emerald-500/30 hover:border-emerald-400',
     iconBg: 'bg-emerald-500/10 border-emerald-500/30',
-    iconColor: 'text-emerald-400',
+    iconColor: 'text-emerald-700',
   },
 ]
 
 export function JourneyShortcuts() {
   return (
-    <section className="relative py-16 md:py-24 bg-[#0a0e1a] overflow-hidden">
+    <section className="relative py-16 md:py-24 bg-[var(--background)] overflow-hidden">
       {/* Top divider */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-[#C5A059]/40 to-transparent" />
 
@@ -91,17 +91,17 @@ export function JourneyShortcuts() {
         {/* Header */}
         <div className="text-center mb-12 md:mb-16 max-w-3xl mx-auto">
           <div className="flex items-center justify-center gap-3 mb-5">
-            <div className="h-px w-8 bg-[#C5A059]" />
-            <p className="text-[10px] font-medium tracking-[0.5em] uppercase text-[#C5A059]">
+            <div className="h-px w-8 bg-amber-700" />
+            <p className="text-[10px] font-medium tracking-[0.5em] uppercase text-amber-700">
               Par où commencer
             </p>
-            <div className="h-px w-8 bg-[#C5A059]" />
+            <div className="h-px w-8 bg-amber-700" />
           </div>
-          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl text-white leading-[1.05] tracking-tight">
+          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl text-[var(--text)] leading-[1.05] tracking-tight">
             Chaque besoin,<br />
-            <span className="font-editorial text-[#C5A059]">son parcours.</span>
+            <span className="font-display italic text-[var(--accent-luxury)]">son parcours.</span>
           </h2>
-          <p className="font-sans text-sm md:text-base text-white/60 mt-6 leading-relaxed">
+          <p className="font-sans text-sm md:text-base text-slate-600 mt-6 leading-relaxed">
             Cinq voies adaptées à votre profil. Choisissez celle qui vous correspond.
           </p>
         </div>
@@ -116,30 +116,30 @@ export function JourneyShortcuts() {
               <Link
                 key={j.title}
                 {...linkProps}
-                className={`group relative flex flex-col bg-white/[0.02] backdrop-blur-sm rounded-2xl p-5 md:p-6 border ${j.borderColor} transition-all duration-500 hover:bg-white/[0.04] hover:-translate-y-1 ${i === 4 ? 'lg:col-start-3 lg:col-end-4 md:col-span-2 lg:col-span-1' : ''}`}
+                className={`group relative flex flex-col bg-[var(--surface-card)] rounded-2xl p-5 md:p-6 border border-[var(--border)] transition-all duration-500 hover:bg-[var(--surface-hover)] hover:-translate-y-1 shadow-sm hover:shadow-md`}
               >
                 {/* Header: number + accent */}
                 <div className="flex items-start justify-between mb-5">
                   <div className={`w-11 h-11 rounded-xl ${j.iconBg} border flex items-center justify-center ${j.iconColor}`}>
                     {j.icon}
                   </div>
-                  <span className="font-mono text-[10px] text-white/30 mt-1">
+                  <span className="font-mono text-[10px] text-slate-400 mt-1" aria-hidden="true">
                     0{i + 1}
                   </span>
                 </div>
 
                 {/* Label */}
-                <p className="text-[9px] font-medium uppercase tracking-[0.25em] text-white/40 mb-2">
+                <p className="text-[9px] font-medium uppercase tracking-[0.25em] text-slate-500 mb-2">
                   {j.label}
                 </p>
 
                 {/* Title */}
-                <h3 className="font-display text-2xl text-white leading-tight mb-3">
+                <h3 className="font-display text-2xl text-[var(--text)] leading-tight mb-3">
                   {j.title}
                 </h3>
 
                 {/* Description */}
-                <p className="font-sans text-xs text-white/60 leading-relaxed mb-6 flex-1">
+                <p className="font-sans text-xs text-[var(--text-muted)] leading-relaxed mb-6 flex-1">
                   {j.description}
                 </p>
 

@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { MessageSquare } from 'lucide-react';
+import Image from 'next/image';
 
 /**
  * WhatsAppConcierge
@@ -41,10 +42,12 @@ export const WhatsAppConcierge = () => {
         {/* Shine effect */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000" />
         
-        <img 
+        <Image 
           src="/whatsapp-icon.svg" 
           alt="WhatsApp" 
-          className="w-12 h-12 object-contain group-hover:scale-110 transition-transform duration-500" 
+          width={48}
+          height={48}
+          className="object-contain group-hover:scale-110 transition-transform duration-500" 
         />
       </motion.a>
       

@@ -5,6 +5,8 @@ import { SearchBar } from '@/components/search/SearchBar'
 import { UserMenu } from '@/components/auth/UserMenu'
 import { MagneticWrapper } from '@/components/landing/MagneticWrapper'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
+import { MobileTabBar } from '@/components/layout/MobileTabBar'
+import { PageTransition } from '@/components/layout/PageTransition'
 
 // Cache-bust: 2026-04-20T13:42:00Z
 
@@ -29,6 +31,7 @@ export default async function PublicLayout({ children }: { children: React.React
 
   // Navigation de base
   let navLinks = [
+    { href: '/', label: 'Accueil' },
     { href: '/biens', label: 'Annonces' },
     { href: '/offre-flash', label: '🔥 Offres flash' },
     { href: '/services', label: 'Services' },
@@ -39,6 +42,7 @@ export default async function PublicLayout({ children }: { children: React.React
   // Si c'est un propriétaire, on lui affiche son menu complet pour ne pas qu'il soit "perdu"
   if (role === 'pro') {
     navLinks = [
+      { href: '/', label: 'Accueil' },
       { href: '/recherche', label: 'Rechercher' },
       { href: '/dashboard', label: 'Tableau de bord' },
       { href: '/mes-biens', label: 'Mes annonces' },
@@ -84,7 +88,7 @@ export default async function PublicLayout({ children }: { children: React.React
 
           {/* Search bar — always visible */}
           <div className="flex-1 max-w-md">
-            <SearchBar placeholder="Commune, quartier, type de bien..." disableTypewriter />
+            <SearchBar placeholder="Commune, quartier, type de bien..." />
           </div>
 
           {/* Nav desktop */}
@@ -138,12 +142,17 @@ export default async function PublicLayout({ children }: { children: React.React
           </nav>
 
           {/* Mobile menu */}
-          <MobileMenu links={navLinks} ctaLinks={ctaLinks} user={user ? { email: user.email ?? '', role, isAdmin } : undefined} />
+          <div className="md:hidden">
+            <MobileMenu links={navLinks} ctaLinks={ctaLinks} user={user ? { email: user.email ?? '', role, isAdmin } : undefined} />
+          </div>
         </div>
       </header>
 
-      {children}
-
+      <PageTransition>
+        {children}
+      </PageTransition>
+      
+      <MobileTabBar />
     </>
   )
 }
