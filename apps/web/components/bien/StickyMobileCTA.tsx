@@ -154,7 +154,7 @@ export function StickyMobileCTA({
               <PrixBloc lieu={bienLieu} prix={prix} prixSuffix={prixSuffix} />
   
               {/* Bouton Réserver */}
-              <AmberCTAButton
+              <ActionButton
                 href={`/reservations/nouvelle?bienId=${bienId}`}
                 icon={BedDouble}
                 label="Réserver"
@@ -307,23 +307,20 @@ export function StickyMobileCTA({
                   <Calendar className="w-3.5 h-3.5" />
                   Demander une visite
                 </button>
-                {/* CTA Button — Amber Luxury */}
-            <motion.button
-              onClick={handleAction}
-              whileTap={{ scale: 0.94 }}
-              className="relative flex-1 flex items-center justify-center gap-3 bg-[var(--accent-luxury)] text-[var(--on-accent)] py-4 px-6 rounded-2xl shadow-[0_12px_40px_-8px_var(--accent-luxury-glow)] animate-[amber-glow-premium_3s_infinite_ease-in-out]"
-            >
-              <div className="flex items-center gap-2.5">
-                <Icon size={20} strokeWidth={3} className="shrink-0" />
-                <span className="font-black text-[13px] uppercase tracking-[0.2em] whitespace-nowrap">
-                  {label}
-                </span>
+                <button
+                  onClick={() => setActiveTab('contact')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all duration-200 ${
+                    activeTab === 'contact'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  Contacter
+                </button>
               </div>
-              
-              {/* Subtle light streak */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-[shimmer_3s_infinite]" />
-            </motion.button>
-u scrollable */}
+
+              {/* Contenu scrollable */}
               <div
                 className="overflow-y-auto px-4 pb-8"
                 style={{ maxHeight: 'calc(88vh - 170px)' }}
