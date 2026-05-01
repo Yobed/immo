@@ -141,7 +141,7 @@ export default function LoginPage() {
               <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">
                 <Lock size={12} className="text-[var(--accent-luxury)]" /> Mot de passe
               </label>
-              <Link href="/forgot-password" size={12} className="text-[10px] font-black text-[var(--accent-luxury)] uppercase tracking-widest hover:underline">
+              <Link href="/forgot-password" className="text-[10px] font-black text-[var(--accent-luxury)] uppercase tracking-widest hover:underline">
                 Oublié ?
               </Link>
             </div>
