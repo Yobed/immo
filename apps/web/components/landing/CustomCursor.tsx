@@ -26,7 +26,12 @@ export const CustomCursor = () => {
     };
 
     const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
+      let target = e.target as Node | null;
+      if (target && target.nodeType === 3) { // TEXT_NODE
+        target = target.parentNode;
+      }
+      if (!target || !(target instanceof Element) || typeof target.closest !== 'function') return;
+
       if (
         target.tagName.toLowerCase() === "button" ||
         target.tagName.toLowerCase() === "a" ||

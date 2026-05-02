@@ -6,7 +6,13 @@ export function TapFeedback() {
     let active: HTMLElement | null = null
 
     const press = (e: TouchEvent) => {
-      const el = (e.target as HTMLElement).closest<HTMLElement>(
+      let target = e.target as Node | null
+      if (target && target.nodeType === 3) { // TEXT_NODE
+        target = target.parentNode
+      }
+      if (!target || !(target instanceof Element) || typeof target.closest !== 'function') return
+
+      const el = target.closest<HTMLElement>(
         'a, button, [role="button"]'
       )
       if (!el) return
@@ -14,7 +20,7 @@ export function TapFeedback() {
       el.style.transition = 'transform 80ms ease, filter 80ms ease'
       el.style.transform = 'scale(0.96)'
       el.style.filter = 'brightness(0.88)'
-      if ('vibrate' in navigator) navigator.vibrate(8)
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) navigator.vibrate(8)
     }
 
     const release = () => {
