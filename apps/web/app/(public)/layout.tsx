@@ -8,6 +8,7 @@ import { MagneticWrapper } from '@/components/landing/MagneticWrapper'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { MobileTabBar } from '@/components/layout/MobileTabBar'
 import { PageTransition } from '@/components/layout/PageTransition'
+import { OnboardingModal } from '@/components/ui/OnboardingModal'
 
 // Cache-bust: 2026-04-20T13:42:00Z
 
@@ -157,6 +158,7 @@ export default async function PublicLayout({ children }: { children: React.React
       </PageTransition>
       
       <MobileTabBar />
+      <OnboardingModal />
     </>
   )
 }

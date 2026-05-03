@@ -11,7 +11,7 @@ import { TYPES_BIEN_LABELS, EQUIPEMENTS_LABELS } from '@immo-ci/shared/constants
 import { BienCarousel } from '@/components/bien/BienCarousel'
 import { BienCard } from '@/components/bien/BienCard'
 import { Bien360 } from '@/components/bien/Bien360'
-import { FavorisButton } from '@/components/bien/FavorisButton'
+import { FavorisWithNote } from '@/components/bien/FavorisWithNote'
 import { VisiteRequestForm } from '@/components/bien/VisiteRequestForm'
 import { VIPConciergeButton } from '@/components/bien/VIPConciergeButton'
 import { DemanderContactWhatsAppButton } from '@/components/bien/DemanderContactWhatsAppButton'
@@ -95,6 +95,11 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
   const isOwner = !!(user?.id && user.id === bien.proprietaire_id)
   if (bien.statut !== 'publie' && !isOwner) notFound()
 
+  const { data: favoriRow } = user?.id
+    ? await supabase.from('favoris').select('id').eq('user_id', user.id).eq('bien_id', id).maybeSingle()
+    : { data: null }
+  const initialIsFavori = !!favoriRow
+
   const medias = ((bien.biens_medias as any[]) ?? []).sort((a: any, b: any) => a.ordre - b.ordre)
   let videoMedias = medias.filter((m: any) => m.type === 'video')
 
@@ -133,6 +138,19 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
     .neq('id', id)
     .eq('statut', 'publie')
     .limit(3)
+
+  // Avis sur le propriétaire
+  const { data: avisData } = bien.proprietaire_id
+    ? await (supabase as any)
+        .from('avis')
+        .select('note, commentaire, created_at, profiles!avis_auteur_id_fkey(full_name, avatar_url)')
+        .eq('cible_id', bien.proprietaire_id)
+        .order('created_at', { ascending: false })
+        .limit(5)
+    : { data: [] }
+
+  const avis = (avisData ?? []) as { note: number; commentaire: string | null; created_at: string; profiles: { full_name: string; avatar_url: string | null } | null }[]
+  const avgNote = avis.length > 0 ? Math.round(avis.reduce((s, a) => s + a.note, 0) / avis.length * 10) / 10 : null
 
   const similarBiens = similarBiensRaw?.map(b => ({
     ...b,
@@ -204,7 +222,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             <div className="flex items-center gap-3 mb-8 flex-wrap">
               <ShareButton titre={bien.titre} />
               {user?.id && (
-                <FavorisButton bienId={bien.id} userId={user.id} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-sm font-bold text-[var(--text-muted)] hover:text-[var(--text)] hover:border-[var(--accent-luxury)]/50 transition-all active:scale-95" />
+                <FavorisWithNote bienId={bien.id} userId={user.id} initialIsFavori={initialIsFavori} />
               )}
             </div>
 
@@ -225,6 +243,38 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                     <span key={eq} className="px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-xs text-slate-600 font-medium">
                       {EQUIPEMENTS_LABELS[eq] ?? eq}
                     </span>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* AVIS PROPRIÉTAIRE */}
+            {avis.length > 0 && (
+              <section className="mb-8">
+                <div className="flex items-center gap-3 mb-4">
+                  <h2 className="text-base font-bold text-slate-800">
+                    Avis sur le propriétaire
+                  </h2>
+                  {avgNote && (
+                    <span className="flex items-center gap-1 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold px-2.5 py-1 rounded-full">
+                      {'★'.repeat(Math.round(avgNote))}{'☆'.repeat(5 - Math.round(avgNote))} {avgNote}/5
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-3">
+                  {avis.map((a, i) => (
+                    <div key={i} className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-bold text-slate-800 text-sm">{a.profiles?.full_name ?? 'Locataire vérifié'}</span>
+                        <span className="text-amber-500 text-sm">{'★'.repeat(a.note)}{'☆'.repeat(5 - a.note)}</span>
+                      </div>
+                      {a.commentaire && (
+                        <p className="text-slate-600 text-sm leading-relaxed">{a.commentaire}</p>
+                      )}
+                      <p className="text-slate-400 text-[10px] mt-2">
+                        {new Date(a.created_at).toLocaleDateString('fr-CI', { month: 'long', year: 'numeric' })}
+                      </p>
+                    </div>
                   ))}
                 </div>
               </section>

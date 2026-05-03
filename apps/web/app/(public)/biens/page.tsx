@@ -9,6 +9,9 @@ import type { LucideIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useRef, useState, useCallback, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { SearchAlert } from '@/components/search/SearchAlert'
+import { useComparator } from '@/hooks/useComparator'
+import { ComparatorBar } from '@/components/bien/ComparatorBar'
 
 const TYPE_FILTERS: { label: string; value: string; icon: LucideIcon }[] = [
   { label: 'Proche de moi',    value: 'near_me',           icon: MapPin },
@@ -72,6 +75,7 @@ function BiensContent() {
   const [count, setCount] = useState(0)
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const { selected: compareSelected, toggle: compareToggle, clear: compareClear, isSelected: compareIsSelected, isFull: compareFull } = useComparator()
 
   // Instance Supabase stable — une seule fois, jamais recréée
   const supabaseRef = useRef(createClient())
@@ -189,11 +193,19 @@ function BiensContent() {
 
   const activeLabel = TYPE_FILTERS.find(f => f.value === activeType)?.label ?? activeType
 
+  const communeFromUrl = searchParams.get('commune') ?? undefined
+  const typeBienFromUrl = searchParams.get('type_bien') ?? undefined
+
   return (
     <div className="min-h-screen bg-[#020617]">
       <PageHeader activeType={activeType} count={count} />
 
-      <main className="max-w-7xl mx-auto px-3 pt-4 pb-28 lg:pb-16" aria-live="polite" aria-busy={loading}>
+      {/* Alerte recherche WhatsApp */}
+      <div className="max-w-7xl mx-auto px-4 pt-3 pb-1">
+        <SearchAlert commune={communeFromUrl} typeBien={typeBienFromUrl} />
+      </div>
+
+      <main className="max-w-7xl mx-auto px-3 pt-3 pb-28 lg:pb-16" aria-live="polite" aria-busy={loading}>
         <AnimatePresence mode="wait">
           {loading ? (
             <motion.div
@@ -282,6 +294,17 @@ function BiensContent() {
                           score_ia={bien.score_ia}
                           url_visite_3d={bien.url_visite_3d}
                           index={i}
+                          isSelected={compareIsSelected(bien.id)}
+                          onSelect={compareFull && !compareIsSelected(bien.id) ? undefined : () => compareToggle({
+                            id: bien.id, titre: bien.titre, commune: bien.commune,
+                            type_bien: bien.type_bien,
+                            prix: bien.prix_nuit_fcfa ? `${bien.prix_nuit_fcfa.toLocaleString()} FCFA/nuit`
+                              : bien.prix_mois_fcfa ? `${bien.prix_mois_fcfa.toLocaleString()} FCFA/mois`
+                              : bien.prix_vente_fcfa ? `${bien.prix_vente_fcfa.toLocaleString()} FCFA`
+                              : 'Prix sur demande',
+                            surface_m2: bien.surface_m2, nb_pieces: bien.nb_pieces,
+                            photo_url: photo ?? null, is_verifie: bien.is_verifie,
+                          })}
                         />
                         {currentUserId === bien.proprietaire_id && (
                           <div className="absolute top-2 left-2 z-20">
@@ -302,6 +325,12 @@ function BiensContent() {
           )}
         </AnimatePresence>
       </main>
+
+      <ComparatorBar
+        selected={compareSelected}
+        onRemove={(id) => { const b = compareSelected.find(x => x.id === id); if (b) compareToggle(b) }}
+        onClear={compareClear}
+      />
 
       {/* CTA WhatsApp flottant — mobile uniquement */}
       <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden px-4 pb-6 pt-4 pointer-events-none"
