@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { X, Calendar, CalendarCheck, MessageCircle, BedDouble, ArrowLeft } from 'lucide-react'
 import { VisiteRequestForm } from './VisiteRequestForm'
 import { DemanderContactWhatsAppButton } from './DemanderContactWhatsAppButton'
@@ -91,15 +90,14 @@ function ActionButton({
 }
 
 function FloatingBackButton() {
-  const router = useRouter()
   return (
-    <button
-      onClick={() => router.back()}
-      className="fixed top-4 left-4 z-[110] flex items-center justify-center w-11 h-11 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200 text-slate-900 active:scale-90 transition-all lg:hidden"
-      aria-label="Retour"
+    <Link
+      href="/biens"
+      className="fixed top-4 left-4 z-[110] flex items-center justify-center w-11 h-11 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200 text-slate-900 active:scale-90 transition-all"
+      aria-label="Retour aux annonces"
     >
       <ArrowLeft className="w-6 h-6" strokeWidth={2.5} />
-    </button>
+    </Link>
   )
 }
 
