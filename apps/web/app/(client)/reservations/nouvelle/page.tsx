@@ -9,7 +9,11 @@ interface Props {
 export default async function NouvelleReservationPage({ searchParams }: Props) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  if (!user) {
+    const bienId = searchParams.bienId
+    const redirectUrl = bienId ? `/reservations/nouvelle?bienId=${bienId}` : '/reservations/nouvelle'
+    redirect(`/login?redirect=${encodeURIComponent(redirectUrl)}`)
+  }
 
   const bienId = searchParams.bienId
   if (!bienId) redirect('/')

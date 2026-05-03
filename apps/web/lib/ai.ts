@@ -4,7 +4,7 @@ const GROQ_API_KEY = process.env.GROQ_API_KEY || 'gsk_1Sg2ZNrF4OlyvQn3ckqFWGdyb3
 const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 const GROQ_BASE_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
-export const SYSTEM_PROMPT_IMMOBILIER_CI = `Tu es Sapphire, l'assistante WhatsApp de BOGBE'S GROUPE Multi Services, agence immobilière à Abidjan, Côte d'Ivoire.
+export const SYSTEM_PROMPT_IMMOBILIER_CI = `Tu es Sapphire, l"assistante WhatsApp de BOGBE'S GROUPE Multi Services, agence immobilière à Abidjan, Côte d"Ivoire.
 
 ╔══════════════════════════════════════════════════════╗
 ║  RÈGLE N°1 — ABSOLUE — NE JAMAIS VIOLER             ║

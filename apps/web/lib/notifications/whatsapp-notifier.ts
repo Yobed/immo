@@ -1,5 +1,5 @@
 /**
- * Service centralisé pour les notifications WhatsApp métier (Immo CI)
+ * Service centralisé pour les notifications WhatsApp métier (BOGBE'S GROUPE)
  *
  * Workflow d'intermédiation :
  *  1. Visiteur fait une demande → notifyAdminTeam(...)
@@ -212,7 +212,7 @@ function tplOwnerVisitAnnounce(ctx: VisitContext): string {
     '',
     'Merci de me confirmer votre disponibilité pour ce créneau.',
     '',
-    '— *Immo CI*',
+    "— *BOGBE'S GROUPE*",
   ].join('\n')
 }
 
@@ -235,7 +235,7 @@ function tplVisitorVisitConfirmed(ctx: VisitContext): string {
     '',
     'Je vous contacterai 1h avant la visite pour vous communiquer l\'adresse exacte et les modalités.',
     '',
-    '— *Immo CI*',
+    "— *BOGBE'S GROUPE*",
   ]
     .filter(Boolean)
     .join('\n')
@@ -251,7 +251,7 @@ function tplVisitorVisitRejected(ctx: VisitContext, reason?: string): string {
     '',
     'N\'hésitez pas à consulter d\'autres biens disponibles sur notre plateforme.',
     '',
-    '— *Immo CI*',
+    "— *BOGBE'S GROUPE*",
   ]
     .filter((x) => x !== null)
     .join('\n')
@@ -293,7 +293,7 @@ function tplOwnerReservationAnnounce(ctx: ReservationContext): string {
     '',
     'Je gère le dossier et vous tiens informé(e) de la suite.',
     '',
-    '— *Immo CI*',
+    "— *BOGBE'S GROUPE*",
   ].join('\n')
 }
 
@@ -308,7 +308,7 @@ function tplVisitorReservationConfirmed(ctx: ReservationContext): string {
     '',
     'Je vous recontacte rapidement pour finaliser le dossier (paiement, contrat, état des lieux).',
     '',
-    '— *Immo CI*',
+    "— *BOGBE'S GROUPE*",
   ].join('\n')
 }
 
@@ -324,7 +324,7 @@ function tplVisitorReservationRejected(
     '',
     'D\'autres biens similaires sont disponibles sur notre plateforme.',
     '',
-    '— *Immo CI*',
+    "— *BOGBE'S GROUPE*",
   ]
     .filter((x) => x !== null)
     .join('\n')
@@ -594,7 +594,7 @@ function tplVisitorContactApproved(ctx: ContactRequestContext): string {
     '',
     'Le propriétaire est informé de votre démarche.',
     '',
-    '— *Immo CI*',
+    "— *BOGBE'S GROUPE*",
   ]
     .filter(Boolean)
     .join('\n')
@@ -613,7 +613,7 @@ function tplOwnerContactShared(ctx: ContactRequestContext): string {
     '',
     'Il devrait vous contacter sous peu.',
     '',
-    '— *Immo CI*',
+    "— *BOGBE'S GROUPE*",
   ].join('\n')
 }
 
@@ -626,7 +626,7 @@ function tplVisitorContactRejected(ctx: ContactRequestContext, reason?: string):
     '',
     'Vous pouvez en revanche réserver une visite via la plateforme.',
     '',
-    '— *Immo CI*',
+    "— *BOGBE'S GROUPE*",
   ]
     .filter((x) => x !== null)
     .join('\n')

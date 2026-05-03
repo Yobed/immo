@@ -1,7 +1,7 @@
 import { ChatBot } from '@/components/chat/ChatBot'
 
 export const metadata = {
-  title:       'Élite Immo CI — Conciergerie Live',
+  title:       "BOGBE'S GROUPE — Conciergerie Live",
   description: 'Votre conseiller immobilier de luxe dédié. L\'excellence au service de votre projet en Côte d\'Ivoire.',
 }
 
@@ -13,7 +13,7 @@ export default function ChatPage() {
           <div className="flex items-center justify-center gap-4 mb-4">
             <span className="w-12 h-[1px] bg-[var(--accent-luxury)]" />
             <h1 className="font-display text-3xl md:text-4xl text-off-white font-bold tracking-tight">
-              Élite Immo CI
+              BOGBE'S GROUPE
             </h1>
             <span className="w-12 h-[1px] bg-[var(--accent-luxury)]" />
           </div>

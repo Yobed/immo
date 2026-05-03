@@ -5,7 +5,7 @@ import { AvisCard } from '@/components/avis/AvisCard'
 import { AvisForm } from '@/components/avis/AvisForm'
 import { Card } from '@/components/ui/Card'
 
-export const metadata = { title: 'Mes Avis — Immo CI' }
+export const metadata = { title: "Mes Avis — BOGBE'S GROUPE" }
 
 export default async function ClientAvisPage() {
   const supabase = await createClient()

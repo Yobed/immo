@@ -30,7 +30,7 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const protectedRoutes = ['/pro', '/client', '/dashboard', '/mes-biens', '/mes-avis', '/mes-visites', '/visites', '/quittances', '/profil', '/avis-recus']
+  const protectedRoutes = ['/pro', '/client', '/dashboard', '/mes-biens', '/mes-avis', '/mes-visites', '/visites', '/quittances', '/profil', '/avis-recus', '/reservations']
   const isProtected = protectedRoutes.some((route) =>
     request.nextUrl.pathname.startsWith(route)
   )
@@ -38,7 +38,9 @@ export async function middleware(request: NextRequest) {
   if (isProtected && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
-    url.searchParams.set('redirect', request.nextUrl.pathname)
+    // Include search parameters (like ?bienId=...) in the redirect parameter
+    const redirectTo = request.nextUrl.pathname + request.nextUrl.search
+    url.searchParams.set('redirect', redirectTo)
     return NextResponse.redirect(url)
   }
 

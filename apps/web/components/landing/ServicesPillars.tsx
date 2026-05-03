@@ -44,8 +44,8 @@ export function ServicesPillars() {
       <div className="relative z-10 mx-auto px-4 md:px-6 max-w-7xl">
         {/* Header */}
         <div className="text-center mb-12 md:mb-16">
-          <p className="text-[10px] font-bold uppercase tracking-[0.5em] text-amber-700 mb-4">
-            L&apos;expérience Immo CI
+          <p className="text-xs font-bold uppercase tracking-[0.4em] text-amber-700 mb-4">
+            L&apos;expérience BOGBE'S GROUPE
           </p>
           <h2 className="font-display text-3xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.05] tracking-tight max-w-3xl mx-auto">
             Quatre piliers pour<br />
@@ -67,7 +67,7 @@ export function ServicesPillars() {
               </div>
 
               {/* Number */}
-              <span className="absolute top-6 right-6 font-mono text-[10px] text-slate-300 group-hover:text-amber-700/60 transition-colors" aria-hidden="true">
+              <span className="absolute top-6 right-6 font-mono text-xs text-slate-300 group-hover:text-amber-700/60 transition-colors" aria-hidden="true">
                 0{i + 1}
               </span>
 
@@ -97,8 +97,8 @@ export function ServicesPillars() {
         <div className="mt-14 md:mt-20 flex items-center justify-center">
           <div className="flex items-center gap-3 px-5 py-2.5 rounded-full bg-white border border-slate-200 shadow-sm">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[11px] font-medium text-slate-600">
-              Plus de <span className="text-slate-900 font-bold">450 transactions</span> sécurisées en 2026
+            <span className="text-[11px] font-medium text-slate-600 italic">
+              Déjà <span className="text-slate-900 font-bold">1 250+ familles</span> accompagnées avec sérénité à Abidjan
             </span>
           </div>
         </div>

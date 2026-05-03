@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -17,11 +17,17 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [googleLoading, setGoogleLoading] = useState(false)
+
+  const supabase = createClient()
+
+  // Get redirect URL from search params
+  const redirectUrl = searchParams.get('redirect') || '/dashboard'
 
   const {
     register,
@@ -30,8 +36,6 @@ export default function LoginPage() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   })
-
-  const supabase = createClient()
 
   const onSubmit = async (data: LoginFormData) => {
     setLoading(true)
@@ -46,7 +50,7 @@ export default function LoginPage() {
       setError('Identifiants incorrects. Veuillez réessayer.')
       setLoading(false)
     } else {
-      router.push('/dashboard')
+      router.push(redirectUrl)
       router.refresh()
     }
   }
@@ -59,7 +63,7 @@ export default function LoginPage() {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${origin}/callback`,
+        redirectTo: `${origin}/callback?next=${encodeURIComponent(redirectUrl)}`,
       },
     })
   }
@@ -90,9 +94,9 @@ export default function LoginPage() {
           type="button"
           onClick={handleGoogleLogin}
           disabled={googleLoading}
-          className="w-full flex items-center justify-center gap-4 px-6 py-4 border border-[var(--border)] rounded-2xl bg-[var(--surface)] text-[var(--text)] font-black text-[11px] uppercase tracking-[0.2em] hover:border-[var(--accent-luxury)] transition-all active:scale-[0.98] shadow-sm group"
+          className="w-full flex items-center justify-center gap-4 px-6 h-[64px] border border-[var(--border)] rounded-2xl bg-[var(--surface)] text-[var(--text)] font-black text-[12px] uppercase tracking-[0.2em] hover:border-[var(--accent-luxury)] transition-all active:scale-[0.98] shadow-sm group"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" className="group-hover:scale-110 transition-transform">
+          <svg width="20" height="20" viewBox="0 0 24 24" className="group-hover:scale-110 transition-transform">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
@@ -129,7 +133,7 @@ export default function LoginPage() {
               {...register('email')}
               type="email"
               placeholder="votre@email.com"
-              className="w-full px-6 py-4 bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-[var(--text-muted)]/20"
+              className="w-full px-6 h-[64px] bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-[var(--text-muted)]/20"
             />
             {errors.email && (
               <p className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.email.message}</p>
@@ -149,7 +153,7 @@ export default function LoginPage() {
               {...register('password')}
               type="password"
               placeholder="••••••••"
-              className="w-full px-6 py-4 bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-[var(--text-muted)]/20"
+              className="w-full px-6 h-[64px] bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-[var(--text-muted)]/20"
             />
             {errors.password && (
               <p className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.password.message}</p>
@@ -160,11 +164,12 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex items-center justify-center gap-3 py-5 bg-[var(--accent-luxury)] hover:bg-[var(--accent-luxury)]/90 text-[var(--on-accent)] font-black uppercase tracking-[0.3em] text-[11px] rounded-2xl shadow-xl shadow-[var(--accent-glow)] transition-all active:scale-[0.98] disabled:opacity-50 border border-white/20"
+          className="w-full flex items-center justify-center gap-3 h-[64px] bg-[var(--accent-luxury)] hover:bg-[var(--accent-luxury)]/90 text-[var(--on-accent)] font-black uppercase tracking-[0.3em] text-[12px] rounded-2xl shadow-xl shadow-[var(--accent-glow)] transition-all active:scale-[0.98] disabled:opacity-50 border border-white/20 relative overflow-hidden group"
         >
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
           {loading ? 'Authentification...' : (
             <>
-              Se connecter <ArrowRight size={14} />
+              Se connecter <ArrowRight size={16} />
             </>
           )}
         </button>
@@ -179,5 +184,13 @@ export default function LoginPage() {
         </p>
       </div>
     </motion.div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="w-full flex items-center justify-center p-8 text-[var(--text-muted)] text-[12px] uppercase tracking-widest font-black">Chargement...</div>}>
+      <LoginContent />
+    </Suspense>
   )
 }

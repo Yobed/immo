@@ -25,7 +25,7 @@ const ConversionFunnel = dynamic(
   { ssr: false }
 )
 
-export const metadata = { title: 'Dashboard — Immo CI' }
+export const metadata = { title: "Dashboard — BOGBE'S GROUPE" }
 
 type BienRow       = { id: string; titre: string; statut: string }
 type PaiementRow   = { montant_net_fcfa: number; methode: string; created_at: string }

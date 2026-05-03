@@ -1,11 +1,11 @@
 // apps/web/lib/wasender.ts
 /**
- * Wasender API Client — Immo CI Platform
+ * Wasender API Client — BOGBE'S GROUPE Platform
  * Intégration pour la gestion intelligente des messages WhatsApp
  */
 
-const WASSENDER_API_KEY = process.env.WASSENDER_API_KEY || '5bad69e29793e748f2fea9043435cd4844aadd6b0947b650b2efb82c86c34017';
-const WASSENDER_WEBHOOK_SECRET = process.env.WASSENDER_WEBHOOK_SECRET || '';
+const WASSENDER_API_KEY = process.env.WASSENDER_API_KEY ?? '';
+const WASSENDER_WEBHOOK_SECRET = process.env.WASSENDER_WEBHOOK_SECRET ?? '';
 const BASE_URL = 'https://www.wasenderapi.com/api';
 
 export type WasenderMessageType = 'text' | 'image' | 'video' | 'document' | 'audio';
@@ -43,8 +43,12 @@ export function verifyWasenderSignature(payload: string, signature: string): boo
  * Helper interne pour les appels API Wasender
  */
 async function wasenderFetch(endpoint: string, options: RequestInit = {}) {
+  if (!WASSENDER_API_KEY) {
+    console.error('[Wasender] WASSENDER_API_KEY not configured');
+    return { success: false, message: 'WASSENDER_API_KEY not configured' } as WasenderSendResponse;
+  }
   const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint}`;
-  
+
   const headers = {
     'Authorization': `Bearer ${WASSENDER_API_KEY}`,
     'Content-Type': 'application/json',

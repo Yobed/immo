@@ -16,7 +16,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <div className="w-10 h-10 rounded-xl bg-[var(--primary)] flex items-center justify-center text-white font-black text-xs shadow-xl shadow-black/10">
             IC
           </div>
-          <span className="font-black text-xl text-[var(--text)] tracking-tighter font-display uppercase italic">Immo CI</span>
+          <span className="font-black text-xl text-[var(--text)] tracking-tighter font-display uppercase italic">BOGBE'S GROUPE</span>
         </Link>
         <Link href="/" className="text-[10px] font-black text-[var(--text-muted)] hover:text-[var(--accent-luxury)] transition-colors flex items-center gap-2 uppercase tracking-[0.2em] bg-[var(--surface)] px-4 py-2 rounded-full border border-[var(--border)]">
           <ArrowLeft className="w-3.5 h-3.5" />

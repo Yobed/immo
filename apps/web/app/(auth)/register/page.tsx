@@ -87,7 +87,7 @@ function RegisterContent() {
           Bienvenue !
         </h2>
         <p className="text-[13px] text-[var(--text-muted)] font-medium max-w-[280px] mx-auto leading-relaxed">
-          Un e-mail de confirmation a été envoyé. Veuillez activer votre compte pour commencer l&apos;expérience Immo CI.
+          Un e-mail de confirmation a été envoyé. Veuillez activer votre compte pour commencer l&apos;expérience BOGBE'S GROUPE.
         </p>
         <Link
           href="/login"

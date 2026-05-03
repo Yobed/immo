@@ -66,7 +66,7 @@ export default function CompleteProfilePage() {
     <div className="max-w-md w-full space-y-8">
       {/* En-tête */}
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-primary font-display">Immo CI</h1>
+        <h1 className="text-3xl font-bold text-primary font-display">BOGBE'S GROUPE</h1>
         <h2 className="mt-4 text-2xl font-semibold text-[var(--text)]">
           Compléter votre profil
         </h2>

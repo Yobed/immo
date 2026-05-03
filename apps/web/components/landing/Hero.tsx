@@ -136,10 +136,10 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7 }}
-              className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15"
+              className="inline-flex items-center gap-2 mb-5 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/15"
             >
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-              <span className="text-[11px] font-bold text-white/80 tracking-wider uppercase">
+              <span className="text-[12px] font-bold text-white/90 tracking-wider uppercase">
                 {totalBiens > 0 ? `${totalBiens} biens disponibles maintenant` : 'Biens disponibles maintenant'}
               </span>
             </motion.div>
@@ -151,11 +151,11 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.1 }}
                 className="font-display font-bold text-white leading-tight"
-                style={{ fontSize: 'clamp(2rem, 5vw, 4.2rem)' }}
+                style={{ fontSize: 'clamp(2.25rem, 6vw, 4.5rem)' }}
               >
                 {current.top}
               </motion.p>
-              <div className="h-[1.2em] overflow-hidden" style={{ fontSize: 'clamp(2rem, 5vw, 4.2rem)' }}>
+              <div className="h-[1.2em] overflow-hidden" style={{ fontSize: 'clamp(2.25rem, 6vw, 4.5rem)' }}>
                 <AnimatePresence mode="wait">
                   <motion.span
                     key={headlineIdx}
@@ -172,26 +172,26 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
               </div>
             </div>
 
-            {/* Stats rapides — remplace le long paragraphe */}
+            {/* Stats rapides */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="flex items-center gap-5 mb-7"
+              className="flex items-center gap-4 mb-7 flex-wrap"
             >
-              <div className="flex items-center gap-1.5 text-white/60">
-                <MapPin className="w-3.5 h-3.5 text-[var(--accent-luxury)]" />
-                <span className="text-[13px] font-medium">{communes > 0 ? `${communes} communes` : 'Abidjan'}</span>
+              <div className="flex items-center gap-2 text-white/75">
+                <MapPin className="w-4 h-4 text-[var(--accent-luxury)] shrink-0" />
+                <span className="text-sm font-semibold">{communes > 0 ? `${communes} communes` : 'Abidjan'}</span>
               </div>
-              <div className="w-px h-4 bg-white/15" />
-              <div className="flex items-center gap-1.5 text-white/60">
-                <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="text-[13px] font-medium">Réponse en 5 min</span>
+              <div className="w-px h-4 bg-white/20" />
+              <div className="flex items-center gap-2 text-white/75">
+                <TrendingUp className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span className="text-sm font-semibold">Réponse en 5 min</span>
               </div>
-              <div className="w-px h-4 bg-white/15" />
-              <div className="flex items-center gap-1.5 text-white/60">
-                <Sparkles className="w-3.5 h-3.5 text-[var(--accent-luxury)]" />
-                <span className="text-[13px] font-medium">100% gratuit</span>
+              <div className="w-px h-4 bg-white/20" />
+              <div className="flex items-center gap-2 text-white/75">
+                <Sparkles className="w-4 h-4 text-[var(--accent-luxury)] shrink-0" />
+                <span className="text-sm font-semibold">100% gratuit</span>
               </div>
             </motion.div>
 
@@ -219,31 +219,31 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
                 <Link
                   key={cat.label}
                   href={cat.href}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/15 text-white text-[12px] font-semibold transition-all duration-200 active:scale-95"
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white/12 hover:bg-white/22 backdrop-blur-md border border-white/20 text-white text-[13px] font-semibold transition-all duration-200 active:scale-95 min-h-[44px]"
                 >
                   {cat.label}
-                  <ChevronRight className="w-3 h-3 opacity-50" />
+                  <ChevronRight className="w-3.5 h-3.5 opacity-60" />
                 </Link>
               ))}
             </motion.div>
 
             {/* Routing rapide — Flash + Pro */}
-            <div className="flex items-center gap-4 mt-2 flex-wrap">
+            <div className="flex items-center gap-3 mt-3 flex-wrap">
               <Link
                 href="/offre-flash"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[var(--accent-luxury)]/30 text-[var(--accent-luxury)] text-[11px] font-bold hover:bg-[var(--accent-luxury)]/10 transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-[var(--accent-luxury)]/40 text-[var(--accent-luxury)] text-[13px] font-bold hover:bg-[var(--accent-luxury)]/12 transition-colors min-h-[44px]"
               >
-                <span className="relative flex w-1.5 h-1.5">
+                <span className="relative flex w-2 h-2 shrink-0">
                   <span className="animate-ping absolute w-full h-full rounded-full bg-[var(--accent-luxury)] opacity-75" />
-                  <span className="relative w-1.5 h-1.5 rounded-full bg-[var(--accent-luxury)]" />
+                  <span className="relative w-2 h-2 rounded-full bg-[var(--accent-luxury)]" />
                 </span>
                 Offres flash du réseau
               </Link>
               <Link
                 href="/register?role=pro"
-                className="text-[11px] text-white/40 hover:text-white/70 transition-colors underline-offset-2 hover:underline"
+                className="text-[13px] text-white/65 hover:text-white/90 transition-colors underline-offset-2 hover:underline py-2.5 min-h-[44px] flex items-center"
               >
-                Publier un bien
+                Publier un bien →
               </Link>
             </div>
           </div>
@@ -319,7 +319,7 @@ function FeaturedBienCards({ biens }: { biens: FeaturedBien[] }) {
                   {bien.commune}{bien.quartier ? `, ${bien.quartier}` : ''}
                 </p>
                 {fmtPrix && (
-                  <p className="text-[var(--accent-luxury)] text-[12px] font-bold mt-1">
+                  <p className="text-[var(--accent-luxury)] font-display font-bold text-[12px] mt-1">
                     {fmtPrix}<span className="text-white/30 font-normal">{suffix}</span>
                   </p>
                 )}

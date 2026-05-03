@@ -94,7 +94,7 @@ async function callOpenRouter(
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
       'HTTP-Referer': 'https://immo-sigma.vercel.app',
-      'X-Title': 'Immo CI Tally Webhook',
+      'X-Title': "BOGBE'S GROUPE Tally Webhook",
     },
     body: JSON.stringify({
       model,

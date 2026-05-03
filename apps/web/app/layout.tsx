@@ -36,7 +36,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_URL ?? 'https://immo-ci.vercel.app'),
-  title: { template: "%s | BOGBE'S GROUPE", default: "BOGBE'S GROUPE — Immobilier en Côte d'Ivoire" },
+  title: { template: `%s | BOGBE'S GROUPE`, default: `BOGBE'S GROUPE — Immobilier en Côte d'Ivoire` },
   description:
     "Trouvez votre bien immobilier en Côte d'Ivoire. Location, vente, résidences meublées à Abidjan et partout en CI.",
   openGraph: {

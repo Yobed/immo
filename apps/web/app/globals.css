@@ -15,16 +15,27 @@ html, body {
 ══════════════════════════════════════════════════════ */
 :root {
   /* Branding Palette */
-  --secondary:       #F97316;   /* Orange branding remains as pop */
-  --accent-gold:     #C5A059;   /* Champagne Gold — sophisticated */
+  --secondary:       #F97316;
+  --accent-gold:     #C5A059;
   --danger:          #ef4444;
+
+  /* Easing functions — always available as CSS vars */
   --ease-expo:       cubic-bezier(0.16, 1, 0.3, 1);
   --ease-soft:       cubic-bezier(0.4, 0, 0.2, 1);
-  
-  /* Semantic Spacing Tokens — tightened for denser homepage */
-  --section-py:      4rem;      /* py-16 instead of py-20 */
-  --section-py-lg:   6rem;      /* py-24 instead of py-32 */
+  --ease-out:        cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-gentle:     cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  /* Glassmorphism */
+  --glass-blur:      20px;
+
+  /* Semantic Spacing Tokens */
+  --section-py:      4rem;
+  --section-py-lg:   6rem;
   --container-px:    1.5rem;
+
+  /* Touch target minimum (iOS 44pt / Android 48dp) */
+  --touch-min:       44px;
 }
 
 /* ═══════════════════════════════════════════════
@@ -43,18 +54,26 @@ html, body {
   --border:          rgba(255, 255, 255, 0.08);
   --border-hover:    rgba(255, 255, 255, 0.12);
 
-  --accent-luxury:   #fbbf24; /* Vibrant Amber */
-  --accent-glow:     rgba(251, 191, 36, 0.25);
-  --accent-luxury-muted: rgba(251, 191, 36, 0.1);
-  --on-accent:       #020617;
+  --accent-luxury:        #fbbf24;
+  --accent-glow:          rgba(251, 191, 36, 0.25);
+  --accent-luxury-muted:  rgba(251, 191, 36, 0.1);
+  --on-accent:            #020617;
 
-  --primary:         #020617;
-  --on-primary:      #ffffff;
+  --primary:              #020617;
+  --on-primary:           #ffffff;
+  --primary-light:        rgba(255, 255, 255, 0.05);
+  --primary-mid:          #1e3a8a;
+  --primary-glow:         rgba(12, 45, 94, 0.25);
+  --secondary-glow:       rgba(249, 115, 22, 0.28);
 
-  --shadow-premium:  0 25px 60px -15px rgba(0, 0, 0, 0.7);
-  --nav-bg:          rgba(2, 4, 10, 0.85);
-  --glass-surface:   rgba(2, 4, 10, 0.7);
-  --glass-border:    rgba(255, 255, 255, 0.1);
+  --shadow-premium:       0 25px 60px -15px rgba(0, 0, 0, 0.7);
+  --shadow-card:          0 2px 8px rgba(0,0,0,0.28), 0 0 0 1px rgba(255,255,255,0.05);
+  --shadow-card-hover:    0 16px 48px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.25);
+  --shadow-md:            0 8px 24px rgba(0,0,0,0.38);
+
+  --nav-bg:               rgba(2, 4, 10, 0.88);
+  --glass-surface:        rgba(2, 4, 10, 0.72);
+  --glass-border:         rgba(255, 255, 255, 0.1);
 }
 
 /* ═══════════════════════════════════════════════
@@ -74,27 +93,35 @@ html, body {
   --border:          #e8e4db;   /* Champagne border */
   --border-hover:    #dcd7cc;
 
-  --accent-luxury:   #92400e;   /* Deep Amber 800 */
-  --accent-glow:     rgba(146, 64, 14, 0.15);
-  --accent-luxury-muted: rgba(146, 64, 14, 0.05);
-  --on-accent:       #ffffff;
+  --accent-luxury:        #92400e;
+  --accent-glow:          rgba(146, 64, 14, 0.15);
+  --accent-luxury-muted:  rgba(146, 64, 14, 0.06);
+  --on-accent:            #ffffff;
 
-  --primary:         #1a1c1e;
-  --on-primary:      #ffffff;
+  --primary:              #1a1c1e;
+  --on-primary:           #ffffff;
+  --primary-light:        rgba(12, 45, 94, 0.05);
+  --primary-mid:          #1e3a8a;
+  --primary-glow:         rgba(12, 45, 94, 0.15);
+  --secondary-glow:       rgba(249, 115, 22, 0.18);
 
-  --shadow-premium:  0 20px 50px -12px rgba(0, 0, 0, 0.08);
-  --nav-bg:          rgba(253, 252, 249, 0.85);
-  --glass-surface:   rgba(255, 255, 255, 0.7);
-  --glass-border:    rgba(146, 64, 14, 0.08);
+  --shadow-premium:       0 20px 50px -12px rgba(0, 0, 0, 0.10);
+  --shadow-card:          0 1px 4px rgba(0,0,0,0.07), 0 0 0 1px rgba(12,45,94,0.07);
+  --shadow-card-hover:    0 10px 36px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md:            0 4px 18px rgba(0,0,0,0.09);
+
+  --nav-bg:               rgba(253, 252, 249, 0.88);
+  --glass-surface:        rgba(255, 255, 255, 0.75);
+  --glass-border:         rgba(146, 64, 14, 0.09);
 }
 
 html {
-  font-size: 16px; /* Base standard */
+  font-size: 16px;
 }
 
 @media (min-width: 1024px) {
   html {
-    font-size: 17px; /* Plus grand sur desktop */
+    font-size: 17px;
   }
 }
 
@@ -106,7 +133,7 @@ html {
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
-  overscroll-behavior-y: none; /* Empêche le bounce système pour un feeling plus app */
+  overscroll-behavior-y: none;
 }
 
 body {
@@ -118,6 +145,60 @@ body {
   line-height: 1.6;
   overflow-x: hidden;
   transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ══════════════════════════════════════════════════════
+   MOBILE — TAP FEEDBACK & TOUCH UX
+   Améliore le feeling tactile sur iOS/Android
+   ══════════════════════════════════════════════════════ */
+
+/* Supprime le tap highlight bleu natif — remplacé par active:scale */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Tous les éléments interactifs : curseur pointer + touch action */
+a, button, [role="button"], [tabindex] {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* Feedback tactile sur les éléments cliquables sans active défini */
+button:not([disabled]):active,
+a:active {
+  opacity: 0.88;
+}
+
+/* Focus visible amélioré — anneau amber au lieu de bleu navigateur */
+:focus-visible {
+  outline: 2px solid var(--accent-luxury);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* ══════════════════════════════════════════════════════
+   LIGHT MODE — Lisibilité renforcée
+   ══════════════════════════════════════════════════════ */
+
+/* Scrollbar adaptée au mode light */
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.32);
+}
+
+/* Skeleton adapté au mode light */
+[data-theme="light"] .skeleton {
+  background: linear-gradient(
+    90deg,
+    #e5e7eb 0%,
+    #f3f4f6 40%,
+    #e5e7eb 60%,
+    #e5e7eb 100%
+  );
+  background-size: 300% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
 }
 
 .font-serif {
@@ -148,11 +229,7 @@ body {
   color: #fff;
 }
 
-:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
+/* focus-visible — handled in the MOBILE section above */
 
 /* ══════════════════════════════════════════════════════
    SCROLLBAR

@@ -194,7 +194,7 @@ export function SearchBar({
             disabled={!isSupported}
             onClick={() => isListening ? stopListening() : startListening()}
             className={cn(
-              "flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300",
+              "flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-300",
               isListening
                 ? "bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.6)] animate-[mic-blink_1s_infinite]"
                 : "text-[var(--accent-luxury)] bg-[var(--accent-luxury)]/10 hover:bg-[var(--accent-luxury)]/20 border border-transparent hover:border-[var(--accent-luxury)]/20",
@@ -211,14 +211,14 @@ export function SearchBar({
           <button 
             type="submit" 
             disabled={isPending}
-            className="flex items-center justify-center w-10 h-10 sm:w-auto sm:px-7 sm:py-3 bg-[var(--accent-luxury)] text-[var(--on-accent)] rounded-xl font-sans font-black text-[11px] md:text-xs uppercase tracking-[0.25em] shadow-lg shadow-[var(--accent-luxury)]/20 active:scale-95 transition-all duration-300"
+            className="flex items-center justify-center w-14 h-14 sm:w-auto sm:px-8 sm:py-3 bg-[var(--accent-luxury)] text-[var(--on-accent)] rounded-2xl font-display font-bold text-[10px] md:text-xs uppercase tracking-[0.2em] shadow-[0_12px_24px_rgba(249,115,22,0.3)] active:scale-95 transition-all duration-300"
           >
             {isPending ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <>
                 <span className="hidden sm:inline">Explorer</span>
-                <ArrowRight className="w-5 h-5 sm:w-4 sm:h-4" strokeWidth={3} />
+                <ArrowRight className="w-7 h-7 sm:w-4 sm:h-4" strokeWidth={3} />
               </>
             )}
           </button>

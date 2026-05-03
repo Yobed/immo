@@ -5,7 +5,7 @@ import { Badge }         from '@/components/ui/Badge'
 import { Card }          from '@/components/ui/Card'
 import Link              from 'next/link'
 
-export const metadata = { title: 'Mes Quittances — Immo CI' }
+export const metadata = { title: "Mes Quittances — BOGBE'S GROUPE" }
 
 // Couleurs statut quittances — variant 'danger' pour en_retard (PAS 'error')
 const STATUT_BADGE: Record<string, { variant: 'default' | 'success' | 'danger' | 'warning'; label: string }> = {

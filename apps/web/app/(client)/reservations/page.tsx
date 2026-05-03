@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
-export const metadata = { title: 'Mes réservations — Immo CI' }
+export const metadata = { title: "Mes réservations — BOGBE'S GROUPE" }
 
 const STATUT_CONFIG: Record<string, { label: string; variant: 'default' | 'success' | 'danger' | 'warning' }> = {
   en_attente: { label: 'En attente de paiement', variant: 'warning' },

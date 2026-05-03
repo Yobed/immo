@@ -27,7 +27,7 @@ const steps = [
   {
     number: '03',
     title: 'Acquisition Intuitive',
-    description: 'Déléguez la complexité. De la contractualisation OHADA aux transactions sécurisées, nous orchestrons chaque étape pour une sérénité absolue.',
+    description: 'Déléguez la complexité. De la contractualisation OHADA à la remise des clés, nous orchestrons chaque détail pour votre sérénité absolue.',
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1" fill="none">
         <path d="M20 7h-9 M14 2l-3 3 3 3 M4 17h9 M10 22l3-3-3-3"/>
@@ -56,10 +56,10 @@ export function HowItWorks() {
              animate={inView ? { opacity: 1, x: 0 } : {}}
              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
           >
-            <span className="text-[var(--text-muted)] font-sans tracking-[0.4em] uppercase text-[11px] mb-6 block font-medium">
+            <span className="text-[var(--text-muted)] font-sans tracking-[0.35em] uppercase text-xs mb-6 block font-medium">
               Notre Méthodologie
             </span>
-            <h2 className="font-display text-5xl md:text-7xl font-light text-[var(--text)] leading-[1.1] tracking-tighter">
+            <h2 className="font-display text-4xl md:text-7xl font-light text-[var(--text)] leading-[1.1] tracking-tighter">
               L'Art de la <br/>
               <span className="italic font-serif opacity-70">Sérénité.</span>
             </h2>
@@ -78,7 +78,7 @@ export function HowItWorks() {
               initial={{ opacity: 0, y: 40 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: i * 0.2 }}
-              className="group relative p-12 md:p-16 border-r border-b border-[var(--border)] flex flex-col items-start transition-all duration-700 hover:bg-[var(--primary-light)]"
+              className="group relative p-8 md:p-16 border-r border-b border-[var(--border)] flex flex-col items-start transition-all duration-700 hover:bg-[var(--primary-light)]"
             >
               <span className="text-4xl font-display font-light text-[var(--text)] opacity-25 mb-12 group-hover:opacity-50 transition-opacity">
                 {step.number}
@@ -108,8 +108,8 @@ export function HowItWorks() {
           transition={{ duration: 2, delay: 1 }}
           className="mt-24 text-center"
         >
-          <span className="text-[11px] tracking-[0.4em] uppercase text-[var(--text-subtle)] opacity-50">
-            Standard d&apos;Excellence — Immo CI
+          <span className="text-xs tracking-[0.35em] uppercase text-[var(--text-subtle)] opacity-55">
+            Standard d&apos;Excellence — BOGBE'S GROUPE
           </span>
         </motion.div>
       </div>

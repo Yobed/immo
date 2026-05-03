@@ -4,12 +4,12 @@ import * as motionClient from 'framer-motion/client';
 import YieldCalculator from '@/components/owners/YieldCalculator';
 
 export const metadata: Metadata = {
-  title: 'Confiez-nous votre bien immobilier | Immo CI Prestige',
-  description: 'Vous êtes propriétaire à Abidjan ? Vendez ou louez votre bien avec Immo CI Prestige. Gestion locative, estimation gratuite et marketing de luxe pour vos villas et appartements.',
-  keywords: ['vendre bien immobilier abidjan', 'gestion locative abidjan', 'mettre en location appartement abidjan', 'estimation immobilière côte d\'ivoire', 'agence immobilière de luxe abidjan'],
+  title: "Confiez-nous votre bien immobilier | BOGBE'S GROUPE",
+  description: "Vous êtes propriétaire à Abidjan ? Vendez ou louez votre bien avec BOGBE'S GROUPE. Gestion locative, estimation gratuite et marketing de luxe pour vos villas et appartements.",
+  keywords: ['vendre bien immobilier abidjan', 'gestion locative abidjan', 'mettre en location appartement abidjan', "estimation immobilière côte d'ivoire", 'agence immobilière de luxe abidjan'],
   openGraph: {
-    title: 'Propriétaires : Maximisez la valeur de votre patrimoine | Immo CI Prestige',
-    description: 'Expertise, discrétion et résultats. Découvrez comment Immo CI transforme la gestion de vos propriétés d\'exception.',
+    title: "Propriétaires : Maximisez la valeur de votre patrimoine | BOGBE'S GROUPE",
+    description: "Expertise, discrétion et résultats. Découvrez comment BOGBE'S GROUPE transforme la gestion de vos propriétés d'exception.",
   }
 };
 
@@ -56,7 +56,7 @@ export default function ProprietairesPage() {
                     <span className="italic font-serif opacity-60">l&apos;Audience qu&apos;il mérite.</span>
                 </h1>
                 <p className="max-w-2xl mx-auto text-xl text-[var(--text-muted)] font-light leading-relaxed mb-12">
-                    De la gestion locative premium à la vente confidentielle, Immo CI Prestige est le partenaire stratégique des propriétaires exigeants en Côte d&apos;Ivoire.
+                    De la gestion locative premium à la vente confidentielle, BOGBE'S GROUPE est le partenaire stratégique des propriétaires exigeants en Côte d&apos;Ivoire.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-6 justify-center">
                     <button className="px-12 py-5 bg-[var(--text)] text-[var(--background)] rounded-sm font-bold text-[11px] uppercase tracking-[0.3em] hover:bg-[var(--accent-luxury)] hover:text-off-white transition-all">
@@ -193,10 +193,10 @@ export default function ProprietairesPage() {
 
       {/* SEO rich text for owners */}
       <section className="py-32 container mx-auto px-6 max-w-4xl text-center">
-        <h2 className="font-display text-4xl font-bold text-[var(--text)] mb-12 tracking-tight">Pourquoi choisir Immo CI pour votre bien à Abidjan ?</h2>
+        <h2 className="font-display text-4xl font-bold text-[var(--text)] mb-12 tracking-tight">Pourquoi choisir BOGBE'S GROUPE pour votre bien à Abidjan ?</h2>
         <div className="space-y-8 text-[var(--text-muted)] font-light leading-relaxed text-lg">
             <p>
-                Le marché immobilier à <strong>Abidjan</strong>, notamment dans les zones de <strong>Cocody (Riviera Golf, Ambassades), Zone 4, et Assinie</strong>, demande une expertise pointue. Immo CI Prestige ne se contente pas de lister votre propriété. Nous créons une véritable <strong>stratégie marketing immobilière de luxe</strong>.
+                Le marché immobilier à <strong>Abidjan</strong>, notamment dans les zones de <strong>Cocody (Riviera Golf, Ambassades), Zone 4, et Assinie</strong>, demande une expertise pointue. BOGBE'S GROUPE ne se contente pas de lister votre propriété. Nous créons une véritable <strong>stratégie marketing immobilière de luxe</strong>.
             </p>
             <p>
                 Nos outils de <strong>visite virtuelle 3D</strong> permettent aux investisseurs internationaux et à la diaspora de visiter votre appartement ou villa comme s&apos;ils y étaient, accélérant la prise de décision. Que vous souhaitiez <strong>vendre une villa à Abidjan</strong> ou <strong>mettre en location une résidence meublée de haut standing</strong>, notre équipe d&apos;experts vous accompagne de l&apos;estimation à la signature de l&apos;acte final.

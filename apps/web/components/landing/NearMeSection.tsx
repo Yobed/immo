@@ -1,7 +1,7 @@
 'use client'
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { MapPin, Navigation, Loader2, Car, ExternalLink, ChevronRight } from 'lucide-react'
+import { MapPin, Navigation, Loader2, Car, ExternalLink, ChevronRight, ArrowUpRight } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -83,13 +83,19 @@ function NearCard({
           </div>
         )}
       </div>
-      <div className="p-2.5 bg-[var(--surface-card)]">
-        <p className="text-[8px] font-bold text-[var(--accent-luxury)] uppercase tracking-widest mb-0.5 truncate">{b.commune}{b.quartier ? ` · ${b.quartier}` : ''}</p>
-        <p className="text-[12px] font-semibold text-[var(--text)] truncate mb-1.5 leading-tight">{b.titre}</p>
-        <div className="flex items-center justify-between">
-          <p className="text-[10px] font-black text-[var(--text)]">{formatPrice(b)}</p>
-          <Link href={`/biens/${b.id}`} onClick={e => e.stopPropagation()} className="w-6 h-6 flex items-center justify-center rounded-full bg-[var(--accent-luxury)]/10 hover:bg-[var(--accent-luxury)] transition-all">
-            <ExternalLink className="w-3 h-3 text-[var(--accent-luxury)]" />
+      <div className="p-3 bg-[var(--surface-card)]">
+        <p className="text-[9px] font-display font-bold text-[var(--accent-luxury)] uppercase tracking-[0.1em] mb-1 truncate">
+          {b.commune}{b.quartier ? ` · ${b.quartier}` : ''}
+        </p>
+        <p className="text-[13px] font-bold text-[var(--text)] truncate mb-2 leading-tight">
+          {b.titre}
+        </p>
+        <div className="flex items-center justify-between mt-auto">
+          <p className="text-[12px] font-display font-bold text-[var(--accent-luxury)] tracking-tight">
+            {formatPrice(b)}
+          </p>
+          <Link href={`/biens/${b.id}`} onClick={e => e.stopPropagation()} className="w-7 h-7 flex items-center justify-center rounded-full bg-[var(--accent-luxury)]/10 hover:bg-[var(--accent-luxury)] transition-all">
+            <ExternalLink className="w-3.5 h-3.5 text-[var(--accent-luxury)]" />
           </Link>
         </div>
       </div>
@@ -353,6 +359,13 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
           </div>
 
           <div className="flex items-center gap-4 shrink-0">
+            <button
+              onClick={() => (window.location.href = '/biens')}
+              className="flex items-center gap-3 px-8 py-4 bg-[var(--text)] text-[var(--background)] font-display text-[11px] font-bold tracking-[0.2em] uppercase rounded-full transition-all hover:scale-105 shadow-[0_15px_35px_rgba(0,0,0,0.4)] active:scale-95 disabled:opacity-50"
+            >
+              Explorer les environs
+              <ArrowUpRight className="w-4 h-4 text-[var(--accent-luxury)]" />
+            </button>
             <button
               onClick={handleLocate}
               disabled={locating}

@@ -5,7 +5,7 @@ import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import Link from 'next/link'
 
-export const metadata = { title: 'Mes visites — Immo CI' }
+export const metadata = { title: "Mes visites — BOGBE'S GROUPE" }
 
 function StatutBadge({ statut }: { statut: string }) {
   const config: Record<string, { label: string; variant: 'default' | 'success' | 'danger' | 'warning' }> = {

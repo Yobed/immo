@@ -137,8 +137,7 @@ function SuccessState({ profil, contact }: { profil: Profil; contact: string }) 
   return (
     <div className="text-center space-y-6 py-6">
       {/* Checkmark animé */}
-      <div className="mx-auto w-20 h-20 rounded-full bg-green-500/20 border border-green-500/30
-                      flex items-center justify-center animate-[scaleIn_0.4s_ease] ">
+      <div className="mx-auto w-20 h-20 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center animate-[scaleIn_0.4s_ease]">
         <svg className="w-10 h-10 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
         </svg>
@@ -153,7 +152,7 @@ function SuccessState({ profil, contact }: { profil: Profil; contact: string }) 
       <a
         onClick={() => track.share({ method: 'whatsapp', content_type: 'waitlist' })}
         href={`https://wa.me/?text=${encodeURIComponent(
-          '🏠 J\'ai rejoint Immo CI — la nouvelle plateforme immo de CI sans arnaque !\nInscrivez-vous ici : ' +
+          "🏠 J'ai rejoint BOGBE'S GROUPE — la nouvelle plateforme immo de CI sans arnaque !\nInscrivez-vous ici : " +
           (typeof window !== 'undefined' ? window.location.href : 'https://immo-ci.vercel.app/acces-anticipe')
         )}`}
         target="_blank"
@@ -237,7 +236,7 @@ export function WaitlistHero() {
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-amber-600 flex items-center justify-center">
             <span className="text-sm">🏠</span>
           </div>
-          <span className="font-bold text-white font-display tracking-tight">Immo CI</span>
+          <span className="font-bold text-white font-display tracking-tight">BOGBE'S GROUPE</span>
         </div>
         <a
           href="/"
@@ -271,7 +270,7 @@ export function WaitlistHero() {
             </h1>
 
             <p className="text-lg text-slate-400 max-w-md mx-auto leading-relaxed">
-              Immo CI arrive. Photos 360°, paiement Wave en 30 secondes,
+              BOGBE'S GROUPE arrive. Photos 360°, paiement Wave en 30 secondes,
               contrat de bail légal automatique.
             </p>
 
@@ -452,7 +451,7 @@ export function WaitlistHero() {
 
       {/* Footer minimaliste */}
       <footer className="relative z-10 text-center py-5 text-slate-700 text-xs">
-        © 2026 Immo CI · La plateforme immobilière de confiance en Côte d&apos;Ivoire
+        © 2026 BOGBE'S GROUPE · La plateforme immobilière de confiance en Côte d&apos;Ivoire
       </footer>
     </div>
   )

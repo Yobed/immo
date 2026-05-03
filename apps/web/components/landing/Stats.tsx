@@ -22,9 +22,9 @@ function useCounter(target: number, active: boolean, duration = 2500) {
 const STATS = [
   {
     target: 2450,
-    label: 'Collection exclusive',
+    label: 'Biens d\'Exception',
     suffix: '+',
-    desc: 'Propriétés de prestige rigoureusement sélectionnées.',
+    desc: 'Une sélection rigoureuse pour des résidents exigeants.',
     accent: '#F97316',
   },
   {
@@ -36,9 +36,9 @@ const STATS = [
   },
   {
     target: 98,
-    label: 'Indice de Confiance',
+    label: 'Clients Heureux',
     suffix: '%',
-    desc: 'Satisfaction client au sommet de l\'exigence.',
+    desc: 'Le taux de recommandation de nos utilisateurs.',
     accent: '#0D9F6E',
   },
   {
@@ -81,7 +81,7 @@ export function Stats() {
             viewport={{ once: true }}
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
           >
-            <span className="text-[var(--text-muted)] font-sans tracking-[0.4em] uppercase text-[10px] mb-6 block font-medium">
+            <span className="text-[var(--text-muted)] font-sans tracking-[0.35em] uppercase text-xs mb-6 block font-medium">
               Performance & Rigueur
             </span>
             <h2 className="font-display text-4xl md:text-7xl font-light text-[var(--text)] leading-[1.1] tracking-tighter">
@@ -125,7 +125,7 @@ function StatItem({ target, label, suffix, desc, tenths, accent, index, onEnter,
       className="group"
     >
       <div className="mb-8">
-        <span className="text-[10px] font-sans tracking-[0.2em] uppercase text-[var(--text-muted)] opacity-90 mb-8 block transition-colors group-hover:text-[var(--text)]">
+        <span className="text-xs font-sans tracking-[0.18em] uppercase text-[var(--text-muted)] opacity-90 mb-8 block transition-colors group-hover:text-[var(--text)]">
           Ref. 0{index + 1}
         </span>
         <div className="flex items-baseline gap-1 mb-4">

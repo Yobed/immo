@@ -28,6 +28,9 @@ export async function GET(request: NextRequest) {
 
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
+      // Get the 'next' parameter for redirection after login
+      const next = searchParams.get('next') || ''
+      
       // Récupérer l'utilisateur authentifié
       const { data: { user } } = await supabase.auth.getUser()
 
@@ -44,8 +47,13 @@ export async function GET(request: NextRequest) {
 
           // Nouveau user Google : full_name vide → onboarding
           if (!profile || profile.full_name === '') {
-            return NextResponse.redirect(`${origin}/complete-profile`)
+            return NextResponse.redirect(`${origin}/complete-profile${next ? `?next=${encodeURIComponent(next)}` : ''}`)
           }
+        }
+
+        // If 'next' is provided, use it (safeguard: check if it starts with /)
+        if (next && next.startsWith('/')) {
+          return NextResponse.redirect(`${origin}${next}`)
         }
 
         // Utilisateur existant → rediriger selon le rôle
@@ -61,7 +69,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.redirect(`${origin}/`)
       }
 
-      return NextResponse.redirect(`${origin}/`)
+      return NextResponse.redirect(`${origin}${next.startsWith('/') ? next : '/'}`)
     }
   }
 

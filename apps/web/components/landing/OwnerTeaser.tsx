@@ -19,7 +19,7 @@ export function OwnerTeaser() {
               Votre patrimoine mérite une <span className="italic font-serif opacity-60">Gestion d'Excellence.</span>
             </h2>
             <p className="text-xl text-[var(--text-muted)] font-light leading-relaxed mb-12 max-w-xl">
-              Immo CI Prestige transforme votre bien en actif hautement rentable. Qu'il s'agisse de gestion meublée ou de vente confidentielle, nous maximisons chaque mètre carré.
+              BOGBE'S GROUPE transforme votre bien en actif hautement rentable. Qu'il s'agisse de gestion meublée ou de vente confidentielle, nous maximisons chaque mètre carré.
             </p>
             
             <div className="grid sm:grid-cols-2 gap-8 mb-12">

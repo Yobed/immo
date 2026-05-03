@@ -70,7 +70,7 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
           <div className="max-w-7xl mx-auto flex items-center gap-3">
             <div className="h-px w-12 bg-[#C5A059]" />
             <p className="text-[10px] md:text-[11px] font-medium tracking-[0.5em] uppercase text-[#C5A059]">
-              Immo CI · Sapphire Edition
+              BOGBE'S GROUPE · Sapphire Edition
             </p>
           </div>
         </div>
@@ -131,7 +131,7 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
                   450<span className="text-[#C5A059]">+</span>
                 </p>
                 <p className="text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-white/50 mt-2">
-                  Transactions sécurisées
+                  Visites garanties
                 </p>
               </div>
               <div className="h-10 w-px bg-white/10 hidden md:block" />
@@ -140,7 +140,7 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
                   7<span className="text-[#C5A059]">k+</span>
                 </p>
                 <p className="text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-white/50 mt-2">
-                  Annonces en direct
+                  Offres exclusives
                 </p>
               </div>
               <div className="h-10 w-px bg-white/10 hidden md:block" />
@@ -149,7 +149,7 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
                   18<span className="text-[#C5A059]">+</span>
                 </p>
                 <p className="text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-white/50 mt-2">
-                  Communes couvertes
+                  Support local 7j/7
                 </p>
               </div>
               <div className="ml-auto hidden md:flex items-center gap-2 text-[11px] text-white/40 font-medium">
@@ -192,7 +192,7 @@ function FeaturedBienCards({ biens }: { biens: FeaturedBien[] }) {
                 <MapPin className="w-2.5 h-2.5 shrink-0" />
                 <span className="truncate">{bien.location}</span>
               </p>
-              <p className="text-[#C5A059] text-[12px] font-bold mt-1 truncate">
+              <p className="text-[#C5A059] font-display font-bold text-[12px] mt-1 truncate">
                 {bien.price}
               </p>
             </div>

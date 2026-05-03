@@ -199,7 +199,7 @@ export function BienCard({
               )}
               
               {aiScore !== undefined && (
-                <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-off-white/5 border border-off-white/10" title="ImmoDash Quality Score">
+                <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-off-white/5 border border-off-white/10" title="BOGBE'S GROUPE Quality Score">
                   <div className="text-[10px] font-bold text-off-white/50 uppercase tracking-tighter">IA</div>
                   <div className="text-[11px] font-bold text-[var(--accent-luxury)]">{aiScore}%</div>
                 </div>
