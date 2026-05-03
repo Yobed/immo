@@ -107,7 +107,10 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
 
   const vue360Medias = medias.filter((m: any) => m.type === '360')
   const proprio = bien['profiles!biens_proprietaire_id_fkey'] as { full_name: string; avatar_url: string | null } | null
-  const isNuitee = bien.type_bien === 'residence_meublee'
+  const isNuitee = bien.type_bien?.toLowerCase().includes('meublee') || 
+                   bien.type_bien?.toLowerCase().includes('meublé') || 
+                   bien.type_bien?.toLowerCase().includes('nuit') || 
+                   bien.type_bien === 'residence_meublee'
 
   const prixValue = isNuitee && bien.prix_nuit_fcfa ? bien.prix_nuit_fcfa : bien.prix_mois_fcfa ? bien.prix_mois_fcfa : bien.prix_vente_fcfa
   const prixSuffix = isNuitee ? '/nuit' : bien.prix_mois_fcfa ? '/mois' : ''
@@ -443,7 +446,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
       </div>
 
       <footer className="border-t border-slate-100 py-8 text-center text-slate-400 text-xs">
-        © 2026 Immo CI — Tous droits réservés
+        © 2026 BOGBE&apos;S GROUPE Multi Services — Tous droits réservés
       </footer>
       </div>{/* /white-card */}
 

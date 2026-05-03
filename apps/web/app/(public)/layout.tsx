@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { MobileMenu } from '@/components/layout/MobileMenu'
 import { SearchBar } from '@/components/search/SearchBar'
@@ -71,17 +72,20 @@ export default async function PublicLayout({ children }: { children: React.React
           {/* Logo */}
           <MagneticWrapper>
             <Link href="/" className="flex items-center gap-2.5 flex-shrink-0 group">
-              <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center text-white font-display font-bold text-sm shadow-sm transition-transform duration-200 group-hover:scale-105"
-                style={{ boxShadow: 'var(--shadow-primary-glow)' }}>
-                IC
-              </div>
-              <span className="font-display text-xl font-semibold text-[var(--text)] hidden sm:block tracking-tight">
-                Immo <span className="text-gradient-gold" style={{
+              <Image
+                src="/bogbes-logo.png"
+                alt="BOGBE'S GROUPE"
+                width={40}
+                height={40}
+                className="w-10 h-10 object-contain transition-transform duration-200 group-hover:scale-105"
+              />
+              <span className="font-display text-base font-bold text-[var(--text)] hidden sm:block tracking-tight leading-tight">
+                BOGBE&apos;S <span style={{
                   background: 'linear-gradient(135deg,#F97316,#FB923C)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
-                }}>CI</span>
+                }}>GROUPE</span>
               </span>
             </Link>
           </MagneticWrapper>

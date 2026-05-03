@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import Image from 'next/image'
 import { NotificationBell } from '@/components/notifications/NotificationBell'
 import { MobileMenu } from '@/components/layout/MobileMenu'
 import { UserMenu } from '@/components/auth/UserMenu'
+import { MobileTabBar } from '@/components/layout/MobileTabBar'
 
 const navLinks = [
   { href: '/recherche', label: 'Rechercher' },
@@ -48,11 +50,15 @@ export default async function ProLayout({ children }: { children: React.ReactNod
 
           {/* Logo */}
           <Link href="/dashboard" className="flex items-center gap-2.5 flex-shrink-0 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--primary)] to-[var(--primary-mid)] flex items-center justify-center text-white font-display font-bold text-sm shadow-sm transition-transform duration-200 group-hover:scale-105">
-              IC
-            </div>
+            <Image
+              src="/bogbes-logo.png"
+              alt="BOGBE'S GROUPE"
+              width={40}
+              height={40}
+              className="w-10 h-10 object-contain transition-transform duration-200 group-hover:scale-105"
+            />
             <div className="hidden sm:flex items-center gap-2">
-              <span className="font-display text-lg font-semibold text-[var(--primary)] tracking-tight">Immo CI</span>
+              <span className="font-display text-base font-bold text-[var(--text)] tracking-tight">BOGBE&apos;S GROUPE</span>
               <span className="text-xs font-sans font-semibold text-white bg-[var(--secondary)] px-2 py-0.5 rounded-pill tracking-wider">PRO</span>
             </div>
           </Link>
@@ -87,7 +93,8 @@ export default async function ProLayout({ children }: { children: React.ReactNod
         </div>
       </header>
 
-      <main>{children}</main>
+      <main className="pb-20 lg:pb-0">{children}</main>
+      <MobileTabBar />
     </div>
   )
 }

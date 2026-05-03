@@ -36,21 +36,21 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_URL ?? 'https://immo-ci.vercel.app'),
-  title: { template: '%s | Immo CI', default: "Immo CI — Immobilier en Côte d'Ivoire" },
+  title: { template: "%s | BOGBE'S GROUPE", default: "BOGBE'S GROUPE — Immobilier en Côte d'Ivoire" },
   description:
     "Trouvez votre bien immobilier en Côte d'Ivoire. Location, vente, résidences meublées à Abidjan et partout en CI.",
   openGraph: {
     type: 'website',
     locale: 'fr_CI',
     url: 'https://immo-ci.vercel.app',
-    siteName: 'Immo CI',
-    title: "Immo CI — Immobilier en Côte d'Ivoire",
+    siteName: "BOGBE'S GROUPE",
+    title: "BOGBE'S GROUPE — Immobilier en Côte d'Ivoire",
     description: "Trouvez votre bien immobilier en Côte d'Ivoire. Location, vente à Abidjan.",
-    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Immo CI' }],
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: "BOGBE'S GROUPE" }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Immo CI — Immobilier en Côte d'Ivoire",
+    title: "BOGBE'S GROUPE — Immobilier en Côte d'Ivoire",
     description: "La plateforme immobilière premium de Côte d'Ivoire",
   },
 }
@@ -67,7 +67,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${unbounded.variable} ${playfair.variable} ${outfit.variable} ${jetbrainsMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="font-sans bg-[var(--background)] text-[var(--text)] antialiased">
+      <body className="font-sans bg-[var(--background)] text-[var(--text)] antialiased" suppressHydrationWarning>
         <ThemeProvider>
           <AnalyticsProvider />
           {children}

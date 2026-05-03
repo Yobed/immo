@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { X, Calendar, CalendarCheck, MessageCircle, BedDouble, ArrowLeft } from 'lucide-react'
 import { VisiteRequestForm } from './VisiteRequestForm'
 import { DemanderContactWhatsAppButton } from './DemanderContactWhatsAppButton'
@@ -46,7 +47,7 @@ function PrixBloc({ lieu, prix, prixSuffix }: { lieu: string; prix: string; prix
           {lieu}
         </p>
         <div className="flex flex-col">
-          <span className="text-[15px] font-black text-[var(--accent-luxury)] leading-tight tracking-tight">
+          <span className="text-[15px] font-display font-bold text-[var(--accent-luxury)] leading-tight tracking-tight">
             {prix}
           </span>
           {prixSuffix && (
@@ -71,28 +72,34 @@ function ActionButton({
   label: string
 }) {
   const content = (
-    <div className="flex items-center justify-center gap-2.5 px-6 h-full">
-      <Icon className="w-5 h-5 text-white shrink-0" strokeWidth={3} />
-      <span className="text-white font-black text-[13px] uppercase tracking-[0.1em] leading-none whitespace-nowrap">
+    <div className="flex items-center justify-center gap-3 px-8 h-full">
+      <Icon className="w-5 h-5 text-white shrink-0 group-hover:scale-110 transition-transform" strokeWidth={3} />
+      <span className="text-white font-display font-bold text-[11px] uppercase tracking-[0.2em] leading-none whitespace-nowrap">
         {label}
       </span>
     </div>
   )
 
-  const baseClass = "h-[56px] rounded-2xl bg-gradient-to-r from-[var(--accent-luxury)] to-[#d97706] shadow-lg shadow-[var(--accent-glow)]/40 active:scale-95 transition-all duration-200 animate-cta border border-white/20 flex-1 flex items-center justify-center"
+  const baseClass = "pointer-events-auto group h-[64px] rounded-2xl bg-gradient-to-r from-[var(--accent-luxury)] via-[#f59e0b] to-[#d97706] shadow-[0_15px_35px_rgba(249,115,22,0.4)] active:scale-95 transition-all duration-300 animate-cta border border-white/30 flex-1 flex items-center justify-center relative overflow-hidden"
 
-  if (href) return <Link href={href} className={baseClass}>{content}</Link>
-  return <button onClick={onClick} className={baseClass}>{content}</button>
+  const shimmer = (
+    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+  )
+
+  if (href) return <Link href={href} className={baseClass}>{shimmer}{content}</Link>
+  return <button onClick={onClick} className={baseClass}>{shimmer}{content}</button>
 }
 
 function FloatingBackButton() {
+  const router = useRouter()
   return (
-    <Link
-      href="/"
+    <button
+      onClick={() => router.back()}
       className="fixed top-4 left-4 z-[110] flex items-center justify-center w-11 h-11 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200 text-slate-900 active:scale-90 transition-all lg:hidden"
+      aria-label="Retour"
     >
       <ArrowLeft className="w-6 h-6" strokeWidth={2.5} />
-    </Link>
+    </button>
   )
 }
 
@@ -111,9 +118,17 @@ export function StickyMobileCTA({
   const [activeTab, setActiveTab] = useState<Tab>('visite')
 
   useEffect(() => {
-    const handler = () => setVisible(window.scrollY > 300)
+    const handler = () => setVisible(window.scrollY > 100)
     window.addEventListener('scroll', handler, { passive: true })
     handler()
+
+    // Auto-open if action in URL
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('action') === 'visiter') {
+      setSheetOpen(true)
+      setActiveTab('visite')
+    }
+
     return () => window.removeEventListener('scroll', handler)
   }, [])
 
@@ -130,22 +145,23 @@ export function StickyMobileCTA({
   /* ─── Layout partagé ─── */
   const barBottom = 'calc(1.25rem + env(safe-area-inset-bottom, 0px))'
 
+  const waText = encodeURIComponent(
+    `Bonjour, je souhaite ${isNuitee ? 'réserver' : 'plus d\'infos sur'} *${bienTitre}* à ${bienLieu} (${prix}${prixSuffix})`
+  )
+
   /* ─── Résidence meublée : Réserver + WhatsApp ─── */
   if (isNuitee && bienId) {
-    const waText = encodeURIComponent(
-      `Bonjour, je souhaite réserver *${bienTitre}* à ${bienLieu} (${prix}${prixSuffix})`
-    )
     return (
       <>
         <FloatingBackButton />
         <AnimatePresence>
-          {visible && (
+          {(visible || isNuitee) && (
             <motion.div
               initial={{ y: 80, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 80, opacity: 0 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed left-3 right-3 z-[95] lg:hidden flex items-center gap-2 pointer-events-none"
+              className="fixed left-3 right-3 z-[110] lg:hidden flex items-center gap-2 pointer-events-none"
               style={{ bottom: barBottom }}
             >
               <style dangerouslySetInnerHTML={{ __html: STICKY_STYLES }} />
@@ -162,7 +178,7 @@ export function StickyMobileCTA({
   
               {/* WhatsApp */}
               <a
-                href={`https://wa.me/2250789263373?text=${waText}`}
+                href={`https://wa.me/2250574243752?text=${waText}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="pointer-events-auto w-[68px] h-[68px] flex items-center justify-center rounded-2xl bg-[#25D366] shadow-[0_12px_32px_rgba(37,211,102,0.3)] active:scale-95 transition-transform shrink-0 border border-white/20"
@@ -185,24 +201,24 @@ export function StickyMobileCTA({
 
       {/* Barre sticky unifiée style "Dynamic Pill" */}
       <AnimatePresence>
-        {visible && (
+        {(visible || isNuitee) && (
           <motion.div
             initial={{ y: 100, opacity: 0, scale: 0.9 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 100, opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed left-4 right-4 z-[95] lg:hidden pointer-events-none flex flex-col items-center gap-4"
+            className="fixed left-4 right-4 z-[110] lg:hidden pointer-events-none flex flex-col items-center gap-4"
             style={{ bottom: `calc(${barBottom} + 20px)` }}
           >
             {/* Action Bar Unifiée */}
             <div className="w-full h-[76px] glass-pill rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/10 flex items-center p-2.5 pointer-events-auto">
               
               {/* Infos Prix - Très compact à gauche */}
-              <div className="flex flex-col pl-4 pr-3 border-r border-white/5 justify-center h-full min-w-[90px]">
-                <span className="text-[14px] font-black text-[var(--accent-luxury)] leading-none mb-1">
+              <div className="flex flex-col pl-4 pr-3 border-r border-white/10 justify-center h-full min-w-[100px]">
+                <span className="text-[18px] font-display font-bold text-[var(--accent-luxury)] leading-none mb-1">
                   {prix}
                 </span>
-                <span className="text-[9px] font-bold text-[var(--text-muted)] uppercase tracking-widest opacity-60">
+                <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest opacity-60">
                   {prixSuffix ? `/${prixSuffix}` : 'Total'}
                 </span>
               </div>
@@ -226,7 +242,7 @@ export function StickyMobileCTA({
 
               {/* WhatsApp discret à l'intérieur de la pilule */}
               <a
-                href={`https://wa.me/2250789263373?text=${waText}`}
+                href={`https://wa.me/2250574243752?text=${waText}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-[56px] h-[56px] flex items-center justify-center rounded-2xl bg-white/5 hover:bg-white/10 transition-colors ml-2"
@@ -270,21 +286,26 @@ export function StickyMobileCTA({
               className="fixed bottom-0 left-0 right-0 z-[101] bg-white rounded-t-3xl lg:hidden shadow-2xl"
               style={{ maxHeight: '88vh' }}
             >
-              {/* Handle */}
-              <div className="flex justify-center pt-3 pb-1">
-                <div className="w-10 h-1 rounded-full bg-slate-200" />
+              {/* Handle — plus large et premium */}
+              <div className="flex justify-center pt-4 pb-2">
+                <div className="w-14 h-1.5 rounded-full bg-slate-200/80" />
               </div>
 
-              {/* En-tête */}
-              <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100">
-                <div className="flex-1 min-w-0 pr-3">
-                  <p className="font-bold text-slate-900 text-sm leading-snug line-clamp-1">{bienTitre}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    {bienLieu} ·{' '}
-                    <span className="font-semibold text-amber-600">
+              {/* En-tête — Typographie plus forte */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100/60">
+                <div className="flex-1 min-w-0 pr-4">
+                  <h3 className="font-display font-bold text-slate-900 text-[16px] leading-tight line-clamp-1 uppercase tracking-tight">
+                    {bienTitre}
+                  </h3>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      {bienLieu}
+                    </span>
+                    <span className="w-1 h-1 rounded-full bg-slate-300" />
+                    <span className="text-[11px] font-black text-[var(--accent-luxury)]">
                       {prix}{prixSuffix}
                     </span>
-                  </p>
+                  </div>
                 </div>
                 <button
                   onClick={() => setSheetOpen(false)}
@@ -344,14 +365,37 @@ export function StickyMobileCTA({
                 ) : null}
 
                 {activeTab === 'contact' && bienId ? (
-                  <div className="py-2">
-                    <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+                  <div className="py-2 space-y-4">
+                    <p className="text-xs text-slate-400 leading-relaxed">
                       Obtenez les coordonnées du propriétaire après validation par notre équipe.
                     </p>
                     <DemanderContactWhatsAppButton
                       bienId={bienId}
                       isAuthenticated={!!isAuthenticated}
                     />
+                    <div className="pt-2 border-t border-slate-100">
+                      <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-3">Contacter directement</p>
+                      <div className="flex flex-col gap-2">
+                        <a
+                          href={`https://wa.me/2250574243752?text=${waText}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 px-4 py-3 bg-[#25D366]/10 border border-[#25D366]/30 rounded-xl text-[#25D366] text-xs font-bold active:scale-95 transition-transform"
+                        >
+                          <Image src="/whatsapp-icon.svg" alt="" width={20} height={20} className="w-5 h-5" />
+                          <span>Principal — +225 05 74 24 37 52</span>
+                        </a>
+                        <a
+                          href={`https://wa.me/225078311541?text=${waText}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 px-4 py-3 bg-[#25D366]/10 border border-[#25D366]/30 rounded-xl text-[#25D366] text-xs font-bold active:scale-95 transition-transform"
+                        >
+                          <Image src="/whatsapp-icon.svg" alt="" width={20} height={20} className="w-5 h-5" />
+                          <span>Support — +225 07 83 11 54 1</span>
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 ) : null}
               </div>
