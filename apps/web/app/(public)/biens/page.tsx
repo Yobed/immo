@@ -199,12 +199,27 @@ function BiensContent() {
             <motion.div
               key="loading"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-5"
+              className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-5"
               role="status" aria-label="Chargement des biens"
             >
-              <div className="col-span-2 aspect-video bg-off-white/5 animate-pulse rounded-2xl" />
+              {/* Featured card skeleton */}
+              <div className="col-span-2 rounded-2xl overflow-hidden">
+                <div className="aspect-video bg-white/5 animate-pulse rounded-2xl" />
+                <div className="mt-3 space-y-2">
+                  <div className="h-4 bg-white/5 animate-pulse rounded-lg w-3/4" />
+                  <div className="h-3 bg-white/5 animate-pulse rounded-lg w-1/2" />
+                </div>
+              </div>
+              {/* Card skeletons */}
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="aspect-[4/3] bg-off-white/5 animate-pulse rounded-xl" />
+                <div key={i} className="rounded-xl overflow-hidden">
+                  <div className="aspect-[4/3] bg-white/5 animate-pulse rounded-xl" />
+                  <div className="mt-2 space-y-1.5">
+                    <div className="h-3 bg-white/5 animate-pulse rounded w-4/5" />
+                    <div className="h-3 bg-white/5 animate-pulse rounded w-2/3" />
+                    <div className="h-4 bg-white/5 animate-pulse rounded w-1/2" />
+                  </div>
+                </div>
               ))}
             </motion.div>
           ) : error ? (
@@ -390,22 +405,50 @@ function PageHeader({ activeType, count }: { activeType: string; count: number }
 }
 
 function EmptyState() {
+  const suggestions = [
+    { label: 'Toutes les annonces', href: '/biens', desc: 'Explorer tout le catalogue' },
+    { label: 'Résidences meublées', href: '/biens?type_bien=residence_meublee', desc: 'Court et moyen séjour' },
+    { label: 'Appartements', href: '/biens?type_bien=appartement', desc: 'Locations longue durée' },
+    { label: 'Villas', href: '/biens?type_bien=villa', desc: 'Haut standing et prestige' },
+  ]
+
   return (
-    <div className="col-span-2 text-center py-24 px-6">
-      <p className="font-display italic text-[var(--accent-luxury)] text-sm mb-1">La Collection</p>
-      <h3 className="font-display text-2xl font-bold text-white mb-3 tracking-tight">
-        Aucun bien pour l'instant
-      </h3>
-      <p className="text-white/40 font-sans text-[13px] max-w-xs mx-auto mb-8 leading-relaxed">
-        Cette catégorie est en cours de curation. Découvrez nos autres collections.
-      </p>
-      <a
-        href="/biens"
-        className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--accent-luxury)] text-black rounded-full text-[12px] font-bold uppercase tracking-widest transition-transform active:scale-95"
-      >
-        Voir tout
-        <ArrowRight className="w-3.5 h-3.5" />
-      </a>
+    <div className="col-span-2 lg:col-span-4 py-20 px-6">
+      <div className="max-w-md mx-auto text-center mb-10">
+        <div className="text-4xl mb-4">🔍</div>
+        <h3 className="font-display text-2xl font-bold text-white mb-2 tracking-tight">
+          Aucun bien dans cette catégorie
+        </h3>
+        <p className="text-white/40 text-[13px] leading-relaxed">
+          Pas de panique — voici d&apos;autres sélections qui pourraient vous intéresser.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-2xl mx-auto mb-10">
+        {suggestions.map((s) => (
+          <a
+            key={s.href}
+            href={s.href}
+            className="flex flex-col gap-1 p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-[var(--accent-luxury)]/40 hover:bg-white/8 transition-all text-center active:scale-95"
+          >
+            <span className="text-white font-bold text-[12px]">{s.label}</span>
+            <span className="text-white/40 text-[10px]">{s.desc}</span>
+          </a>
+        ))}
+      </div>
+
+      <div className="text-center">
+        <a
+          href={`https://wa.me/2250574243752?text=${encodeURIComponent("Bonjour, je cherche un bien qui ne figure pas encore dans votre catalogue. Pouvez-vous m'aider ?")}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full text-[12px] font-bold uppercase tracking-widest transition-all active:scale-95"
+        >
+          <ArrowRight className="w-3.5 h-3.5" />
+          Demander via WhatsApp
+        </a>
+        <p className="text-white/25 text-[10px] mt-3">Notre équipe peut trouver le bien idéal pour vous</p>
+      </div>
     </div>
   )
 }

@@ -34,6 +34,8 @@ import { BienMediaGallery } from '@/components/bien/BienMediaGallery'
 import { MediaNavBar } from '@/components/bien/MediaNavBar'
 import { ExpandableText } from '@/components/bien/ExpandableText'
 import { ScrollToTop } from '@/components/bien/ScrollToTop'
+import { TrackView } from '@/components/bien/TrackView'
+import { ShareButton } from '@/components/bien/ShareButton'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
@@ -47,7 +49,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     .limit(1)
     .single()
 
-  if (!bien) return { title: 'Bien introuvable — Immo CI' }
+  if (!bien) return { title: "Bien introuvable — BOGBE'S GROUPE" }
 
   const photo = (bien.biens_medias as { url: string; est_couverture: boolean; ordre: number }[] | null)
     ?.sort((a, b) => (b.est_couverture ? 1 : 0) - (a.est_couverture ? 1 : 0))[0]?.url
@@ -55,13 +57,13 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const prix = bien.prix_vente_fcfa
     ? formatFCFA(bien.prix_vente_fcfa)
     : bien.prix_mois_fcfa ? `${formatFCFA(bien.prix_mois_fcfa)}/mois` : ''
-  const desc = `${bien.type_bien} à ${lieu}${prix ? ` — ${prix}` : ''}. Découvrez ce bien sur Immo CI, la plateforme immobilière N°1 en Côte d'Ivoire.`
+  const desc = `${bien.type_bien} à ${lieu}${prix ? ` — ${prix}` : ''}. Découvrez ce bien sur BOGBE'S GROUPE, la plateforme immobilière N°1 en Côte d'Ivoire.`
 
   return {
-    title: `${bien.titre} — ${lieu} | Immo CI Prestige`,
+    title: `${bien.titre} — ${lieu} | BOGBE'S GROUPE`,
     description: desc,
-    keywords: [`immobilier luxe Abidjan`, `location meublée ${bien.commune}`, `achat appartement ${bien.commune}`, `Immo CI prestige`, bien.titre],
-    authors: [{ name: 'Immo CI Prestige' }],
+    keywords: [`immobilier luxe Abidjan`, `location meublée ${bien.commune}`, `achat appartement ${bien.commune}`, `BOGBE'S GROUPE prestige`, bien.titre],
+    authors: [{ name: "BOGBE'S GROUPE" }],
     alternates: { canonical: `https://immo-ci.com/biens/${id}` },
     openGraph: {
       title: bien.titre,
@@ -137,9 +139,19 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
     photo_url: (b.biens_medias as any[])?.find((m: any) => m.est_couverture)?.url || (b.biens_medias as any[])?.[0]?.url
   }))
 
+  const prixLabel = prix ? `${prix.value}${prix.suffix}` : ''
+
   return (
     <main className="bg-white min-h-screen selection:bg-accent-luxury/20 font-sans text-slate-800 antialiased overflow-x-hidden pb-20 lg:pb-0">
       <ScrollToTop />
+      <TrackView
+        id={bien.id}
+        titre={bien.titre}
+        commune={bien.commune}
+        type_bien={bien.type_bien}
+        prix={prixLabel}
+        photo_url={medias.find((m: any) => m.est_couverture)?.url ?? medias[0]?.url ?? null}
+      />
 
 
       {/* Discovery Bar — desktop only */}
@@ -187,6 +199,14 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
 
           {/* Left column */}
           <div className="flex-1 min-w-0">
+
+            {/* ACTIONS rapides */}
+            <div className="flex items-center gap-3 mb-8 flex-wrap">
+              <ShareButton titre={bien.titre} />
+              {user?.id && (
+                <FavorisButton bienId={bien.id} userId={user.id} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-sm font-bold text-[var(--text-muted)] hover:text-[var(--text)] hover:border-[var(--accent-luxury)]/50 transition-all active:scale-95" />
+              )}
+            </div>
 
             {/* DESCRIPTION */}
             {bien.description && (
@@ -372,7 +392,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                       </div>
                       <div>
                         <p className="text-[9px] text-slate-400 uppercase tracking-widest mb-0.5">Propriétaire</p>
-                        <p className="font-bold text-slate-800 text-sm">{proprio?.full_name || 'Immo CI'}</p>
+                        <p className="font-bold text-slate-800 text-sm">{proprio?.full_name || "BOGBE'S GROUPE"}</p>
                         <div className="flex items-center gap-1.5 mt-0.5">
                           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                           <span className="text-[9px] text-emerald-600">Disponible</span>

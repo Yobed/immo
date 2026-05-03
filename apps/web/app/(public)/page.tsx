@@ -9,6 +9,7 @@ import { PublishChoiceTeaser } from '@/components/landing/PublishChoiceTeaser'
 import { MapZones } from '@/components/landing/MapZones'
 import { NearMeSection } from '@/components/landing/NearMeSection'
 import { Footer } from '@/components/landing/Footer'
+import { RecentlyViewed } from '@/components/landing/RecentlyViewed'
 
 export const revalidate = 300 // ISR: revalide toutes les 5 min
 
@@ -95,7 +96,10 @@ export default async function HomePage() {
       {/* 1. Hero éditorial — image fixe, typo serif, recherche minimaliste */}
       <HeroEditorial bgImage={bgImages[0]} featuredBiens={premiumProperties} />
 
-      {/* 2. Parcours utilisateurs — 5 personas explicites */}
+      {/* 2. Dernières visites (si l'utilisateur a déjà consulté des biens) */}
+      <RecentlyViewed />
+
+      {/* 3. Parcours utilisateurs — 5 personas explicites */}
       <JourneyShortcuts />
 
       {/* 3. Près de chez moi (Coup de coeur de l'utilisateur) */}
