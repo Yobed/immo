@@ -1,26 +1,45 @@
-import Link from 'next/link'
-import Image from 'next/image'
-import { Flame, MapPin, BedDouble, Maximize, Phone, ChevronLeft, ChevronRight, Search, Sparkles } from 'lucide-react'
+'use client'
 import { createLocauxClient } from '@/lib/supabase/locaux'
 import { mapLocauxRow, type LocauxRow, type BienExterne } from '@/lib/locaux/mapper'
 import { formatFCFA } from '@/lib/format'
-
-export const revalidate = 60
-export const dynamic = 'force-dynamic'
+import Link from 'next/link'
+import Image from 'next/image'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useEffect, useRef, useState, useCallback, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+import {
+  Home, Building2, Palmtree, Warehouse, Briefcase, Shovel,
+  Store, Flame, MapPin, MessageCircle, ArrowRight, AlertCircle,
+  ChevronLeft, ChevronRight, BedDouble, Maximize,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 const PAGE_SIZE = 24
 
-interface SearchParams {
-  type?: string
-  offre?: string
-  commune?: string
-  q?: string
-  page?: string
-  meuble?: string
-}
+const TYPE_FILTERS: { label: string; value: string; icon: LucideIcon }[] = [
+  { label: 'Tous',         value: '',            icon: Flame },
+  { label: 'Appartements', value: 'appartement', icon: Building2 },
+  { label: 'Villas',       value: 'villa',       icon: Palmtree },
+  { label: 'Studios',      value: 'studio',      icon: Warehouse },
+  { label: 'Maisons',      value: 'maison',      icon: Home },
+  { label: 'Bureaux',      value: 'bureau',      icon: Briefcase },
+  { label: 'Terrains',     value: 'terrain',     icon: Shovel },
+  { label: 'Commerce',     value: 'commerce',    icon: Store },
+]
 
-interface PageProps {
-  searchParams: Promise<SearchParams>
+const OFFRE_FILTERS = [
+  { label: 'Tous',      value: '' },
+  { label: 'À vendre',  value: 'vente' },
+  { label: 'À louer',   value: 'location' },
+]
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.07, delayChildren: 0.1 } },
+}
+const itemVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } },
 }
 
 function priceDisplay(b: BienExterne): string {
@@ -44,239 +63,521 @@ function relativeTime(iso: string): string {
   return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
 }
 
-const TYPE_OPTIONS = [
-  { value: '', label: 'Tous types' },
-  { value: 'terrain', label: 'Terrain' },
-  { value: 'appartement', label: 'Appartement' },
-  { value: 'studio', label: 'Studio' },
-  { value: 'villa', label: 'Villa' },
-  { value: 'maison', label: 'Maison' },
-  { value: 'bureau', label: 'Bureau' },
-  { value: 'commerce', label: 'Commerce' },
-]
+export default function OffreFlashPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-4xl px-4">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="aspect-[3/4] bg-off-white/5 animate-pulse rounded-[1.5rem]" />
+          ))}
+        </div>
+      </div>
+    }>
+      <OffreFlashContent />
+    </Suspense>
+  )
+}
 
-const OFFRE_OPTIONS = [
-  { value: '', label: 'Vente + Location' },
-  { value: 'vente', label: 'À vendre' },
-  { value: 'location', label: 'À louer' },
-]
+function OffreFlashContent() {
+  const searchParams = useSearchParams()
+  const activeType  = searchParams.get('type')  ?? ''
+  const activeOffre = searchParams.get('offre') ?? ''
+  const page        = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10) || 1)
 
-export default async function OffreFlashPage({ searchParams }: PageProps) {
-  const sp = await searchParams
-  const type = sp.type ?? ''
-  const offre = sp.offre ?? ''
-  const commune = sp.commune ?? ''
-  const q = sp.q?.trim() ?? ''
-  const meubleOnly = sp.meuble === '1'
-  const page = Math.max(1, parseInt(sp.page ?? '1', 10) || 1)
+  const [biens, setBiens]   = useState<BienExterne[]>([])
+  const [total, setTotal]   = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [error, setError]   = useState<string | null>(null)
 
-  const locaux = createLocauxClient()
+  const locauxRef = useRef(createLocauxClient())
+  const locaux    = locauxRef.current
 
-  let query = locaux
-    .from('locaux')
-    .select(
-      'id,ref_bien,type_de_bien,type_offre,zone_geographique,commune,quartier,prix,prix_normalise,telephone,telephone_bien,caracteristiques,publie_par,meubles,chambre,disponible,surface,groupe_whatsapp_origine,date_publication,lien_image,message_initial,status,is_duplicate,date_expiration,created_at',
-      { count: 'exact' }
-    )
-    .eq('status', 'active')
-    .eq('is_duplicate', false)
-    .order('date_publication', { ascending: false, nullsFirst: false })
+  const load = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let query = (locaux as any)
+        .from('locaux')
+        .select(
+          'id,ref_bien,type_de_bien,type_offre,zone_geographique,commune,quartier,prix,prix_normalise,telephone,telephone_bien,caracteristiques,publie_par,meubles,chambre,disponible,surface,groupe_whatsapp_origine,date_publication,lien_image,message_initial,status,is_duplicate,date_expiration,created_at',
+          { count: 'exact' }
+        )
+        .eq('status', 'active')
+        .eq('is_duplicate', false)
+        .order('date_publication', { ascending: false, nullsFirst: false })
 
-  if (type) query = query.ilike('type_de_bien', `%${type}%`)
-  if (offre) query = query.ilike('type_offre', `${offre}%`)
-  if (commune) query = query.ilike('commune', `%${commune}%`)
-  if (meubleOnly) query = query.eq('meubles', 'Oui')
-  if (q) query = query.or(`message_initial.ilike.%${q}%,caracteristiques.ilike.%${q}%,quartier.ilike.%${q}%,commune.ilike.%${q}%`)
+      if (activeType)  query = query.ilike('type_de_bien', `%${activeType}%`)
+      if (activeOffre) query = query.ilike('type_offre',   `${activeOffre}%`)
 
-  const from = (page - 1) * PAGE_SIZE
-  const to = from + PAGE_SIZE - 1
-  query = query.range(from, to)
+      const from = (page - 1) * PAGE_SIZE
+      query = query.range(from, from + PAGE_SIZE - 1)
 
-  const { data: rows, count } = await query
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const biens = ((rows ?? []) as any as LocauxRow[]).map(mapLocauxRow)
-  const total = count ?? 0
+      const { data: rows, count, error: err } = await query
+      if (err) throw new Error(err.message)
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mapped = ((rows ?? []) as any as LocauxRow[]).map(mapLocauxRow)
+      setBiens(mapped)
+      setTotal(count ?? 0)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Erreur de chargement')
+    } finally {
+      setLoading(false)
+    }
+  }, [locaux, activeType, activeOffre, page])
+
+  useEffect(() => { load() }, [load])
+
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
-  const buildLink = (overrides: Partial<SearchParams>) => {
-    const params = new URLSearchParams()
-    if (type) params.set('type', type)
-    if (offre) params.set('offre', offre)
-    if (commune) params.set('commune', commune)
-    if (q) params.set('q', q)
-    if (meubleOnly) params.set('meuble', '1')
+  const buildLink = (overrides: Record<string, string | null>) => {
+    const p = new URLSearchParams()
+    if (activeType)  p.set('type', activeType)
+    if (activeOffre) p.set('offre', activeOffre)
+    if (page > 1)    p.set('page', String(page))
     Object.entries(overrides).forEach(([k, v]) => {
-      if (v == null || v === '') params.delete(k)
-      else params.set(k, String(v))
+      if (v == null || v === '') p.delete(k)
+      else p.set(k, v)
     })
-    const s = params.toString()
+    const s = p.toString()
     return `/offre-flash${s ? `?${s}` : ''}`
   }
 
   return (
-    <main className="bg-slate-50 min-h-screen">
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-orange-500 via-red-500 to-pink-600 text-white">
-        <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-10 md:py-14">
-          <div className="flex items-center gap-3 mb-3">
-            <Flame className="w-7 h-7" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.4em] opacity-90">Offres Flash</span>
-          </div>
-          <h1 className="font-display text-3xl md:text-5xl font-bold mb-3 leading-tight">
-            Annonces fraîches du terrain
-          </h1>
-          <p className="text-white/85 text-sm md:text-base max-w-2xl">
-            Annonces fraîches de notre réseau d&apos;agents et propriétaires de Côte d&apos;Ivoire.{' '}
-            {total.toLocaleString('fr-FR')} offres actives.
-          </p>
-        </div>
-      </section>
+    <div className="min-h-screen bg-[#020617]">
+      <PageHeader
+        activeType={activeType}
+        activeOffre={activeOffre}
+        count={total}
+        buildLink={buildLink}
+      />
 
-      {/* Filtres */}
-      <form className="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-sm">
-        <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-3 flex flex-wrap items-center gap-2">
-          <div className="flex-1 min-w-[240px] relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              name="q"
-              defaultValue={q}
-              placeholder="Rechercher (commune, mot-clé...)"
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400"
-            />
-          </div>
-          <select name="type" defaultValue={type} className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium">
-            {TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
-          <select name="offre" defaultValue={offre} className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium">
-            {OFFRE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
-          <input
-            type="text"
-            name="commune"
-            defaultValue={commune}
-            placeholder="Commune"
-            className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm w-[140px]"
-          />
-          <label className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium cursor-pointer hover:bg-slate-100">
-            <input type="checkbox" name="meuble" value="1" defaultChecked={meubleOnly} className="w-3.5 h-3.5" />
-            Meublé
-          </label>
-          <button type="submit" className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-bold hover:bg-orange-700">
-            Filtrer
-          </button>
-          {(type || offre || commune || q || meubleOnly) && (
-            <Link href="/offre-flash" className="px-3 py-2 text-slate-500 hover:text-slate-900 text-sm font-medium">
-              Reset
-            </Link>
-          )}
-        </div>
-      </form>
-
-      {/* Liste */}
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6">
-        <p className="text-slate-400 text-xs mb-4">
-          {total.toLocaleString('fr-FR')} résultat{total > 1 ? 's' : ''} · Page {page} / {totalPages}
-        </p>
-
-        {biens.length === 0 ? (
-          <div className="bg-white rounded-2xl p-16 text-center border border-slate-200">
-            <Sparkles className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500 text-sm">Aucune annonce ne correspond à ces critères.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-            {biens.map(bien => (
-              <Link
-                key={bien.id}
-                href={`/offre-flash/${bien.id}`}
-                className="group bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex flex-col"
+      <main className="max-w-7xl mx-auto px-3 pt-3 pb-28 lg:pb-16" aria-live="polite" aria-busy={loading}>
+        <AnimatePresence mode="wait">
+          {loading ? (
+            <motion.div
+              key="loading"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-5"
+              role="status" aria-label="Chargement des offres flash"
+            >
+              <div className="col-span-2 rounded-2xl overflow-hidden">
+                <div className="aspect-video bg-white/5 animate-pulse rounded-2xl" />
+                <div className="mt-3 space-y-2">
+                  <div className="h-4 bg-white/5 animate-pulse rounded-lg w-3/4" />
+                  <div className="h-3 bg-white/5 animate-pulse rounded-lg w-1/2" />
+                </div>
+              </div>
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="rounded-xl overflow-hidden">
+                  <div className="aspect-[4/3] bg-white/5 animate-pulse rounded-xl" />
+                  <div className="mt-2 space-y-1.5">
+                    <div className="h-3 bg-white/5 animate-pulse rounded w-4/5" />
+                    <div className="h-3 bg-white/5 animate-pulse rounded w-2/3" />
+                    <div className="h-4 bg-white/5 animate-pulse rounded w-1/2" />
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+          ) : error ? (
+            <motion.div
+              key="error"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="text-center py-32 px-8"
+              role="alert"
+            >
+              <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-6" />
+              <h3 className="font-display text-2xl font-bold text-off-white mb-3">Erreur de chargement</h3>
+              <p className="text-off-white/60 mb-8 max-w-md mx-auto">{error}</p>
+              <button
+                onClick={load}
+                className="px-8 py-3 bg-off-white/10 hover:bg-off-white/20 text-off-white rounded-full font-bold transition-colors"
               >
-                {/* Image / placeholder */}
-                <div className="aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 relative overflow-hidden">
-                  {bien.image_url ? (
-                    <Image
-                      src={bien.image_url}
-                      alt={bien.titre}
-                      fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      unoptimized
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-300">
-                      <Flame className="w-12 h-12" />
+                Réessayer
+              </button>
+            </motion.div>
+          ) : (
+            <motion.div key="grid" variants={containerVariants} initial="hidden" animate="visible">
+              {biens.length === 0 ? (
+                <EmptyState activeType={activeType} />
+              ) : (
+                <>
+                  {/* Mobile: défilement horizontal épuré */}
+                  <div className="md:hidden overflow-hidden -mx-3">
+                    <div className="flex gap-2.5 overflow-x-auto pb-4 px-3 no-scrollbar">
+                      {biens.map((bien) => (
+                        <Link
+                          key={bien.id}
+                          href={`/offre-flash/${bien.id}`}
+                          className="shrink-0 w-[148px] flex flex-col rounded-2xl overflow-hidden bg-[var(--surface-card)] border border-white/8 active:scale-95 transition-transform duration-150"
+                        >
+                          <div className="relative aspect-[3/4] overflow-hidden bg-black/20">
+                            {bien.image_url ? (
+                              <Image src={bien.image_url} alt={bien.titre} fill className="object-cover" sizes="148px" unoptimized />
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center opacity-20">
+                                <Flame className="w-8 h-8 text-white" />
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+                            <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-black/55 backdrop-blur-sm text-[7px] font-bold uppercase tracking-wide text-white">
+                              {bien.type_bien.replace(/_/g, ' ')}
+                            </span>
+                            {bien.is_recent && (
+                              <span className="absolute top-2 right-2 w-4 h-4 rounded-full bg-orange-500 flex items-center justify-center">
+                                <Flame className="w-2.5 h-2.5 text-white" />
+                              </span>
+                            )}
+                            <div className="absolute bottom-2 left-2 right-2">
+                              <p className="text-white text-[11px] font-bold leading-tight line-clamp-2">{bien.titre}</p>
+                            </div>
+                          </div>
+                          <div className="px-2.5 py-2 flex items-center justify-between gap-1">
+                            <span className="text-[9px] font-black text-[var(--accent-luxury)] uppercase tracking-wide truncate">{bien.commune}</span>
+                            <span className="text-[10px] font-bold text-[var(--accent-luxury)] shrink-0">{priceDisplay(bien)}</span>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Desktop: grille */}
+                  <div className="hidden md:grid grid-cols-3 xl:grid-cols-4 gap-4">
+                    {biens.map((bien, i) => (
+                      <motion.div
+                        key={bien.id}
+                        variants={itemVariants}
+                        className={i === 0 ? 'col-span-2 row-span-1' : ''}
+                      >
+                        <FlashCard bien={bien} featured={i === 0} index={i} />
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-2 mt-10">
+                      {page > 1 && (
+                        <Link
+                          href={buildLink({ page: String(page - 1) })}
+                          className="flex items-center gap-1.5 px-4 py-2 bg-white/8 border border-white/12 rounded-xl text-sm font-bold text-white/70 hover:bg-white/15 hover:text-white transition-all"
+                        >
+                          <ChevronLeft className="w-4 h-4" /> Précédent
+                        </Link>
+                      )}
+                      <span className="px-4 py-2 text-sm text-white/40 font-medium">
+                        {page} / {totalPages}
+                      </span>
+                      {page < totalPages && (
+                        <Link
+                          href={buildLink({ page: String(page + 1) })}
+                          className="flex items-center gap-1.5 px-4 py-2 bg-white/8 border border-white/12 rounded-xl text-sm font-bold text-white/70 hover:bg-white/15 hover:text-white transition-all"
+                        >
+                          Suivant <ChevronRight className="w-4 h-4" />
+                        </Link>
+                      )}
                     </div>
                   )}
-                  {bien.is_recent && (
-                    <span className="absolute top-2 left-2 flex items-center gap-1 px-2 py-1 bg-red-600 text-white text-[10px] font-bold uppercase tracking-wider rounded-full shadow-md">
-                      <Flame className="w-3 h-3" />
-                      Nouveau
-                    </span>
-                  )}
-                  <span className="absolute top-2 right-2 px-2 py-0.5 bg-white/90 backdrop-blur text-slate-700 text-[10px] font-bold uppercase tracking-wide rounded-full border border-slate-200">
-                    {bien.type_offre === 'location' ? 'Location' : bien.type_offre === 'vente' ? 'Vente' : 'Offre'}
-                  </span>
-                </div>
 
-                <div className="p-3 flex flex-col flex-1">
-                  <p className="text-orange-600 font-display font-bold text-base leading-tight mb-1.5 line-clamp-1">
-                    {priceDisplay(bien)}
-                  </p>
-                  <h3 className="font-bold text-slate-900 text-[13px] leading-snug mb-1.5 line-clamp-2 capitalize">
-                    {bien.type_bien} · {bien.commune}
-                  </h3>
-                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mb-2">
-                    <MapPin className="w-3 h-3 shrink-0" />
-                    <span className="truncate">{[bien.quartier, bien.commune].filter(Boolean).join(', ')}</span>
+                  {/* Disclaimer */}
+                  <div className="mt-10 p-4 bg-orange-950/30 border border-orange-900/30 rounded-xl flex items-start gap-3 text-xs text-orange-200/60">
+                    <Flame className="w-4 h-4 mt-0.5 shrink-0 text-orange-500/60" />
+                    <p>
+                      Annonces issues de notre réseau de groupes WhatsApp. Vérifiez toujours l&apos;authenticité de l&apos;offre avant tout paiement. BOGBE&apos;S GROUPE ne valide pas individuellement chaque annonce flash.
+                    </p>
                   </div>
-                  <div className="flex items-center gap-3 text-[10px] text-slate-500 mb-2">
-                    {bien.nb_chambres != null && bien.nb_chambres > 0 && (
-                      <span className="flex items-center gap-1"><BedDouble className="w-3 h-3" />{bien.nb_chambres} ch.</span>
-                    )}
-                    {bien.surface_m2 && (
-                      <span className="flex items-center gap-1"><Maximize className="w-3 h-3" />{bien.surface_m2.toLocaleString('fr-FR')} m²</span>
-                    )}
-                    {bien.meuble && (
-                      <span className="px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded font-bold text-[9px]">MEUBLÉ</span>
-                    )}
-                  </div>
-                  <p className="mt-auto text-[10px] text-slate-400 font-medium">
-                    {relativeTime(bien.date_publication)}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+                </>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-8">
-            {page > 1 && (
-              <Link href={buildLink({ page: String(page - 1) })} className="flex items-center gap-1 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50">
-                <ChevronLeft className="w-4 h-4" /> Précédent
-              </Link>
-            )}
-            <span className="px-4 py-2 text-sm text-slate-600 font-medium">
-              {page} / {totalPages}
-            </span>
-            {page < totalPages && (
-              <Link href={buildLink({ page: String(page + 1) })} className="flex items-center gap-1 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium hover:bg-slate-50">
-                Suivant <ChevronRight className="w-4 h-4" />
-              </Link>
-            )}
+      {/* CTA WhatsApp flottant — mobile uniquement */}
+      <div
+        className="fixed bottom-0 left-0 right-0 z-50 lg:hidden px-4 pb-6 pt-4 pointer-events-none"
+        style={{ background: 'linear-gradient(to top, var(--background) 40%, transparent)' }}
+      >
+        <a
+          href="https://wa.me/2250574243752?text=Bonjour%2C%20je%20cherche%20un%20bien%20%C3%A0%20Abidjan"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="pointer-events-auto flex items-center gap-3 px-5 py-3.5 bg-emerald-600 rounded-2xl shadow-2xl shadow-emerald-950/50 w-full active:scale-95 transition-transform duration-150"
+        >
+          <MessageCircle className="w-5 h-5 text-white shrink-0" />
+          <div className="flex-1">
+            <p className="text-[13px] font-bold text-white leading-tight">Parler à Sapphire</p>
+            <p className="text-[10px] text-white/70 leading-tight">Trouvez votre bien idéal</p>
           </div>
-        )}
+          <ArrowRight className="w-4 h-4 text-white/60 shrink-0" />
+        </a>
+      </div>
+    </div>
+  )
+}
 
-        {/* Disclaimer */}
-        <div className="mt-10 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3 text-xs text-amber-900">
-          <Phone className="w-4 h-4 mt-0.5 shrink-0" />
-          <p>
-            Les annonces affichées proviennent de notre réseau de groupes WhatsApp d&apos;agents et propriétaires. Vérifiez toujours l&apos;authenticité de l&apos;offre avant tout paiement. Immo CI ne valide pas individuellement chaque annonce flash.
+// ──────────────────────────────────────────────
+// Header
+// ──────────────────────────────────────────────
+function PageHeader({
+  activeType,
+  activeOffre,
+  count,
+  buildLink,
+}: {
+  activeType: string
+  activeOffre: string
+  count: number
+  buildLink: (overrides: Record<string, string | null>) => string
+}) {
+  const typeLabel = TYPE_FILTERS.find(f => f.value === activeType)?.label ?? 'Flash'
+
+  return (
+    <header className="relative bg-[#020617] overflow-hidden" data-theme="dark">
+      <div
+        className="absolute -top-24 -left-24 w-96 h-96 pointer-events-none"
+        style={{ background: 'radial-gradient(circle, oklch(65% 0.18 45 / 0.13) 0%, transparent 65%)' }}
+      />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 pt-6 pb-4 md:pt-16 md:pb-6">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white/70 hover:text-white text-[11px] font-bold uppercase tracking-wider transition-all active:scale-95"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5M12 5l-7 7 7 7" />
+          </svg>
+          Accueil
+        </Link>
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <p className="font-display italic text-orange-400 text-[13px] tracking-wide mb-0.5 flex items-center gap-1.5">
+            <Flame className="w-3.5 h-3.5" />
+            Offre Flash
           </p>
+          <h1 className="font-display font-bold text-[28px] md:text-5xl text-white tracking-tight leading-none">
+            {typeLabel}
+          </h1>
+          {count > 0 && (
+            <p className="text-white/35 text-[11px] font-sans mt-2 uppercase tracking-[0.2em]">
+              {count.toLocaleString('fr-FR')} offre{count > 1 ? 's' : ''} active{count > 1 ? 's' : ''}
+            </p>
+          )}
+        </motion.div>
+      </div>
+
+      {/* Filter pills */}
+      <div className="sticky top-0 z-50 bg-[#020617]/95 backdrop-blur-md border-b border-white/8">
+        <div className="max-w-7xl mx-auto px-3 py-2 space-y-1.5">
+          {/* Type pills */}
+          <nav className="flex gap-1.5 overflow-x-auto scrollbar-hide" aria-label="Filtres de type de bien">
+            {TYPE_FILTERS.map((f) => {
+              const isActive = f.value === activeType
+              return (
+                <a
+                  key={f.value}
+                  href={buildLink({ type: f.value || null, page: null })}
+                  aria-current={isActive ? 'page' : undefined}
+                  className={`flex flex-col items-center gap-0.5 shrink-0 px-3 py-2 rounded-xl min-w-[48px] transition-all duration-200 ${
+                    isActive
+                      ? 'bg-orange-500 text-black'
+                      : 'bg-white/6 text-white/55 hover:bg-white/12 hover:text-white'
+                  }`}
+                >
+                  <f.icon className={`w-4 h-4 ${isActive ? 'text-black' : 'text-white/50'}`} aria-hidden="true" />
+                  <span className="text-[8px] font-bold uppercase tracking-wide whitespace-nowrap">{f.label}</span>
+                </a>
+              )
+            })}
+          </nav>
+
+          {/* Vente / Location toggle */}
+          <div className="flex gap-1.5" role="group" aria-label="Type d'offre">
+            {OFFRE_FILTERS.map((f) => {
+              const isActive = f.value === activeOffre
+              return (
+                <a
+                  key={f.value}
+                  href={buildLink({ offre: f.value || null, page: null })}
+                  className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide transition-all duration-200 ${
+                    isActive
+                      ? 'bg-white/15 text-white border border-white/25'
+                      : 'text-white/40 hover:text-white/70'
+                  }`}
+                >
+                  {f.label}
+                </a>
+              )
+            })}
+          </div>
         </div>
       </div>
-    </main>
+    </header>
+  )
+}
+
+// ──────────────────────────────────────────────
+// Card desktop
+// ──────────────────────────────────────────────
+function FlashCard({ bien, featured, index }: { bien: BienExterne; featured: boolean; index: number }) {
+  return (
+    <Link
+      href={`/offre-flash/${bien.id}`}
+      className={`group relative flex flex-col bg-[var(--surface-card)] border border-[var(--border)] rounded-[2rem] overflow-hidden transition-all duration-700 hover:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.35)] hover:-translate-y-1 h-full`}
+    >
+      {/* Image */}
+      <div className={`relative ${featured ? 'aspect-video' : 'aspect-[4/5]'} overflow-hidden bg-[var(--midnight-muted)]`}>
+        {bien.image_url ? (
+          <Image
+            src={bien.image_url}
+            alt={bien.titre}
+            fill
+            className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-110"
+            sizes={featured ? '(max-width: 1280px) 66vw, 50vw' : '(max-width: 1280px) 33vw, 25vw'}
+            unoptimized
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center opacity-20">
+            <Flame className="w-12 h-12 text-white" />
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+
+        {/* Badges top */}
+        <div className="absolute top-3 left-3 right-3 flex justify-between items-start pointer-events-none">
+          <span className="px-2.5 py-1 rounded-full bg-black/55 backdrop-blur-xl border border-white/12 text-[10px] font-bold uppercase tracking-[0.12em] text-white">
+            {bien.type_bien.replace(/_/g, ' ')}
+          </span>
+          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md border ${
+            bien.type_offre === 'vente'
+              ? 'bg-amber-500/85 border-amber-400/30 text-white'
+              : bien.type_offre === 'location'
+              ? 'bg-blue-500/85 border-blue-400/30 text-white'
+              : 'bg-white/15 border-white/20 text-white'
+          }`}>
+            {bien.type_offre === 'vente' ? 'Vente' : bien.type_offre === 'location' ? 'Location' : 'Offre'}
+          </span>
+        </div>
+
+        {/* Badges bottom */}
+        <div className="absolute bottom-3 left-3 flex gap-1.5">
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/65 backdrop-blur-md border border-white/10 text-[10px] font-black uppercase tracking-wider text-white">
+            <span className="relative flex w-1.5 h-1.5 shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
+              <span className="relative inline-flex rounded-full w-1.5 h-1.5 bg-orange-500" />
+            </span>
+            Flash
+          </span>
+          {bien.is_recent && (
+            <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-orange-500/90 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-wider">
+              <Flame className="w-2.5 h-2.5" /> Nouveau
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex flex-col p-4 pt-3.5 flex-1">
+        <div className="flex items-center justify-between gap-1 mb-2">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <MapPin className="w-3.5 h-3.5 shrink-0 text-[var(--accent-luxury)]" strokeWidth={2.5} />
+            <span className="text-xs font-black text-[var(--accent-luxury)] uppercase tracking-[0.12em] truncate">
+              {bien.commune}
+            </span>
+          </div>
+          <span className="text-base font-display font-bold text-[var(--accent-luxury)] tracking-tight shrink-0 whitespace-nowrap">
+            {priceDisplay(bien)}
+          </span>
+        </div>
+
+        <h3 className={`font-display ${featured ? 'text-[18px]' : 'text-[15px]'} font-bold text-[var(--text)] tracking-tight leading-[1.3] line-clamp-2 mb-3`}>
+          {bien.titre}
+        </h3>
+
+        {(bien.nb_chambres || bien.surface_m2) ? (
+          <div className="flex items-center gap-4 mb-3">
+            {bien.nb_chambres && bien.nb_chambres > 0 && (
+              <div className="flex items-center gap-1.5">
+                <BedDouble className="w-4 h-4 text-[var(--text-muted)]" />
+                <span className="text-xs font-bold text-[var(--text)]">{bien.nb_chambres} ch.</span>
+              </div>
+            )}
+            {bien.surface_m2 && (
+              <div className="flex items-center gap-1.5">
+                <Maximize className="w-4 h-4 text-[var(--text-muted)]" />
+                <span className="text-xs font-bold text-[var(--text)]">{bien.surface_m2.toLocaleString('fr-FR')} m²</span>
+              </div>
+            )}
+            {bien.meuble && (
+              <span className="px-2 py-0.5 bg-blue-500/15 text-blue-400 rounded text-[9px] font-black uppercase tracking-wider border border-blue-500/20">
+                Meublé
+              </span>
+            )}
+          </div>
+        ) : null}
+
+        <p className="mt-auto text-[10px] text-white/30 font-medium">
+          {relativeTime(bien.date_publication)}
+        </p>
+      </div>
+    </Link>
+  )
+}
+
+// ──────────────────────────────────────────────
+// Empty state
+// ──────────────────────────────────────────────
+function EmptyState({ activeType }: { activeType: string }) {
+  const suggestions = [
+    { label: 'Toutes les offres', href: '/offre-flash',                    desc: 'Explorer tout le flash' },
+    { label: 'Villas',           href: '/offre-flash?type=villa',          desc: 'Haut standing' },
+    { label: 'Appartements',     href: '/offre-flash?type=appartement',    desc: 'Locations disponibles' },
+    { label: 'Terrains',         href: '/offre-flash?type=terrain',        desc: 'Investissement foncier' },
+  ]
+
+  return (
+    <div className="col-span-2 lg:col-span-4 py-20 px-6">
+      <div className="max-w-md mx-auto text-center mb-10">
+        <div className="text-4xl mb-4">🔍</div>
+        <h3 className="font-display text-2xl font-bold text-white mb-2 tracking-tight">
+          Aucune offre dans cette catégorie
+        </h3>
+        <p className="text-white/40 text-[13px] leading-relaxed">
+          Voici d&apos;autres sélections qui pourraient vous intéresser.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-2xl mx-auto mb-10">
+        {suggestions.map((s) => (
+          <a
+            key={s.href}
+            href={s.href}
+            className="flex flex-col gap-1 p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-orange-500/40 hover:bg-white/8 transition-all text-center active:scale-95"
+          >
+            <span className="text-white font-bold text-[12px]">{s.label}</span>
+            <span className="text-white/40 text-[10px]">{s.desc}</span>
+          </a>
+        ))}
+      </div>
+
+      <div className="text-center">
+        <a
+          href={`https://wa.me/2250574243752?text=${encodeURIComponent('Bonjour, je cherche un bien qui ne figure pas dans vos offres flash. Pouvez-vous m\'aider ?')}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full text-[12px] font-bold uppercase tracking-widest transition-all active:scale-95"
+        >
+          <ArrowRight className="w-3.5 h-3.5" />
+          Demander via WhatsApp
+        </a>
+        <p className="text-white/25 text-[10px] mt-3">Notre équipe peut trouver le bien idéal pour vous</p>
+      </div>
+    </div>
   )
 }
