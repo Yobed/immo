@@ -6,13 +6,14 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useRef, useState, useCallback, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import {
   Home, Building2, Palmtree, Warehouse, Briefcase, Shovel,
   Store, Flame, MapPin, MessageCircle, ArrowRight, AlertCircle,
-  ChevronLeft, ChevronRight, BedDouble, Maximize,
+  ChevronLeft, ChevronRight, BedDouble, Maximize, Mic, MicOff,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { useVoiceSearch, parseVoiceCommand } from '@/hooks/useVoiceSearch'
 
 const PAGE_SIZE = 24
 
@@ -28,9 +29,19 @@ const TYPE_FILTERS: { label: string; value: string; icon: LucideIcon }[] = [
 ]
 
 const OFFRE_FILTERS = [
-  { label: 'Tous',      value: '' },
-  { label: 'À vendre',  value: 'vente' },
-  { label: 'À louer',   value: 'location' },
+  { label: 'Vente + Location', value: '' },
+  { label: 'À vendre',         value: 'vente' },
+  { label: 'À louer',          value: 'location' },
+]
+
+const COMMUNES = ['Cocody', 'Plateau', 'Yopougon', 'Marcory', 'Treichville', 'Adjamé', 'Abobo', 'Koumassi', 'Port-Bouët']
+
+const BUDGET_FILTERS = [
+  { label: 'Tout budget', value: '' },
+  { label: '≤ 500k',      value: '500000' },
+  { label: '≤ 1.5M',      value: '1500000' },
+  { label: '≤ 10M',       value: '10000000' },
+  { label: '≤ 50M',       value: '50000000' },
 ]
 
 const containerVariants = {
@@ -80,25 +91,49 @@ export default function OffreFlashPage() {
 }
 
 function OffreFlashContent() {
-  const searchParams = useSearchParams()
-  const activeType  = searchParams.get('type')  ?? ''
-  const activeOffre = searchParams.get('offre') ?? ''
-  const page        = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10) || 1)
+  const searchParams   = useSearchParams()
+  const router         = useRouter()
+  const activeType     = searchParams.get('type')       ?? ''
+  const activeOffre    = searchParams.get('offre')      ?? ''
+  const activeCommune  = searchParams.get('commune')    ?? ''
+  const activeBudget   = searchParams.get('budget_max') ?? ''
+  const page           = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10) || 1)
 
   const [biens, setBiens]   = useState<BienExterne[]>([])
   const [total, setTotal]   = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError]   = useState<string | null>(null)
+  const [voiceHint, setVoiceHint] = useState('')
+
+  const { isListening, transcript, isSupported, startListening, stopListening } = useVoiceSearch()
 
   const locauxRef = useRef(createLocauxClient())
   const locaux    = locauxRef.current
+
+  // Voice → navigate
+  useEffect(() => {
+    if (!transcript) return
+    const f = parseVoiceCommand(transcript)
+    setVoiceHint(transcript)
+    const p = new URLSearchParams()
+    const t = f.type ?? activeType
+    if (t) p.set('type', t)
+    if (f.offre ?? activeOffre) p.set('offre', f.offre ?? activeOffre)
+    if (f.commune) p.set('commune', f.commune)
+    if (f.budgetMax) p.set('budget_max', f.budgetMax)
+    router.push(`/offre-flash${p.toString() ? `?${p.toString()}` : ''}`)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transcript])
+
+  // Clear hint on filter change
+  useEffect(() => { setVoiceHint('') }, [activeType, activeOffre, activeCommune, activeBudget])
 
   const load = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let query = (locaux as any)
+      let q = (locaux as any)
         .from('locaux')
         .select(
           'id,ref_bien,type_de_bien,type_offre,zone_geographique,commune,quartier,prix,prix_normalise,telephone,telephone_bien,caracteristiques,publie_par,meubles,chambre,disponible,surface,groupe_whatsapp_origine,date_publication,lien_image,message_initial,status,is_duplicate,date_expiration,created_at',
@@ -108,15 +143,16 @@ function OffreFlashContent() {
         .eq('is_duplicate', false)
         .order('date_publication', { ascending: false, nullsFirst: false })
 
-      if (activeType)  query = query.ilike('type_de_bien', `%${activeType}%`)
-      if (activeOffre) query = query.ilike('type_offre',   `${activeOffre}%`)
+      if (activeType)    q = q.ilike('type_de_bien', `%${activeType}%`)
+      if (activeOffre)   q = q.ilike('type_offre', `${activeOffre}%`)
+      if (activeCommune) q = q.ilike('commune', `%${activeCommune}%`)
+      if (activeBudget)  q = q.lte('prix_normalise', parseInt(activeBudget))
 
       const from = (page - 1) * PAGE_SIZE
-      query = query.range(from, from + PAGE_SIZE - 1)
+      q = q.range(from, from + PAGE_SIZE - 1)
 
-      const { data: rows, count, error: err } = await query
+      const { data: rows, count, error: err } = await q
       if (err) throw new Error(err.message)
-
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mapped = ((rows ?? []) as any as LocauxRow[]).map(mapLocauxRow)
       setBiens(mapped)
@@ -126,7 +162,7 @@ function OffreFlashContent() {
     } finally {
       setLoading(false)
     }
-  }, [locaux, activeType, activeOffre, page])
+  }, [locaux, activeType, activeOffre, activeCommune, activeBudget, page])
 
   useEffect(() => { load() }, [load])
 
@@ -134,9 +170,11 @@ function OffreFlashContent() {
 
   const buildLink = (overrides: Record<string, string | null>) => {
     const p = new URLSearchParams()
-    if (activeType)  p.set('type', activeType)
-    if (activeOffre) p.set('offre', activeOffre)
-    if (page > 1)    p.set('page', String(page))
+    if (activeType)    p.set('type', activeType)
+    if (activeOffre)   p.set('offre', activeOffre)
+    if (activeCommune) p.set('commune', activeCommune)
+    if (activeBudget)  p.set('budget_max', activeBudget)
+    if (page > 1)      p.set('page', String(page))
     Object.entries(overrides).forEach(([k, v]) => {
       if (v == null || v === '') p.delete(k)
       else p.set(k, v)
@@ -145,14 +183,32 @@ function OffreFlashContent() {
     return `/offre-flash${s ? `?${s}` : ''}`
   }
 
+  const typeLabel = TYPE_FILTERS.find(f => f.value === activeType)?.label ?? 'Flash'
+
   return (
     <div className="min-h-screen bg-[#020617]">
       <PageHeader
         activeType={activeType}
         activeOffre={activeOffre}
+        activeCommune={activeCommune}
+        activeBudget={activeBudget}
         count={total}
+        typeLabel={typeLabel}
         buildLink={buildLink}
+        isListening={isListening}
+        isSupported={isSupported}
+        onMic={isListening ? stopListening : startListening}
       />
+
+      {/* Feedback vocal */}
+      {voiceHint && (
+        <div className="max-w-7xl mx-auto px-4 py-1.5">
+          <p className="text-[10px] text-white/35 flex items-center gap-1.5">
+            <Mic className="w-3 h-3 text-orange-400" />
+            <span>Recherche vocale : &ldquo;{voiceHint}&rdquo;</span>
+          </p>
+        </div>
+      )}
 
       <main className="max-w-7xl mx-auto px-3 pt-3 pb-28 lg:pb-16" aria-live="polite" aria-busy={loading}>
         <AnimatePresence mode="wait">
@@ -161,7 +217,7 @@ function OffreFlashContent() {
               key="loading"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-5"
-              role="status" aria-label="Chargement des offres flash"
+              role="status"
             >
               <div className="col-span-2 rounded-2xl overflow-hidden">
                 <div className="aspect-video bg-white/5 animate-pulse rounded-2xl" />
@@ -201,10 +257,10 @@ function OffreFlashContent() {
           ) : (
             <motion.div key="grid" variants={containerVariants} initial="hidden" animate="visible">
               {biens.length === 0 ? (
-                <EmptyState activeType={activeType} />
+                <EmptyState />
               ) : (
                 <>
-                  {/* Mobile: défilement horizontal épuré */}
+                  {/* Mobile: défilement horizontal */}
                   <div className="md:hidden overflow-hidden -mx-3">
                     <div className="flex gap-2.5 overflow-x-auto pb-4 px-3 no-scrollbar">
                       {biens.map((bien) => (
@@ -246,11 +302,7 @@ function OffreFlashContent() {
                   {/* Desktop: grille */}
                   <div className="hidden md:grid grid-cols-3 xl:grid-cols-4 gap-4">
                     {biens.map((bien, i) => (
-                      <motion.div
-                        key={bien.id}
-                        variants={itemVariants}
-                        className={i === 0 ? 'col-span-2 row-span-1' : ''}
-                      >
+                      <motion.div key={bien.id} variants={itemVariants} className={i === 0 ? 'col-span-2' : ''}>
                         <FlashCard bien={bien} featured={i === 0} index={i} />
                       </motion.div>
                     ))}
@@ -260,19 +312,15 @@ function OffreFlashContent() {
                   {totalPages > 1 && (
                     <div className="flex items-center justify-center gap-2 mt-10">
                       {page > 1 && (
-                        <Link
-                          href={buildLink({ page: String(page - 1) })}
+                        <Link href={buildLink({ page: String(page - 1) })}
                           className="flex items-center gap-1.5 px-4 py-2 bg-white/8 border border-white/12 rounded-xl text-sm font-bold text-white/70 hover:bg-white/15 hover:text-white transition-all"
                         >
                           <ChevronLeft className="w-4 h-4" /> Précédent
                         </Link>
                       )}
-                      <span className="px-4 py-2 text-sm text-white/40 font-medium">
-                        {page} / {totalPages}
-                      </span>
+                      <span className="px-4 py-2 text-sm text-white/40 font-medium">{page} / {totalPages}</span>
                       {page < totalPages && (
-                        <Link
-                          href={buildLink({ page: String(page + 1) })}
+                        <Link href={buildLink({ page: String(page + 1) })}
                           className="flex items-center gap-1.5 px-4 py-2 bg-white/8 border border-white/12 rounded-xl text-sm font-bold text-white/70 hover:bg-white/15 hover:text-white transition-all"
                         >
                           Suivant <ChevronRight className="w-4 h-4" />
@@ -281,11 +329,10 @@ function OffreFlashContent() {
                     </div>
                   )}
 
-                  {/* Disclaimer */}
                   <div className="mt-10 p-4 bg-orange-950/30 border border-orange-900/30 rounded-xl flex items-start gap-3 text-xs text-orange-200/60">
                     <Flame className="w-4 h-4 mt-0.5 shrink-0 text-orange-500/60" />
                     <p>
-                      Annonces issues de notre réseau de groupes WhatsApp. Vérifiez toujours l&apos;authenticité de l&apos;offre avant tout paiement. BOGBE&apos;S GROUPE ne valide pas individuellement chaque annonce flash.
+                      Annonces issues de notre réseau de groupes WhatsApp. Vérifiez l&apos;authenticité de l&apos;offre avant tout paiement. BOGBE&apos;S GROUPE ne valide pas individuellement chaque annonce flash.
                     </p>
                   </div>
                 </>
@@ -295,15 +342,13 @@ function OffreFlashContent() {
         </AnimatePresence>
       </main>
 
-      {/* CTA WhatsApp flottant — mobile uniquement */}
       <div
         className="fixed bottom-0 left-0 right-0 z-50 lg:hidden px-4 pb-6 pt-4 pointer-events-none"
         style={{ background: 'linear-gradient(to top, var(--background) 40%, transparent)' }}
       >
         <a
           href="https://wa.me/2250574243752?text=Bonjour%2C%20je%20cherche%20un%20bien%20%C3%A0%20Abidjan"
-          target="_blank"
-          rel="noopener noreferrer"
+          target="_blank" rel="noopener noreferrer"
           className="pointer-events-auto flex items-center gap-3 px-5 py-3.5 bg-emerald-600 rounded-2xl shadow-2xl shadow-emerald-950/50 w-full active:scale-95 transition-transform duration-150"
         >
           <MessageCircle className="w-5 h-5 text-white shrink-0" />
@@ -318,22 +363,17 @@ function OffreFlashContent() {
   )
 }
 
-// ──────────────────────────────────────────────
-// Header
-// ──────────────────────────────────────────────
-function PageHeader({
-  activeType,
-  activeOffre,
-  count,
-  buildLink,
-}: {
-  activeType: string
-  activeOffre: string
-  count: number
-  buildLink: (overrides: Record<string, string | null>) => string
-}) {
-  const typeLabel = TYPE_FILTERS.find(f => f.value === activeType)?.label ?? 'Flash'
+// ─── Header ────────────────────────────────────────────────────────────────
 
+function PageHeader({
+  activeType, activeOffre, activeCommune, activeBudget, count, typeLabel, buildLink,
+  isListening, isSupported, onMic,
+}: {
+  activeType: string; activeOffre: string; activeCommune: string; activeBudget: string
+  count: number; typeLabel: string
+  buildLink: (o: Record<string, string | null>) => string
+  isListening: boolean; isSupported: boolean; onMic: () => void
+}) {
   return (
     <header className="relative bg-[#020617] overflow-hidden" data-theme="dark">
       <div
@@ -351,15 +391,13 @@ function PageHeader({
           </svg>
           Accueil
         </Link>
-
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
           <p className="font-display italic text-orange-400 text-[13px] tracking-wide mb-0.5 flex items-center gap-1.5">
-            <Flame className="w-3.5 h-3.5" />
-            Offre Flash
+            <Flame className="w-3.5 h-3.5" /> Offre Flash
           </p>
           <h1 className="font-display font-bold text-[28px] md:text-5xl text-white tracking-tight leading-none">
             {typeLabel}
@@ -372,10 +410,10 @@ function PageHeader({
         </motion.div>
       </div>
 
-      {/* Filter pills */}
       <div className="sticky top-0 z-50 bg-[#020617]/95 backdrop-blur-md border-b border-white/8">
         <div className="max-w-7xl mx-auto px-3 py-2 space-y-1.5">
-          {/* Type pills */}
+
+          {/* Row 1 — Type */}
           <nav className="flex gap-1.5 overflow-x-auto scrollbar-hide" aria-label="Filtres de type de bien">
             {TYPE_FILTERS.map((f) => {
               const isActive = f.value === activeType
@@ -385,9 +423,7 @@ function PageHeader({
                   href={buildLink({ type: f.value || null, page: null })}
                   aria-current={isActive ? 'page' : undefined}
                   className={`flex flex-col items-center gap-0.5 shrink-0 px-3 py-2 rounded-xl min-w-[48px] transition-all duration-200 ${
-                    isActive
-                      ? 'bg-orange-500 text-black'
-                      : 'bg-white/6 text-white/55 hover:bg-white/12 hover:text-white'
+                    isActive ? 'bg-orange-500 text-black' : 'bg-white/6 text-white/55 hover:bg-white/12 hover:text-white'
                   }`}
                 >
                   <f.icon className={`w-4 h-4 ${isActive ? 'text-black' : 'text-white/50'}`} aria-hidden="true" />
@@ -397,41 +433,94 @@ function PageHeader({
             })}
           </nav>
 
-          {/* Vente / Location toggle */}
-          <div className="flex gap-1.5" role="group" aria-label="Type d'offre">
-            {OFFRE_FILTERS.map((f) => {
-              const isActive = f.value === activeOffre
-              return (
+          {/* Row 2 — Zone + Mic */}
+          <div className="flex items-center gap-1.5">
+            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide flex-1">
+              <a
+                href={buildLink({ commune: null, page: null })}
+                className={`shrink-0 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wide transition-all duration-200 ${
+                  !activeCommune ? 'bg-white/15 text-white border border-white/20' : 'bg-white/5 text-white/40 hover:text-white/70'
+                }`}
+              >
+                Tout CI
+              </a>
+              {COMMUNES.map((c) => (
+                <a
+                  key={c}
+                  href={buildLink({ commune: c, page: null })}
+                  className={`shrink-0 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wide transition-all duration-200 whitespace-nowrap ${
+                    activeCommune === c ? 'bg-white/15 text-white border border-white/20' : 'bg-white/5 text-white/40 hover:text-white/70'
+                  }`}
+                >
+                  {c}
+                </a>
+              ))}
+            </div>
+
+            {isSupported && (
+              <button
+                onClick={onMic}
+                aria-label={isListening ? 'Arrêter la recherche vocale' : 'Recherche vocale'}
+                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wide transition-all duration-200 border ${
+                  isListening
+                    ? 'bg-red-500 border-red-400 text-white animate-pulse'
+                    : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/12 hover:text-white'
+                }`}
+              >
+                {isListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
+                <span className="hidden sm:inline">{isListening ? 'Écoute…' : 'Vocal'}</span>
+              </button>
+            )}
+          </div>
+
+          {/* Row 3 — Budget + Vente/Location */}
+          <div className="flex items-center gap-2">
+            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide flex-1">
+              {BUDGET_FILTERS.map((b) => (
+                <a
+                  key={b.value}
+                  href={buildLink({ budget_max: b.value || null, page: null })}
+                  className={`shrink-0 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wide transition-all duration-200 whitespace-nowrap ${
+                    activeBudget === b.value ? 'bg-white/15 text-white border border-white/20' : 'bg-white/5 text-white/40 hover:text-white/70'
+                  }`}
+                >
+                  {b.label}
+                </a>
+              ))}
+            </div>
+
+            {/* Vente / Location — à droite, fixe */}
+            <div className="flex gap-1 shrink-0" role="group" aria-label="Type d'offre">
+              {OFFRE_FILTERS.map((f) => (
                 <a
                   key={f.value}
                   href={buildLink({ offre: f.value || null, page: null })}
-                  className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wide transition-all duration-200 ${
-                    isActive
-                      ? 'bg-white/15 text-white border border-white/25'
-                      : 'text-white/40 hover:text-white/70'
+                  className={`px-2.5 py-1.5 rounded-lg text-[8px] font-bold uppercase tracking-wide transition-all whitespace-nowrap ${
+                    f.value === activeOffre
+                      ? 'bg-white/15 text-white border border-white/20'
+                      : 'text-white/35 hover:text-white/60'
                   }`}
                 >
-                  {f.label}
+                  {f.label === 'Vente + Location' ? 'Tous' : f.label === 'À vendre' ? 'Vente' : 'Location'}
                 </a>
-              )
-            })}
+              ))}
+            </div>
           </div>
+
         </div>
       </div>
     </header>
   )
 }
 
-// ──────────────────────────────────────────────
-// Card desktop
-// ──────────────────────────────────────────────
+// ─── Card desktop ───────────────────────────────────────────────────────────
+
 function FlashCard({ bien, featured, index }: { bien: BienExterne; featured: boolean; index: number }) {
   return (
     <Link
       href={`/offre-flash/${bien.id}`}
-      className={`group relative flex flex-col bg-[var(--surface-card)] border border-[var(--border)] rounded-[2rem] overflow-hidden transition-all duration-700 hover:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.35)] hover:-translate-y-1 h-full`}
+      className="group relative flex flex-col bg-[var(--surface-card)] border border-[var(--border)] rounded-[2rem] overflow-hidden transition-all duration-700 hover:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.35)] hover:-translate-y-1 h-full"
     >
-      {/* Image */}
       <div className={`relative ${featured ? 'aspect-video' : 'aspect-[4/5]'} overflow-hidden bg-[var(--midnight-muted)]`}>
         {bien.image_url ? (
           <Image
@@ -449,23 +538,19 @@ function FlashCard({ bien, featured, index }: { bien: BienExterne; featured: boo
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
 
-        {/* Badges top */}
         <div className="absolute top-3 left-3 right-3 flex justify-between items-start pointer-events-none">
           <span className="px-2.5 py-1 rounded-full bg-black/55 backdrop-blur-xl border border-white/12 text-[10px] font-bold uppercase tracking-[0.12em] text-white">
             {bien.type_bien.replace(/_/g, ' ')}
           </span>
           <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md border ${
-            bien.type_offre === 'vente'
-              ? 'bg-amber-500/85 border-amber-400/30 text-white'
-              : bien.type_offre === 'location'
-              ? 'bg-blue-500/85 border-blue-400/30 text-white'
-              : 'bg-white/15 border-white/20 text-white'
+            bien.type_offre === 'vente'    ? 'bg-amber-500/85 border-amber-400/30 text-white'
+            : bien.type_offre === 'location' ? 'bg-blue-500/85 border-blue-400/30 text-white'
+            : 'bg-white/15 border-white/20 text-white'
           }`}>
             {bien.type_offre === 'vente' ? 'Vente' : bien.type_offre === 'location' ? 'Location' : 'Offre'}
           </span>
         </div>
 
-        {/* Badges bottom */}
         <div className="absolute bottom-3 left-3 flex gap-1.5">
           <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/65 backdrop-blur-md border border-white/10 text-[10px] font-black uppercase tracking-wider text-white">
             <span className="relative flex w-1.5 h-1.5 shrink-0">
@@ -482,14 +567,11 @@ function FlashCard({ bien, featured, index }: { bien: BienExterne; featured: boo
         </div>
       </div>
 
-      {/* Content */}
       <div className="flex flex-col p-4 pt-3.5 flex-1">
         <div className="flex items-center justify-between gap-1 mb-2">
           <div className="flex items-center gap-1.5 min-w-0">
             <MapPin className="w-3.5 h-3.5 shrink-0 text-[var(--accent-luxury)]" strokeWidth={2.5} />
-            <span className="text-xs font-black text-[var(--accent-luxury)] uppercase tracking-[0.12em] truncate">
-              {bien.commune}
-            </span>
+            <span className="text-xs font-black text-[var(--accent-luxury)] uppercase tracking-[0.12em] truncate">{bien.commune}</span>
           </div>
           <span className="text-base font-display font-bold text-[var(--accent-luxury)] tracking-tight shrink-0 whitespace-nowrap">
             {priceDisplay(bien)}
@@ -522,42 +604,31 @@ function FlashCard({ bien, featured, index }: { bien: BienExterne; featured: boo
           </div>
         ) : null}
 
-        <p className="mt-auto text-[10px] text-white/30 font-medium">
-          {relativeTime(bien.date_publication)}
-        </p>
+        <p className="mt-auto text-[10px] text-white/30 font-medium">{relativeTime(bien.date_publication)}</p>
       </div>
     </Link>
   )
 }
 
-// ──────────────────────────────────────────────
-// Empty state
-// ──────────────────────────────────────────────
-function EmptyState({ activeType }: { activeType: string }) {
-  const suggestions = [
-    { label: 'Toutes les offres', href: '/offre-flash',                    desc: 'Explorer tout le flash' },
-    { label: 'Villas',           href: '/offre-flash?type=villa',          desc: 'Haut standing' },
-    { label: 'Appartements',     href: '/offre-flash?type=appartement',    desc: 'Locations disponibles' },
-    { label: 'Terrains',         href: '/offre-flash?type=terrain',        desc: 'Investissement foncier' },
-  ]
+// ─── Empty state ────────────────────────────────────────────────────────────
 
+function EmptyState() {
+  const suggestions = [
+    { label: 'Toutes les offres', href: '/offre-flash',                 desc: 'Explorer tout le flash' },
+    { label: 'Villas',            href: '/offre-flash?type=villa',      desc: 'Haut standing' },
+    { label: 'Appartements',      href: '/offre-flash?type=appartement', desc: 'Locations disponibles' },
+    { label: 'Terrains',          href: '/offre-flash?type=terrain',    desc: 'Investissement foncier' },
+  ]
   return (
     <div className="col-span-2 lg:col-span-4 py-20 px-6">
       <div className="max-w-md mx-auto text-center mb-10">
         <div className="text-4xl mb-4">🔍</div>
-        <h3 className="font-display text-2xl font-bold text-white mb-2 tracking-tight">
-          Aucune offre dans cette catégorie
-        </h3>
-        <p className="text-white/40 text-[13px] leading-relaxed">
-          Voici d&apos;autres sélections qui pourraient vous intéresser.
-        </p>
+        <h3 className="font-display text-2xl font-bold text-white mb-2 tracking-tight">Aucune offre dans cette catégorie</h3>
+        <p className="text-white/40 text-[13px] leading-relaxed">Voici d&apos;autres sélections qui pourraient vous intéresser.</p>
       </div>
-
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-2xl mx-auto mb-10">
         {suggestions.map((s) => (
-          <a
-            key={s.href}
-            href={s.href}
+          <a key={s.href} href={s.href}
             className="flex flex-col gap-1 p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-orange-500/40 hover:bg-white/8 transition-all text-center active:scale-95"
           >
             <span className="text-white font-bold text-[12px]">{s.label}</span>
@@ -565,16 +636,13 @@ function EmptyState({ activeType }: { activeType: string }) {
           </a>
         ))}
       </div>
-
       <div className="text-center">
         <a
-          href={`https://wa.me/2250574243752?text=${encodeURIComponent('Bonjour, je cherche un bien qui ne figure pas dans vos offres flash. Pouvez-vous m\'aider ?')}`}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={`https://wa.me/2250574243752?text=${encodeURIComponent("Bonjour, je cherche un bien qui ne figure pas dans vos offres flash. Pouvez-vous m'aider ?")}`}
+          target="_blank" rel="noopener noreferrer"
           className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full text-[12px] font-bold uppercase tracking-widest transition-all active:scale-95"
         >
-          <ArrowRight className="w-3.5 h-3.5" />
-          Demander via WhatsApp
+          <ArrowRight className="w-3.5 h-3.5" /> Demander via WhatsApp
         </a>
         <p className="text-white/25 text-[10px] mt-3">Notre équipe peut trouver le bien idéal pour vous</p>
       </div>
