@@ -59,21 +59,26 @@ import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { ConditionalWhatsApp } from '@/components/ui/ConditionalWhatsApp'
 import { TapFeedback } from '@/components/ui/TapFeedback'
 import { AnalyticsProvider } from '@/components/providers/AnalyticsProvider'
+import { I18nProvider } from '@/lib/i18n/client'
+import { getLocale } from '@/lib/i18n/server'
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale()
   return (
     <html
-      lang="fr"
+      lang={locale}
       className={`${unbounded.variable} ${playfair.variable} ${outfit.variable} ${jetbrainsMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="font-sans bg-[var(--background)] text-[var(--text)] antialiased" suppressHydrationWarning>
-        <ThemeProvider>
-          <AnalyticsProvider />
-          {children}
-          <ConditionalWhatsApp />
-          <TapFeedback />
-        </ThemeProvider>
+      <body className="font-sans bg-[var(--background)] text-[var(--text)] antialiased overflow-x-hidden" suppressHydrationWarning>
+        <I18nProvider locale={locale}>
+          <ThemeProvider>
+            <AnalyticsProvider />
+            {children}
+            <ConditionalWhatsApp />
+            <TapFeedback />
+          </ThemeProvider>
+        </I18nProvider>
       </body>
     </html>
   )

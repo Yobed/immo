@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { createLocauxClient } from '@/lib/supabase/locaux'
 import { mapLocauxRow, type LocauxRow, type BienExterne } from '@/lib/locaux/mapper'
 import { formatFCFA } from '@/lib/format'
@@ -11,9 +11,11 @@ import {
   Home, Building2, Palmtree, Warehouse, Briefcase, Shovel,
   Store, Flame, MapPin, MessageCircle, ArrowRight, AlertCircle,
   ChevronLeft, ChevronRight, BedDouble, Maximize, Mic, MicOff,
+  ChevronDown,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useVoiceSearch, parseVoiceCommand } from '@/hooks/useVoiceSearch'
+import { useT } from '@/lib/i18n/client'
 
 const PAGE_SIZE = 24
 
@@ -93,6 +95,7 @@ export default function OffreFlashPage() {
 function OffreFlashContent() {
   const searchParams   = useSearchParams()
   const router         = useRouter()
+  const tx             = useT()
   const activeType     = searchParams.get('type')       ?? ''
   const activeOffre    = searchParams.get('offre')      ?? ''
   const activeCommune  = searchParams.get('commune')    ?? ''
@@ -136,7 +139,9 @@ function OffreFlashContent() {
       let q = (locaux as any)
         .from('locaux')
         .select(
-          'id,ref_bien,type_de_bien,type_offre,zone_geographique,commune,quartier,prix,prix_normalise,telephone,telephone_bien,caracteristiques,publie_par,meubles,chambre,disponible,surface,groupe_whatsapp_origine,date_publication,lien_image,message_initial,status,is_duplicate,date_expiration,created_at',
+          // SECURITY: ne JAMAIS exposer telephone/telephone_bien côté client.
+          // Toutes les prises de contact passent par le conseiller BOGBE'S.
+          'id,ref_bien,type_de_bien,type_offre,zone_geographique,commune,quartier,prix,prix_normalise,caracteristiques,publie_par,meubles,chambre,disponible,surface,groupe_whatsapp_origine,date_publication,lien_image,message_initial,status,is_duplicate,date_expiration,created_at',
           { count: 'exact' }
         )
         .eq('status', 'active')
@@ -245,13 +250,13 @@ function OffreFlashContent() {
               role="alert"
             >
               <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-6" />
-              <h3 className="font-display text-2xl font-bold text-off-white mb-3">Erreur de chargement</h3>
+              <h3 className="font-display text-2xl font-bold text-off-white mb-3">{tx.flash.loadError}</h3>
               <p className="text-off-white/60 mb-8 max-w-md mx-auto">{error}</p>
               <button
                 onClick={load}
                 className="px-8 py-3 bg-off-white/10 hover:bg-off-white/20 text-off-white rounded-full font-bold transition-colors"
               >
-                Réessayer
+                {tx.flash.retry}
               </button>
             </motion.div>
           ) : (
@@ -347,14 +352,14 @@ function OffreFlashContent() {
         style={{ background: 'linear-gradient(to top, var(--background) 40%, transparent)' }}
       >
         <a
-          href="https://wa.me/2250574243752?text=Bonjour%2C%20je%20cherche%20un%20bien%20%C3%A0%20Abidjan"
+          href="https://wa.me/2250544872051?text=Bonjour%2C%20je%20cherche%20un%20bien%20%C3%A0%20Abidjan"
           target="_blank" rel="noopener noreferrer"
           className="pointer-events-auto flex items-center gap-3 px-5 py-3.5 bg-emerald-600 rounded-2xl shadow-2xl shadow-emerald-950/50 w-full active:scale-95 transition-transform duration-150"
         >
           <MessageCircle className="w-5 h-5 text-white shrink-0" />
           <div className="flex-1">
-            <p className="text-[13px] font-bold text-white leading-tight">Parler à Sapphire</p>
-            <p className="text-[10px] text-white/70 leading-tight">Trouvez votre bien idéal</p>
+            <p className="text-[13px] font-bold text-white leading-tight">{tx.biensPage.speakToSapphire}</p>
+            <p className="text-[10px] text-white/70 leading-tight">{tx.biensPage.findIdealBien}</p>
           </div>
           <ArrowRight className="w-4 h-4 text-white/60 shrink-0" />
         </a>
@@ -374,13 +379,42 @@ function PageHeader({
   buildLink: (o: Record<string, string | null>) => string
   isListening: boolean; isSupported: boolean; onMic: () => void
 }) {
+  const router = useRouter()
+  const tx = useT()
+  const [budgetVal, setBudgetVal] = useState(activeBudget)
+  const [communeVal, setCommuneVal] = useState(activeCommune)
+
+  useEffect(() => { setBudgetVal(activeBudget) }, [activeBudget])
+  useEffect(() => { setCommuneVal(activeCommune) }, [activeCommune])
+
+  const go = useCallback((ov: Record<string, string> = {}) => {
+    const p = new URLSearchParams()
+    const t = ov.type !== undefined ? ov.type : activeType
+    const c = ov.commune !== undefined ? ov.commune : communeVal
+    const b = ov.budget !== undefined ? ov.budget : budgetVal
+    const o = ov.offre !== undefined ? ov.offre : activeOffre
+    if (t) p.set('type', t)
+    if (c) p.set('commune', c)
+    if (b) p.set('budget_max', b)
+    if (o) p.set('offre', o)
+    router.push(`/offre-flash?${p.toString()}`)
+  }, [activeType, communeVal, budgetVal, activeOffre, router])
+
+  const buildTypeLink = (typeValue: string) => {
+    const p = new URLSearchParams()
+    if (typeValue) p.set('type', typeValue)
+    if (communeVal) p.set('commune', communeVal)
+    if (budgetVal) p.set('budget_max', budgetVal)
+    if (activeOffre) p.set('offre', activeOffre)
+    return `/offre-flash?${p.toString()}`
+  }
+
   return (
     <header className="relative bg-[#020617] overflow-hidden" data-theme="dark">
       <div
         className="absolute -top-24 -left-24 w-96 h-96 pointer-events-none"
         style={{ background: 'radial-gradient(circle, oklch(65% 0.18 45 / 0.13) 0%, transparent 65%)' }}
       />
-
       <div className="relative z-10 max-w-7xl mx-auto px-4 pt-6 pb-4 md:pt-16 md:pb-6">
         <Link
           href="/"
@@ -389,7 +423,7 @@ function PageHeader({
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 5l-7 7 7 7" />
           </svg>
-          Accueil
+          {tx.nav.home}
         </Link>
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -397,116 +431,108 @@ function PageHeader({
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
           <p className="font-display italic text-orange-400 text-[13px] tracking-wide mb-0.5 flex items-center gap-1.5">
-            <Flame className="w-3.5 h-3.5" /> Offre Flash
+            <Flame className="w-3.5 h-3.5" /> {tx.flash.pageTitle}
           </p>
           <h1 className="font-display font-bold text-[28px] md:text-5xl text-white tracking-tight leading-none">
             {typeLabel}
           </h1>
           {count > 0 && (
             <p className="text-white/35 text-[11px] font-sans mt-2 uppercase tracking-[0.2em]">
-              {count.toLocaleString('fr-FR')} offre{count > 1 ? 's' : ''} active{count > 1 ? 's' : ''}
+              {(count > 1 ? tx.flash.active_plural : tx.flash.active).replace('{{count}}', count.toLocaleString())}
             </p>
           )}
         </motion.div>
       </div>
 
       <div className="sticky top-0 z-50 bg-[#020617]/95 backdrop-blur-md border-b border-white/8">
-        <div className="max-w-7xl mx-auto px-3 py-2 space-y-1.5">
-
-          {/* Row 1 — Type */}
-          <nav className="flex gap-1.5 overflow-x-auto scrollbar-hide" aria-label="Filtres de type de bien">
-            {TYPE_FILTERS.map((f) => {
+        <div className="max-w-7xl mx-auto px-3 py-3 space-y-2">
+          {/* Row 1 — Type icons */}
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-0.5">
+            {TYPE_FILTERS.map(f => {
+              const Icon = f.icon
               const isActive = f.value === activeType
               return (
                 <a
                   key={f.value}
-                  href={buildLink({ type: f.value || null, page: null })}
-                  aria-current={isActive ? 'page' : undefined}
-                  className={`flex flex-col items-center gap-0.5 shrink-0 px-3 py-2 rounded-xl min-w-[48px] transition-all duration-200 ${
-                    isActive ? 'bg-orange-500 text-black' : 'bg-white/6 text-white/55 hover:bg-white/12 hover:text-white'
+                  href={buildTypeLink(f.value)}
+                  className={`shrink-0 flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl border transition-all ${
+                    isActive
+                      ? 'bg-orange-500/20 border-orange-500/40 text-orange-400'
+                      : 'bg-white/5 border-white/10 text-white/50 hover:text-white/80 hover:bg-white/10'
                   }`}
                 >
-                  <f.icon className={`w-4 h-4 ${isActive ? 'text-black' : 'text-white/50'}`} aria-hidden="true" />
-                  <span className="text-[8px] font-bold uppercase tracking-wide whitespace-nowrap">{f.label}</span>
+                  <Icon className="w-4 h-4" />
+                  <span className="text-[9px] font-bold uppercase tracking-wide whitespace-nowrap">{f.label}</span>
                 </a>
               )
             })}
-          </nav>
+          </div>
 
-          {/* Row 2 — Zone + Mic */}
-          <div className="flex items-center gap-1.5">
-            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide flex-1">
-              <a
-                href={buildLink({ commune: null, page: null })}
-                className={`shrink-0 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wide transition-all duration-200 ${
-                  !activeCommune ? 'bg-white/15 text-white border border-white/20' : 'bg-white/5 text-white/40 hover:text-white/70'
-                }`}
+          {/* Row 2 — Budget + Commune + Offre toggle + Mic (scrollable horizontally on mobile) */}
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-0.5">
+            {/* Budget */}
+            <div className="flex items-center gap-2 shrink-0 w-[140px] bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+              <span className="text-orange-400 text-xs font-bold shrink-0">$</span>
+              <input
+                type="number"
+                placeholder={tx.flash.budgetMax}
+                value={budgetVal}
+                onChange={e => setBudgetVal(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && go()}
+                className="w-full min-w-0 bg-transparent text-white placeholder-white/30 text-[11px] outline-none"
+              />
+              {budgetVal && (
+                <button onClick={() => { setBudgetVal(''); go({ budget: '' }) }} className="text-white/30 hover:text-white/60 text-xs leading-none shrink-0">✕</button>
+              )}
+            </div>
+
+            {/* Commune select */}
+            <div className="flex items-center gap-1 shrink-0 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+              <select
+                value={communeVal}
+                onChange={e => { setCommuneVal(e.target.value); go({ commune: e.target.value }) }}
+                className="bg-transparent text-white text-[11px] outline-none appearance-none cursor-pointer w-[90px]"
               >
-                Tout CI
-              </a>
-              {COMMUNES.map((c) => (
-                <a
-                  key={c}
-                  href={buildLink({ commune: c, page: null })}
-                  className={`shrink-0 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wide transition-all duration-200 whitespace-nowrap ${
-                    activeCommune === c ? 'bg-white/15 text-white border border-white/20' : 'bg-white/5 text-white/40 hover:text-white/70'
+                <option value="" className="bg-[#0d1425] text-white">{tx.flash.all}</option>
+                {COMMUNES.map(c => (
+                  <option key={c} value={c} className="bg-[#0d1425] text-white">{c}</option>
+                ))}
+              </select>
+              <ChevronDown className="w-3 h-3 text-white/30 shrink-0 pointer-events-none" />
+            </div>
+
+            {/* Offre toggle */}
+            <div className="flex gap-1 shrink-0">
+              {OFFRE_FILTERS.map(f => (
+                <button
+                  key={f.value}
+                  onClick={() => go({ offre: f.value })}
+                  className={`px-2.5 py-1.5 rounded-lg text-[8px] font-bold uppercase tracking-wide transition-all whitespace-nowrap ${
+                    f.value === activeOffre
+                      ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
+                      : 'text-white/35 hover:text-white/60 border border-transparent'
                   }`}
                 >
-                  {c}
-                </a>
+                  {f.label === 'Vente + Location' ? 'Tous' : f.label === 'À vendre' ? 'Vente' : 'Louer'}
+                </button>
               ))}
             </div>
 
+            {/* Mic */}
             {isSupported && (
               <button
                 onClick={onMic}
-                aria-label={isListening ? 'Arrêter la recherche vocale' : 'Recherche vocale'}
-                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wide transition-all duration-200 border ${
+                aria-label={isListening ? 'Arrêter' : 'Recherche vocale'}
+                className={`shrink-0 p-2 rounded-xl border transition-all ${
                   isListening
                     ? 'bg-red-500 border-red-400 text-white animate-pulse'
-                    : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/12 hover:text-white'
+                    : 'bg-orange-400/10 border-orange-400/25 text-orange-400'
                 }`}
               >
-                {isListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
-                <span className="hidden sm:inline">{isListening ? 'Écoute…' : 'Vocal'}</span>
+                {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
               </button>
             )}
           </div>
-
-          {/* Row 3 — Budget + Vente/Location */}
-          <div className="flex items-center gap-2">
-            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide flex-1">
-              {BUDGET_FILTERS.map((b) => (
-                <a
-                  key={b.value}
-                  href={buildLink({ budget_max: b.value || null, page: null })}
-                  className={`shrink-0 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wide transition-all duration-200 whitespace-nowrap ${
-                    activeBudget === b.value ? 'bg-white/15 text-white border border-white/20' : 'bg-white/5 text-white/40 hover:text-white/70'
-                  }`}
-                >
-                  {b.label}
-                </a>
-              ))}
-            </div>
-
-            {/* Vente / Location — à droite, fixe */}
-            <div className="flex gap-1 shrink-0" role="group" aria-label="Type d'offre">
-              {OFFRE_FILTERS.map((f) => (
-                <a
-                  key={f.value}
-                  href={buildLink({ offre: f.value || null, page: null })}
-                  className={`px-2.5 py-1.5 rounded-lg text-[8px] font-bold uppercase tracking-wide transition-all whitespace-nowrap ${
-                    f.value === activeOffre
-                      ? 'bg-white/15 text-white border border-white/20'
-                      : 'text-white/35 hover:text-white/60'
-                  }`}
-                >
-                  {f.label === 'Vente + Location' ? 'Tous' : f.label === 'À vendre' ? 'Vente' : 'Location'}
-                </a>
-              ))}
-            </div>
-          </div>
-
         </div>
       </div>
     </header>
@@ -613,17 +639,18 @@ function FlashCard({ bien, featured, index }: { bien: BienExterne; featured: boo
 // ─── Empty state ────────────────────────────────────────────────────────────
 
 function EmptyState() {
+  const tx = useT()
   const suggestions = [
-    { label: 'Toutes les offres', href: '/offre-flash',                 desc: 'Explorer tout le flash' },
-    { label: 'Villas',            href: '/offre-flash?type=villa',      desc: 'Haut standing' },
-    { label: 'Appartements',      href: '/offre-flash?type=appartement', desc: 'Locations disponibles' },
-    { label: 'Terrains',          href: '/offre-flash?type=terrain',    desc: 'Investissement foncier' },
+    { label: tx.flash.all, href: '/offre-flash',                 desc: '' },
+    { label: tx.filters.villas, href: '/offre-flash?type=villa',      desc: '' },
+    { label: tx.filters.appartements, href: '/offre-flash?type=appartement', desc: '' },
+    { label: tx.filters.lands, href: '/offre-flash?type=terrain',    desc: '' },
   ]
   return (
     <div className="col-span-2 lg:col-span-4 py-20 px-6">
       <div className="max-w-md mx-auto text-center mb-10">
         <div className="text-4xl mb-4">🔍</div>
-        <h3 className="font-display text-2xl font-bold text-white mb-2 tracking-tight">Aucune offre dans cette catégorie</h3>
+        <h3 className="font-display text-2xl font-bold text-white mb-2 tracking-tight">{tx.flash.noCategoryResults}</h3>
         <p className="text-white/40 text-[13px] leading-relaxed">Voici d&apos;autres sélections qui pourraient vous intéresser.</p>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-2xl mx-auto mb-10">
@@ -638,13 +665,13 @@ function EmptyState() {
       </div>
       <div className="text-center">
         <a
-          href={`https://wa.me/2250574243752?text=${encodeURIComponent("Bonjour, je cherche un bien qui ne figure pas dans vos offres flash. Pouvez-vous m'aider ?")}`}
+          href={`https://wa.me/2250544872051?text=${encodeURIComponent("Bonjour, je cherche un bien qui ne figure pas dans vos offres flash. Pouvez-vous m'aider ?")}`}
           target="_blank" rel="noopener noreferrer"
           className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full text-[12px] font-bold uppercase tracking-widest transition-all active:scale-95"
         >
           <ArrowRight className="w-3.5 h-3.5" /> Demander via WhatsApp
         </a>
-        <p className="text-white/25 text-[10px] mt-3">Notre équipe peut trouver le bien idéal pour vous</p>
+        <p className="text-white/25 text-[10px] mt-3">{tx.flash.noVerifiedOffer}</p>
       </div>
     </div>
   )

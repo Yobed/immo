@@ -4,29 +4,34 @@ import { Radio, ArrowUpRight, MapPin } from 'lucide-react'
 import { createLocauxClient } from '@/lib/supabase/locaux'
 import { mapLocauxRow, type LocauxRow, type BienExterne } from '@/lib/locaux/mapper'
 import { formatFCFA } from '@/lib/format'
+import { getDictionary, getLocale } from '@/lib/i18n/server'
 
-function priceLine(b: BienExterne): string {
-  if (b.prix_value == null) return b.prix_label || 'Sur demande'
+function priceLine(b: BienExterne, onRequest: string): string {
+  if (b.prix_value == null) return b.prix_label || onRequest
   const f = formatFCFA(b.prix_value)
   if (b.prix_unit === 'fcfa_par_m2') return `${f} /m²`
   if (b.prix_unit === 'fcfa_par_mois') return `${f} /mois`
   return f
 }
 
-function timeBadge(iso: string): string {
+function timeBadge(iso: string, locale: string): string {
   const diff = Date.now() - new Date(iso).getTime()
   const h = Math.floor(diff / 3600000)
-  if (h < 1) return "à l'instant"
-  if (h < 24) return `il y a ${h}h`
+  const fr = locale === 'fr'
+  if (h < 1) return fr ? "à l'instant" : 'just now'
+  if (h < 24) return fr ? `il y a ${h}h` : `${h}h ago`
   const d = Math.floor(h / 24)
-  return `il y a ${d}j`
+  return fr ? `il y a ${d}j` : `${d}d ago`
 }
 
 export async function FlashOffersSection() {
+  const t = await getDictionary()
+  const locale = await getLocale()
   const c = createLocauxClient()
   const { data: rows } = await c
     .from('locaux')
-    .select('id,ref_bien,type_de_bien,type_offre,zone_geographique,commune,quartier,prix,prix_normalise,telephone,telephone_bien,caracteristiques,publie_par,meubles,chambre,disponible,surface,groupe_whatsapp_origine,date_publication,lien_image,message_initial,status,is_duplicate,date_expiration,created_at')
+    // SECURITY: pas de telephone/telephone_bien — données confidentielles propriétaire
+    .select('id,ref_bien,type_de_bien,type_offre,zone_geographique,commune,quartier,prix,prix_normalise,caracteristiques,publie_par,meubles,chambre,disponible,surface,groupe_whatsapp_origine,date_publication,lien_image,message_initial,status,is_duplicate,date_expiration,created_at')
     .eq('status', 'active')
     .eq('is_duplicate', false)
     .neq('lien_image', '')
@@ -54,22 +59,22 @@ export async function FlashOffersSection() {
                 <span className="relative rounded-full w-2 h-2 bg-[var(--accent-luxury)]" />
               </span>
               <p className="text-[10px] font-bold uppercase tracking-[0.5em] text-[var(--accent-luxury)]">
-                Notre veille en direct
+                {t.flash.kicker}
               </p>
             </div>
             <h2 className="font-display text-3xl md:text-5xl lg:text-6xl font-bold text-[var(--text)] leading-[1.05] tracking-tight">
-              Offres fraîches<br />
-              <span className="italic font-light text-[var(--accent-luxury)]">de notre réseau</span>
+              {t.flash.headline}<br />
+              <span className="italic font-light text-[var(--accent-luxury)]">{t.flash.headlineAccent}</span>
             </h2>
             <p className="text-[var(--text-muted)] text-sm md:text-base mt-5 max-w-xl leading-relaxed">
-              Annonces remontées en continu de notre réseau d&apos;agents et propriétaires partenaires sur WhatsApp.
+              {t.flash.subtitle}
             </p>
           </div>
           <Link
             href="/offre-flash"
             className="hidden md:inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.25em] uppercase text-[var(--accent-luxury)] border-b border-[var(--accent-luxury)]/40 pb-1 hover:border-[var(--accent-luxury)] transition-colors"
           >
-            Voir toutes les offres <ArrowUpRight className="w-3.5 h-3.5" />
+            {t.flash.viewAll} <ArrowUpRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
@@ -102,20 +107,20 @@ export async function FlashOffersSection() {
                 {b.is_recent && (
                   <span className="absolute top-3 left-3 inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--accent-luxury)] text-white text-[9px] font-bold uppercase tracking-[0.2em] rounded-full">
                     <Radio className="w-2.5 h-2.5" />
-                    Nouveau
+                    {t.common.new}
                   </span>
                 )}
                 <span className="absolute top-3 right-3 px-2.5 py-1 bg-white/95 backdrop-blur text-slate-900 text-[9px] font-bold uppercase tracking-wide rounded-full">
-                  {b.type_offre === 'location' ? 'Location' : b.type_offre === 'vente' ? 'Vente' : '—'}
+                  {b.type_offre === 'location' ? t.footer.rentals : b.type_offre === 'vente' ? t.footer.sales : '—'}
                 </span>
 
                 {/* Body */}
                 <div className={`absolute inset-x-0 bottom-0 p-4 md:p-${i === 0 ? '6' : '5'}`}>
                   <p className="text-[10px] font-medium text-white/60 uppercase tracking-wider mb-1">
-                    {timeBadge(b.date_publication)}
+                    {timeBadge(b.date_publication, locale)}
                   </p>
                   <p className={`font-display font-bold text-[var(--accent-luxury)] mb-1 ${i === 0 ? 'text-2xl md:text-3xl' : 'text-base md:text-lg'}`}>
-                    {priceLine(b)}
+                    {priceLine(b, t.common.onRequest)}
                   </p>
                   <h3 className={`font-bold text-white capitalize line-clamp-1 mb-1.5 ${i === 0 ? 'text-lg md:text-xl' : 'text-sm'}`}>
                     {b.type_bien} · {b.commune}
@@ -135,14 +140,9 @@ export async function FlashOffersSection() {
             href="/offre-flash"
             className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.25em] uppercase text-[var(--accent-luxury)] border-b border-[var(--accent-luxury)]/40 pb-1"
           >
-            Voir toutes les offres <ArrowUpRight className="w-3.5 h-3.5" />
+            {t.flash.viewAll} <ArrowUpRight className="w-3.5 h-3.5" />
           </Link>
         </div>
-
-        {/* Subtle disclaimer */}
-        <p className="mt-8 text-center text-[10px] text-white/30 max-w-xl mx-auto leading-relaxed">
-          Annonces réseau — vérifiez l&apos;identité du vendeur avant toute transaction. Pour des biens 100% vérifiés, consultez nos <Link href="/biens" className="text-white/60 underline hover:text-white">Résidences Premium</Link>.
-        </p>
       </div>
     </section>
   )

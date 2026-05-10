@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from 'react';
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
@@ -10,7 +10,7 @@ import Image from 'next/image';
  * Intègre un comportement "smart scroll" et une animation de flottaison.
  */
 export const WhatsAppConcierge = () => {
-  const WHATSAPP_NUMBER = "2250574243752";
+  const WHATSAPP_NUMBER = "2250544872051";
   const MESSAGE = encodeURIComponent("Bonjour BOGBE'S GROUPE, je souhaiterais obtenir des informations sur un bien immobilier.");
 
   const { scrollY } = useScroll();
@@ -35,7 +35,7 @@ export const WhatsAppConcierge = () => {
       initial="visible"
       animate={hidden ? "hidden" : "visible"}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="fixed bottom-36 right-6 md:bottom-8 md:right-8 z-[110] group"
+      className="fixed bottom-[6.5rem] right-4 md:bottom-8 md:right-8 z-[110] group"
     >
       {/* Tooltip */}
       <div className="absolute bottom-full right-0 mb-4 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none transform translate-y-2 group-hover:translate-y-0">

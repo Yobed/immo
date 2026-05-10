@@ -171,7 +171,7 @@ export function QuittanceDocument(props: QuittanceProps) {
         </View>
 
         <Text style={S.footer}>
-          Document genere automatiquement — Immo CI Platform — {new Date().toLocaleDateString('fr-FR')}
+          Document genere automatiquement — BOGBE'S GROUPE Platform — {new Date().toLocaleDateString('fr-FR')}
         </Text>
       </Page>
     </Document>

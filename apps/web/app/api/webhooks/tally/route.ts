@@ -213,7 +213,7 @@ async function sendConfirmationWhatsApp(phone: string, bien_id: string, user_id:
   const rawUrl = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/^﻿/, '')
   const baseUrl = rawUrl || 'https://immo-sigma.vercel.app'
   const link = `${baseUrl}/confirmer/${token}`
-  const text = `🏠 *Immo CI* — Votre annonce a été reçue !
+  const text = `🏠 *BOGBE'S GROUPE* — Votre annonce a été reçue !
 
 *${titre}*
 

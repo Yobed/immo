@@ -2,13 +2,16 @@
 
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useT } from '@/lib/i18n/client'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
+import { resolvePostLoginPath } from '@/app/actions/post-login'
 import { motion } from 'framer-motion'
-import { LogIn, Mail, Lock, ArrowRight } from 'lucide-react'
+import { Mail, Lock, ArrowRight } from 'lucide-react'
 
 const loginSchema = z.object({
   email: z.string().email('Adresse e-mail invalide'),
@@ -19,6 +22,7 @@ type LoginFormData = z.infer<typeof loginSchema>
 
 function LoginContent() {
   const router = useRouter()
+  const t = useT()
   const searchParams = useSearchParams()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -26,8 +30,9 @@ function LoginContent() {
 
   const supabase = createClient()
 
-  // Get redirect URL from search params
-  const redirectUrl = searchParams.get('redirect') || '/dashboard'
+  // Get redirect URL from search params (null si non fourni → on choisira selon le rôle)
+  const explicitRedirect = searchParams.get('redirect')
+  const redirectUrl = explicitRedirect || '/dashboard'
 
   const {
     register,
@@ -50,7 +55,8 @@ function LoginContent() {
       setError('Identifiants incorrects. Veuillez réessayer.')
       setLoading(false)
     } else {
-      router.push(redirectUrl)
+      const path = await resolvePostLoginPath(explicitRedirect)
+      router.push(path)
       router.refresh()
     }
   }
@@ -77,14 +83,18 @@ function LoginContent() {
     >
       {/* Header — Editorial Style */}
       <div className="text-center space-y-4">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-[var(--accent-luxury)]/10 text-[var(--accent-luxury)] mb-2 shadow-inner border border-[var(--accent-luxury)]/20">
-          <LogIn size={28} strokeWidth={2.5} />
-        </div>
+        <Image
+          src="/bogbes-logo.png"
+          alt="BOGBE'S GROUPE"
+          width={72}
+          height={72}
+          className="mx-auto mb-2 object-contain"
+        />
         <h1 className="text-3xl md:text-4xl font-black text-[var(--text)] font-display tracking-tight uppercase italic leading-none">
-          Connexion
+          {t.auth.loginTitle}
         </h1>
         <p className="text-[13px] text-[var(--text-muted)] font-medium tracking-wide max-w-[260px] mx-auto leading-relaxed">
-          Accédez à votre espace privilégié et gérez vos biens immobiliers.
+          {t.auth.loginSubtitle}
         </p>
       </div>
 
@@ -102,12 +112,12 @@ function LoginContent() {
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
           </svg>
-          {googleLoading ? 'Chargement...' : 'Continuer avec Google'}
+          {googleLoading ? t.auth.googleLoading : t.auth.googleContinue}
         </button>
 
         <div className="relative flex items-center gap-4 py-2">
           <div className="flex-1 h-px bg-[var(--border)]" />
-          <span className="text-[9px] font-black text-[var(--text-subtle)] uppercase tracking-widest">ou par e-mail</span>
+          <span className="text-[9px] font-black text-[var(--text-subtle)] uppercase tracking-widest">{t.auth.orEmail}</span>
           <div className="flex-1 h-px bg-[var(--border)]" />
         </div>
       </div>
@@ -127,12 +137,12 @@ function LoginContent() {
         <div className="space-y-5">
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] ml-1">
-              <Mail size={12} className="text-[var(--accent-luxury)]" /> Adresse e-mail
+              <Mail size={12} className="text-[var(--accent-luxury)]" /> {t.auth.email}
             </label>
             <input
               {...register('email')}
               type="email"
-              placeholder="votre@email.com"
+              placeholder={t.auth.emailPlaceholder}
               className="w-full px-6 h-[64px] bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-[var(--text-muted)]/20"
             />
             {errors.email && (
@@ -143,10 +153,10 @@ function LoginContent() {
           <div className="space-y-2">
             <div className="flex justify-between items-center ml-1">
               <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">
-                <Lock size={12} className="text-[var(--accent-luxury)]" /> Mot de passe
+                <Lock size={12} className="text-[var(--accent-luxury)]" /> {t.auth.password}
               </label>
               <Link href="/forgot-password" className="text-[10px] font-black text-[var(--accent-luxury)] uppercase tracking-widest hover:underline">
-                Oublié ?
+                {t.auth.forgotPassword}
               </Link>
             </div>
             <input
@@ -167,9 +177,9 @@ function LoginContent() {
           className="w-full flex items-center justify-center gap-3 h-[64px] bg-[var(--accent-luxury)] hover:bg-[var(--accent-luxury)]/90 text-[var(--on-accent)] font-black uppercase tracking-[0.3em] text-[12px] rounded-2xl shadow-xl shadow-[var(--accent-glow)] transition-all active:scale-[0.98] disabled:opacity-50 border border-white/20 relative overflow-hidden group"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-          {loading ? 'Authentification...' : (
+          {loading ? t.auth.loading : (
             <>
-              Se connecter <ArrowRight size={16} />
+              {t.auth.submitLogin} <ArrowRight size={16} />
             </>
           )}
         </button>
@@ -177,9 +187,9 @@ function LoginContent() {
 
       <div className="text-center pt-6">
         <p className="text-[13px] text-[var(--text-muted)] font-medium">
-          Pas encore membre ?{' '}
+          {t.auth.noAccount}{' '}
           <Link href="/register" className="text-[var(--text)] hover:text-[var(--accent-luxury)] font-black uppercase tracking-widest text-[11px] transition-colors border-b border-[var(--text)]/20 ml-1 pb-0.5">
-            Créer un compte
+            {t.auth.createAccount}
           </Link>
         </p>
       </div>

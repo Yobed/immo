@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -6,6 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { X, Calendar, CalendarCheck, MessageCircle, BedDouble, ArrowLeft } from 'lucide-react'
 import { VisiteRequestForm } from './VisiteRequestForm'
+import { useT } from '@/lib/i18n/client'
 import { DemanderContactWhatsAppButton } from './DemanderContactWhatsAppButton'
 
 /* ── Animations CSS injectées une seule fois ── */
@@ -39,18 +40,18 @@ type Tab = 'visite' | 'contact'
 /* ── Bloc prix compact partagé ── */
 function PrixBloc({ lieu, prix, prixSuffix }: { lieu: string; prix: string; prixSuffix: string }) {
   return (
-    <div className="pointer-events-auto flex items-center gap-3 h-[72px] pl-4 pr-5 bg-[var(--surface-card)] rounded-2xl shadow-[var(--shadow-premium)] shrink-0 border border-[var(--border)]">
-      <div className="w-[3px] h-8 rounded-full bg-[var(--accent-luxury)] shrink-0 shadow-[0_0_12px_var(--accent-glow)]" />
+    <div className="pointer-events-auto flex items-center gap-2.5 h-[52px] pl-3.5 pr-4 bg-[var(--surface-card)] rounded-xl shadow-[var(--shadow-premium)] shrink-0 border border-[var(--border)]">
+      <div className="w-[2px] h-6 rounded-full bg-[var(--accent-luxury)] shrink-0" />
       <div className="min-w-0">
-        <p className="text-[7px] uppercase tracking-[0.3em] font-black text-[var(--text-muted)] leading-none mb-1.5 truncate max-w-[70px]">
+        <p className="text-[7px] uppercase tracking-[0.25em] font-black text-[var(--text-muted)] leading-none mb-1 truncate max-w-[72px]">
           {lieu}
         </p>
-        <div className="flex flex-col">
-          <span className="text-[15px] font-display font-bold text-[var(--accent-luxury)] leading-tight tracking-tight">
+        <div className="flex items-baseline gap-0.5">
+          <span className="text-[14px] font-display font-bold text-[var(--accent-luxury)] leading-none tracking-tight">
             {prix}
           </span>
           {prixSuffix && (
-            <span className="text-[var(--text-muted)] text-[8px] font-bold tracking-tight opacity-70">/{prixSuffix}</span>
+            <span className="text-[var(--text-muted)] text-[8px] font-bold opacity-60">/{prixSuffix}</span>
           )}
         </div>
       </div>
@@ -71,15 +72,15 @@ function ActionButton({
   label: string
 }) {
   const content = (
-    <div className="flex items-center justify-center gap-3 px-8 h-full">
-      <Icon className="w-5 h-5 text-white shrink-0 group-hover:scale-110 transition-transform" strokeWidth={3} />
-      <span className="text-white font-display font-bold text-[11px] uppercase tracking-[0.2em] leading-none whitespace-nowrap">
+    <div className="flex items-center justify-center gap-2 px-5 h-full">
+      <Icon className="w-4 h-4 text-white shrink-0 group-hover:scale-110 transition-transform" strokeWidth={2.5} />
+      <span className="text-white font-display font-bold text-[10px] uppercase tracking-[0.18em] leading-none whitespace-nowrap">
         {label}
       </span>
     </div>
   )
 
-  const baseClass = "pointer-events-auto group h-[64px] rounded-2xl bg-gradient-to-r from-[var(--accent-luxury)] via-[#f59e0b] to-[#d97706] shadow-[0_15px_35px_rgba(249,115,22,0.4)] active:scale-95 transition-all duration-300 animate-cta border border-white/30 flex-1 flex items-center justify-center relative overflow-hidden"
+  const baseClass = "pointer-events-auto group h-[52px] rounded-xl bg-gradient-to-r from-[var(--accent-luxury)] via-[#f59e0b] to-[#d97706] shadow-[0_8px_24px_rgba(249,115,22,0.35)] active:scale-95 transition-all duration-300 animate-cta border border-white/20 flex-1 flex items-center justify-center relative overflow-hidden"
 
   const shimmer = (
     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
@@ -114,6 +115,7 @@ export function StickyMobileCTA({
   const [visible, setVisible] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>('visite')
+  const t = useT()
 
   useEffect(() => {
     const handler = () => setVisible(window.scrollY > 100)
@@ -143,8 +145,13 @@ export function StickyMobileCTA({
   /* ─── Layout partagé ─── */
   const barBottom = 'calc(1.25rem + env(safe-area-inset-bottom, 0px))'
 
+  const SITE_URL =
+    typeof window !== 'undefined'
+      ? window.location.origin
+      : (process.env.NEXT_PUBLIC_SITE_URL || 'https://bogbes-groupe.vercel.app')
+  const bienUrl = bienId ? `${SITE_URL}/biens/${bienId}` : null
   const waText = encodeURIComponent(
-    `Bonjour, je souhaite ${isNuitee ? 'réserver' : 'plus d\'infos sur'} *${bienTitre}* à ${bienLieu} (${prix}${prixSuffix})`
+    `Bonjour, je souhaite ${isNuitee ? 'réserver' : "plus d'infos sur"} *${bienTitre}* à ${bienLieu} (${prix}${prixSuffix})${bienUrl ? `\n\n🔗 ${bienUrl}` : ''}`
   )
 
   /* ─── Résidence meublée : Réserver + WhatsApp ─── */
@@ -171,18 +178,18 @@ export function StickyMobileCTA({
               <ActionButton
                 href={`/reservations/nouvelle?bienId=${bienId}`}
                 icon={BedDouble}
-                label="Réserver"
+                label={t.sticky.reserve}
               />
   
               {/* WhatsApp */}
               <a
-                href={`https://wa.me/2250574243752?text=${waText}`}
+                href={`https://wa.me/2250544872051?text=${waText}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="pointer-events-auto w-[68px] h-[68px] flex items-center justify-center rounded-2xl bg-[#25D366] shadow-[0_12px_32px_rgba(37,211,102,0.3)] active:scale-95 transition-transform shrink-0 border border-white/20"
+                className="pointer-events-auto w-[52px] h-[52px] flex items-center justify-center rounded-xl bg-[#25D366] shadow-[0_6px_20px_rgba(37,211,102,0.3)] active:scale-95 transition-transform shrink-0 border border-white/20"
                 aria-label="Contacter via WhatsApp"
               >
-                <Image src="/whatsapp-icon.svg" alt="" width={32} height={32} className="w-8 h-8 object-contain" />
+                <Image src="/whatsapp-icon.svg" alt="" width={26} height={26} className="w-[26px] h-[26px] object-contain" />
               </a>
             </motion.div>
           )}
@@ -205,19 +212,24 @@ export function StickyMobileCTA({
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 100, opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed left-4 right-4 z-[110] lg:hidden pointer-events-none flex flex-col items-center gap-4"
+            className="fixed left-4 right-4 z-[110] lg:hidden pointer-events-none flex flex-col items-center gap-2"
             style={{ bottom: `calc(${barBottom} + 20px)` }}
           >
+            {/* Reassurance microtext */}
+            <div className="px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white/70 text-[9px] font-bold uppercase tracking-wider pointer-events-auto">
+              ⚡ {t.sticky.fastReply}
+            </div>
+
             {/* Action Bar Unifiée */}
-            <div className="w-full h-[76px] glass-pill rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/10 flex items-center p-2.5 pointer-events-auto">
-              
+            <div className="w-full h-[58px] glass-pill rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.25)] border border-white/10 flex items-center p-2 pointer-events-auto">
+
               {/* Infos Prix - Très compact à gauche */}
-              <div className="flex flex-col pl-4 pr-3 border-r border-white/10 justify-center h-full min-w-[100px]">
-                <span className="text-[18px] font-display font-bold text-[var(--accent-luxury)] leading-none mb-1">
+              <div className="flex flex-col pl-3 pr-3 border-r border-white/10 justify-center h-full min-w-[90px]">
+                <span className="text-[15px] font-display font-bold text-[var(--accent-luxury)] leading-none mb-0.5">
                   {prix}
                 </span>
-                <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest opacity-60">
-                  {prixSuffix ? `/${prixSuffix}` : 'Total'}
+                <span className="text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-widest opacity-60">
+                  {prixSuffix ? `/${prixSuffix}` : t.sticky.total}
                 </span>
               </div>
 
@@ -227,20 +239,20 @@ export function StickyMobileCTA({
                   <ActionButton
                     href={`/reservations/nouvelle?bienId=${bienId}`}
                     icon={BedDouble}
-                    label="Réserver"
+                    label={t.sticky.reserve}
                   />
                 ) : (
                   <ActionButton
                     onClick={() => openSheet('visite')}
                     icon={CalendarCheck}
-                    label="Visiter"
+                    label={t.sticky.visit}
                   />
                 )}
               </div>
 
               {/* WhatsApp discret à l'intérieur de la pilule */}
               <a
-                href={`https://wa.me/2250574243752?text=${waText}`}
+                href={`https://wa.me/2250544872051?text=${waText}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-[56px] h-[56px] flex items-center justify-center rounded-2xl bg-white/5 hover:bg-white/10 transition-colors ml-2"
@@ -375,22 +387,22 @@ export function StickyMobileCTA({
                       <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-3">Contacter directement</p>
                       <div className="flex flex-col gap-2">
                         <a
-                          href={`https://wa.me/2250574243752?text=${waText}`}
+                          href={`https://wa.me/2250544872051?text=${waText}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-3 px-4 py-3 bg-[#25D366]/10 border border-[#25D366]/30 rounded-xl text-[#25D366] text-xs font-bold active:scale-95 transition-transform"
                         >
                           <Image src="/whatsapp-icon.svg" alt="" width={20} height={20} className="w-5 h-5" />
-                          <span>Principal — +225 05 74 24 37 52</span>
+                          <span>Principal — +225 05 44 87 20 51</span>
                         </a>
                         <a
-                          href={`https://wa.me/225078311541?text=${waText}`}
+                          href={`https://wa.me/2250778311541?text=${waText}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-3 px-4 py-3 bg-[#25D366]/10 border border-[#25D366]/30 rounded-xl text-[#25D366] text-xs font-bold active:scale-95 transition-transform"
                         >
                           <Image src="/whatsapp-icon.svg" alt="" width={20} height={20} className="w-5 h-5" />
-                          <span>Support — +225 07 83 11 54 1</span>
+                          <span>Support — +225 07 78 31 15 41</span>
                         </a>
                       </div>
                     </div>

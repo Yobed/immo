@@ -2,20 +2,20 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Search, Heart, User, Sparkles } from 'lucide-react'
+import { Search, Heart, User, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
-
-const TABS = [
-  { href: '/', icon: Home, label: 'Accueil' },
-  { href: '/recherche', icon: Search, label: 'Rechercher' },
-  { href: '/offre-flash', icon: Sparkles, label: 'Flash' },
-  { href: '/favoris', icon: Heart, label: 'Favoris' },
-  { href: '/dashboard', icon: User, label: 'Compte' },
-]
+import { useT } from '@/lib/i18n/client'
 
 export function MobileTabBar() {
   const pathname = usePathname()
+  const t = useT()
+  const TABS = [
+    { href: '/biens', icon: Search, label: t.nav.biens, key: 'biens' },
+    { href: '/offre-flash', icon: Sparkles, label: t.flash.title, key: 'flash' },
+    { href: '/favoris', icon: Heart, label: t.nav.favorites, key: 'favoris' },
+    { href: '/dashboard', icon: User, label: t.nav.account, key: 'account' },
+  ]
 
   // On cache la barre sur la fiche bien car il y a déjà le StickyMobileCTA
   const isPropertyDetail = pathname.startsWith('/biens/') && pathname.split('/').length > 2
@@ -52,7 +52,7 @@ export function MobileTabBar() {
                   <Icon className={cn(
                     "w-6 h-6 transition-transform duration-300",
                     isActive ? "stroke-[2.5] scale-110" : "stroke-[1.75]",
-                    tab.label === 'Flash' && !isActive && "animate-pulse text-amber-500/70"
+                    tab.key === 'flash' && !isActive && "animate-pulse text-amber-500/70"
                   )} />
                   {isActive && (
                     <motion.span
@@ -62,7 +62,7 @@ export function MobileTabBar() {
                   )}
                 </div>
                 <span className={cn(
-                  "text-[11px] font-bold uppercase tracking-[0.12em] transition-all duration-300 leading-none",
+                  "text-[9px] font-bold uppercase tracking-[0.08em] transition-all duration-300 leading-none truncate max-w-full",
                   isActive ? "opacity-100 text-[var(--accent-luxury)]" : "opacity-55 translate-y-0.5"
                 )}>
                   {tab.label}

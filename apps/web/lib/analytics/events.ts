@@ -1,5 +1,5 @@
 /**
- * Analytics Events — Immo CI
+ * Analytics Events — BOGBE'S GROUPE
  * Toutes les conversions et événements clés de la plateforme.
  *
  * Usage:

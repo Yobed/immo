@@ -3,6 +3,12 @@ import { createClient } from '@supabase/supabase-js';
 import { wasenderSendMessage, verifyWasenderSignature } from '@/lib/wasender';
 import { chatImmobilier } from '@/lib/ai';
 import { getAIBienContext } from '@/lib/ai/tools';
+import { extractBienFromWhatsApp } from '@/lib/extractors/whatsapp-bien-extractor';
+import { upsertProspect, recordOptOut } from '@/lib/outreach/agent-prospects';
+import { tryInviteProspect } from '@/lib/outreach/dispatch';
+
+const MIN_EXTRACTION_CONFIDENCE = 0.7;
+const OPT_OUT_REGEX = /^\s*(stop|stopper|arrete|arrêter|unsubscribe|désabonner|desabonner)\s*$/i;
 
 const getSupabase = () => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,10 +41,19 @@ function extractDateFromMessage(text: string): string | null {
 }
 
 // Détecte si l'AI a confirmé un RDV dans sa réponse
-function detectRdvConfirmation(aiText: string): { confirmed: boolean; bienId?: string; date?: string } {
-  const rdvTag = /\[RDV_CONFIRME bien_id=([a-f0-9-]+) date=([^\]]+)\]/i.exec(aiText);
+// Matche les IDs UUID (biens BOGBE'S) ET numériques (offres flash WhatsApp)
+function detectRdvConfirmation(aiText: string): { confirmed: boolean; bienId?: string; date?: string; source?: 'bogbes' | 'offre_flash' } {
+  const rdvTag = /\[RDV_CONFIRME bien_id=([a-zA-Z0-9-]+) date=([^\]]+)\]/i.exec(aiText);
   if (rdvTag) {
-    return { confirmed: true, bienId: rdvTag[1], date: rdvTag[2] };
+    const id = rdvTag[1];
+    // UUID = 36 chars avec tirets aux bonnes positions ; sinon → numérique = offre flash
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    return {
+      confirmed: true,
+      bienId: id,
+      date: rdvTag[2],
+      source: isUuid ? 'bogbes' : 'offre_flash',
+    };
   }
   return { confirmed: false };
 }
@@ -85,6 +100,43 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = getSupabase();
+
+    // ─── Branche OUTREACH : message provenant d'un groupe public ───
+    const isGroupMessage = typeof jid === 'string' && jid.endsWith('@g.us');
+    if (isGroupMessage) {
+      // 1. Extraction de l'annonce (silencieux : on ne répond JAMAIS dans le groupe)
+      const { data: extracted } = await extractBienFromWhatsApp(userMessage);
+      const isAd = !!extracted && extracted.confidence >= MIN_EXTRACTION_CONFIDENCE;
+      if (!isAd) {
+        return NextResponse.json({ status: 'ok', branch: 'group_no_ad' });
+      }
+
+      // 2. Upsert prospect (par numéro)
+      const prospect = await upsertProspect({
+        phone: senderPn,
+        jid: msg.key?.participant || jid,
+        displayName: contactName,
+        sourceGroupJid: jid,
+        sourceGroupName: msg.subject || null,
+        extraction: extracted,
+      });
+
+      // 3. Tentative d'envoi DM privé (cooldown + quota gérés en interne)
+      const result = await tryInviteProspect(prospect);
+      return NextResponse.json({
+        status: 'ok',
+        branch: 'group_outreach',
+        invited: result.sent,
+        reason: result.sent ? undefined : result.reason,
+      });
+    }
+
+    // ─── Opt-out : STOP / STOPPER / etc. ───
+    if (OPT_OUT_REGEX.test(userMessage)) {
+      await recordOptOut(senderPn);
+      await wasenderSendMessage(senderPn, 'Reçu. Tu ne recevras plus de message de notre part. À bientôt.', 'text');
+      return NextResponse.json({ status: 'ok', branch: 'opt_out' });
+    }
 
     // 1. Sauvegarder le message entrant
     await supabase.from('whatsapp_messages').insert({
@@ -137,16 +189,39 @@ export async function POST(req: NextRequest) {
     // 6. Détecter confirmation RDV et sauvegarder la visite
     const rdvCheck = detectRdvConfirmation(aiResponse);
     if (rdvCheck.confirmed && rdvCheck.bienId) {
-      await supabase.from('visites').insert({
-        bien_id: rdvCheck.bienId,
-        client_jid: jid,
-        client_name: contactName,
-        client_phone: senderPn,
-        date_souhaitee: rdvCheck.date || new Date().toISOString().slice(0, 10),
-        statut: 'en_attente',
-        source: 'whatsapp',
-        notes: `Demande via WhatsApp. Message : "${userMessage.slice(0, 200)}"`,
-      }).select('id').single();
+      if (rdvCheck.source === 'bogbes') {
+        // Bien BOGBE'S → insertion classique dans la table visites (FK valide)
+        await supabase.from('visites').insert({
+          bien_id: rdvCheck.bienId,
+          client_jid: jid,
+          client_name: contactName,
+          client_phone: senderPn,
+          date_souhaitee: rdvCheck.date || new Date().toISOString().slice(0, 10),
+          statut: 'en_attente',
+          source: 'whatsapp',
+          notes: `Demande via WhatsApp. Message : "${userMessage.slice(0, 200)}"`,
+        }).select('id').single();
+      } else {
+        // Offre flash → pas de FK valide vers la table biens.
+        // On notifie le conseiller humain par Wasender pour qu'il prenne le relais.
+        const advisorPhone = process.env.SAPPHIRE_ADVISOR_PHONE || '+2250544872051';
+        const flashUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://bogbes-groupe.vercel.app'}/offre-flash/${rdvCheck.bienId}`;
+        const advisorMsg = `🔔 RDV demandé sur OFFRE FLASH #${rdvCheck.bienId}
+👤 ${contactName} — ${senderPn}
+📅 ${rdvCheck.date || 'date à préciser'}
+🔗 ${flashUrl}
+
+Message client : "${userMessage.slice(0, 200)}"`;
+        await wasenderSendMessage(advisorPhone, advisorMsg, 'text').catch(() => null);
+
+        // Log dans whatsapp_messages pour traçabilité
+        await supabase.from('whatsapp_messages').insert({
+          jid,
+          direction: 'system',
+          body: `RDV_OFFRE_FLASH bien_id=${rdvCheck.bienId} date=${rdvCheck.date || 'n/a'} → conseiller notifié`,
+          metadata: { type: 'rdv_offre_flash', bien_id: rdvCheck.bienId, date: rdvCheck.date },
+        });
+      }
     }
 
     // 7. Extraire les balises [MEDIA: URL] et nettoyer les tags RDV

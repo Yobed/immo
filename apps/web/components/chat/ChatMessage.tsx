@@ -107,10 +107,67 @@ function renderContent(content: string) {
       }
       return subPart.split('\n').map((line, i) => (
         <span key={`text-${index}-${subIndex}-${i}`}>
-          {line}
+          {renderInlineLinks(line, `${index}-${subIndex}-${i}`)}
           {i < subPart.split('\n').length - 1 && <br />}
         </span>
       ));
     });
   });
+}
+
+const MARKDOWN_LINK_REGEX = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g
+const PLAIN_URL_REGEX = /(https?:\/\/[^\s)]+)/g
+
+function renderInlineLinks(text: string, keyPrefix: string): React.ReactNode {
+  if (!text) return null
+
+  const nodes: React.ReactNode[] = []
+  let cursor = 0
+  let i = 0
+
+  const md = [...text.matchAll(MARKDOWN_LINK_REGEX)].map(m => ({
+    start: m.index!,
+    end: m.index! + m[0].length,
+    label: m[1],
+    url: m[2],
+    type: 'md' as const,
+  }))
+
+  const consumed: Array<[number, number]> = md.map(m => [m.start, m.end])
+  const inMd = (idx: number) => consumed.some(([s, e]) => idx >= s && idx < e)
+
+  const plain = [...text.matchAll(PLAIN_URL_REGEX)]
+    .filter(m => !inMd(m.index!))
+    .map(m => ({
+      start: m.index!,
+      end: m.index! + m[0].length,
+      label: m[0],
+      url: m[0],
+      type: 'plain' as const,
+    }))
+
+  const all = [...md, ...plain].sort((a, b) => a.start - b.start)
+
+  for (const link of all) {
+    if (link.start > cursor) {
+      nodes.push(<span key={`t-${keyPrefix}-${i++}`}>{text.slice(cursor, link.start)}</span>)
+    }
+    nodes.push(
+      <a
+        key={`a-${keyPrefix}-${i++}`}
+        href={link.url}
+        target={link.url.startsWith('http') ? '_blank' : undefined}
+        rel="noopener noreferrer"
+        className="text-[var(--accent-luxury)] underline decoration-[var(--accent-luxury)]/40 underline-offset-2 hover:decoration-[var(--accent-luxury)] font-semibold break-all"
+      >
+        {link.label}
+      </a>
+    )
+    cursor = link.end
+  }
+  if (cursor < text.length) {
+    nodes.push(<span key={`t-${keyPrefix}-${i++}`}>{text.slice(cursor)}</span>)
+  }
+
+  return nodes.length > 0 ? nodes : text
 }

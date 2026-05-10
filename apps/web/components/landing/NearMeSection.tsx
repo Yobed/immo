@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useTheme } from 'next-themes'
 import Image from 'next/image'
+import { useT } from '@/lib/i18n/client'
 
 // Charger la carte dynamiquement pour éviter les erreurs d'hydratation
 const PropertiesMap = dynamic(
@@ -145,10 +146,22 @@ function addJitter(val: number) {
 }
 
 export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
+  const tx = useT()
   const [loading, setLoading] = useState(false)
   const [locating, setLocating] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
+  const [mapHeight, setMapHeight] = useState(420)
+
+  useEffect(() => {
+    function updateHeight() {
+      const w = window.innerWidth
+      setMapHeight(w < 640 ? 380 : w < 768 ? 420 : 560)
+    }
+    updateHeight()
+    window.addEventListener('resize', updateHeight)
+    return () => window.removeEventListener('resize', updateHeight)
+  }, [])
+
   // Use initialBiens as default to avoid empty map on load
   const [biens, setBiens] = useState<BienProche[]>([])
 
@@ -336,50 +349,48 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
       {/* Ambient glow */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[var(--accent-luxury)]/5 blur-[150px] rounded-full -mr-64 -mt-32 pointer-events-none" />
 
-      <div className="container relative z-10 mx-auto px-6 max-w-7xl">
+      <div className="relative z-10 mx-auto px-4 md:px-6 max-w-7xl">
 
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-10">
+        <div className="flex flex-col gap-6 mb-10">
           <div>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-[var(--accent-luxury)]/10 flex items-center justify-center border border-[var(--accent-luxury)]/20">
                 <Navigation className={`w-5 h-5 text-[var(--accent-luxury)] ${locating ? 'animate-spin' : ''}`} />
               </div>
               <span className="text-[var(--accent-luxury)] font-sans tracking-[0.4em] uppercase text-[11px] font-bold">
-                Carte Interactive · Filtre Géo
+                {tx.near.interactive}
               </span>
             </div>
-            <h2 className="font-display text-4xl md:text-6xl text-[var(--text)] leading-tight tracking-tight">
-              Biens{' '}
-              <span className="italic font-serif text-[var(--accent-luxury)]">autour de vous</span>
+            <h2 className="font-display text-3xl md:text-6xl text-[var(--text)] leading-tight tracking-tight">
+              {tx.near.title}{' '}
+              <span className="italic font-serif text-[var(--accent-luxury)]">{tx.near.titleAccent}</span>
             </h2>
             <p className="text-[var(--text-muted)] mt-3 text-sm max-w-lg font-sans">
-              Tous nos biens immobiliers s&apos;affichent sur cette carte, filtrés et triés dynamiquement par rapport à votre position ! Cliquez sur Activer ma position pour resserrer le filtre géographique.
+              {tx.near.subtitle}
             </p>
           </div>
 
-          <div className="flex items-center gap-4 shrink-0">
+          <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={() => (window.location.href = '/biens')}
-              className="flex items-center gap-3 px-8 py-4 bg-[var(--text)] text-[var(--background)] font-display text-[11px] font-bold tracking-[0.2em] uppercase rounded-full transition-all hover:scale-105 shadow-[0_15px_35px_rgba(0,0,0,0.4)] active:scale-95 disabled:opacity-50"
+              className="flex items-center gap-2 px-5 py-3 bg-[var(--text)] text-[var(--background)] font-display text-[11px] font-bold tracking-[0.2em] uppercase rounded-full transition-all hover:scale-105 shadow-lg active:scale-95"
             >
-              Explorer les environs
+              {tx.near.exploreAds}
               <ArrowUpRight className="w-4 h-4 text-[var(--accent-luxury)]" />
             </button>
             <button
               onClick={handleLocate}
               disabled={locating}
-              className="flex items-center gap-3 px-7 py-3.5 bg-[var(--text)] text-[var(--background)] font-sans text-xs font-bold tracking-widest uppercase rounded-full transition-all hover:scale-105 shadow-2xl active:scale-95 disabled:opacity-50"
+              className="flex items-center gap-2 px-5 py-3 border border-[var(--border)] text-[var(--text)] font-sans text-xs font-bold tracking-widest uppercase rounded-full transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
             >
               {locating ? <Loader2 className="w-4 h-4 animate-spin" /> : <MapPin className="w-4 h-4" />}
-              {locating ? 'Localisation...' : 'Rafraîchir ma position'}
+              {locating ? tx.near.locating : tx.near.myPosition}
             </button>
             {userPos && (
-              <div className="flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-emerald-500/10 border border-emerald-500/30">
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30">
                 <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                <span className="text-emerald-400 text-[10px] font-bold uppercase tracking-widest">
-                  Filtre Géo Actif
-                </span>
+                <span className="text-emerald-400 text-[10px] font-bold uppercase tracking-widest">{tx.near.geoActive}</span>
               </div>
             )}
           </div>
@@ -396,12 +407,12 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
         <div className="flex flex-col gap-8">
 
           {/* BIG MAP — ALWAYS mounted, loading spinner overlays on top */}
-          <div ref={mapContainerRef} className="group rounded-3xl overflow-hidden ring-1 ring-[var(--border)] p-1 bg-[var(--surface-card)] backdrop-blur-3xl transition-all duration-1000 hover:ring-[var(--accent-luxury)]" style={{ height: '560px' }}>
+          <div ref={mapContainerRef} className="group rounded-3xl overflow-hidden ring-1 ring-[var(--border)] p-1 bg-[var(--surface-card)] backdrop-blur-3xl transition-all duration-1000 hover:ring-[var(--accent-luxury)]" style={{ height: mapHeight + 2 }}>
             <div className="rounded-[calc(1.5rem-4px)] overflow-hidden bg-[var(--background)] relative h-full transition-all duration-700">
             {/* Map is ALWAYS rendered — never unmounted */}
             <PropertiesMap
               biens={mapBiens}
-              hauteur={560}
+              hauteur={mapHeight}
               mapTheme={mapTheme}
               targetCenter={userPos}
               highlightedId={hoveredId}
@@ -471,7 +482,7 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
             <div className="space-y-1">
               <p className="text-[var(--text-muted)] text-xs uppercase tracking-widest font-bold mb-5 flex items-center gap-2">
                 <span className="w-4 h-[1px] bg-[var(--accent-luxury)]" />
-                {selectedId ? 'Bien sélectionné — Itinéraire affiché sur la carte' : 'Triés par distance · Cliquez pour voir le trajet'}
+                {selectedId ? tx.near.selected : tx.near.sortedByDistance}
               </p>
 
               {/* ── TOUS LES ECRANS : rangées par catégorie avec scroll horizontal ── */}
@@ -490,9 +501,10 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
                           href={`/biens?type_bien=${cat.key}`}
                           className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--accent-luxury)] border-b border-[var(--accent-luxury)]/40 pb-0.5 hover:border-[var(--accent-luxury)] transition-colors"
                         >
-                          Voir tout <ChevronRight className="w-3 h-3" />
+                          {tx.near.viewAll} <ChevronRight className="w-3 h-3" />
                         </Link>
                       </div>
+                      <div className="overflow-hidden">
                       <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 md:-mx-6 md:px-6 snap-x snap-mandatory">
                         {items.map((b, i) => (
                           <div key={b.id} className="snap-start">
@@ -507,6 +519,7 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
                           </div>
                         ))}
                       </div>
+                      </div>
                     </div>
                   )
                 })}
@@ -514,16 +527,16 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
 
               <div className="mt-10 text-center">
                 <Link href="/biens" className="inline-flex items-center gap-3 px-8 py-3 rounded-full border border-[var(--accent-luxury)] text-[var(--accent-luxury)] text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-[var(--accent-luxury)] hover:text-black transition-all">
-                  Explorer tout le catalogue <ChevronRight className="w-4 h-4" />
+                  {tx.near.exploreCatalogue} <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>
           ) : (
             <div className="text-center py-20 border border-dashed border-[var(--border)] rounded-[2rem] bg-[var(--surface-card)]">
               <MapPin className="w-12 h-12 text-[var(--accent-luxury)] opacity-50 mx-auto mb-4" />
-              <p className="text-[var(--text-muted)] mb-6 font-sans">Aucun bien trouvé sur la plateforme.</p>
+              <p className="text-[var(--text-muted)] mb-6 font-sans">{tx.near.noBien}</p>
               <Link href="/biens" className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border border-[var(--accent-luxury)] text-[var(--accent-luxury)] text-xs font-bold uppercase tracking-widest hover:bg-[var(--accent-luxury)] hover:text-black transition-all">
-                Voir le catalogue
+                {tx.near.viewCatalogue}
               </Link>
             </div>
           )}

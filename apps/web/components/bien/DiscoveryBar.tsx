@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -13,7 +13,10 @@ interface DiscoveryBarProps {
   userId: string | null
 }
 
+import { useT } from '@/lib/i18n/client'
+
 export function DiscoveryBar({ bien, prix, userId }: DiscoveryBarProps) {
+  const t = useT()
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
@@ -65,33 +68,33 @@ export function DiscoveryBar({ bien, prix, userId }: DiscoveryBarProps) {
                {/* Pricing Context - Desktop Only */}
                <div className="hidden xl:flex items-center gap-6 pl-6 border-l border-white/10">
                   <div className="flex flex-col">
-                     <span className="text-[8px] font-bold uppercase tracking-widest text-white/30">Investissement</span>
+                     <span className="text-[8px] font-bold uppercase tracking-widest text-white/30">{t.bien.investment}</span>
                      <span className="text-lg font-display font-bold text-accent-luxury">{prix?.value}</span>
                   </div>
-                  
+
                   <div className="flex flex-col">
-                     <span className="text-[8px] font-bold uppercase tracking-widest text-white/30">Localisation</span>
+                     <span className="text-[8px] font-bold uppercase tracking-widest text-white/30">{t.bien.location}</span>
                      <span className="text-sm font-medium text-white/60">{bien.commune}</span>
                   </div>
                </div>
 
                {/* Navigation Links - Desktop Only */}
                <nav className="hidden lg:flex items-center gap-6 px-6 py-2.5 bg-white/5 border border-white/10 rounded-full">
-                  <a href="#signature" className="text-[9px] font-black uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">Narration</a>
-                  <a href="#shorts" className="text-[9px] font-black uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">Shorts</a>
-                  <a href="#visite-3d" className="text-[9px] font-black uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">3D View</a>
+                  <a href="#signature" className="text-[9px] font-black uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">{t.bien.narration}</a>
+                  <a href="#shorts" className="text-[9px] font-black uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">{t.bien.shorts}</a>
+                  <a href="#visite-3d" className="text-[9px] font-black uppercase tracking-[0.2em] text-white/50 hover:text-white transition-colors">{t.bien.view3d}</a>
                </nav>
 
                {/* Primary CTA */}
                <div className="flex items-center gap-3">
                   <a
-                    href={`https://wa.me/2250574243752?text=${encodeURIComponent(`Bonjour, je suis intéressé(e) par ce bien : *${bien.titre}* — ${bien.commune}. Pouvez-vous me donner plus d'informations ?`)}`}
+                    href={`https://wa.me/2250544872051?text=${encodeURIComponent(`Bonjour, je suis intéressé(e) par ce bien : *${bien.titre}* — ${bien.commune}. Pouvez-vous me donner plus d'informations ?\n\n🔗 ${typeof window !== 'undefined' ? window.location.origin : 'https://bogbes-groupe.vercel.app'}/biens/${bien.id}`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 px-5 lg:px-8 py-3 bg-emerald-600 rounded-full hover:bg-emerald-500 transition-all shadow-[0_10px_30px_rgba(16,185,129,0.3)] shrink-0"
                   >
                     <Image src="/whatsapp-icon.svg" alt="WA" width={20} height={20} className="w-5 h-5" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-white hidden sm:inline">Contacter</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-white hidden sm:inline">{t.bien.contact}</span>
                   </a>
 
                   <div className="flex items-center gap-2">

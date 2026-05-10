@@ -9,7 +9,7 @@ test.describe('Authentification', () => {
     await page.goto('/auth/login')
 
     // Vérifier que la page login est chargée
-    await expect(page).toHaveTitle(/Immo CI|Connexion/i)
+    await expect(page).toHaveTitle(/BOGBE'S GROUPE|Connexion/i)
     await expect(page.getByRole('heading', { name: /connexion/i })).toBeVisible()
 
     // Remplir le formulaire

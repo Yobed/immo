@@ -6,6 +6,7 @@ import dynamic            from 'next/dynamic'
 import { KPICard }        from '@/components/dashboard/KPICard'
 import { OccupancyGauge } from '@/components/dashboard/OccupancyGauge'
 import { AlertesSection } from '@/components/dashboard/AlertesSection'
+import { OnboardingChecklist } from '@/components/dashboard/OnboardingChecklist'
 import type { Alerte }          from '@/components/dashboard/AlertesSection'
 import type { RevenueData }     from '@/components/dashboard/RevenueBarChart'
 import type { PaymentMethodData } from '@/components/dashboard/PaymentDonut'
@@ -207,6 +208,9 @@ export default async function DashboardPage() {
     <div className="min-h-screen bg-surface">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <h1 className="font-display text-2xl text-primary mb-6">Dashboard</h1>
+
+        {/* Onboarding checklist (auto-disparaît quand 4/4 ou dismissée) */}
+        <OnboardingChecklist userId={user.id} />
 
         {/* KPI Cards — DASH-01 */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

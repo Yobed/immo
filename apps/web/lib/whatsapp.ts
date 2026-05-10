@@ -1,5 +1,5 @@
 // apps/web/lib/whatsapp.ts
-// Client WhatsApp Business API (WABA) — Immo CI Platform
+// Client WhatsApp Business API (WABA) — BOGBE'S GROUPE Platform
 // Utilise l'API Graph Meta v19.0
 
 export class WhatsAppError extends Error {
@@ -73,16 +73,16 @@ export async function sendWhatsApp(to: string, body: string): Promise<WhatsAppRe
 /** Templates de messages pour les jalons de relance loyer */
 export const RELANCE_MESSAGES = {
   'J-3': (montant: number, dateEcheance: string) =>
-    `Bonjour, rappel : votre loyer de ${montant.toLocaleString('fr-FR')} FCFA est dû le ${dateEcheance}. Merci de procéder au règlement dans les délais. — Immo CI`,
+    `Bonjour, rappel : votre loyer de ${montant.toLocaleString('fr-FR')} FCFA est dû le ${dateEcheance}. Merci de procéder au règlement dans les délais. — BOGBE'S GROUPE`,
 
   'J-1': (montant: number, dateEcheance: string) =>
-    `RAPPEL URGENT : votre loyer de ${montant.toLocaleString('fr-FR')} FCFA est dû DEMAIN (${dateEcheance}). Veuillez régulariser votre situation. — Immo CI`,
+    `RAPPEL URGENT : votre loyer de ${montant.toLocaleString('fr-FR')} FCFA est dû DEMAIN (${dateEcheance}). Veuillez régulariser votre situation. — BOGBE'S GROUPE`,
 
   'J+1': (montant: number, dateEcheance: string) =>
-    `⚠️ Votre loyer de ${montant.toLocaleString('fr-FR')} FCFA était dû le ${dateEcheance}. Votre compte est maintenant en retard. Contactez votre propriétaire pour régulariser. — Immo CI`,
+    `⚠️ Votre loyer de ${montant.toLocaleString('fr-FR')} FCFA était dû le ${dateEcheance}. Votre compte est maintenant en retard. Contactez votre propriétaire pour régulariser. — BOGBE'S GROUPE`,
 
   'J+7': (montant: number, _dateEcheance: string) =>
-    `DERNIER RAPPEL : votre loyer de ${montant.toLocaleString('fr-FR')} FCFA est en retard depuis 7 jours. Sans règlement, des pénalités contractuelles s'appliquent. Contactez votre propriétaire immédiatement. — Immo CI`,
+    `DERNIER RAPPEL : votre loyer de ${montant.toLocaleString('fr-FR')} FCFA est en retard depuis 7 jours. Sans règlement, des pénalités contractuelles s'appliquent. Contactez votre propriétaire immédiatement. — BOGBE'S GROUPE`,
 } as const
 
 export type RelanceJalon = keyof typeof RELANCE_MESSAGES

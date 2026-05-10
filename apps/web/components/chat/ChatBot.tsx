@@ -1,16 +1,11 @@
-'use client'
+﻿'use client'
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChatMessage } from './ChatMessage'
 import { Sparkles, Send, X, MessageCircle, Mic, Phone, ShieldCheck } from 'lucide-react'
+import { useT } from '@/lib/i18n/client'
 
 type Message = { role: 'user' | 'assistant'; content: string }
-
-const PLACEHOLDER_SUGGESTIONS = [
-  'Quels sont les atouts de ce bien ?',
-  'Services de conciergerie disponibles ?',
-  'Je souhaite planifier une visite VIP',
-]
 
 interface ChatBotProps {
   context?: string
@@ -18,11 +13,52 @@ interface ChatBotProps {
   isFloating?: boolean
 }
 
+const STORAGE_KEY = 'sapphire-chat-history-v1'
+const STORAGE_TTL_MS = 24 * 60 * 60 * 1000 // 24h
+
+function loadHistory(): Message[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw) as { ts: number; messages: Message[] }
+    if (Date.now() - parsed.ts > STORAGE_TTL_MS) {
+      localStorage.removeItem(STORAGE_KEY)
+      return []
+    }
+    return Array.isArray(parsed.messages) ? parsed.messages.slice(-10) : []
+  } catch {
+    return []
+  }
+}
+
+function saveHistory(messages: Message[]) {
+  if (typeof window === 'undefined') return
+  try {
+    const last = messages.slice(-10).filter((m) => m.content?.trim())
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ts: Date.now(), messages: last }))
+  } catch {
+    // quota exceeded ou autre — ignoré silencieusement
+  }
+}
+
 export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) {
+  const tx = useT()
+  const PLACEHOLDER_SUGGESTIONS = [tx.chat.suggestion1, tx.chat.suggestion2, tx.chat.suggestion3]
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+
+  // Charger l'historique au mount
+  useEffect(() => {
+    setMessages(loadHistory())
+  }, [])
+
+  // Persister l'historique à chaque changement
+  useEffect(() => {
+    if (messages.length > 0) saveHistory(messages)
+  }, [messages])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -104,7 +140,7 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
         </div>
         <div className="flex items-center gap-2">
           <a 
-            href="https://wa.me/2250574243752" 
+            href="https://wa.me/2250544872051" 
             target="_blank" 
             rel="noopener noreferrer"
             className="p-2 hover:bg-green-500/20 text-green-500 rounded-full transition-all group relative"
@@ -171,7 +207,7 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }}
-            placeholder="Échangez avec votre conseiller..."
+            placeholder={tx.chat.placeholder}
             disabled={loading}
             className="flex-1 bg-transparent px-4 py-2 text-sm text-[var(--text)] placeholder-[var(--text)]/20 focus:outline-none disabled:opacity-50"
           />
@@ -186,7 +222,7 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
          <div className="flex justify-center gap-8 mt-4">
             <Mic className="w-3.5 h-3.5 text-[var(--text)]/20 cursor-not-allowed" />
             <a 
-              href="https://wa.me/2250574243752" 
+              href="https://wa.me/2250544872051" 
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center gap-2 opacity-30 hover:opacity-100 transition-all group"

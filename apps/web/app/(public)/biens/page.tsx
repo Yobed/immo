@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -6,7 +6,7 @@ import { PremiumBienCard } from '@/components/bien/PremiumBienCard'
 import * as React from 'react'
 import {
   Home, Building2, Palmtree, Warehouse, Briefcase, Landmark, Shovel,
-  ArrowRight, AlertCircle, MapPin, MessageCircle, Mic, MicOff,
+  ArrowRight, AlertCircle, MapPin, MessageCircle, Mic, MicOff, Search, ChevronDown,
 } from 'lucide-react'
 import { FeaturedCard } from '@/components/bien/FeaturedCard'
 import type { LucideIcon } from 'lucide-react'
@@ -16,7 +16,10 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { SearchAlert } from '@/components/search/SearchAlert'
 import { useComparator } from '@/hooks/useComparator'
 import { ComparatorBar } from '@/components/bien/ComparatorBar'
+import { ComparatorHint } from '@/components/bien/ComparatorHint'
+import { useT } from '@/lib/i18n/client'
 import { useVoiceSearch, parseVoiceCommand } from '@/hooks/useVoiceSearch'
+import { formatFCFA } from '@/lib/format'
 
 const TYPE_FILTERS: { label: string; value: string; icon: LucideIcon }[] = [
   { label: 'Proche de moi',     value: 'near_me',           icon: MapPin },
@@ -32,13 +35,6 @@ const TYPE_FILTERS: { label: string; value: string; icon: LucideIcon }[] = [
 
 const COMMUNES = ['Cocody', 'Plateau', 'Yopougon', 'Marcory', 'Treichville', 'Adjamé', 'Abobo', 'Koumassi', 'Port-Bouët']
 
-const BUDGET_FILTERS = [
-  { label: 'Tout budget', value: '' },
-  { label: '≤ 200k/mois', value: '200000' },
-  { label: '≤ 500k/mois', value: '500000' },
-  { label: '≤ 1M/mois',   value: '1000000' },
-  { label: '≤ 2M/mois',   value: '2000000' },
-]
 
 type BienRow = {
   id: string; titre: string; commune: string; quartier: string | null
@@ -76,6 +72,7 @@ export default function BiensListePage() {
 function BiensContent() {
   const searchParams  = useSearchParams()
   const router        = useRouter()
+  const tx            = useT()
   const typeFromUrl   = searchParams.get('type_bien') ?? ''
   const communeFromUrl = searchParams.get('commune') ?? ''
   const budgetFromUrl  = searchParams.get('budget_max') ?? ''
@@ -83,6 +80,7 @@ function BiensContent() {
   const [activeType, setActiveType]       = useState(typeFromUrl)
   const [biens, setBiens]                 = useState<BienRow[]>([])
   const [coverMap, setCoverMap]           = useState<Record<string, string>>({})
+  const [photosMap, setPhotosMap]         = useState<Record<string, string[]>>({})
   const [loading, setLoading]             = useState(true)
   const [error, setError]                 = useState<string | null>(null)
   const [count, setCount]                 = useState(0)
@@ -106,6 +104,7 @@ function BiensContent() {
     if (t) p.set('type_bien', t)
     if (f.commune) p.set('commune', f.commune)
     if (f.budgetMax) p.set('budget_max', f.budgetMax)
+    if (f.offre) p.set('offre', f.offre)
     router.push(`/biens${p.toString() ? `?${p.toString()}` : ''}`)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transcript])
@@ -113,22 +112,26 @@ function BiensContent() {
   // Clear hint on filter change
   useEffect(() => { setVoiceHint('') }, [typeFromUrl, communeFromUrl, budgetFromUrl])
 
-  const getCoverMap = useCallback(async (ids: string[]) => {
-    if (ids.length === 0) return {}
+  const getCoverMap = useCallback(async (ids: string[]): Promise<{ cover: Record<string, string>; photos: Record<string, string[]> }> => {
+    if (ids.length === 0) return { cover: {}, photos: {} }
     const { data: medias } = await (supabase as any)
       .from('biens_medias')
-      .select('bien_id, url, est_couverture')
+      .select('bien_id, url, est_couverture, ordre')
       .in('bien_id', ids)
       .eq('type', 'photo')
       .order('est_couverture', { ascending: false })
+      .order('ordre', { ascending: true })
 
-    const map: Record<string, string> = {}
+    const cover: Record<string, string> = {}
+    const photos: Record<string, string[]> = {}
     if (medias) {
       for (const m of medias as { bien_id: string; url: string; est_couverture: boolean }[]) {
-        if (!map[m.bien_id] || m.est_couverture) map[m.bien_id] = m.url
+        if (!cover[m.bien_id] || m.est_couverture) cover[m.bien_id] = m.url
+        if (!photos[m.bien_id]) photos[m.bien_id] = []
+        if (photos[m.bien_id].length < 5) photos[m.bien_id].push(m.url)
       }
     }
-    return map
+    return { cover, photos }
   }, [supabase])
 
   useEffect(() => {
@@ -159,8 +162,8 @@ function BiensContent() {
             })
             if (err) throw new Error(err.message)
             const rows = (data ?? []) as BienRow[]
-            const cMap = await getCoverMap(rows.map(b => b.id))
-            if (!cancelled) { setBiens(rows); setCoverMap(cMap); setCount(rows.length) }
+            const { cover, photos } = await getCoverMap(rows.map(b => b.id))
+            if (!cancelled) { setBiens(rows); setCoverMap(cover); setPhotosMap(photos); setCount(rows.length) }
           }
         } else {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -181,8 +184,8 @@ function BiensContent() {
           const { data, count: c, error: err } = await q
           if (err) throw new Error(err.message)
           const rows = (data ?? []) as BienRow[]
-          const cMap = await getCoverMap(rows.map(b => b.id))
-          if (!cancelled) { setBiens(rows); setCoverMap(cMap); setCount(c ?? 0) }
+          const { cover, photos } = await getCoverMap(rows.map(b => b.id))
+          if (!cancelled) { setBiens(rows); setCoverMap(cover); setPhotosMap(photos); setCount(c ?? 0) }
         }
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : 'Erreur de chargement')
@@ -259,13 +262,13 @@ function BiensContent() {
               role="alert"
             >
               <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-6" />
-              <h3 className="font-display text-2xl font-bold text-off-white mb-3">Erreur de chargement</h3>
+              <h3 className="font-display text-2xl font-bold text-off-white mb-3">{tx.biensPage.errorLoading}</h3>
               <p className="text-off-white/60 mb-8 max-w-md mx-auto">{error}</p>
               <button
                 onClick={() => window.location.reload()}
                 className="px-8 py-3 bg-off-white/10 hover:bg-off-white/20 text-off-white rounded-full font-bold transition-colors"
               >
-                Réessayer
+                {tx.biensPage.retry}
               </button>
             </motion.div>
           ) : (
@@ -358,6 +361,7 @@ function BiensContent() {
                             surface_m2={bien.surface_m2}
                             nb_pieces={bien.nb_pieces}
                             photo_url={photo}
+                            photos={photosMap[bien.id]}
                             is_verifie={bien.is_verifie}
                             score_ia={bien.score_ia}
                             url_visite_3d={bien.url_visite_3d}
@@ -366,9 +370,9 @@ function BiensContent() {
                             onSelect={compareFull && !compareIsSelected(bien.id) ? undefined : () => compareToggle({
                               id: bien.id, titre: bien.titre, commune: bien.commune,
                               type_bien: bien.type_bien,
-                              prix: bien.prix_nuit_fcfa ? `${bien.prix_nuit_fcfa.toLocaleString()} FCFA/nuit`
-                                : bien.prix_mois_fcfa ? `${bien.prix_mois_fcfa.toLocaleString()} FCFA/mois`
-                                : bien.prix_vente_fcfa ? `${bien.prix_vente_fcfa.toLocaleString()} FCFA`
+                              prix: bien.prix_nuit_fcfa ? `${formatFCFA(bien.prix_nuit_fcfa)} / nuit`
+                                : bien.prix_mois_fcfa ? `${formatFCFA(bien.prix_mois_fcfa)} / mois`
+                                : bien.prix_vente_fcfa ? formatFCFA(bien.prix_vente_fcfa)
                                 : 'Prix sur demande',
                               surface_m2: bien.surface_m2, nb_pieces: bien.nb_pieces,
                               photo_url: photo ?? null, is_verifie: bien.is_verifie,
@@ -400,47 +404,27 @@ function BiensContent() {
         onRemove={(id) => { const b = compareSelected.find(x => x.id === id); if (b) compareToggle(b) }}
         onClear={compareClear}
       />
+      {compareSelected.length === 0 && <ComparatorHint />}
 
       <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden px-4 pb-6 pt-4 pointer-events-none"
         style={{ background: 'linear-gradient(to top, var(--background) 40%, transparent)' }}
       >
         <a
-          href="https://wa.me/2250574243752?text=Bonjour%2C%20je%20cherche%20un%20bien%20%C3%A0%20Abidjan"
+          href="https://wa.me/2250544872051?text=Bonjour%2C%20je%20cherche%20un%20bien%20%C3%A0%20Abidjan"
           target="_blank"
           rel="noopener noreferrer"
           className="pointer-events-auto flex items-center gap-3 px-5 py-3.5 bg-emerald-600 rounded-2xl shadow-2xl shadow-emerald-950/50 w-full active:scale-95 transition-transform duration-150"
         >
           <MessageCircle className="w-5 h-5 text-white shrink-0" />
           <div className="flex-1">
-            <p className="text-[13px] font-bold text-white leading-tight">Parler à Sapphire</p>
-            <p className="text-[10px] text-white/70 leading-tight">Trouvez votre bien idéal</p>
+            <p className="text-[13px] font-bold text-white leading-tight">{tx.biensPage.speakToSapphire}</p>
+            <p className="text-[10px] text-white/70 leading-tight">{tx.biensPage.findIdealBien}</p>
           </div>
           <ArrowRight className="w-4 h-4 text-white/60 shrink-0" />
         </a>
       </div>
     </div>
   )
-}
-
-// ─── Helpers ───────────────────────────────────────────────────────────────
-
-const COLLECTION_LABELS: Record<string, string> = {
-  '': 'Abidjan', 'appartement': 'Appartements', 'villa': 'Villas de Luxe',
-  'studio': 'Studios', 'residence_meublee': 'Résidences', 'maison': 'Maisons',
-  'bureau': 'Bureaux', 'terrain': 'Terrains', 'near_me': 'Autour de moi',
-}
-
-function buildBiensLink(overrides: Record<string, string | null>, type: string, commune: string, budget: string) {
-  const p = new URLSearchParams()
-  if (type)    p.set('type_bien', type)
-  if (commune) p.set('commune', commune)
-  if (budget)  p.set('budget_max', budget)
-  Object.entries(overrides).forEach(([k, v]) => {
-    if (v == null || v === '') p.delete(k)
-    else p.set(k, v)
-  })
-  const s = p.toString()
-  return `/biens${s ? `?${s}` : ''}`
 }
 
 // ─── Header ────────────────────────────────────────────────────────────────
@@ -451,7 +435,32 @@ function PageHeader({
   activeType: string; activeCommune: string; activeBudget: string; count: number
   isListening: boolean; isSupported: boolean; onMic: () => void
 }) {
-  const collectionTitle = COLLECTION_LABELS[activeType] ?? 'Abidjan'
+  const router = useRouter()
+  const tx = useT()
+  const [budgetVal, setBudgetVal] = useState(activeBudget)
+  const [communeVal, setCommuneVal] = useState(activeCommune)
+
+  useEffect(() => { setBudgetVal(activeBudget) }, [activeBudget])
+  useEffect(() => { setCommuneVal(activeCommune) }, [activeCommune])
+
+  const go = useCallback((ov: Record<string, string> = {}) => {
+    const p = new URLSearchParams()
+    const t = ov.type !== undefined ? ov.type : activeType
+    const c = ov.commune !== undefined ? ov.commune : communeVal
+    const b = ov.budget !== undefined ? ov.budget : budgetVal
+    if (t && t !== 'near_me') p.set('type_bien', t)
+    if (c) p.set('commune', c)
+    if (b) p.set('budget_max', b)
+    router.push(`/biens?${p.toString()}`)
+  }, [activeType, communeVal, budgetVal, router])
+
+  const buildTypeLink = (typeValue: string) => {
+    const p = new URLSearchParams()
+    if (typeValue && typeValue !== 'near_me') p.set('type_bien', typeValue)
+    if (communeVal) p.set('commune', communeVal)
+    if (budgetVal) p.set('budget_max', budgetVal)
+    return `/biens?${p.toString()}`
+  }
 
   return (
     <header className="relative bg-[#020617] overflow-hidden" data-theme="dark">
@@ -459,7 +468,6 @@ function PageHeader({
         className="absolute -top-24 -left-24 w-96 h-96 pointer-events-none"
         style={{ background: 'radial-gradient(circle, oklch(65% 0.18 45 / 0.13) 0%, transparent 65%)' }}
       />
-
       <div className="relative z-10 max-w-7xl mx-auto px-4 pt-6 pb-4 md:pt-16 md:pb-6">
         <Link
           href="/"
@@ -468,20 +476,18 @@ function PageHeader({
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M19 12H5M12 5l-7 7 7 7" />
           </svg>
-          Accueil
+          {tx.nav.home}
         </Link>
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         >
-          <p className="font-display italic text-[var(--accent-luxury)] text-[13px] tracking-wide mb-0.5">La Collection</p>
-          <h1 className="font-display font-bold text-[28px] md:text-5xl text-white tracking-tight leading-none">
-            {collectionTitle}
-          </h1>
+          <p className="font-display italic text-[var(--accent-luxury)] text-[13px] tracking-wide mb-0.5">{tx.biensPage.collection}</p>
+          <h1 className="font-display font-bold text-[28px] md:text-5xl text-white tracking-tight leading-none">{tx.biensPage.abidjan}</h1>
           {count > 0 && (
             <p className="text-white/35 text-[11px] font-sans mt-2 uppercase tracking-[0.2em]">
-              {count} bien{count > 1 ? 's' : ''} disponible{count > 1 ? 's' : ''}
+              {(count > 1 ? tx.biensPage.available_plural : tx.biensPage.available).replace('{{count}}', String(count))}
             </p>
           )}
         </motion.div>
@@ -490,7 +496,28 @@ function PageHeader({
       <div className="sticky top-0 z-50 bg-[#020617]/95 backdrop-blur-md border-b border-white/8">
         <div className="max-w-7xl mx-auto px-3 py-2 space-y-1.5">
 
-          {/* Row 1 — Type */}
+          {/* Row 0 — Quick filter presets (1-clic, applique plusieurs critères) */}
+          <div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
+            {[
+              { label: `🔥 ${tx.filters.rare}`, href: '/biens?type_bien=villa' },
+              { label: tx.filters.underBudget, href: '/biens?prix_max=300000' },
+              { label: 'Cocody', href: '/biens?commune=Cocody' },
+              { label: 'Plateau', href: '/biens?commune=Plateau' },
+              { label: 'Marcory', href: '/biens?commune=Marcory' },
+              { label: tx.filters.furnished, href: '/biens?type_bien=residence_meublee' },
+              { label: tx.filters.studios, href: '/biens?type_bien=studio' },
+            ].map((p) => (
+              <a
+                key={p.label}
+                href={p.href}
+                className="shrink-0 px-3 py-1 rounded-full bg-white/5 hover:bg-[var(--accent-luxury)]/20 hover:text-[var(--accent-luxury)] text-white/60 text-[11px] font-bold transition-all border border-white/10 hover:border-[var(--accent-luxury)]/40 whitespace-nowrap"
+              >
+                {p.label}
+              </a>
+            ))}
+          </div>
+
+          {/* Row 1 — Types avec icônes */}
           <nav className="flex gap-1.5 overflow-x-auto scrollbar-hide" aria-label="Filtres de type de bien">
             {TYPE_FILTERS.map((f) => {
               const isActive = f.value === activeType
@@ -502,7 +529,7 @@ function PageHeader({
               return (
                 <a
                   key={f.value}
-                  href={buildBiensLink({ type_bien: f.value || null }, f.value, activeCommune, activeBudget)}
+                  href={buildTypeLink(f.value)}
                   aria-current={isActive ? 'page' : undefined}
                   className={`flex flex-col items-center gap-0.5 shrink-0 px-3 py-2 rounded-xl min-w-[48px] transition-all duration-200 ${
                     isActive ? 'bg-[var(--accent-luxury)] text-black' : 'bg-white/6 text-white/55 hover:bg-white/12 hover:text-white'
@@ -515,66 +542,48 @@ function PageHeader({
             })}
           </nav>
 
-          {/* Row 2 — Zone + Mic */}
-          <div className="flex items-center gap-1.5">
-            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide flex-1">
-              <a
-                href={buildBiensLink({ commune: null }, activeType, '', activeBudget)}
-                className={`shrink-0 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wide transition-all duration-200 ${
-                  !activeCommune ? 'bg-white/15 text-white border border-white/20' : 'bg-white/5 text-white/40 hover:text-white/70'
-                }`}
-              >
-                Tout CI
-              </a>
-              {COMMUNES.map((c) => {
-                const isActive = activeCommune === c
-                return (
-                  <a
-                    key={c}
-                    href={buildBiensLink({ commune: c }, activeType, c, activeBudget)}
-                    className={`shrink-0 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wide transition-all duration-200 whitespace-nowrap ${
-                      isActive ? 'bg-white/15 text-white border border-white/20' : 'bg-white/5 text-white/40 hover:text-white/70'
-                    }`}
-                  >
-                    {c}
-                  </a>
-                )
-              })}
+          {/* Row 2 — Budget + Commune + Mic (scrollable horizontally on mobile) */}
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-0.5">
+            <div className="flex items-center gap-2 shrink-0 w-[150px] bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+              <span className="text-[var(--accent-luxury)] text-xs font-bold shrink-0">$</span>
+              <input
+                type="number"
+                placeholder="Budget max…"
+                value={budgetVal}
+                onChange={e => setBudgetVal(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && go()}
+                className="w-full min-w-0 bg-transparent text-white text-[11px] outline-none placeholder-white/25"
+              />
+              {budgetVal && (
+                <button onClick={() => { setBudgetVal(''); go({ budget: '' }) }} className="text-white/30 hover:text-white/60 text-xs shrink-0">✕</button>
+              )}
             </div>
-
-            {/* Mic */}
+            <div className="flex items-center gap-1 shrink-0 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+              <select
+                value={communeVal}
+                onChange={e => { setCommuneVal(e.target.value); go({ commune: e.target.value }) }}
+                className="bg-transparent text-white text-[11px] outline-none appearance-none cursor-pointer w-[90px]"
+              >
+                <option value="" className="bg-[#0d1425] text-white">Toutes</option>
+                {COMMUNES.map(c => (
+                  <option key={c} value={c} className="bg-[#0d1425] text-white">{c}</option>
+                ))}
+              </select>
+              <ChevronDown className="w-3 h-3 text-white/30 shrink-0 pointer-events-none" />
+            </div>
             {isSupported && (
               <button
                 onClick={onMic}
-                aria-label={isListening ? 'Arrêter la recherche vocale' : 'Recherche vocale'}
-                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wide transition-all duration-200 border ${
+                aria-label={isListening ? 'Arrêter' : 'Recherche vocale'}
+                className={`shrink-0 p-2 rounded-xl border transition-all ${
                   isListening
                     ? 'bg-red-500 border-red-400 text-white animate-pulse'
-                    : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/12 hover:text-white'
+                    : 'bg-[var(--accent-luxury)]/10 border-[var(--accent-luxury)]/25 text-[var(--accent-luxury)]'
                 }`}
               >
                 {isListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
-                <span className="hidden sm:inline">{isListening ? 'Écoute…' : 'Vocal'}</span>
               </button>
             )}
-          </div>
-
-          {/* Row 3 — Budget */}
-          <div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
-            {BUDGET_FILTERS.map((b) => {
-              const isActive = b.value === activeBudget
-              return (
-                <a
-                  key={b.value}
-                  href={buildBiensLink({ budget_max: b.value || null }, activeType, activeCommune, b.value)}
-                  className={`shrink-0 px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wide transition-all duration-200 whitespace-nowrap ${
-                    isActive ? 'bg-white/15 text-white border border-white/20' : 'bg-white/5 text-white/40 hover:text-white/70'
-                  }`}
-                >
-                  {b.label}
-                </a>
-              )
-            })}
           </div>
 
         </div>
@@ -614,7 +623,7 @@ function EmptyState() {
       </div>
       <div className="text-center">
         <a
-          href={`https://wa.me/2250574243752?text=${encodeURIComponent("Bonjour, je cherche un bien qui ne figure pas encore dans votre catalogue. Pouvez-vous m'aider ?")}`}
+          href={`https://wa.me/2250544872051?text=${encodeURIComponent("Bonjour, je cherche un bien qui ne figure pas encore dans votre catalogue. Pouvez-vous m'aider ?")}`}
           target="_blank" rel="noopener noreferrer"
           className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full text-[12px] font-bold uppercase tracking-widest transition-all active:scale-95"
         >

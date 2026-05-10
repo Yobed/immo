@@ -168,7 +168,7 @@ export function ContratDocument(props: ContratProps) {
         </Text>
 
         <Text style={S.footer}>
-          Immo CI — Plateforme immobiliere Cote d&apos;Ivoire — immo-ci.vercel.app
+          BOGBE'S GROUPE — Plateforme immobiliere Cote d&apos;Ivoire — immo-ci.vercel.app
         </Text>
       </Page>
     </Document>

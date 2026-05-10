@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { PremiumBienCard } from '@/components/bien/PremiumBienCard'
 import { SmartFilter } from './SmartFilter'
 import { ArrowRight } from 'lucide-react'
+import { useT } from '@/lib/i18n/client'
 
 type BienRow = {
   id: string
@@ -38,6 +39,7 @@ const CATEGORIES = [
 ]
 
 export function FeaturedProperties({ initialBiens = [] }: FeaturedPropertiesProps) {
+  const t = useT()
   const [filteredRows, setFilteredRows] = useState<BienRow[]>(initialBiens)
 
   const handleFilter = (filters: { prixMax: string; commune: string; typeBien: string }) => {
@@ -74,13 +76,13 @@ export function FeaturedProperties({ initialBiens = [] }: FeaturedPropertiesProp
         {/* En-tête */}
         <div className="flex items-end justify-between mb-6 gap-4">
           <h2 className="font-display text-2xl md:text-4xl font-bold text-[var(--text)] leading-tight tracking-tight">
-            Dernières annonces
+            {t.featured.latest}
           </h2>
           <Link
             href="/biens"
             className="shrink-0 text-[11px] font-bold tracking-[0.2em] uppercase text-[var(--accent-luxury)] border-b border-[var(--accent-luxury)]/40 pb-0.5 hover:border-[var(--accent-luxury)] transition-colors"
           >
-            Voir tout →
+            {t.featured.viewAll} →
           </Link>
         </div>
 
@@ -91,12 +93,12 @@ export function FeaturedProperties({ initialBiens = [] }: FeaturedPropertiesProp
 
         {filteredRows.length === 0 ? (
           <div className="py-16 text-center border border-dashed border-[var(--border)] rounded-3xl">
-            <p className="text-[var(--text-muted)] mb-4">Aucun bien ne correspond à ces critères.</p>
+            <p className="text-[var(--text-muted)] mb-4">{t.featured.noMatch}</p>
             <button
               onClick={() => handleFilter({ prixMax: '', commune: '', typeBien: '' })}
               className="text-[var(--accent-luxury)] text-xs uppercase tracking-widest font-bold border-b border-[var(--accent-luxury)] pb-1"
             >
-              Réinitialiser
+              {t.featured.reset}
             </button>
           </div>
         ) : (
@@ -105,6 +107,7 @@ export function FeaturedProperties({ initialBiens = [] }: FeaturedPropertiesProp
             <div className="space-y-8">
               <div>
                 {/* Scroll horizontal — déborde du padding parent sur les bords */}
+                <div className="overflow-hidden">
                 <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 md:-mx-6 md:px-6 snap-x snap-mandatory">
                   {latestProperties.map((bien, i) => (
                     <div key={bien.id} className="w-[192px] md:w-[240px] shrink-0 snap-start">
@@ -129,6 +132,7 @@ export function FeaturedProperties({ initialBiens = [] }: FeaturedPropertiesProp
                     </div>
                   ))}
                 </div>
+                </div>
               </div>
             </div>
           </>
@@ -138,9 +142,7 @@ export function FeaturedProperties({ initialBiens = [] }: FeaturedPropertiesProp
         {initialBiens.length > 0 && (
           <div className="mt-10 pt-8 border-t border-[var(--border)] flex items-center justify-between gap-4 flex-wrap">
             <p className="text-[var(--text-muted)] text-sm leading-relaxed max-w-md">
-              Ces annonces sont{' '}
-              <span className="font-semibold text-[var(--text)]">vérifiées par notre équipe</span>.
-              {' '}Des offres moins formelles circulent aussi dans notre réseau.
+              {t.featured.promoLine}
             </p>
             <Link
               href="/offre-flash"
@@ -150,7 +152,7 @@ export function FeaturedProperties({ initialBiens = [] }: FeaturedPropertiesProp
                 <span className="animate-ping absolute w-full h-full rounded-full bg-[var(--accent-luxury)] opacity-75" />
                 <span className="relative w-1.5 h-1.5 rounded-full bg-[var(--accent-luxury)]" />
               </span>
-              Offres flash du réseau
+              {t.featured.promoCta}
             </Link>
           </div>
         )}

@@ -95,24 +95,29 @@ export function BienMap({ latitude, longitude, titre, commune, hauteur = 300 }: 
   ) : null
 
   const routeBtn = (size: 'sm' | 'lg') => (
-    <button
-      onClick={fetchRoute}
-      disabled={loading}
-      className={[
-        size === 'lg'
-          ? 'flex items-center gap-2 px-5 py-3 bg-white rounded-2xl font-bold text-[13px] text-slate-800 shadow-xl border border-slate-200 active:scale-95 transition-transform disabled:opacity-60'
-          : 'flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl font-bold text-[12px] text-slate-800 shadow-lg border border-slate-200 active:scale-95 transition-transform disabled:opacity-60',
-        route && !loading ? 'animate-pulse' : '',
-      ].join(' ')}
-    >
-      {loading ? (
-        <><Loader2 className="w-4 h-4 animate-spin text-blue-600" />Calcul en cours…</>
-      ) : route ? (
-        <><RefreshCw className="w-4 h-4 text-blue-600" />Rafraîchir ma position</>
-      ) : (
-        <><Navigation className="w-4 h-4 text-[#D97706]" />Itinéraire depuis ma position</>
+    <div className="relative">
+      {!route && !loading && (
+        <span className="absolute inset-0 rounded-2xl bg-amber-400/30 animate-ping pointer-events-none" />
       )}
-    </button>
+      <button
+        onClick={fetchRoute}
+        disabled={loading}
+        className={[
+          size === 'lg'
+            ? 'flex items-center gap-2 px-5 py-3 bg-white rounded-2xl font-bold text-[13px] text-slate-800 shadow-xl border border-slate-200 active:scale-95 transition-all disabled:opacity-60'
+            : 'flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl font-bold text-[12px] text-slate-800 shadow-lg border border-slate-200 active:scale-95 transition-all disabled:opacity-60',
+          !route && !loading ? 'shadow-amber-400/30' : '',
+        ].join(' ')}
+      >
+        {loading ? (
+          <><Loader2 className="w-4 h-4 animate-spin text-blue-600" />Calcul en cours…</>
+        ) : route ? (
+          <><RefreshCw className="w-4 h-4 text-blue-600" />Rafraîchir ma position</>
+        ) : (
+          <><Navigation className="w-4 h-4 text-[#D97706] animate-pulse" />Itinéraire depuis ma position</>
+        )}
+      </button>
+    </div>
   )
 
   return (

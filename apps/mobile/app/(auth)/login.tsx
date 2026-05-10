@@ -38,7 +38,7 @@ export default function LoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.inner}>
-        <Text style={styles.title}>Immo CI</Text>
+        <Text style={styles.title}>BOGBE'S GROUPE</Text>
         <Text style={styles.subtitle}>Connectez-vous à votre compte</Text>
 
         <TextInput

@@ -61,7 +61,7 @@ export default async function ConfirmerPage({ params }: PageProps) {
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/^﻿/, '') || 'https://immo-sigma.vercel.app'
     const lieu = [bien.quartier, bien.commune].filter(Boolean).join(', ')
-    const text = `✅ *Immo CI* — Votre annonce est publiée !
+    const text = `✅ *BOGBE'S GROUPE* — Votre annonce est publiée !
 
 🏠 *${bien.titre}*${lieu ? `\n📍 ${lieu}` : ''}
 
@@ -71,7 +71,7 @@ ${baseUrl}/biens/${bien.id}
 Gérer / modifier vos biens :
 ${baseUrl}/mes-biens
 
-Merci de faire confiance à Immo CI Saphire 💎`
+Merci de faire confiance à BOGBE'S GROUPE 💎`
 
     await wasenderSendMessage(payload.phone, text, 'text').catch(() => null)
   }

@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { Search, ArrowRight, MapPin, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SearchBar } from '@/components/search/SearchBar'
+import { useT } from '@/lib/i18n/client'
 
 interface FeaturedBien {
   id: string
@@ -23,14 +24,14 @@ interface HeroEditorialProps {
 
 const DEFAULT_BG = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2400&auto=format&fit=crop'
 
-const HEADLINE_WORDS = [
-  "d'exception",
-  "de prestige",
-  "exclusif",
-  "sur-mesure"
-]
-
 export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: HeroEditorialProps) {
+  const tx = useT()
+  const HEADLINE_WORDS = [
+    tx.hero.wordsExceptional,
+    tx.hero.wordsPrestige,
+    tx.hero.wordsExclusive,
+    tx.hero.wordsCustom,
+  ]
   const [headlineIdx, setHeadlineIdx] = useState(0)
 
   useEffect(() => {
@@ -38,10 +39,11 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
       setHeadlineIdx(i => (i + 1) % HEADLINE_WORDS.length)
     }, 3500)
     return () => clearInterval(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
-    <section className="relative w-full h-[100svh] min-h-[640px] max-h-[920px] bg-[#0a0e1a] overflow-hidden">
+    <section className="relative w-full h-[100svh] min-h-[720px] max-h-[980px] bg-[#0a0e1a] overflow-x-hidden">
       {/* Single image — no rotation, calm */}
       <div className="absolute inset-0">
         <Image
@@ -70,7 +72,7 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
           <div className="max-w-7xl mx-auto flex items-center gap-3">
             <div className="h-px w-12 bg-[#C5A059]" />
             <p className="text-[10px] md:text-[11px] font-medium tracking-[0.5em] uppercase text-[#C5A059]">
-              BOGBE'S GROUPE · Sapphire Edition
+              {tx.hero.edition}
             </p>
           </div>
         </div>
@@ -82,7 +84,7 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
             {/* Left Column: Text and Search */}
             <div className="flex-1 max-w-3xl">
               <h1 className="font-display text-[42px] sm:text-6xl md:text-7xl lg:text-[88px] xl:text-[104px] leading-[1.02] text-white tracking-tighter mb-6 md:mb-8">
-                <span className="block uppercase">L&apos;immobilier</span>
+                <span className="block uppercase">{tx.hero.lineOne}</span>
                 <span className="block font-editorial text-[#C5A059] lowercase text-[1.1em] -mt-2 -mb-2 h-[1.2em] overflow-hidden">
                   <AnimatePresence mode="wait">
                     <motion.span
@@ -97,16 +99,16 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
                     </motion.span>
                   </AnimatePresence>
                 </span>
-                <span className="block uppercase">en Côte d&apos;Ivoire</span>
+                <span className="block uppercase">{tx.hero.lineTwo}</span>
               </h1>
               <p className="font-sans text-base md:text-lg text-white/80 max-w-xl leading-relaxed mb-10">
-                Résidences vérifiées, conciergerie premium et veille de marché en direct. Toutes les voies vers votre prochain bien réunies en un seul lieu.
+                {tx.hero.intro}
               </p>
 
               {/* Inline search — unifié avec animation */}
               <div className="max-w-2xl">
-                <SearchBar 
-                  placeholder="Cocody, villa avec piscine, 4 chambres..." 
+                <SearchBar
+                  placeholder={tx.hero.searchExample}
                   className="shadow-2xl"
                 />
               </div>
@@ -123,7 +125,7 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
         </div>
 
         {/* Bottom — chiffres clés */}
-        <div className="px-6 md:px-12 pb-8 md:pb-12">
+        <div className="px-6 md:px-12 pb-14 md:pb-16">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-wrap items-center gap-6 md:gap-12 pt-6 border-t border-white/10">
               <div>
@@ -131,7 +133,7 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
                   450<span className="text-[#C5A059]">+</span>
                 </p>
                 <p className="text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-white/50 mt-2">
-                  Visites garanties
+                  {tx.hero.stat1}
                 </p>
               </div>
               <div className="h-10 w-px bg-white/10 hidden md:block" />
@@ -140,7 +142,7 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
                   7<span className="text-[#C5A059]">k+</span>
                 </p>
                 <p className="text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-white/50 mt-2">
-                  Offres exclusives
+                  {tx.hero.stat2}
                 </p>
               </div>
               <div className="h-10 w-px bg-white/10 hidden md:block" />
@@ -149,7 +151,7 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
                   18<span className="text-[#C5A059]">+</span>
                 </p>
                 <p className="text-[10px] md:text-[11px] uppercase tracking-[0.3em] text-white/50 mt-2">
-                  Support local 7j/7
+                  {tx.hero.stat3}
                 </p>
               </div>
               <div className="ml-auto hidden md:flex items-center gap-2 text-[11px] text-white/40 font-medium">
@@ -157,7 +159,7 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
                   <span className="animate-ping absolute inline-flex w-full h-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative rounded-full w-2 h-2 bg-emerald-400" />
                 </span>
-                Mis à jour en temps réel
+                {tx.hero.liveUpdate}
               </div>
             </div>
           </div>

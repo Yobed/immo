@@ -8,8 +8,10 @@ import { ServicesPillars } from '@/components/landing/ServicesPillars'
 import { PublishChoiceTeaser } from '@/components/landing/PublishChoiceTeaser'
 import { MapZones } from '@/components/landing/MapZones'
 import { NearMeSection } from '@/components/landing/NearMeSection'
+import { TestimonialsSection } from '@/components/landing/TestimonialsSection'
 import { Footer } from '@/components/landing/Footer'
 import { RecentlyViewed } from '@/components/landing/RecentlyViewed'
+import { formatFCFA } from '@/lib/format'
 
 export const revalidate = 300 // ISR: revalide toutes les 5 min
 
@@ -82,10 +84,10 @@ export default async function HomePage() {
       id: b.id,
       title: b.titre,
       location: b.commune + (b.quartier ? `, ${b.quartier}` : ''),
-      price: b.prix_vente_fcfa 
-        ? `${b.prix_vente_fcfa.toLocaleString()} FCFA` 
-        : b.prix_mois_fcfa 
-          ? `${b.prix_mois_fcfa.toLocaleString()} FCFA / mois`
+      price: b.prix_vente_fcfa
+        ? formatFCFA(b.prix_vente_fcfa)
+        : b.prix_mois_fcfa
+          ? `${formatFCFA(b.prix_mois_fcfa)} / mois`
           : 'Prix sur demande',
       tags: [b.type_bien.replace('_', ' '), b.commune],
       image: b.photo_url!
@@ -111,7 +113,10 @@ export default async function HomePage() {
       {/* 5. Veille en direct (réseau WhatsApp) */}
       <FlashOffersSection />
 
-      {/* 6. Footer */}
+      {/* 6. Témoignages clients (proof social) */}
+      <TestimonialsSection />
+
+      {/* 7. Footer */}
       <Footer />
     </main>
   )

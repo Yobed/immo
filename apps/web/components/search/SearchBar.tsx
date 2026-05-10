@@ -17,11 +17,11 @@ const TYPEWRITER_PLACEHOLDERS = [
   'Moins de 300k/mois à Yopougon...',
 ]
 
-// Délais machine à écrire (ms)
-const TYPING_SPEED  = 55   // par caractère
-const ERASING_SPEED = 28   // par caractère (effacement plus rapide)
-const PAUSE_AFTER_TYPED  = 1800
-const PAUSE_AFTER_ERASED = 350
+// Délais machine à écrire (ms) — réglés pour lisibilité confortable
+const TYPING_SPEED  = 75
+const ERASING_SPEED = 35
+const PAUSE_AFTER_TYPED  = 3000
+const PAUSE_AFTER_ERASED = 500
 
 // Version: 1.0.3 (Force mobile visibility)
 // Cache-bust: 2026-04-20_14-00
@@ -156,7 +156,7 @@ export function SearchBar({
     <div ref={containerRef} className={cn("relative w-full", className)}>
       <form 
         onSubmit={handleSubmit} 
-        className="group flex items-center gap-2 p-2 bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] shadow-2xl focus-within:border-[var(--accent-luxury)] transition-all duration-300"
+        className="group flex items-center gap-1.5 p-1.5 bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] shadow-2xl focus-within:border-[var(--accent-luxury)] transition-all duration-300"
       >
         <div className="flex-1 flex items-center gap-1.5 pl-2 relative overflow-hidden">
           <Search className={cn(
@@ -174,7 +174,7 @@ export function SearchBar({
               onKeyDown={handleKeyDown}
               autoComplete="off"
               placeholder={disableTypewriter ? (placeholder || 'Rechercher...') : undefined}
-              className="w-full bg-transparent py-3 text-base font-sans text-[var(--text)] focus:outline-none min-w-0 placeholder:text-[var(--text-muted)]"
+              className="w-full bg-transparent py-2 text-sm font-sans text-[var(--text)] focus:outline-none min-w-0 placeholder:text-[var(--text-muted)]"
             />
             {/* Placeholder machine à écrire — visible si vide, non focalisé, et activé */}
             {!query && !focused && !disableTypewriter && (
@@ -194,7 +194,7 @@ export function SearchBar({
             disabled={!isSupported}
             onClick={() => isListening ? stopListening() : startListening()}
             className={cn(
-              "flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-300",
+              "flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-300",
               isListening
                 ? "bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.6)] animate-[mic-blink_1s_infinite]"
                 : "text-[var(--accent-luxury)] bg-[var(--accent-luxury)]/10 hover:bg-[var(--accent-luxury)]/20 border border-transparent hover:border-[var(--accent-luxury)]/20",
@@ -208,17 +208,17 @@ export function SearchBar({
             }
           </button>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={isPending}
-            className="flex items-center justify-center w-14 h-14 sm:w-auto sm:px-8 sm:py-3 bg-[var(--accent-luxury)] text-[var(--on-accent)] rounded-2xl font-display font-bold text-[10px] md:text-xs uppercase tracking-[0.2em] shadow-[0_12px_24px_rgba(249,115,22,0.3)] active:scale-95 transition-all duration-300"
+            className="flex items-center justify-center w-10 h-10 sm:w-auto sm:px-6 sm:py-2.5 bg-[var(--accent-luxury)] text-[var(--on-accent)] rounded-xl sm:rounded-2xl font-display font-bold text-[10px] md:text-xs uppercase tracking-[0.2em] shadow-[0_8px_16px_rgba(249,115,22,0.3)] active:scale-95 transition-all duration-300"
           >
             {isPending ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <>
                 <span className="hidden sm:inline">Explorer</span>
-                <ArrowRight className="w-7 h-7 sm:w-4 sm:h-4" strokeWidth={3} />
+                <ArrowRight className="w-5 h-5 sm:w-4 sm:h-4" strokeWidth={2.5} />
               </>
             )}
           </button>

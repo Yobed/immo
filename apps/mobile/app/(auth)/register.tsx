@@ -57,7 +57,7 @@ export default function RegisterScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={styles.inner}>
-        <Text style={styles.title}>Immo CI</Text>
+        <Text style={styles.title}>BOGBE'S GROUPE</Text>
         <Text style={styles.subtitle}>Créez votre compte</Text>
 
         <TextInput

@@ -61,18 +61,18 @@ export async function sendNotification(type: NotificationType, payload: Notifica
 function formatMessage(type: NotificationType, p: NotificationPayload): string {
   switch (type) {
     case 'RESERVATION':
-      return `💎 *NOUVELLE RÉSERVATION - ImmoDash PRO*\n\nBonjour,\nUne nouvelle réservation a été effectuée pour *${p.propertyName}*.\n👤 Client : ${p.customerName}\n📅 Date : ${p.date || 'Dès que possible'}\n\n🔗 Gérer ici : ${p.link || 'https://immodash.ci/dashboard'}`;
+      return `💎 *NOUVELLE RÉSERVATION - BOGBE'S GROUPE PRO*\n\nBonjour,\nUne nouvelle réservation a été effectuée pour *${p.propertyName}*.\n👤 Client : ${p.customerName}\n📅 Date : ${p.date || 'Dès que possible'}\n\n🔗 Gérer ici : ${p.link || 'https://immodash.ci/dashboard'}`;
     
     case 'PAIEMENT':
-      return `✅ *PAIEMENT CONFIRMÉ - ImmoDash PRO*\n\nFélicitations !\nUn paiement de *${p.amount} FCFA* a été reçu pour *${p.propertyName}*.\nL'annonce a été automatiquement mise à jour en statut "Indisponible".`;
+      return `✅ *PAIEMENT CONFIRMÉ - BOGBE'S GROUPE PRO*\n\nFélicitations !\nUn paiement de *${p.amount} FCFA* a été reçu pour *${p.propertyName}*.\nL'annonce a été automatiquement mise à jour en statut "Indisponible".`;
 
     case 'VISITE':
-      return `👀 *DEMANDE DE VISITE - ImmoDash PRO*\n\n${p.customerName} souhaite visiter *${p.propertyName}*.\nVeuillez confirmer votre disponibilité sur la plateforme.`;
+      return `👀 *DEMANDE DE VISITE - BOGBE'S GROUPE PRO*\n\n${p.customerName} souhaite visiter *${p.propertyName}*.\nVeuillez confirmer votre disponibilité sur la plateforme.`;
 
     case 'ALERTE_PRIX':
       return `📉 *OPTIMISATION DE PRIX*\n\nVotre bien *${p.propertyName}* est inoccupé depuis 15 jours. L'IA suggère une remise de 10% pour attirer des clients VIP.`;
     
     default:
-      return `Nouvelle notification ImmoDash PRO pour ${p.propertyName}`;
+      return `Nouvelle notification BOGBE'S GROUPE PRO pour ${p.propertyName}`;
   }
 }

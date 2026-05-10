@@ -6,6 +6,7 @@ import { SearchBar } from '@/components/search/SearchBar'
 import { UserMenu } from '@/components/auth/UserMenu'
 import { MagneticWrapper } from '@/components/landing/MagneticWrapper'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
 import { MobileTabBar } from '@/components/layout/MobileTabBar'
 import { PageTransition } from '@/components/layout/PageTransition'
 import { OnboardingModal } from '@/components/ui/OnboardingModal'
@@ -112,6 +113,10 @@ export default async function PublicLayout({ children }: { children: React.React
             <div className="w-px h-5 bg-[var(--border)] mx-2" />
 
             <ThemeToggle />
+
+            <div className="w-px h-5 bg-[var(--border)] mx-1" />
+
+            <LanguageSwitcher variant="compact" />
 
             <div className="w-px h-5 bg-[var(--border)] mx-2" />
 

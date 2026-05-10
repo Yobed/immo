@@ -1,5 +1,5 @@
 /**
- * Analytics Configuration — Immo CI
+ * Analytics Configuration — BOGBE'S GROUPE
  * Centralise les IDs et flags de tous les outils de tracking.
  */
 

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -13,17 +13,18 @@ interface SapphireHubProps {
 
 export function SapphireHub({ bien, videoMedias }: SapphireHubProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const WHATSAPP_NUMBER = '2250574243752'
+  const WHATSAPP_NUMBER = '2250544872051'
 
   const handleWhatsApp = () => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://bogbes-groupe.vercel.app'
     const text = encodeURIComponent(
-      `Bonjour Sapphire Intelligence,\n\nJe souhaiterais obtenir des informations exclusives sur le bien suivant :\n\n💎 *${bien.titre}*\n📍 ${bien.commune}\n💰 ${bien.prix_vente_fcfa || bien.prix_mois_fcfa}\n\nCan you please provide more details and high-resolution visuals?\n\nMerci.`
+      `Bonjour Sapphire Intelligence,\n\nJe souhaiterais obtenir des informations exclusives sur le bien suivant :\n\n💎 *${bien.titre}*\n📍 ${bien.commune}\n💰 ${bien.prix_vente_fcfa || bien.prix_mois_fcfa}\n\n🔗 ${origin}/biens/${bien.id}\n\nMerci.`
     )
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${text}`, '_blank')
   }
 
   return (
-    <div className="fixed bottom-12 right-12 z-[200] flex flex-col items-end gap-6">
+    <div className="hidden lg:flex fixed bottom-8 right-8 z-[120] flex-col items-end gap-6">
       <AnimatePresence>
         {isOpen && (
           <motion.div

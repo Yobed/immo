@@ -31,6 +31,9 @@ import { DiscoveryBar } from '@/components/bien/DiscoveryBar'
 import { BroadcastButton } from '@/components/bien/BroadcastButton'
 import { StickyMobileCTA } from '@/components/bien/StickyMobileCTA'
 import { BienMediaGallery } from '@/components/bien/BienMediaGallery'
+import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { ViewCount } from '@/components/bien/ViewCount'
+import { getDictionary } from '@/lib/i18n/server'
 import { MediaNavBar } from '@/components/bien/MediaNavBar'
 import { ExpandableText } from '@/components/bien/ExpandableText'
 import { ScrollToTop } from '@/components/bien/ScrollToTop'
@@ -76,28 +79,38 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 
 export default async function FicheBienPage({ params }: { params: Promise<{ id: string }> }) {
+  const t = await getDictionary()
   const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: bien } = await (supabase as any)
+  const { data: bien, error: bienError } = await (supabase as any)
     .from('biens')
     .select(`
       *,
-      biens_medias(id, url, type, titre, ordre, est_couverture, hotspots, embed_url, duree_sec),
-      profiles!biens_proprietaire_id_fkey(full_name, avatar_url)
+      biens_medias(id, url, type, titre, ordre, est_couverture, hotspots, embed_url, duree_sec)
     `)
     .eq('id', id)
-    .single()
+    .maybeSingle()
 
+  if (bienError) console.error('[FicheBien] query error:', bienError)
   if (!bien) notFound()
 
   const isOwner = !!(user?.id && user.id === bien.proprietaire_id)
   if (bien.statut !== 'publie' && !isOwner) notFound()
 
-  const { data: favoriRow } = user?.id
-    ? await supabase.from('favoris').select('id').eq('user_id', user.id).eq('bien_id', id).maybeSingle()
-    : { data: null }
+  // Fetch owner profile separately to avoid RLS conflicts on the join
+  const { data: proprio } = await (supabase as any)
+    .from('profiles')
+    .select('full_name, avatar_url')
+    .eq('id', bien.proprietaire_id)
+    .maybeSingle()
+
+  const [{ data: favoriRow }] = await Promise.all([
+    user?.id
+      ? supabase.from('favoris').select('id').eq('user_id', user.id).eq('bien_id', id).maybeSingle()
+      : Promise.resolve({ data: null }),
+  ])
   const initialIsFavori = !!favoriRow
 
   const medias = ((bien.biens_medias as any[]) ?? []).sort((a: any, b: any) => a.ordre - b.ordre)
@@ -113,7 +126,6 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
   }
 
   const vue360Medias = medias.filter((m: any) => m.type === '360')
-  const proprio = bien['profiles!biens_proprietaire_id_fkey'] as { full_name: string; avatar_url: string | null } | null
   const isNuitee = bien.type_bien?.toLowerCase().includes('meublee') || 
                    bien.type_bien?.toLowerCase().includes('meublé') || 
                    bien.type_bien?.toLowerCase().includes('nuit') || 
@@ -131,13 +143,58 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
 
   const prix = prixValue ? { value: formatFCFA(prixValue), suffix: prixSuffix } : null
 
-  const { data: similarBiensRaw } = await supabase
+  // Recommandations : commune + type + plage prix ±30%, fallback progressif
+  const refPrice = bien.prix_vente_fcfa ?? bien.prix_mois_fcfa ?? bien.prix_nuit_fcfa ?? null
+  const priceField: 'prix_vente_fcfa' | 'prix_mois_fcfa' | 'prix_nuit_fcfa' | null =
+    bien.prix_vente_fcfa ? 'prix_vente_fcfa'
+      : bien.prix_mois_fcfa ? 'prix_mois_fcfa'
+      : bien.prix_nuit_fcfa ? 'prix_nuit_fcfa'
+      : null
+
+  const baseQuery = () => (supabase as any)
     .from('biens')
     .select('*, biens_medias(url, est_couverture)')
-    .eq('commune', bien.commune)
     .neq('id', id)
     .eq('statut', 'publie')
-    .limit(3)
+    .order('score_ia', { ascending: false, nullsFirst: false })
+    .order('is_verifie', { ascending: false })
+
+  // Strict: même commune + même type + plage prix
+  let strict = baseQuery()
+    .eq('commune', bien.commune)
+    .eq('type_bien', bien.type_bien)
+    .limit(6)
+  if (refPrice && priceField) {
+    strict = strict
+      .gte(priceField, Math.round(refPrice * 0.7))
+      .lte(priceField, Math.round(refPrice * 1.3))
+  }
+  let { data: similarBiensRaw } = await strict
+
+  // Fallback 1: même commune + même type (sans plage prix)
+  if (!similarBiensRaw || similarBiensRaw.length < 3) {
+    const { data } = await baseQuery()
+      .eq('commune', bien.commune)
+      .eq('type_bien', bien.type_bien)
+      .limit(6)
+    similarBiensRaw = data
+  }
+
+  // Fallback 2: même commune (n'importe quel type)
+  if (!similarBiensRaw || similarBiensRaw.length < 3) {
+    const { data } = await baseQuery()
+      .eq('commune', bien.commune)
+      .limit(6)
+    similarBiensRaw = data
+  }
+
+  // Fallback 3: même type, hors commune
+  if (!similarBiensRaw || similarBiensRaw.length === 0) {
+    const { data } = await baseQuery()
+      .eq('type_bien', bien.type_bien)
+      .limit(6)
+    similarBiensRaw = data
+  }
 
   // Avis sur le propriétaire
   const { data: avisData } = bien.proprietaire_id
@@ -152,7 +209,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
   const avis = (avisData ?? []) as { note: number; commentaire: string | null; created_at: string; profiles: { full_name: string; avatar_url: string | null } | null }[]
   const avgNote = avis.length > 0 ? Math.round(avis.reduce((s, a) => s + a.note, 0) / avis.length * 10) / 10 : null
 
-  const similarBiens = similarBiensRaw?.map(b => ({
+  const similarBiens = (similarBiensRaw ?? []).map((b: any) => ({
     ...b,
     photo_url: (b.biens_medias as any[])?.find((m: any) => m.est_couverture)?.url || (b.biens_medias as any[])?.[0]?.url
   }))
@@ -199,6 +256,19 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
       <div className="bg-white rounded-t-[28px] -mt-3 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] relative z-10">
       <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-8 md:py-14">
 
+        {/* Breadcrumb + proof social */}
+        <div className="mb-6 flex items-center justify-between gap-4 flex-wrap">
+          <Breadcrumb
+            items={[
+              { label: 'Biens', href: '/biens' },
+              { label: bien.commune, href: `/biens?commune=${encodeURIComponent(bien.commune)}` },
+              ...(bien.quartier ? [{ label: bien.quartier }] : []),
+              { label: bien.titre },
+            ]}
+          />
+          <ViewCount bienId={bien.id} />
+        </div>
+
         {/* Media quick nav */}
         <div className="mb-8">
           <MediaNavBar
@@ -229,7 +299,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             {/* DESCRIPTION */}
             {bien.description && (
               <section className="mb-8 pl-4 border-l-2 border-accent-luxury/50">
-                <h2 className="text-[10px] font-bold uppercase tracking-[0.4em] text-slate-400 mb-3">Description</h2>
+                <h2 className="text-[10px] font-bold uppercase tracking-[0.4em] text-slate-400 mb-3">{t.bien.description}</h2>
                 <ExpandableText text={bien.description} />
               </section>
             )}
@@ -237,7 +307,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             {/* ÉQUIPEMENTS */}
             {bien.equipements?.length > 0 && (
               <section className="mb-8">
-                <h2 className="text-[10px] font-bold uppercase tracking-[0.4em] text-slate-400 mb-3">Équipements</h2>
+                <h2 className="text-[10px] font-bold uppercase tracking-[0.4em] text-slate-400 mb-3">{t.bien.equipments}</h2>
                 <div className="flex flex-wrap gap-2">
                   {bien.equipements.map((eq: string) => (
                     <span key={eq} className="px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-xs text-slate-600 font-medium">
@@ -252,8 +322,8 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             {avis.length > 0 && (
               <section className="mb-8">
                 <div className="flex items-center gap-3 mb-4">
-                  <h2 className="text-base font-bold text-slate-800">
-                    Avis sur le propriétaire
+                  <h2 className="text-xl md:text-2xl font-display font-bold text-slate-900 tracking-tight">
+                    {t.bien.ownerReviews}
                   </h2>
                   {avgNote && (
                     <span className="flex items-center gap-1 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold px-2.5 py-1 rounded-full">
@@ -285,7 +355,9 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
               <section id="visite-3d" className="mb-8 scroll-mt-20">
                 <div className="flex items-center gap-3 mb-4">
                   <Eye className="w-4 h-4 text-accent-luxury/60" />
-                  <h2 className="text-base font-bold text-slate-800">Visite 3D / 360°</h2>
+                  <h2 className="text-xl md:text-2xl font-display font-bold text-slate-900 tracking-tight">
+                    {t.bien.virtualTour}
+                  </h2>
                 </div>
                 <div className="space-y-4">
                   {bien.url_visite_3d && (
@@ -316,7 +388,9 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             <section className="mb-8">
               <div className="flex items-center gap-3 mb-3">
                 <MapPin className="w-4 h-4 text-accent-luxury/60" />
-                <h3 className="text-base font-bold text-slate-800">Localisation</h3>
+                <h3 className="text-xl md:text-2xl font-display font-bold text-slate-900 tracking-tight">
+                  {t.bien.location}
+                </h3>
               </div>
               <BienMap
                 latitude={bien.latitude}
@@ -330,12 +404,12 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             {/* Owner management (desktop only — mobile shown above) */}
             {isOwner && (
               <section className="mb-8 space-y-2.5 hidden lg:block">
-                <p className="text-[10px] text-slate-400 uppercase tracking-widest font-medium mb-3">Gestion de l&apos;annonce</p>
+                <p className="text-[10px] text-slate-400 uppercase tracking-widest font-medium mb-3">{t.bien.ownerManagement}</p>
                 <Link href={`/mes-biens/${bien.id}/modifier`} className="flex items-center justify-center w-full py-3.5 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-accent-luxury transition-all">
-                  Modifier l&apos;annonce
+                  {t.bien.editAd}
                 </Link>
                 <Link href={`/mes-biens/${bien.id}/modifier?step=medias`} className="flex items-center justify-center w-full py-3.5 bg-slate-100 border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all">
-                  Gérer les médias
+                  {t.bien.manageMedia}
                 </Link>
                 <BroadcastButton bienId={bien.id} statut={bien.statut} />
                 <div className="pt-3 border-t border-slate-100">
@@ -346,7 +420,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
           </div>
 
           {/* ─── SIDEBAR DESKTOP ─── */}
-          <aside className="hidden lg:block w-[360px] xl:w-[400px] shrink-0">
+          <aside id="reserver" className="hidden lg:block w-[360px] xl:w-[400px] shrink-0 scroll-mt-24">
             <div className="sticky top-24">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -388,6 +462,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                             bienTitre={bien.titre}
                             bienLieu={`${bien.commune}${bien.quartier ? `, ${bien.quartier}` : ''}`}
                             bienPrix={`${formatFCFA(prixValue!)}${prixSuffix}`}
+                            bienId={bien.id}
                           />
                           {/* Trust strip */}
                           <div className="flex items-center gap-2 py-2.5 px-3 rounded-xl bg-slate-50 border border-slate-200">
@@ -461,16 +536,16 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
           <section className="mt-10 border-t border-slate-100 pt-8">
             <div className="flex items-center justify-between gap-4 mb-5">
               <h2 className="text-xl md:text-2xl font-display font-bold text-slate-800">
-                Similaires à <span className="text-accent-luxury">{bien.commune}</span>
+                {t.bien.similarIn} <span className="text-accent-luxury">{bien.commune}</span>
               </h2>
               <Link href={`/recherche?commune=${bien.commune}`} className="flex items-center gap-1.5 text-slate-400 hover:text-slate-700 text-xs font-medium transition-colors shrink-0">
-                Voir tout <ArrowRight className="w-3.5 h-3.5" />
+                {t.bien.viewAll} <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
 
             {/* Mobile: horizontal scroll — Desktop: grid */}
             <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar -mx-4 px-4 md:overflow-x-visible md:grid md:grid-cols-3 md:gap-5 md:mx-0 md:px-0">
-              {similarBiens.map((sb, i) => (
+              {similarBiens.map((sb: any, i: number) => (
                 <div key={sb.id} className="min-w-[200px] md:min-w-0">
                   <PremiumBienCard
                     id={sb.id}
@@ -499,10 +574,9 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
           <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--accent-luxury)]/5 blur-3xl -mr-16 -mt-16 rounded-full" />
           
           <div className="relative">
-            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--accent-luxury)] mb-2">Aussi disponible</p>
+            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--accent-luxury)] mb-2">{t.bien.alsoAvailable}</p>
             <p className="text-sm md:text-base text-[var(--text)] leading-relaxed">
-              Des offres exclusives circulent dans{' '}
-              <span className="font-bold border-b-2 border-[var(--accent-luxury)]/20 text-[var(--text)]">notre réseau privé WhatsApp</span>.
+              {t.bien.promoLine}
             </p>
           </div>
           <Link
@@ -510,7 +584,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             className="relative shrink-0 flex items-center justify-center gap-2.5 px-6 py-3.5 bg-[var(--accent-luxury)] hover:bg-[var(--accent-luxury)]/90 text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all shadow-xl shadow-[var(--accent-glow)]/20 active:scale-95"
           >
             <Flame className="w-4 h-4" />
-            Voir les Offres flash
+            {t.bien.promoCta}
           </Link>
         </div>
       </div>

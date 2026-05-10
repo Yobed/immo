@@ -1,4 +1,4 @@
-// Palette officielle Immo CI — StyleSheet natif uniquement (pas NativeWind)
+// Palette officielle BOGBE'S GROUPE — StyleSheet natif uniquement (pas NativeWind)
 export const colors = {
   primary: '#1A5276',    // bleu profond CI
   secondary: '#E67E22',  // orange CI

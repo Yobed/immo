@@ -3,9 +3,11 @@ import { useRecentlyViewed } from '@/hooks/useRecentlyViewed'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Clock, ArrowRight } from 'lucide-react'
+import { useT } from '@/lib/i18n/client'
 
 export function RecentlyViewed() {
   const { items } = useRecentlyViewed()
+  const t = useT()
 
   if (items.length === 0) return null
 
@@ -17,17 +19,18 @@ export function RecentlyViewed() {
             <Clock className="w-4 h-4 text-[var(--accent-luxury)]" />
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-[0.25em] font-black text-[var(--text-muted)]">Reprenez où vous étiez</p>
+            <p className="text-[10px] uppercase tracking-[0.25em] font-black text-[var(--text-muted)]">{t.recent.kicker}</p>
             <h2 className="font-display font-bold text-lg text-[var(--text)] tracking-tight leading-none">
-              Vos dernières visites
+              {t.recent.title} {t.recent.titleAccent}
             </h2>
           </div>
         </div>
         <Link href="/biens" className="flex items-center gap-1.5 text-[var(--accent-luxury)] text-xs font-bold uppercase tracking-widest hover:underline">
-          Tout voir <ArrowRight className="w-3.5 h-3.5" />
+          {t.recent.viewAll} <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>
 
+      <div className="overflow-hidden">
       <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4">
         {items.map((bien) => (
           <Link
@@ -58,6 +61,7 @@ export function RecentlyViewed() {
             <p className="text-[var(--text-muted)] text-[10px] truncate">{bien.commune}</p>
           </Link>
         ))}
+      </div>
       </div>
     </section>
   )

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { LogOut, User, LayoutDashboard, Home, Search, Heart, MessageSquare, Menu, X, ArrowRight } from 'lucide-react'
@@ -62,9 +63,10 @@ export function MobileMenu({ links, ctaLinks, user }: MobileMenuProps) {
       >
         {/* Header Section */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)] bg-[var(--glass-surface)] backdrop-blur-2xl">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <span className="font-display text-xl font-black text-[var(--text)] italic uppercase tracking-tighter">Menu</span>
             <ThemeToggle />
+            <LanguageSwitcher variant="compact" />
           </div>
           <button
             onClick={close}

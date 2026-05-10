@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Bell } from 'lucide-react'
 
@@ -22,7 +22,7 @@ export function SearchAlert({ commune, typeBien, prixMax }: SearchAlertProps) {
   const message = encodeURIComponent(
     `Bonjour, je souhaite recevoir des alertes WhatsApp pour : ${criteria}. Merci de m'ajouter à la liste.`
   )
-  const href = `https://wa.me/2250574243752?text=${message}`
+  const href = `https://wa.me/2250544872051?text=${message}`
 
   return (
     <a

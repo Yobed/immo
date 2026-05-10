@@ -57,13 +57,21 @@ export async function GET(request: NextRequest) {
         }
 
         // Utilisateur existant → rediriger selon le rôle
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', user.id)
-          .single()
+          .maybeSingle()
 
-        if (profile?.role === 'proprietaire') {
+        if (profileError) {
+          console.error('[callback] profile read failed', { userId: user.id, error: profileError.message })
+        }
+
+        const role = (profile?.role ?? '').toString().trim().toLowerCase()
+        if (role === 'admin') {
+          return NextResponse.redirect(`${origin}/admin/suivi`)
+        }
+        if (role === 'proprietaire') {
           return NextResponse.redirect(`${origin}/dashboard`)
         }
         return NextResponse.redirect(`${origin}/`)

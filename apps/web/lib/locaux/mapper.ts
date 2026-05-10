@@ -1,5 +1,5 @@
 /**
- * Mapper: row brute de la table `locaux` (scraping WhatsApp) → format normalisé Immo CI.
+ * Mapper: row brute de la table `locaux` (scraping WhatsApp) → format normalisé BOGBE'S GROUPE.
  */
 
 export interface LocauxRow {
