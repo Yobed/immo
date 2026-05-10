@@ -57,7 +57,7 @@ export function MobileMenu({ links, ctaLinks, user }: MobileMenuProps) {
       {/* Overlay — Theme Aware */}
       <div
         className={cn(
-          'fixed inset-0 z-[100] bg-[var(--background)] flex flex-col md:hidden transition-all duration-500 ease-[var(--ease-expo)]',
+          'fixed inset-0 z-[300] bg-[var(--background)] flex flex-col md:hidden transition-all duration-500 ease-[var(--ease-expo)]',
           open ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full'
         )}
       >

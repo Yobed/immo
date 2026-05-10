@@ -35,7 +35,7 @@ export const WhatsAppConcierge = () => {
       initial="visible"
       animate={hidden ? "hidden" : "visible"}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="fixed bottom-[6.5rem] right-4 md:bottom-8 md:right-8 z-[110] group"
+      className="fixed bottom-[6.5rem] right-4 md:bottom-8 md:right-8 z-[90] group"
     >
       {/* Tooltip */}
       <div className="absolute bottom-full right-0 mb-4 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none transform translate-y-2 group-hover:translate-y-0">

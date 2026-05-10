@@ -40,7 +40,7 @@ export function ComparatorHint() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 30, scale: 0.95 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed bottom-28 lg:bottom-8 right-4 z-[150] max-w-[280px]"
+          className="fixed bottom-28 lg:bottom-8 right-4 z-[150] max-w-[280px] hidden lg:block"
         >
           <div className="relative bg-[var(--midnight)] border border-[var(--accent-luxury)]/40 rounded-2xl shadow-2xl p-4 pr-10">
             <div className="flex items-start gap-3">
