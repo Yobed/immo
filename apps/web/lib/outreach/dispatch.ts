@@ -1,4 +1,3 @@
-import 'server-only'
 import { randomBytes } from 'crypto'
 import { wasenderSendMessage } from '@/lib/wasender'
 import {

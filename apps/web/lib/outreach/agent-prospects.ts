@@ -1,4 +1,3 @@
-import 'server-only'
 import { createClient } from '@supabase/supabase-js'
 import type { ExtractedBien } from '@/lib/extractors/whatsapp-bien-extractor'
 

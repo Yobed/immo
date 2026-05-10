@@ -1,4 +1,3 @@
-import 'server-only'
 import { cookies, headers } from 'next/headers'
 import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale, type Locale } from './config'
 import frDict from './dictionaries/fr.json'
