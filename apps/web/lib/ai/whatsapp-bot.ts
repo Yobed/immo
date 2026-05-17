@@ -34,21 +34,34 @@ export async function handleWhatsAppSapphire(jid: string, userMessage: string) {
  * Extrait les URLs de médias de la réponse et les envoie via Wasender
  */
 async function extractAndSendMedia(jid: string, text: string) {
-    // Regex pour capturer les URLs d'images (jpg, png, webp) et vidéos (mp4)
-    const imageRegex = /https?:\/\/[^\s"'<>]+\.(?:jpg|jpeg|png|webp|gif)/gi;
-    const videoRegex = /https?:\/\/[^\s"'<>]+\.(?:mp4|mov|avi)/gi;
-
-    const images = text.match(imageRegex) || [];
-    const videos = text.match(videoRegex) || [];
-
-    // Limiter à 3 images max pour ne pas spammer
-    for (const url of images.slice(0, 3)) {
-        await wasenderSendMessage(jid, '', 'image', url);
+    // 1. Chercher spécifiquement les balises [MEDIA: url] demandées par le nouveau prompt
+    const mediaRegex = /\[MEDIA:\s*(https?:\/\/[^\]]+)\]/gi;
+    let match;
+    const mediaUrls: string[] = [];
+    
+    while ((match = mediaRegex.exec(text)) !== null) {
+        mediaUrls.push(match[1]);
     }
 
-    // Envoyer la vidéo si présente
-    for (const url of videos.slice(0, 1)) {
-        await wasenderSendMessage(jid, '', 'video', url);
+    // Si on a trouvé des balises MEDIA, on les envoie
+    if (mediaUrls.length > 0) {
+        for (const url of mediaUrls.slice(0, 3)) {
+            await wasenderSendMessage(jid, '', 'image', url);
+        }
+    } else {
+        // 2. Fallback: Ancienne méthode de détection d'URLs d'images brutes au cas où
+        const imageRegex = /https?:\/\/[^\s"'<>]+\.(?:jpg|jpeg|png|webp|gif)/gi;
+        const videoRegex = /https?:\/\/[^\s"'<>]+\.(?:mp4|mov|avi)/gi;
+
+        const images = text.match(imageRegex) || [];
+        const videos = text.match(videoRegex) || [];
+
+        for (const url of images.slice(0, 3)) {
+            await wasenderSendMessage(jid, '', 'image', url);
+        }
+        for (const url of videos.slice(0, 1)) {
+            await wasenderSendMessage(jid, '', 'video', url);
+        }
     }
 }
 
@@ -58,12 +71,14 @@ async function extractAndSendMedia(jid: string, text: string) {
 function formatForWhatsApp(text: string): string {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bogbes-groupe.vercel.app';
     return text
-        // Remplacer les liens Markdown [Titre](/chemin) par l'URL dynamique
+        // Remplacer les liens Markdown [Titre](/chemin) par l'URL dynamique (fallback)
         .replace(/\[([^\]]+)\]\(\/([^\)]+)\)/g, (match, title, path) => {
             return `*${title}* : ${baseUrl}/${path}`;
         })
         // Mettre en gras les titres de biens (souvent entre [ID: ...])
         .replace(/\[ID: [^\]]+\]/g, (match) => `*${match}*`)
+        // Supprimer complètement la balise [MEDIA: ...] pour qu'elle ne soit pas visible par le client
+        .replace(/\[MEDIA:\s*https?:\/\/[^\]]+\]/gi, '')
         // Nettoyer les doubles sauts de lignes excessifs
         .replace(/\n{3,}/g, '\n\n')
         .trim();
