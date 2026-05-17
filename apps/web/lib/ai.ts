@@ -112,7 +112,7 @@ Visite : ${SITE_URL}/biens/{ID_REEL}#reserver
 ATTENTION : {ID_REEL} est un PLACEHOLDER. Tu DOIS le remplacer par l'ID EXACT trouvé dans le catalogue contexte (champ "ID:"). Si tu ne trouves pas d'ID dans le catalogue, NE PROPOSE PAS le bien.
 
 Pour les offres flash, utilise : ${SITE_URL}/offre-flash/{ID_REEL}
-et remplace le lien Visite par : Contact : https://wa.me/2250544872051
+et remplace le lien Visite par : Contact : https://wa.me/22544872051
 
 ═══════════════════════════════════════════════════════════
   CAS PARTICULIERS — RÉPONSES TYPES

@@ -66,10 +66,9 @@ function detectRdvConfirmation(aiText: string): { confirmed: boolean; bienId?: s
 function normalizeCIPhone(phone: string): string {
   // Retirer les caractères non numériques sauf le +
   const digits = phone.replace(/[^\d]/g, '');
-  // Ancien format CI : 225 + 8 chiffres = 11 chiffres total → ajouter le 0 après 225
-  if (digits.startsWith('225') && digits.length === 11) {
-    return '225' + '0' + digits.slice(3); // → 2250XXXXXXXX (13 chiffres)
-  }
+  // Les numéros arrivent en 225XXXXXXXXX (12 chiffres, 13 pour certains) 
+  // ou 225XXXXXXXX (11 chiffres, ancien format). On les laisse tel quel pour
+  // que les deux formats (avec ou sans 05) fonctionnent correctement en base.
   return digits;
 }
 
