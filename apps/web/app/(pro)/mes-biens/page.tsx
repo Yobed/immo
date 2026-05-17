@@ -58,7 +58,7 @@ export default async function MesAnnoncesPage() {
   }
 
   return (
-    <main className="bg-surface min-h-screen py-8">
+    <main className="bg-[var(--background)] min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between mb-6">
           <h1 className="font-display text-3xl text-[var(--text)]">Mes annonces</h1>
@@ -68,7 +68,7 @@ export default async function MesAnnoncesPage() {
         </div>
         {bienRows.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-muted font-sans mb-4">Vous n'avez pas encore d'annonces.</p>
+            <p className="text-[var(--text-muted)] font-sans mb-4">Vous n&apos;avez pas encore d&apos;annonces.</p>
             <Link href="/mes-biens/nouveau"><Button>Créer ma première annonce</Button></Link>
           </div>
         ) : (

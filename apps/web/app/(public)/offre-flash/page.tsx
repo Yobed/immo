@@ -11,13 +11,13 @@ import {
   Home, Building2, Palmtree, Warehouse, Briefcase, Shovel,
   Store, Flame, MapPin, MessageCircle, ArrowRight, AlertCircle,
   ChevronLeft, ChevronRight, BedDouble, Maximize, Mic, MicOff,
-  ChevronDown,
+  ChevronDown, Search,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useVoiceSearch, parseVoiceCommand } from '@/hooks/useVoiceSearch'
 import { useT } from '@/lib/i18n/client'
 
-const PAGE_SIZE = 24
+const PAGE_SIZE = 20
 
 const TYPE_FILTERS: { label: string; value: string; icon: LucideIcon }[] = [
   { label: 'Tous',         value: '',            icon: Flame },
@@ -265,43 +265,41 @@ function OffreFlashContent() {
                 <EmptyState />
               ) : (
                 <>
-                  {/* Mobile: défilement horizontal */}
-                  <div className="md:hidden overflow-hidden -mx-3">
-                    <div className="flex gap-2.5 overflow-x-auto pb-4 px-3 no-scrollbar">
-                      {biens.map((bien) => (
-                        <Link
-                          key={bien.id}
-                          href={`/offre-flash/${bien.id}`}
-                          className="shrink-0 w-[148px] flex flex-col rounded-2xl overflow-hidden bg-[var(--surface-card)] border border-white/8 active:scale-95 transition-transform duration-150"
-                        >
-                          <div className="relative aspect-[3/4] overflow-hidden bg-black/20">
-                            {bien.image_url ? (
-                              <Image src={bien.image_url} alt={bien.titre} fill className="object-cover" sizes="148px" unoptimized />
-                            ) : (
-                              <div className="absolute inset-0 flex items-center justify-center opacity-20">
-                                <Flame className="w-8 h-8 text-white" />
-                              </div>
-                            )}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-                            <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-black/55 backdrop-blur-sm text-[7px] font-bold uppercase tracking-wide text-white">
-                              {bien.type_bien.replace(/_/g, ' ')}
-                            </span>
-                            {bien.is_recent && (
-                              <span className="absolute top-2 right-2 w-4 h-4 rounded-full bg-orange-500 flex items-center justify-center">
-                                <Flame className="w-2.5 h-2.5 text-white" />
-                              </span>
-                            )}
-                            <div className="absolute bottom-2 left-2 right-2">
-                              <p className="text-white text-[11px] font-bold leading-tight line-clamp-2">{bien.titre}</p>
+                  {/* Mobile: grille verticale 2 colonnes */}
+                  <div className="md:hidden grid grid-cols-2 gap-2.5">
+                    {biens.map((bien) => (
+                      <Link
+                        key={bien.id}
+                        href={`/offre-flash/${bien.id}`}
+                        className="flex flex-col rounded-2xl overflow-hidden bg-[var(--surface-card)] border border-white/8 active:scale-95 transition-transform duration-150"
+                      >
+                        <div className="relative aspect-[3/4] overflow-hidden bg-black/20">
+                          {bien.image_url ? (
+                            <Image src={bien.image_url} alt={bien.titre} fill className="object-cover" sizes="(max-width: 768px) 50vw, 200px" unoptimized />
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center opacity-20">
+                              <Flame className="w-8 h-8 text-white" />
                             </div>
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+                          <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-black/55 backdrop-blur-sm text-[7px] font-bold uppercase tracking-wide text-white">
+                            {bien.type_bien.replace(/_/g, ' ')}
+                          </span>
+                          {bien.is_recent && (
+                            <span className="absolute top-2 right-2 w-4 h-4 rounded-full bg-orange-500 flex items-center justify-center">
+                              <Flame className="w-2.5 h-2.5 text-white" />
+                            </span>
+                          )}
+                          <div className="absolute bottom-2 left-2 right-2">
+                            <p className="text-white text-[11px] font-bold leading-tight line-clamp-2">{bien.titre}</p>
                           </div>
-                          <div className="px-2.5 py-2 flex items-center justify-between gap-1">
-                            <span className="text-[9px] font-black text-[var(--accent-luxury)] uppercase tracking-wide truncate">{bien.commune}</span>
-                            <span className="text-[10px] font-bold text-[var(--accent-luxury)] shrink-0">{priceDisplay(bien)}</span>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
+                        </div>
+                        <div className="px-2.5 py-2 flex items-center justify-between gap-1">
+                          <span className="text-[9px] font-black text-[var(--accent-luxury)] uppercase tracking-wide truncate">{bien.commune}</span>
+                          <span className="text-[10px] font-bold text-[var(--accent-luxury)] shrink-0">{priceDisplay(bien)}</span>
+                        </div>
+                      </Link>
+                    ))}
                   </div>
 
                   {/* Desktop: grille */}
@@ -400,15 +398,6 @@ function PageHeader({
     router.push(`/offre-flash?${p.toString()}`)
   }, [activeType, communeVal, budgetVal, activeOffre, router])
 
-  const buildTypeLink = (typeValue: string) => {
-    const p = new URLSearchParams()
-    if (typeValue) p.set('type', typeValue)
-    if (communeVal) p.set('commune', communeVal)
-    if (budgetVal) p.set('budget_max', budgetVal)
-    if (activeOffre) p.set('offre', activeOffre)
-    return `/offre-flash?${p.toString()}`
-  }
-
   return (
     <header className="relative bg-[#020617] overflow-hidden" data-theme="dark">
       <div
@@ -445,93 +434,94 @@ function PageHeader({
       </div>
 
       <div className="sticky top-0 z-50 bg-[#020617]/95 backdrop-blur-md border-b border-white/8">
-        <div className="max-w-7xl mx-auto px-3 py-3 space-y-2">
-          {/* Row 1 — Type icons */}
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-0.5">
-            {TYPE_FILTERS.map(f => {
-              const Icon = f.icon
-              const isActive = f.value === activeType
-              return (
-                <a
-                  key={f.value}
-                  href={buildTypeLink(f.value)}
-                  className={`shrink-0 flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl border transition-all ${
-                    isActive
-                      ? 'bg-orange-500/20 border-orange-500/40 text-orange-400'
-                      : 'bg-white/5 border-white/10 text-white/50 hover:text-white/80 hover:bg-white/10'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span className="text-[9px] font-bold uppercase tracking-wide whitespace-nowrap">{f.label}</span>
-                </a>
-              )
-            })}
-          </div>
+        <div className="max-w-7xl mx-auto px-3 py-3">
+          {/* Single pill search bar — citu.ci style */}
+          <div className="flex flex-col md:flex-row items-stretch md:items-center bg-white rounded-2xl md:rounded-full shadow-xl overflow-hidden border border-slate-200">
+            {/* Commune */}
+            <div className="flex items-center gap-2 flex-1 px-4 md:px-6 py-3 md:py-3.5 border-b md:border-b-0 md:border-r border-slate-200">
+              <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
+              <input
+                type="text"
+                list="flash-communes"
+                placeholder="Commune (ex. Cocody)"
+                value={communeVal}
+                onChange={e => setCommuneVal(e.target.value)}
+                onBlur={() => { if (communeVal !== activeCommune) go({ commune: communeVal }) }}
+                onKeyDown={e => e.key === 'Enter' && go()}
+                className="w-full min-w-0 bg-transparent text-slate-900 placeholder-slate-400 text-sm outline-none font-medium"
+              />
+              <datalist id="flash-communes">
+                {COMMUNES.map(c => <option key={c} value={c} />)}
+              </datalist>
+            </div>
 
-          {/* Row 2 — Budget + Commune + Offre toggle + Mic (scrollable horizontally on mobile) */}
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-0.5">
             {/* Budget */}
-            <div className="flex items-center gap-2 shrink-0 w-[140px] bg-white/5 border border-white/10 rounded-xl px-3 py-2">
-              <span className="text-orange-400 text-xs font-bold shrink-0">$</span>
+            <div className="flex items-center gap-2 flex-1 px-4 md:px-6 py-3 md:py-3.5 border-b md:border-b-0 md:border-r border-slate-200">
+              <span className="text-slate-400 text-xs font-bold shrink-0">FCFA</span>
               <input
                 type="number"
                 placeholder={tx.flash.budgetMax}
                 value={budgetVal}
                 onChange={e => setBudgetVal(e.target.value)}
+                onBlur={() => { if (budgetVal !== activeBudget) go({ budget: budgetVal }) }}
                 onKeyDown={e => e.key === 'Enter' && go()}
-                className="w-full min-w-0 bg-transparent text-white placeholder-white/30 text-[11px] outline-none"
+                className="w-full min-w-0 bg-transparent text-slate-900 placeholder-slate-400 text-sm outline-none font-medium"
               />
-              {budgetVal && (
-                <button onClick={() => { setBudgetVal(''); go({ budget: '' }) }} className="text-white/30 hover:text-white/60 text-xs leading-none shrink-0">✕</button>
-              )}
             </div>
 
-            {/* Commune select */}
-            <div className="flex items-center gap-1 shrink-0 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+            {/* Type */}
+            <div className="flex items-center gap-2 flex-1 px-4 md:px-6 py-3 md:py-3.5 md:border-r border-slate-200 relative border-b md:border-b-0">
               <select
-                value={communeVal}
-                onChange={e => { setCommuneVal(e.target.value); go({ commune: e.target.value }) }}
-                className="bg-transparent text-white text-[11px] outline-none appearance-none cursor-pointer w-[90px]"
+                value={activeType}
+                onChange={e => go({ type: e.target.value })}
+                className="w-full bg-transparent text-slate-900 text-sm outline-none appearance-none cursor-pointer font-medium pr-6"
               >
-                <option value="" className="bg-[#0d1425] text-white">{tx.flash.all}</option>
-                {COMMUNES.map(c => (
-                  <option key={c} value={c} className="bg-[#0d1425] text-white">{c}</option>
+                <option value="">Tous les types</option>
+                {TYPE_FILTERS.filter(f => f.value).map(f => (
+                  <option key={f.value} value={f.value}>{f.label}</option>
                 ))}
               </select>
-              <ChevronDown className="w-3 h-3 text-white/30 shrink-0 pointer-events-none" />
+              <ChevronDown className="w-4 h-4 text-slate-400 absolute right-4 md:right-5 pointer-events-none" />
             </div>
 
-            {/* Offre toggle */}
-            <div className="flex gap-1 shrink-0">
-              {OFFRE_FILTERS.map(f => (
+            {/* Offre */}
+            <div className="flex items-center gap-2 flex-1 px-4 md:px-6 py-3 md:py-3.5 md:border-r border-slate-200 relative border-b md:border-b-0">
+              <select
+                value={activeOffre}
+                onChange={e => go({ offre: e.target.value })}
+                className="w-full bg-transparent text-slate-900 text-sm outline-none appearance-none cursor-pointer font-medium pr-6"
+              >
+                {OFFRE_FILTERS.map(f => (
+                  <option key={f.value} value={f.value}>{f.label}</option>
+                ))}
+              </select>
+              <ChevronDown className="w-4 h-4 text-slate-400 absolute right-4 md:right-5 pointer-events-none" />
+            </div>
+
+            {/* Search + Mic */}
+            <div className="flex items-center justify-end gap-2 px-3 py-3 md:py-2 md:pr-2">
+              {isSupported && (
                 <button
-                  key={f.value}
-                  onClick={() => go({ offre: f.value })}
-                  className={`px-2.5 py-1.5 rounded-lg text-[8px] font-bold uppercase tracking-wide transition-all whitespace-nowrap ${
-                    f.value === activeOffre
-                      ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
-                      : 'text-white/35 hover:text-white/60 border border-transparent'
+                  onClick={onMic}
+                  aria-label={isListening ? 'Arrêter' : 'Recherche vocale'}
+                  className={`shrink-0 p-2.5 rounded-full transition-all ${
+                    isListening
+                      ? 'bg-red-500 text-white animate-pulse'
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
                   }`}
                 >
-                  {f.label === 'Vente + Location' ? 'Tous' : f.label === 'À vendre' ? 'Vente' : 'Louer'}
+                  {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
                 </button>
-              ))}
-            </div>
-
-            {/* Mic */}
-            {isSupported && (
+              )}
               <button
-                onClick={onMic}
-                aria-label={isListening ? 'Arrêter' : 'Recherche vocale'}
-                className={`shrink-0 p-2 rounded-xl border transition-all ${
-                  isListening
-                    ? 'bg-red-500 border-red-400 text-white animate-pulse'
-                    : 'bg-orange-400/10 border-orange-400/25 text-orange-400'
-                }`}
+                onClick={() => go()}
+                aria-label="Rechercher"
+                className="shrink-0 flex items-center justify-center gap-2 flex-1 md:flex-none md:w-11 md:h-11 px-5 md:px-0 py-2.5 md:py-0 rounded-full bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm transition-all active:scale-95 shadow-md"
               >
-                {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                <Search className="w-4 h-4" />
+                <span className="md:hidden">Rechercher</span>
               </button>
-            )}
+            </div>
           </div>
         </div>
       </div>

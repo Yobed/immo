@@ -279,5 +279,17 @@ Le client demande des photos/vidéos.
 - N'invente AUCUNE URL.\n`
   }
 
+  // --- LIEN DE RECHERCHE PRÉ-FILTRÉ ---
+  const params = new URLSearchParams()
+  if (p.commune) params.append('commune', p.commune)
+  if (p.type_bien) params.append('type', p.type_bien)
+  if (p.prix_max) params.append('budget_max', p.prix_max)
+
+  if (params.toString()) {
+    const searchUrl = `${SITE_URL}/biens?${params.toString()}`
+    context += `\nLIEN DE RECHERCHE PERSONNALISÉ :
+Propose également ce lien au client pour qu'il puisse voir tous les autres biens disponibles correspondant à sa recherche : ${searchUrl}\n`
+  }
+
   return context
 }

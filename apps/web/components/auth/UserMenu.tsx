@@ -38,7 +38,7 @@ export function UserMenu({ email, role = 'public', isAdmin = false }: UserMenuPr
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-8 h-8 rounded-full bg-[var(--primary)]/10 flex items-center justify-center text-[var(--primary)] font-display font-bold text-sm hover:bg-[var(--primary)]/20 transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30"
+        className="w-9 h-9 rounded-full bg-[var(--accent-luxury)] flex items-center justify-center text-[var(--on-accent)] font-display font-bold text-sm hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-[var(--accent-luxury)]/40 shadow-md"
         aria-expanded={open}
         aria-haspopup="true"
       >
@@ -72,7 +72,7 @@ export function UserMenu({ email, role = 'public', isAdmin = false }: UserMenuPr
           {isAdmin && (
             <div className="py-1 border-b border-[var(--border)]">
               <Link href="/admin/suivi" onClick={() => setOpen(false)}
-                className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans font-semibold text-red-700 hover:bg-red-50 transition-colors">
+                className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans font-semibold text-red-500 hover:bg-red-500/10 transition-colors">
                 <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
                   <path d="M9 11l3 3L22 4"/>
                   <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
@@ -80,7 +80,7 @@ export function UserMenu({ email, role = 'public', isAdmin = false }: UserMenuPr
                 Suivi & Intermédiation
               </Link>
               <Link href="/admin/moderation" onClick={() => setOpen(false)}
-                className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans font-semibold text-red-700 hover:bg-red-50 transition-colors">
+                className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans font-semibold text-red-500 hover:bg-red-500/10 transition-colors">
                 <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                 </svg>
@@ -94,23 +94,23 @@ export function UserMenu({ email, role = 'public', isAdmin = false }: UserMenuPr
             {role === 'pro' && (
               <>
                 <Link href="/dashboard" onClick={() => setOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans text-[var(--text)] hover:bg-[var(--surface)] hover:text-[var(--primary)] transition-colors">
-                  <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" className="text-[var(--primary)]/50">
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans text-[var(--text)] hover:bg-[var(--surface)] hover:text-[var(--accent-luxury)] transition-colors">
+                  <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" className="text-[var(--text-muted)]">
                     <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
                     <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
                   </svg>
                   Tableau de bord
                 </Link>
                 <Link href="/mes-biens" onClick={() => setOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans text-[var(--text)] hover:bg-[var(--surface)] hover:text-[var(--primary)] transition-colors">
-                  <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" className="text-[var(--primary)]/50">
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans text-[var(--text)] hover:bg-[var(--surface)] hover:text-[var(--accent-luxury)] transition-colors">
+                  <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" className="text-[var(--text-muted)]">
                     <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
                   </svg>
                   Mes annonces
                 </Link>
                 <Link href="/profil" onClick={() => setOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans text-[var(--text)] hover:bg-[var(--surface)] hover:text-[var(--primary)] transition-colors">
-                  <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" className="text-[var(--primary)]/50">
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans text-[var(--text)] hover:bg-[var(--surface)] hover:text-[var(--accent-luxury)] transition-colors">
+                  <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" className="text-[var(--text-muted)]">
                     <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
                   </svg>
                   Mon profil
@@ -120,15 +120,15 @@ export function UserMenu({ email, role = 'public', isAdmin = false }: UserMenuPr
             {role === 'client' && (
               <>
                 <Link href="/biens" onClick={() => setOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans text-[var(--text)] hover:bg-[var(--surface)] hover:text-[var(--primary)] transition-colors">
-                  <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" className="text-[var(--primary)]/50">
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans text-[var(--text)] hover:bg-[var(--surface)] hover:text-[var(--accent-luxury)] transition-colors">
+                  <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" className="text-[var(--text-muted)]">
                     <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
                   </svg>
                   Annonces
                 </Link>
                 <Link href="/favoris" onClick={() => setOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans text-[var(--text)] hover:bg-[var(--surface)] hover:text-[var(--primary)] transition-colors">
-                  <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" className="text-[var(--primary)]/50">
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans text-[var(--text)] hover:bg-[var(--surface)] hover:text-[var(--accent-luxury)] transition-colors">
+                  <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" className="text-[var(--text-muted)]">
                     <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
                   </svg>
                   Mes favoris
@@ -137,8 +137,8 @@ export function UserMenu({ email, role = 'public', isAdmin = false }: UserMenuPr
             )}
             {role === 'public' && (
               <Link href="/dashboard" onClick={() => setOpen(false)}
-                className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans text-[var(--text)] hover:bg-[var(--surface)] hover:text-[var(--primary)] transition-colors">
-                <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" className="text-[var(--primary)]/50">
+                className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans text-[var(--text)] hover:bg-[var(--surface)] hover:text-[var(--accent-luxury)] transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" className="text-[var(--text-muted)]">
                   <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
                 </svg>
                 Mon espace
@@ -149,7 +149,7 @@ export function UserMenu({ email, role = 'public', isAdmin = false }: UserMenuPr
           {/* Déconnexion */}
           <div className="border-t border-[var(--border)]">
             <button type="button" onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-sans text-[var(--danger)] hover:bg-[var(--danger-light)] transition-colors">
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-sans text-red-500 hover:bg-red-500/10 transition-colors">
               <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
                 <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
               </svg>

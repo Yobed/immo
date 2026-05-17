@@ -43,8 +43,8 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
   }, [])
 
   return (
-    <section className="relative w-full h-[100svh] min-h-[720px] max-h-[980px] bg-[#0a0e1a] overflow-x-hidden">
-      {/* Single image — no rotation, calm */}
+    <section className="relative w-full md:min-h-[720px] md:h-[100svh] md:max-h-[980px] bg-[#0a0e1a] overflow-x-hidden">
+      {/* Single image — dimmed strongly on mobile for legibility */}
       <div className="absolute inset-0">
         <Image
           src={bgImage}
@@ -52,38 +52,39 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
           fill
           priority
           sizes="100vw"
-          className="object-cover scale-105"
+          className="object-cover scale-105 opacity-30 md:opacity-100"
         />
       </div>
 
-      {/* Refined dark gradient — preserves image visibility */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/75" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/90 via-[#020617]/40 to-transparent" />
+      {/* Strong dark overlay on mobile, refined gradient on desktop */}
+      <div className="absolute inset-0 bg-[#020617]/70 md:hidden" />
+      <div className="absolute inset-0 hidden md:block bg-gradient-to-b from-black/40 via-black/30 to-black/75" />
+      <div className="absolute inset-0 hidden md:block bg-gradient-to-t from-[#020617]/90 via-[#020617]/40 to-transparent" />
 
-      {/* Subtle vignette */}
-      <div className="absolute inset-0 bg-radial-vignette pointer-events-none" style={{
+      {/* Subtle vignette — desktop only */}
+      <div className="absolute inset-0 hidden md:block pointer-events-none" style={{
         background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.4) 100%)',
       }} />
 
       {/* Content */}
-      <div className="relative z-10 h-full flex flex-col">
+      <div className="relative z-10 md:h-full flex flex-col">
         {/* Top brand line */}
-        <div className="px-6 md:px-12 pt-8 md:pt-10">
+        <div className="px-5 md:px-12 pt-5 md:pt-10">
           <div className="max-w-7xl mx-auto flex items-center gap-3">
-            <div className="h-px w-12 bg-[#C5A059]" />
-            <p className="text-[10px] md:text-[11px] font-medium tracking-[0.5em] uppercase text-[#C5A059]">
+            <div className="h-px w-8 md:w-12 bg-[#C5A059]" />
+            <p className="text-[9px] md:text-[11px] font-medium tracking-[0.4em] md:tracking-[0.5em] uppercase text-[#C5A059]">
               {tx.hero.edition}
             </p>
           </div>
         </div>
 
         {/* Centered content */}
-        <div className="flex-1 flex flex-col justify-center px-6 md:px-12">
+        <div className="md:flex-1 flex flex-col md:justify-center px-5 md:px-12 py-8 md:py-0">
           <div className="max-w-7xl mx-auto w-full flex flex-col lg:flex-row gap-10 lg:gap-16 items-start lg:items-center">
-            
+
             {/* Left Column: Text and Search */}
             <div className="flex-1 max-w-3xl">
-              <h1 className="font-display text-[42px] sm:text-6xl md:text-7xl lg:text-[88px] xl:text-[104px] leading-[1.02] text-white tracking-tighter mb-6 md:mb-8">
+              <h1 className="font-display text-[36px] sm:text-6xl md:text-7xl lg:text-[88px] xl:text-[104px] leading-[1.02] text-white tracking-tighter mb-4 md:mb-8">
                 <span className="block uppercase">{tx.hero.lineOne}</span>
                 <span className="block font-editorial text-[#C5A059] lowercase text-[1.1em] -mt-2 -mb-2 h-[1.2em] overflow-hidden">
                   <AnimatePresence mode="wait">
@@ -101,12 +102,12 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
                 </span>
                 <span className="block uppercase">{tx.hero.lineTwo}</span>
               </h1>
-              <p className="font-sans text-base md:text-lg text-white/80 max-w-xl leading-relaxed mb-10">
+              <p className="hidden md:block font-sans text-base md:text-lg text-white/80 max-w-xl leading-relaxed mb-10">
                 {tx.hero.intro}
               </p>
 
               {/* Inline search — unifié avec animation */}
-              <div className="max-w-2xl">
+              <div className="max-w-2xl mt-6 md:mt-0">
                 <SearchBar
                   placeholder={tx.hero.searchExample}
                   className="shadow-2xl"
@@ -124,8 +125,8 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
           </div>
         </div>
 
-        {/* Bottom — chiffres clés */}
-        <div className="px-6 md:px-12 pb-14 md:pb-16">
+        {/* Bottom — chiffres clés (desktop only — mobile is too dense) */}
+        <div className="hidden md:block px-6 md:px-12 pb-14 md:pb-16">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-wrap items-center gap-6 md:gap-12 pt-6 border-t border-white/10">
               <div>

@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/server-auth'
-import { notifyAdminVisitRequest, type VisitContext } from '@/lib/notifications/whatsapp-notifier'
+import { notifyAdminVisitRequest, notifyOwnerVisitApproved, type VisitContext } from '@/lib/notifications/whatsapp-notifier'
 
 // POST — créer une demande de visite (workflow admin-first)
-// Le propriétaire N'EST PAS notifié à ce stade. L'admin valide d'abord.
+// Le propriétaire EST notifié à ce stade pour vérifier sa disponibilité.
 export async function POST(request: Request) {
   const { user, supabase } = await getServerUser(request)
   if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
@@ -77,19 +77,38 @@ export async function POST(request: Request) {
     notes: message ?? null,
   }
 
-  // Notif équipe admin uniquement (proprio attend la validation).
+  // Notif équipe admin et propriétaire
   // ⚠ Vercel serverless : les fonctions sont gelées dès la réponse HTTP.
   // On AWAIT pour garantir l'envoi avant fin de la requête.
-  let notif: { sent: number; total: number } = { sent: 0, total: 0 }
+  let notifAdmin: { sent: number; total: number } = { sent: 0, total: 0 }
   try {
-    notif = await notifyAdminVisitRequest(supabase, ctx)
+    notifAdmin = await notifyAdminVisitRequest(supabase, ctx)
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('[visites] notifyAdmin failed', err)
   }
 
+  // Notif propriétaire
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: owner } = await (supabase as any)
+    .from('profiles')
+    .select('full_name, phone')
+    .eq('id', bien.proprietaire_id)
+    .single()
+
+  if (owner) {
+    ctx.ownerName = owner.full_name
+    ctx.ownerPhone = owner.phone
+    try {
+      await notifyOwnerVisitApproved(supabase, ctx)
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('[visites] notifyOwner failed', err)
+    }
+  }
+
   return NextResponse.json(
-    { id: data.id, admin_validation_status: 'pending', notified: notif },
+    { id: data.id, admin_validation_status: 'pending', notified: notifAdmin },
     { status: 201 }
   )
 }

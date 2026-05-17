@@ -15,7 +15,7 @@ const registerSchema = z.object({
   full_name: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
   email: z.string().email('Adresse e-mail invalide'),
   password: z.string().min(8, 'Le mot de passe doit contenir au moins 8 caractères'),
-  role: z.enum(['locataire', 'proprietaire']),
+  role: z.enum(['locataire', 'proprietaire', 'agence']),
 })
 
 type RegisterFormData = z.infer<typeof registerSchema>
@@ -200,7 +200,7 @@ function RegisterContent() {
             <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] ml-1">
               {t.auth.yourProfile}
             </label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <label className="relative group cursor-pointer">
                 <input type="radio" value="locataire" {...register('role')} className="sr-only peer" />
                 <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-center peer-checked:border-[var(--accent-luxury)] peer-checked:bg-[var(--accent-luxury)]/5 transition-all">
@@ -211,6 +211,12 @@ function RegisterContent() {
                 <input type="radio" value="proprietaire" {...register('role')} className="sr-only peer" />
                 <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-center peer-checked:border-[var(--accent-luxury)] peer-checked:bg-[var(--accent-luxury)]/5 transition-all">
                   <span className="text-[11px] font-black uppercase tracking-widest text-[var(--text-muted)] peer-checked:text-[var(--accent-luxury)]">{t.auth.owner}</span>
+                </div>
+              </label>
+              <label className="relative group cursor-pointer">
+                <input type="radio" value="agence" {...register('role')} className="sr-only peer" />
+                <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-center peer-checked:border-[var(--accent-luxury)] peer-checked:bg-[var(--accent-luxury)]/5 transition-all">
+                  <span className="text-[11px] font-black uppercase tracking-widest text-[var(--text-muted)] peer-checked:text-[var(--accent-luxury)]">Agence</span>
                 </div>
               </label>
             </div>

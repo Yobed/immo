@@ -24,10 +24,10 @@ export function PaymentDonut({ data }: { data: PaymentMethodData[] }) {
   }))
 
   return (
-    <div className="bg-surface-card rounded-card p-4 shadow-sm">
-      <h3 className="text-sm font-medium text-text mb-4">Repartition des paiements</h3>
+    <div className="bg-[var(--surface-card)] border border-[var(--border)] rounded-card p-4 shadow-sm">
+      <h3 className="text-sm font-medium text-[var(--text)] mb-4">Repartition des paiements</h3>
       {chartData.length === 0 ? (
-        <p className="text-muted text-sm py-8 text-center">Aucun paiement ce mois</p>
+        <p className="text-[var(--text-muted)] text-sm py-8 text-center">Aucun paiement ce mois</p>
       ) : (
         <ResponsiveContainer width="100%" height={220}>
           <PieChart>
@@ -46,12 +46,12 @@ export function PaymentDonut({ data }: { data: PaymentMethodData[] }) {
             </Pie>
             <Tooltip
               formatter={(v: unknown) => `${(v as number).toLocaleString('fr-FR')} FCFA`}
-              contentStyle={{ borderRadius: '8px', fontSize: 12 }}
+              contentStyle={{ borderRadius: '8px', backgroundColor: 'var(--surface-card)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 12 }}
             />
             <Legend
               iconType="circle"
               iconSize={8}
-              wrapperStyle={{ fontSize: 11 }}
+              wrapperStyle={{ fontSize: 11, color: 'var(--text)' }}
             />
           </PieChart>
         </ResponsiveContainer>

@@ -56,10 +56,11 @@ async function extractAndSendMedia(jid: string, text: string) {
  * Reformate les réponses AI pour une meilleure expérience sur WhatsApp
  */
 function formatForWhatsApp(text: string): string {
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bogbes-groupe.vercel.app';
     return text
-        // Remplacer les liens Markdown [Titre](/chemin) par "Titre : https://immo-sigma.vercel.app/chemin"
+        // Remplacer les liens Markdown [Titre](/chemin) par l'URL dynamique
         .replace(/\[([^\]]+)\]\(\/([^\)]+)\)/g, (match, title, path) => {
-            return `*${title}* : https://immo-sigma.vercel.app/${path}`;
+            return `*${title}* : ${baseUrl}/${path}`;
         })
         // Mettre en gras les titres de biens (souvent entre [ID: ...])
         .replace(/\[ID: [^\]]+\]/g, (match) => `*${match}*`)

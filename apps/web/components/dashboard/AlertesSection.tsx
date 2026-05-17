@@ -22,18 +22,18 @@ export function AlertesSection({ alertes }: { alertes: Alerte[] }) {
   )
 
   return (
-    <div className="bg-surface-card rounded-card p-4 shadow-sm">
-      <h3 className="text-sm font-medium text-text mb-3">
+    <div className="bg-[var(--surface-card)] border border-[var(--border)] rounded-card p-4 shadow-sm">
+      <h3 className="text-sm font-medium text-[var(--text)] mb-3">
         Alertes
         {alertes.filter(a => a.type === 'urgent').length > 0 && (
-          <span className="ml-2 bg-danger text-white text-xs px-2 py-0.5 rounded-pill">
+          <span className="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-pill">
             {alertes.filter(a => a.type === 'urgent').length}
           </span>
         )}
       </h3>
 
       {sorted.length === 0 ? (
-        <p className="text-muted text-sm py-4 text-center">Aucune alerte</p>
+        <p className="text-[var(--text-muted)] text-sm py-4 text-center">Aucune alerte</p>
       ) : (
         <ul className="space-y-2">
           {sorted.map(alerte => {

@@ -75,7 +75,9 @@ export default async function VisitesPropriétairePage() {
                     </p>
                     <p className="text-sm text-muted mt-1">
                       Demandeur: {visite.profiles?.full_name ?? 'Inconnu'}
-                      {visite.profiles?.phone && ` · ${visite.profiles.phone}`}
+                      <span className="ml-2 text-xs bg-[var(--surface)] px-2 py-0.5 rounded-pill text-[var(--text-muted)]">
+                        Contact masqué
+                      </span>
                     </p>
                     {visite.notes && (
                       <p className="text-sm text-[var(--text)] mt-2 bg-[var(--surface)] rounded-btn px-3 py-2">

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowLeft } from 'lucide-react'
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
@@ -12,11 +13,16 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
       {/* Header compact pour l'auth */}
       <header className="h-16 flex items-center justify-between px-6 bg-[var(--glass-surface)] backdrop-blur-xl border-b border-[var(--border)] z-10 sticky top-0">
-        <Link href="/" className="flex items-center gap-2.5 active:scale-95 transition-transform">
-          <div className="w-10 h-10 rounded-xl bg-[var(--primary)] flex items-center justify-center text-white font-black text-xs shadow-xl shadow-black/10">
-            IC
-          </div>
-          <span className="font-black text-xl text-[var(--text)] tracking-tighter font-display uppercase italic">BOGBE'S GROUPE</span>
+        <Link href="/" className="flex items-center gap-2.5 active:scale-95 transition-transform min-w-0">
+          <Image
+            src="/bogbes-logo.png"
+            alt="BOGBE'S GROUPE"
+            width={40}
+            height={40}
+            className="w-10 h-10 object-contain shrink-0"
+            priority
+          />
+          <span className="font-black text-base sm:text-xl text-[var(--text)] tracking-tighter font-display uppercase italic truncate">BOGBE&apos;S GROUPE</span>
         </Link>
         <Link href="/" className="text-[10px] font-black text-[var(--text-muted)] hover:text-[var(--accent-luxury)] transition-colors flex items-center gap-2 uppercase tracking-[0.2em] bg-[var(--surface)] px-4 py-2 rounded-full border border-[var(--border)]">
           <ArrowLeft className="w-3.5 h-3.5" />

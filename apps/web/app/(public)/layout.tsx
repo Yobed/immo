@@ -92,8 +92,8 @@ export default async function PublicLayout({ children }: { children: React.React
             </Link>
           </MagneticWrapper>
 
-          {/* Search bar — always visible */}
-          <div className="flex-1 max-w-md">
+          {/* Search bar — desktop only (mobile has the hero search) */}
+          <div className="flex-1 max-w-md hidden md:block">
             <SearchBar placeholder="Commune, quartier, type de bien..." />
           </div>
 

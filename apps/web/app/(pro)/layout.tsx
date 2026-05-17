@@ -37,7 +37,7 @@ export default async function ProLayout({ children }: { children: React.ReactNod
     ])
 
     unreadCount = count ?? 0
-    if (profile?.role === 'proprietaire') role = 'pro'
+    if (profile?.role === 'proprietaire' || profile?.role === 'agence') role = 'pro'
     else if (profile?.role === 'locataire') role = 'client'
     else if (profile?.role === 'admin') { role = 'pro'; isAdmin = true }
   }

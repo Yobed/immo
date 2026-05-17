@@ -21,19 +21,19 @@ export function ConversionFunnel({ data }: { data: FunnelData }) {
   ]
 
   return (
-    <div className="bg-surface-card rounded-card p-4 shadow-sm">
-      <h3 className="text-sm font-medium text-text mb-4">Funnel de conversion</h3>
+    <div className="bg-[var(--surface-card)] border border-[var(--border)] rounded-card p-4 shadow-sm">
+      <h3 className="text-sm font-medium text-[var(--text)] mb-4">Funnel de conversion</h3>
       <ResponsiveContainer width="100%" height={220}>
         <FunnelChart>
           <Tooltip
             formatter={(v: unknown) => [(v as number).toLocaleString('fr-FR'), '']}
-            contentStyle={{ borderRadius: '8px', fontSize: 12 }}
+            contentStyle={{ borderRadius: '8px', backgroundColor: 'var(--surface-card)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 12 }}
           />
           <Funnel dataKey="value" data={chartData} isAnimationActive>
             {chartData.map((_entry, i) => (
               <Cell key={i} fill={FUNNEL_COLORS[i % FUNNEL_COLORS.length]} />
             ))}
-            <LabelList position="right" fill="#1C2833" stroke="none" dataKey="name" style={{ fontSize: 11 }} />
+            <LabelList position="right" fill="var(--text)" stroke="none" dataKey="name" style={{ fontSize: 11 }} />
           </Funnel>
         </FunnelChart>
       </ResponsiveContainer>

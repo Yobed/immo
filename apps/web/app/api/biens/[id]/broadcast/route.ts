@@ -59,6 +59,7 @@ export async function POST(
         ? `${(bien.prix_mois_fcfa as number).toLocaleString()} FCFA/mois`
         : 'Prix à confirmer'
 
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.trim() || 'https://bogbes-groupe.vercel.app'
   const message = `Bonjour 👋 Nouveau bien disponible qui pourrait vous intéresser !
 
 🏠 *${bien.titre}*
@@ -67,7 +68,7 @@ export async function POST(
 
 Intéressé(e) ? Répondez ici pour plus d'infos ou pour planifier une visite. 😊
 
-👉 https://immo-sigma.vercel.app/biens/${bienId}`
+👉 ${baseUrl}/biens/${bienId}`
 
   // Send to all recipients with a small delay between messages
   let sent = 0

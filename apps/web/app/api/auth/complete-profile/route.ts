@@ -22,7 +22,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Nom invalide' }, { status: 400 })
   }
 
-  if (!role || !['visiteur', 'locataire', 'proprietaire'].includes(role)) {
+  if (!role || !['visiteur', 'locataire', 'proprietaire', 'agence'].includes(role)) {
     return NextResponse.json({ error: 'Rôle invalide' }, { status: 400 })
   }
 

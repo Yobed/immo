@@ -99,33 +99,43 @@ export function NotificationBell({ userId, initialUnreadCount }: NotificationBel
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-[var(--surface-card)] rounded-card shadow-card border border-[var(--border)] z-50 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
-            <span className="font-sans text-sm font-semibold text-[var(--text)]">Notifications</span>
-            <a
-              href="/notifications"
-              className="font-sans text-xs text-primary hover:underline"
-            >
-              Voir tout
-            </a>
-          </div>
-
-          {notifications.length === 0 ? (
-            <p className="px-4 py-6 text-center font-sans text-sm text-muted">
-              {loaded ? 'Aucune notification' : 'Chargement...'}
-            </p>
-          ) : (
-            <div>
-              {notifications.map((notification) => (
-                <NotificationItem
-                  key={notification.id}
-                  notification={notification}
-                  onRead={handleRead}
-                />
-              ))}
+        <>
+          {/* Mobile backdrop — tap to close */}
+          <div
+            className="fixed inset-0 z-40 bg-black/20 sm:hidden"
+            onClick={() => setOpen(false)}
+            aria-hidden
+          />
+          {/* Dropdown — fixed full-width on mobile, absolute right-aligned on desktop */}
+          <div className="fixed left-2 right-2 top-[4.5rem] sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80 bg-[var(--surface-card)] rounded-card shadow-2xl border border-[var(--border)] z-50 overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
+              <span className="font-sans text-sm font-semibold text-[var(--text)]">Notifications</span>
+              <a
+                href="/notifications"
+                onClick={() => setOpen(false)}
+                className="font-sans text-xs text-[var(--accent-luxury)] hover:underline font-semibold"
+              >
+                Voir tout
+              </a>
             </div>
-          )}
-        </div>
+
+            {notifications.length === 0 ? (
+              <p className="px-4 py-6 text-center font-sans text-sm text-[var(--text-muted)]">
+                {loaded ? 'Aucune notification' : 'Chargement...'}
+              </p>
+            ) : (
+              <div className="max-h-[60vh] overflow-y-auto">
+                {notifications.map((notification) => (
+                  <NotificationItem
+                    key={notification.id}
+                    notification={notification}
+                    onRead={handleRead}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </>
       )}
     </div>
   )

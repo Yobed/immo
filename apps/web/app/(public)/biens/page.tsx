@@ -179,7 +179,12 @@ function BiensContent() {
 
           if (typeFromUrl)    q = q.eq('type_bien', typeFromUrl)
           if (communeFromUrl) q = q.ilike('commune', `%${communeFromUrl}%`)
-          if (budgetFromUrl)  q = q.lte('prix_mois_fcfa', parseInt(budgetFromUrl))
+          if (budgetFromUrl) {
+            const b = parseInt(budgetFromUrl)
+            if (!isNaN(b)) {
+              q = q.or(`prix_mois_fcfa.lte.${b},prix_vente_fcfa.lte.${b},prix_nuit_fcfa.lte.${b}`)
+            }
+          }
 
           const { data, count: c, error: err } = await q
           if (err) throw new Error(err.message)
@@ -204,7 +209,7 @@ function BiensContent() {
   return (
     <div className="min-h-screen bg-[#020617]">
       <PageHeader
-        activeType={activeType}
+        activeType={typeFromUrl}
         activeCommune={communeFromUrl}
         activeBudget={budgetFromUrl}
         count={count}
@@ -277,53 +282,51 @@ function BiensContent() {
                 <EmptyState />
               ) : (
                 <>
-                  {/* Mobile: défilement horizontal épuré */}
-                  <div className="md:hidden overflow-hidden -mx-3">
-                    <div className="flex gap-2.5 overflow-x-auto pb-4 px-3 no-scrollbar">
-                      {biens.map((bien) => {
-                        const photo = coverMap[bien.id] ?? null
-                        const prix = bien.prix_nuit_fcfa
-                          ? `${Math.round(bien.prix_nuit_fcfa / 1000)}k/nuit`
-                          : bien.prix_mois_fcfa
-                          ? `${Math.round(bien.prix_mois_fcfa / 1000)}k/mois`
-                          : bien.prix_vente_fcfa
-                          ? `${(bien.prix_vente_fcfa / 1000000).toFixed(0)}M`
-                          : ''
-                        return (
-                          <Link
-                            key={bien.id}
-                            href={`/biens/${bien.id}`}
-                            className="shrink-0 w-[148px] flex flex-col rounded-2xl overflow-hidden bg-[var(--surface-card)] border border-white/8 active:scale-95 transition-transform duration-150"
-                          >
-                            <div className="relative aspect-[3/4] overflow-hidden bg-black/20">
-                              {photo ? (
-                                <Image src={photo} alt={bien.titre} fill className="object-cover" sizes="148px" />
-                              ) : (
-                                <div className="absolute inset-0 flex items-center justify-center opacity-20">
-                                  <MapPin className="w-8 h-8 text-white" />
-                                </div>
-                              )}
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-                              <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-black/55 backdrop-blur-sm text-[7px] font-bold uppercase tracking-wide text-white">
-                                {bien.type_bien.replace(/_/g, ' ')}
-                              </span>
-                              {bien.is_verifie && (
-                                <span className="absolute top-2 right-2 w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center">
-                                  <svg viewBox="0 0 24 24" fill="white" className="w-2.5 h-2.5"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
-                                </span>
-                              )}
-                              <div className="absolute bottom-2 left-2 right-2">
-                                <p className="text-white text-[11px] font-bold leading-tight line-clamp-2">{bien.titre}</p>
+                  {/* Mobile: 1 colonne verticale */}
+                  <div className="md:hidden flex flex-col gap-3">
+                    {biens.map((bien) => {
+                      const photo = coverMap[bien.id] ?? null
+                      const prix = bien.prix_nuit_fcfa
+                        ? `${Math.round(bien.prix_nuit_fcfa / 1000)}k/nuit`
+                        : bien.prix_mois_fcfa
+                        ? `${Math.round(bien.prix_mois_fcfa / 1000)}k/mois`
+                        : bien.prix_vente_fcfa
+                        ? `${(bien.prix_vente_fcfa / 1000000).toFixed(0)}M`
+                        : ''
+                      return (
+                        <Link
+                          key={bien.id}
+                          href={`/biens/${bien.id}`}
+                          className="flex flex-col rounded-2xl overflow-hidden bg-[var(--surface-card)] border border-white/8 active:scale-[0.98] transition-transform duration-150"
+                        >
+                          <div className="relative aspect-[16/10] overflow-hidden bg-black/20">
+                            {photo ? (
+                              <Image src={photo} alt={bien.titre} fill className="object-cover" sizes="100vw" />
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center opacity-20">
+                                <MapPin className="w-10 h-10 text-white" />
                               </div>
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+                            <span className="absolute top-3 left-3 px-2 py-1 rounded-md bg-black/55 backdrop-blur-sm text-[9px] font-bold uppercase tracking-wide text-white">
+                              {bien.type_bien.replace(/_/g, ' ')}
+                            </span>
+                            {bien.is_verifie && (
+                              <span className="absolute top-3 right-3 w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+                                <svg viewBox="0 0 24 24" fill="white" className="w-3 h-3"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                              </span>
+                            )}
+                            <div className="absolute bottom-3 left-3 right-3">
+                              <p className="text-white text-base font-bold leading-tight line-clamp-2">{bien.titre}</p>
                             </div>
-                            <div className="px-2.5 py-2 flex items-center justify-between gap-1">
-                              <span className="text-[9px] font-black text-[var(--accent-luxury)] uppercase tracking-wide truncate">{bien.commune}</span>
-                              {prix && <span className="text-[10px] font-bold text-[var(--accent-luxury)] shrink-0">{prix}</span>}
-                            </div>
-                          </Link>
-                        )
-                      })}
-                    </div>
+                          </div>
+                          <div className="px-4 py-3 flex items-center justify-between gap-2">
+                            <span className="text-xs font-black text-[var(--accent-luxury)] uppercase tracking-wide truncate">{bien.commune}</span>
+                            {prix && <span className="text-sm font-bold text-[var(--accent-luxury)] shrink-0">{prix}</span>}
+                          </div>
+                        </Link>
+                      )
+                    })}
                   </div>
 
                   {/* Desktop: grille */}
@@ -454,14 +457,6 @@ function PageHeader({
     router.push(`/biens?${p.toString()}`)
   }, [activeType, communeVal, budgetVal, router])
 
-  const buildTypeLink = (typeValue: string) => {
-    const p = new URLSearchParams()
-    if (typeValue && typeValue !== 'near_me') p.set('type_bien', typeValue)
-    if (communeVal) p.set('commune', communeVal)
-    if (budgetVal) p.set('budget_max', budgetVal)
-    return `/biens?${p.toString()}`
-  }
-
   return (
     <header className="relative bg-[#020617] overflow-hidden" data-theme="dark">
       <div
@@ -494,98 +489,81 @@ function PageHeader({
       </div>
 
       <div className="sticky top-0 z-50 bg-[#020617]/95 backdrop-blur-md border-b border-white/8">
-        <div className="max-w-7xl mx-auto px-3 py-2 space-y-1.5">
+        <div className="max-w-7xl mx-auto px-3 py-3">
+          {/* Single pill search bar — citu.ci style */}
+          <div className="flex flex-col md:flex-row items-stretch md:items-center bg-white rounded-2xl md:rounded-full shadow-xl overflow-hidden border border-slate-200">
+            {/* Commune */}
+            <div className="flex items-center gap-2 flex-1 px-4 md:px-6 py-3 md:py-3.5 border-b md:border-b-0 md:border-r border-slate-200">
+              <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
+              <input
+                type="text"
+                list="biens-communes"
+                placeholder="Commune (ex. Cocody)"
+                value={communeVal}
+                onChange={e => setCommuneVal(e.target.value)}
+                onBlur={() => { if (communeVal !== activeCommune) go({ commune: communeVal }) }}
+                onKeyDown={e => e.key === 'Enter' && go()}
+                className="w-full min-w-0 bg-transparent text-slate-900 placeholder-slate-400 text-sm outline-none font-medium"
+              />
+              <datalist id="biens-communes">
+                {COMMUNES.map(c => <option key={c} value={c} />)}
+              </datalist>
+            </div>
 
-          {/* Row 0 — Quick filter presets (1-clic, applique plusieurs critères) */}
-          <div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
-            {[
-              { label: `🔥 ${tx.filters.rare}`, href: '/biens?type_bien=villa' },
-              { label: tx.filters.underBudget, href: '/biens?prix_max=300000' },
-              { label: 'Cocody', href: '/biens?commune=Cocody' },
-              { label: 'Plateau', href: '/biens?commune=Plateau' },
-              { label: 'Marcory', href: '/biens?commune=Marcory' },
-              { label: tx.filters.furnished, href: '/biens?type_bien=residence_meublee' },
-              { label: tx.filters.studios, href: '/biens?type_bien=studio' },
-            ].map((p) => (
-              <a
-                key={p.label}
-                href={p.href}
-                className="shrink-0 px-3 py-1 rounded-full bg-white/5 hover:bg-[var(--accent-luxury)]/20 hover:text-[var(--accent-luxury)] text-white/60 text-[11px] font-bold transition-all border border-white/10 hover:border-[var(--accent-luxury)]/40 whitespace-nowrap"
-              >
-                {p.label}
-              </a>
-            ))}
-          </div>
-
-          {/* Row 1 — Types avec icônes */}
-          <nav className="flex gap-1.5 overflow-x-auto scrollbar-hide" aria-label="Filtres de type de bien">
-            {TYPE_FILTERS.map((f) => {
-              const isActive = f.value === activeType
-              const shortLabel = f.label === 'Résidences meublées' ? 'Meublés'
-                : f.label === 'Villas de Luxe' ? 'Villas'
-                : f.label === 'Appartements' ? 'Appt.'
-                : f.label === 'Proche de moi' ? 'Proche'
-                : f.label
-              return (
-                <a
-                  key={f.value}
-                  href={buildTypeLink(f.value)}
-                  aria-current={isActive ? 'page' : undefined}
-                  className={`flex flex-col items-center gap-0.5 shrink-0 px-3 py-2 rounded-xl min-w-[48px] transition-all duration-200 ${
-                    isActive ? 'bg-[var(--accent-luxury)] text-black' : 'bg-white/6 text-white/55 hover:bg-white/12 hover:text-white'
-                  }`}
-                >
-                  <f.icon className={`w-4 h-4 ${isActive ? 'text-black' : 'text-white/50'}`} aria-hidden="true" />
-                  <span className="text-[8px] font-bold uppercase tracking-wide whitespace-nowrap">{shortLabel}</span>
-                </a>
-              )
-            })}
-          </nav>
-
-          {/* Row 2 — Budget + Commune + Mic (scrollable horizontally on mobile) */}
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-0.5">
-            <div className="flex items-center gap-2 shrink-0 w-[150px] bg-white/5 border border-white/10 rounded-xl px-3 py-2">
-              <span className="text-[var(--accent-luxury)] text-xs font-bold shrink-0">$</span>
+            {/* Budget */}
+            <div className="flex items-center gap-2 flex-1 px-4 md:px-6 py-3 md:py-3.5 border-b md:border-b-0 md:border-r border-slate-200">
+              <span className="text-slate-400 text-xs font-bold shrink-0">FCFA</span>
               <input
                 type="number"
-                placeholder="Budget max…"
+                placeholder="Budget max"
                 value={budgetVal}
                 onChange={e => setBudgetVal(e.target.value)}
+                onBlur={() => { if (budgetVal !== activeBudget) go({ budget: budgetVal }) }}
                 onKeyDown={e => e.key === 'Enter' && go()}
-                className="w-full min-w-0 bg-transparent text-white text-[11px] outline-none placeholder-white/25"
+                className="w-full min-w-0 bg-transparent text-slate-900 placeholder-slate-400 text-sm outline-none font-medium"
               />
-              {budgetVal && (
-                <button onClick={() => { setBudgetVal(''); go({ budget: '' }) }} className="text-white/30 hover:text-white/60 text-xs shrink-0">✕</button>
-              )}
             </div>
-            <div className="flex items-center gap-1 shrink-0 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+
+            {/* Type */}
+            <div className="flex items-center gap-2 flex-1 px-4 md:px-6 py-3 md:py-3.5 md:border-r border-slate-200 relative border-b md:border-b-0">
               <select
-                value={communeVal}
-                onChange={e => { setCommuneVal(e.target.value); go({ commune: e.target.value }) }}
-                className="bg-transparent text-white text-[11px] outline-none appearance-none cursor-pointer w-[90px]"
+                value={activeType}
+                onChange={e => go({ type: e.target.value })}
+                className="w-full bg-transparent text-slate-900 text-sm outline-none appearance-none cursor-pointer font-medium pr-6"
               >
-                <option value="" className="bg-[#0d1425] text-white">Toutes</option>
-                {COMMUNES.map(c => (
-                  <option key={c} value={c} className="bg-[#0d1425] text-white">{c}</option>
+                <option value="">Tous les types</option>
+                {TYPE_FILTERS.filter(f => f.value && f.value !== 'near_me').map(f => (
+                  <option key={f.value} value={f.value}>{f.label}</option>
                 ))}
               </select>
-              <ChevronDown className="w-3 h-3 text-white/30 shrink-0 pointer-events-none" />
+              <ChevronDown className="w-4 h-4 text-slate-400 absolute right-4 md:right-5 pointer-events-none" />
             </div>
-            {isSupported && (
-              <button
-                onClick={onMic}
-                aria-label={isListening ? 'Arrêter' : 'Recherche vocale'}
-                className={`shrink-0 p-2 rounded-xl border transition-all ${
-                  isListening
-                    ? 'bg-red-500 border-red-400 text-white animate-pulse'
-                    : 'bg-[var(--accent-luxury)]/10 border-[var(--accent-luxury)]/25 text-[var(--accent-luxury)]'
-                }`}
-              >
-                {isListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
-              </button>
-            )}
-          </div>
 
+            {/* Search + Mic */}
+            <div className="flex items-center justify-end gap-2 px-3 py-3 md:py-2 md:pr-2">
+              {isSupported && (
+                <button
+                  onClick={onMic}
+                  aria-label={isListening ? 'Arrêter' : 'Recherche vocale'}
+                  className={`shrink-0 p-2.5 rounded-full transition-all ${
+                    isListening
+                      ? 'bg-red-500 text-white animate-pulse'
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                  }`}
+                >
+                  {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                </button>
+              )}
+              <button
+                onClick={() => go()}
+                aria-label="Rechercher"
+                className="shrink-0 flex items-center justify-center gap-2 flex-1 md:flex-none md:w-11 md:h-11 px-5 md:px-0 py-2.5 md:py-0 rounded-full bg-[var(--accent-luxury)] hover:opacity-90 text-black font-bold text-sm transition-all active:scale-95 shadow-md"
+              >
+                <Search className="w-4 h-4" />
+                <span className="md:hidden">Rechercher</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </header>

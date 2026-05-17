@@ -16,15 +16,15 @@ export function KPICard({ titre, valeur, sous_titre, variation, alerte }: KPICar
     : 'unchanged'
 
   return (
-    <Card className="rounded-card shadow-sm">
-      <Text className="text-muted text-sm">{titre}</Text>
-      <Metric className={`font-mono mt-1 ${alerte ? 'text-danger' : 'text-primary'}`}>
+    <Card className="rounded-card shadow-sm !bg-[var(--surface)] !border-[var(--border)]">
+      <Text className="!text-[var(--text-muted)] text-sm">{titre}</Text>
+      <Metric className={`font-mono mt-1 ${alerte ? '!text-red-500' : '!text-[var(--text)]'}`}>
         {valeur}
-        {alerte && <span className="ml-2 text-xs bg-danger text-white px-2 py-0.5 rounded-pill font-sans">!</span>}
+        {alerte && <span className="ml-2 text-xs bg-red-500 text-white px-2 py-0.5 rounded-pill font-sans">!</span>}
       </Metric>
       {(sous_titre || variation !== undefined) && (
         <div className="flex items-center gap-2 mt-2">
-          {sous_titre && <Text className="text-muted text-xs">{sous_titre}</Text>}
+          {sous_titre && <Text className="!text-[var(--text-muted)] text-xs">{sous_titre}</Text>}
           {deltaType && variation !== undefined && (
             <BadgeDelta deltaType={deltaType} size="xs">
               {Math.abs(variation).toFixed(1)}%
