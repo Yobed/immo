@@ -24,9 +24,8 @@ export default async function VisitesPropriétairePage() {
   const { data: visites } = await supabase
     .from('visites')
     .select(`
-      id, date_souhaitee, heure_debut, heure_fin, statut, notes, created_at,
-      biens(titre),
-      profiles!visites_locataire_id_fkey(full_name, phone)
+      id, date_souhaitee, heure_debut, heure_fin, statut, notes, created_at, source,
+      biens(titre)
     `)
     .eq('proprietaire_id', user.id)
     .order('date_souhaitee', { ascending: true })
@@ -74,9 +73,9 @@ export default async function VisitesPropriétairePage() {
                       )}
                     </p>
                     <p className="text-sm text-muted mt-1">
-                      Demandeur: {visite.profiles?.full_name ?? 'Inconnu'}
+                      Client vérifié BOGBE&apos;S
                       <span className="ml-2 text-xs bg-[var(--surface)] px-2 py-0.5 rounded-pill text-[var(--text-muted)]">
-                        Contact masqué
+                        Coordonnées protégées · contact via la plateforme
                       </span>
                     </p>
                     {visite.notes && (

@@ -231,9 +231,19 @@ Dis au client que tu vas faire une recherche manuelle et que tu le recontactes r
     flash: offresFlash.length,
   }
 
+  // Lien catalogue filtré (commune + type + budget) — pour proposer une exploration alternative
+  const filterParams = new URLSearchParams()
+  if (p.commune) filterParams.set('commune', p.commune)
+  if (p.type_bien) filterParams.set('type', p.type_bien)
+  if (budget) filterParams.set('budget', String(budget))
+  const catalogueLink = filterParams.toString()
+    ? `${SITE_URL}/biens?${filterParams.toString()}`
+    : `${SITE_URL}/biens`
+
   let context = `${allBiens.length} bien(s) trouvé(s) (max ${SAPPHIRE_MAX_RESULTS})\n`
   context += `Sources interrogées : Catalogue BOGBE'S (${counts.bogbes}) + Offres Flash WhatsApp (${counts.flash})\n`
   if (critereLines.length) context += `\nCRITÈRES STRICTS APPLIQUÉS :\n${critereLines.join('\n')}\n`
+  context += `\nLIEN DE RECHERCHE PERSONNALISÉ :\n${catalogueLink}\n`
   context += '\n'
 
   allBiens.forEach((b, i) => {

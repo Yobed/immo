@@ -6,6 +6,7 @@ import { getAIBienContext } from '@/lib/ai/tools';
 import { extractBienFromWhatsApp } from '@/lib/extractors/whatsapp-bien-extractor';
 import { upsertProspect, recordOptOut } from '@/lib/outreach/agent-prospects';
 import { tryInviteProspect } from '@/lib/outreach/dispatch';
+import { notifyOwnerVisitPending } from '@/lib/notifications/whatsapp-notifier';
 
 const MIN_EXTRACTION_CONFIDENCE = 0.7;
 const OPT_OUT_REGEX = /^\s*(stop|stopper|arrete|arrêter|unsubscribe|désabonner|desabonner)\s*$/i;
@@ -208,17 +209,49 @@ export async function POST(req: NextRequest) {
     const rdvCheck = detectRdvConfirmation(aiResponse);
     if (rdvCheck.confirmed && rdvCheck.bienId) {
       if (rdvCheck.source === 'bogbes') {
-        // Bien BOGBE'S → insertion classique dans la table visites (FK valide)
-        await supabase.from('visites').insert({
-          bien_id: rdvCheck.bienId,
-          client_jid: jid,
-          client_name: contactName,
-          client_phone: senderPn,
-          date_souhaitee: rdvCheck.date || new Date().toISOString().slice(0, 10),
-          statut: 'en_attente',
-          source: 'whatsapp',
-          notes: `Demande via WhatsApp. Message : "${userMessage.slice(0, 200)}"`,
-        }).select('id').single();
+        // Bien BOGBE'S → charger d'abord le bien + propriétaire (FK proprietaire_id NOT NULL)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: bienRow } = await (supabase as any)
+          .from('biens')
+          .select('id, titre, commune, proprietaire_id, profiles!biens_proprietaire_id_fkey(full_name, phone)')
+          .eq('id', rdvCheck.bienId)
+          .single();
+
+        const proprietaireId: string | null = bienRow?.proprietaire_id ?? null;
+        const dateSouhaitee = rdvCheck.date || new Date().toISOString().slice(0, 10);
+
+        if (proprietaireId) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: visiteRow } = await (supabase as any).from('visites').insert({
+            bien_id: rdvCheck.bienId,
+            proprietaire_id: proprietaireId,
+            client_jid: jid,
+            client_name: contactName,
+            client_phone: senderPn,
+            date_souhaitee: dateSouhaitee,
+            statut: 'en_attente',
+            source: 'whatsapp',
+            notes: `Demande via WhatsApp. Message : "${userMessage.slice(0, 200)}"`,
+          }).select('id').single();
+
+          // Notification proprio immédiate (sans détails client — date + horaire uniquement)
+          const ownerProfile = Array.isArray(bienRow?.profiles) ? bienRow.profiles[0] : bienRow?.profiles;
+          if (visiteRow?.id && ownerProfile?.phone) {
+            await notifyOwnerVisitPending(supabase, {
+              id: visiteRow.id,
+              bienTitre: bienRow.titre || 'Bien sans titre',
+              bienCommune: bienRow.commune ?? null,
+              dateSouhaitee,
+              heureDebut: null,
+              heureFin: null,
+              visitorName: '',          // masqué côté proprio
+              visitorPhone: '',          // masqué côté proprio
+              ownerName: ownerProfile.full_name ?? null,
+              ownerPhone: ownerProfile.phone,
+              notes: null,
+            }).catch(() => null);
+          }
+        }
       } else {
         // Offre flash → pas de FK valide vers la table biens.
         // On notifie le conseiller humain par Wasender pour qu'il prenne le relais.

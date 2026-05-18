@@ -192,6 +192,32 @@ function tplAdminVisitRequest(ctx: VisitContext): string {
     .join('\n')
 }
 
+function tplOwnerVisitPending(ctx: VisitContext): string {
+  const dateFr = formatDateFR(ctx.dateSouhaitee)
+  const horaire =
+    ctx.heureDebut && ctx.heureFin
+      ? `${ctx.heureDebut} - ${ctx.heureFin}`
+      : null
+
+  return [
+    `Bonjour ${ctx.ownerName || ''} 👋`,
+    '',
+    `Un client souhaite visiter votre bien *« ${ctx.bienTitre} »*${
+      ctx.bienCommune ? ` à *${ctx.bienCommune}*` : ''
+    }.`,
+    '',
+    `📅 *Date souhaitée :* ${dateFr}`,
+    horaire ? `🕐 *Créneau :* ${horaire}` : null,
+    '',
+    'Pouvez-vous confirmer votre disponibilité pour ce créneau ?',
+    'Notre équipe valide et vous recontacte pour finaliser la visite.',
+    '',
+    "— *BOGBE'S GROUPE*",
+  ]
+    .filter((x) => x !== null)
+    .join('\n')
+}
+
 function tplOwnerVisitAnnounce(ctx: VisitContext): string {
   const dateFr = formatDateFR(ctx.dateSouhaitee)
   const horaire =
@@ -369,6 +395,31 @@ export async function notifyAdminVisitRequest(
   }
 
   return { sent, total: admins.length }
+}
+
+/**
+ * Notifie le propriétaire IMMÉDIATEMENT qu'une demande de visite est en attente.
+ * Aucun détail client n'est partagé (nom/téléphone masqués) — seulement date + horaire.
+ * Appelé dès l'INSERT de la visite (avant validation admin).
+ */
+export async function notifyOwnerVisitPending(
+  supabase: SupabaseClient,
+  ctx: VisitContext
+): Promise<SendResult> {
+  if (!ctx.ownerPhone) {
+    return { success: false, error: 'owner phone missing' }
+  }
+  const result = await send(ctx.ownerPhone, tplOwnerVisitPending(ctx))
+  await logNotification(supabase, {
+    toPhone: ctx.ownerPhone,
+    role: 'owner',
+    template: 'visit_pending_owner',
+    relatedType: 'visite',
+    relatedId: ctx.id,
+    payload: { bienTitre: ctx.bienTitre, dateSouhaitee: ctx.dateSouhaitee },
+    result,
+  })
+  return result
 }
 
 /**
