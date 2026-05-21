@@ -109,7 +109,24 @@ export function JourneyShortcuts() {
           </p>
         </div>
 
-        {/* Journey cards — image when available, icon fallback otherwise */}
+        {/* Primary persona switch — answers "Je suis…" at a glance, above the 5 cards */}
+        <div className="mb-6 md:mb-8 flex flex-wrap items-center justify-center gap-2 text-sm">
+          <span className="text-[var(--text-muted)] mr-1">{t.journey.iAm}</span>
+          <Link
+            href="/biens"
+            className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2.5 rounded-full bg-[var(--accent-luxury)] text-[var(--on-accent)] font-bold text-[12px] uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all"
+          >
+            {t.journey.imRenter} <ArrowUpRight className="w-3.5 h-3.5" />
+          </Link>
+          <Link
+            href="/login?next=/mes-biens/nouveau"
+            className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2.5 rounded-full bg-[var(--surface-card)] border border-[var(--border)] text-[var(--text)] font-bold text-[12px] uppercase tracking-wider hover:border-[var(--accent-luxury)] active:scale-95 transition-all"
+          >
+            {t.journey.imOwner} <ArrowUpRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        {/* Journey cards — secondary level, image when available, icon fallback otherwise */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
           {JOURNEYS.map((j, i) => (
             <JourneyCard key={j.title} journey={j} index={i} />
@@ -132,20 +149,33 @@ function JourneyCard({ journey: j, index: i }: { journey: Journey; index: number
     return (
       <Link
         {...linkProps}
-        aria-label={j.title}
-        className="group relative block aspect-[4/3] sm:aspect-[5/4] rounded-2xl overflow-hidden border border-[var(--border)] bg-[var(--surface-card)] transition-all duration-500 hover:-translate-y-1 shadow-sm hover:shadow-xl"
+        aria-label={`${j.title} — ${j.label}`}
+        className="group relative block aspect-[4/3] sm:aspect-[5/4] rounded-2xl overflow-hidden border border-[var(--border)] bg-[var(--surface-card)] transition-all duration-500 hover:-translate-y-1 shadow-sm hover:shadow-md focus-visible:ring-2 focus-visible:ring-[var(--accent-luxury)] focus-visible:ring-offset-2"
       >
         {/* Use plain img for graceful error handling */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={j.image}
-          alt={j.title}
+          alt=""
           loading="lazy"
           onError={() => setImgError(true)}
-          className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
+          className="absolute inset-0 w-full h-full object-cover motion-safe:group-hover:scale-[1.03] transition-transform duration-700"
         />
-        <div className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-md">
-          <ArrowUpRight className={`w-4 h-4 ${j.ctaColor}`} />
+
+        {/* Persona pill — visible always, top-left */}
+        <span className="absolute top-3 left-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--surface-card)]/95 backdrop-blur-sm border border-[var(--border)] text-[10px] font-bold uppercase tracking-wider text-[var(--text)]">
+          {j.label}
+        </span>
+
+        {/* Bottom gradient + title — readable on any image */}
+        <div className="absolute inset-x-0 bottom-0 pt-12 pb-3 px-3 bg-gradient-to-t from-black/85 via-black/55 to-transparent">
+          <h3 className="font-display text-base md:text-lg font-bold text-white leading-tight mb-0.5 line-clamp-1">
+            {j.title}
+          </h3>
+          <p className="flex items-center gap-1 text-[11px] font-semibold text-white/85 group-hover:gap-2 transition-all">
+            {j.cta}
+            <ArrowUpRight className="w-3 h-3" />
+          </p>
         </div>
       </Link>
     )

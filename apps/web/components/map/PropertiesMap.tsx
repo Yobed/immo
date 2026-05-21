@@ -7,6 +7,7 @@ import Map, { Marker, Source, Layer, GeolocateControl, NavigationControl, type M
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { MapPin } from 'lucide-react'
+import { formatFCFACompact } from '@/lib/format'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 export interface BienMarker {
@@ -38,9 +39,9 @@ function formatPrice(b: BienMarker): string {
   const vente = toNum(b.prix_vente_fcfa)
   const v = nuit || mois || vente
   if (!v) return '—'
-  const label = v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}M` : `${Math.round(v / 1_000)}k`
   const suffix = nuit ? '/nuit' : mois ? '/mois' : ''
-  return `${label}${suffix}`
+  // Marker label : compact sans "FCFA" pour économiser la place sur la carte
+  return `${formatFCFACompact(v, false)}${suffix}`
 }
 
 // ── Inline CSS (injected once, avoids external CSS issues with Mapbox) ────────

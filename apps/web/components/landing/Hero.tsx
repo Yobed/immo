@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { SearchBar } from '@/components/search/SearchBar'
 import { Sparkles, TrendingUp, MapPin, Clock, ChevronRight } from 'lucide-react'
+import { formatFCFACompact } from '@/lib/format'
 
 const FALLBACK_BG = [
   'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2000&auto=format&fit=crop',
@@ -317,11 +318,7 @@ function FeaturedBienCards({ biens }: { biens: FeaturedBien[] }) {
       {biens.map((bien, i) => {
         const prix = bien.prix_nuit_fcfa ?? bien.prix_mois_fcfa ?? bien.prix_vente_fcfa
         const suffix = bien.prix_nuit_fcfa ? '/nuit' : bien.prix_mois_fcfa ? '/mois' : ''
-        const fmtPrix = prix
-          ? prix >= 1_000_000
-            ? `${(prix / 1_000_000).toFixed(1)}M FCFA`
-            : `${Math.round(prix / 1_000)}k FCFA`
-          : null
+        const fmtPrix = prix ? formatFCFACompact(prix) : null
 
         return (
           <motion.div

@@ -8,6 +8,7 @@ import { motion } from 'framer-motion'
 import { useTheme } from 'next-themes'
 import Image from 'next/image'
 import { useT } from '@/lib/i18n/client'
+import { formatFCFACompact } from '@/lib/format'
 
 // Charger la carte dynamiquement pour éviter les erreurs d'hydratation
 const PropertiesMap = dynamic(
@@ -107,8 +108,7 @@ function NearCard({
 function formatPrice(b: BienProche): string {
   const v = b.prix_nuit_fcfa || b.prix_mois_fcfa || b.prix_vente_fcfa || 0
   const suffix = b.prix_nuit_fcfa ? '/nuit' : b.prix_mois_fcfa ? '/mois' : ''
-  const label = v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}M` : `${Math.round(v / 1_000)}k`
-  return `${label} FCFA${suffix}`
+  return `${formatFCFACompact(v)}${suffix}`
 }
 
 function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -334,11 +334,42 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
     )
   }
 
-  const mapBiens = useMemo(() => {
-    return biens.map((b: BienProche) => ({ ...b, photo_url: coverMap[b.id] }))
-  }, [biens, coverMap])
+  // ── Quick filters (Airbnb-style above the map) ────────────────────────────
+  const [filterType, setFilterType] = useState<string | null>(null)
+  const [filterOffre, setFilterOffre] = useState<'all' | 'location' | 'vente'>('all')
+  const [filterMaxPrice, setFilterMaxPrice] = useState<number | null>(null)
 
-  const selectedBien = useMemo(() => biens.find(b => b.id === selectedId) ?? null, [biens, selectedId])
+  // Get the max price across all biens to scale the slider
+  const maxPriceInData = useMemo(() => {
+    let max = 0
+    for (const b of biens) {
+      const v = Math.max(b.prix_mois_fcfa ?? 0, b.prix_nuit_fcfa ?? 0, b.prix_vente_fcfa ?? 0)
+      if (v > max) max = v
+    }
+    return max
+  }, [biens])
+
+  const filteredBiens = useMemo(() => {
+    return biens.filter((b) => {
+      if (filterType && b.type_bien !== filterType) return false
+      if (filterOffre === 'location' && !b.prix_mois_fcfa && !b.prix_nuit_fcfa) return false
+      if (filterOffre === 'vente' && !b.prix_vente_fcfa) return false
+      if (filterMaxPrice !== null) {
+        const price = b.prix_mois_fcfa ?? b.prix_nuit_fcfa ?? b.prix_vente_fcfa ?? 0
+        if (price > filterMaxPrice) return false
+      }
+      return true
+    })
+  }, [biens, filterType, filterOffre, filterMaxPrice])
+
+  const activeFilterCount =
+    (filterType ? 1 : 0) + (filterOffre !== 'all' ? 1 : 0) + (filterMaxPrice !== null ? 1 : 0)
+
+  const mapBiens = useMemo(() => {
+    return filteredBiens.map((b: BienProche) => ({ ...b, photo_url: coverMap[b.id] }))
+  }, [filteredBiens, coverMap])
+
+  const selectedBien = useMemo(() => filteredBiens.find(b => b.id === selectedId) ?? null, [filteredBiens, selectedId])
 
   const mapTheme = theme === 'light'
     ? 'mapbox://styles/mapbox/streets-v12'
@@ -403,6 +434,92 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
           </div>
         )}
 
+        {/* ── QUICK FILTERS (Airbnb-style) ─────────────────────────────── */}
+        <div className="mb-5 rounded-2xl border border-[var(--border)] bg-[var(--surface-card)] p-3 md:p-4 flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
+          {/* Offre toggle */}
+          <div
+            className="inline-flex p-1 rounded-full bg-[var(--surface-hover)] shrink-0"
+            role="radiogroup"
+            aria-label="Type d'offre"
+          >
+            {(['all', 'location', 'vente'] as const).map((o) => (
+              <button
+                key={o}
+                type="button"
+                role="radio"
+                aria-checked={filterOffre === o}
+                onClick={() => setFilterOffre(o)}
+                className={`px-3 md:px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-colors ${
+                  filterOffre === o
+                    ? 'bg-[var(--text)] text-[var(--background)]'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text)]'
+                }`}
+              >
+                {o === 'all' ? 'Tous' : o === 'location' ? 'Location' : 'Vente'}
+              </button>
+            ))}
+          </div>
+
+          {/* Type chips */}
+          <div className="flex gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1 md:flex-1 md:mx-0 md:px-0">
+            {NEAR_CATEGORIES.map((cat) => {
+              const active = filterType === cat.key
+              return (
+                <button
+                  key={cat.key}
+                  type="button"
+                  onClick={() => setFilterType(active ? null : cat.key)}
+                  aria-pressed={active}
+                  className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium border transition-colors ${
+                    active
+                      ? 'bg-[var(--accent-luxury)] text-[var(--on-accent)] border-[var(--accent-luxury)]'
+                      : 'bg-transparent text-[var(--text-muted)] border-[var(--border)] hover:border-[var(--accent-luxury)]/40 hover:text-[var(--text)]'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Budget slider */}
+          {maxPriceInData > 0 && (
+            <div className="flex items-center gap-2 shrink-0 md:min-w-[200px]">
+              <label htmlFor="budget-max" className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] whitespace-nowrap">
+                Max
+              </label>
+              <input
+                id="budget-max"
+                type="range"
+                min={0}
+                max={maxPriceInData}
+                step={Math.max(50_000, Math.round(maxPriceInData / 100 / 10_000) * 10_000)}
+                value={filterMaxPrice ?? maxPriceInData}
+                onChange={(e) => {
+                  const v = Number(e.target.value)
+                  setFilterMaxPrice(v >= maxPriceInData ? null : v)
+                }}
+                aria-label="Budget maximum"
+                className="flex-1 md:w-24 accent-[var(--accent-luxury)]"
+              />
+              <span className="text-[11px] font-semibold text-[var(--accent-luxury)] tabular-nums min-w-[60px] text-right">
+                {filterMaxPrice === null ? '∞' : formatFCFACompact(filterMaxPrice, false)}
+              </span>
+            </div>
+          )}
+
+          {/* Reset */}
+          {activeFilterCount > 0 && (
+            <button
+              type="button"
+              onClick={() => { setFilterType(null); setFilterOffre('all'); setFilterMaxPrice(null) }}
+              className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] hover:text-[var(--text)] transition-colors px-3 py-1.5"
+            >
+              Réinitialiser ({activeFilterCount})
+            </button>
+          )}
+        </div>
+
         {/* ── MAIN LAYOUT: Map always on top ── */}
         <div className="flex flex-col gap-8">
 
@@ -439,10 +556,14 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
                   <span className="text-[var(--accent-luxury)] text-[10px] font-bold uppercase tracking-widest">Ma position Géo</span>
                 </div>
               )}
-              {biens.length > 0 && (
+              {filteredBiens.length > 0 && (
                 <div className="px-5 py-2.5 bg-black/60 backdrop-blur-xl rounded-full border border-white/10 flex items-center gap-3">
-                  <div className="w-2 h-2 bg-[#D4AF37] rounded-full animate-pulse" />
-                  <span className="text-white text-[10px] font-bold uppercase tracking-widest">{biens.length} biens filtrés</span>
+                  <div className="w-2 h-2 bg-[var(--accent-luxury)] rounded-full animate-pulse" />
+                  <span className="text-white text-[10px] font-bold uppercase tracking-widest">
+                    {filteredBiens.length}
+                    {activeFilterCount > 0 && biens.length !== filteredBiens.length ? ` / ${biens.length}` : ''}
+                    {' '}biens
+                  </span>
                 </div>
               )}
             </div>
@@ -488,7 +609,9 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
               {/* ── TOUS LES ECRANS : rangées par catégorie avec scroll horizontal ── */}
               <div className="space-y-8">
                 {NEAR_CATEGORIES.map(cat => {
-                  const items = biens.filter(b => b.type_bien === cat.key)
+                  // If user filtered a specific type, only show that row
+                  if (filterType && filterType !== cat.key) return null
+                  const items = filteredBiens.filter(b => b.type_bien === cat.key)
                   if (items.length === 0) return null
                   return (
                     <div key={cat.key}>

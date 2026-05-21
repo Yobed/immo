@@ -1,118 +1,146 @@
-'use client'
-import { motion, useInView } from 'framer-motion'
-import { useRef } from 'react'
+import { ShieldCheck, FileSearch, Handshake, Radio, Eye, MessageCircle, AlertTriangle, FileCheck2, Lock } from 'lucide-react'
+import { getDictionary } from '@/lib/i18n/server'
 
-const steps = [
-  {
-    number: '01',
-    title: 'Présentation Curatée',
-    description: 'Votre bien mérite une mise en scène olympienne. Nous sublimons chaque annonce avec une direction artistique dédiée pour capter l\'attention de l\'élite.',
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1" fill="none">
-        <path d="M4 4h16v16H4V4z M4 8h16 M8 4v16"/>
-      </svg>
-    ),
-  },
-  {
-    number: '02',
-    title: 'Connexions Discrètes',
-    description: 'La confidentialité est notre pierre angulaire. Nous filtrons chaque demande pour ne retenir que les profils qualifiés correspondant à vos exigences.',
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1" fill="none">
-        <circle cx="12" cy="12" r="9"/>
-        <path d="M12 8v4l3 3"/>
-      </svg>
-    ),
-  },
-  {
-    number: '03',
-    title: 'Acquisition Intuitive',
-    description: 'Déléguez la complexité. De la contractualisation OHADA à la remise des clés, nous orchestrons chaque détail pour votre sérénité absolue.',
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1" fill="none">
-        <path d="M20 7h-9 M14 2l-3 3 3 3 M4 17h9 M10 22l3-3-3-3"/>
-      </svg>
-    ),
-  },
-]
-
-export function HowItWorks() {
-  const containerRef = useRef<HTMLElement>(null)
-  const inView = useInView(containerRef, { once: true, margin: "-100px" })
+/**
+ * "Comment ça marche ?" — section qui explique en 3 étapes
+ * 1) le pipeline des annonces vérifiées BOGBE'S
+ * 2) le pipeline des offres flash WhatsApp
+ * 3) le process anti-arnaque (différenciateur clé sur le marché ivoirien)
+ */
+export async function HowItWorks() {
+  const t = await getDictionary()
 
   return (
-    <section
-      ref={containerRef}
-      className="py-[var(--section-py)] relative overflow-hidden bg-[var(--background)] -mt-10 rounded-t-[3rem] z-20"
-    >
-       {/* Background Ambience */}
-      <div className="absolute top-0 left-0 w-[800px] h-[800px] pointer-events-none opacity-5" style={{ background: 'radial-gradient(circle, var(--accent-luxury) 0%, transparent 70%)', filter: 'blur(100px)' }}/>
-
-      <div className="container mx-auto px-6 max-w-7xl">
-        {/* Editorial Header */}
-        <div className="grid lg:grid-cols-2 gap-12 items-end mb-12">
-          <motion.div
-             initial={{ opacity: 0, x: -30 }}
-             animate={inView ? { opacity: 1, x: 0 } : {}}
-             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <span className="text-[var(--text-muted)] font-sans tracking-[0.35em] uppercase text-xs mb-6 block font-medium">
-              Notre Méthodologie
-            </span>
-            <h2 className="font-display text-4xl md:text-7xl font-light text-[var(--text)] leading-[1.1] tracking-tighter">
-              L'Art de la <br/>
-              <span className="italic font-serif opacity-70">Sérénité.</span>
-            </h2>
-          </motion.div>
-          
-            <p className="font-sans text-lg text-[var(--text-muted)] max-w-md leading-relaxed" >
-              Chaque étape est une orchestration minutieuse dédiée à la perfection spatiale et légale.
-            </p>
+    <section className="relative py-16 md:py-24 bg-[var(--surface)] border-t border-[var(--border)]">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6">
+        {/* Header */}
+        <div className="max-w-2xl mb-12 md:mb-16">
+          <p className="text-[10px] font-bold uppercase tracking-[0.5em] text-[var(--accent-luxury)] mb-4">
+            {t.howItWorks.kicker}
+          </p>
+          <h2 className="font-display text-3xl md:text-5xl lg:text-6xl font-bold text-[var(--text)] leading-[1.05] tracking-tight">
+            {t.howItWorks.title1}{' '}
+            <span className="italic font-light text-[var(--accent-luxury)]">{t.howItWorks.title2}</span>
+          </h2>
+          <p className="font-sans text-sm md:text-base text-[var(--text-muted)] mt-5 leading-relaxed max-w-xl">
+            {t.howItWorks.subtitle}
+          </p>
         </div>
 
-        {/* Steps Grid with Architectural Styling */}
-        <div className="grid grid-cols-1 md:grid-cols-3 border-l border-[var(--border)]">
-          {steps.map((step, i) => (
-            <motion.div
-              key={step.number}
-              initial={{ opacity: 0, y: 40 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: i * 0.2 }}
-              className="group relative p-8 md:p-16 border-r border-b border-[var(--border)] flex flex-col items-start transition-all duration-700 hover:bg-[var(--primary-light)]"
-            >
-              <span className="text-4xl font-display font-light text-[var(--text)] opacity-25 mb-12 group-hover:opacity-50 transition-opacity">
-                {step.number}
-              </span>
+        {/* Two pipelines side by side */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 mb-12 md:mb-16">
+          <Pipeline
+            badge={{ label: t.howItWorks.verifiedTag, icon: <ShieldCheck className="w-3 h-3" />, tint: 'success' }}
+            title={t.howItWorks.verifiedTitle}
+            subtitle={t.howItWorks.verifiedSubtitle}
+            steps={[
+              { icon: <FileSearch className="w-5 h-5" />, label: t.howItWorks.v1Label, desc: t.howItWorks.v1Desc },
+              { icon: <ShieldCheck className="w-5 h-5" />, label: t.howItWorks.v2Label, desc: t.howItWorks.v2Desc },
+              { icon: <Handshake className="w-5 h-5" />, label: t.howItWorks.v3Label, desc: t.howItWorks.v3Desc },
+            ]}
+          />
 
-              <div className="mb-8 text-[var(--text-muted)] opacity-75 group-hover:opacity-100 group-hover:text-[var(--accent-luxury)] transition-all duration-500">
-                {step.icon}
+          <Pipeline
+            badge={{ label: t.howItWorks.flashTag, icon: <Radio className="w-3 h-3" />, tint: 'warning' }}
+            title={t.howItWorks.flashTitle}
+            subtitle={t.howItWorks.flashSubtitle}
+            steps={[
+              { icon: <Radio className="w-5 h-5" />, label: t.howItWorks.f1Label, desc: t.howItWorks.f1Desc },
+              { icon: <Eye className="w-5 h-5" />, label: t.howItWorks.f2Label, desc: t.howItWorks.f2Desc },
+              { icon: <MessageCircle className="w-5 h-5" />, label: t.howItWorks.f3Label, desc: t.howItWorks.f3Desc },
+            ]}
+          />
+        </div>
+
+        {/* Anti-arnaque trust block */}
+        <div className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border)] p-6 md:p-8 lg:p-10">
+          <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start">
+            <div className="md:max-w-xs">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--accent-luxury-muted)] border border-[var(--accent-luxury)]/30 text-[var(--accent-luxury)] text-[10px] font-bold uppercase tracking-wider mb-4">
+                <AlertTriangle className="w-3 h-3" />
+                {t.howItWorks.antiScamTag}
               </div>
-
-              <h3 className="font-display text-2xl font-light text-[var(--text)] mb-6 tracking-tight relative z-10">
-                {step.title}
+              <h3 className="font-display text-2xl md:text-3xl font-bold text-[var(--text)] leading-tight mb-3">
+                {t.howItWorks.antiScamTitle}
               </h3>
-
-              <p className="font-sans text-base text-[var(--text-muted)] leading-loose relative z-10">
-                {step.description}
+              <p className="text-sm text-[var(--text-muted)] leading-relaxed">
+                {t.howItWorks.antiScamSubtitle}
               </p>
+            </div>
 
-              <div className="mt-12 h-[1px] w-0 bg-[var(--accent-luxury)] opacity-20 group-hover:w-full transition-all duration-1000 ease-expo" />
-            </motion.div>
-          ))}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 flex-1">
+              <TrustItem icon={<FileCheck2 className="w-5 h-5" />} title={t.howItWorks.t1Title} desc={t.howItWorks.t1Desc} />
+              <TrustItem icon={<ShieldCheck className="w-5 h-5" />} title={t.howItWorks.t2Title} desc={t.howItWorks.t2Desc} />
+              <TrustItem icon={<Lock className="w-5 h-5" />} title={t.howItWorks.t3Title} desc={t.howItWorks.t3Desc} />
+            </div>
+          </div>
         </div>
-
-        {/* Dynamic Footnote */}
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ duration: 2, delay: 1 }}
-          className="mt-24 text-center"
-        >
-          <span className="text-xs tracking-[0.35em] uppercase text-[var(--text-subtle)] opacity-55">
-            Standard d&apos;Excellence — BOGBE'S GROUPE
-          </span>
-        </motion.div>
       </div>
     </section>
+  )
+}
+
+interface PipelineProps {
+  badge: { label: string; icon: React.ReactNode; tint: 'success' | 'warning' }
+  title: string
+  subtitle: string
+  steps: { icon: React.ReactNode; label: string; desc: string }[]
+}
+
+function Pipeline({ badge, title, subtitle, steps }: PipelineProps) {
+  const tintClasses =
+    badge.tint === 'success'
+      ? 'bg-[var(--success-soft)] text-[var(--success)] border-[var(--success)]/20'
+      : 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/20'
+
+  return (
+    <div className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border)] p-6 md:p-8">
+      <div className="mb-6">
+        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${tintClasses}`}>
+          {badge.icon}
+          {badge.label}
+        </span>
+        <h3 className="font-display text-xl md:text-2xl font-bold text-[var(--text)] mt-3 leading-tight">
+          {title}
+        </h3>
+        <p className="text-sm text-[var(--text-muted)] mt-1.5">{subtitle}</p>
+      </div>
+
+      <ol className="space-y-4 md:space-y-5">
+        {steps.map((s, i) => (
+          <li key={i} className="flex items-start gap-4">
+            <div className="relative shrink-0">
+              <div className="w-10 h-10 rounded-full bg-[var(--surface-hover)] border border-[var(--border)] flex items-center justify-center text-[var(--accent-luxury)]">
+                {s.icon}
+              </div>
+              {i < steps.length - 1 && (
+                <div className="absolute left-1/2 -translate-x-1/2 top-full w-px h-5 bg-[var(--border)]" />
+              )}
+            </div>
+            <div className="flex-1 pt-1">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-mono text-[10px] text-[var(--text-muted)]">
+                  0{i + 1}
+                </span>
+                <h4 className="text-sm font-bold text-[var(--text)]">{s.label}</h4>
+              </div>
+              <p className="text-xs text-[var(--text-muted)] leading-relaxed">{s.desc}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  )
+}
+
+function TrustItem({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
+  return (
+    <div>
+      <div className="w-10 h-10 rounded-full bg-[var(--accent-luxury-muted)] border border-[var(--accent-luxury)]/20 flex items-center justify-center text-[var(--accent-luxury)] mb-3">
+        {icon}
+      </div>
+      <h4 className="text-sm font-bold text-[var(--text)] mb-1.5">{title}</h4>
+      <p className="text-xs text-[var(--text-muted)] leading-relaxed">{desc}</p>
+    </div>
   )
 }

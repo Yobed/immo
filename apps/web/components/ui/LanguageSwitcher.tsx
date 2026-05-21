@@ -25,23 +25,33 @@ export function LanguageSwitcher({ variant = 'compact', className = '' }: Langua
 
   if (variant === 'compact') {
     return (
-      <div className={`inline-flex items-center gap-1 ${className}`} role="group" aria-label={t.language.switch}>
-        <Globe className="w-3.5 h-3.5 text-slate-400" aria-hidden />
-        {LOCALES.map((l) => (
-          <button
-            key={l}
-            type="button"
-            onClick={() => setLocale(l)}
-            disabled={isPending}
-            aria-pressed={l === locale}
-            className={`px-2 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider transition-colors ${
-              l === locale
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-500 hover:text-slate-900'
-            } disabled:opacity-50`}
-          >
-            {l}
-          </button>
+      <div
+        className={`inline-flex items-center gap-1.5 px-1 ${className}`}
+        role="group"
+        aria-label={t.language.switch}
+      >
+        <Globe className="w-3.5 h-3.5 text-[var(--text-muted)]" aria-hidden="true" />
+        {LOCALES.map((l, i) => (
+          <span key={l} className="inline-flex items-center gap-1.5">
+            {i > 0 && (
+              <span className="text-[var(--text-muted)]/40 select-none" aria-hidden="true">
+                /
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => setLocale(l)}
+              disabled={isPending}
+              aria-pressed={l === locale}
+              className={`min-w-[44px] min-h-[28px] px-2 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider transition-colors ${
+                l === locale
+                  ? 'bg-[var(--text)] text-[var(--background)]'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text)]'
+              } disabled:opacity-50`}
+            >
+              {l}
+            </button>
+          </span>
         ))}
       </div>
     )

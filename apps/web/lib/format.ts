@@ -9,12 +9,31 @@ export function formatFCFA(n: number, withCurrency = true): string {
   return withCurrency ? `${formatted} FCFA` : formatted
 }
 
-/** Formate un montant compact : 1 500 000 → "1,5M" */
-export function formatFCFACompact(n: number): string {
-  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}Md`
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`
-  if (n >= 1_000) return `${Math.round(n / 1_000)}k`
-  return String(n)
+/**
+ * Formate un montant compact en respectant la locale fr-CI.
+ * - 1 500 000 000 → "1,5 Md FCFA"
+ * - 250 000 000   → "250 M FCFA"
+ * - 1 500 000     → "1,5 M FCFA"
+ * - 350 000       → "350 k FCFA"
+ * - 800           → "800 FCFA"
+ *
+ * Avec `withCurrency=false`, retourne la valeur sans le suffixe FCFA
+ * (utile pour les contextes où FCFA est déjà dans le label adjacent).
+ *
+ * Note: utilise virgule décimale française pour cohérence avec formatFCFA().
+ */
+export function formatFCFACompact(n: number, withCurrency = true): string {
+  const suffix = withCurrency ? ' FCFA' : ''
+  if (n >= 1_000_000_000) {
+    const v = n / 1_000_000_000
+    return `${v.toFixed(v >= 100 ? 0 : 1).replace('.', ',')} Md${suffix}`
+  }
+  if (n >= 1_000_000) {
+    const v = n / 1_000_000
+    return `${v.toFixed(v >= 100 || n % 1_000_000 === 0 ? 0 : 1).replace('.', ',')} M${suffix}`
+  }
+  if (n >= 1_000) return `${Math.round(n / 1_000)} k${suffix}`
+  return `${n}${suffix}`
 }
 
 /** Retourne le prix affiché d'un bien + le suffixe approprié */

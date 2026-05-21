@@ -4,6 +4,7 @@ import { JourneyShortcuts } from '@/components/landing/JourneyShortcuts'
 import { FeaturedProperties } from '@/components/landing/FeaturedProperties'
 import { PrestigeCommunes } from '@/components/landing/PrestigeCommunes'
 import { FlashOffersSection } from '@/components/landing/FlashOffersSection'
+import { HowItWorks } from '@/components/landing/HowItWorks'
 import { ServicesPillars } from '@/components/landing/ServicesPillars'
 import { PublishChoiceTeaser } from '@/components/landing/PublishChoiceTeaser'
 import { MapZones } from '@/components/landing/MapZones'
@@ -118,7 +119,10 @@ export default async function HomePage() {
       {/* 5. Veille en direct (réseau WhatsApp) */}
       <FlashOffersSection />
 
-      {/* 6. Témoignages clients (proof social) */}
+      {/* 6. Comment ça marche — différenciateur anti-arnaque + 2 pipelines */}
+      <HowItWorks />
+
+      {/* 7. Témoignages clients (proof social) */}
       <TestimonialsSection />
 
       {/* 7. Footer */}
