@@ -78,12 +78,19 @@ async function fetchBogbes(filters: ConsolidatedFilters): Promise<ConsolidatedBi
   if (filters.source === 'flash') return []
   const supabase = await createClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // biens_medias capped at 6 rows/bien — we only need cover + a few extras for cards.
+  // Left join (no !inner) so biens without medias still appear with a placeholder.
   let q = (supabase as any)
     .from('biens')
     .select(
-      'id, titre, commune, quartier, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces, description, is_verifie, score_ia, equipements, created_at, biens_medias(url, est_couverture, ordre, type)',
+      `id, titre, commune, quartier, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa,
+       surface_m2, nb_pieces, description, is_verifie, score_ia, equipements, created_at,
+       biens_medias(url, est_couverture, ordre, type)`,
     )
     .eq('statut', 'publie')
+    .order('est_couverture', { ascending: false, foreignTable: 'biens_medias' })
+    .order('ordre', { ascending: true, foreignTable: 'biens_medias' })
+    .limit(6, { foreignTable: 'biens_medias' })
     .limit(filters.limitPerSource ?? DEFAULT_LIMIT)
 
   if (filters.commune) q = q.ilike('commune', `%${filters.commune}%`)

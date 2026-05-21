@@ -84,15 +84,17 @@ export function NotificationBell({ userId, initialUnreadCount }: NotificationBel
       <button
         type="button"
         onClick={handleToggle}
-        aria-label="Notifications"
-        className="relative p-2 rounded-btn hover:bg-[var(--surface)] transition-colors"
+        aria-label={unreadCount > 0 ? `Notifications (${unreadCount} non lues)` : 'Notifications'}
+        aria-expanded={open}
+        aria-haspopup="true"
+        className="relative min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center rounded-btn hover:bg-[var(--surface)] transition-colors"
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
           <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
           <path d="M13.73 21a2 2 0 01-3.46 0"/>
         </svg>
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 min-w-[16px] h-4 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full px-0.5">
+          <span aria-hidden="true" className="absolute top-1 right-1 min-w-[16px] h-4 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full px-0.5">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}

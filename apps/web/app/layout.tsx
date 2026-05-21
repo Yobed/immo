@@ -1,17 +1,22 @@
 import type { Metadata, Viewport } from 'next'
-import { Unbounded, Playfair_Display, Outfit, JetBrains_Mono } from 'next/font/google'
+import { Bricolage_Grotesque, EB_Garamond, Manrope, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 
-// Fonts trimmed to critical weights only (was 6+4+default+2 = ~180kb extra).
-// Heavy display weights kept (700/800) for headlines; body weights pruned.
-const unbounded = Unbounded({
+// Distinctive typographic system — deliberately off the "AI default" list
+// (no Inter, Outfit, Playfair, Plus Jakarta, DM Sans, Instrument, Fraunces, Newsreader).
+//
+// Display: Bricolage Grotesque — variable contemporary, characterful headlines
+// Serif:   EB Garamond — classical italic for editorial accents
+// Sans:    Manrope — warm geometric body
+// Mono:    JetBrains Mono — kept for numeric/reference text
+const display = Bricolage_Grotesque({
   subsets: ['latin'],
   weight: ['500', '700'],
   variable: '--font-display',
   display: 'swap',
   preload: true,
 })
-const playfair = Playfair_Display({
+const serif = EB_Garamond({
   subsets: ['latin'],
   weight: ['400', '600'],
   style: ['normal', 'italic'],
@@ -19,14 +24,14 @@ const playfair = Playfair_Display({
   display: 'swap',
   preload: false,
 })
-const outfit = Outfit({
+const sans = Manrope({
   subsets: ['latin'],
   weight: ['400', '500', '600'],
   variable: '--font-sans',
   display: 'swap',
   preload: true,
 })
-const jetbrainsMono = JetBrains_Mono({
+const mono = JetBrains_Mono({
   subsets: ['latin'],
   weight: ['400'],
   variable: '--font-mono',
@@ -91,7 +96,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html
       lang={locale}
-      className={`${unbounded.variable} ${playfair.variable} ${outfit.variable} ${jetbrainsMono.variable}`}
+      className={`${display.variable} ${serif.variable} ${sans.variable} ${mono.variable}`}
       suppressHydrationWarning
     >
       <body className="font-sans bg-[var(--background)] text-[var(--text)] antialiased overflow-x-hidden" suppressHydrationWarning>
