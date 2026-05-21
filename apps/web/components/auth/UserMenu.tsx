@@ -12,6 +12,7 @@ interface UserMenuProps {
 
 export function UserMenu({ email, role = 'public', isAdmin = false }: UserMenuProps) {
   const [open, setOpen] = useState(false)
+  const [pendingCount, setPendingCount] = useState<number>(0)
   const ref = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
@@ -23,6 +24,33 @@ export function UserMenu({ email, role = 'public', isAdmin = false }: UserMenuPr
     return () => document.removeEventListener('mousedown', onClickOutside)
   }, [])
 
+  // Compteur de demandes en attente pour admin (visites + reservations + contacts)
+  useEffect(() => {
+    if (!isAdmin) return
+    let cancelled = false
+    const supabase = createClient()
+    ;(async () => {
+      try {
+        const [visites, reservations, contacts] = await Promise.all([
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (supabase as any).from('visites').select('id', { count: 'exact', head: true }).eq('admin_validation_status', 'pending'),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (supabase as any).from('reservations').select('id', { count: 'exact', head: true }).eq('admin_validation_status', 'pending'),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (supabase as any).from('contact_requests').select('id', { count: 'exact', head: true }).eq('admin_validation_status', 'pending'),
+        ])
+        if (cancelled) return
+        const total = (visites.count ?? 0) + (reservations.count ?? 0) + (contacts.count ?? 0)
+        setPendingCount(total)
+      } catch {
+        // silently ignore
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [isAdmin])
+
   const handleLogout = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
@@ -32,18 +60,27 @@ export function UserMenu({ email, role = 'public', isAdmin = false }: UserMenuPr
   }
 
   const initial = email.charAt(0).toUpperCase()
+  const showBadge = isAdmin && pendingCount > 0
 
   return (
     <div ref={ref} className="relative">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-[var(--accent-luxury)] flex items-center justify-center text-[var(--on-accent)] font-display font-bold text-sm hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-[var(--accent-luxury)]/40 shadow-md"
+        className="relative min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-[var(--accent-luxury)] flex items-center justify-center text-[var(--on-accent)] font-display font-bold text-sm hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-[var(--accent-luxury)]/40 shadow-md"
         aria-expanded={open}
         aria-haspopup="true"
-        aria-label={`Menu utilisateur (${email})`}
+        aria-label={`Menu utilisateur (${email})${showBadge ? ` — ${pendingCount} demandes en attente` : ''}`}
       >
         <span aria-hidden="true">{initial}</span>
+        {showBadge && (
+          <span
+            className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-[var(--surface)] shadow-sm"
+            aria-hidden="true"
+          >
+            {pendingCount > 9 ? '9+' : pendingCount}
+          </span>
+        )}
       </button>
 
       {open && (

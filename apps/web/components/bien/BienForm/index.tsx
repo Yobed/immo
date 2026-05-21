@@ -42,6 +42,14 @@ export type BienFormData = z.infer<typeof BienSchema>
 
 const TOTAL_STEPS = 5
 
+const STEP_LABELS: Record<number, { label: string; sub: string }> = {
+  1: { label: 'Infos', sub: 'Titre, type, description' },
+  2: { label: 'Prix', sub: 'Loyer ou vente' },
+  3: { label: 'Localisation', sub: 'Commune et carte' },
+  4: { label: 'Équipements', sub: 'Caractéristiques' },
+  5: { label: 'Médias', sub: 'Confirmation' },
+}
+
 function validateStep(
   step: number,
   values: Partial<BienFormData>,
@@ -167,16 +175,55 @@ export function BienForm({ defaultValues, bienId }: BienFormProps) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Colonne Formulaire (Main) */}
         <div className="lg:col-span-8">
-          {/* Progress bar */}
-          <div className="flex items-center gap-2 mb-8">
-            {Array.from({ length: TOTAL_STEPS }, (_, i) => (
-              <div
-                key={i}
-                className={`h-2 flex-1 rounded-pill transition-colors ${
-                  i + 1 <= step ? 'bg-primary' : 'bg-[var(--border)]'
-                }`}
-              />
-            ))}
+          {/* Progress indicator — étape courante + barre + numéros */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-muted font-bold">
+                  Étape {step} sur {TOTAL_STEPS}
+                </p>
+                <h2 className="font-display text-lg font-bold text-[var(--text)]">
+                  {STEP_LABELS[step]?.label}
+                  <span className="ml-2 text-xs font-normal text-muted">
+                    · {STEP_LABELS[step]?.sub}
+                  </span>
+                </h2>
+              </div>
+              <p className="text-[10px] uppercase tracking-widest text-muted font-bold">
+                {Math.round((step / TOTAL_STEPS) * 100)}%
+              </p>
+            </div>
+
+            {/* Stepper avec cercles + lignes de progression */}
+            <div className="flex items-center gap-1">
+              {Array.from({ length: TOTAL_STEPS }, (_, i) => {
+                const stepNum = i + 1
+                const isDone = stepNum < step
+                const isCurrent = stepNum === step
+                return (
+                  <div key={i} className="flex items-center flex-1 last:flex-initial">
+                    <div
+                      className={`flex items-center justify-center w-7 h-7 rounded-full text-[11px] font-bold transition-all ${
+                        isDone
+                          ? 'bg-primary text-white'
+                          : isCurrent
+                            ? 'bg-primary text-white ring-4 ring-primary/20'
+                            : 'bg-[var(--border)] text-muted'
+                      }`}
+                    >
+                      {isDone ? '✓' : stepNum}
+                    </div>
+                    {stepNum < TOTAL_STEPS && (
+                      <div
+                        className={`flex-1 h-1 mx-1 rounded-pill transition-colors ${
+                          stepNum < step ? 'bg-primary' : 'bg-[var(--border)]'
+                        }`}
+                      />
+                    )}
+                  </div>
+                )
+              })}
+            </div>
           </div>
 
           <div className="bg-surface p-6 rounded-3xl border border-[var(--border)] shadow-sm">

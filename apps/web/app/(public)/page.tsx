@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { HeroEditorial } from '@/components/landing/HeroEditorial'
 import { JourneyShortcuts } from '@/components/landing/JourneyShortcuts'
+import { GuidedSearchSteps } from '@/components/landing/GuidedSearchSteps'
 import { FeaturedProperties } from '@/components/landing/FeaturedProperties'
 import { PrestigeCommunes } from '@/components/landing/PrestigeCommunes'
 import { FlashOffersSection } from '@/components/landing/FlashOffersSection'
@@ -109,6 +110,10 @@ export default async function HomePage() {
 
       {/* 3. Parcours utilisateurs — switch "Je suis…" prioritaire + 5 cartes */}
       <JourneyShortcuts />
+
+      {/* 3bis. Déroulé visuel des 3 étapes du wizard — rend visible la promesse
+              "30 secondes" annoncée dans le Hero CTA */}
+      <GuidedSearchSteps />
 
       {/* 4. ⚠️ Comment ça marche — bloc anti-arnaque AVANT les annonces.
             Adresse la méfiance immédiate du marché ivoirien : badges, KYC,

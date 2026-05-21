@@ -277,7 +277,27 @@ Message client : "${userMessage.slice(0, 200)}"`;
 
     // 7. Extraire les balises [MEDIA: URL] et nettoyer les tags RDV
     const cleanedAi = aiResponse.replace(/\[RDV_CONFIRME[^\]]*\]/gi, '').trim();
-    const { cleanText, mediaUrls } = extractMediaTags(cleanedAi);
+    const { cleanText: rawText, mediaUrls } = extractMediaTags(cleanedAi);
+
+    // 7b. Pré-remplir les liens /biens/<id> et /offre-flash/<id> avec le tél
+    // + le nom du client. Le formulaire "Demander une visite" lit ces params
+    // et pré-remplit ses champs → 0 friction pour le client venu via Sapphire.
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bogbes-groupe.vercel.app';
+    const siteUrlEscaped = siteUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const prefillParams = new URLSearchParams({
+      prefill_phone: senderPn,
+      prefill_name: contactName || '',
+    }).toString();
+    const linkRegex = new RegExp(
+      `(${siteUrlEscaped}/(?:biens|offre-flash)/[a-zA-Z0-9-]+)(\\?[^\\s]*)?`,
+      'g',
+    );
+    const cleanText = rawText.replace(linkRegex, (_match, base, existingQs) => {
+      if (existingQs) {
+        return `${base}${existingQs}&${prefillParams}`;
+      }
+      return `${base}?${prefillParams}`;
+    });
 
     // 8. Envoyer le texte principal
     if (cleanText) {

@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { MessageCircle, X, Loader2, CheckCircle2, Phone, User, Mail, AlertCircle } from 'lucide-react'
 import { Honeypot } from '@/components/ui/Honeypot'
 import { HONEYPOT_NAME } from '@/lib/honeypot'
@@ -27,10 +28,21 @@ export function FlashContactModal({
   const [open, setOpen] = useState(false)
   const [status, setStatus] = useState<Status>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
+  // Pré-remplissage prioritaire :
+  //   1. URL params (?prefill_name, ?prefill_phone) — utilisé par Sapphire WhatsApp
+  //      qui forwarde le pushName + jid du client.
+  //   2. Props (utilisateur connecté → profil DB).
+  // Permet à un client venant de Sapphire d'avoir nom + tél déjà remplis.
+  const searchParams = useSearchParams()
+  const prefillName = searchParams.get('prefill_name') ?? ''
+  const prefillPhone = searchParams.get('prefill_phone') ?? ''
+  const prefillEmail = searchParams.get('prefill_email') ?? ''
+
   const [form, setForm] = useState({
-    name: initialName,
-    phone: initialPhone,
-    email: initialEmail,
+    name: prefillName || initialName,
+    phone: prefillPhone || initialPhone,
+    email: prefillEmail || initialEmail,
     reason: '',
   })
 
@@ -86,7 +98,7 @@ export function FlashContactModal({
         className="w-full inline-flex items-center justify-center gap-2 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20 transition-all active:scale-[0.98]"
       >
         <MessageCircle className="w-4 h-4" />
-        Contacter via BOGBE&apos;S
+        Demander une visite
       </button>
 
       {open && (
@@ -133,7 +145,7 @@ export function FlashContactModal({
                 <Honeypot />
                 <div className="mb-5">
                   <h2 id="flash-contact-title" className="font-display text-xl font-bold text-slate-900 mb-1">
-                    Contacter via BOGBE&apos;S
+                    Demander une visite
                   </h2>
                   <p className="text-xs text-slate-700 leading-relaxed">
                     Bien : <span className="font-semibold text-slate-900">{bienTitre}</span>

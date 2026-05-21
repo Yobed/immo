@@ -248,7 +248,9 @@
     "j5Cta": "Ouvrir le formulaire",
     "iAm": "Je suis…",
     "imRenter": "Locataire / Acheteur",
-    "imOwner": "Propriétaire"
+    "imOwner": "Propriétaire",
+    "renterPath": "recherche guidée en 30 sec → catalogue ou WhatsApp conseiller.",
+    "ownerPath": "publication express WhatsApp ou accompagnement complet via compte Pro."
   },
   "howItWorks": {
     "kicker": "Comment ça marche",

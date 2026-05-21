@@ -248,7 +248,9 @@
     "j5Cta": "Open form",
     "iAm": "I'm a…",
     "imRenter": "Renter / Buyer",
-    "imOwner": "Property owner"
+    "imOwner": "Property owner",
+    "renterPath": "30-sec guided search → catalogue or WhatsApp advisor.",
+    "ownerPath": "express WhatsApp publishing or full-service pro account."
   },
   "howItWorks": {
     "kicker": "How it works",

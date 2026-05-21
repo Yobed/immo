@@ -260,8 +260,8 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
         <div className="mb-6 flex items-center justify-between gap-4 flex-wrap">
           <Breadcrumb
             items={[
-              { label: 'Biens', href: '/biens' },
-              { label: bien.commune, href: `/biens?commune=${encodeURIComponent(bien.commune)}` },
+              { label: 'Catalogue', href: '/catalogue' },
+              { label: bien.commune, href: `/catalogue?commune=${encodeURIComponent(bien.commune)}` },
               ...(bien.quartier ? [{ label: bien.quartier }] : []),
               { label: bien.titre },
             ]}
@@ -454,7 +454,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                           href={`/reservations/nouvelle?bienId=${bien.id}`}
                           className="flex items-center justify-center w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-accent-luxury transition-all duration-300 active:scale-[0.98]"
                         >
-                          Réserver maintenant
+                          Demander une visite
                         </Link>
                       ) : (
                         <>

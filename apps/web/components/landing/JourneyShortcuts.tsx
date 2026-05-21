@@ -112,9 +112,9 @@ export function JourneyShortcuts() {
         </div>
 
         {/* Primary persona switch — answers "Je suis…" at a glance, above the 5 cards.
-            The Locataire/Acheteur CTA now opens a 3-step guided wizard
+            The Locataire/Acheteur CTA opens a 3-step guided wizard
             (commune → budget → catalogue or WhatsApp) for first-time visitors. */}
-        <div className="mb-6 md:mb-8 flex flex-wrap items-center justify-center gap-2 text-sm">
+        <div className="mb-3 flex flex-wrap items-center justify-center gap-2 text-sm">
           <span className="text-[var(--text-muted)] mr-1">{t.journey.iAm}</span>
           <button
             type="button"
@@ -130,6 +130,18 @@ export function JourneyShortcuts() {
           >
             {t.journey.imOwner} <ArrowUpRight className="w-3.5 h-3.5" />
           </Link>
+        </div>
+
+        {/* Micro-copy comparative — clarifie ce que chaque voie déclenche concrètement */}
+        <div className="mb-6 md:mb-8 grid grid-cols-1 md:grid-cols-2 gap-2 max-w-2xl mx-auto text-center">
+          <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
+            <strong className="text-[var(--text)]">{t.journey.imRenter} :</strong>{' '}
+            {t.journey.renterPath}
+          </p>
+          <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
+            <strong className="text-[var(--text)]">{t.journey.imOwner} :</strong>{' '}
+            {t.journey.ownerPath}
+          </p>
         </div>
 
         <GuidedSearchWizard open={wizardOpen} onClose={() => setWizardOpen(false)} />

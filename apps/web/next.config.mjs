@@ -18,6 +18,14 @@ const nextConfig = {
       { protocol: 'https', hostname: 'i.pravatar.cc' },
     ],
   },
+  async redirects() {
+    return [
+      // Unification IA — /biens (listing) et /recherche → /catalogue
+      // /biens/[id] (page détail) reste accessible normalement.
+      { source: '/biens', destination: '/catalogue', permanent: true },
+      { source: '/recherche', destination: '/catalogue', permanent: true },
+    ]
+  },
 }
 
 export default nextConfig
