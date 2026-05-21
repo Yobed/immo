@@ -37,14 +37,14 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
       whileInView={prefersReduced ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-30px' }}
       transition={prefersReduced ? { duration: 0 } : { duration: 0.4, delay: (index % 4) * 0.04, ease: [0.16, 1, 0.3, 1] }}
-      className="group relative h-full"
+      className="group relative h-full @container/card"
     >
       <Link
         // Lien relatif explicite vers la fiche source (évite tout problème
         // de mismatch env entre client/server). flash → /offre-flash/<id>,
         // bogbes → /biens/<uuid>.
         href={bien.source === 'flash' ? `/offre-flash/${bien.sourceId}` : `/biens/${bien.sourceId}`}
-        className="flex flex-col h-full bg-[var(--surface-card)] border border-[var(--border)] rounded-xl overflow-hidden hover:border-[var(--accent-luxury)]/40 hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.15)] transition-all duration-300"
+        className="flex flex-col h-full bg-[var(--surface-card)] border border-[var(--border)] rounded-xl overflow-hidden hover:border-[var(--accent-luxury)]/40 hover:shadow-md transition-all duration-300"
       >
         {/* Image — ratio 4:3 (au lieu de 4:5) → 25% plus court */}
         <div className="relative aspect-[4/3] overflow-hidden bg-[var(--midnight-muted)]">
@@ -103,12 +103,13 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
           </div>
         </div>
 
-        {/* Body — padding réduit, typo plus serrée */}
-        <div className="flex flex-col flex-1 p-2.5">
-          <h3 className="font-sans font-semibold text-[12px] text-[var(--text)] leading-tight line-clamp-2 mb-1.5 min-h-[2.4em]">
+        {/* Body — padding et typo scalent avec la largeur du container parent
+            (sidebar = compact 12px, grille large = 14-16px). */}
+        <div className="flex flex-col flex-1 p-2.5 @[260px]/card:p-3.5 @[340px]/card:p-4">
+          <h3 className="font-sans font-semibold text-[12px] @[260px]/card:text-[13px] @[340px]/card:text-[14px] text-[var(--text)] leading-tight line-clamp-2 mb-1.5 min-h-[2.4em]">
             {bien.titre}
           </h3>
-          <p className="text-[13px] font-display font-bold text-[var(--accent-luxury)] tracking-tight mb-1.5 leading-none">
+          <p className="text-[13px] @[260px]/card:text-[15px] @[340px]/card:text-[17px] font-display font-bold text-[var(--accent-luxury)] tracking-tight mb-1.5 leading-none">
             {bien.prix_label}
           </p>
 
