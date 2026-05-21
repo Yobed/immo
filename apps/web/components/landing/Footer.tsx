@@ -20,10 +20,11 @@ export function Footer() {
       title: t.footer.biens,
       links: [
         { label: t.catalogue.title, href: '/catalogue' },
-        { label: t.footer.rentals, href: '/biens?type=location' },
-        { label: t.footer.sales, href: '/biens?type=vente' },
-        { label: t.footer.furnished, href: '/biens?type=meuble' },
-        { label: t.footer.owners, href: '/proprietaires' },
+        { label: t.footer.rentals, href: '/catalogue?type=location' },
+        { label: t.footer.sales, href: '/catalogue?type=vente' },
+        { label: t.footer.furnished, href: '/catalogue?type_bien=residence_meublee' },
+        { label: 'Offres flash', href: '/offre-flash' },
+        { label: 'Comment ça marche', href: '/comment-ca-marche' },
         { label: t.footer.publishAd, href: '/register' },
       ],
     },
@@ -49,6 +50,22 @@ export function Footer() {
   return (
     <footer className="bg-[var(--background)] text-[var(--text)] relative overflow-hidden pt-16 lg:pt-24 pb-12 border-t border-[var(--border)]">
       <div className="container mx-auto px-4 md:px-6 max-w-7xl relative z-10">
+
+        {/* Mémo 3 étapes — visible avant les colonnes pour rappeler le parcours */}
+        <div className="mb-12 lg:mb-16 grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6">
+          <FooterStep num="1" emoji="🔍" title="Tu cherches" desc="Catalogue ou Sapphire WhatsApp" />
+          <FooterStep num="2" emoji="💬" title="BOGBE'S coordonne" desc="Conseiller valide & organise" />
+          <FooterStep num="3" emoji="🏠" title="Tu visites" desc="Adresse + horaire confirmés" />
+        </div>
+        <div className="text-center mb-12 lg:mb-16">
+          <Link
+            href="/comment-ca-marche"
+            className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--accent-luxury)] hover:underline"
+          >
+            En savoir plus sur notre parcours →
+          </Link>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 mb-12 lg:mb-20">
           
           {/* Brand Identity */}
@@ -133,5 +150,29 @@ export function Footer() {
       {/* Background Signature Accent */}
       <div className="absolute -bottom-24 -right-24 w-96 h-96 opacity-10 pointer-events-none" style={{ background: 'radial-gradient(circle, #F97316 0%, transparent 70%)', filter: 'blur(100px)' }} />
     </footer>
+  )
+}
+
+interface FooterStepProps {
+  num: string
+  emoji: string
+  title: string
+  desc: string
+}
+
+function FooterStep({ num, emoji, title, desc }: FooterStepProps) {
+  return (
+    <div className="relative flex items-start gap-3 p-4 rounded-2xl bg-[var(--surface-card)]/50 border border-[var(--border)]">
+      <div className="flex-shrink-0 w-9 h-9 rounded-full bg-[var(--accent-luxury)] text-[var(--on-accent)] flex items-center justify-center font-display font-black text-sm shadow-sm">
+        {num}
+      </div>
+      <div className="min-w-0">
+        <p className="font-display text-sm font-bold text-[var(--text)] mb-1">
+          <span aria-hidden className="mr-1">{emoji}</span>
+          {title}
+        </p>
+        <p className="text-xs text-[var(--text-muted)] leading-snug">{desc}</p>
+      </div>
+    </div>
   )
 }

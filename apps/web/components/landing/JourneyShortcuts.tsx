@@ -170,33 +170,31 @@ function JourneyCard({ journey: j, index: i }: { journey: Journey; index: number
       <Link
         {...linkProps}
         aria-label={`${j.title} — ${j.label}`}
-        className="group relative block aspect-[4/3] sm:aspect-[5/4] rounded-2xl overflow-hidden border border-[var(--border)] bg-[var(--surface-card)] transition-all duration-500 hover:-translate-y-1 shadow-sm hover:shadow-md focus-visible:ring-2 focus-visible:ring-[var(--accent-luxury)] focus-visible:ring-offset-2"
+        title={`${j.title} — ${j.cta}`}
+        className="group relative block aspect-[4/3] sm:aspect-[5/4] rounded-2xl overflow-hidden border border-[var(--border)] bg-[var(--surface-card)] transition-all duration-500 hover:-translate-y-1 hover:border-[var(--accent-luxury)]/60 shadow-sm hover:shadow-md focus-visible:ring-2 focus-visible:ring-[var(--accent-luxury)] focus-visible:ring-offset-2"
       >
-        {/* Use plain img for graceful error handling */}
+        {/* L'image embarque déjà le persona, le titre et la description.
+            On ne rajoute PAS d'overlay texte pour éviter le doublon visuel.
+            Seule affordance : un coin discret avec une flèche au hover. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={j.image}
-          alt=""
+          alt={`${j.title} — ${j.label}`}
           loading="lazy"
           onError={() => setImgError(true)}
           className="absolute inset-0 w-full h-full object-cover motion-safe:group-hover:scale-[1.03] transition-transform duration-700"
         />
 
-        {/* Persona pill — visible always, top-left */}
-        <span className="absolute top-3 left-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--surface-card)]/95 backdrop-blur-sm border border-[var(--border)] text-[10px] font-bold uppercase tracking-wider text-[var(--text)]">
-          {j.label}
+        {/* Indicateur cliquable — chevron en bas-droite, apparaît au hover */}
+        <span
+          className="absolute bottom-3 right-3 inline-flex items-center justify-center w-9 h-9 rounded-full bg-white/95 backdrop-blur-md text-[var(--accent-luxury)] shadow-md opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-1 group-hover:translate-y-0"
+          aria-hidden="true"
+        >
+          <ArrowUpRight className="w-4 h-4" />
         </span>
 
-        {/* Bottom gradient + title — readable on any image */}
-        <div className="absolute inset-x-0 bottom-0 pt-12 pb-3 px-3 bg-gradient-to-t from-black/85 via-black/55 to-transparent">
-          <h3 className="font-display text-base md:text-lg font-bold text-white leading-tight mb-0.5 line-clamp-1">
-            {j.title}
-          </h3>
-          <p className="flex items-center gap-1 text-[11px] font-semibold text-white/85 group-hover:gap-2 transition-all">
-            {j.cta}
-            <ArrowUpRight className="w-3 h-3" />
-          </p>
-        </div>
+        {/* Texte SR-only pour les lecteurs d'écran (l'image n'expose pas son texte) */}
+        <span className="sr-only">{j.title}. {j.description}. {j.cta}.</span>
       </Link>
     )
   }
