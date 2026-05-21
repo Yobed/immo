@@ -101,31 +101,33 @@ export default async function HomePage() {
 
   return (
     <main className="bg-[var(--background)]">
-      {/* 1. Hero éditorial — image fixe, typo serif, recherche minimaliste */}
+      {/* 1. Hero éditorial — search + wizard CTA */}
       <HeroEditorial bgImage={bgImages[0]} featuredBiens={premiumProperties} />
 
-      {/* 2. Dernières visites (si l'utilisateur a déjà consulté des biens) */}
+      {/* 2. Dernières visites — auto-hidden if no localStorage history */}
       <RecentlyViewed />
 
-      {/* 3. Parcours utilisateurs — 5 personas explicites */}
+      {/* 3. Parcours utilisateurs — switch "Je suis…" prioritaire + 5 cartes */}
       <JourneyShortcuts />
 
-      {/* 3. Près de chez moi (Coup de coeur de l'utilisateur) */}
-      <NearMeSection initialBiens={biensWithPhoto} />
-
-      {/* 4. Sélection éditoriale */}
-      <FeaturedProperties initialBiens={biensWithPhoto} />
-
-      {/* 5. Veille en direct (réseau WhatsApp) */}
-      <FlashOffersSection />
-
-      {/* 6. Comment ça marche — différenciateur anti-arnaque + 2 pipelines */}
+      {/* 4. ⚠️ Comment ça marche — bloc anti-arnaque AVANT les annonces.
+            Adresse la méfiance immédiate du marché ivoirien : badges, KYC,
+            coordonnées masquées, deux pipelines clairement étiquetés. */}
       <HowItWorks />
 
-      {/* 7. Témoignages clients (proof social) */}
+      {/* 5. Près de chez moi (carte interactive avec filtres rapides) */}
+      <NearMeSection initialBiens={biensWithPhoto} />
+
+      {/* 6. Sélection éditoriale */}
+      <FeaturedProperties initialBiens={biensWithPhoto} />
+
+      {/* 7. Veille en direct (réseau WhatsApp) */}
+      <FlashOffersSection />
+
+      {/* 8. Témoignages clients (proof social) */}
       <TestimonialsSection />
 
-      {/* 7. Footer */}
+      {/* 9. Footer */}
       <Footer />
     </main>
   )

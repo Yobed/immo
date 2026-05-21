@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Search, ArrowRight, MapPin, ChevronRight } from 'lucide-react'
+import { Search, ArrowRight, MapPin, ChevronRight, Wand2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SearchBar } from '@/components/search/SearchBar'
 import { useT } from '@/lib/i18n/client'
+import { GuidedSearchWizard } from './GuidedSearchWizard'
 
 interface FeaturedBien {
   id: string
@@ -33,6 +34,7 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
     tx.hero.wordsCustom,
   ]
   const [headlineIdx, setHeadlineIdx] = useState(0)
+  const [wizardOpen, setWizardOpen] = useState(false)
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -112,6 +114,21 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
                   placeholder={tx.hero.searchExample}
                   className="shadow-md"
                 />
+
+                {/* Guided wizard CTA — pour les visiteurs qui ne savent pas par où commencer */}
+                <button
+                  type="button"
+                  onClick={() => setWizardOpen(true)}
+                  className="mt-3 inline-flex items-center gap-2 text-[13px] text-white/85 hover:text-white transition-colors group"
+                >
+                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#C5A059]/20 text-[#C5A059] group-hover:bg-[#C5A059]/30 transition-colors">
+                    <Wand2 className="w-3.5 h-3.5" />
+                  </span>
+                  <span className="underline-offset-4 group-hover:underline">
+                    Pas sûr ? <strong className="font-bold">Trouvez votre bien en 30 secondes</strong>
+                  </span>
+                  <ChevronRight className="w-3.5 h-3.5 opacity-60 group-hover:translate-x-0.5 transition-transform" />
+                </button>
               </div>
             </div>
 
@@ -166,6 +183,8 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
           </div>
         </div>
       </div>
+
+      <GuidedSearchWizard open={wizardOpen} onClose={() => setWizardOpen(false)} />
     </section>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { MapPin, Navigation, Loader2, Car, ExternalLink, ChevronRight, ArrowUpRight } from 'lucide-react'
+import { MapPin, Navigation, Loader2, Car, ExternalLink, ChevronRight, ArrowUpRight, ShieldCheck } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -76,7 +76,10 @@ function NearCard({
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
         {b.is_verifie && (
-          <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-blue-500/80 backdrop-blur-md rounded-full text-[7px] font-bold text-white uppercase tracking-wide">Certifié</span>
+          <span className="absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-0.5 bg-blue-600 backdrop-blur-md rounded-full text-[9px] font-black text-white uppercase tracking-wide shadow-md" title="Vérifié physiquement par l'équipe BOGBE'S">
+            <ShieldCheck className="w-2.5 h-2.5" />
+            Vérifié
+          </span>
         )}
         {b.dist_meters < 999999 && (
           <div className="absolute bottom-2 left-2 flex items-center gap-1 px-1.5 py-0.5 bg-emerald-500/90 backdrop-blur-md rounded-full">
@@ -365,6 +368,17 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
   const activeFilterCount =
     (filterType ? 1 : 0) + (filterOffre !== 'all' ? 1 : 0) + (filterMaxPrice !== null ? 1 : 0)
 
+  // Construit l'URL /catalogue qui propage les filtres actifs de la carte —
+  // évite la perte de contexte quand l'utilisateur passe carte → catalogue.
+  const cataloguePath = useMemo(() => {
+    const params = new URLSearchParams()
+    if (filterType) params.set('type_bien', filterType)
+    if (filterOffre !== 'all') params.set('type_offre', filterOffre)
+    if (filterMaxPrice !== null) params.set('prix_max', String(filterMaxPrice))
+    const qs = params.toString()
+    return qs ? `/catalogue?${qs}` : '/catalogue'
+  }, [filterType, filterOffre, filterMaxPrice])
+
   const mapBiens = useMemo(() => {
     return filteredBiens.map((b: BienProche) => ({ ...b, photo_url: coverMap[b.id] }))
   }, [filteredBiens, coverMap])
@@ -404,7 +418,7 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
 
           <div className="flex flex-wrap items-center gap-3">
             <button
-              onClick={() => (window.location.href = '/biens')}
+              onClick={() => (window.location.href = cataloguePath)}
               className="flex items-center gap-2 px-5 py-3 bg-[var(--text)] text-[var(--background)] font-display text-[11px] font-bold tracking-[0.2em] uppercase rounded-full transition-all hover:scale-105 shadow-lg active:scale-95"
             >
               {tx.near.exploreAds}
@@ -621,7 +635,7 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
                           <h3 className="font-display font-bold text-lg text-[var(--text)] tracking-tight">{cat.label}</h3>
                         </div>
                         <Link
-                          href={`/biens?type_bien=${cat.key}`}
+                          href={`/catalogue?type_bien=${cat.key}${filterOffre !== 'all' ? `&type_offre=${filterOffre}` : ''}${filterMaxPrice !== null ? `&prix_max=${filterMaxPrice}` : ''}`}
                           className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--accent-luxury)] border-b border-[var(--accent-luxury)]/40 pb-0.5 hover:border-[var(--accent-luxury)] transition-colors"
                         >
                           {tx.near.viewAll} <ChevronRight className="w-3 h-3" />
@@ -649,8 +663,14 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
               </div>
 
               <div className="mt-10 text-center">
-                <Link href="/biens" className="inline-flex items-center gap-3 px-8 py-3 rounded-full border border-[var(--accent-luxury)] text-[var(--accent-luxury)] text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-[var(--accent-luxury)] hover:text-black transition-all">
-                  {tx.near.exploreCatalogue} <ChevronRight className="w-4 h-4" />
+                <Link href={cataloguePath} className="inline-flex items-center gap-3 px-8 py-3 rounded-full border border-[var(--accent-luxury)] text-[var(--accent-luxury)] text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-[var(--accent-luxury)] hover:text-black transition-all">
+                  {tx.near.exploreCatalogue}
+                  {activeFilterCount > 0 && (
+                    <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[var(--accent-luxury)] text-black text-[8px]">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                  <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>
