@@ -5,7 +5,7 @@ const TALLY_FORM_URL = 'https://tally.so/r/QKxNNp'
 
 export function PublishChoiceTeaser() {
   return (
-    <section className="relative py-16 md:py-24 bg-[#020617] overflow-hidden">
+    <section className="relative py-16 md:py-24 bg-[var(--background)] overflow-hidden">
       {/* Decorative top divider */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--accent-luxury)]/30 to-transparent" />
 

@@ -143,10 +143,13 @@ function LoginContent() {
               {...register('email')}
               type="email"
               placeholder={t.auth.emailPlaceholder}
+              autoComplete="email"
+              aria-invalid={errors.email ? 'true' : 'false'}
+              aria-describedby={errors.email ? 'login-email-error' : undefined}
               className="w-full px-6 h-[64px] bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-[var(--text-muted)]/20"
             />
             {errors.email && (
-              <p className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.email.message}</p>
+              <p id="login-email-error" role="alert" className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.email.message}</p>
             )}
           </div>
 
@@ -163,10 +166,13 @@ function LoginContent() {
               {...register('password')}
               type="password"
               placeholder="••••••••"
+              autoComplete="current-password"
+              aria-invalid={errors.password ? 'true' : 'false'}
+              aria-describedby={errors.password ? 'login-password-error' : undefined}
               className="w-full px-6 h-[64px] bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-[var(--text-muted)]/20"
             />
             {errors.password && (
-              <p className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.password.message}</p>
+              <p id="login-password-error" role="alert" className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.password.message}</p>
             )}
           </div>
         </div>

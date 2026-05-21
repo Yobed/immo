@@ -318,10 +318,12 @@ export function StickyMobileCTA({
                   </div>
                 </div>
                 <button
+                  type="button"
+                  aria-label="Fermer"
                   onClick={() => setSheetOpen(false)}
-                  className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center active:bg-slate-200 shrink-0"
+                  className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-slate-100 flex items-center justify-center active:bg-slate-200 shrink-0"
                 >
-                  <X className="w-4 h-4 text-slate-500" />
+                  <X className="w-5 h-5 text-slate-600" />
                 </button>
               </div>
 

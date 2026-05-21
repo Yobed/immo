@@ -65,8 +65,9 @@ export function MobileMenu({ links, user }: MobileMenuProps) {
       {/* Hamburger */}
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center justify-center w-10 h-10 rounded-xl hover:bg-[var(--surface-hover)] transition-all md:hidden border border-[var(--border)]"
+        className="flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 rounded-xl hover:bg-[var(--surface-hover)] transition-all md:hidden border border-[var(--border)]"
         aria-label="Menu"
+        aria-expanded={open}
       >
         {open ? <X className="w-5 h-5 text-[var(--text)]" /> : <Menu className="w-5 h-5 text-[var(--text)]" />}
       </button>
@@ -83,18 +84,13 @@ export function MobileMenu({ links, user }: MobileMenuProps) {
           <Link href="/" onClick={close} className="flex items-center gap-2.5">
             <Image src="/bogbes-logo.png" alt="BOGBE'S" width={36} height={36} className="object-contain" />
             <span className="font-display text-base font-bold text-[var(--text)] tracking-tight leading-tight">
-              BOGBE&apos;S <span style={{
-                background: 'linear-gradient(135deg,#F97316,#FB923C)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}>GROUPE</span>
+              BOGBE&apos;S <span className="text-[var(--secondary)]">GROUPE</span>
             </span>
           </Link>
           <button
             onClick={close}
             aria-label="Fermer"
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-[var(--surface-card)] border border-[var(--border)] text-[var(--text)] active:scale-95 transition-transform"
+            className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center rounded-full bg-[var(--surface-card)] border border-[var(--border)] text-[var(--text)] active:scale-95 transition-transform"
           >
             <X size={20} />
           </button>

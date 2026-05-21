@@ -36,7 +36,7 @@ export function PropertyHeroOverlay({ urlVisite3d, videoMedias = [] }: PropertyH
                   id: v.id, url: v.url, title: "Expérience Immersive",
                   price: "", location: "", propertyId: ""
                 }))}
-                className="!bg-white/10 !backdrop-blur-3xl !border-white/20 !text-white hover:!bg-white/20 !shadow-none !h-full !px-4 md:!px-10"
+                className="!bg-white/10 !backdrop-blur-md !border-white/20 !text-white hover:!bg-white/20 !shadow-none !h-full !px-4 md:!px-10"
               />
             </div>
           )}
@@ -50,7 +50,7 @@ export function PropertyHeroOverlay({ urlVisite3d, videoMedias = [] }: PropertyH
             // Event to notify parent if needed
             window.dispatchEvent(new CustomEvent('hero-focus-toggle', { detail: !isFocused }))
           }}
-          className="flex items-center gap-3 px-6 py-4 bg-[#020617]/60 backdrop-blur-3xl rounded-2xl border border-white/20 text-[#f8fafc] shadow-2xl transition-all hover:bg-[#020617]/80"
+          className="flex items-center gap-3 px-6 py-4 bg-[#020617]/60 backdrop-blur-md rounded-2xl border border-white/20 text-[#f8fafc] shadow-md transition-all hover:bg-[#020617]/80"
           title={isFocused ? "Afficher les détails" : "Mode Immersion (Masquer texte)"}
         >
           {isFocused ? (

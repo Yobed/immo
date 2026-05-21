@@ -407,7 +407,7 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
         <div className="flex flex-col gap-8">
 
           {/* BIG MAP — ALWAYS mounted, loading spinner overlays on top */}
-          <div ref={mapContainerRef} className="group rounded-3xl overflow-hidden ring-1 ring-[var(--border)] p-1 bg-[var(--surface-card)] backdrop-blur-3xl transition-all duration-1000 hover:ring-[var(--accent-luxury)]" style={{ height: mapHeight + 2 }}>
+          <div ref={mapContainerRef} className="group rounded-3xl overflow-hidden ring-1 ring-[var(--border)] p-1 bg-[var(--surface-card)] backdrop-blur-md transition-all duration-1000 hover:ring-[var(--accent-luxury)]" style={{ height: mapHeight + 2 }}>
             <div className="rounded-[calc(1.5rem-4px)] overflow-hidden bg-[var(--background)] relative h-full transition-all duration-700">
             {/* Map is ALWAYS rendered — never unmounted */}
             <PropertiesMap
@@ -449,7 +449,7 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
 
             {/* Route info badge — desktop only (mobile handled by PropertiesMap compact bar) */}
             {selectedBien && (
-              <div className="hidden sm:flex absolute bottom-5 left-1/2 -translate-x-1/2 z-10 px-5 py-3 bg-black/80 backdrop-blur-xl rounded-full border border-[var(--accent-luxury)]/40 items-center gap-4 shadow-2xl">
+              <div className="hidden sm:flex absolute bottom-5 left-1/2 -translate-x-1/2 z-10 px-5 py-3 bg-black/80 backdrop-blur-xl rounded-full border border-[var(--accent-luxury)]/40 items-center gap-4 shadow-md">
                 <div className="w-2 h-2 rounded-full bg-[var(--accent-luxury)] animate-pulse" />
                 <span className="text-white text-[10px] font-bold uppercase tracking-widest">
                   Itinéraire vers : {selectedBien.titre}

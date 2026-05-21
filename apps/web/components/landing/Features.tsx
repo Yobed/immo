@@ -138,7 +138,7 @@ export function Features() {
               variants={itemVariants}
               className={`${f.span} group relative rounded-2xl overflow-hidden`}
             >
-              <div className="h-full bg-[var(--surface-card)] border border-[var(--border)] p-8 backdrop-blur-3xl transition-all duration-700 ease-expo group-hover:bg-[var(--primary-light)] group-hover:border-[var(--border-hover)]">
+              <div className="h-full bg-[var(--surface-card)] border border-[var(--border)] p-8 backdrop-blur-md transition-all duration-700 ease-expo group-hover:bg-[var(--primary-light)] group-hover:border-[var(--border-hover)]">
                 {/* Visual Accent */}
                 <div 
                   className="absolute top-0 right-0 w-32 h-32 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"
@@ -146,10 +146,7 @@ export function Features() {
                 />
 
                 <div className="relative z-10">
-                  <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center mb-10 transition-transform duration-700 group-hover:scale-110"
-                    style={{ background: 'var(--primary-light)', color: 'var(--text)', border: '1px solid var(--border)' }}
-                  >
+                  <div className="inline-flex w-10 h-10 items-center justify-center mb-10 text-[var(--accent-luxury)] transition-transform duration-700 group-hover:translate-x-1">
                     {f.icon}
                   </div>
                   

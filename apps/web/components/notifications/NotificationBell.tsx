@@ -107,7 +107,7 @@ export function NotificationBell({ userId, initialUnreadCount }: NotificationBel
             aria-hidden
           />
           {/* Dropdown — fixed full-width on mobile, absolute right-aligned on desktop */}
-          <div className="fixed left-2 right-2 top-[4.5rem] sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80 bg-[var(--surface-card)] rounded-card shadow-2xl border border-[var(--border)] z-50 overflow-hidden">
+          <div className="fixed left-2 right-2 top-[4.5rem] sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80 bg-[var(--surface-card)] rounded-card shadow-md border border-[var(--border)] z-50 overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
               <span className="font-sans text-sm font-semibold text-[var(--text)]">Notifications</span>
               <a

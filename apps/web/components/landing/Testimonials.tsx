@@ -77,7 +77,7 @@ export function Testimonials() {
                   &ldquo;
                 </span>
                 
-                <p className="font-sans text-xl text-[var(--text-muted)] leading-relaxed mb-12 relative z-10 h-[100px] lg:h-[140px] italic">
+                <p className="font-sans text-xl text-[var(--text-muted)] leading-relaxed mb-12 relative z-10 min-h-[5em] italic">
                   {t.text}
                 </p>
 
@@ -93,10 +93,6 @@ export function Testimonials() {
                 </div>
               </div>
 
-              {/* Hover Line Animation */}
-              <div 
-                className="absolute -bottom-4 left-0 h-[1px] w-0 bg-[#fafbfc]/20 transition-all duration-1000 group-hover:w-full"
-              />
             </motion.div>
           ))}
         </motion.div>

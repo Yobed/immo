@@ -53,7 +53,7 @@ export function ConciergerieLive({ propertyContext, isFloatingTrigger = false, c
       <div className={className || "flex flex-col gap-4"}>
         <button 
           onClick={() => setIsOpen(true)}
-          className="w-full flex flex-col items-center justify-center gap-2 py-10 bg-gradient-to-br from-slate-900 to-black border border-accent-luxury/20 rounded-[2.5rem] hover:border-accent-luxury/50 transition-all duration-500 hover:bg-accent-luxury/5 text-white group shadow-2xl relative overflow-hidden"
+          className="w-full flex flex-col items-center justify-center gap-2 py-10 bg-gradient-to-br from-slate-900 to-black border border-accent-luxury/20 rounded-[2.5rem] hover:border-accent-luxury/50 transition-all duration-500 hover:bg-accent-luxury/5 text-white group shadow-md relative overflow-hidden"
         >
           <div className="absolute top-0 right-0 w-24 h-24 bg-accent-luxury/5 blur-2xl rounded-full translate-x-1/2 -translate-y-1/2 group-hover:bg-accent-luxury/10 transition-colors" />
           <div className="p-3 bg-accent-luxury/10 rounded-2xl mb-2 group-hover:scale-110 group-hover:bg-accent-luxury/20 transition-all duration-500">

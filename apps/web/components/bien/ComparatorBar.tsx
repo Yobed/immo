@@ -30,7 +30,7 @@ export function ComparatorBar({ selected, onRemove, onClear }: Props) {
         exit={{ y: 100, opacity: 0 }}
         className="fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 z-[200] w-[calc(100%-2rem)] max-w-xl"
       >
-        <div className="bg-[var(--midnight)]/95 backdrop-blur-xl border border-[var(--accent-luxury)]/30 rounded-2xl shadow-2xl px-4 py-3 flex items-center gap-3">
+        <div className="bg-[var(--surface-card)]/95 backdrop-blur-xl border border-[var(--accent-luxury)]/30 rounded-2xl shadow-md px-4 py-3 flex items-center gap-3">
           <GitCompare className="w-4 h-4 text-[var(--accent-luxury)] shrink-0" />
           <div className="flex items-center gap-2 flex-1 min-w-0">
             {selected.map(b => (
@@ -77,7 +77,7 @@ export function ComparatorBar({ selected, onRemove, onClear }: Props) {
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 50, opacity: 0 }}
-              className="w-full max-w-4xl bg-[var(--background)] rounded-3xl overflow-hidden border border-[var(--border)] shadow-2xl max-h-[90vh] overflow-y-auto"
+              className="w-full max-w-4xl bg-[var(--background)] rounded-3xl overflow-hidden border border-[var(--border)] shadow-md max-h-[90vh] overflow-y-auto"
             >
               {/* Header */}
               <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)] sticky top-0 bg-[var(--background)] z-10">

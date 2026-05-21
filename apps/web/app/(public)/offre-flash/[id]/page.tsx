@@ -343,6 +343,7 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
         {/* Biens similaires (même type, même commune, ±25% prix) */}
         <SimilarBiensSection
           excludeId={String(bien.id)}
+          excludeSource="flash"
           commune={bien.commune}
           type_bien={bien.type_bien}
           prix_value={bien.prix_value}

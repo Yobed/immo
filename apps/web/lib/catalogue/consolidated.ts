@@ -260,6 +260,65 @@ async function fetchLocaux(filters: ConsolidatedFilters): Promise<ConsolidatedBi
   }
 }
 
+// ─── Dédup ──────────────────────────────────────────────────────────────────
+
+/**
+ * Construit une empreinte (fingerprint) approximative pour détecter les doublons :
+ * même commune + type + prix (bucket 5%) + surface (bucket 5m²) + chambres.
+ * Note : on ne peut pas faire un match exact car le scraper saisit des prix
+ * légèrement différents (ex: 350 000 vs 350000) → on bucket.
+ */
+function fingerprint(b: ConsolidatedBien): string {
+  const commune = (b.commune || '').toLowerCase().trim()
+  const type = (b.type_bien || '').toLowerCase().trim()
+  // Bucket prix : palier 5% → "tranche prix"
+  const prixBucket = b.prix_value
+    ? Math.round(b.prix_value / Math.max(1, b.prix_value * 0.05))
+    : 0
+  // Bucket surface : palier 5m²
+  const surfaceBucket = b.surface_m2 ? Math.round(b.surface_m2 / 5) : 0
+  const pieces = b.nb_pieces ?? 0
+  return `${commune}|${type}|${prixBucket}|${surfaceBucket}|${pieces}`
+}
+
+/**
+ * Déduplique les biens consolidés. Stratégie :
+ * - Empreinte identique (commune+type+prix±5%+surface±5m²+pieces) → on garde 1 seul.
+ * - Priorité : vérifié BOGBE'S > flash récent > flash ancien.
+ * - On garde aussi tous les biens sans assez d'infos pour fingerprint (prix_value null + surface null).
+ */
+function dedupConsolidated(items: ConsolidatedBien[]): ConsolidatedBien[] {
+  const map = new Map<string, ConsolidatedBien>()
+  const passthrough: ConsolidatedBien[] = []
+  for (const item of items) {
+    // Si on n'a ni prix ni surface, on ne peut pas dédupliquer fiablement → on garde tel quel
+    if (item.prix_value == null && item.surface_m2 == null) {
+      passthrough.push(item)
+      continue
+    }
+    const key = fingerprint(item)
+    const existing = map.get(key)
+    if (!existing) {
+      map.set(key, item)
+      continue
+    }
+    // Conflit : on garde le meilleur
+    const score = (b: ConsolidatedBien): number => {
+      let s = 0
+      if (b.is_verifie) s += 100
+      if (b.source === 'bogbes') s += 50
+      if (b.photo_url) s += 10
+      if (b.score_ia) s += b.score_ia / 10
+      if (b.is_recent) s += 5
+      return s
+    }
+    if (score(item) > score(existing)) {
+      map.set(key, item)
+    }
+  }
+  return [...map.values(), ...passthrough]
+}
+
 // ─── Merge + tri unifié ─────────────────────────────────────────────────────
 
 function sortConsolidated(items: ConsolidatedBien[], sort: ConsolidatedFilters['sort']): ConsolidatedBien[] {
@@ -293,7 +352,8 @@ export async function getConsolidatedCatalogue(
   filters: ConsolidatedFilters = {},
 ): Promise<{ items: ConsolidatedBien[]; counts: { bogbes: number; flash: number; total: number } }> {
   const [bogbes, flash] = await Promise.all([fetchBogbes(filters), fetchLocaux(filters)])
-  const merged = sortConsolidated([...bogbes, ...flash], filters.sort ?? 'verified_first')
+  const deduped = dedupConsolidated([...bogbes, ...flash])
+  const merged = sortConsolidated(deduped, filters.sort ?? 'verified_first')
   return {
     items: merged,
     counts: {

@@ -208,6 +208,34 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
               />
             </motion.div>
 
+            {/* Mobile featured biens preview — replaces the hidden lg:flex column */}
+            {featuredBiens && featuredBiens.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.55 }}
+                className="lg:hidden mt-6 -mx-4 px-4 flex gap-2.5 overflow-x-auto no-scrollbar"
+              >
+                {featuredBiens.slice(0, 5).map((bien) => (
+                  <Link
+                    key={bien.id}
+                    href={`/biens/${bien.id}`}
+                    className="shrink-0 w-[140px] rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 active:scale-95 transition-transform overflow-hidden"
+                  >
+                    <div className="relative aspect-[4/3] bg-white/5">
+                      {bien.photo_url && (
+                        <Image src={bien.photo_url} alt={bien.titre} fill className="object-cover" sizes="140px" />
+                      )}
+                    </div>
+                    <div className="p-2">
+                      <p className="text-white text-[11px] font-semibold truncate">{bien.titre}</p>
+                      <p className="text-white/50 text-[10px] truncate">{bien.commune}</p>
+                    </div>
+                  </Link>
+                ))}
+              </motion.div>
+            )}
+
             {/* Catégories — pill buttons bien visibles */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -219,7 +247,7 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
                 <Link
                   key={cat.label}
                   href={cat.href}
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white/12 hover:bg-white/22 backdrop-blur-md border border-white/20 text-white text-[13px] font-semibold transition-all duration-200 active:scale-95 min-h-[44px]"
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white text-[13px] font-semibold transition-all duration-200 active:scale-95 min-h-[44px]"
                 >
                   {cat.label}
                   <ChevronRight className="w-3.5 h-3.5 opacity-60" />

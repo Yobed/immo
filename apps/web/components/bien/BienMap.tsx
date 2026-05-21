@@ -78,8 +78,8 @@ export function BienMap({ latitude, longitude, titre, commune, hauteur = 300 }: 
   const propertyPin = hasCoords ? (
     <Marker longitude={propLng} latitude={propLat} anchor="bottom">
       <div className="relative">
-        <div className="absolute -inset-3 bg-[#D97706] rounded-full animate-ping opacity-30" />
-        <div className="relative w-11 h-11 bg-[#D97706] rounded-full border-2 border-white shadow-xl flex items-center justify-center text-white">
+        <div className="absolute -inset-3 bg-[var(--secondary)] rounded-full animate-ping opacity-30" />
+        <div className="relative w-11 h-11 bg-[var(--secondary)] rounded-full border-2 border-white shadow-xl flex items-center justify-center text-white">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
           </svg>
@@ -114,7 +114,7 @@ export function BienMap({ latitude, longitude, titre, commune, hauteur = 300 }: 
         ) : route ? (
           <><RefreshCw className="w-4 h-4 text-blue-600" />Rafraîchir ma position</>
         ) : (
-          <><Navigation className="w-4 h-4 text-[#D97706] animate-pulse" />Itinéraire depuis ma position</>
+          <><Navigation className="w-4 h-4 text-[var(--secondary)] animate-pulse" />Itinéraire depuis ma position</>
         )}
       </button>
     </div>

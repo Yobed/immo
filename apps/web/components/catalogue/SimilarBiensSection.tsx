@@ -3,8 +3,10 @@ import { getConsolidatedCatalogue } from '@/lib/catalogue/consolidated'
 import { UnifiedBienCard } from './UnifiedBienCard'
 
 interface Props {
-  /** ID du bien courant à exclure des résultats */
+  /** ID brut du bien courant à exclure (sourceId) */
   excludeId: string
+  /** Source du bien courant (pour exclusion fiable, évite collisions UUID/numeric) */
+  excludeSource?: 'bogbes' | 'flash'
   /** Commune pour cibler les similaires */
   commune: string
   /** Type de bien pour cibler les similaires */
@@ -30,6 +32,7 @@ interface Props {
  */
 export async function SimilarBiensSection({
   excludeId,
+  excludeSource,
   commune,
   type_bien,
   prix_value,
@@ -46,11 +49,16 @@ export async function SimilarBiensSection({
     prix_min: prixMin,
     prix_max: prixMax,
     sort: 'verified_first',
-    limitPerSource: 10,
+    limitPerSource: 20,
   })
 
-  // Exclure le bien courant et garder max 4
-  const similar = items.filter((b) => b.sourceId !== excludeId).slice(0, 4)
+  // Exclure le bien courant via ID préfixé si possible (évite collision UUID/numeric)
+  const excludedFullId = excludeSource ? `${excludeSource}:${excludeId}` : null
+  const similar = items
+    .filter((b) =>
+      excludedFullId ? b.id !== excludedFullId : b.sourceId !== excludeId,
+    )
+    .slice(0, 4)
 
   if (similar.length === 0) return null
 

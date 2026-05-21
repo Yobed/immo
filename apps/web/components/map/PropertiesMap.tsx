@@ -75,7 +75,7 @@ const MAP_STYLES = `
   /* ── Bien marker dot (gold) — SAME structure as user dot ── */
   .bien-dot {
     width: 18px; height: 18px;
-    background: #D4AF37;
+    background: var(--accent-luxury);
     border: 3px solid #fff;
     border-radius: 50%;
     box-shadow: 0 0 15px rgba(212,175,55,0.9), 0 0 30px rgba(212,175,55,0.4);
@@ -86,14 +86,14 @@ const MAP_STYLES = `
   .bien-dot.selected {
     width: 24px; height: 24px;
     background: #fff;
-    border: 4px solid #D4AF37;
+    border: 4px solid var(--accent-luxury);
     box-shadow: 0 0 30px rgba(212,175,55,1), 0 0 60px rgba(212,175,55,0.6);
   }
   .bien-ring {
     position: absolute;
     top: 50%; left: 50%;
     width: 44px; height: 44px;
-    border: 3px solid #D4AF37;
+    border: 3px solid var(--accent-luxury);
     border-radius: 50%;
     animation: gps-pulse 2.5s ease-out infinite;
     pointer-events: none;
@@ -114,7 +114,7 @@ const MAP_STYLES = `
     letter-spacing: 0.05em;
     white-space: nowrap;
     background: rgba(10,10,25,0.95);
-    color: #D4AF37;
+    color: var(--accent-luxury);
     border: 1.5px solid rgba(212,175,55,0.7);
     box-shadow: 0 8px 24px rgba(0,0,0,0.7);
     backdrop-filter: blur(12px);
@@ -123,7 +123,7 @@ const MAP_STYLES = `
     transition: all 0.3s;
   }
   .bien-price.selected {
-    background: #D4AF37;
+    background: var(--accent-luxury);
     color: #000;
     border-color: #fff;
     box-shadow: 0 0 22px rgba(212,175,55,0.9);
@@ -356,7 +356,7 @@ export function PropertiesMap({
 
         {markers.length > 0 && (
           <div className="flex items-center gap-2.5 px-3 sm:px-4 py-2 sm:py-2 bg-black/85 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-white/10 shadow-2xl whitespace-nowrap">
-            <span className="w-2.5 h-2.5 bg-[#D4AF37] rounded-full shrink-0" />
+            <span className="w-2.5 h-2.5 bg-[var(--accent-luxury)] rounded-full shrink-0" />
             <div className="flex flex-col">
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-white leading-tight">
                 {markers.length} Biens
@@ -383,12 +383,12 @@ export function PropertiesMap({
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-[9px] font-bold text-[#D4AF37] uppercase tracking-wider truncate">
+                  <p className="text-[9px] font-bold text-[var(--accent-luxury)] uppercase tracking-wider truncate">
                     {bien.commune}{bien.quartier ? ` · ${bien.quartier}` : ''}
                   </p>
                   <p className="text-white text-[13px] font-bold truncate leading-tight">{bien.titre}</p>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <p className="text-[#D4AF37] text-xs font-black">{formatPrice(bien)}</p>
+                    <p className="text-[var(--accent-luxury)] text-xs font-black">{formatPrice(bien)}</p>
                     {routeGeometry && (
                       <span className="flex items-center gap-1 text-blue-400 text-[9px] font-bold">
                         <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" />
@@ -400,7 +400,7 @@ export function PropertiesMap({
                 <div className="flex flex-col gap-1.5 shrink-0">
                   <Link
                     href={`/biens/${bien.id}`}
-                    className="px-3 py-1.5 bg-[#D4AF37] text-black rounded-xl text-[10px] font-black uppercase tracking-wide text-center"
+                    className="px-3 py-1.5 bg-[var(--accent-luxury)] text-black rounded-xl text-[10px] font-black uppercase tracking-wide text-center"
                     onClick={e => e.stopPropagation()}
                   >
                     Voir
@@ -423,7 +423,7 @@ export function PropertiesMap({
                     <Image src={bien.photo_url} alt={bien.titre} fill className="object-cover" sizes="(max-width: 640px) 100vw, 300px" />
                   ) : (
                     <div className="w-full h-full bg-[#1a1a2e] flex items-center justify-center">
-                      <MapPin className="text-[#D4AF37] opacity-20" size={32} />
+                      <MapPin className="text-[var(--accent-luxury)] opacity-20" size={32} />
                     </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a12] via-[#0a0a12]/20 to-transparent" />
@@ -435,11 +435,11 @@ export function PropertiesMap({
                   </button>
                 </div>
                 <div className="px-5 py-5 -mt-4 relative">
-                  <p className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-[#D4AF37] mb-1">
+                  <p className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-[var(--accent-luxury)] mb-1">
                     {bien.commune}{bien.quartier ? ` · ${bien.quartier}` : ''}
                   </p>
                   <h3 className="text-white text-base font-bold leading-tight mb-2">{bien.titre}</h3>
-                  <p className="text-[#D4AF37] text-lg font-black mb-4">{formatPrice(bien)}</p>
+                  <p className="text-[var(--accent-luxury)] text-lg font-black mb-4">{formatPrice(bien)}</p>
                   {routeGeometry && (
                     <div className="flex items-center gap-2.5 p-3 bg-blue-500/10 rounded-xl border border-blue-500/20 mb-4">
                       <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shrink-0" />
@@ -451,7 +451,7 @@ export function PropertiesMap({
                   )}
                   <Link
                     href={`/biens/${bien.id}`}
-                    className="flex items-center justify-center w-full py-3 bg-[#D4AF37] text-black rounded-xl text-[11px] font-black uppercase tracking-[0.15em] hover:scale-[1.02] active:scale-95 transition-all"
+                    className="flex items-center justify-center w-full py-3 bg-[var(--accent-luxury)] text-black rounded-xl text-[11px] font-black uppercase tracking-[0.15em] hover:scale-[1.02] active:scale-95 transition-all"
                     onClick={e => e.stopPropagation()}
                   >
                     Consulter les détails

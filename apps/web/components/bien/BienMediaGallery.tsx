@@ -190,14 +190,16 @@ export function BienMediaGallery({
             {/* Header sticky */}
             <div className="sticky top-0 bg-white/95 backdrop-blur-sm border-b border-slate-200 px-4 py-3.5 flex items-center gap-4 z-10">
               <button
+                type="button"
+                aria-label="Fermer la galerie"
                 onClick={() => setShowAllPhotos(false)}
-                className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors"
+                className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors"
               >
                 <X className="w-5 h-5 text-slate-700" />
               </button>
               <div>
                 <h2 className="font-bold text-slate-900 text-sm leading-none">{bien.titre}</h2>
-                <p className="text-slate-400 text-xs mt-0.5">{photos.length} photos</p>
+                <p className="text-slate-600 text-xs mt-0.5">{photos.length} photos</p>
               </div>
             </div>
 
@@ -228,6 +230,9 @@ export function BienMediaGallery({
       <AnimatePresence>
         {lightboxIndex !== null && (
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Photo agrandie"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -238,7 +243,7 @@ export function BienMediaGallery({
             {/* Image */}
             <Image
               src={photos[lightboxIndex]?.url || ''}
-              alt=""
+              alt={`Photo ${lightboxIndex + 1} sur ${photos.length}`}
               width={1920}
               height={1080}
               className="max-w-full max-h-full object-contain"
@@ -247,8 +252,10 @@ export function BienMediaGallery({
 
             {/* Fermer */}
             <button
+              type="button"
+              aria-label="Fermer la photo"
               onClick={() => setLightboxIndex(null)}
-              className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
+              className="absolute top-4 right-4 min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -283,7 +290,7 @@ export function BienMediaGallery({
 
       {/* ─── ONGLETS MÉDIAS ─── */}
       {tabKeys.length > 0 && (
-        <div className="bg-[#020617] border-b border-white/5 px-4 py-3">
+        <div className="bg-[var(--background)] border-b border-white/5 px-4 py-3">
           <div className="flex gap-2 overflow-x-auto no-scrollbar max-w-[1400px] mx-auto">
             {tabKeys.map(key => {
               const Icon = TAB_ICONS[key]!
@@ -340,7 +347,7 @@ export function BienMediaGallery({
 
       {/* ─── STATS INLINE ─── */}
       {stats.length > 0 && (
-        <div className="bg-[#020617] px-4 py-4 md:px-6 border-b border-white/5">
+        <div className="bg-[var(--background)] px-4 py-4 md:px-6 border-b border-white/5">
           <div className="flex flex-wrap gap-x-5 gap-y-2 max-w-[1400px] mx-auto">
             {stats.map((stat, i) => {
               const Icon = STAT_ICONS[stat.key]

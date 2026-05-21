@@ -67,7 +67,7 @@ export function ServicesPillars() {
               </div>
 
               {/* Number */}
-              <span className="absolute top-6 right-6 font-mono text-xs text-slate-300 group-hover:text-amber-700/60 transition-colors" aria-hidden="true">
+              <span className="absolute top-6 right-6 font-mono text-xs text-slate-500 group-hover:text-amber-800 transition-colors" aria-hidden="true">
                 0{i + 1}
               </span>
 
@@ -82,7 +82,7 @@ export function ServicesPillars() {
               </p>
 
               {/* Arrow */}
-              <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.25em] text-slate-500 group-hover:text-amber-700 transition-colors">
+              <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.25em] text-slate-700 group-hover:text-amber-800 transition-colors">
                 En savoir plus
                 <ArrowUpRight className="w-3 h-3 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
               </div>

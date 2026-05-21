@@ -41,7 +41,7 @@ function SocialProofBar() {
           <div
             key={i}
             className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-400 to-amber-600
-                       border-2 border-[#020617] flex items-center justify-center text-xs"
+                       border-2 border-[var(--background)] flex items-center justify-center text-xs"
           >
             {e}
           </div>
@@ -222,7 +222,7 @@ export function WaitlistHero() {
   }
 
   return (
-    <div className="min-h-screen bg-[#020617] flex flex-col">
+    <div className="min-h-screen bg-[var(--background)] flex flex-col">
       {/* Background orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -left-40 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
@@ -264,9 +264,7 @@ export function WaitlistHero() {
 
             <h1 className="text-4xl sm:text-5xl font-bold text-white leading-[1.08] tracking-tight font-display">
               Trouvez votre logement<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500">
-                sans arnaque
-              </span>{' '}à Abidjan
+              <span className="text-[var(--accent-luxury)] italic font-light">sans arnaque</span>{' '}à Abidjan
             </h1>
 
             <p className="text-lg text-slate-400 max-w-md mx-auto leading-relaxed">

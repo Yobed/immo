@@ -23,6 +23,11 @@ export default async function HomePage() {
     .from('biens')
     .select('id, titre, commune, quartier, type_bien, latitude, longitude, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces, est_disponible, is_verifie, score_ia, statut')
     .eq('statut', 'publie')
+    // Cap homepage to last 80 biens — used by NearMe/Featured/Hero sections
+    // (top 8 photos for Hero, top 3 premium, NearMe filters client-side).
+    .order('is_verifie', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(80)
 
   const biensList = (biens ?? []).map((b: any) => ({
     ...b,

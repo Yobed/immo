@@ -1,6 +1,6 @@
 'use client'
-import { useEffect, useState, useRef } from 'react'
-import { motion, Variants, useScroll, useTransform } from 'framer-motion'
+import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 
 function useCounter(target: number, active: boolean, duration = 2500) {
   const [count, setCount] = useState(0)
@@ -25,21 +25,18 @@ const STATS = [
     label: 'Biens d\'Exception',
     suffix: '+',
     desc: 'Une sélection rigoureuse pour des résidents exigeants.',
-    accent: '#F97316',
   },
   {
     target: 12,
     label: 'Rayonnement Local',
     suffix: '',
     desc: 'Communes stratégiques couvertes avec excellence.',
-    accent: '#fafbfc',
   },
   {
     target: 98,
     label: 'Clients Heureux',
     suffix: '%',
     desc: 'Le taux de recommandation de nos utilisateurs.',
-    accent: '#0D9F6E',
   },
   {
     target: 48,
@@ -47,24 +44,15 @@ const STATS = [
     suffix: '/5',
     desc: 'Une note reflétant notre engagement absolu.',
     tenths: true,
-    accent: '#fafbfc',
   },
 ]
 
 export function Stats() {
   const [isActive, setIsActive] = useState(false)
-  const containerRef = useRef(null)
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"]
-  })
-
-  const y1 = useTransform(scrollYProgress, [0, 1], [0, -50])
 
   return (
     <section
-      ref={containerRef}
-      className="py-[var(--section-py)] bg-[var(--background)] relative overflow-hidden -mt-10 rounded-t-[3rem] z-[70]"
+      className="py-[var(--section-py)] bg-[var(--background)] relative overflow-hidden -mt-10 rounded-t-[var(--radius-2xl)] z-[70]"
     >
       {/* Background Ambience */}
       <div className="absolute inset-0 opacity-10 pointer-events-none">
@@ -73,26 +61,22 @@ export function Stats() {
       </div>
 
       <div className="relative container mx-auto px-6 max-w-7xl">
-        {/* Editorial Header */}
-        <div className="mb-16 md:mb-24 flex flex-col md:flex-row justify-between items-end gap-12">
+        {/* Editorial Header — title carries the full message, no redundant lede */}
+        <div className="mb-16 md:mb-24">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            className="max-w-3xl"
           >
             <span className="text-[var(--text-muted)] font-sans tracking-[0.35em] uppercase text-xs mb-6 block font-medium">
               Performance & Rigueur
             </span>
-            <h2 className="font-display text-4xl md:text-7xl font-light text-[var(--text)] leading-[1.1] tracking-tighter">
-              L'immobilier en <br/>
-              <span className="italic font-serif opacity-70">Sa Plus Haute Expression.</span>
+            <h2 className="font-display text-4xl md:text-7xl font-light text-[var(--text)] leading-[1.05] tracking-tighter">
+              L'immobilier en <span className="italic font-serif opacity-70">sa plus haute expression.</span>
             </h2>
           </motion.div>
-
-            <p className="font-sans text-base md:text-lg text-[var(--text-muted)] max-w-sm leading-relaxed">
-              Nos chiffres ne sont pas des statistiques, mais le reflet d'un standard de service inégalé.
-            </p>
         </div>
 
         {/* Minimalist Grid */}
@@ -111,7 +95,7 @@ export function Stats() {
   )
 }
 
-function StatItem({ target, label, suffix, desc, tenths, accent, index, onEnter, active }: any) {
+function StatItem({ target, label, suffix, desc, tenths, index, onEnter, active }: any) {
   const count = useCounter(target, active)
   const display = tenths ? (count / 10).toFixed(1) : count.toLocaleString('fr-FR')
 
@@ -141,9 +125,6 @@ function StatItem({ target, label, suffix, desc, tenths, accent, index, onEnter,
           {desc}
         </p>
       </div>
-       <div 
-        className="h-[1px] w-0 bg-gradient-to-r from-[var(--accent-luxury)]/30 to-transparent transition-all duration-1000 ease-[0.16, 1, 0.3, 1] group-hover:w-full"
-      />
     </motion.div>
   )
 }

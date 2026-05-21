@@ -43,7 +43,7 @@ export function CardsCarousel({ children, cardWidth = 300 }: CardsCarouselProps)
     >
       {/* Glisseur Customisé sur le Carousel (Masqué sur mobile) */}
       <motion.div
-        className="hidden md:flex fixed top-0 left-0 w-16 h-16 rounded-full bg-secondary/95 text-white items-center justify-center pointer-events-none z-50 backdrop-blur-md shadow-2xl border border-white/20"
+        className="hidden md:flex fixed top-0 left-0 w-16 h-16 rounded-full bg-secondary/95 text-white items-center justify-center pointer-events-none z-50 backdrop-blur-md shadow-md border border-white/20"
         style={{
           x: cursorXSpring,
           y: cursorYSpring,

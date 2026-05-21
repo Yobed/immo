@@ -296,7 +296,7 @@ export function PremiumBienCard({
                     window.location.href = `/biens/${id}?action=visiter`;
                   }
                 }}
-                className="w-full h-9 rounded-xl bg-gradient-to-r from-[var(--accent-luxury)] to-[#d97706] text-white flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all"
+                className="w-full min-h-[44px] h-11 rounded-[var(--radius-md)] bg-[var(--accent-luxury)] text-[var(--on-accent)] flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all hover:bg-[var(--accent-luxury)]/90"
               >
                 {type_bien.toLowerCase().includes('meublee') || type_bien.toLowerCase().includes('nuit') ? (
                   <>

@@ -62,11 +62,7 @@ export function Footer() {
                 className="w-13 h-13 object-contain group-hover:scale-105 transition-transform"
               />
               <span className="font-display text-2xl font-black tracking-tight text-[var(--text)] uppercase leading-tight">
-                BOGBE&apos;S <span style={{
-                  background: 'linear-gradient(135deg,#F97316,#FB923C)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent'
-                }}>GROUPE</span>
+                BOGBE&apos;S <span className="text-[var(--secondary)]">GROUPE</span>
               </span>
             </Link>
             <p className="font-sans text-sm text-[var(--text-muted)] max-w-xs leading-relaxed mb-4 font-light">

@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* Fonts loaded via next/font in app/layout.tsx (zero render-blocking,
+   optimised subsetting). No @import here — removed to save ~180kb. */
 
 @tailwind base;
 @tailwind components;
@@ -37,6 +38,29 @@ html, body {
 
   /* Touch target minimum (iOS 44pt / Android 48dp) */
   --touch-min:       44px;
+
+  /* Radius scale (used to replace 8+ arbitrary values across components) */
+  --radius-xs:       6px;
+  --radius-sm:       10px;
+  --radius-md:       14px;
+  --radius-lg:       18px;
+  --radius-xl:       24px;
+  --radius-2xl:      32px;
+  --radius-full:     9999px;
+
+  /* Glass surface opacity (consumed by .card-glass / .card-glass-light) */
+  --glass-opacity-dark:  0.06;
+  --glass-opacity-light: 0.85;
+
+  /* Semantic states (success / warning / info)
+     — kept distinct from brand accent-luxury so badges remain readable */
+  --success:         #047857;
+  --success-soft:    rgba(4, 120, 87, 0.10);
+  --success-on:      #ffffff;
+  --warning:         #b45309;
+  --warning-soft:    rgba(180, 83, 9, 0.10);
+  --info:            #1d4ed8;
+  --info-soft:       rgba(29, 78, 216, 0.10);
 }
 
 /* ═══════════════════════════════════════════════
@@ -75,6 +99,10 @@ html, body {
   --nav-bg:               rgba(2, 4, 10, 0.88);
   --glass-surface:        rgba(2, 4, 10, 0.72);
   --glass-border:         rgba(255, 255, 255, 0.1);
+
+  /* Legacy aliases (kept for backwards-compat with existing components) */
+  --midnight:             var(--background);
+  --midnight-muted:       var(--surface-hover);
 }
 
 /* ═══════════════════════════════════════════════
@@ -114,6 +142,11 @@ html, body {
   --nav-bg:               rgba(253, 252, 249, 0.88);
   --glass-surface:        rgba(255, 255, 255, 0.75);
   --glass-border:         rgba(146, 64, 14, 0.09);
+
+  /* Legacy aliases — these are dark-theme tokens that don't make sense in light,
+     so we route them to surface-hover for graceful degradation rather than black. */
+  --midnight:             var(--surface-card);
+  --midnight-muted:       var(--surface-hover);
 }
 
 html {
@@ -378,20 +411,9 @@ a:active {
   border: 1px solid var(--glass-border);
 }
 
-/* Gradient text */
-.text-gradient {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-mid) 50%, var(--secondary) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.text-gradient-orange {
-  background: linear-gradient(135deg, #F97316 0%, #FB923C 50%, #F97316 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+/* Gradient text removed — replaced by solid `text-[var(--accent-luxury)]`
+   or italic emphasis. Gradient text is one of the strongest AI-design tells
+   and harms legibility on small viewports. */
 
 /* Gradient animated background */
 .bg-gradient-animated {
@@ -720,37 +742,17 @@ main {
 .anim-blob        { animation: blobMorph 12s ease-in-out infinite; }
 .anim-spin-border { animation: spinBorder 4s linear infinite; }
 .anim-pulse-glow  { animation: pulseGlow 2.5s ease-in-out infinite; }
-.text-shimmer {
-  background: linear-gradient(90deg, #F97316 0%, #FFB84D 30%, #F97316 60%, #FB923C 100%);
-  background-size: 300% 100%;
-  animation: textShimmerAnim 4s linear infinite;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.gradient-border-spin {
-  position: relative;
-}
-.gradient-border-spin::before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: inherit;
-  background: conic-gradient(from 0deg, #F97316, #0C2D5E, #F97316);
-  animation: spinBorder 3s linear infinite;
-  z-index: -1;
-}
 .card-glass {
-  background: rgba(255,255,255,0.06);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.12);
+  background: color-mix(in oklch, var(--surface) calc(var(--glass-opacity-dark) * 100%), transparent);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
 }
 .card-glass-light {
-  background: rgba(255,255,255,0.85);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(12,45,94,0.08);
+  background: color-mix(in oklch, var(--surface) calc(var(--glass-opacity-light) * 100%), transparent);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
 }
 
 /* ── Floating property cards ── */
@@ -877,10 +879,10 @@ main {
 .user-dot-pulse {
   width: 16px;
   height: 16px;
-  background: #3B82F6;
-  border: 3px solid white;
+  background: var(--primary-mid);
+  border: 3px solid var(--surface);
   border-radius: 50%;
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
+  box-shadow: 0 0 15px color-mix(in oklch, var(--primary-mid) 60%, transparent);
   position: relative;
 }
 
@@ -889,7 +891,7 @@ main {
   position: absolute;
   inset: -8px;
   border-radius: 50%;
-  background: rgba(59, 130, 246, 0.4);
+  background: color-mix(in oklch, var(--primary-mid) 40%, transparent);
   animation: ping 2s infinite;
 }
 

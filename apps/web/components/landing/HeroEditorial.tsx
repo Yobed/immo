@@ -110,7 +110,7 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
               <div className="max-w-2xl mt-6 md:mt-0">
                 <SearchBar
                   placeholder={tx.hero.searchExample}
-                  className="shadow-2xl"
+                  className="shadow-md"
                 />
               </div>
             </div>

@@ -80,12 +80,7 @@ export default async function PublicLayout({ children }: { children: React.React
                 className="w-10 h-10 object-contain transition-transform duration-200 group-hover:scale-105"
               />
               <span className="font-display text-base font-bold text-[var(--text)] hidden sm:block tracking-tight leading-tight">
-                BOGBE&apos;S <span style={{
-                  background: 'linear-gradient(135deg,#F97316,#FB923C)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}>GROUPE</span>
+                BOGBE&apos;S <span className="text-[var(--secondary)]">GROUPE</span>
               </span>
             </Link>
           </MagneticWrapper>

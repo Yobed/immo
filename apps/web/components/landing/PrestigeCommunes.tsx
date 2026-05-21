@@ -64,7 +64,7 @@ const COMMUNES: CommuneCard[] = [
 
 export function PrestigeCommunes() {
   return (
-    <section className="relative py-16 md:py-24 bg-[#020617] overflow-hidden">
+    <section className="relative py-16 md:py-24 bg-[var(--background)] overflow-hidden">
       {/* Subtle gold glow background */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.04]">
         <div className="absolute top-1/4 left-1/3 w-[600px] h-[600px] bg-amber-500 rounded-full blur-[140px]" />

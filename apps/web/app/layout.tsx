@@ -2,29 +2,36 @@ import type { Metadata, Viewport } from 'next'
 import { Unbounded, Playfair_Display, Outfit, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 
+// Fonts trimmed to critical weights only (was 6+4+default+2 = ~180kb extra).
+// Heavy display weights kept (700/800) for headlines; body weights pruned.
 const unbounded = Unbounded({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700', '800'],
+  weight: ['500', '700'],
   variable: '--font-display',
   display: 'swap',
+  preload: true,
 })
 const playfair = Playfair_Display({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['400', '600'],
   style: ['normal', 'italic'],
   variable: '--font-serif',
   display: 'swap',
+  preload: false,
 })
 const outfit = Outfit({
   subsets: ['latin'],
+  weight: ['400', '500', '600'],
   variable: '--font-sans',
   display: 'swap',
+  preload: true,
 })
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
-  weight: ['400', '500'],
+  weight: ['400'],
   variable: '--font-mono',
   display: 'swap',
+  preload: false,
 })
 
 export const viewport: Viewport = {

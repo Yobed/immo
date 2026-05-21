@@ -184,7 +184,7 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
         </motion.div>
 
         {/* Unified Filter Dashboard */}
-        <motion.div variants={itemVariants} className="mb-10 p-8 rounded-[2.5rem] bg-[var(--surface-card)] border border-[var(--border)] shadow-2xl backdrop-blur-3xl relative z-50">
+        <motion.div variants={itemVariants} className="mb-10 p-8 rounded-[2.5rem] bg-[var(--surface-card)] border border-[var(--border)] shadow-md backdrop-blur-md relative z-50">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-end">
             
             {/* 1. Recherche Textuelle */}
@@ -360,11 +360,11 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
 
         {/* Map - Deep Contrast */}
         <motion.div variants={itemVariants} className="mb-14">
-          <div className="rounded-3xl overflow-hidden ring-1 ring-[var(--border)] p-1 bg-[var(--surface-card)] backdrop-blur-3xl transition-all duration-1000 ease-[0.16, 1, 0.3, 1] hover:ring-[var(--accent-luxury)]">
+          <div className="rounded-3xl overflow-hidden ring-1 ring-[var(--border)] p-1 bg-[var(--surface-card)] backdrop-blur-md transition-all duration-1000 ease-[0.16, 1, 0.3, 1] hover:ring-[var(--accent-luxury)]">
             <div className="rounded-[calc(1.5rem-4px)] overflow-hidden bg-[var(--background)] relative">
               {filteredBiens.length === 0 && (
                 <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 backdrop-blur-[2px] pointer-events-none">
-                  <div className="bg-[var(--midnight)] border border-[var(--border)] p-4 rounded-2xl shadow-2xl text-center">
+                  <div className="bg-[var(--midnight)] border border-[var(--border)] p-4 rounded-2xl shadow-md text-center">
                     <p className="text-[var(--accent-luxury)] text-xs font-bold uppercase tracking-widest mb-1">Aucun bien trouvé</p>
                     <p className="text-[var(--text-muted)] text-[10px] uppercase tracking-widest">Essayez de modifier vos filtres</p>
                   </div>

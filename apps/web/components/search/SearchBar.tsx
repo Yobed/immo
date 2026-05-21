@@ -156,7 +156,7 @@ export function SearchBar({
     <div ref={containerRef} className={cn("relative w-full", className)}>
       <form 
         onSubmit={handleSubmit} 
-        className="group flex items-center gap-1.5 p-1.5 bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] shadow-2xl focus-within:border-[var(--accent-luxury)] transition-all duration-300"
+        className="group flex items-center gap-1.5 p-1.5 bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] shadow-md focus-within:border-[var(--accent-luxury)] transition-all duration-300"
       >
         <div className="flex-1 flex items-center gap-1.5 pl-2 relative overflow-hidden">
           <Search className={cn(
@@ -232,7 +232,7 @@ export function SearchBar({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="absolute z-[200] top-full left-0 right-0 mt-2 overflow-hidden bg-[var(--surface-card)] border border-[var(--accent-luxury)]/30 rounded-2xl shadow-2xl p-6 text-center"
+            className="absolute z-[200] top-full left-0 right-0 mt-2 overflow-hidden bg-[var(--surface-card)] border border-[var(--accent-luxury)]/30 rounded-2xl shadow-md p-6 text-center"
           >
             <div className="flex justify-center gap-1.5 h-8 items-center mb-4">
               {[1, 2, 3, 4, 5, 4, 3, 2, 1].map((h, i) => (
@@ -263,7 +263,7 @@ export function SearchBar({
             initial={{ opacity: 0, y: 10, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
-            className="absolute z-[200] top-full left-0 right-0 mt-2 overflow-hidden bg-slate-900 border border-white/10 rounded-2xl shadow-2xl p-2"
+            className="absolute z-[200] top-full left-0 right-0 mt-2 overflow-hidden bg-slate-900 border border-white/10 rounded-2xl shadow-md p-2"
           >
             <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] px-4 py-3 mb-1">
               Suggestions de recherche

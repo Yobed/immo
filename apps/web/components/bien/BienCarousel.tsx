@@ -188,10 +188,10 @@ export function BienCarousel({ medias, isHero = false, externalFilter }: BienCar
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
                 className={cn(
-                  'flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] uppercase tracking-[0.2em] font-bold font-display border transition-all duration-500 shadow-2xl backdrop-blur-3xl',
+                  'flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] uppercase tracking-[0.2em] font-bold font-display border transition-all duration-500 shadow-md backdrop-blur-md',
                   activeFilter === filter
-                    ? 'bg-[#D4AF37] text-black border-[#D4AF37] scale-105 shadow-[0_0_20px_rgba(212,175,55,0.3)]'
-                    : 'bg-black/80 text-white border-white/20 hover:border-[#D4AF37]/50 hover:bg-black'
+                    ? 'bg-[var(--accent-luxury)] text-black border-[var(--accent-luxury)] scale-105 shadow-[0_0_20px_rgba(212,175,55,0.3)]'
+                    : 'bg-black/80 text-white border-white/20 hover:border-[var(--accent-luxury)]/50 hover:bg-black'
                 )}
               >
                 <Icon size={14} className={cn("transition-transform duration-500", activeFilter === filter ? "scale-110" : "")} />
@@ -216,7 +216,7 @@ export function BienCarousel({ medias, isHero = false, externalFilter }: BienCar
                   {/* Badge type */}
                   {!isHero && (
                     <div className="absolute top-4 right-4 pointer-events-none">
-                      <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-[#020617]/90 text-white border border-white/20 backdrop-blur-xl shadow-2xl">
+                      <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-[var(--background)]/90 text-white border border-white/20 backdrop-blur-xl shadow-md">
                         {FILTER_LABELS[media.type] || media.type.toUpperCase()}
                       </span>
                     </div>
@@ -224,7 +224,7 @@ export function BienCarousel({ medias, isHero = false, externalFilter }: BienCar
                   {/* Titre du média */}
                   {media.titre && !isHero && (
                     <div className="absolute bottom-4 left-4 right-4 pointer-events-none">
-                      <span className="inline-flex items-center px-4 py-2 rounded-xl text-[10px] font-medium tracking-wide bg-[#020617]/90 text-white border border-white/10 backdrop-blur-xl shadow-2xl">
+                      <span className="inline-flex items-center px-4 py-2 rounded-xl text-[10px] font-medium tracking-wide bg-[var(--background)]/90 text-white border border-white/10 backdrop-blur-xl shadow-md">
                         {media.titre}
                       </span>
                     </div>
@@ -240,14 +240,14 @@ export function BienCarousel({ medias, isHero = false, externalFilter }: BienCar
           <>
             <button
               onClick={scrollPrev}
-              className="absolute left-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#020617]/40 hover:bg-[#020617]/80 backdrop-blur-xl border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 hover:scale-110 shadow-2xl z-40 pointer-events-auto"
+              className="absolute left-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[var(--background)]/40 hover:bg-[var(--background)]/80 backdrop-blur-xl border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 hover:scale-110 shadow-md z-40 pointer-events-auto"
               aria-label="Précédent"
             >
               <ChevronLeft size={24} className="text-white" strokeWidth={1.5} />
             </button>
             <button
               onClick={scrollNext}
-              className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#020617]/40 hover:bg-[#020617]/80 backdrop-blur-xl border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 hover:scale-110 shadow-2xl z-40 pointer-events-auto"
+              className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[var(--background)]/40 hover:bg-[var(--background)]/80 backdrop-blur-xl border border-white/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 hover:scale-110 shadow-md z-40 pointer-events-auto"
               aria-label="Suivant"
             >
               <ChevronRight size={24} className="text-white" strokeWidth={1.5} />

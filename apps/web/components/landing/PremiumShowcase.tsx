@@ -102,7 +102,7 @@ export const PremiumShowcase = ({ properties }: { properties?: Property[] }) => 
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true, margin: "-100px" }}
                   transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-                  className={`lg:col-span-7 relative aspect-[4/5] md:aspect-video lg:aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl ${isEven ? 'lg:order-1' : 'lg:order-2'}`}
+                  className={`lg:col-span-7 relative aspect-[4/5] md:aspect-video lg:aspect-[4/3] rounded-2xl overflow-hidden shadow-md ${isEven ? 'lg:order-1' : 'lg:order-2'}`}
                 >
                   <Image
                     src={property.image}

@@ -112,7 +112,7 @@ export function CommuneAutocomplete({
 
       {/* Dropdown suggestions */}
       {open && suggestions.length > 0 && (
-        <div className="absolute z-[100] top-full left-0 right-0 mt-1 bg-[var(--midnight-muted)] border border-[var(--border)] rounded-card shadow-2xl overflow-hidden backdrop-blur-xl">
+        <div className="absolute z-[100] top-full left-0 right-0 mt-1 bg-[var(--midnight-muted)] border border-[var(--border)] rounded-card shadow-md overflow-hidden backdrop-blur-xl">
           {suggestions.map((s, idx) => (
             <button
               key={`${s.type}-${s.label}`}
