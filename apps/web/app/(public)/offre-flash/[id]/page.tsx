@@ -319,8 +319,7 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
                       <span className="relative rounded-full w-2 h-2 bg-emerald-500" />
                     </span>
                     <span>
-                      Récupéré le <strong>{new Date(bien.date_scraping).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}</strong>
-                      {' '}à {new Date(bien.date_scraping).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                      Mise à jour <strong>{new Date(bien.date_scraping).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}</strong>
                     </span>
                   </div>
                 )}

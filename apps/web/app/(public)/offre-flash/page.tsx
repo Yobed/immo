@@ -11,8 +11,8 @@ import { getConsolidatedCatalogue, type ConsolidatedFilters } from '@/lib/catalo
 export const dynamic = 'force-dynamic'
 export const revalidate = 60
 export const metadata = {
-  title: 'Offres flash WhatsApp',
-  description: 'Bons plans immobiliers détectés en temps réel sur les groupes WhatsApp de Côte d\'Ivoire.',
+  title: 'Offres flash — Bons plans immobiliers en temps réel',
+  description: 'Bons plans immobiliers captés en temps réel sur le marché ivoirien. Validation conseiller incluse avant chaque visite.',
 }
 
 interface PageProps {
@@ -100,7 +100,7 @@ export default async function OffreFlashPage({ searchParams }: PageProps) {
             <span className="text-orange-500 text-sm">⚡</span>
           </div>
           <div className="text-xs md:text-sm text-[var(--text-muted)] leading-relaxed">
-            <strong className="text-[var(--text)]">Annonces non vérifiées</strong> — issues de groupes WhatsApp publics.
+            <strong className="text-[var(--text)]">Annonces non vérifiées</strong> — issues de sources tierces sur le marché ivoirien.
             Notre conseiller valide la disponibilité avec le propriétaire avant tout engagement.
             <Link href="/catalogue" className="ml-2 inline-flex items-center gap-1 text-[var(--accent-luxury)] hover:underline font-bold">
               Voir aussi nos biens vérifiés →
@@ -191,7 +191,7 @@ function EmptyResults({ hasFilters }: { hasFilters: boolean }) {
       <p className="text-[var(--text-muted)] font-medium max-w-sm mx-auto mb-8 leading-relaxed text-sm">
         {hasFilters
           ? 'Aucune offre flash ne correspond à vos critères. Essayez d\'élargir la recherche.'
-          : 'Pas d\'offre flash active pour le moment. Reviens dans quelques minutes — le scraping tourne en continu.'}
+          : 'Pas d\'offre flash active pour le moment. Reviens dans quelques minutes — notre équipe veille tourne en continu.'}
       </p>
       <div className="flex gap-3 justify-center">
         {hasFilters && (

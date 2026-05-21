@@ -33,14 +33,14 @@ export default async function PublicLayout({ children }: { children: React.React
     else if (profile?.role === 'admin') { role = 'pro'; isAdmin = true }
   }
 
-  // Navigation de base
+  // Navigation desktop — concise pour éviter le wrap.
+  // "Rechercher" est déjà couvert par la SearchBar du header.
+  // "Résidences meublées" est accessible via le filtre sur /catalogue.
   let navLinks = [
     { href: '/', label: 'Accueil' },
-    { href: '/biens', label: 'Annonces' },
-    { href: '/offre-flash', label: '🔥 Offres flash' },
+    { href: '/catalogue', label: 'Annonces' },
+    { href: '/offre-flash', label: 'Offres flash' },
     { href: '/services', label: 'Services' },
-    { href: '/recherche', label: 'Rechercher' },
-    { href: '/recherche?type_bien=residence_meublee', label: 'Résidences meublées' },
   ]
 
   // Pour le propriétaire : nav TOP minimal (4 items) pour éviter le wrap sur 2 lignes.
@@ -71,54 +71,51 @@ export default async function PublicLayout({ children }: { children: React.React
 
           {/* Logo */}
           <MagneticWrapper>
-            <Link href="/" className="flex items-center gap-2.5 flex-shrink-0 group">
+            <Link href="/" className="flex items-center gap-2 flex-shrink-0 group">
               <Image
                 src="/bogbes-logo.png"
                 alt="BOGBE'S GROUPE"
-                width={40}
-                height={40}
-                className="w-10 h-10 object-contain transition-transform duration-200 group-hover:scale-105"
+                width={36}
+                height={36}
+                className="w-9 h-9 object-contain transition-transform duration-200 group-hover:scale-105"
               />
-              <span className="font-display text-base font-bold text-[var(--text)] hidden sm:block tracking-tight leading-tight">
-                BOGBE&apos;S <span className="text-[var(--secondary)]">GROUPE</span>
+              <span className="font-display text-sm xl:text-base font-bold text-[var(--text)] hidden lg:inline-flex items-baseline gap-1 whitespace-nowrap tracking-tight">
+                BOGBE&apos;S<span className="text-[var(--secondary)]">GROUPE</span>
               </span>
             </Link>
           </MagneticWrapper>
 
-          {/* Search bar — desktop only (mobile has the hero search) */}
-          <div className="flex-1 max-w-md hidden md:block">
-            <SearchBar placeholder="Commune, quartier, type de bien..." />
+          {/* Search bar — desktop only, plus compacte pour libérer de l'espace nav */}
+          <div className="flex-1 max-w-xs xl:max-w-sm hidden md:block">
+            <SearchBar placeholder="Commune, quartier, type..." />
           </div>
 
           {/* Nav desktop */}
           <nav className="hidden md:flex items-center gap-0.5">
             {navLinks.map((link) => (
               <MagneticWrapper key={link.href}>
-                <Link 
+                <Link
                   href={link.href}
-                  className="nav-link px-3 py-2 font-sans text-sm text-[var(--text-muted)] hover:text-[var(--text)] transition-colors duration-200 rounded-btn hover:bg-[var(--surface)]"
+                  className="nav-link px-2.5 py-2 font-sans text-[13px] font-medium text-[var(--text-muted)] hover:text-[var(--text)] transition-colors duration-200 rounded-btn hover:bg-[var(--surface)] whitespace-nowrap"
                 >
                   {link.label}
                 </Link>
               </MagneticWrapper>
             ))}
 
-            <div className="w-px h-5 bg-[var(--border)] mx-2" />
+            <div className="w-px h-5 bg-[var(--border)] mx-1.5" />
 
             <ThemeToggle />
-
-            <div className="w-px h-5 bg-[var(--border)] mx-1" />
-
             <LanguageSwitcher variant="compact" />
 
-            <div className="w-px h-5 bg-[var(--border)] mx-2" />
+            <div className="w-px h-5 bg-[var(--border)] mx-1.5" />
 
             {user ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 {role === 'pro' && (
                   <Link
                     href="/mes-biens/nouveau"
-                    className="hidden lg:flex items-center gap-1.5 px-4 py-2 bg-[var(--secondary)] text-white text-[11px] font-sans font-bold uppercase tracking-wider rounded-btn hover:opacity-90 transition-opacity shadow-sm"
+                    className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--secondary)] text-white text-[11px] font-sans font-bold uppercase tracking-wider rounded-btn hover:opacity-90 transition-opacity shadow-sm whitespace-nowrap"
                   >
                     <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" fill="none"><path d="M12 5v14M5 12h14"/></svg>
                     Annonce
@@ -127,16 +124,20 @@ export default async function PublicLayout({ children }: { children: React.React
                 <UserMenu email={user.email ?? ''} role={role} isAdmin={isAdmin} />
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <MagneticWrapper>
-                  <Link href="/login"
-                    className="px-3 py-2 font-sans text-sm text-[var(--text-muted)] hover:text-[var(--text)] transition-colors duration-200 rounded-btn hover:bg-[var(--surface)]">
+                  <Link
+                    href="/login"
+                    className="px-2.5 py-2 font-sans text-[13px] font-medium text-[var(--text-muted)] hover:text-[var(--text)] transition-colors duration-200 rounded-btn hover:bg-[var(--surface)] whitespace-nowrap"
+                  >
                     Se connecter
                   </Link>
                 </MagneticWrapper>
                 <MagneticWrapper>
-                  <Link href="/register"
-                    className="px-4 py-2 font-sans text-sm font-semibold bg-[var(--secondary)] text-[var(--on-accent)] rounded-btn hover:opacity-90 transition-opacity">
+                  <Link
+                    href="/register"
+                    className="px-3 py-2 font-sans text-[13px] font-semibold bg-[var(--secondary)] text-[var(--on-accent)] rounded-btn hover:opacity-90 transition-opacity whitespace-nowrap"
+                  >
                     S&apos;inscrire
                   </Link>
                 </MagneticWrapper>

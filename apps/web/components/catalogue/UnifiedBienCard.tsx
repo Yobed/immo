@@ -130,7 +130,7 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
               {bien.date_scraping && isFlash && (
                 <div
                   className="flex items-center gap-0.5 ml-auto text-emerald-600"
-                  title={`Récupéré : ${new Date(bien.date_scraping).toLocaleString('fr-FR')}`}
+                  title="Mise à jour récente"
                 >
                   <Radio className="w-2.5 h-2.5" />
                   <span className="font-medium">{relativeTime(bien.date_scraping)}</span>

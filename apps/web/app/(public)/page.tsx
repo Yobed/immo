@@ -121,7 +121,7 @@ export default async function HomePage() {
       {/* 6. Sélection éditoriale */}
       <FeaturedProperties initialBiens={biensWithPhoto} />
 
-      {/* 7. Veille en direct (réseau WhatsApp) */}
+      {/* 7. Marché en direct — opportunités captées par notre équipe veille */}
       <FlashOffersSection />
 
       {/* 8. Témoignages clients (proof social) */}

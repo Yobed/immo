@@ -92,10 +92,10 @@ export async function FlashOffersInline({ filters, limit = 6 }: FlashOffersInlin
             </p>
           </div>
           <h2 className="font-display text-2xl md:text-3xl font-bold text-[var(--text)] tracking-tight">
-            Offres flash WhatsApp correspondantes
+            Offres flash correspondantes
           </h2>
           <p className="text-[var(--text-muted)] text-sm mt-2 max-w-xl">
-            Annonces sourcées en temps réel depuis les groupes WhatsApp publics. À valider rapidement —
+            Opportunités captées sur le marché ivoirien, à valider avec notre conseiller —
             elles partent vite.
           </p>
         </div>
@@ -145,7 +145,7 @@ export async function FlashOffersInline({ filters, limit = 6 }: FlashOffersInlin
               {b.date_scraping && (
                 <span
                   className="absolute top-3 right-3 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-black/60 backdrop-blur-md text-white/90 text-[9px] font-medium tracking-wide"
-                  title={`Récupéré : ${new Date(b.date_scraping).toLocaleString('fr-FR')}`}
+                  title="Mise à jour récente"
                 >
                   <Radio className="w-2.5 h-2.5 text-emerald-400" />
                   {relativeTime(b.date_scraping)}

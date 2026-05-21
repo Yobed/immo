@@ -52,10 +52,10 @@ export async function FlashOffersBanner({ filters }: { filters: Filters }) {
         <div className="min-w-0">
           <p className="font-bold text-white text-sm leading-tight">
             <span className="text-orange-400">{count.toLocaleString('fr-FR')}</span>{' '}
-            offre{count > 1 ? 's' : ''} flash WhatsApp correspond{count > 1 ? 'ent' : ''} aussi
+            offre{count > 1 ? 's' : ''} flash correspond{count > 1 ? 'ent' : ''} aussi
           </p>
           <p className="text-white/50 text-xs leading-tight mt-0.5 truncate">
-            Offres de notre réseau d&apos;agents et propriétaires WhatsApp
+            Opportunités captées sur le marché ivoirien
           </p>
         </div>
       </div>
