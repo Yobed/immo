@@ -115,20 +115,44 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
                   className="shadow-md"
                 />
 
-                {/* Guided wizard CTA — pour les visiteurs qui ne savent pas par où commencer */}
-                <button
+                {/* Guided wizard CTA — banner visible pour les nouveaux visiteurs
+                    qui ne savent pas par où commencer. Animation soft d'attention
+                    sur l'icône, hover scale léger. */}
+                <motion.button
                   type="button"
                   onClick={() => setWizardOpen(true)}
-                  className="mt-3 inline-flex items-center gap-2 text-[13px] text-white/85 hover:text-white transition-colors group"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  className="group mt-4 w-full sm:w-auto flex items-center gap-3 px-4 sm:px-5 py-3.5 rounded-2xl bg-gradient-to-r from-[#C5A059]/15 via-[#C5A059]/10 to-transparent border border-[#C5A059]/40 hover:border-[#C5A059]/70 hover:bg-[#C5A059]/20 backdrop-blur-sm shadow-[0_4px_24px_rgba(197,160,89,0.15)] hover:shadow-[0_6px_32px_rgba(197,160,89,0.25)] transition-all min-h-[56px]"
+                  aria-label="Ouvrir l'assistant de recherche guidée en 3 étapes"
                 >
-                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[#C5A059]/20 text-[#C5A059] group-hover:bg-[#C5A059]/30 transition-colors">
-                    <Wand2 className="w-3.5 h-3.5" />
+                  {/* Icon with attention pulse */}
+                  <span className="relative inline-flex shrink-0">
+                    <span aria-hidden="true" className="absolute inset-0 rounded-full bg-[#C5A059]/50 animate-ping opacity-60" />
+                    <span className="relative inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#C5A059] text-[#020617] shadow-md">
+                      <Wand2 className="w-4 h-4" strokeWidth={2.5} />
+                    </span>
                   </span>
-                  <span className="underline-offset-4 group-hover:underline">
-                    Pas sûr ? <strong className="font-bold">Trouvez votre bien en 30 secondes</strong>
+
+                  {/* Copy */}
+                  <span className="flex-1 text-left min-w-0">
+                    <span className="block text-[11px] uppercase tracking-[0.2em] font-bold text-[#C5A059]/90 leading-none mb-1">
+                      Première visite ?
+                    </span>
+                    <span className="block text-sm md:text-base font-bold text-white leading-tight">
+                      Trouvez votre bien en 30 secondes
+                    </span>
                   </span>
-                  <ChevronRight className="w-3.5 h-3.5 opacity-60 group-hover:translate-x-0.5 transition-transform" />
-                </button>
+
+                  {/* Timer chip + arrow */}
+                  <span className="hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#020617]/40 border border-white/10 text-[10px] font-bold text-white/80 uppercase tracking-wider shrink-0">
+                    3 étapes
+                  </span>
+                  <ChevronRight className="w-4 h-4 text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all shrink-0" />
+                </motion.button>
               </div>
             </div>
 
