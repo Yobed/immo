@@ -204,7 +204,16 @@ Redige une description attractive et professionnelle pour cette annonce.
 
 export type ChatMessage = { role: 'user' | 'assistant' | 'system'; content: string };
 
-async function groqFetch(messages: ChatMessage[], system: string): Promise<string | null> {
+/**
+ * Single Groq call attempt. Returns:
+ *   - string on success
+ *   - 'retry' if the failure is transient (network, 429, 5xx) → caller should retry
+ *   - null if the failure is permanent (401, 400, empty completion)
+ */
+async function groqFetchOnce(
+  messages: ChatMessage[],
+  system: string,
+): Promise<string | 'retry' | null> {
   let response: Response
   try {
     response = await fetch(GROQ_BASE_URL, {
@@ -224,27 +233,90 @@ async function groqFetch(messages: ChatMessage[], system: string): Promise<strin
       }),
     })
   } catch (e) {
-    // Erreur réseau / clé manquante (requireGroqKey throw)
-    console.error('[Groq] fetch failed:', (e as Error).message);
-    return null;
+    // Network failure — transient, worth retrying once
+    console.error('[Groq] fetch failed (network):', (e as Error).message)
+    return 'retry'
   }
 
   if (!response.ok) {
-    const err = await response.text().catch(() => '<no body>');
-    console.error(`[Groq] HTTP ${response.status} ${response.statusText} - body: ${err.slice(0, 500)} - msgs=${messages.length} sysLen=${system.length}`);
-    return null;
+    const err = await response.text().catch(() => '<no body>')
+    console.error(`[Groq] HTTP ${response.status} - body: ${err.slice(0, 300)} - msgs=${messages.length} sysLen=${system.length}`)
+    // 429 (rate limit) and 5xx (Groq downtime) are transient → retry
+    if (response.status === 429 || response.status >= 500) return 'retry'
+    return null
   }
 
-  const data = await response.json().catch(() => null);
-  const content = data?.choices?.[0]?.message?.content;
+  const data = await response.json().catch(() => null)
+  const content = data?.choices?.[0]?.message?.content
   if (!content) {
-    console.error('[Groq] empty completion. data=', JSON.stringify(data).slice(0, 500));
-    return null;
+    console.error('[Groq] empty completion. data=', JSON.stringify(data).slice(0, 300))
+    return null
   }
-  return content;
+  return content
+}
+
+async function groqFetch(messages: ChatMessage[], system: string): Promise<string | null> {
+  const first = await groqFetchOnce(messages, system)
+  if (typeof first === 'string') return first
+  if (first === null) return null
+
+  // Transient failure → wait briefly then retry once.
+  // 700ms is enough to clear most rate-limit/timeouts without blowing Vercel's
+  // 10s function budget (we still have ~9s for the retry + DB writes).
+  await new Promise((r) => setTimeout(r, 700))
+  console.warn('[Groq] retrying after transient failure')
+  const second = await groqFetchOnce(messages, system)
+  return typeof second === 'string' ? second : null
+}
+
+/**
+ * Detect short greetings / pleasantries that don't need LLM reasoning.
+ * Returning a hand-written reply avoids the Groq round-trip (and the
+ * "Désolé, problème technique" fallback when Groq has a hiccup).
+ */
+function detectGreeting(userMessage: string): string | null {
+  const m = userMessage
+    .trim()
+    .toLowerCase()
+    .replace(/[!?.,;:'"`]/g, '')
+    .replace(/\s+/g, ' ')
+
+  // Word count > 4 → probably has intent, let Groq handle it
+  if (m.split(' ').length > 4) return null
+
+  const greetingPatterns = [
+    /^(bonjour|bonsoir|salut|coucou|hello|hi|hey)( .*)?$/,
+    /^(bonjour|bonsoir|salut|hello) (monsieur|madame|mademoiselle|mr|mme|messieurs|mesdames)$/,
+    /^(merci|thanks|thank you)( beaucoup)?$/,
+    /^(ok|d accord|daccord|parfait|super|cool|bien recu|bien reçu)$/,
+    /^(ça va|ca va|comment allez vous|comment ça va|comment ca va)( ?.*)?$/,
+  ]
+
+  if (!greetingPatterns.some((p) => p.test(m))) return null
+
+  const hour = new Date().getHours()
+  const timeOfDay = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bonjour' : 'Bonsoir'
+
+  if (/^(merci|thanks|thank you)/.test(m)) {
+    return `Avec plaisir 🙏\n\nDites-moi ce que vous cherchez : commune, type de bien, budget. Je vous oriente immédiatement.`
+  }
+  if (/^(ok|d accord|daccord|parfait|super|cool|bien)/.test(m)) {
+    return `Très bien 👍\n\nDécrivez-moi ce que vous cherchez (commune, type, budget) et je vous présente les biens disponibles.`
+  }
+
+  return `${timeOfDay} 👋\n\nJe suis Sapphire, conseillère BOGBE'S. Je vous aide à trouver votre bien à Abidjan.\n\nDécrivez-moi votre besoin :\n• La commune ou le quartier\n• Le type de bien (appartement, villa, studio…)\n• Votre budget\n\nJe vous présente les meilleures options.`
 }
 
 export async function chatImmobilier(messages: ChatMessage[], context?: string): Promise<string> {
+  // Greeting fast-path : pas besoin de Groq pour répondre à "Bonsoir".
+  // Évite le round-trip LLM (latence + risque de fallback erreur)
+  // et garantit une réponse instantanée même si Groq est indisponible.
+  const lastUserMsg = [...messages].reverse().find((m) => m.role === 'user')?.content
+  if (lastUserMsg && messages.length <= 2) {
+    const greeting = detectGreeting(lastUserMsg)
+    if (greeting) return greeting
+  }
+
   const system = context
     ? `${SYSTEM_PROMPT_IMMOBILIER_CI}\n\n== CATALOGUE DES BIENS DISPONIBLES ==\n${context}`
     : SYSTEM_PROMPT_IMMOBILIER_CI;
@@ -255,8 +327,10 @@ export async function chatImmobilier(messages: ChatMessage[], context?: string):
   const result = await groqFetch(trimmed, system);
   if (!result) {
     console.error(`[Sapphire] fallback triggered. systemBytes=${system.length} historyMsgs=${messages.length} -> trimmed=${trimmed.length}`);
+    // Fallback moins alarmant : on propose une action concrète
+    return `Un instant, je reçois beaucoup de demandes 🙏\n\nEn attendant, dites-moi simplement :\n• Quelle commune ? (Cocody, Plateau, Riviera…)\n• Quel budget ?\n\nJe reviens vers vous dans quelques secondes.`
   }
-  return result ?? 'Désolé, je rencontre un problème technique. Réessayez dans un instant. 🙏';
+  return result;
 }
 
 export async function chatImmobilierStream(messages: ChatMessage[], context?: string): Promise<ReadableStream | null> {
