@@ -5,8 +5,9 @@ import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { SearchBar } from '@/components/search/SearchBar'
-import { Sparkles, TrendingUp, MapPin, Clock, ChevronRight } from 'lucide-react'
+import { Sparkles, TrendingUp, MapPin, Clock, ChevronRight, Wand2 } from 'lucide-react'
 import { formatFCFACompact } from '@/lib/format'
+import { GuidedSearchWizard } from './GuidedSearchWizard'
 
 const FALLBACK_BG = [
   'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2000&auto=format&fit=crop',
@@ -56,6 +57,7 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
   const [headlineIdx, setHeadlineIdx] = useState(0)
   const [activityIdx, setActivityIdx] = useState(0)
   const [showActivity, setShowActivity] = useState(false)
+  const [wizardOpen, setWizardOpen] = useState(false)
   const sectionRef = useRef<HTMLElement>(null)
 
   // Rotation du background toutes les 6s
@@ -206,7 +208,25 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
                 initialQuery=""
                 placeholder="Commune, quartier, type de bien..."
               />
+
+              {/* Or use the 3-step guided wizard — for visitors who don't know
+                  where to start with the free-text search bar above. */}
+              <button
+                type="button"
+                onClick={() => setWizardOpen(true)}
+                className="mt-3 inline-flex items-center gap-2 text-[13px] text-white/80 hover:text-white transition-colors group"
+              >
+                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[var(--accent-luxury)]/20 text-[var(--accent-luxury)] group-hover:bg-[var(--accent-luxury)]/30 transition-colors">
+                  <Wand2 className="w-3.5 h-3.5" />
+                </span>
+                <span className="underline-offset-4 group-hover:underline">
+                  Pas sûr ? <strong className="font-bold">Trouvez votre bien en 30 secondes</strong>
+                </span>
+                <ChevronRight className="w-3.5 h-3.5 opacity-60 group-hover:translate-x-0.5 transition-transform" />
+              </button>
             </motion.div>
+
+            <GuidedSearchWizard open={wizardOpen} onClose={() => setWizardOpen(false)} />
 
             {/* Mobile featured biens preview — replaces the hidden lg:flex column */}
             {featuredBiens && featuredBiens.length > 0 && (

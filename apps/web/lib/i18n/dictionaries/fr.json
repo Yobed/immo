@@ -304,7 +304,9 @@
     "gotoCatalogue": "Voir le catalogue filtré",
     "gotoCatalogueDesc": "Toutes les annonces qui correspondent à votre recherche, en un clic.",
     "gotoWhatsapp": "Discuter avec un conseiller",
-    "gotoWhatsappDesc": "Un humain vous aide à organiser une visite via WhatsApp. Sous 1 h en journée."
+    "gotoWhatsappDesc": "Un humain vous aide à organiser une visite via WhatsApp. Sous 1 h en journée.",
+    "heroCtaPrefix": "Pas sûr ?",
+    "heroCtaLabel": "Trouvez votre bien en 30 secondes"
   },
   "catalogue": {
     "kicker": "Catalogue consolidé",

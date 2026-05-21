@@ -304,7 +304,9 @@
     "gotoCatalogue": "See the filtered catalogue",
     "gotoCatalogueDesc": "All listings matching your search, in one click.",
     "gotoWhatsapp": "Chat with an advisor",
-    "gotoWhatsappDesc": "A human helps you book a viewing via WhatsApp. Within 1 h on weekdays."
+    "gotoWhatsappDesc": "A human helps you book a viewing via WhatsApp. Within 1 h on weekdays.",
+    "heroCtaPrefix": "Not sure?",
+    "heroCtaLabel": "Find your property in 30 seconds"
   },
   "catalogue": {
     "kicker": "Consolidated catalogue",
