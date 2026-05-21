@@ -257,8 +257,11 @@ async function groqFetchOnce(
 
 async function groqFetch(messages: ChatMessage[], system: string): Promise<string | null> {
   const first = await groqFetchOnce(messages, system)
-  if (typeof first === 'string') return first
-  if (first === null) return null
+  // CRITICAL: check the 'retry' sentinel BEFORE the typeof string check,
+  // otherwise the sentinel itself would be returned as a valid completion.
+  if (first !== 'retry') {
+    return first // string completion or null (permanent failure)
+  }
 
   // Transient failure → wait briefly then retry once.
   // 700ms is enough to clear most rate-limit/timeouts without blowing Vercel's
@@ -266,7 +269,8 @@ async function groqFetch(messages: ChatMessage[], system: string): Promise<strin
   await new Promise((r) => setTimeout(r, 700))
   console.warn('[Groq] retrying after transient failure')
   const second = await groqFetchOnce(messages, system)
-  return typeof second === 'string' ? second : null
+  if (second === 'retry' || second === null) return null
+  return second
 }
 
 /**
