@@ -5,6 +5,8 @@ import { useT } from '@/lib/i18n/client'
 
 interface Props {
   bienId: string
+  /** Source : 'bien' (BOGBE'S) ou 'flash' (offre flash scrapée) */
+  source?: 'bien' | 'flash'
   className?: string
 }
 
@@ -12,13 +14,17 @@ interface Props {
  * Affiche le nombre de vues du bien sur les 7 derniers jours.
  * Ping l'API en POST (fire-and-forget) et récupère le compteur.
  */
-export function ViewCount({ bienId, className = '' }: Props) {
+export function ViewCount({ bienId, source = 'bien', className = '' }: Props) {
   const [count, setCount] = useState<number | null>(null)
   const t = useT()
 
   useEffect(() => {
     let cancelled = false
-    fetch(`/api/biens/${bienId}/view`, { method: 'GET' })
+    const endpoint =
+      source === 'flash'
+        ? `/api/offre-flash/${bienId}/view`
+        : `/api/biens/${bienId}/view`
+    fetch(endpoint, { method: 'GET' })
       .then((r) => r.json())
       .then((data: { count?: number }) => {
         if (!cancelled && typeof data?.count === 'number') {
@@ -29,7 +35,7 @@ export function ViewCount({ bienId, className = '' }: Props) {
     return () => {
       cancelled = true
     }
-  }, [bienId])
+  }, [bienId, source])
 
   if (count === null || count < 3) return null
 

@@ -1,21 +1,83 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
 import {
   ArrowLeft, Flame, MapPin, BedDouble, Maximize,
-  MessageCircle, Calendar, User, Tag, AlertTriangle,
+  Calendar, Tag, AlertTriangle,
 } from 'lucide-react'
 import { createLocauxClient } from '@/lib/supabase/locaux'
 import { mapLocauxRow, type LocauxRow } from '@/lib/locaux/mapper'
 import { formatFCFA } from '@/lib/format'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { getDictionary } from '@/lib/i18n/server'
+import { SimilarBiensSection } from '@/components/catalogue/SimilarBiensSection'
+import { FlashContactModal } from '@/components/offre-flash/FlashContactModal'
+import { ViewCount } from '@/components/bien/ViewCount'
+import { createClient as createSupabaseServer } from '@/lib/supabase/server'
 
 export const revalidate = 60
 export const dynamic = 'force-dynamic'
 
 interface PageProps {
   params: Promise<{ id: string }>
+}
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bogbes-groupe.vercel.app'
+
+/**
+ * Metadata Open Graph pour preview WhatsApp / réseaux sociaux.
+ * Sans ça, le lien partagé affiche le preview générique du site.
+ */
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params
+  const numId = parseInt(id, 10)
+  if (isNaN(numId)) return { title: 'Offre flash introuvable' }
+
+  const locaux = createLocauxClient()
+  const { data: row } = await locaux
+    .from('locaux')
+    .select('id,ref_bien,type_de_bien,type_offre,commune,quartier,prix,prix_normalise,caracteristiques,meubles,chambre,disponible,surface,date_publication,lien_image,message_initial,status,is_duplicate,date_expiration,created_at,zone_geographique')
+    .eq('id', numId)
+    .single()
+
+  if (!row) return { title: 'Offre flash introuvable' }
+
+  const bien = mapLocauxRow(row as LocauxRow)
+  const lieu = [bien.quartier, bien.commune].filter(Boolean).join(', ')
+  const prix = bien.prix_value
+    ? formatFCFA(bien.prix_value) + (bien.prix_unit === 'fcfa_par_mois' ? '/mois' : bien.prix_unit === 'fcfa_par_m2' ? '/m²' : '')
+    : bien.prix_label ?? 'Prix sur demande'
+
+  const title = `${bien.titre} — ${prix}`
+  const description =
+    `🔥 Offre flash WhatsApp : ${bien.type_bien} à ${lieu}. ${prix}. ` +
+    `${bien.surface_m2 ? `${bien.surface_m2} m². ` : ''}` +
+    `${bien.nb_chambres ? `${bien.nb_chambres} chambre${bien.nb_chambres > 1 ? 's' : ''}. ` : ''}` +
+    `Réf ${bien.ref}. Annonce non vérifiée — validation par notre conseiller avant tout engagement.`
+
+  const canonical = `${SITE_URL}/offre-flash/${bien.id}`
+  const image = bien.image_url || `${SITE_URL}/og-image.jpg`
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: 'article',
+      url: canonical,
+      title,
+      description,
+      siteName: "BOGBE'S GROUPE",
+      images: [{ url: image, width: 1200, height: 630, alt: bien.titre }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [image],
+    },
+  }
 }
 
 function priceDisplay(prix_value: number | null, prix_unit: string | null, prix_label: string | null): string {
@@ -26,20 +88,10 @@ function priceDisplay(prix_value: number | null, prix_unit: string | null, prix_
   return formatted
 }
 
-/**
- * Numéro du conseiller BOGBE'S — toutes les prises de contact sur les offres flash
- * passent par lui pour préserver la confidentialité du propriétaire scrapé.
- */
-const ADVISOR_PHONE = '2250544872051'
-
-function buildAdvisorWhatsAppUrl(id: number, ref: string, titre: string, commune: string, prix: string | null): string {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bogbes-groupe.vercel.app'
-  const link = `${siteUrl}/offre-flash/${id}`
-  const msg = encodeURIComponent(
-    `Bonjour BOGBE'S, je suis intéressé(e) par cette offre flash :\n\n*${titre}*\n📍 ${commune}${prix ? `\n💰 ${prix}` : ''}\nRéf : ${ref}\n\n🔗 ${link}\n\nPouvez-vous me confirmer la disponibilité et organiser une visite ?`
-  )
-  return `https://wa.me/${ADVISOR_PHONE}?text=${msg}`
-}
+// Anciennement `buildAdvisorWhatsAppUrl` ouvrait wa.me direct vers le conseiller.
+// Désormais remplacé par <FlashContactModal /> qui enregistre la demande server-side
+// dans contact_requests et notifie l'admin via Wasender — l'admin contacte ensuite
+// le propriétaire manuellement depuis flash_owner_phone.
 
 export default async function OffreFlashDetailPage({ params }: PageProps) {
   const t = await getDictionary()
@@ -52,7 +104,9 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
   // Les colonnes telephone/telephone_bien sont volontairement omises.
   const { data: row } = await locaux
     .from('locaux')
-    .select('id,ref_bien,type_de_bien,type_offre,zone_geographique,commune,quartier,prix,prix_normalise,caracteristiques,publie_par,meubles,chambre,disponible,surface,groupe_whatsapp_origine,date_publication,lien_image,message_initial,status,is_duplicate,date_expiration,created_at')
+    // SECURITY: publie_par, telephone, telephone_bien et groupe_whatsapp_origine
+    // sont volontairement exclus — données identifiantes du propriétaire/source.
+    .select('id,ref_bien,type_de_bien,type_offre,zone_geographique,commune,quartier,prix,prix_normalise,caracteristiques,meubles,chambre,disponible,surface,date_publication,lien_image,message_initial,status,is_duplicate,date_expiration,created_at')
     .eq('id', numId)
     .single()
 
@@ -62,6 +116,26 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
   const dateFormatted = new Date(bien.date_publication).toLocaleString('fr-FR', {
     day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
   })
+
+  // Pré-remplir le formulaire si l'utilisateur est connecté
+  const supabase = await createSupabaseServer()
+  const { data: { user } } = await supabase.auth.getUser()
+  let prefill: { name: string; phone: string; email: string } = { name: '', phone: '', email: '' }
+  if (user) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: profile } = await (supabase as any)
+      .from('profiles')
+      .select('full_name, phone, email')
+      .eq('id', user.id)
+      .single()
+    if (profile) {
+      prefill = {
+        name: profile.full_name || '',
+        phone: profile.phone || '',
+        email: profile.email || user.email || '',
+      }
+    }
+  }
 
   return (
     <main className="bg-slate-50 min-h-screen pb-12">
@@ -127,6 +201,7 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
                     Meublé
                   </span>
                 )}
+                <ViewCount bienId={String(bien.id)} source="flash" />
               </div>
 
               <h1 className="font-display text-2xl md:text-3xl font-bold text-slate-900 mb-2 capitalize leading-tight">
@@ -214,43 +289,41 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
               <h3 className="font-bold text-slate-900 text-sm mb-1">{t.flash.contactSeller}</h3>
               <p className="text-slate-400 text-xs mb-4">{t.flash.broadcastedOn}</p>
 
-              {bien.publie_par && (
-                <div className="flex items-center gap-2 mb-4 pb-4 border-b border-slate-100">
-                  <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center">
-                    <User className="w-4 h-4 text-slate-400" />
-                  </div>
-                  <div>
-                    <div className="text-[10px] text-slate-400 uppercase tracking-wider">{t.flash.publishedBy}</div>
-                    <div className="font-bold text-slate-800 text-sm leading-none mt-0.5">{bien.publie_par}</div>
-                  </div>
-                </div>
-              )}
-
               <div className="space-y-2">
-                <a
-                  href={buildAdvisorWhatsAppUrl(bien.id, bien.ref, bien.titre, bien.commune, bien.prix_label)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="relative flex items-center justify-center gap-2 w-full py-3.5 bg-green-600 text-white rounded-xl font-bold text-sm hover:bg-green-700 transition-colors overflow-hidden group"
-                >
-                  <span className="absolute left-5 flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-40" />
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-white/80" />
-                  </span>
-                  <MessageCircle className="w-4 h-4 ml-4" />
-                  {t.flash.contactBtn}
-                </a>
+                <FlashContactModal
+                  locauxId={bien.id}
+                  bienTitre={bien.titre}
+                  initialName={prefill.name}
+                  initialPhone={prefill.phone}
+                  initialEmail={prefill.email}
+                />
                 <p className="text-[10px] text-slate-400 text-center px-2 leading-relaxed">
                   🔒 {t.flash.contactBtnHint}
                 </p>
               </div>
 
-              <div className="mt-4 pt-4 border-t border-slate-100 flex items-center gap-1.5 text-[11px] text-slate-400">
-                <Calendar className="w-3 h-3" />
-                {t.flash.publishedOn} {new Date(bien.date_publication).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
-              </div>
-              <div className="text-[11px] text-slate-400">
-                {dateFormatted}
+              <div className="mt-4 pt-4 border-t border-slate-100 space-y-1.5">
+                <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
+                  <Calendar className="w-3 h-3" />
+                  <span>
+                    {t.flash.publishedOn} <strong className="text-slate-700">{new Date(bien.date_publication).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}</strong>
+                  </span>
+                </div>
+                <div className="text-[11px] text-slate-400 pl-4.5">
+                  {dateFormatted}
+                </div>
+                {bien.date_scraping && (
+                  <div className="flex items-center gap-1.5 text-[11px] text-emerald-700">
+                    <span className="relative flex w-2 h-2">
+                      <span className="animate-ping absolute inline-flex w-full h-full rounded-full bg-emerald-500 opacity-60" />
+                      <span className="relative rounded-full w-2 h-2 bg-emerald-500" />
+                    </span>
+                    <span>
+                      Récupéré le <strong>{new Date(bien.date_scraping).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}</strong>
+                      {' '}à {new Date(bien.date_scraping).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -266,6 +339,14 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
             </div>
           </aside>
         </div>
+
+        {/* Biens similaires (même type, même commune, ±25% prix) */}
+        <SimilarBiensSection
+          excludeId={String(bien.id)}
+          commune={bien.commune}
+          type_bien={bien.type_bien}
+          prix_value={bien.prix_value}
+        />
       </div>
     </main>
   )

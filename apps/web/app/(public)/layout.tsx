@@ -10,6 +10,7 @@ import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher'
 import { MobileTabBar } from '@/components/layout/MobileTabBar'
 import { PageTransition } from '@/components/layout/PageTransition'
 import { OnboardingModal } from '@/components/ui/OnboardingModal'
+import { BackToHomeButton } from '@/components/layout/BackToHomeButton'
 
 // Cache-bust: 2026-04-20T13:42:00Z
 
@@ -42,18 +43,15 @@ export default async function PublicLayout({ children }: { children: React.React
     { href: '/recherche?type_bien=residence_meublee', label: 'Résidences meublées' },
   ]
 
-  // Si c'est un propriétaire, on lui affiche son menu complet pour ne pas qu'il soit "perdu"
+  // Pour le propriétaire : nav TOP minimal (4 items) pour éviter le wrap sur 2 lignes.
+  // Tous les autres (Visites, Messages, Quittances, Profil & KYC, Vue publique)
+  // sont accessibles via le UserMenu dropdown (avatar) à droite.
   if (role === 'pro') {
     navLinks = [
       { href: '/', label: 'Accueil' },
       { href: '/recherche', label: 'Rechercher' },
       { href: '/dashboard', label: 'Tableau de bord' },
       { href: '/mes-biens', label: 'Mes annonces' },
-      { href: '/visites', label: 'Visites' },
-      { href: '/messages', label: 'Messages' },
-      { href: '/quittances', label: 'Quittances' },
-      { href: '/profil', label: 'Profil & KYC' },
-      { href: '/biens', label: 'Vue publique' },
     ]
   }
 
@@ -158,10 +156,12 @@ export default async function PublicLayout({ children }: { children: React.React
         </div>
       </header>
 
+      <BackToHomeButton />
+
       <PageTransition>
         {children}
       </PageTransition>
-      
+
       <MobileTabBar />
       <OnboardingModal />
     </>

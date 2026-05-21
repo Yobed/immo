@@ -247,6 +247,17 @@
     "j5Desc": "Sans inscription. Collez votre annonce, validez en 1 clic via WhatsApp.",
     "j5Cta": "Ouvrir le formulaire"
   },
+  "catalogue": {
+    "kicker": "Catalogue consolidé",
+    "title": "Tous les biens",
+    "titleAccent": "en un coup d'œil",
+    "subtitle": "La fusion en temps réel de notre catalogue vérifié et des offres flash repérées sur les groupes WhatsApp. Filtrez par source ou explorez tout.",
+    "allSources": "Tout",
+    "verified": "Vérifiés",
+    "results": "résultat",
+    "resultsPlural": "résultats",
+    "empty": "Aucun bien ne correspond à ces critères pour le moment."
+  },
   "testimonials": {
     "kicker": "Ils nous ont fait confiance",
     "title": "La preuve par",

@@ -247,6 +247,17 @@
     "j5Desc": "No sign-up. Paste your ad, validate in 1 click via WhatsApp.",
     "j5Cta": "Open form"
   },
+  "catalogue": {
+    "kicker": "Consolidated catalogue",
+    "title": "All properties",
+    "titleAccent": "at a glance",
+    "subtitle": "Real-time merge of our verified catalogue and the flash deals spotted on WhatsApp groups. Filter by source or explore everything.",
+    "allSources": "All",
+    "verified": "Verified",
+    "results": "result",
+    "resultsPlural": "results",
+    "empty": "No property matches these criteria right now."
+  },
   "testimonials": {
     "kicker": "They trusted us",
     "title": "Proof by",

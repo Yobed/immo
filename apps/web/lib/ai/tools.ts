@@ -1,12 +1,25 @@
-import { createClient } from '@/lib/supabase/server'
-import { createLocauxClient } from '@/lib/supabase/locaux'
-import { mapLocauxRow, type LocauxRow, type BienExterne } from '@/lib/locaux/mapper'
 import { parseSearchQuery } from '../searchParser'
 import { formatFCFA } from '../format'
+import {
+  getConsolidatedCatalogue,
+  getConsolidatedBienById,
+  extractBienIdFromText,
+  type ConsolidatedBien,
+} from '@/lib/catalogue/consolidated'
 
 /**
- * Marge budgétaire appliquée autour du budget client (±15%).
+ * Outil de recherche Sapphire.
+ *
+ * Source unique : `getConsolidatedCatalogue` — qui fusionne déjà :
+ *   • biens BOGBE'S (proprios + agences inscrites)
+ *   • locaux scrapés depuis les groupes WhatsApp publics
+ *
+ * Sapphire ne fait JAMAIS sa propre query DB. Tout passe par le catalogue
+ * consolidé pour garantir que la réponse Sapphire et la page /catalogue
+ * voient exactement les mêmes biens.
  */
+
+/** Marge budgétaire appliquée autour du budget client (±15%). */
 const BUDGET_MARGIN_PCT = 0.15
 
 /** Max biens retournés par source (BOGBE'S + offres flash) */
@@ -16,166 +29,86 @@ const SAPPHIRE_MAX_RESULTS = 5
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bogbes-groupe.vercel.app'
 
-interface BienCatalogue {
-  source: 'bogbes' | 'offre_flash'
-  id: string
-  url: string
-  reserve_url: string
-  titre: string
-  type_bien: string
-  commune: string
-  quartier: string | null
-  prix: string
-  prix_value: number | null
-  surface_m2: number | null
-  nb_pieces: number | null
-  description: string | null
-  is_verifie: boolean
-  score_ia: number | null
-  photos: string[]
-  videos: string[]
-}
+function formatBienBlock(b: ConsolidatedBien, i: number | null): string {
+  const sourceTag = b.source === 'bogbes' ? "[CATALOGUE BOGBE'S]" : '[OFFRE FLASH WhatsApp]'
+  const badges: string[] = []
+  if (b.is_verifie) badges.push('✓ VÉRIFIÉ')
+  if (typeof b.score_ia === 'number' && b.score_ia >= 80) badges.push('★ Top qualité')
+  if (b.source === 'flash') badges.push('⚡ Offre flash (récente, à valider rapidement)')
+  if (b.is_recent) badges.push('🆕 Nouveau (< 24h)')
 
-function bogbesPrixLabel(b: any): { label: string; value: number | null } {
-  if (b.prix_nuit_fcfa) return { label: `${formatFCFA(b.prix_nuit_fcfa)} / nuit`, value: b.prix_nuit_fcfa }
-  if (b.prix_vente_fcfa) return { label: `${formatFCFA(b.prix_vente_fcfa)} (vente)`, value: b.prix_vente_fcfa }
-  if (b.prix_mois_fcfa) return { label: `${formatFCFA(b.prix_mois_fcfa)} / mois`, value: b.prix_mois_fcfa }
-  return { label: 'Prix à confirmer', value: null }
-}
-
-async function fetchBogbesBiens(
-  supabase: any,
-  p: { commune?: string; type_bien?: string; q?: string; equipements?: string[] },
-  budgetMin: number | null,
-  budgetMax: number | null
-): Promise<BienCatalogue[]> {
-  let dbQuery = supabase
-    .from('biens')
-    .select(`
-      id, titre, commune, quartier, type_bien,
-      prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa,
-      nb_pieces, surface_m2, description, equipements,
-      is_verifie, score_ia,
-      biens_medias(id, url, type, est_couverture, ordre)
-    `)
-    .eq('statut', 'publie')
-    .order('is_verifie', { ascending: false })
-    .order('score_ia', { ascending: false, nullsFirst: false })
-    .limit(MAX_PER_SOURCE)
-
-  if (p.q?.trim()) dbQuery = dbQuery.textSearch('fts', p.q.trim(), { type: 'plain', config: 'french' })
-  if (p.commune) dbQuery = dbQuery.ilike('commune', `%${p.commune}%`)
-  if (p.type_bien) dbQuery = dbQuery.eq('type_bien', p.type_bien)
-  if (budgetMin && budgetMax) {
-    dbQuery = dbQuery.or(
-      `and(prix_mois_fcfa.gte.${budgetMin},prix_mois_fcfa.lte.${budgetMax}),` +
-      `and(prix_nuit_fcfa.gte.${budgetMin},prix_nuit_fcfa.lte.${budgetMax}),` +
-      `and(prix_vente_fcfa.gte.${budgetMin},prix_vente_fcfa.lte.${budgetMax})`
-    )
-  }
-  if (p.equipements && p.equipements.length > 0) dbQuery = dbQuery.contains('equipements', p.equipements)
-
-  const { data: biens, error } = await dbQuery
-  if (error || !biens) return []
-
-  return (biens as any[]).map((b) => {
-    const medias = (b.biens_medias || []).slice().sort((a: any, b: any) => {
-      if (a.est_couverture) return -1
-      if (b.est_couverture) return 1
-      return (a.ordre ?? 0) - (b.ordre ?? 0)
-    })
-    const photos = medias.filter((m: any) => m.type === 'photo').map((m: any) => m.url).slice(0, 5)
-    const videos = medias.filter((m: any) => m.type === 'video').map((m: any) => m.url).slice(0, 2)
-    const prix = bogbesPrixLabel(b)
-    return {
-      source: 'bogbes' as const,
-      id: b.id,
-      url: `${SITE_URL}/biens/${b.id}`,
-      reserve_url: `${SITE_URL}/biens/${b.id}#reserver`,
-      titre: b.titre,
-      type_bien: b.type_bien,
-      commune: b.commune,
-      quartier: b.quartier ?? null,
-      prix: prix.label,
-      prix_value: prix.value,
-      surface_m2: b.surface_m2 ?? null,
-      nb_pieces: b.nb_pieces ?? null,
-      description: b.description ?? null,
-      is_verifie: !!b.is_verifie,
-      score_ia: typeof b.score_ia === 'number' ? b.score_ia : null,
-      photos,
-      videos,
-    }
-  })
-}
-
-async function fetchOffreFlashBiens(
-  p: { commune?: string; type_bien?: string; q?: string },
-  budgetMin: number | null,
-  budgetMax: number | null
-): Promise<BienCatalogue[]> {
-  try {
-    const sb = createLocauxClient() as any
-    // SECURITY: whitelist explicite — JAMAIS de telephone/telephone_bien
-    // exposés au LLM (qui pourrait les répéter dans ses réponses).
-    let q = sb
-      .from('locaux')
-      .select('id,ref_bien,type_de_bien,type_offre,zone_geographique,commune,quartier,prix,prix_normalise,caracteristiques,publie_par,meubles,chambre,disponible,surface,groupe_whatsapp_origine,date_publication,lien_image,message_initial,status,is_duplicate,date_expiration,created_at')
-      .eq('status', 'active')
-      .eq('is_duplicate', false)
-      .order('date_publication', { ascending: false })
-      .limit(MAX_PER_SOURCE * 2) // marge pour filtrer is_actif après mapping
-
-    if (p.commune) q = q.ilike('commune', `%${p.commune}%`)
-    if (p.type_bien) q = q.ilike('type_de_bien', `%${p.type_bien}%`)
-    if (budgetMin && budgetMax) {
-      q = q.gte('prix_normalise', budgetMin).lte('prix_normalise', budgetMax)
-    }
-    if (p.q?.trim()) {
-      const term = p.q.trim()
-      q = q.or(`caracteristiques.ilike.%${term}%,message_initial.ilike.%${term}%`)
-    }
-
-    const { data, error } = await q
-    if (error || !data) return []
-
-    const mapped = (data as LocauxRow[])
-      .map(mapLocauxRow)
-      .filter((b: BienExterne) => b.is_actif)
-      .slice(0, MAX_PER_SOURCE)
-
-    return mapped.map((b) => {
-      const prix = b.prix_label ?? (b.prix_value ? formatFCFA(b.prix_value) : 'Prix à confirmer')
-      return {
-        source: 'offre_flash' as const,
-        id: String(b.id),
-        url: `${SITE_URL}/offre-flash/${b.id}`,
-        reserve_url: `https://wa.me/2250544872051?text=${encodeURIComponent(`Bonjour, je suis intéressé(e) par l'offre flash ${b.ref} (${b.titre})`)}`,
-        titre: b.titre,
-        type_bien: b.type_bien,
-        commune: b.commune,
-        quartier: b.quartier ?? null,
-        prix,
-        prix_value: b.prix_value,
-        surface_m2: b.surface_m2,
-        nb_pieces: b.nb_chambres,
-        description: b.description || b.caracteristiques,
-        is_verifie: false,
-        score_ia: null,
-        photos: b.image_url ? [b.image_url] : [],
-        videos: [],
-      }
-    })
-  } catch {
-    return []
-  }
+  let out = i !== null ? `--- BIEN ${i + 1} ${sourceTag} ---\n` : `--- BIEN DEMANDÉ ${sourceTag} ---\n`
+  out += `ID: ${b.sourceId}\n`
+  out += `Source: ${b.source}\n`
+  if (badges.length) out += `Badges: ${badges.join(' | ')}\n`
+  out += `Titre: ${b.titre}\n`
+  out += `Type: ${b.type_bien}\n`
+  out += `Localisation: ${b.commune}${b.quartier ? ' / ' + b.quartier : ''}\n`
+  out += `Prix: ${b.prix_label}\n`
+  if (b.nb_pieces) out += `Pièces/chambres: ${b.nb_pieces}\n`
+  if (b.surface_m2) out += `Surface: ${b.surface_m2} m²\n`
+  if (b.equipements.length) out += `Équipements: ${b.equipements.join(', ')}\n`
+  if (b.description) out += `Description: ${b.description.slice(0, 280)}\n`
+  if (b.photos.length > 0) out += `Photos disponibles (${b.photos.length}): ${b.photos.slice(0, 3).join(' | ')}\n`
+  else out += `Pas de photos dans le catalogue pour ce bien.\n`
+  if (b.videos.length > 0) out += `Vidéos disponibles (${b.videos.length}): ${b.videos.slice(0, 2).join(' | ')}\n`
+  out += `Lien fiche: ${b.url}\n`
+  out += `CTA visite/contact: ${b.cta_url}\n`
+  return out
 }
 
 export async function getAIBienContext(
   userMessage: string,
-  history?: { role: string; content: string }[]
+  history?: { role: string; content: string }[],
 ) {
-  const supabase = await createClient()
+  // ─── PRIORITÉ 1 : URL d'un bien dans le message ────────────────────────────
+  // Si le client envoie un lien comme bogbes-groupe.vercel.app/biens/<UUID> ou
+  // /offre-flash/<id>, on fetch CE bien et on cherche aussi des similaires.
+  const detected = extractBienIdFromText(userMessage)
+  if (detected) {
+    const requested = await getConsolidatedBienById(detected.source, detected.id)
+    if (requested) {
+      let context = `INSTRUCTION SPÉCIALE — Le client envoie un lien vers un bien précis. Tu DOIS :
+1. D'abord présenter en détail LE BIEN DEMANDÉ ci-dessous (titre, prix, localisation, surface, équipements, description courte si utile).
+2. Répondre à sa question (s'il en pose une) en t'appuyant uniquement sur les infos du contexte.
+3. Ensuite, et SEULEMENT ensuite, proposer 2-3 biens similaires en disant "Voici aussi des biens du même type / zone / budget qui pourraient t'intéresser :"
+4. Ne JAMAIS proposer les biens similaires AVANT de répondre sur le bien demandé.
+
+`
+      context += formatBienBlock(requested, null) + '\n'
+
+      // Fetch des similaires : même type, même commune, prix ±15%
+      const margin = 0.15
+      const prixMin = requested.prix_value ? Math.round(requested.prix_value * (1 - margin)) : undefined
+      const prixMax = requested.prix_value ? Math.round(requested.prix_value * (1 + margin)) : undefined
+      const { items: similar } = await getConsolidatedCatalogue({
+        commune: requested.commune,
+        type_bien: requested.type_bien,
+        prix_min: prixMin,
+        prix_max: prixMax,
+        sort: 'verified_first',
+        limitPerSource: 3,
+      })
+      const similarFiltered = similar.filter((s) => s.sourceId !== requested.sourceId).slice(0, 3)
+
+      if (similarFiltered.length > 0) {
+        context += `\n=== BIENS SIMILAIRES (à proposer APRÈS la réponse sur le bien demandé) ===\n\n`
+        similarFiltered.forEach((b, i) => {
+          context += formatBienBlock(b, i) + '\n'
+        })
+      }
+
+      // Lien catalogue filtré
+      const params = new URLSearchParams()
+      params.append('commune', requested.commune)
+      params.append('type_bien', requested.type_bien)
+      const catalogueUrl = `${SITE_URL}/catalogue?${params.toString()}`
+      context += `\nLIEN CATALOGUE FILTRÉ (à proposer en fin de message) : ${catalogueUrl}\n`
+
+      return context
+    }
+  }
+
   const p = parseSearchQuery(userMessage)
 
   // Détecter si le client demande des images/photos/vidéos
@@ -202,19 +135,27 @@ export async function getAIBienContext(
 
   // Marge budgétaire : ±15%
   const budget = p.prix_max ? parseInt(p.prix_max) : null
-  const budgetMin = budget ? Math.round(budget * (1 - BUDGET_MARGIN_PCT)) : null
-  const budgetMax = budget ? Math.round(budget * (1 + BUDGET_MARGIN_PCT)) : null
+  const budgetMin = budget ? Math.round(budget * (1 - BUDGET_MARGIN_PCT)) : undefined
+  const budgetMax = budget ? Math.round(budget * (1 + BUDGET_MARGIN_PCT)) : undefined
 
-  // Recherche en parallèle dans les 2 sources
-  const [bogbes, offresFlash] = await Promise.all([
-    fetchBogbesBiens(supabase, p, budgetMin, budgetMax),
-    fetchOffreFlashBiens(p, budgetMin, budgetMax),
-  ])
+  // ─── Unique appel au catalogue consolidé ────────────────────────────────────
+  // ⚠️ ON NE PASSE PAS `p.q` au catalogue : c'est une recherche full-text trop stricte
+  // (ilike %louer riviera 3 03 pièces% ne matche jamais une description réelle).
+  // La combinaison commune + type + budget ±15% suffit pour trouver les biens pertinents,
+  // et le LLM peut ensuite mentionner le quartier (Riviera 3) à partir des biens retournés.
+  const { items, counts } = await getConsolidatedCatalogue({
+    commune: p.commune,
+    type_bien: p.type_bien,
+    equipements: p.equipements,
+    prix_min: budgetMin,
+    prix_max: budgetMax,
+    sort: 'verified_first',
+    limitPerSource: MAX_PER_SOURCE,
+  })
 
-  // Merge avec priorité aux biens vérifiés BOGBE'S, puis offres flash récentes
-  const allBiens: BienCatalogue[] = [...bogbes, ...offresFlash].slice(0, SAPPHIRE_MAX_RESULTS)
+  const top = items.slice(0, SAPPHIRE_MAX_RESULTS)
 
-  if (allBiens.length === 0) {
+  if (top.length === 0) {
     return `Aucun bien ne correspond exactement à ces critères, ni dans le catalogue BOGBE'S, ni dans les offres flash WhatsApp.
 Dis au client que tu vas faire une recherche manuelle et que tu le recontactes rapidement.`
   }
@@ -223,52 +164,44 @@ Dis au client que tu vas faire une recherche manuelle et que tu le recontactes r
   const critereLines: string[] = []
   if (p.commune) critereLines.push(`- Zone : ${p.commune}`)
   if (p.type_bien) critereLines.push(`- Type : ${p.type_bien}`)
-  if (budget) critereLines.push(`- Budget client : ${formatFCFA(budget)} (intervalle accepté ±15% : ${formatFCFA(budgetMin!)} – ${formatFCFA(budgetMax!)})`)
+  if (budget && budgetMin != null && budgetMax != null) {
+    critereLines.push(
+      `- Budget client : ${formatFCFA(budget)} (intervalle accepté ±15% : ${formatFCFA(budgetMin)} – ${formatFCFA(budgetMax)})`,
+    )
+  }
   if (p.equipements?.length) critereLines.push(`- Équipements : ${p.equipements.join(', ')}`)
 
-  const counts = {
-    bogbes: bogbes.length,
-    flash: offresFlash.length,
-  }
-
-  // Lien catalogue filtré (commune + type + budget) — pour proposer une exploration alternative
-  const filterParams = new URLSearchParams()
-  if (p.commune) filterParams.set('commune', p.commune)
-  if (p.type_bien) filterParams.set('type', p.type_bien)
-  if (budget) filterParams.set('budget', String(budget))
-  const catalogueLink = filterParams.toString()
-    ? `${SITE_URL}/biens?${filterParams.toString()}`
-    : `${SITE_URL}/biens`
-
-  let context = `${allBiens.length} bien(s) trouvé(s) (max ${SAPPHIRE_MAX_RESULTS})\n`
-  context += `Sources interrogées : Catalogue BOGBE'S (${counts.bogbes}) + Offres Flash WhatsApp (${counts.flash})\n`
+  let context = `${top.length} bien(s) trouvé(s) (max ${SAPPHIRE_MAX_RESULTS}) via catalogue consolidé\n`
+  context += `Sources : BOGBE'S vérifiés (${counts.bogbes}) + Offres Flash WhatsApp (${counts.flash})\n`
   if (critereLines.length) context += `\nCRITÈRES STRICTS APPLIQUÉS :\n${critereLines.join('\n')}\n`
-  context += `\nLIEN DE RECHERCHE PERSONNALISÉ :\n${catalogueLink}\n`
   context += '\n'
 
-  allBiens.forEach((b, i) => {
+  top.forEach((b: ConsolidatedBien, i: number) => {
     const sourceTag = b.source === 'bogbes' ? '[CATALOGUE BOGBE\'S]' : '[OFFRE FLASH WhatsApp]'
     const badges: string[] = []
     if (b.is_verifie) badges.push('✓ VÉRIFIÉ')
     if (typeof b.score_ia === 'number' && b.score_ia >= 80) badges.push('★ Top qualité')
-    if (b.source === 'offre_flash') badges.push('⚡ Offre flash (récente, à valider rapidement)')
+    if (b.source === 'flash') badges.push('⚡ Offre flash (récente, à valider rapidement)')
+    if (b.is_recent) badges.push('🆕 Nouveau (< 24h)')
 
     context += `--- BIEN ${i + 1} ${sourceTag} ---\n`
-    context += `ID: ${b.id}\n`
+    context += `ID: ${b.sourceId}\n`
     context += `Source: ${b.source}\n`
     if (badges.length) context += `Badges: ${badges.join(' | ')}\n`
     context += `Titre: ${b.titre}\n`
     context += `Type: ${b.type_bien}\n`
     context += `Localisation: ${b.commune}${b.quartier ? ' / ' + b.quartier : ''}\n`
-    context += `Prix: ${b.prix}\n`
+    context += `Prix: ${b.prix_label}\n`
     if (b.nb_pieces) context += `Pièces/chambres: ${b.nb_pieces}\n`
     if (b.surface_m2) context += `Surface: ${b.surface_m2} m²\n`
+    if (b.equipements.length) context += `Équipements: ${b.equipements.join(', ')}\n`
     if (b.description) context += `Description: ${b.description.slice(0, 220)}\n`
     if (b.photos.length > 0) context += `Photos disponibles (${b.photos.length}): ${b.photos.slice(0, 3).join(' | ')}\n`
     else context += `Pas de photos dans le catalogue pour ce bien.\n`
     if (b.videos.length > 0) context += `Vidéos disponibles (${b.videos.length}): ${b.videos.slice(0, 2).join(' | ')}\n`
+    if (b.date_scraping) context += `Récupéré dans notre système : ${new Date(b.date_scraping).toISOString()}\n`
     context += `Lien fiche: ${b.url}\n`
-    context += `CTA visite/contact: ${b.reserve_url}\n`
+    context += `CTA visite/contact: ${b.cta_url}\n`
     context += '\n'
   })
 
@@ -276,8 +209,8 @@ Dis au client que tu vas faire une recherche manuelle et que tu le recontactes r
     context += `\nNOTE OFFRES FLASH :
 Les biens taggés [OFFRE FLASH WhatsApp] proviennent de canaux WhatsApp publics scrapés en temps réel.
 - Ils tournent vite : annonce-les comme "à valider rapidement, possiblement déjà loué/vendu".
-- Le lien #reserver est remplacé par un lien WhatsApp direct vers notre conseiller (pour ces biens uniquement).
-- Tu peux les présenter dans le même message que les biens BOGBE'S, mais en signalant la source : "(Offre flash)" ou "⚡".\n`
+- Le CTA n'est PAS un lien #reserver — c'est un lien wa.me direct vers notre conseiller, qui valide l'offre avant tout engagement.
+- Tu peux les présenter dans le même message que les biens BOGBE'S, mais signale la source avec ⚡.\n`
   }
 
   if (demandeMedia) {
@@ -289,17 +222,18 @@ Le client demande des photos/vidéos.
 - N'invente AUCUNE URL.\n`
   }
 
-  // --- LIEN DE RECHERCHE PRÉ-FILTRÉ ---
+  // --- LIEN DE RECHERCHE PRÉ-FILTRÉ (CATALOGUE CONSOLIDÉ) ---
   const params = new URLSearchParams()
   if (p.commune) params.append('commune', p.commune)
-  if (p.type_bien) params.append('type', p.type_bien)
-  if (p.prix_max) params.append('budget_max', p.prix_max)
+  if (p.type_bien) params.append('type_bien', p.type_bien)
+  if (p.prix_max) params.append('prix_max', p.prix_max)
 
-  if (params.toString()) {
-    const searchUrl = `${SITE_URL}/biens?${params.toString()}`
-    context += `\nLIEN DE RECHERCHE PERSONNALISÉ :
-Propose également ce lien au client pour qu'il puisse voir tous les autres biens disponibles correspondant à sa recherche : ${searchUrl}\n`
-  }
+  const catalogueUrl = params.toString()
+    ? `${SITE_URL}/catalogue?${params.toString()}`
+    : `${SITE_URL}/catalogue`
+
+  context += `\nLIEN DE RECHERCHE PERSONNALISÉ (CATALOGUE CONSOLIDÉ) :
+Propose ce lien au client pour qu'il explore l'intégralité de notre catalogue (biens vérifiés BOGBE'S + offres flash WhatsApp) correspondant à sa recherche : ${catalogueUrl}\n`
 
   return context
 }

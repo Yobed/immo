@@ -6,8 +6,17 @@ import type { NextRequest } from 'next/server'
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
+  const tokenHash = searchParams.get('token_hash')
+  const verifyType = searchParams.get('type') as
+    | 'signup'
+    | 'invite'
+    | 'magiclink'
+    | 'recovery'
+    | 'email_change'
+    | 'email'
+    | null
 
-  if (code) {
+  if (code || (tokenHash && verifyType)) {
     const cookieStore = await cookies()
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -26,7 +35,16 @@ export async function GET(request: NextRequest) {
       }
     )
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    // Deux flows possibles :
+    // - PKCE (OAuth Google, magic links modernes) → exchangeCodeForSession
+    // - Legacy (anciens templates email Supabase) → verifyOtp(token_hash)
+    const { error } = code
+      ? await supabase.auth.exchangeCodeForSession(code)
+      : await supabase.auth.verifyOtp({
+          token_hash: tokenHash!,
+          type: verifyType === 'email' ? 'email' : verifyType!,
+        })
+
     if (!error) {
       // Get the 'next' parameter for redirection after login
       const next = searchParams.get('next') || ''

@@ -153,7 +153,7 @@ function SuccessState({ profil, contact }: { profil: Profil; contact: string }) 
         onClick={() => track.share({ method: 'whatsapp', content_type: 'waitlist' })}
         href={`https://wa.me/?text=${encodeURIComponent(
           "🏠 J'ai rejoint BOGBE'S GROUPE — la nouvelle plateforme immo de CI sans arnaque !\nInscrivez-vous ici : " +
-          (typeof window !== 'undefined' ? window.location.href : 'https://immo-ci.vercel.app/acces-anticipe')
+          (typeof window !== 'undefined' ? window.location.href : `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bogbes-groupe.vercel.app'}/acces-anticipe`)
         )}`}
         target="_blank"
         rel="noopener noreferrer"

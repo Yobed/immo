@@ -204,15 +204,15 @@ export function StickyMobileCTA({
       <FloatingBackButton />
       <style dangerouslySetInnerHTML={{ __html: STICKY_STYLES }} />
 
-      {/* Barre sticky unifiée style "Dynamic Pill" */}
+      {/* Barre sticky unifiée style "Dynamic Pill" — masquée quand la sheet est ouverte */}
       <AnimatePresence>
-        {(visible || isNuitee) && (
+        {(visible || isNuitee) && !sheetOpen && (
           <motion.div
             initial={{ y: 100, opacity: 0, scale: 0.9 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 100, opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed left-4 right-4 z-[110] lg:hidden pointer-events-none flex flex-col items-center gap-2"
+            className="fixed left-4 right-4 z-[105] lg:hidden pointer-events-none flex flex-col items-center gap-2"
             style={{ bottom: `calc(${barBottom} + 20px)` }}
           >
             {/* Reassurance microtext */}
@@ -284,7 +284,7 @@ export function StickyMobileCTA({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               onClick={() => setSheetOpen(false)}
-              className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-sm lg:hidden"
             />
 
             {/* Panneau */}
@@ -293,7 +293,7 @@ export function StickyMobileCTA({
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 32, stiffness: 320 }}
-              className="fixed bottom-0 left-0 right-0 z-[101] bg-white rounded-t-3xl lg:hidden shadow-2xl"
+              className="fixed bottom-0 left-0 right-0 z-[121] bg-white rounded-t-3xl lg:hidden shadow-2xl"
               style={{ maxHeight: '88vh' }}
             >
               {/* Handle — plus large et premium */}

@@ -52,6 +52,8 @@ export interface BienExterne {
   image_url: string | null
   groupe_whatsapp: string | null
   date_publication: string
+  /** Date à laquelle notre système a récupéré (scrapé) cette annonce. */
+  date_scraping: string | null
   is_recent: boolean
   is_actif: boolean
 }
@@ -204,9 +206,14 @@ function isRecent(date: string | null): boolean {
 }
 
 function isStillActive(row: LocauxRow): boolean {
-  if (row.status !== 'active') return false
-  if (row.disponible && row.disponible.toLowerCase() !== 'oui') return false
-  if (row.is_duplicate) return false
+  // ⚠️ Politique permissive : on remonte TOUS les biens scrapés sauf cas explicitement disqualifiants.
+  // - status === 'inactive' explicite → exclu (mais NULL/manquant → accepté)
+  // - is_duplicate === true → exclu (mais NULL → accepté)
+  // - disponible === 'non' explicite → exclu (mais NULL ou 'oui' ou tout autre → accepté)
+  // - date_expiration dépassée → exclu (NULL = pas d'expiration → accepté)
+  if (row.status && row.status.toLowerCase() === 'inactive') return false
+  if (row.is_duplicate === true) return false
+  if (row.disponible && row.disponible.toLowerCase().trim() === 'non') return false
   if (row.date_expiration) {
     const exp = new Date(row.date_expiration).getTime()
     if (!isNaN(exp) && exp < Date.now()) return false
@@ -240,6 +247,7 @@ export function mapLocauxRow(row: LocauxRow): BienExterne {
     image_url: row.lien_image?.trim() || null,
     groupe_whatsapp: row.groupe_whatsapp_origine?.trim() || null,
     date_publication: row.date_publication || row.created_at || new Date().toISOString(),
+    date_scraping: row.created_at,
     is_recent: isRecent(row.date_publication || row.created_at),
     is_actif: isStillActive(row),
   }

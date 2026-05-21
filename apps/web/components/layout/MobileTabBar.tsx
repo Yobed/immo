@@ -11,7 +11,7 @@ export function MobileTabBar() {
   const pathname = usePathname()
   const t = useT()
   const TABS = [
-    { href: '/biens', icon: Search, label: t.nav.biens, key: 'biens' },
+    { href: '/catalogue', icon: Search, label: t.nav.biens, key: 'biens' },
     { href: '/offre-flash', icon: Sparkles, label: t.flash.title, key: 'flash' },
     { href: '/favoris', icon: Heart, label: t.nav.favorites, key: 'favoris' },
     { href: '/dashboard', icon: User, label: t.nav.account, key: 'account' },

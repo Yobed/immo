@@ -30,8 +30,9 @@ export async function FlashOffersSection() {
   const c = createLocauxClient()
   const { data: rows } = await c
     .from('locaux')
-    // SECURITY: pas de telephone/telephone_bien — données confidentielles propriétaire
-    .select('id,ref_bien,type_de_bien,type_offre,zone_geographique,commune,quartier,prix,prix_normalise,caracteristiques,publie_par,meubles,chambre,disponible,surface,groupe_whatsapp_origine,date_publication,lien_image,message_initial,status,is_duplicate,date_expiration,created_at')
+    // SECURITY: telephone, telephone_bien, publie_par, groupe_whatsapp_origine
+    // omis — données identifiantes propriétaire/source.
+    .select('id,ref_bien,type_de_bien,type_offre,zone_geographique,commune,quartier,prix,prix_normalise,caracteristiques,meubles,chambre,disponible,surface,date_publication,lien_image,message_initial,status,is_duplicate,date_expiration,created_at')
     .eq('status', 'active')
     .eq('is_duplicate', false)
     .neq('lien_image', '')

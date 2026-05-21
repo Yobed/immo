@@ -5,6 +5,7 @@ import { extractBienFromWhatsApp } from '@/lib/extractors/whatsapp-bien-extracto
 import { signMagicLinkToken } from '@/lib/auth/magic-link-token'
 import { wasenderSendMessage } from '@/lib/wasender'
 import { v2 as cloudinary } from 'cloudinary'
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -226,6 +227,10 @@ Ce lien valide votre numéro et publie votre annonce en 1 clic. Valide 7 jours.`
 }
 
 export async function POST(req: NextRequest) {
+  // Rate limit Tally : max 30 publications par IP / 1h (anti-abus)
+  const rl = checkRateLimit(req, { scope: 'tally-webhook', max: 30, windowMs: 60 * 60_000 })
+  if (!rl.ok) return rateLimitResponse(rl)
+
   const rawBody = await req.text()
   const signature = req.headers.get('tally-signature')
   if (!verifyTallySignature(rawBody, signature)) {

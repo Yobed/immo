@@ -4,8 +4,13 @@ import {
   notifyAdminReservationRequest,
   type ReservationContext,
 } from '@/lib/notifications/whatsapp-notifier'
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
 
 export async function POST(req: NextRequest) {
+  // Rate limit : max 5 réservations par IP / 5 minutes
+  const rl = checkRateLimit(req, { scope: 'reservation-create', max: 5, windowMs: 5 * 60_000 })
+  if (!rl.ok) return rateLimitResponse(rl)
+
   const { user, supabase } = await getServerUser(req)
   if (!user) return NextResponse.json({ error: 'Non authentifie' }, { status: 401 })
 

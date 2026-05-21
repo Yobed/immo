@@ -218,9 +218,10 @@ export async function validateContactAction(formData: FormData): Promise<void> {
   const { data: req, error: fetchErr } = await (admin as any)
     .from('contact_requests')
     .select(`
-      id, admin_validation_status, reason,
+      id, admin_validation_status, reason, source,
       visitor_id, visitor_name, visitor_phone, visitor_email,
       proprietaire_id,
+      locaux_id, flash_owner_phone, flash_titre,
       biens ( titre, commune )
     `)
     .eq('id', contactId)
@@ -231,23 +232,33 @@ export async function validateContactAction(formData: FormData): Promise<void> {
     throw new Error(`Déjà ${req.admin_validation_status}`)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: owner } = await (admin as any)
-    .from('profiles')
-    .select('id, full_name, phone')
-    .eq('id', req.proprietaire_id)
-    .single()
+  // Pour les contacts source='web' : owner depuis profiles via proprietaire_id
+  // Pour les contacts source='flash' : owner = scrapé, on a juste flash_owner_phone
+  let ownerName: string | null = null
+  let ownerPhone: string | null = null
+  if (req.source === 'flash') {
+    ownerPhone = req.flash_owner_phone ?? null
+  } else if (req.proprietaire_id) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: owner } = await (admin as any)
+      .from('profiles')
+      .select('id, full_name, phone')
+      .eq('id', req.proprietaire_id)
+      .single()
+    ownerName = owner?.full_name ?? null
+    ownerPhone = owner?.phone ?? null
+  }
 
   const ctx: ContactRequestContext = {
     id: req.id,
-    bienTitre: req.biens?.titre || 'Bien',
+    bienTitre: req.biens?.titre || req.flash_titre || 'Bien',
     bienCommune: req.biens?.commune ?? null,
     visitorName: req.visitor_name || 'Visiteur',
     visitorPhone: req.visitor_phone || '',
     visitorEmail: req.visitor_email,
     reason: req.reason,
-    ownerName: owner?.full_name ?? null,
-    ownerPhone: owner?.phone ?? null,
+    ownerName,
+    ownerPhone,
   }
 
   const newStatus = action === 'approve' ? 'approved' : 'rejected'

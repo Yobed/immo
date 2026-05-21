@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/server-auth'
 import { notifyAdminVisitRequest, notifyOwnerVisitApproved, type VisitContext } from '@/lib/notifications/whatsapp-notifier'
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
 
 // POST — créer une demande de visite (workflow admin-first)
 // Le propriétaire EST notifié à ce stade pour vérifier sa disponibilité.
 export async function POST(request: Request) {
+  // Rate limit : max 5 demandes de visite par IP / 5 minutes (anti-spam)
+  const rl = checkRateLimit(request, { scope: 'visite-create', max: 5, windowMs: 5 * 60_000 })
+  if (!rl.ok) return rateLimitResponse(rl)
+
   const { user, supabase } = await getServerUser(request)
   if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/server-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import {
   notifyAdminContactRequest,
   type ContactRequestContext,
@@ -19,6 +20,10 @@ import {
  *  - reason       (string, optionnel)
  */
 export async function POST(req: NextRequest) {
+  // Rate limit : max 8 demandes de contact par IP / 10 minutes
+  const rl = checkRateLimit(req, { scope: 'contact-create', max: 8, windowMs: 10 * 60_000 })
+  if (!rl.ok) return rateLimitResponse(rl)
+
   const { user, supabase } = await getServerUser(req)
 
   const body = await req.json() as {

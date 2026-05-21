@@ -19,6 +19,7 @@ export function Footer() {
     {
       title: t.footer.biens,
       links: [
+        { label: t.catalogue.title, href: '/catalogue' },
         { label: t.footer.rentals, href: '/biens?type=location' },
         { label: t.footer.sales, href: '/biens?type=vente' },
         { label: t.footer.furnished, href: '/biens?type=meuble' },

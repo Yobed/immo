@@ -57,10 +57,14 @@ function RegisterContent() {
     setLoading(true)
     setError(null)
 
+    const origin = window.location.origin
     const { error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
       options: {
+        // Lien dans l'email de confirmation — doit pointer vers notre handler /callback
+        // qui échange le code contre une session avant de rediriger vers /profil.
+        emailRedirectTo: `${origin}/callback?next=/profil`,
         data: {
           full_name: data.full_name,
           role: data.role,

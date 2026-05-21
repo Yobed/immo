@@ -1,21 +1,29 @@
 import { MetadataRoute } from 'next'
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bogbes-groupe.vercel.app'
+
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
-      url: 'https://immo-ci.vercel.app',
+      url: SITE_URL,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 1,
     },
     {
-      url: 'https://immo-ci.vercel.app/biens',
+      url: `${SITE_URL}/biens`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
     },
     {
-      url: 'https://immo-ci.vercel.app/login',
+      url: `${SITE_URL}/catalogue`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/login`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.5,

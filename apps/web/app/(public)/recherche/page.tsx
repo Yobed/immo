@@ -7,6 +7,7 @@ import { MobileFiltersDrawer } from '@/components/search/MobileFiltersDrawer'
 import { PropertiesMap } from '@/components/map/PropertiesMap'
 import { Compass, Grid, Map as MapIcon, SlidersHorizontal, List, X } from 'lucide-react'
 import { FlashOffersBanner } from '@/components/search/FlashOffersBanner'
+import { FlashOffersInline } from '@/components/search/FlashOffersInline'
 import { QuickFilters } from '@/components/search/QuickFilters'
 import Link from 'next/link'
 import * as motion from 'framer-motion/client'
@@ -211,6 +212,18 @@ export default async function RecherchePage({
                 <PaginationGroup params={params} page={page} totalPages={totalPages} />
               </div>
             )}
+
+            {/* Section unifiée : offres flash WhatsApp correspondant aux mêmes filtres */}
+            <FlashOffersInline
+              filters={{
+                q: params.q,
+                commune: params.commune,
+                type_bien: params.type_bien,
+                prix_min: params.prix_min,
+                prix_max: params.prix_max,
+              }}
+              limit={6}
+            />
           </div>
         </div>
       </div>

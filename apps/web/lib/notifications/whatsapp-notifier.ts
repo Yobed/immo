@@ -631,19 +631,22 @@ function tplAdminContactRequest(ctx: ContactRequestContext): string {
 }
 
 function tplVisitorContactApproved(ctx: ContactRequestContext): string {
-  const ownerWa = ctx.ownerPhone
-    ? `https://wa.me/${ctx.ownerPhone.replace(/\D/g, '')}`
-    : null
+  // INTERMÉDIATION TOTALE : on ne partage JAMAIS le numéro du propriétaire au visiteur.
+  // Le conseiller BOGBE'S coordonne la visite des deux côtés.
   return [
     `Bonjour ${ctx.visitorName} 👋`,
     '',
-    `Voici les coordonnées du propriétaire pour le bien *« ${ctx.bienTitre} »* :`,
+    `Votre demande pour le bien *« ${ctx.bienTitre} »*${
+      ctx.bienCommune ? ` à *${ctx.bienCommune}*` : ''
+    } a été *acceptée* ✅`,
     '',
-    `*Nom :* ${ctx.ownerName || '—'}`,
-    `*WhatsApp :* ${ctx.ownerPhone || '—'}`,
-    ownerWa ? `${ownerWa}` : null,
+    'Notre conseiller a vérifié la disponibilité avec le propriétaire et organise la visite avec vous.',
     '',
-    'Le propriétaire est informé de votre démarche.',
+    '👉 Réponds à ce message avec :',
+    '• Tes créneaux préférés (jour + heure)',
+    '• Toute information complémentaire utile',
+    '',
+    "Pour ta sécurité, toutes les communications passent par BOGBE'S — tu n'as pas à contacter le propriétaire directement.",
     '',
     "— *BOGBE'S GROUPE*",
   ]
@@ -652,17 +655,22 @@ function tplVisitorContactApproved(ctx: ContactRequestContext): string {
 }
 
 function tplOwnerContactShared(ctx: ContactRequestContext): string {
+  // INTERMÉDIATION TOTALE : on ne partage JAMAIS le numéro du visiteur au proprio.
+  // Le conseiller BOGBE'S accompagne le client jusqu'à la visite.
   return [
     `Bonjour ${ctx.ownerName || ''} 👋`,
     '',
-    `J'ai partagé votre numéro WhatsApp avec un client intéressé par votre bien *« ${ctx.bienTitre} »*${
+    `Un client est *intéressé par votre bien* *« ${ctx.bienTitre} »*${
       ctx.bienCommune ? ` à *${ctx.bienCommune}*` : ''
     }.`,
     '',
-    `*Client :* ${ctx.visitorName}`,
-    `*Son tél :* ${ctx.visitorPhone}`,
+    "Notre conseiller BOGBE'S l'accompagne et organisera la visite avec vous prochainement.",
     '',
-    'Il devrait vous contacter sous peu.',
+    '👉 Merci de nous indiquer :',
+    '• Si le bien est toujours disponible',
+    '• Vos créneaux de disponibilité cette semaine',
+    '',
+    'Toutes les communications client passent par notre équipe — vous restez serein, on coordonne tout.',
     '',
     "— *BOGBE'S GROUPE*",
   ].join('\n')
@@ -672,10 +680,10 @@ function tplVisitorContactRejected(ctx: ContactRequestContext, reason?: string):
   return [
     `Bonjour ${ctx.visitorName},`,
     '',
-    `Nous ne pouvons malheureusement pas partager les coordonnées du propriétaire pour *« ${ctx.bienTitre} »*.`,
+    `Nous ne pouvons donner suite à votre demande pour *« ${ctx.bienTitre} »*.`,
     reason ? `\nRaison : ${reason}` : null,
     '',
-    'Vous pouvez en revanche réserver une visite via la plateforme.',
+    "D'autres biens correspondant à votre recherche sont disponibles sur notre plateforme.",
     '',
     "— *BOGBE'S GROUPE*",
   ]

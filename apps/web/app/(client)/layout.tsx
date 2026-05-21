@@ -5,6 +5,7 @@ import { NotificationBell } from '@/components/notifications/NotificationBell'
 import { MobileMenu } from '@/components/layout/MobileMenu'
 import { UserMenu } from '@/components/auth/UserMenu'
 import { MobileTabBar } from '@/components/layout/MobileTabBar'
+import { BackToHomeButton } from '@/components/layout/BackToHomeButton'
 
 const navLinks = [
   { href: '/recherche', label: 'Rechercher' },
@@ -82,6 +83,7 @@ export default async function ClientLayout({ children }: { children: React.React
         </div>
       </header>
 
+      <BackToHomeButton />
       <main className="pb-20 lg:pb-0">{children}</main>
       <MobileTabBar />
     </div>

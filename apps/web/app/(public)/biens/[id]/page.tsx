@@ -67,7 +67,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     description: desc,
     keywords: [`immobilier luxe Abidjan`, `location meublée ${bien.commune}`, `achat appartement ${bien.commune}`, `BOGBE'S GROUPE prestige`, bien.titre],
     authors: [{ name: "BOGBE'S GROUPE" }],
-    alternates: { canonical: `https://immo-ci.com/biens/${id}` },
+    alternates: { canonical: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bogbes-groupe.vercel.app'}/biens/${id}` },
     openGraph: {
       title: bien.titre,
       description: desc,
