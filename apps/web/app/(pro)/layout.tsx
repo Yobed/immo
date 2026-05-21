@@ -13,6 +13,7 @@ const navLinks = [
   { href: '/visites', label: 'Visites' },
   { href: '/quittances', label: 'Quittances' },
   { href: '/avis-recus', label: 'Avis reçus' },
+  { href: '/agence', label: 'Mon agence' },
   { href: '/ambassadeur', label: 'Ambassadeur' },
   { href: '/profil', label: 'Profil & KYC' },
   { href: '/messages', label: 'Messages' },
