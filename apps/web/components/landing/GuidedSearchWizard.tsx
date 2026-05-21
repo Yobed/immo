@@ -117,7 +117,10 @@ export function GuidedSearchWizard({ open, onClose, intent = null }: GuidedSearc
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div className="w-full max-w-lg bg-[var(--surface-card)] text-[var(--text)] rounded-t-3xl md:rounded-3xl shadow-md overflow-hidden max-h-[90vh] flex flex-col border border-[var(--border)]">
+      {/* Bottom-sheet sur mobile : on force min-h-[85vh] pour que le sheet
+          remonte presque jusqu'en haut de l'écran (au lieu de s'arrêter au
+          milieu). Sur desktop, modal centrale classique. */}
+      <div className="w-full max-w-lg bg-[var(--surface-card)] text-[var(--text)] rounded-t-3xl md:rounded-3xl shadow-md overflow-hidden max-h-[92vh] min-h-[85vh] md:min-h-0 flex flex-col border border-[var(--border)]">
         {/* Header — progress + close */}
         <div className="relative px-5 pt-5 pb-4 border-b border-[var(--border)]">
           <button
