@@ -20,7 +20,7 @@ export function NarrativeSignature({ description, bienType, commune, rarityScore
     : description
 
   return (
-    <section className="relative py-20 overflow-hidden border-y border-white/5 bg-[#020617]">
+    <section className="relative py-20 overflow-hidden border-y border-[var(--border)] bg-[var(--background)]">
       {/* Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent-luxury/5 blur-[120px] rounded-full pointer-events-none" />
 

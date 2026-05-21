@@ -102,10 +102,11 @@ export function FurnishedRentalsSection() {
               <div className="space-y-6">
                 <p className="text-[11px] font-bold text-[var(--text)] uppercase tracking-[0.3em] mb-4">Équipements Standards</p>
                 {AMENITIES.map((item, i) => (
-                  <motion.div 
+                  <motion.div
                     key={i}
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: '-50px' }}
                     transition={{ delay: i * 0.1 }}
                     className="flex items-center gap-4 group"
                   >

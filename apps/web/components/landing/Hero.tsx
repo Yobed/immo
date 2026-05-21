@@ -90,7 +90,7 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
   return (
     <section
       ref={sectionRef}
-      className="relative overflow-hidden bg-[#020617]"
+      className="relative overflow-hidden bg-[var(--background)]"
       style={{ minHeight: 'clamp(560px, 88svh, 95svh)' }}
     >
       {/* ── BACKGROUND SLIDESHOW ─────────────────────── */}
@@ -110,15 +110,14 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
               fill
               className="object-cover object-center scale-105"
               priority={idx === 0}
-              loading={idx === 0 ? 'eager' : 'lazy'}
-              sizes="100vw"
-              quality={85}
+              sizes="(max-width: 768px) 100vw, (max-width: 1400px) 100vw, 1400px"
+              quality={82}
             />
           </div>
         ))}
         {/* Overlay plus léger — laisse les images respirer */}
         <div className="absolute inset-0 bg-black/40" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/30 to-transparent" />
       </div>
 
       {/* ── CONTENU ─────────────────────────────────── */}
@@ -236,18 +235,18 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
               </motion.div>
             )}
 
-            {/* Catégories — pill buttons bien visibles */}
+            {/* Catégories — pill buttons : scroll horizontal sur mobile pour éviter wrap qui casse */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.6 }}
-              className="flex flex-wrap gap-2"
+              className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0 md:flex-wrap"
             >
               {CATEGORIES.map((cat) => (
                 <Link
                   key={cat.label}
                   href={cat.href}
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white text-[13px] font-semibold transition-all duration-200 active:scale-95 min-h-[44px]"
+                  className="shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white text-[13px] font-semibold transition-all duration-200 active:scale-95 min-h-[44px]"
                 >
                   {cat.label}
                   <ChevronRight className="w-3.5 h-3.5 opacity-60" />

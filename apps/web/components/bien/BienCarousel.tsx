@@ -42,11 +42,13 @@ const FILTER_ICONS: Record<FilterType, any> = {
   plan:    MapIcon,
 }
 
+// Unified badge palette — type is conveyed by icon, no colour wheel salad.
+const BADGE_BASE = 'bg-[var(--surface-hover)] text-[var(--text-muted)] border border-[var(--border)]'
 const BADGE_CLASSES: Record<MediaType, string> = {
-  photo:   'bg-accent-light text-accent',
-  video:   'bg-secondary-light text-secondary',
-  vue_360: 'bg-purple-100 text-purple-700',
-  plan:    'bg-primary-light text-primary',
+  photo:   BADGE_BASE,
+  video:   BADGE_BASE,
+  vue_360: 'bg-[var(--accent-luxury-muted)] text-[var(--accent-luxury)] border border-[var(--accent-luxury)]/20',
+  plan:    BADGE_BASE,
 }
 
 function formatDuration(sec: number): string {
@@ -110,14 +112,14 @@ function MediaSlide({ media, isHero }: { media: BienMedia, isHero?: boolean }) {
 
   // Photo (type='photo')
   return (
-    <div className={cn("relative w-full bg-[var(--midnight-muted)] overflow-hidden", isHero ? "h-full" : "aspect-[4/3] rounded-card")}>
+    <div className={cn("relative w-full bg-[var(--surface-hover)] overflow-hidden", isHero ? "h-full" : "aspect-[4/3] rounded-card")}>
       <Image
         src={media.url}
         alt={media.titre ?? 'Photo du bien'}
         fill
-        className="object-cover transition-transform duration-[20s] ease-linear group-hover:scale-110"
-        sizes="100vw"
-        priority
+        className="object-cover transition-transform duration-[20s] ease-linear motion-safe:group-hover:scale-110"
+        sizes="(max-width: 768px) 100vw, (max-width: 1400px) 100vw, 1400px"
+        priority={isHero}
       />
     </div>
   )

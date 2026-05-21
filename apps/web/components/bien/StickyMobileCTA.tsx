@@ -308,7 +308,7 @@ export function StickyMobileCTA({
                     {bienTitre}
                   </h3>
                   <div className="flex items-center gap-2 mt-1.5">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">
                       {bienLieu}
                     </span>
                     <span className="w-1 h-1 rounded-full bg-slate-300" />
@@ -334,7 +334,7 @@ export function StickyMobileCTA({
                   className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all duration-200 ${
                     activeTab === 'visite'
                       ? 'bg-white text-slate-900 shadow-sm'
-                      : 'text-slate-500 hover:text-slate-700'
+                      : 'text-slate-700 hover:text-slate-900'
                   }`}
                 >
                   <Calendar className="w-3.5 h-3.5" />
@@ -345,7 +345,7 @@ export function StickyMobileCTA({
                   className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all duration-200 ${
                     activeTab === 'contact'
                       ? 'bg-white text-slate-900 shadow-sm'
-                      : 'text-slate-500 hover:text-slate-700'
+                      : 'text-slate-700 hover:text-slate-900'
                   }`}
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
@@ -369,7 +369,7 @@ export function StickyMobileCTA({
                   <div className="py-8 text-center">
                     <CalendarCheck className="w-10 h-10 mx-auto mb-3 text-amber-500" />
                     <p className="text-slate-600 text-sm font-medium mb-1">Connexion requise</p>
-                    <p className="text-slate-400 text-xs mb-4">Connectez-vous pour planifier une visite.</p>
+                    <p className="text-slate-600 text-xs mb-4">Connectez-vous pour planifier une visite.</p>
                     <a href="/login" className="inline-block px-6 py-3 bg-slate-900 text-white rounded-xl text-sm font-bold">
                       Se connecter
                     </a>
@@ -378,7 +378,7 @@ export function StickyMobileCTA({
 
                 {activeTab === 'contact' && bienId ? (
                   <div className="py-2 space-y-4">
-                    <p className="text-xs text-slate-400 leading-relaxed">
+                    <p className="text-xs text-slate-600 leading-relaxed">
                       Obtenez les coordonnées du propriétaire après validation par notre équipe.
                     </p>
                     <DemanderContactWhatsAppButton
@@ -386,7 +386,7 @@ export function StickyMobileCTA({
                       isAuthenticated={!!isAuthenticated}
                     />
                     <div className="pt-2 border-t border-slate-100">
-                      <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold mb-3">Contacter directement</p>
+                      <p className="text-[10px] text-slate-600 uppercase tracking-widest font-bold mb-3">Contacter directement</p>
                       <div className="flex flex-col gap-2">
                         <a
                           href={`https://wa.me/2250544872051?text=${waText}`}

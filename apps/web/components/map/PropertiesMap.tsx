@@ -76,18 +76,18 @@ const MAP_STYLES = `
   .bien-dot {
     width: 18px; height: 18px;
     background: var(--accent-luxury);
-    border: 3px solid #fff;
+    border: 3px solid var(--surface);
     border-radius: 50%;
-    box-shadow: 0 0 15px rgba(212,175,55,0.9), 0 0 30px rgba(212,175,55,0.4);
+    box-shadow: 0 0 15px color-mix(in oklch, var(--accent-luxury) 60%, transparent), 0 0 30px color-mix(in oklch, var(--accent-luxury) 25%, transparent);
     position: relative;
     z-index: 10;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s, border-color 0.3s;
   }
   .bien-dot.selected {
     width: 24px; height: 24px;
-    background: #fff;
+    background: var(--surface);
     border: 4px solid var(--accent-luxury);
-    box-shadow: 0 0 30px rgba(212,175,55,1), 0 0 60px rgba(212,175,55,0.6);
+    box-shadow: 0 0 30px color-mix(in oklch, var(--accent-luxury) 70%, transparent), 0 0 60px color-mix(in oklch, var(--accent-luxury) 40%, transparent);
   }
   .bien-ring {
     position: absolute;
@@ -113,20 +113,20 @@ const MAP_STYLES = `
     font-weight: 800;
     letter-spacing: 0.05em;
     white-space: nowrap;
-    background: rgba(10,10,25,0.95);
+    background: color-mix(in oklch, var(--surface-card) 92%, transparent);
     color: var(--accent-luxury);
-    border: 1.5px solid rgba(212,175,55,0.7);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+    border: 1.5px solid color-mix(in oklch, var(--accent-luxury) 55%, transparent);
+    box-shadow: 0 8px 24px color-mix(in oklch, var(--background) 55%, transparent);
     backdrop-filter: blur(12px);
     pointer-events: none;
     z-index: 15;
-    transition: all 0.3s;
+    transition: background 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
   }
   .bien-price.selected {
     background: var(--accent-luxury);
-    color: #000;
-    border-color: #fff;
-    box-shadow: 0 0 22px rgba(212,175,55,0.9);
+    color: var(--on-accent);
+    border-color: var(--surface);
+    box-shadow: 0 0 22px color-mix(in oklch, var(--accent-luxury) 65%, transparent);
   }
 `
 
@@ -344,7 +344,7 @@ export function PropertiesMap({
 
       {/* ── Stats overlay (Top Left) ── */}
       <div className="absolute top-4 left-4 z-10 flex flex-row sm:flex-col gap-2 sm:gap-2.5 max-w-[calc(100%-2rem)] overflow-x-auto no-scrollbar">
-        <div className="flex items-center gap-2.5 px-3 sm:px-4 py-2 sm:py-2 bg-black/85 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-[rgba(212,175,55,0.4)] shadow-2xl whitespace-nowrap">
+        <div className="flex items-center gap-2.5 px-3 sm:px-4 py-2 sm:py-2 bg-black/85 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-[var(--accent-luxury)]/40 shadow-md whitespace-nowrap">
           <div className="user-dot shrink-0" style={{ width: 10, height: 10, border: '2px solid #fff' }} />
           <div className="flex flex-col">
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-white leading-tight">
@@ -355,7 +355,7 @@ export function PropertiesMap({
         </div>
 
         {markers.length > 0 && (
-          <div className="flex items-center gap-2.5 px-3 sm:px-4 py-2 sm:py-2 bg-black/85 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-white/10 shadow-2xl whitespace-nowrap">
+          <div className="flex items-center gap-2.5 px-3 sm:px-4 py-2 sm:py-2 bg-black/85 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-white/10 shadow-md whitespace-nowrap">
             <span className="w-2.5 h-2.5 bg-[var(--accent-luxury)] rounded-full shrink-0" />
             <div className="flex flex-col">
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-white leading-tight">
@@ -376,7 +376,7 @@ export function PropertiesMap({
           <>
             {/* ── MOBILE: barre compacte en bas (ne masque pas la route) ── */}
             <div className="sm:hidden absolute inset-x-2 bottom-2 z-20">
-              <div className="bg-[#0a0a12]/95 backdrop-blur-xl border border-[rgba(212,175,55,0.4)] rounded-2xl shadow-2xl p-3 flex items-center gap-3">
+              <div className="bg-[var(--surface-card)]/95 backdrop-blur-xl border border-[var(--accent-luxury)]/40 rounded-2xl shadow-md p-3 flex items-center gap-3">
                 {bien.photo_url && (
                   <div className="relative w-12 h-12 shrink-0">
                     <Image src={bien.photo_url} alt="" fill className="rounded-xl object-cover" sizes="48px" />
@@ -417,7 +417,7 @@ export function PropertiesMap({
 
             {/* ── DESKTOP: panneau en haut à droite ── */}
             <div className="hidden sm:block absolute top-16 right-4 z-20 w-[300px]">
-              <div className="bg-[#0a0a12]/95 backdrop-blur-[20px] border border-[rgba(212,175,55,0.4)] rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.8)] overflow-hidden">
+              <div className="bg-[var(--surface-card)]/95 backdrop-blur-[20px] border border-[var(--accent-luxury)]/40 rounded-3xl shadow-md overflow-hidden">
                 <div className="h-40 w-full relative">
                   {bien.photo_url ? (
                     <Image src={bien.photo_url} alt={bien.titre} fill className="object-cover" sizes="(max-width: 640px) 100vw, 300px" />

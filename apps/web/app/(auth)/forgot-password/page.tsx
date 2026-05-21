@@ -103,17 +103,22 @@ export default function ForgotPasswordPage() {
 
         <div className="space-y-5">
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] ml-1">
+            <label htmlFor="forgot-email" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] ml-1">
               <Mail size={12} className="text-[var(--accent-luxury)]" /> Adresse e-mail
             </label>
             <input
+              id="forgot-email"
               {...register('email')}
               type="email"
               placeholder="votre@email.com"
+              autoComplete="email"
+              aria-required="true"
+              aria-invalid={errors.email ? 'true' : 'false'}
+              aria-describedby={errors.email ? 'forgot-email-error' : undefined}
               className="w-full px-6 h-[64px] bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-[var(--text-muted)]/20"
             />
             {errors.email && (
-              <p className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.email.message}</p>
+              <p id="forgot-email-error" role="alert" className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.email.message}</p>
             )}
           </div>
         </div>

@@ -164,10 +164,14 @@ function RegisterContent() {
             <input
               {...register('full_name')}
               placeholder={t.auth.fullNamePlaceholderEx}
+              autoComplete="name"
+              aria-required="true"
+              aria-invalid={errors.full_name ? 'true' : 'false'}
+              aria-describedby={errors.full_name ? 'reg-fullname-error' : undefined}
               className="w-full px-6 py-4 bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-[var(--text-muted)]/20"
             />
             {errors.full_name && (
-              <p className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.full_name.message}</p>
+              <p id="reg-fullname-error" role="alert" className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.full_name.message}</p>
             )}
           </div>
 
@@ -178,10 +182,15 @@ function RegisterContent() {
             <input
               {...register('email')}
               placeholder={t.auth.emailPlaceholder}
+              type="email"
+              autoComplete="email"
+              aria-required="true"
+              aria-invalid={errors.email ? 'true' : 'false'}
+              aria-describedby={errors.email ? 'reg-email-error' : undefined}
               className="w-full px-6 py-4 bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-[var(--text-muted)]/20"
             />
             {errors.email && (
-              <p className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.email.message}</p>
+              <p id="reg-email-error" role="alert" className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.email.message}</p>
             )}
           </div>
 
@@ -193,10 +202,14 @@ function RegisterContent() {
               {...register('password')}
               type="password"
               placeholder="••••••••"
+              autoComplete="new-password"
+              aria-required="true"
+              aria-invalid={errors.password ? 'true' : 'false'}
+              aria-describedby={errors.password ? 'reg-password-error' : undefined}
               className="w-full px-6 py-4 bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-[var(--text-muted)]/20"
             />
             {errors.password && (
-              <p className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.password.message}</p>
+              <p id="reg-password-error" role="alert" className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.password.message}</p>
             )}
           </div>
 

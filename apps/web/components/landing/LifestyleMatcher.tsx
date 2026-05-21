@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Moon, TreePine, GlassWater, Briefcase, Car, Waves, ArrowRight } from "lucide-react";
 import Image from "next/image";
@@ -70,14 +70,25 @@ export const LifestyleMatcher = () => {
   const [activeTag, setActiveTag] = useState("calm");
   const sectionRef = useRef<HTMLElement>(null);
   const router = useRouter();
+  const prefersReduced = useReducedMotion();
 
+  // Scroll-driven parallax: gated by prefers-reduced-motion AND scoped to sectionRef
+  // (framer-motion only subscribes when target intersects viewport)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start end", "end start"]
+    offset: ["start end", "end start"],
   });
 
-  const imageTranslateX = useTransform(scrollYProgress, [0, 0.5, 1], ["20%", "0%", "-20%"]);
-  const textTranslateY = useTransform(scrollYProgress, [0, 0.5, 1], ["30px", "0px", "-30px"]);
+  const imageTranslateX = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    prefersReduced ? ["0%", "0%", "0%"] : ["20%", "0%", "-20%"],
+  );
+  const textTranslateY = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    prefersReduced ? ["0px", "0px", "0px"] : ["30px", "0px", "-30px"],
+  );
 
   return (
     <section ref={sectionRef} className="py-16 md:py-24 bg-[var(--background)] relative overflow-hidden">

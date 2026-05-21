@@ -91,19 +91,22 @@ export function FlashContactModal({
 
       {open && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="flash-contact-title"
           className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm"
           onClick={(e) => {
             if (e.target === e.currentTarget) setOpen(false)
           }}
         >
-          <div className="relative w-full max-w-md bg-white text-slate-900 rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+          <div className="relative w-full max-w-md bg-white text-slate-900 rounded-2xl shadow-md overflow-hidden max-h-[90vh] overflow-y-auto">
             <button
               type="button"
               onClick={() => setOpen(false)}
-              aria-label="Fermer"
-              className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
+              aria-label="Fermer la fenêtre de contact"
+              className="absolute top-3 right-3 z-10 min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
             >
-              <X className="w-4 h-4" />
+              <X className="w-5 h-5" />
             </button>
 
             {status === 'success' ? (
@@ -126,14 +129,14 @@ export function FlashContactModal({
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="p-6">
+              <form onSubmit={handleSubmit} className="p-6" noValidate>
                 <Honeypot />
                 <div className="mb-5">
-                  <h2 className="font-display text-xl font-bold text-slate-900 mb-1">
+                  <h2 id="flash-contact-title" className="font-display text-xl font-bold text-slate-900 mb-1">
                     Contacter via BOGBE&apos;S
                   </h2>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Bien : <span className="font-semibold text-slate-700">{bienTitre}</span>
+                  <p className="text-xs text-slate-700 leading-relaxed">
+                    Bien : <span className="font-semibold text-slate-900">{bienTitre}</span>
                   </p>
                 </div>
 
@@ -146,63 +149,73 @@ export function FlashContactModal({
 
                 <div className="space-y-3">
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5 mb-1.5">
-                      <User className="w-3 h-3" /> Ton nom <span className="text-red-500">*</span>
+                    <label htmlFor="fc-name" className="text-[10px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5 mb-1.5">
+                      <User className="w-3 h-3" /> Ton nom <span className="text-red-600" aria-hidden="true">*</span>
                     </label>
                     <input
+                      id="fc-name"
                       type="text"
                       required
+                      aria-required="true"
+                      autoComplete="name"
                       value={form.name}
                       onChange={(e) => setForm({ ...form, name: e.target.value })}
                       placeholder="Prénom Nom"
-                      className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+                      className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
                     />
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5 mb-1.5">
-                      <Phone className="w-3 h-3" /> Téléphone WhatsApp <span className="text-red-500">*</span>
+                    <label htmlFor="fc-phone" className="text-[10px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5 mb-1.5">
+                      <Phone className="w-3 h-3" /> Téléphone WhatsApp <span className="text-red-600" aria-hidden="true">*</span>
                     </label>
                     <input
+                      id="fc-phone"
                       type="tel"
                       required
+                      aria-required="true"
+                      autoComplete="tel"
                       value={form.phone}
                       onChange={(e) => setForm({ ...form, phone: e.target.value })}
                       placeholder="07 12 34 56 78"
-                      className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+                      className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
                     />
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5 mb-1.5">
-                      <Mail className="w-3 h-3" /> Email <span className="text-slate-400 normal-case font-normal">(optionnel)</span>
+                    <label htmlFor="fc-email" className="text-[10px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5 mb-1.5">
+                      <Mail className="w-3 h-3" /> Email <span className="text-slate-500 normal-case font-normal">(optionnel)</span>
                     </label>
                     <input
+                      id="fc-email"
                       type="email"
+                      autoComplete="email"
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
                       placeholder="prenom@email.com"
-                      className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+                      className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
                     />
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">
-                      Message <span className="text-slate-400 normal-case font-normal">(optionnel)</span>
+                    <label htmlFor="fc-reason" className="text-[10px] font-bold uppercase tracking-wider text-slate-700 mb-1.5 block">
+                      Message <span className="text-slate-500 normal-case font-normal">(optionnel)</span>
                     </label>
                     <textarea
+                      id="fc-reason"
                       value={form.reason}
                       onChange={(e) => setForm({ ...form, reason: e.target.value })}
                       placeholder="Précise tes besoins, dispos pour visiter, etc."
                       rows={3}
                       maxLength={500}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition resize-none"
+                      aria-describedby={errorMsg ? 'fc-error' : undefined}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition resize-none"
                     />
                   </div>
                 </div>
 
                 {errorMsg && (
-                  <div className="mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs">
+                  <div id="fc-error" role="alert" className="mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs">
                     {errorMsg}
                   </div>
                 )}

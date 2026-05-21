@@ -50,9 +50,10 @@ export const PremiumShowcase = ({ properties }: { properties?: Property[] }) => 
     <section className="relative bg-[var(--background)] z-30 overflow-hidden pb-12 md:pb-24">
       {/* Editorial Intro */}
       <div className="min-h-[70vh] flex flex-col items-center justify-center relative px-4">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 0.1 }}
+          viewport={{ once: true }}
           className="absolute inset-0 bg-[url('/grid.svg')] opacity-5 dark:invert-0 invert"
         />
         

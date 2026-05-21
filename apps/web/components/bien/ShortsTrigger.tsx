@@ -29,14 +29,12 @@ export function ShortsTrigger({ videos, className, children }: ShortsTriggerProp
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(true)}
-        className={`group relative flex items-center gap-6 px-10 py-5 bg-white text-midnight rounded-[2rem] font-bold text-[12px] uppercase tracking-[0.4em] font-display overflow-hidden shadow-[0_20px_50px_rgba(212,175,55,0.4)] border-2 border-accent-luxury/20 ${className}`}
+        className={`group relative flex items-center gap-6 px-10 py-5 bg-[var(--surface-card)] text-[var(--text)] rounded-[var(--radius-2xl)] font-bold text-[12px] uppercase tracking-[0.4em] font-display overflow-hidden shadow-md border border-[var(--accent-luxury)]/30 hover:border-[var(--accent-luxury)]/60 transition-colors ${className}`}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-accent-luxury/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-        
         {children || (
           <div className="relative z-10 flex items-center gap-3">
-            <div className="p-2.5 bg-midnight/5 rounded-xl group-hover:bg-accent-luxury transition-colors duration-500">
-              <Play className="w-4 h-4 fill-current group-hover:text-white" />
+            <div className="p-2.5 bg-[var(--accent-luxury-muted)] rounded-xl group-hover:bg-[var(--accent-luxury)] group-hover:text-[var(--on-accent)] transition-colors duration-500">
+              <Play className="w-4 h-4 fill-current" />
             </div>
             <span>Voir les vidéos</span>
           </div>

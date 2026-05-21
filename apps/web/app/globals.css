@@ -349,10 +349,7 @@ a:active {
   100% { opacity: 1; transform: scale(1); }
 }
 
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
+/* (duplicate @keyframes shimmer removed — single canonical definition at line 319) */
 
 /* ══════════════════════════════════════════════════════
    ANIMATION CLASSES
@@ -947,23 +944,19 @@ main {
 
 /* ══════════════════════════════════════════════════════
    SKELETON SHIMMER — Image loading state pour les cartes
+   (keyframe defined once at line 319 — uses it via reverse direction)
 ══════════════════════════════════════════════════════ */
-@keyframes shimmer {
-  0%   { background-position: 200% center; }
-  100% { background-position: -200% center; }
-}
-
 .animate-shimmer {
   background: linear-gradient(
     90deg,
-    var(--midnight-muted, #0f172a) 0%,
-    rgba(148, 163, 184, 0.08) 40%,
-    rgba(148, 163, 184, 0.15) 50%,
-    rgba(148, 163, 184, 0.08) 60%,
-    var(--midnight-muted, #0f172a) 100%
+    var(--surface-hover) 0%,
+    color-mix(in oklch, var(--text-muted) 8%, transparent) 40%,
+    color-mix(in oklch, var(--text-muted) 15%, transparent) 50%,
+    color-mix(in oklch, var(--text-muted) 8%, transparent) 60%,
+    var(--surface-hover) 100%
   );
   background-size: 200% 100%;
-  animation: shimmer 1.6s ease-in-out infinite;
+  animation: shimmer 1.6s ease-in-out infinite reverse;
 }
 
 /* ══════════════════════════════════════════════════════

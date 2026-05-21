@@ -70,7 +70,7 @@ export async function SimilarBiensSection({
           <h2 className="text-xl md:text-2xl font-display font-bold text-slate-900 tracking-tight">
             {title}
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>
+          <p className="text-xs text-slate-700 mt-0.5">{subtitle}</p>
         </div>
       </div>
 

@@ -125,7 +125,7 @@ export function OnboardingChecklist({ userId }: Props) {
         <button
           onClick={dismiss}
           aria-label="Masquer la checklist"
-          className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all"
+          className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-md text-slate-600 hover:text-slate-700 hover:bg-slate-100 transition-all"
         >
           <X className="w-4 h-4" />
         </button>
@@ -145,7 +145,7 @@ export function OnboardingChecklist({ userId }: Props) {
         {/* Progress bar */}
         <div className="mt-4 mb-5">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-700">
               {completed} / {items.length} terminées
             </span>
             <span className="text-[10px] font-bold text-amber-700">{progress}%</span>
@@ -167,7 +167,7 @@ export function OnboardingChecklist({ userId }: Props) {
                 href={item.href}
                 className={`flex items-center gap-3 p-3 rounded-xl transition-all border ${
                   item.done
-                    ? 'bg-emerald-50/50 border-emerald-100 text-slate-500'
+                    ? 'bg-emerald-50/50 border-emerald-100 text-slate-700'
                     : 'bg-white border-slate-200 hover:border-amber-300 hover:shadow-sm text-slate-900'
                 }`}
               >
@@ -180,9 +180,9 @@ export function OnboardingChecklist({ userId }: Props) {
                   <p className={`text-sm font-bold leading-tight ${item.done ? 'line-through opacity-60' : ''}`}>
                     {item.label}
                   </p>
-                  <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">{item.desc}</p>
+                  <p className="text-[11px] text-slate-700 mt-0.5 leading-relaxed">{item.desc}</p>
                 </div>
-                {!item.done && <ArrowRight className="w-4 h-4 text-slate-400 shrink-0" />}
+                {!item.done && <ArrowRight className="w-4 h-4 text-slate-600 shrink-0" />}
               </Link>
             </li>
           ))}
