@@ -56,6 +56,8 @@ export interface ConsolidatedBien {
 export interface ConsolidatedFilters {
   commune?: string
   type_bien?: string
+  /** Type d'offre — 'location' (loyer mois/nuit) ou 'vente'. Filtre serveur. */
+  type_offre?: 'location' | 'vente'
   prix_min?: number
   prix_max?: number
   /** Mots-clés full-text (recherche dans biens.fts / locaux.message_initial+caracteristiques) */
@@ -95,6 +97,13 @@ async function fetchBogbes(filters: ConsolidatedFilters): Promise<ConsolidatedBi
 
   if (filters.commune) q = q.ilike('commune', `%${filters.commune}%`)
   if (filters.type_bien) q = q.eq('type_bien', filters.type_bien)
+  if (filters.type_offre === 'vente') {
+    // Exige un prix_vente_fcfa renseigné
+    q = q.not('prix_vente_fcfa', 'is', null)
+  } else if (filters.type_offre === 'location') {
+    // Exige soit prix_mois_fcfa soit prix_nuit_fcfa
+    q = q.or('prix_mois_fcfa.not.is.null,prix_nuit_fcfa.not.is.null')
+  }
   if (filters.q?.trim()) {
     q = q.textSearch('fts', filters.q.trim(), { type: 'plain', config: 'french' })
   }
@@ -201,6 +210,7 @@ async function fetchLocaux(filters: ConsolidatedFilters): Promise<ConsolidatedBi
 
     if (filters.commune) q = q.ilike('commune', `%${filters.commune}%`)
     if (filters.type_bien) q = q.ilike('type_de_bien', `%${filters.type_bien}%`)
+    if (filters.type_offre) q = q.eq('type_offre', filters.type_offre)
     if (filters.q?.trim()) {
       const term = filters.q.trim()
       q = q.or(`caracteristiques.ilike.%${term}%,message_initial.ilike.%${term}%,quartier.ilike.%${term}%`)

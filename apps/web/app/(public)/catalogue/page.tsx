@@ -22,6 +22,7 @@ interface PageProps {
     source?: string
     commune?: string
     type_bien?: string
+    type_offre?: string
     prix_min?: string
     prix_max?: string
     sort?: string
@@ -38,10 +39,14 @@ export default async function CataloguePage({ searchParams }: PageProps) {
   const vue = ['grille', 'liste'].includes(sp.vue as string) ? sp.vue : 'grille'
   const pageIdx = Math.max(0, parseInt(sp.page ?? '0', 10))
 
+  const typeOffre =
+    sp.type_offre === 'vente' || sp.type_offre === 'location' ? sp.type_offre : undefined
+
   const filters: ConsolidatedFilters = {
     source: sp.source === 'bogbes' || sp.source === 'flash' ? sp.source : null,
     commune: sp.commune?.trim() || undefined,
     type_bien: sp.type_bien?.trim() || undefined,
+    type_offre: typeOffre,
     q: sp.q?.trim() || undefined,
     prix_min: sp.prix_min ? Number(sp.prix_min) : undefined,
     prix_max: sp.prix_max ? Number(sp.prix_max) : undefined,

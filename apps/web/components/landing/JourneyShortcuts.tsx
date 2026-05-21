@@ -1,8 +1,9 @@
 'use client'
 import Link from 'next/link'
 import { useState } from 'react'
-import { Search, Flame, Compass, Crown, MessageCircle, ArrowUpRight } from 'lucide-react'
+import { Search, Flame, Compass, Crown, MessageCircle, ArrowUpRight, Sparkles } from 'lucide-react'
 import { useT } from '@/lib/i18n/client'
+import { GuidedSearchWizard } from './GuidedSearchWizard'
 
 interface Journey {
   icon: React.ReactNode
@@ -22,6 +23,7 @@ const TALLY_FORM_URL = 'https://tally.so/r/QKxNNp'
 
 export function JourneyShortcuts() {
   const t = useT()
+  const [wizardOpen, setWizardOpen] = useState(false)
   const JOURNEYS: Journey[] = [
     {
       icon: <Search className="w-5 h-5" strokeWidth={1.5} />,
@@ -109,15 +111,19 @@ export function JourneyShortcuts() {
           </p>
         </div>
 
-        {/* Primary persona switch — answers "Je suis…" at a glance, above the 5 cards */}
+        {/* Primary persona switch — answers "Je suis…" at a glance, above the 5 cards.
+            The Locataire/Acheteur CTA now opens a 3-step guided wizard
+            (commune → budget → catalogue or WhatsApp) for first-time visitors. */}
         <div className="mb-6 md:mb-8 flex flex-wrap items-center justify-center gap-2 text-sm">
           <span className="text-[var(--text-muted)] mr-1">{t.journey.iAm}</span>
-          <Link
-            href="/biens"
+          <button
+            type="button"
+            onClick={() => setWizardOpen(true)}
             className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2.5 rounded-full bg-[var(--accent-luxury)] text-[var(--on-accent)] font-bold text-[12px] uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all"
           >
-            {t.journey.imRenter} <ArrowUpRight className="w-3.5 h-3.5" />
-          </Link>
+            <Sparkles className="w-3.5 h-3.5" />
+            {t.journey.imRenter}
+          </button>
           <Link
             href="/login?next=/mes-biens/nouveau"
             className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2.5 rounded-full bg-[var(--surface-card)] border border-[var(--border)] text-[var(--text)] font-bold text-[12px] uppercase tracking-wider hover:border-[var(--accent-luxury)] active:scale-95 transition-all"
@@ -125,6 +131,8 @@ export function JourneyShortcuts() {
             {t.journey.imOwner} <ArrowUpRight className="w-3.5 h-3.5" />
           </Link>
         </div>
+
+        <GuidedSearchWizard open={wizardOpen} onClose={() => setWizardOpen(false)} />
 
         {/* Journey cards — secondary level, image when available, icon fallback otherwise */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
