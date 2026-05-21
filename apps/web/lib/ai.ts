@@ -1,8 +1,21 @@
-// lib/ai.ts — Groq API (llama-3.3-70b-versatile)
+// lib/ai.ts — Sapphire conversational AI
+//
+// Stratégie fail-over :
+//   1. Groq (primary)         — Llama 3.3 70B, ultra rapide, gratuit
+//   2. OpenRouter (backup)    — Gemini 2.0 Flash :free quand Groq KO
+//   3. Hand-written fallback  — message d'attente amical en dernier recours
+//
+// Le greeting fast-path (détection "Bonjour", "Merci"…) court-circuite tout
+// pour les conversations neuves.
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 const GROQ_BASE_URL = 'https://api.groq.com/openai/v1/chat/completions';
+
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+// Modèle gratuit, robuste en FR, ~30 req/min sur le tier free
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-exp:free';
+const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bogbes-groupe.vercel.app';
 
@@ -274,6 +287,61 @@ async function groqFetch(messages: ChatMessage[], system: string): Promise<strin
 }
 
 /**
+ * Fallback completion via OpenRouter (Gemini 2.0 Flash :free).
+ * Used when Groq is rate-limited or down.
+ * Same OpenAI-compatible request shape — only base URL + model change.
+ */
+async function openRouterFetch(
+  messages: ChatMessage[],
+  system: string,
+): Promise<string | null> {
+  if (!OPENROUTER_API_KEY) {
+    console.warn('[OpenRouter] OPENROUTER_API_KEY not configured — skipping fallback');
+    return null;
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(OPENROUTER_BASE_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        // Recommandé par OpenRouter pour identifier l'app dans leur dashboard
+        'HTTP-Referer': SITE_URL,
+        'X-Title': "BOGBE'S Sapphire",
+      },
+      body: JSON.stringify({
+        model: OPENROUTER_MODEL,
+        messages: [
+          { role: 'system', content: system },
+          ...messages,
+        ],
+        temperature: 0.15,
+        max_tokens: 800,
+      }),
+    });
+  } catch (e) {
+    console.error('[OpenRouter] fetch failed:', (e as Error).message);
+    return null;
+  }
+
+  if (!response.ok) {
+    const err = await response.text().catch(() => '<no body>');
+    console.error(`[OpenRouter] HTTP ${response.status} - body: ${err.slice(0, 300)}`);
+    return null;
+  }
+
+  const data = await response.json().catch(() => null);
+  const content = data?.choices?.[0]?.message?.content;
+  if (!content) {
+    console.error('[OpenRouter] empty completion. data=', JSON.stringify(data).slice(0, 300));
+    return null;
+  }
+  return content;
+}
+
+/**
  * Detect short greetings / pleasantries that don't need LLM reasoning.
  * Returning a hand-written reply avoids the Groq round-trip (and the
  * "Désolé, problème technique" fallback when Groq has a hiccup).
@@ -328,13 +396,24 @@ export async function chatImmobilier(messages: ChatMessage[], context?: string):
   // Garde-fou : limiter l'historique aux 6 derniers messages pour rester sous le budget tokens
   const trimmed = messages.length > 6 ? messages.slice(-6) : messages;
 
-  const result = await groqFetch(trimmed, system);
-  if (!result) {
-    console.error(`[Sapphire] fallback triggered. systemBytes=${system.length} historyMsgs=${messages.length} -> trimmed=${trimmed.length}`);
-    // Fallback moins alarmant : on propose une action concrète
-    return `Un instant, je reçois beaucoup de demandes 🙏\n\nEn attendant, dites-moi simplement :\n• Quelle commune ? (Cocody, Plateau, Riviera…)\n• Quel budget ?\n\nJe reviens vers vous dans quelques secondes.`
+  // Étage 1 — Groq (primary, le plus rapide)
+  const groqResult = await groqFetch(trimmed, system);
+  if (groqResult) {
+    console.log('[Sapphire] route=groq');
+    return groqResult;
   }
-  return result;
+
+  // Étage 2 — OpenRouter (Gemini Flash :free) en backup
+  console.warn(`[Sapphire] Groq failed → trying OpenRouter. sysLen=${system.length} historyMsgs=${trimmed.length}`);
+  const openRouterResult = await openRouterFetch(trimmed, system);
+  if (openRouterResult) {
+    console.log('[Sapphire] route=openrouter');
+    return openRouterResult;
+  }
+
+  // Étage 3 — Hand-written fallback (dernier recours)
+  console.error('[Sapphire] route=fallback (both Groq + OpenRouter failed)');
+  return `Un instant, je reçois beaucoup de demandes 🙏\n\nEn attendant, dites-moi simplement :\n• Quelle commune ? (Cocody, Plateau, Riviera…)\n• Quel budget ?\n\nJe reviens vers vous dans quelques secondes.`
 }
 
 export async function chatImmobilierStream(messages: ChatMessage[], context?: string): Promise<ReadableStream | null> {
