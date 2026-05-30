@@ -125,7 +125,7 @@ export function Step5Medias({ bienId }: Step5MediasProps) {
           disabled={publishing}
           className="flex-1 py-3 px-6 rounded-btn bg-primary text-white font-sans font-medium text-sm hover:bg-primary/90 transition-colors disabled:opacity-60"
         >
-          {publishing ? 'Envoi…' : 'Soumettre à validation'}
+          {publishing ? 'Publication…' : 'Publier l\'annonce'}
         </button>
       </div>
     </div>

@@ -25,7 +25,7 @@ type BienRow = {
 
 const STATUT_BADGE: Record<string, { label: string; cls: string }> = {
   brouillon: { label: 'Brouillon', cls: 'bg-[var(--surface-hover)] text-[var(--text-muted)] border-[var(--border)]' },
-  en_attente: { label: 'En attente de validation', cls: 'bg-amber-100 text-amber-700 border-amber-200' },
+  en_attente: { label: 'En ligne · vérification en cours', cls: 'bg-amber-100 text-amber-700 border-amber-200' },
   publie: { label: 'En ligne', cls: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
   refuse: { label: 'Refusée', cls: 'bg-red-100 text-red-700 border-red-200' },
   suspendu: { label: 'Suspendue', cls: 'bg-orange-100 text-orange-700 border-orange-200' },
@@ -86,8 +86,8 @@ export default async function MesAnnoncesPage({
 
         {justSubmitted && (
           <div className="mb-6 rounded-xl border border-amber-300/60 bg-amber-50 text-amber-800 px-4 py-3 text-sm">
-            <strong>Annonce soumise ✅</strong> — elle est <strong>en attente de validation</strong> par notre équipe.
-            Vous serez notifié(e) dès qu&apos;elle sera approuvée et mise en ligne.
+            <strong>Annonce publiée ✅</strong> — elle est <strong>déjà visible</strong> dans le catalogue avec la mention
+            « vérification en cours ». Notre équipe la contrôle ; vous serez notifié(e) dès qu&apos;elle obtient le badge ✓ Vérifié.
           </div>
         )}
         {bienRows.length === 0 ? (
