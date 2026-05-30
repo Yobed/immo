@@ -108,23 +108,15 @@ export function UserMenu({ email, role = 'public', isAdmin = false }: UserMenuPr
             )}
           </div>
 
-          {/* Liens admin (visibles uniquement pour admins) */}
+          {/* Accès à la console d'administration — espace dédié et dissocié */}
           {isAdmin && (
             <div className="py-1 border-b border-[var(--border)]">
               <Link href="/admin/suivi" onClick={() => setOpen(false)}
-                className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans font-semibold text-red-500 hover:bg-red-500/10 transition-colors">
-                <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
-                  <path d="M9 11l3 3L22 4"/>
-                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-                </svg>
-                Suivi & Intermédiation
-              </Link>
-              <Link href="/admin/moderation" onClick={() => setOpen(false)}
-                className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans font-semibold text-red-500 hover:bg-red-500/10 transition-colors">
+                className="flex items-center gap-3 px-4 py-2.5 text-sm font-sans font-bold text-red-500 hover:bg-red-500/10 transition-colors">
                 <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                 </svg>
-                Modération
+                Console Admin
               </Link>
             </div>
           )}

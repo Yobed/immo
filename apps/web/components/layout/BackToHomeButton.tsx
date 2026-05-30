@@ -14,10 +14,11 @@ export function BackToHomeButton() {
   if (pathname === '/') return null
 
   return (
-    <div className="max-w-7xl mx-auto px-4 pt-3 lg:px-8">
+    <div className="relative z-10 max-w-7xl mx-auto px-4 pt-3 lg:px-8">
       <Link
         href="/"
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] hover:border-[var(--accent-luxury)]/40 text-[11px] font-bold uppercase tracking-wider transition-all active:scale-95"
+        prefetch={false}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] hover:border-[var(--accent-luxury)]/40 text-[11px] font-bold uppercase tracking-wider transition-all active:scale-95 cursor-pointer"
       >
         <Home className="w-3 h-3" />
         Accueil
