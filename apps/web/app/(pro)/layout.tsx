@@ -6,8 +6,10 @@ import { MobileMenu } from '@/components/layout/MobileMenu'
 import { UserMenu } from '@/components/auth/UserMenu'
 import { MobileTabBar } from '@/components/layout/MobileTabBar'
 import { BackToHomeButton } from '@/components/layout/BackToHomeButton'
+import { ThemeToggle } from '@/components/layout/ThemeToggle'
 
 const navLinks = [
+  { href: '/', label: 'Accueil' },
   { href: '/recherche', label: 'Rechercher' },
   { href: '/mes-biens', label: 'Mes annonces' },
   { href: '/visites', label: 'Visites' },
@@ -88,6 +90,7 @@ export default async function ProLayout({ children }: { children: React.ReactNod
               Annonce
             </Link>
 
+            <ThemeToggle />
             {user && <NotificationBell userId={user.id} initialUnreadCount={unreadCount} />}
             {user && <UserMenu email={user.email ?? ''} role={role} isAdmin={isAdmin} />}
             <MobileMenu links={navLinks} ctaLinks={[{ href: '/mes-biens/nouveau', label: '+ Nouvelle annonce', variant: 'primary' }]} user={user ? { email: user.email ?? '', role, isAdmin } : undefined} />
