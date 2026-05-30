@@ -1,5 +1,6 @@
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { AdminShell } from '@/components/admin/AdminShell'
 
 export const dynamic = 'force-dynamic'
@@ -22,5 +23,22 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   if (profile?.role !== 'admin') notFound()
 
-  return <AdminShell email={user.email ?? ''}>{children}</AdminShell>
+  // Compteur d'annonces en attente pour le badge "Validation".
+  let pendingCount = 0
+  try {
+    const admin = createAdminClient()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { count } = await (admin.from('biens') as any)
+      .select('id', { count: 'exact', head: true })
+      .eq('statut', 'en_attente')
+    pendingCount = count ?? 0
+  } catch {
+    /* badge best-effort */
+  }
+
+  return (
+    <AdminShell email={user.email ?? ''} pendingCount={pendingCount}>
+      {children}
+    </AdminShell>
+  )
 }

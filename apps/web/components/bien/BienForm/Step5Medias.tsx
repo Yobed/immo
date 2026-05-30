@@ -40,13 +40,14 @@ export function Step5Medias({ bienId }: Step5MediasProps) {
 
   const handlePublish = async () => {
     setPublishing(true)
+    // L'annonce part en validation admin (en_attente) avant d'être publiée.
     await authFetch(`/api/biens/${bienId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ statut: 'publie' }),
+      body: JSON.stringify({ statut: 'en_attente' }),
     })
     setPublishing(false)
-    router.push('/mes-biens')
+    router.push('/mes-biens?soumis=1')
   }
 
   const handleUploadComplete = (_url: string, _type: MediaType) => {
@@ -79,12 +80,12 @@ export function Step5Medias({ bienId }: Step5MediasProps) {
             onClick={() => setActiveType(tab.type)}
             className={`px-4 py-2 text-sm font-sans border-b-2 transition-colors ${
               activeType === tab.type
-                ? 'border-primary text-primary font-medium'
-                : 'border-transparent text-muted hover:text-[var(--text)]'
+                ? 'border-[var(--accent-luxury)] text-[var(--accent-luxury)] font-medium'
+                : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text)]'
             }`}
           >
             {tab.label}
-            <span className="ml-1 text-xs text-muted">
+            <span className="ml-1 text-xs text-[var(--text-muted)]">
               ({medias.filter((m) => m.type === tab.type).length})
             </span>
           </button>
@@ -101,7 +102,7 @@ export function Step5Medias({ bienId }: Step5MediasProps) {
       {/* Liste ordonnée */}
       {medias.length > 0 && (
         <div>
-          <h3 className="font-sans font-medium text-sm text-muted mb-3 uppercase tracking-wide">
+          <h3 className="font-sans font-medium text-sm text-[var(--text-muted)] mb-3 uppercase tracking-wide">
             Médias uploadés ({medias.length}) — glisser pour réordonner
           </h3>
           {/* key force le remontage du composant quand la liste change (useState interne) */}
@@ -124,7 +125,7 @@ export function Step5Medias({ bienId }: Step5MediasProps) {
           disabled={publishing}
           className="flex-1 py-3 px-6 rounded-btn bg-primary text-white font-sans font-medium text-sm hover:bg-primary/90 transition-colors disabled:opacity-60"
         >
-          {publishing ? 'Publication…' : 'Publier l\'annonce'}
+          {publishing ? 'Envoi…' : 'Soumettre à validation'}
         </button>
       </div>
     </div>

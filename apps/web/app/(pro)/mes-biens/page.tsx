@@ -19,10 +19,27 @@ type BienRow = {
   surface_m2: number | null
   nb_pieces: number | null
   statut: string
+  rejet_motif: string | null
   created_at: string
 }
 
-export default async function MesAnnoncesPage() {
+const STATUT_BADGE: Record<string, { label: string; cls: string }> = {
+  brouillon: { label: 'Brouillon', cls: 'bg-slate-100 text-slate-600 border-slate-200' },
+  en_attente: { label: 'En attente de validation', cls: 'bg-amber-100 text-amber-700 border-amber-200' },
+  publie: { label: 'En ligne', cls: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+  refuse: { label: 'Refusée', cls: 'bg-red-100 text-red-700 border-red-200' },
+  suspendu: { label: 'Suspendue', cls: 'bg-orange-100 text-orange-700 border-orange-200' },
+  archive: { label: 'Archivée', cls: 'bg-slate-100 text-slate-500 border-slate-200' },
+  loue: { label: 'Loué/Vendu', cls: 'bg-blue-100 text-blue-700 border-blue-200' },
+}
+
+export default async function MesAnnoncesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ soumis?: string }>
+}) {
+  const sp = await searchParams
+  const justSubmitted = sp.soumis === '1'
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -30,7 +47,7 @@ export default async function MesAnnoncesPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: biens } = await (supabase as any)
     .from('biens')
-    .select('id, titre, commune, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces, statut, created_at, est_disponible')
+    .select('id, titre, commune, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces, statut, rejet_motif, created_at, est_disponible')
     .eq('proprietaire_id', user.id)
     .order('created_at', { ascending: false })
 
@@ -66,6 +83,13 @@ export default async function MesAnnoncesPage() {
             <Button variant="primary">+ Nouvelle annonce</Button>
           </Link>
         </div>
+
+        {justSubmitted && (
+          <div className="mb-6 rounded-xl border border-amber-300/60 bg-amber-50 text-amber-800 px-4 py-3 text-sm">
+            <strong>Annonce soumise ✅</strong> — elle est <strong>en attente de validation</strong> par notre équipe.
+            Vous serez notifié(e) dès qu&apos;elle sera approuvée et mise en ligne.
+          </div>
+        )}
         {bienRows.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-[var(--text-muted)] font-sans mb-4">Vous n&apos;avez pas encore d&apos;annonces.</p>
@@ -94,6 +118,24 @@ export default async function MesAnnoncesPage() {
                 {/* Actions propriétaire - Intégrées proprement en bas de la carte */}
                 <div className="p-4 pt-0 pb-5 mt-auto space-y-4 bg-inherit">
                   <div className="h-px w-full bg-[var(--border)] opacity-20 mb-4" />
+
+                  {/* Statut de validation */}
+                  {(() => {
+                    const s = STATUT_BADGE[bien.statut] ?? { label: bien.statut, cls: 'bg-slate-100 text-slate-600 border-slate-200' }
+                    return (
+                      <div className="space-y-2">
+                        <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border ${s.cls}`}>
+                          {s.label}
+                        </span>
+                        {bien.statut === 'refuse' && bien.rejet_motif && (
+                          <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2 leading-snug">
+                            <strong>Motif du refus :</strong> {bien.rejet_motif}
+                          </p>
+                        )}
+                      </div>
+                    )
+                  })()}
+
                   <BienAvailabilityToggle 
                     bienId={bien.id} 
                     initialValue={bien.est_disponible} 

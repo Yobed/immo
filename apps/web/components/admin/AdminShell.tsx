@@ -3,17 +3,19 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
-import { ShieldCheck, CheckSquare, Home, Building2, LogOut } from 'lucide-react'
+import { ShieldCheck, CheckSquare, Home, Building2, LogOut, ClipboardCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface AdminShellProps {
   email: string
+  pendingCount?: number
   children: React.ReactNode
 }
 
 const ADMIN_NAV = [
-  { href: '/admin/suivi', label: 'Suivi & Intermédiation', icon: CheckSquare },
-  { href: '/admin/moderation', label: 'Modération', icon: ShieldCheck },
+  { href: '/admin/validation', label: 'Validation', icon: ClipboardCheck, badge: true },
+  { href: '/admin/suivi', label: 'Suivi & Intermédiation', icon: CheckSquare, badge: false },
+  { href: '/admin/moderation', label: 'Modération', icon: ShieldCheck, badge: false },
 ]
 
 /**
@@ -22,7 +24,7 @@ const ADMIN_NAV = [
  * croisés explicites vers l'espace propriétaire (publication de ses biens)
  * et l'accueil public.
  */
-export function AdminShell({ email, children }: AdminShellProps) {
+export function AdminShell({ email, pendingCount = 0, children }: AdminShellProps) {
   const pathname = usePathname()
   const router = useRouter()
 
@@ -55,12 +57,17 @@ export function AdminShell({ email, children }: AdminShellProps) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold whitespace-nowrap transition-colors ${
+                  className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold whitespace-nowrap transition-colors ${
                     active ? 'bg-white/15 text-white' : 'text-white/60 hover:text-white hover:bg-white/10'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
                   <span className="hidden md:inline">{item.label}</span>
+                  {item.badge && pendingCount > 0 && (
+                    <span className="ml-0.5 min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center rounded-full bg-amber-400 text-[#0a0e1a] text-[10px] font-bold">
+                      {pendingCount > 99 ? '99+' : pendingCount}
+                    </span>
+                  )}
                 </Link>
               )
             })}

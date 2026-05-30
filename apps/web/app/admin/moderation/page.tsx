@@ -38,8 +38,10 @@ interface BienRow {
 function statusBadge(statut: string) {
   const map: Record<string, { label: string; cls: string }> = {
     publie: { label: 'Publié', cls: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
-    brouillon: { label: 'Brouillon', cls: 'bg-amber-100 text-amber-700 border-amber-200' },
-    suspendu: { label: 'Suspendu', cls: 'bg-red-100 text-red-700 border-red-200' },
+    en_attente: { label: 'En attente', cls: 'bg-amber-100 text-amber-700 border-amber-200' },
+    refuse: { label: 'Refusé', cls: 'bg-red-100 text-red-700 border-red-200' },
+    brouillon: { label: 'Brouillon', cls: 'bg-slate-100 text-slate-600 border-slate-200' },
+    suspendu: { label: 'Suspendu', cls: 'bg-orange-100 text-orange-700 border-orange-200' },
     archive: { label: 'Archivé', cls: 'bg-slate-100 text-slate-600 border-slate-200' },
   }
   const s = map[statut] ?? { label: statut, cls: 'bg-slate-100 text-slate-600 border-slate-200' }
@@ -158,7 +160,9 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
             className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:border-slate-400"
           >
             <option value="all">Tous statuts</option>
+            <option value="en_attente">⏳ En attente</option>
             <option value="publie">Publiés</option>
+            <option value="refuse">Refusés</option>
             <option value="brouillon">Brouillons</option>
             <option value="suspendu">Suspendus</option>
             <option value="archive">🗑️ Corbeille</option>
