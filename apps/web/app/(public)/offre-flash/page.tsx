@@ -56,8 +56,8 @@ export default async function OffreFlashPage({ searchParams }: PageProps) {
   return (
     <main className="bg-[var(--background)] min-h-screen pt-24 pb-16">
       <div className="max-w-[1600px] mx-auto px-4 lg:px-8">
-        {/* Header — même shell que /recherche */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-10">
+        {/* Header — titre + recherche à gauche, compteur + vue à droite */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-6">
           <div className="flex-1 max-w-3xl">
             <div className="inline-flex items-center gap-2 mb-3">
               <span className="relative flex w-2 h-2">
@@ -72,9 +72,6 @@ export default async function OffreFlashPage({ searchParams }: PageProps) {
               Trouvez votre <span className="italic font-serif text-[var(--accent-luxury)]">offre flash</span>
             </h1>
             <SearchBar className="w-full" initialQuery={sp.q ?? ''} />
-            <div className="mt-4">
-              <QuickFilters />
-            </div>
           </div>
 
           <div className="flex items-center gap-6 self-end lg:self-center">
@@ -92,6 +89,12 @@ export default async function OffreFlashPage({ searchParams }: PageProps) {
               <ViewToggle active={vue === 'liste'} href={buildHref(sp, { vue: 'liste' })} icon={ListIcon} label="Liste" />
             </div>
           </div>
+        </div>
+
+        {/* Filtres rapides — pleine largeur du conteneur (jusqu'à 1600px) pour
+            que toutes les rangées de chips s'étalent sans être coupées sur PC */}
+        <div className="mb-8">
+          <QuickFilters />
         </div>
 
         {/* Bandeau avertissement intermédiation */}
