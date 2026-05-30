@@ -11,6 +11,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createLocauxClient } from '@/lib/supabase/locaux'
 import { mapLocauxRow, type LocauxRow } from '@/lib/locaux/mapper'
 import { formatFCFA } from '@/lib/format'
+import { STATUTS_PUBLICS } from './statuts'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bogbes-groupe.vercel.app'
 
@@ -33,6 +34,9 @@ export interface ConsolidatedBien {
   description: string | null
   photo_url: string | null
   is_verifie: boolean
+  /** Bien enregistré mais pas encore validé par l'admin (statut 'en_attente').
+   *  Toujours false pour les offres flash. Sert au badge « En validation » + au tri. */
+  is_pending: boolean
   /** URL de la fiche détail */
   url: string
   /** ISO date de publication */
@@ -86,10 +90,10 @@ async function fetchBogbes(filters: ConsolidatedFilters): Promise<ConsolidatedBi
     .from('biens')
     .select(
       `id, titre, commune, quartier, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa,
-       surface_m2, nb_pieces, description, is_verifie, score_ia, equipements, created_at,
+       surface_m2, nb_pieces, description, is_verifie, statut, score_ia, equipements, created_at,
        biens_medias(url, est_couverture, ordre, type)`,
     )
-    .eq('statut', 'publie')
+    .in('statut', [...STATUTS_PUBLICS])
     .order('est_couverture', { ascending: false, foreignTable: 'biens_medias' })
     .order('ordre', { ascending: true, foreignTable: 'biens_medias' })
     .limit(6, { foreignTable: 'biens_medias' })
@@ -172,6 +176,7 @@ async function fetchBogbes(filters: ConsolidatedFilters): Promise<ConsolidatedBi
       description: b.description ?? null,
       photo_url: cover,
       is_verifie: !!b.is_verifie,
+      is_pending: b.statut === 'en_attente',
       url: `${SITE_URL}/biens/${b.id}`,
       date_publication: dateIso,
       date_scraping: b.created_at ?? null,
@@ -259,6 +264,7 @@ async function fetchLocaux(filters: ConsolidatedFilters): Promise<ConsolidatedBi
           description: b.description || b.caracteristiques,
           photo_url: b.image_url,
           is_verifie: false,
+          is_pending: false,
           url: `${SITE_URL}/offre-flash/${b.id}`,
           date_publication: b.date_publication,
           date_scraping: b.date_scraping,
@@ -288,10 +294,14 @@ async function fetchLocaux(filters: ConsolidatedFilters): Promise<ConsolidatedBi
 function fingerprint(b: ConsolidatedBien): string {
   const commune = (b.commune || '').toLowerCase().trim()
   const type = (b.type_bien || '').toLowerCase().trim()
-  // Bucket prix : palier 5% → "tranche prix"
-  const prixBucket = b.prix_value
-    ? Math.round(b.prix_value / Math.max(1, b.prix_value * 0.05))
-    : 0
+  // Bucket prix : paliers logarithmiques ~5%. Deux prix à moins de 5% l'un de
+  // l'autre tombent dans le même bucket ; des prix nettement différents non.
+  // (l'ancienne formule prix/(prix*0.05) valait toujours 20 → fusionnait à tort
+  // des biens distincts de même commune/type/surface.)
+  const prixBucket =
+    b.prix_value && b.prix_value > 0
+      ? Math.round(Math.log(b.prix_value) / Math.log(1.05))
+      : 0
   // Bucket surface : palier 5m²
   const surfaceBucket = b.surface_m2 ? Math.round(b.surface_m2 / 5) : 0
   const pieces = b.nb_pieces ?? 0
@@ -324,6 +334,8 @@ function dedupConsolidated(items: ConsolidatedBien[]): ConsolidatedBien[] {
       let s = 0
       if (b.is_verifie) s += 100
       if (b.source === 'bogbes') s += 50
+      // Un bien validé prime sur un doublon encore en attente de validation
+      if (b.is_pending) s -= 25
       if (b.photo_url) s += 10
       if (b.score_ia) s += b.score_ia / 10
       if (b.is_recent) s += 5
@@ -371,11 +383,15 @@ export async function getConsolidatedCatalogue(
   const [bogbes, flash] = await Promise.all([fetchBogbes(filters), fetchLocaux(filters)])
   const deduped = dedupConsolidated([...bogbes, ...flash])
   const merged = sortConsolidated(deduped, filters.sort ?? 'verified_first')
+  // Compteurs APRÈS déduplication, par source → garantit total = bogbes + flash
+  // (sinon "Tout" pouvait afficher moins que "Offres flash", ce qui n'a pas de sens).
+  const bogbesCount = merged.filter((b) => b.source === 'bogbes').length
+  const flashCount = merged.filter((b) => b.source === 'flash').length
   return {
     items: merged,
     counts: {
-      bogbes: bogbes.length,
-      flash: flash.length,
+      bogbes: bogbesCount,
+      flash: flashCount,
       total: merged.length,
     },
   }
@@ -425,7 +441,7 @@ export async function getCatalogueCommunes(
           const { data } = await (supabase as any)
             .from('biens')
             .select('commune')
-            .eq('statut', 'publie')
+            .in('statut', [...STATUTS_PUBLICS])
             .limit(5000)
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           for (const r of (data ?? []) as any[]) add(r.commune)
@@ -490,10 +506,10 @@ export async function getConsolidatedBienById(
     const { data: b } = await (supabase as any)
       .from('biens')
       .select(
-        'id, titre, commune, quartier, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces, description, is_verifie, score_ia, equipements, created_at, biens_medias(url, est_couverture, ordre, type)',
+        'id, titre, commune, quartier, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces, description, is_verifie, statut, score_ia, equipements, created_at, biens_medias(url, est_couverture, ordre, type)',
       )
       .eq('id', id)
-      .eq('statut', 'publie')
+      .in('statut', [...STATUTS_PUBLICS])
       .maybeSingle()
     if (!b) return null
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -533,6 +549,7 @@ export async function getConsolidatedBienById(
       description: b.description ?? null,
       photo_url: cover,
       is_verifie: !!b.is_verifie,
+      is_pending: b.statut === 'en_attente',
       url: `${SITE_URL}/biens/${b.id}`,
       date_publication: dateIso,
       date_scraping: b.created_at ?? null,
@@ -583,6 +600,7 @@ export async function getConsolidatedBienById(
       description: b.description || b.caracteristiques,
       photo_url: b.image_url,
       is_verifie: false,
+      is_pending: false,
       url: `${SITE_URL}/offre-flash/${b.id}`,
       date_publication: b.date_publication,
       date_scraping: b.date_scraping,
