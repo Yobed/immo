@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
-import { MapPin, Wallet, Send, X, ArrowRight, ArrowLeft, Check, MessageCircle, Search } from 'lucide-react'
+import { MapPin, Wallet, Send, X, ArrowRight, ArrowLeft, Check, MessageCircle, Search, Building2 } from 'lucide-react'
 import { useT } from '@/lib/i18n/client'
 import { CommuneAutocomplete } from '@/components/ui/CommuneAutocomplete'
 import { formatFCFACompact } from '@/lib/format'
@@ -40,6 +40,8 @@ export function GuidedSearchWizard({ open, onClose, intent = null }: GuidedSearc
 
   const [step, setStep] = useState(0)
   const [commune, setCommune] = useState('')
+  const [typeBien, setTypeBien] = useState('')
+  const [typeBienLabel, setTypeBienLabel] = useState<string | null>(null)
   const [typeOffre, setTypeOffre] = useState<TypeOffre>(intent === 'acheter' ? 'vente' : 'location')
   const [budgetMax, setBudgetMax] = useState<number | null>(null)
   const [budgetLabel, setBudgetLabel] = useState<string | null>(null)
@@ -58,6 +60,8 @@ export function GuidedSearchWizard({ open, onClose, intent = null }: GuidedSearc
     if (open) {
       setStep(0)
       setCommune('')
+      setTypeBien('')
+      setTypeBienLabel(null)
       setTypeOffre(intent === 'acheter' ? 'vente' : 'location')
       setBudgetMax(null)
       setBudgetLabel(null)
@@ -82,19 +86,30 @@ export function GuidedSearchWizard({ open, onClose, intent = null }: GuidedSearc
   if (!open || !mounted) return null
 
   const presets = typeOffre === 'vente' ? SALE_PRESETS : RENT_PRESETS
-  const canNext = (step === 0 && commune.trim().length > 0) || step === 1 || step === 2
+
+  // Type de bien — mêmes valeurs que QuickFilters (labels FR, cohérents app-wide).
+  const TYPE_BIENS: { value: string; label: string }[] = [
+    { value: '', label: t.guided.anyType },
+    { value: 'residence_meublee', label: 'Meublé' },
+    { value: 'appartement', label: 'Appartement' },
+    { value: 'villa', label: 'Villa' },
+    { value: 'maison', label: 'Maison' },
+    { value: 'studio', label: 'Studio' },
+    { value: 'terrain', label: 'Terrain' },
+    { value: 'bureau', label: 'Bureau' },
+    { value: 'commerce', label: 'Commerce' },
+  ]
+
+  const LAST_STEP = 3
+  // Seule l'étape commune (0) est obligatoire ; type/budget sont optionnels.
+  const canNext = step !== 0 || commune.trim().length > 0
 
   function gotoCatalogue() {
     const params = new URLSearchParams()
     if (commune) params.set('commune', commune)
-    if (typeOffre === 'vente') {
-      // Prix max sur prix_vente_fcfa — la page catalogue accepte un range
-      if (budgetMax) params.set('prix_max', String(budgetMax))
-      params.set('type_offre', 'vente')
-    } else {
-      if (budgetMax) params.set('prix_max', String(budgetMax))
-      params.set('type_offre', 'location')
-    }
+    if (typeBien) params.set('type_bien', typeBien)
+    if (budgetMax) params.set('prix_max', String(budgetMax))
+    params.set('type_offre', typeOffre)
     onClose()
     router.push(`/catalogue?${params.toString()}`)
   }
@@ -104,7 +119,8 @@ export function GuidedSearchWizard({ open, onClose, intent = null }: GuidedSearc
       'Bonjour,',
       "j'utilise BOGBE'S et je cherche :",
       `• Commune : ${commune || 'à préciser'}`,
-      `• Type : ${typeOffre === 'vente' ? 'Achat' : 'Location'}`,
+      `• Type de bien : ${typeBienLabel ?? 'à préciser'}`,
+      `• Offre : ${typeOffre === 'vente' ? 'Achat' : 'Location'}`,
       `• Budget max : ${budgetLabel ?? 'à préciser'}`,
       '',
       'Pouvez-vous m\'aider à organiser une visite ?',
@@ -148,7 +164,7 @@ export function GuidedSearchWizard({ open, onClose, intent = null }: GuidedSearc
 
           {/* Progress steps */}
           <ol className="flex items-center gap-2 mt-4" aria-label="Progression">
-            {[0, 1, 2].map((i) => (
+            {[0, 1, 2, 3].map((i) => (
               <li key={i} className="flex-1">
                 <div
                   className={`h-1.5 rounded-full transition-colors ${
@@ -157,7 +173,7 @@ export function GuidedSearchWizard({ open, onClose, intent = null }: GuidedSearc
                   aria-current={i === step ? 'step' : undefined}
                 />
                 <span className="sr-only">
-                  Étape {i + 1} sur 3 {i < step ? '(terminée)' : i === step ? '(en cours)' : ''}
+                  Étape {i + 1} sur 4 {i < step ? '(terminée)' : i === step ? '(en cours)' : ''}
                 </span>
               </li>
             ))}
@@ -211,8 +227,44 @@ export function GuidedSearchWizard({ open, onClose, intent = null }: GuidedSearc
             </div>
           )}
 
-          {/* Step 1 — type + budget */}
+          {/* Step 1 — type de bien */}
           {step === 1 && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[var(--accent-luxury-muted)] text-[var(--accent-luxury)] flex items-center justify-center shrink-0">
+                  <Building2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-display text-lg font-bold">{t.guided.sTypeTitle}</h3>
+                  <p className="text-xs text-[var(--text-muted)]">{t.guided.sTypeHint}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {TYPE_BIENS.map((tb) => {
+                  const active = typeBien === tb.value
+                  return (
+                    <button
+                      key={tb.value || 'any'}
+                      type="button"
+                      onClick={() => { setTypeBien(tb.value); setTypeBienLabel(tb.value ? tb.label : null) }}
+                      aria-pressed={active}
+                      className={`px-3 py-3 rounded-xl text-sm font-bold border transition-colors text-center ${
+                        active
+                          ? 'border-[var(--accent-luxury)] bg-[var(--accent-luxury-muted)] text-[var(--accent-luxury)]'
+                          : 'border-[var(--border)] text-[var(--text)] hover:border-[var(--accent-luxury)]/40'
+                      }`}
+                    >
+                      {tb.label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Step 2 — type d'offre + budget */}
+          {step === 2 && (
             <div className="space-y-5">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[var(--accent-luxury-muted)] text-[var(--accent-luxury)] flex items-center justify-center shrink-0">
@@ -278,8 +330,8 @@ export function GuidedSearchWizard({ open, onClose, intent = null }: GuidedSearc
             </div>
           )}
 
-          {/* Step 2 — action */}
-          {step === 2 && (
+          {/* Step 3 — action */}
+          {step === 3 && (
             <div className="space-y-5">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[var(--accent-luxury-muted)] text-[var(--accent-luxury)] flex items-center justify-center shrink-0">
@@ -294,6 +346,7 @@ export function GuidedSearchWizard({ open, onClose, intent = null }: GuidedSearc
               {/* Recap */}
               <div className="rounded-xl bg-[var(--surface-hover)] border border-[var(--border)] p-4 space-y-1.5 text-sm">
                 <Recap icon={<MapPin className="w-3.5 h-3.5" />} label={t.guided.s1Title} value={commune || '—'} />
+                <Recap icon={<Building2 className="w-3.5 h-3.5" />} label={t.guided.sTypeTitle} value={typeBienLabel || t.guided.anyType} />
                 <Recap icon={<Wallet className="w-3.5 h-3.5" />} label={typeOffre === 'location' ? t.guided.rent : t.guided.buy} value={budgetLabel || t.guided.anyBudget} />
               </div>
 
@@ -333,32 +386,35 @@ export function GuidedSearchWizard({ open, onClose, intent = null }: GuidedSearc
           )}
         </div>
 
-        {/* Footer — nav buttons (only for steps 0 & 1) */}
-        {step < 2 && (
-          <div className="px-5 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] border-t border-[var(--border)] flex items-center justify-between gap-3">
-            {step > 0 ? (
-              <button
-                type="button"
-                onClick={() => setStep((s) => Math.max(0, s - 1))}
-                className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2.5 rounded-full text-sm font-semibold text-[var(--text-muted)] hover:text-[var(--text)]"
-              >
-                <ArrowLeft className="w-4 h-4" /> {t.guided.back}
-              </button>
-            ) : (
-              <span aria-hidden="true" />
-            )}
+        {/* Footer — navigation : Retour disponible dès l'étape 1 (y compris
+            sur l'étape finale), Suivant masqué sur la dernière étape. */}
+        <div className="px-5 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] border-t border-[var(--border)] flex items-center justify-between gap-3">
+          {step > 0 ? (
             <button
               type="button"
-              onClick={() => setStep((s) => Math.min(2, s + 1))}
+              onClick={() => setStep((s) => Math.max(0, s - 1))}
+              className="inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2.5 rounded-full text-sm font-semibold text-[var(--text-muted)] hover:text-[var(--text)]"
+            >
+              <ArrowLeft className="w-4 h-4" /> {t.guided.back}
+            </button>
+          ) : (
+            <span aria-hidden="true" />
+          )}
+          {step < LAST_STEP ? (
+            <button
+              type="button"
+              onClick={() => setStep((s) => Math.min(LAST_STEP, s + 1))}
               disabled={!canNext}
               className="inline-flex items-center gap-1.5 min-h-[44px] px-5 py-2.5 rounded-full bg-[var(--accent-luxury)] text-[var(--on-accent)] font-bold text-sm hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {step === 1 && budgetLabel ? <Check className="w-4 h-4" /> : null}
+              {step === 2 && budgetLabel ? <Check className="w-4 h-4" /> : null}
               {t.guided.next}
               <ArrowRight className="w-4 h-4" />
             </button>
-          </div>
-        )}
+          ) : (
+            <span aria-hidden="true" />
+          )}
+        </div>
       </div>
     </div>,
     document.body,

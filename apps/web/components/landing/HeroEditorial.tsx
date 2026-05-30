@@ -127,7 +127,7 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
                   className="group mt-4 w-full sm:w-auto flex items-center gap-3 px-4 sm:px-5 py-3.5 rounded-2xl bg-gradient-to-r from-[#C5A059]/15 via-[#C5A059]/10 to-transparent border border-[#C5A059]/40 hover:border-[#C5A059]/70 hover:bg-[#C5A059]/20 backdrop-blur-sm shadow-[0_4px_24px_rgba(197,160,89,0.15)] hover:shadow-[0_6px_32px_rgba(197,160,89,0.25)] transition-all min-h-[56px]"
-                  aria-label="Ouvrir l'assistant de recherche guidée en 3 étapes"
+                  aria-label="Ouvrir l'assistant de recherche guidée en 4 étapes"
                 >
                   {/* Icon with attention pulse */}
                   <span className="relative inline-flex shrink-0">
@@ -149,7 +149,7 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
 
                   {/* Timer chip + arrow */}
                   <span className="hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#020617]/40 border border-white/10 text-[10px] font-bold text-white/80 uppercase tracking-wider shrink-0">
-                    3 étapes
+                    4 étapes
                   </span>
                   <ChevronRight className="w-4 h-4 text-white/70 group-hover:text-white group-hover:translate-x-1 transition-all shrink-0" />
                 </motion.button>
