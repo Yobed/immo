@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { MapPin, Wallet, Send, X, ArrowRight, ArrowLeft, Check, MessageCircle, Search } from 'lucide-react'
 import { useT } from '@/lib/i18n/client'
@@ -45,6 +46,13 @@ export function GuidedSearchWizard({ open, onClose, intent = null }: GuidedSearc
 
   const dialogRef = useRef<HTMLDivElement>(null)
 
+  // Portail vers document.body : indispensable pour échapper au contexte
+  // d'empilement créé par les ancêtres framer-motion (transform) du Hero,
+  // sinon l'overlay z-[300] reste piégé SOUS la MobileTabBar (z-100) et le
+  // pied de page (bouton Suivant) est masqué en bas sur mobile.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
   // Reset state when reopened with a fresh intent
   useEffect(() => {
     if (open) {
@@ -71,7 +79,7 @@ export function GuidedSearchWizard({ open, onClose, intent = null }: GuidedSearc
     }
   }, [open, onClose])
 
-  if (!open) return null
+  if (!open || !mounted) return null
 
   const presets = typeOffre === 'vente' ? SALE_PRESETS : RENT_PRESETS
   const canNext = (step === 0 && commune.trim().length > 0) || step === 1 || step === 2
@@ -106,7 +114,7 @@ export function GuidedSearchWizard({ open, onClose, intent = null }: GuidedSearc
     window.open(`https://wa.me/${ADVISOR_PHONE}?text=${text}`, '_blank', 'noopener')
   }
 
-  return (
+  return createPortal(
     <div
       ref={dialogRef}
       role="dialog"
@@ -352,7 +360,8 @@ export function GuidedSearchWizard({ open, onClose, intent = null }: GuidedSearc
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 

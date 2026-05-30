@@ -64,12 +64,12 @@ export default async function HomePage() {
     photo_url: photoMap[b.id] ?? null,
   }))
 
-  // Arrière-plan Hero — image éditoriale curatée : villa de prestige au crépuscule,
-  // piscine éclairée, tons chauds dorés (accord avec l'accent or #C5A059).
+  // Arrière-plan Hero — image éditoriale curatée : villa de luxe moderne avec
+  // grande piscine, ambiance résidence de standing.
   // Fixe et toujours flatteuse : on n'utilise PAS les photos de biens en fond
   // (risque de tomber sur un terrain/chantier peu engageant).
   const HERO_BG =
-    'https://images.unsplash.com/photo-1567496898669-ee935f5f647a?q=80&w=2400&auto=format&fit=crop'
+    'https://images.unsplash.com/photo-1613977257363-707ba9348227?q=80&w=2400&auto=format&fit=crop'
 
   // Bien vedettes pour la carte flottante du Hero (plusieurs pour le cycle)
   const featuredBiens = biensWithPhoto.filter((b: any) => b.photo_url).slice(0, 8)
