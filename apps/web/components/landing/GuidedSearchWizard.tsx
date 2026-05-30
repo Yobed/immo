@@ -112,7 +112,7 @@ export function GuidedSearchWizard({ open, onClose, intent = null }: GuidedSearc
       role="dialog"
       aria-modal="true"
       aria-labelledby="guided-search-title"
-      className="fixed inset-0 z-[300] flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm p-0 md:p-4"
+      className="fixed inset-x-0 top-0 h-[100dvh] z-[300] flex items-end md:items-center justify-center bg-black/60 backdrop-blur-sm p-0 md:p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose()
       }}
@@ -120,7 +120,7 @@ export function GuidedSearchWizard({ open, onClose, intent = null }: GuidedSearc
       {/* Bottom-sheet sur mobile : on force min-h-[85vh] pour que le sheet
           remonte presque jusqu'en haut de l'écran (au lieu de s'arrêter au
           milieu). Sur desktop, modal centrale classique. */}
-      <div className="w-full max-w-lg bg-[var(--surface-card)] text-[var(--text)] rounded-t-3xl md:rounded-3xl shadow-md overflow-hidden max-h-[92vh] min-h-[85vh] md:min-h-0 flex flex-col border border-[var(--border)]">
+      <div className="w-full max-w-lg bg-[var(--surface-card)] text-[var(--text)] rounded-t-3xl md:rounded-3xl shadow-md overflow-hidden max-h-[92dvh] min-h-[85dvh] md:min-h-0 md:max-h-[92vh] flex flex-col border border-[var(--border)]">
         {/* Header — progress + close */}
         <div className="relative px-5 pt-5 pb-4 border-b border-[var(--border)]">
           <button
@@ -327,7 +327,7 @@ export function GuidedSearchWizard({ open, onClose, intent = null }: GuidedSearc
 
         {/* Footer — nav buttons (only for steps 0 & 1) */}
         {step < 2 && (
-          <div className="px-5 pt-3 pb-5 border-t border-[var(--border)] flex items-center justify-between gap-3">
+          <div className="px-5 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] border-t border-[var(--border)] flex items-center justify-between gap-3">
             {step > 0 ? (
               <button
                 type="button"

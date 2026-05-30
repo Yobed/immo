@@ -348,6 +348,18 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
           prix_value={bien.prix_value}
         />
       </div>
+
+      {/* Mobile-only — Sticky CTA en bas pour atteindre la demande de visite
+          depuis n'importe où dans le scroll */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 p-3 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
+        <FlashContactModal
+          locauxId={bien.id}
+          bienTitre={bien.titre}
+          initialName={prefill.name}
+          initialPhone={prefill.phone}
+          initialEmail={prefill.email}
+        />
+      </div>
     </main>
   )
 }

@@ -122,22 +122,54 @@ export function FlashContactModal({
             </button>
 
             {status === 'success' ? (
-              <div className="p-8 text-center">
-                <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-emerald-100 flex items-center justify-center">
-                  <CheckCircle2 className="w-7 h-7 text-emerald-600" />
+              <div className="p-6 md:p-8">
+                {/* Header succès */}
+                <div className="text-center mb-6">
+                  <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-emerald-100 flex items-center justify-center">
+                    <CheckCircle2 className="w-7 h-7 text-emerald-600" />
+                  </div>
+                  <h2 className="font-display text-xl font-bold text-slate-900 mb-1">
+                    Demande envoyée !
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    On prend le relais. Voici la suite.
+                  </p>
                 </div>
-                <h2 className="font-display text-xl font-bold text-slate-900 mb-2">
-                  Demande envoyée !
-                </h2>
-                <p className="text-sm text-slate-600 mb-6">
-                  Notre conseiller va valider la disponibilité avec le propriétaire et te recontacte rapidement par WhatsApp.
-                </p>
+
+                {/* Roadmap 4 étapes — ce qui se passe ensuite */}
+                <ol className="space-y-3 mb-6">
+                  <RoadmapStep
+                    num={1}
+                    emoji="📞"
+                    title="Notre conseiller t'appelle"
+                    desc="Dans l'heure en journée, par WhatsApp ou téléphone."
+                  />
+                  <RoadmapStep
+                    num={2}
+                    emoji="✅"
+                    title="Vérification avec le propriétaire"
+                    desc="On confirme la disponibilité du bien et le créneau qui te convient."
+                  />
+                  <RoadmapStep
+                    num={3}
+                    emoji="📅"
+                    title="Visite organisée"
+                    desc="Adresse et horaire confirmés. Conseiller présent pour t'accompagner."
+                  />
+                  <RoadmapStep
+                    num={4}
+                    emoji="🏠"
+                    title="Suivi jusqu'à la signature"
+                    desc="Si tu valides, on coordonne contrat + paiements sécurisés."
+                  />
+                </ol>
+
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="inline-flex px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-slate-700 transition-colors"
+                  className="w-full inline-flex justify-center items-center px-5 py-3 rounded-xl bg-slate-900 text-white text-xs font-bold uppercase tracking-wider hover:bg-slate-700 transition-colors"
                 >
-                  Fermer
+                  Compris, merci
                 </button>
               </div>
             ) : (
@@ -259,5 +291,23 @@ export function FlashContactModal({
         </div>
       )}
     </>
+  )
+}
+
+/** Étape du roadmap post-envoi — numéro + emoji + titre + description courte */
+function RoadmapStep({ num, emoji, title, desc }: { num: number; emoji: string; title: string; desc: string }) {
+  return (
+    <li className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200">
+      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white border border-slate-300 flex items-center justify-center text-xs font-bold text-slate-700">
+        {num}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-bold text-slate-900 leading-tight mb-0.5">
+          <span aria-hidden className="mr-1.5">{emoji}</span>
+          {title}
+        </p>
+        <p className="text-xs text-slate-600 leading-snug">{desc}</p>
+      </div>
+    </li>
   )
 }

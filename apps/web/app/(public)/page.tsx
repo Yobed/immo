@@ -9,6 +9,7 @@ import { HowItWorks } from '@/components/landing/HowItWorks'
 import { ServicesPillars } from '@/components/landing/ServicesPillars'
 import { PublishChoiceTeaser } from '@/components/landing/PublishChoiceTeaser'
 import { MapZones } from '@/components/landing/MapZones'
+import { StatsRibbon } from '@/components/landing/StatsRibbon'
 import { NearMeSection } from '@/components/landing/NearMeSection'
 import { TestimonialsSection } from '@/components/landing/TestimonialsSection'
 import { Footer } from '@/components/landing/Footer'
@@ -63,17 +64,12 @@ export default async function HomePage() {
     photo_url: photoMap[b.id] ?? null,
   }))
 
-  // Extraire les meilleures photos de biens pour le diaporama Hero (max 8)
-  const FALLBACK_IMAGES = [
-    'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2000&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=2000&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1600607687920-4e2a09be1587?q=80&w=2000&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1613490900233-08145a3b2b8b?q=80&w=2000&auto=format&fit=crop',
-  ]
-  const heroBgImages = Object.values(photoMap)
-    .filter(Boolean)
-    .slice(0, 8)
-  const bgImages = heroBgImages.length >= 2 ? heroBgImages : FALLBACK_IMAGES
+  // Arrière-plan Hero — image éditoriale curatée : villa de prestige au crépuscule,
+  // piscine éclairée, tons chauds dorés (accord avec l'accent or #C5A059).
+  // Fixe et toujours flatteuse : on n'utilise PAS les photos de biens en fond
+  // (risque de tomber sur un terrain/chantier peu engageant).
+  const HERO_BG =
+    'https://images.unsplash.com/photo-1567496898669-ee935f5f647a?q=80&w=2400&auto=format&fit=crop'
 
   // Bien vedettes pour la carte flottante du Hero (plusieurs pour le cycle)
   const featuredBiens = biensWithPhoto.filter((b: any) => b.photo_url).slice(0, 8)
@@ -103,12 +99,15 @@ export default async function HomePage() {
   return (
     <main className="bg-[var(--background)]">
       {/* 1. Hero éditorial — search + wizard CTA */}
-      <HeroEditorial bgImage={bgImages[0]} featuredBiens={premiumProperties} />
+      <HeroEditorial bgImage={HERO_BG} featuredBiens={premiumProperties} />
+
+      {/* 1bis. Chiffres clés — preuves de valeur tangibles juste sous le hero */}
+      <StatsRibbon />
 
       {/* 2. Dernières visites — auto-hidden if no localStorage history */}
       <RecentlyViewed />
 
-      {/* 3. Parcours utilisateurs — switch "Je suis…" prioritaire + 5 cartes */}
+      {/* 3. Parcours utilisateurs — 2 voies "Je suis…" (locataire vs proprio) */}
       <JourneyShortcuts />
 
       {/* 3bis. Déroulé visuel des 3 étapes du wizard — rend visible la promesse
@@ -120,17 +119,17 @@ export default async function HomePage() {
             coordonnées masquées, deux pipelines clairement étiquetés. */}
       <HowItWorks />
 
-      {/* 5. Près de chez moi (carte interactive avec filtres rapides) */}
+      {/* 5. Témoignages clients juste après la promesse anti-arnaque — preuve sociale immédiate */}
+      <TestimonialsSection />
+
+      {/* 6. Près de chez moi (carte interactive avec filtres rapides) */}
       <NearMeSection initialBiens={biensWithPhoto} />
 
-      {/* 6. Sélection éditoriale */}
+      {/* 7. Sélection éditoriale */}
       <FeaturedProperties initialBiens={biensWithPhoto} />
 
-      {/* 7. Marché en direct — opportunités captées par notre équipe veille */}
+      {/* 8. Marché en direct — opportunités captées par notre équipe veille */}
       <FlashOffersSection />
-
-      {/* 8. Témoignages clients (proof social) */}
-      <TestimonialsSection />
 
       {/* 9. Footer */}
       <Footer />
