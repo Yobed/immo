@@ -134,7 +134,7 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
             <h3 className="text-[var(--text)] font-display font-bold text-base tracking-tight">Sapphire Intelligence</h3>
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-secondary" />
-              <p className="text-[9px] uppercase font-bold tracking-[0.2em] text-[var(--text)]/40">Sapphire Intelligence</p>
+              <p className="text-[9px] uppercase font-bold tracking-[0.2em] text-foreground/40">Sapphire Intelligence</p>
             </div>
           </div>
         </div>
@@ -148,8 +148,8 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
             <MessageCircle className="w-5 h-5" />
           </a>
           {onClose && (
-            <button onClick={onClose} className="p-2 hover:bg-[var(--text)]/10 rounded-full transition-colors">
-              <X className="w-5 h-5 text-[var(--text)]/50" />
+            <button onClick={onClose} className="p-2 hover:bg-foreground/10 rounded-full transition-colors">
+              <X className="w-5 h-5 text-foreground/50" />
             </button>
           )}
         </div>
@@ -166,7 +166,7 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
               <p className="text-xl font-display font-light text-[var(--text)] mb-2 italic">
                 Bienvenue dans votre résidence digitale, Excellence.
               </p>
-              <p className="text-sm text-[var(--text)]/40 max-w-[280px] leading-relaxed mx-auto uppercase tracking-widest text-[10px] font-bold">
+              <p className="text-sm text-foreground/40 max-w-[280px] leading-relaxed mx-auto uppercase tracking-widest text-[10px] font-bold">
                 Je suis Sapphire Intelligence. Comment puis-je sublimer votre recherche immobilière aujourd'hui ?
               </p>
             </div>
@@ -175,7 +175,7 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
                 <button
                   key={i}
                   onClick={() => sendMessage(s)}
-                  className="w-full text-center text-[10px] uppercase tracking-widest font-bold bg-[var(--text)]/5 border border-[var(--text)]/5 text-[var(--text)]/60 px-5 py-3 rounded-xl hover:bg-[var(--text)]/[0.08] hover:text-[var(--text)] hover:border-[var(--text)]/20 transition-all duration-500"
+                  className="w-full text-center text-[10px] uppercase tracking-widest font-bold bg-foreground/5 border border-foreground/5 text-foreground/60 px-5 py-3 rounded-xl hover:bg-[var(--text)]/[0.08] hover:text-[var(--text)] hover:border-foreground/20 transition-all duration-500"
                 >
                   {s}
                 </button>
@@ -193,7 +193,7 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
              <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
                 <div className="w-1.5 h-1.5 bg-[var(--accent-luxury)] rounded-full animate-pulse" />
              </div>
-             <p className="text-[10px] uppercase font-bold tracking-[0.3em] text-[var(--text)]/20">Analyse en cours...</p>
+             <p className="text-[10px] uppercase font-bold tracking-[0.3em] text-foreground/20">Analyse en cours...</p>
           </div>
         )}
         <div ref={bottomRef} className="h-4" />
@@ -201,7 +201,7 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
 
       {/* Input */}
       <div className="p-6 relative z-10 bg-white/[0.02] border-t border-white/5">
-        <div className="flex gap-4 p-2 bg-[var(--midnight-muted)]/50 rounded-2xl border border-white/5 focus-within:border-[var(--accent-luxury)]/30 transition-all duration-500">
+        <div className="flex gap-4 p-2 bg-surface-raised/50 rounded-2xl border border-white/5 focus-within:border-accent-luxury/30 transition-all duration-500">
           <input
             type="text"
             value={input}
@@ -209,7 +209,7 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }}
             placeholder={tx.chat.placeholder}
             disabled={loading}
-            className="flex-1 bg-transparent px-4 py-2 text-sm text-[var(--text)] placeholder-[var(--text)]/20 focus:outline-none disabled:opacity-50"
+            className="flex-1 bg-transparent px-4 py-2 text-sm text-[var(--text)] placeholder-foreground/20 focus:outline-none disabled:opacity-50"
           />
           <button
             onClick={() => sendMessage()}
@@ -220,7 +220,7 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
           </button>
         </div>
          <div className="flex justify-center gap-8 mt-4">
-            <Mic className="w-3.5 h-3.5 text-[var(--text)]/20 cursor-not-allowed" />
+            <Mic className="w-3.5 h-3.5 text-foreground/20 cursor-not-allowed" />
             <a 
               href="https://wa.me/2250544872051" 
               target="_blank" 
@@ -228,7 +228,7 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
               className="flex items-center gap-2 opacity-30 hover:opacity-100 transition-all group"
             >
               <Phone className="w-3.5 h-3.5 text-green-500" />
-              <span className="text-[10px] text-[var(--text)]/50 group-hover:text-[var(--text)] uppercase tracking-tighter transition-colors">WhatsApp 5.0</span>
+              <span className="text-[10px] text-foreground/50 group-hover:text-[var(--text)] uppercase tracking-tighter transition-colors">WhatsApp 5.0</span>
             </a>
          </div>
       </div>

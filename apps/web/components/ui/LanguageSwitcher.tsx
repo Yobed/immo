@@ -34,7 +34,7 @@ export function LanguageSwitcher({ variant = 'compact', className = '' }: Langua
         {LOCALES.map((l, i) => (
           <span key={l} className="inline-flex items-center gap-1.5">
             {i > 0 && (
-              <span className="text-[var(--text-muted)]/40 select-none" aria-hidden="true">
+              <span className="text-muted/40 select-none" aria-hidden="true">
                 /
               </span>
             )}
@@ -62,13 +62,13 @@ export function LanguageSwitcher({ variant = 'compact', className = '' }: Langua
       <label htmlFor="locale-select" className="sr-only">
         {t.language.switch}
       </label>
-      <Globe className="w-4 h-4 text-slate-400" aria-hidden />
+      <Globe className="w-4 h-4 text-[var(--text-subtle)]" aria-hidden />
       <select
         id="locale-select"
         value={locale}
         onChange={(e) => setLocale(e.target.value as Locale)}
         disabled={isPending}
-        className="bg-transparent text-sm font-medium text-slate-700 border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent-luxury/50"
+        className="bg-transparent text-sm font-medium text-[var(--text)] border border-[var(--border)] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent-luxury/50"
       >
         {LOCALES.map((l) => (
           <option key={l} value={l}>

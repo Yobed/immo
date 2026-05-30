@@ -216,7 +216,7 @@ export function GuidedSearchWizard({ open, onClose, intent = null }: GuidedSearc
                       className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                         commune === c
                           ? 'bg-[var(--accent-luxury)] text-[var(--on-accent)] border-[var(--accent-luxury)]'
-                          : 'border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--accent-luxury)]/40 hover:text-[var(--text)]'
+                          : 'border-[var(--border)] text-[var(--text-muted)] hover:border-accent-luxury/40 hover:text-[var(--text)]'
                       }`}
                     >
                       {c}
@@ -252,7 +252,7 @@ export function GuidedSearchWizard({ open, onClose, intent = null }: GuidedSearc
                       className={`px-3 py-3 rounded-xl text-sm font-bold border transition-colors text-center ${
                         active
                           ? 'border-[var(--accent-luxury)] bg-[var(--accent-luxury-muted)] text-[var(--accent-luxury)]'
-                          : 'border-[var(--border)] text-[var(--text)] hover:border-[var(--accent-luxury)]/40'
+                          : 'border-[var(--border)] text-[var(--text)] hover:border-accent-luxury/40'
                       }`}
                     >
                       {tb.label}
@@ -315,7 +315,7 @@ export function GuidedSearchWizard({ open, onClose, intent = null }: GuidedSearc
                         className={`px-3 py-3 rounded-xl text-sm font-bold border transition-colors text-left ${
                           active
                             ? 'border-[var(--accent-luxury)] bg-[var(--accent-luxury-muted)] text-[var(--accent-luxury)]'
-                            : 'border-[var(--border)] text-[var(--text)] hover:border-[var(--accent-luxury)]/40'
+                            : 'border-[var(--border)] text-[var(--text)] hover:border-accent-luxury/40'
                         }`}
                       >
                         <span className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1">
@@ -370,7 +370,7 @@ export function GuidedSearchWizard({ open, onClose, intent = null }: GuidedSearc
                 <button
                   type="button"
                   onClick={gotoWhatsApp}
-                  className="group flex items-center gap-3 p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] hover:border-[var(--accent-luxury)]/40 font-bold text-sm text-[var(--text)] active:scale-[0.99] transition-all"
+                  className="group flex items-center gap-3 p-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] hover:border-accent-luxury/40 font-bold text-sm text-[var(--text)] active:scale-[0.99] transition-all"
                 >
                   <MessageCircle className="w-5 h-5 shrink-0 text-emerald-600" />
                   <span className="flex-1 text-left">

@@ -78,8 +78,8 @@ export function FurnishedRentalsSection() {
   return (
     <section className="relative py-24 bg-[var(--midnight-muted)] overflow-hidden">
       {/* Abstract Background Decoration */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[var(--accent-luxury)]/5 blur-[120px] rounded-full -mr-64 -mt-64" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[var(--accent-luxury)]/5 blur-[120px] rounded-full -ml-64 -mb-64" />
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent-luxury/5 blur-[120px] rounded-full -mr-64 -mt-64" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent-luxury/5 blur-[120px] rounded-full -ml-64 -mb-64" />
 
       <div className="mx-auto px-4 md:px-6 max-w-7xl relative z-10">
         <div className="grid lg:grid-cols-12 gap-16 items-start">
@@ -87,7 +87,7 @@ export function FurnishedRentalsSection() {
           {/* Left Column: Context & Amenities */}
           <div className="lg:col-span-4 sticky top-24">
             <ScrollReveal>
-              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--accent-luxury)]/10 border border-[var(--accent-luxury)]/20 text-[var(--accent-luxury)] text-[10px] font-bold tracking-[0.2em] uppercase mb-8">
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-luxury/10 border border-accent-luxury/20 text-[var(--accent-luxury)] text-[10px] font-bold tracking-[0.2em] uppercase mb-8">
                 <Star className="w-3 h-3 fill-current" />
                 Séjours Premium
               </span>
@@ -123,7 +123,7 @@ export function FurnishedRentalsSection() {
               <div className="mt-16">
                 <Link 
                   href="/recherche?type_bien=residence_meublee"
-                  className="inline-flex items-center gap-4 text-[var(--accent-luxury)] font-bold text-xs uppercase tracking-[0.2em] group border-b border-[var(--accent-luxury)]/30 pb-2 hover:border-[var(--accent-luxury)] transition-all"
+                  className="inline-flex items-center gap-4 text-[var(--accent-luxury)] font-bold text-xs uppercase tracking-[0.2em] group border-b border-accent-luxury/30 pb-2 hover:border-[var(--accent-luxury)] transition-all"
                 >
                   Découvrir toutes les résidences
                   <span className="group-hover:translate-x-2 transition-transform">→</span>
@@ -137,7 +137,7 @@ export function FurnishedRentalsSection() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {loading ? (
                 Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="aspect-[4/5] bg-[var(--background)]/50 animate-pulse rounded-lg border border-[var(--border)]" />
+                  <div key={i} className="aspect-[4/5] bg-background/50 animate-pulse rounded-lg border border-[var(--border)]" />
                 ))
               ) : (
                 biens.map((bien, i) => (

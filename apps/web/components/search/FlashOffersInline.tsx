@@ -101,7 +101,7 @@ export async function FlashOffersInline({ filters, limit = 6 }: FlashOffersInlin
         </div>
         <Link
           href="/offre-flash"
-          className="hidden md:inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[0.2em] uppercase text-[var(--accent-luxury)] border-b border-[var(--accent-luxury)]/40 pb-0.5 hover:border-[var(--accent-luxury)] transition-colors"
+          className="hidden md:inline-flex items-center gap-1.5 text-[11px] font-bold tracking-[0.2em] uppercase text-[var(--accent-luxury)] border-b border-accent-luxury/40 pb-0.5 hover:border-[var(--accent-luxury)] transition-colors"
         >
           Voir tout <ArrowUpRight className="w-3.5 h-3.5" />
         </Link>

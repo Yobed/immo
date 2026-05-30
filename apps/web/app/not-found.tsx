@@ -24,7 +24,7 @@ export default async function NotFound() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[var(--accent-luxury)] text-black font-display font-bold text-[11px] uppercase tracking-[0.2em] hover:scale-105 transition-transform"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[var(--accent-luxury)] text-[var(--text)] font-display font-bold text-[11px] uppercase tracking-[0.2em] hover:scale-105 transition-transform"
           >
             <Home className="w-4 h-4" />
             {t.nav.home}

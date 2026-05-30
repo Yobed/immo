@@ -105,7 +105,7 @@ export function BienCard({
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center gap-3
                 bg-[var(--surface-hover)]">
-                <Home className="w-12 h-12 text-[var(--text-muted)]/40" aria-hidden="true" />
+                <Home className="w-12 h-12 text-muted/40" aria-hidden="true" />
                 <span className="text-[10px] font-bold text-[var(--accent-luxury)] uppercase tracking-widest italic">
                   Photo à venir
                 </span>
@@ -130,7 +130,7 @@ export function BienCard({
               <div className="absolute top-3 right-3 z-10 flex flex-col items-end gap-2">
                 {isVerified && (
                   <div className="bg-[var(--success-soft)] text-[var(--success)] px-2.5 py-1 rounded-full
-                    text-[8px] font-bold uppercase tracking-widest flex items-center gap-1 border border-[var(--success)]/30">
+                    text-[8px] font-bold uppercase tracking-widest flex items-center gap-1 border border-success/30">
                     <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 20 20" aria-hidden="true">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
@@ -138,14 +138,14 @@ export function BienCard({
                   </div>
                 )}
                 {isExclusive && (
-                  <div className="bg-[var(--surface-card)]/70 backdrop-blur-md text-[var(--text)] px-2.5 py-1 rounded-full
+                  <div className="bg-surface-card/70 backdrop-blur-md text-[var(--text)] px-2.5 py-1 rounded-full
                     text-[8px] font-bold uppercase tracking-widest flex items-center gap-1 border border-[var(--border)]">
                     <Star className="w-2.5 h-2.5 text-[var(--accent-luxury)] fill-[var(--accent-luxury)]" />
                     Exclusif
                   </div>
                 )}
                 {url_visite_3d && (
-                  <div className="bg-[var(--accent-luxury)]/90 backdrop-blur-md text-[var(--on-accent)] px-2.5 py-1 rounded-full
+                  <div className="bg-accent-luxury/90 backdrop-blur-md text-[var(--on-accent)] px-2.5 py-1 rounded-full
                     text-[8px] font-bold uppercase tracking-widest flex items-center gap-1 shadow-md">
                     <span className="relative flex h-1.5 w-1.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-75"></span>
@@ -160,7 +160,7 @@ export function BienCard({
             {/* CTA au hover — centre image */}
             <div className="absolute inset-0 flex items-center justify-center z-10
               opacity-0 group-hover:opacity-100 transition-opacity duration-250 pointer-events-none">
-              <span className="bg-white/90 text-slate-900 px-5 py-2 rounded-full text-[10px] font-bold
+              <span className="bg-white/90 text-[var(--text)] px-5 py-2 rounded-full text-[10px] font-bold
                 flex items-center gap-2 shadow-md">
                 Voir le bien
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -209,13 +209,13 @@ export function BienCard({
             <div className="mt-auto grid grid-cols-2 gap-2 pt-3 border-t border-off-white/8">
               {surface_m2 && (
                 <div className="flex items-center gap-1.5 text-[10px] text-[var(--text-muted)]">
-                  <Ruler className="w-3 h-3 text-[var(--accent-luxury)]/60 shrink-0" />
+                  <Ruler className="w-3 h-3 text-accent-luxury/60 shrink-0" />
                   <span className="font-semibold text-off-white">{surface_m2} m²</span>
                 </div>
               )}
               {nb_pieces && (
                 <div className="flex items-center gap-1.5 text-[10px] text-[var(--text-muted)]">
-                  <Layers className="w-3 h-3 text-[var(--accent-luxury)]/60 shrink-0" />
+                  <Layers className="w-3 h-3 text-accent-luxury/60 shrink-0" />
                   <span className="font-semibold text-off-white">{nb_pieces} pièce{nb_pieces > 1 ? 's' : ''}</span>
                 </div>
               )}

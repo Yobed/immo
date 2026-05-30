@@ -4,7 +4,7 @@ import Link from 'next/link'
 export default function ProError({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="min-h-screen bg-[var(--surface)] flex items-center justify-center p-4">
-      <div className="bg-white rounded-card border border-[var(--border)] p-8 max-w-md w-full text-center">
+      <div className="bg-[var(--surface-card)] rounded-card border border-[var(--border)] p-8 max-w-md w-full text-center">
         <div className="flex justify-center mb-4">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-warning">
             <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>

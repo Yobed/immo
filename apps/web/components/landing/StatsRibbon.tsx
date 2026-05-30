@@ -156,7 +156,7 @@ export async function StatsRibbon() {
       value: delay.label,
       label: delay.hint === 'live' ? 'Réponse moyenne (30j)' : 'Objectif réponse',
       color: 'text-[var(--accent-luxury)]',
-      bg: 'bg-[var(--accent-luxury)]/10',
+      bg: 'bg-accent-luxury/10',
       isLiteral: true,
     },
   ] as const
@@ -168,7 +168,7 @@ export async function StatsRibbon() {
           {stats.map((s) => (
             <div
               key={s.label}
-              className="flex items-center gap-3 md:gap-4 p-4 md:p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border)] hover:border-[var(--accent-luxury)]/30 transition-colors"
+              className="flex items-center gap-3 md:gap-4 p-4 md:p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border)] hover:border-accent-luxury/30 transition-colors"
             >
               <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl ${s.bg} ${s.color} flex items-center justify-center shrink-0`}>
                 <s.icon className="w-5 h-5 md:w-6 md:h-6" strokeWidth={2} />

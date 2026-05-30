@@ -162,7 +162,7 @@ interface FooterStepProps {
 
 function FooterStep({ num, emoji, title, desc }: FooterStepProps) {
   return (
-    <div className="relative flex items-start gap-3 p-4 rounded-2xl bg-[var(--surface-card)]/50 border border-[var(--border)]">
+    <div className="relative flex items-start gap-3 p-4 rounded-2xl bg-surface-card/50 border border-[var(--border)]">
       <div className="flex-shrink-0 w-9 h-9 rounded-full bg-[var(--accent-luxury)] text-[var(--on-accent)] flex items-center justify-center font-display font-black text-sm shadow-sm">
         {num}
       </div>

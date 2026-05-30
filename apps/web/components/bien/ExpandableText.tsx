@@ -17,7 +17,7 @@ export function ExpandableText({ text, limit = 200 }: ExpandableTextProps) {
 
   return (
     <div className="relative">
-      <p className="text-base md:text-lg font-light text-slate-700 leading-[1.7] break-words whitespace-pre-wrap transition-all duration-300">
+      <p className="text-base md:text-lg font-light text-[var(--text)] leading-[1.7] break-words whitespace-pre-wrap transition-all duration-300">
         {displayText}
       </p>
       

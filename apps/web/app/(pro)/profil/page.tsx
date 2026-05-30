@@ -37,7 +37,7 @@ export default async function ProfilPage() {
         <h1 className="font-display text-3xl text-[var(--text)]">Mon profil</h1>
 
         {/* Informations de base */}
-        <section className="bg-white rounded-card shadow-card p-6 space-y-4">
+        <section className="bg-[var(--surface-card)] rounded-card shadow-card p-6 space-y-4">
           <h2 className="font-display text-xl text-[var(--text)]">Informations personnelles</h2>
 
           <div className="space-y-4">
@@ -55,7 +55,7 @@ export default async function ProfilPage() {
         </section>
 
         {/* Section KYC */}
-        <section className="bg-white rounded-card shadow-card p-6 space-y-4">
+        <section className="bg-[var(--surface-card)] rounded-card shadow-card p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-xl text-[var(--text)]">Vérification d'identité (KYC)</h2>
             <KYCStatusBadge statut={kycStatut} />

@@ -121,7 +121,7 @@ export function CommuneAutocomplete({
               onMouseEnter={() => setHighlighted(idx)}
               className={`w-full text-left px-3 py-2 flex items-center gap-2 text-sm font-sans transition-colors ${
                 idx === highlighted
-                  ? 'bg-[var(--accent-luxury)]/10 text-[var(--accent-luxury)]'
+                  ? 'bg-accent-luxury/10 text-[var(--accent-luxury)]'
                   : 'text-[var(--off-white-muted)] hover:bg-[var(--midnight-light)]'
               }`}
             >

@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion, useReducedMotion } from 'framer-motion'
-import { MapPin, BedDouble, Maximize2, Flame, ShieldCheck, Radio } from 'lucide-react'
+import { MapPin, BedDouble, Maximize2, Flame, ShieldCheck, Radio, Clock } from 'lucide-react'
 import { useT } from '@/lib/i18n/client'
 import type { ConsolidatedBien } from '@/lib/catalogue/consolidated'
 
@@ -44,7 +44,7 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
         // de mismatch env entre client/server). flash → /offre-flash/<id>,
         // bogbes → /biens/<uuid>.
         href={bien.source === 'flash' ? `/offre-flash/${bien.sourceId}` : `/biens/${bien.sourceId}`}
-        className="flex flex-col h-full bg-[var(--surface-card)] border border-[var(--border)] rounded-xl overflow-hidden hover:border-[var(--accent-luxury)]/40 hover:shadow-md transition-all duration-300"
+        className="flex flex-col h-full bg-[var(--surface-card)] border border-[var(--border)] rounded-xl overflow-hidden hover:border-accent-luxury/40 hover:shadow-md transition-all duration-300"
       >
         {/* Image — ratio 4:3 (au lieu de 4:5) → 25% plus court */}
         <div className="relative aspect-[4/3] overflow-hidden bg-[var(--midnight-muted)]">
@@ -71,7 +71,10 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
             {bien.type_bien.replace(/_/g, ' ').slice(0, 12)}
           </span>
 
-          {/* Top-right : badge source — pictogramme uniquement */}
+          {/* Top-right : badge source — pictogramme uniquement.
+              Vérifié → bouclier ; offre flash → flamme ; bien enregistré non
+              encore validé → horloge « En validation » (ne PAS le confondre
+              avec une offre flash). */}
           {bien.is_verifie ? (
             <span
               className="absolute top-1.5 right-1.5 flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white shadow-md"
@@ -79,7 +82,7 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
             >
               <ShieldCheck className="w-3.5 h-3.5" strokeWidth={2.5} />
             </span>
-          ) : (
+          ) : isFlash ? (
             <span
               className="absolute top-1.5 right-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[8px] font-black uppercase tracking-wider shadow-md"
               title={t.flash.tag}
@@ -87,7 +90,15 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
               <Flame className="w-2.5 h-2.5" strokeWidth={2.5} />
               Flash
             </span>
-          )}
+          ) : bien.is_pending ? (
+            <span
+              className="absolute top-1.5 right-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-slate-500/90 text-white text-[8px] font-black uppercase tracking-wider shadow-md"
+              title="En cours de validation par notre équipe"
+            >
+              <Clock className="w-2.5 h-2.5" strokeWidth={2.5} />
+              En validation
+            </span>
+          ) : null}
 
           {/* Bottom : ville + badges temps (très compact) */}
           <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-end justify-between gap-1.5">
@@ -96,7 +107,7 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
             </span>
             {bien.is_recent && (
               <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-500/90 text-white text-[8px] font-bold uppercase">
-                <span className="w-1 h-1 bg-white rounded-full animate-pulse" />
+                <span className="w-1 h-1 bg-[var(--surface-card)] rounded-full animate-pulse" />
                 {t.common.new}
               </span>
             )}
@@ -114,7 +125,7 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
           </p>
 
           {(bien.nb_pieces || bien.surface_m2 || bien.date_scraping) && (
-            <div className="flex items-center gap-2 mt-auto pt-1.5 border-t border-[var(--border)]/30 text-[9px] text-[var(--text-muted)]">
+            <div className="flex items-center gap-2 mt-auto pt-1.5 border-t border-border/30 text-[9px] text-[var(--text-muted)]">
               {bien.nb_pieces ? (
                 <div className="flex items-center gap-0.5">
                   <BedDouble className="w-2.5 h-2.5" />

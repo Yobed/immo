@@ -87,7 +87,7 @@ export default async function OffreFlashPage({ searchParams }: PageProps) {
               </p>
             </div>
             <div className="h-10 w-px bg-[var(--border)]" />
-            <div className="flex gap-1 p-1 bg-[var(--midnight-muted)]/50 backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-inner">
+            <div className="flex gap-1 p-1 bg-surface-raised/50 backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-inner">
               <ViewToggle active={vue === 'grille'} href={buildHref(sp, { vue: 'grille' })} icon={Grid} label="Grille" />
               <ViewToggle active={vue === 'liste'} href={buildHref(sp, { vue: 'liste' })} icon={ListIcon} label="Liste" />
             </div>

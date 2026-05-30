@@ -39,7 +39,7 @@ export function NotificationItem({ notification, onRead }: NotificationItemProps
     <div
       onClick={handleClick}
       className={cn(
-        'px-4 py-3 cursor-pointer transition-colors hover:bg-gray-50 border-b border-[var(--border)] last:border-b-0',
+        'px-4 py-3 cursor-pointer transition-colors hover:bg-[var(--surface-hover)] border-b border-[var(--border)] last:border-b-0',
         notification.lu ? 'bg-[var(--surface-card)]' : 'bg-blue-50'
       )}
     >

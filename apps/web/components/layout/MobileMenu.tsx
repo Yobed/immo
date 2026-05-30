@@ -112,7 +112,7 @@ export function MobileMenu({ links, user }: MobileMenuProps) {
                       <span className="text-[8px] font-bold uppercase tracking-wider text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded-full border border-red-500/20">Admin</span>
                     )}
                     {user.role === 'pro' && (
-                      <span className="text-[8px] font-bold uppercase tracking-wider text-[var(--accent-luxury)] bg-[var(--accent-luxury)]/10 px-1.5 py-0.5 rounded-full border border-[var(--accent-luxury)]/20">Propriétaire</span>
+                      <span className="text-[8px] font-bold uppercase tracking-wider text-[var(--accent-luxury)] bg-accent-luxury/10 px-1.5 py-0.5 rounded-full border border-accent-luxury/20">Propriétaire</span>
                     )}
                   </div>
                   <span className="text-[13px] font-semibold text-[var(--text)] truncate">{user.email}</span>
@@ -134,11 +134,11 @@ export function MobileMenu({ links, user }: MobileMenuProps) {
                       onClick={close}
                       className="flex items-center gap-3 px-3 py-3.5 rounded-xl text-[15px] font-semibold text-[var(--text)] hover:bg-[var(--surface-card)] active:bg-[var(--surface-card)] active:scale-[0.98] transition-all group"
                     >
-                      <span className="w-9 h-9 rounded-lg bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center group-hover:border-[var(--accent-luxury)]/40 group-hover:bg-[var(--accent-luxury)]/5 transition-colors shrink-0">
+                      <span className="w-9 h-9 rounded-lg bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center group-hover:border-accent-luxury/40 group-hover:bg-accent-luxury/5 transition-colors shrink-0">
                         <Icon size={16} className="text-[var(--text-muted)] group-hover:text-[var(--accent-luxury)]" />
                       </span>
                       <span className="flex-1">{link.label}</span>
-                      <ChevronRight size={16} className="text-[var(--text-muted)]/40 shrink-0" />
+                      <ChevronRight size={16} className="text-muted/40 shrink-0" />
                     </Link>
                   </li>
                 )
@@ -154,11 +154,11 @@ export function MobileMenu({ links, user }: MobileMenuProps) {
                 onClick={() => { router.push('/dashboard'); close() }}
                 className="w-full flex items-center gap-3 px-3 py-3.5 rounded-xl text-[15px] font-semibold text-[var(--text)] hover:bg-[var(--surface-card)] active:scale-[0.98] transition-all group"
               >
-                <span className="w-9 h-9 rounded-lg bg-[var(--accent-luxury)]/10 border border-[var(--accent-luxury)]/20 flex items-center justify-center shrink-0">
+                <span className="w-9 h-9 rounded-lg bg-accent-luxury/10 border border-accent-luxury/20 flex items-center justify-center shrink-0">
                   <LayoutDashboard size={16} className="text-[var(--accent-luxury)]" />
                 </span>
                 <span className="flex-1 text-left">Tableau de bord</span>
-                <ChevronRight size={16} className="text-[var(--text-muted)]/40 shrink-0" />
+                <ChevronRight size={16} className="text-muted/40 shrink-0" />
               </button>
               <button
                 onClick={handleLogout}

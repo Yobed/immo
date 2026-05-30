@@ -244,7 +244,7 @@ export function PropertiesMap({
   if (!MAPBOX_TOKEN) {
     return (
       <div className="w-full rounded-2xl bg-gray-900 flex items-center justify-center" style={{ height: hauteur }}>
-        <p className="text-gray-400 text-sm">Token Mapbox manquant</p>
+        <p className="text-[var(--text-subtle)] text-sm">Token Mapbox manquant</p>
       </div>
     )
   }
@@ -345,7 +345,7 @@ export function PropertiesMap({
 
       {/* ── Stats overlay (Top Left) ── */}
       <div className="absolute top-4 left-4 z-10 flex flex-row sm:flex-col gap-2 sm:gap-2.5 max-w-[calc(100%-2rem)] overflow-x-auto no-scrollbar">
-        <div className="flex items-center gap-2.5 px-3 sm:px-4 py-2 sm:py-2 bg-black/85 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-[var(--accent-luxury)]/40 shadow-md whitespace-nowrap">
+        <div className="flex items-center gap-2.5 px-3 sm:px-4 py-2 sm:py-2 bg-black/85 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-accent-luxury/40 shadow-md whitespace-nowrap">
           <div className="user-dot shrink-0" style={{ width: 10, height: 10, border: '2px solid #fff' }} />
           <div className="flex flex-col">
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-white leading-tight">
@@ -377,7 +377,7 @@ export function PropertiesMap({
           <>
             {/* ── MOBILE: barre compacte en bas (ne masque pas la route) ── */}
             <div className="sm:hidden absolute inset-x-2 bottom-2 z-20">
-              <div className="bg-[var(--surface-card)]/95 backdrop-blur-xl border border-[var(--accent-luxury)]/40 rounded-2xl shadow-md p-3 flex items-center gap-3">
+              <div className="bg-surface-card/95 backdrop-blur-xl border border-accent-luxury/40 rounded-2xl shadow-md p-3 flex items-center gap-3">
                 {bien.photo_url && (
                   <div className="relative w-12 h-12 shrink-0">
                     <Image src={bien.photo_url} alt="" fill className="rounded-xl object-cover" sizes="48px" />
@@ -401,7 +401,7 @@ export function PropertiesMap({
                 <div className="flex flex-col gap-1.5 shrink-0">
                   <Link
                     href={`/biens/${bien.id}`}
-                    className="px-3 py-1.5 bg-[var(--accent-luxury)] text-black rounded-xl text-[10px] font-black uppercase tracking-wide text-center"
+                    className="px-3 py-1.5 bg-[var(--accent-luxury)] text-[var(--text)] rounded-xl text-[10px] font-black uppercase tracking-wide text-center"
                     onClick={e => e.stopPropagation()}
                   >
                     Voir
@@ -418,7 +418,7 @@ export function PropertiesMap({
 
             {/* ── DESKTOP: panneau en haut à droite ── */}
             <div className="hidden sm:block absolute top-16 right-4 z-20 w-[300px]">
-              <div className="bg-[var(--surface-card)]/95 backdrop-blur-[20px] border border-[var(--accent-luxury)]/40 rounded-3xl shadow-md overflow-hidden">
+              <div className="bg-surface-card/95 backdrop-blur-[20px] border border-accent-luxury/40 rounded-3xl shadow-md overflow-hidden">
                 <div className="h-40 w-full relative">
                   {bien.photo_url ? (
                     <Image src={bien.photo_url} alt={bien.titre} fill className="object-cover" sizes="(max-width: 640px) 100vw, 300px" />
@@ -452,7 +452,7 @@ export function PropertiesMap({
                   )}
                   <Link
                     href={`/biens/${bien.id}`}
-                    className="flex items-center justify-center w-full py-3 bg-[var(--accent-luxury)] text-black rounded-xl text-[11px] font-black uppercase tracking-[0.15em] hover:scale-[1.02] active:scale-95 transition-all"
+                    className="flex items-center justify-center w-full py-3 bg-[var(--accent-luxury)] text-[var(--text)] rounded-xl text-[11px] font-black uppercase tracking-[0.15em] hover:scale-[1.02] active:scale-95 transition-all"
                     onClick={e => e.stopPropagation()}
                   >
                     Consulter les détails

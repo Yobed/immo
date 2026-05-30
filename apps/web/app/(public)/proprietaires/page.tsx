@@ -42,7 +42,7 @@ export default function ProprietairesPage() {
       {/* Hero Section */}
       <section className="relative h-[80vh] flex items-center justify-center overflow-hidden border-b border-[var(--border)]">
         <div className="absolute inset-0 z-0 bg-[url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2000')] bg-cover bg-center grayscale opacity-10" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[var(--background)]/80 to-[var(--background)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/80 to-[var(--background)]" />
         
         <div className="relative z-10 container mx-auto px-6 text-center">
             <motionClient.div
@@ -80,7 +80,7 @@ export default function ProprietairesPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1, duration: 1 }}
-                className="group p-10 bg-[var(--surface-card)] border border-[var(--border)] rounded-2xl hover:border-[var(--accent-luxury)]/30 transition-all duration-700"
+                className="group p-10 bg-[var(--surface-card)] border border-[var(--border)] rounded-2xl hover:border-accent-luxury/30 transition-all duration-700"
             >
               <div className="w-16 h-16 rounded-2xl bg-[var(--background)] border border-[var(--border)] flex items-center justify-center mb-8 text-[var(--accent-luxury)] group-hover:scale-110 transition-transform duration-700">
                 {prop.icon}
@@ -151,7 +151,7 @@ export default function ProprietairesPage() {
                         "Assurance loyers impayés et protection juridique"
                     ].map((item, i) => (
                         <div key={i} className="flex items-center gap-6">
-                            <div className="w-6 h-6 rounded-full bg-[var(--accent-luxury)]/10 flex items-center justify-center flex-shrink-0">
+                            <div className="w-6 h-6 rounded-full bg-accent-luxury/10 flex items-center justify-center flex-shrink-0">
                                 <Sparkles className="w-3 h-3 text-[var(--accent-luxury)]" />
                             </div>
                             <span className="text-lg text-[var(--text-muted)] font-light">{item}</span>
@@ -159,7 +159,7 @@ export default function ProprietairesPage() {
                     ))}
                 </div>
                 <div className="mt-12 p-8 bg-[var(--background)] rounded-3xl border border-[var(--border)] relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--accent-luxury)]/5 rounded-full blur-3xl group-hover:bg-[var(--accent-luxury)]/10 transition-all duration-700" />
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-accent-luxury/5 rounded-full blur-3xl group-hover:bg-accent-luxury/10 transition-all duration-700" />
                   <h4 className="font-display text-xl font-bold mb-4">Demander une étude personnalisée</h4>
                   <p className="text-sm text-[var(--text-muted)] mb-8 font-light">Laissez vos coordonnées, un expert Sapphire vous rappellera sous 24h pour une estimation gratuite.</p>
                   

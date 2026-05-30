@@ -4,10 +4,10 @@ import { ArrowLeft } from 'lucide-react'
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-[var(--background)] flex flex-col selection:bg-[var(--accent-luxury)]/30">
+    <div className="min-h-screen min-h-[100dvh] bg-[var(--background)] flex flex-col selection:bg-accent-luxury/30">
       {/* Background decoration */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-[var(--accent-luxury)]/5 blur-[120px]" />
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-accent-luxury/5 blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/5 blur-[120px]" />
       </div>
 

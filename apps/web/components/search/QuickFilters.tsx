@@ -205,13 +205,13 @@ interface ChipProps {
 function Chip({ active, onClick, label, icon, variant = 'default' }: ChipProps) {
   const activeBase = 'bg-[var(--accent-luxury)] border-[var(--accent-luxury)] text-[var(--on-accent)] shadow-sm'
   const inactiveByVariant = {
-    default: 'bg-[var(--midnight-muted)]/50 border-[var(--border)] text-[var(--text-muted)] hover:border-white/20 hover:text-[var(--text)]',
+    default: 'bg-surface-raised/50 border-[var(--border)] text-[var(--text-muted)] hover:border-white/20 hover:text-[var(--text)]',
     muted: 'bg-white/5 border-white/10 text-[var(--text-muted)] hover:text-[var(--text)]',
     verified: 'bg-blue-500/10 border-blue-500/30 text-blue-700 hover:bg-blue-500/20',
   }
   const activeByVariant = {
     default: activeBase,
-    muted: 'bg-[var(--accent-luxury)]/20 border-[var(--accent-luxury)]/50 text-[var(--accent-luxury)]',
+    muted: 'bg-accent-luxury/20 border-accent-luxury/50 text-[var(--accent-luxury)]',
     verified: 'bg-blue-600 border-blue-600 text-white shadow-sm',
   }
 

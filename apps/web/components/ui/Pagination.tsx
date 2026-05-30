@@ -23,7 +23,7 @@ export function Pagination({ pageIdx, totalPages, buildHref, siblingCount = 2 }:
 
   return (
     <nav className="flex items-center justify-center gap-2 mt-12" aria-label="Pagination">
-      <div className="flex gap-1 p-1.5 bg-[var(--midnight-muted)]/50 backdrop-blur-xl rounded-2xl border border-[var(--border)]">
+      <div className="flex gap-1 p-1.5 bg-surface-raised/50 backdrop-blur-xl rounded-2xl border border-[var(--border)]">
         {pageIdx > 0 && (
           <Link
             href={buildHref(pageIdx - 1)}

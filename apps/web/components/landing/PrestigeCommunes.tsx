@@ -81,13 +81,13 @@ export function PrestigeCommunes() {
               Les adresses qui<br />
               <span className="italic font-light text-[var(--accent-luxury)]">font la différence</span>
             </h2>
-            <p className="text-slate-400 text-sm md:text-base mt-5 max-w-xl leading-relaxed">
+            <p className="text-[var(--text-subtle)] text-sm md:text-base mt-5 max-w-xl leading-relaxed">
               Six destinations choisies pour leur cadre de vie, leur potentiel d&apos;investissement et la qualité de leur immobilier.
             </p>
           </div>
           <Link
             href="/biens"
-            className="hidden md:inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.25em] uppercase text-[var(--accent-luxury)] border-b border-[var(--accent-luxury)]/40 pb-1 hover:border-[var(--accent-luxury)] transition-colors"
+            className="hidden md:inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.25em] uppercase text-[var(--accent-luxury)] border-b border-accent-luxury/40 pb-1 hover:border-[var(--accent-luxury)] transition-colors"
           >
             Toutes les communes <ArrowUpRight className="w-3.5 h-3.5" />
           </Link>
@@ -105,7 +105,7 @@ export function PrestigeCommunes() {
               <Link
                 key={c.name}
                 href={c.href}
-                className={`group relative ${colSpan} rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 hover:border-[var(--accent-luxury)]/50 transition-all duration-500`}
+                className={`group relative ${colSpan} rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 hover:border-accent-luxury/50 transition-all duration-500`}
               >
                 {/* Image with subtle zoom */}
                 <Image
@@ -121,7 +121,7 @@ export function PrestigeCommunes() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
 
                 {/* Hover gold glow */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-[var(--accent-luxury)]/0 to-[var(--accent-luxury)]/0 group-hover:from-[var(--accent-luxury)]/15 group-hover:to-transparent transition-all duration-500" />
+                <div className="absolute inset-0 bg-gradient-to-tr from-accent-luxury/0 to-accent-luxury/0 group-hover:from-accent-luxury/15 group-hover:to-transparent transition-all duration-500" />
 
                 {/* Text */}
                 <div className="absolute inset-0 p-4 md:p-6 flex flex-col justify-end">
@@ -147,7 +147,7 @@ export function PrestigeCommunes() {
         <div className="md:hidden mt-6 text-center">
           <Link
             href="/biens"
-            className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.25em] uppercase text-[var(--accent-luxury)] border-b border-[var(--accent-luxury)]/40 pb-1"
+            className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.25em] uppercase text-[var(--accent-luxury)] border-b border-accent-luxury/40 pb-1"
           >
             Toutes les communes <ArrowUpRight className="w-3.5 h-3.5" />
           </Link>

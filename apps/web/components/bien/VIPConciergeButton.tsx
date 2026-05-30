@@ -30,7 +30,7 @@ export function VIPConciergeButton({ bienTitre, bienLieu, bienPrix, bienId, clas
       <Image src="/whatsapp-icon.svg" alt="" width={24} height={24} className="w-6 h-6 object-contain" />
       <span className="font-bold text-white text-sm tracking-wide">{t.bien.contactWhatsapp}</span>
       <span className="ml-auto flex items-center gap-1.5">
-        <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+        <span className="w-2 h-2 rounded-full bg-[var(--surface-card)] animate-pulse" />
         <span className="text-[10px] text-white/70 font-medium">{t.chat.online}</span>
       </span>
     </button>

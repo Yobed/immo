@@ -80,7 +80,7 @@ export function GuidedSearchSteps() {
                 transition={{ delay: i * 0.08, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                 className={`relative p-5 md:p-6 border rounded-2xl md:rounded-none md:border-0 ${
                   isLast
-                    ? 'bg-[var(--accent-luxury-muted)] border-[var(--accent-luxury)]/40 md:bg-[var(--accent-luxury-muted)]'
+                    ? 'bg-[var(--accent-luxury-muted)] border-accent-luxury/40 md:bg-[var(--accent-luxury-muted)]'
                     : 'bg-[var(--surface-card)] border-[var(--border)]'
                 } ${i > 0 ? 'md:border-l md:border-[var(--border)]' : ''}`}
               >
@@ -124,7 +124,7 @@ export function GuidedSearchSteps() {
                 {/* Connector arrow (desktop only, between cards) */}
                 {!isLast && (
                   <ArrowRight
-                    className="hidden md:block absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]/40 bg-[var(--surface-card)] z-10"
+                    className="hidden md:block absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted/40 bg-[var(--surface-card)] z-10"
                     aria-hidden="true"
                   />
                 )}

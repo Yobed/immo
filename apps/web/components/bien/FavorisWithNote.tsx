@@ -40,7 +40,7 @@ export function FavorisWithNote({ bienId, userId, initialIsFavori = false, class
           'flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-sm font-bold transition-all active:scale-95',
           isFavori
             ? 'text-rose-500 border-rose-300 bg-rose-50'
-            : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:border-[var(--accent-luxury)]/50',
+            : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:border-accent-luxury/50',
           loading && 'opacity-60 cursor-not-allowed',
           className
         )}

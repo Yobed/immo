@@ -47,7 +47,7 @@ export default async function AgencePage() {
             </p>
           </header>
 
-          <section className="bg-white rounded-card shadow-card p-6">
+          <section className="bg-[var(--surface-card)] rounded-card shadow-card p-6">
             <AgenceCreateForm />
           </section>
 
@@ -129,7 +129,7 @@ export default async function AgencePage() {
           <StatCard label="Membres" value={membresCount ?? 0} />
         </div>
 
-        <section className="bg-white rounded-card shadow-card p-6 space-y-4">
+        <section className="bg-[var(--surface-card)] rounded-card shadow-card p-6 space-y-4">
           <h2 className="font-display text-xl text-[var(--text)]">Profil de l&apos;agence</h2>
           {agenceRole === 'admin' ? (
             <AgenceEditForm agence={a} />
@@ -146,7 +146,7 @@ export default async function AgencePage() {
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="bg-white rounded-card border border-[var(--border)] p-4">
+    <div className="bg-[var(--surface-card)] rounded-card border border-[var(--border)] p-4">
       <p className="text-xs font-sans text-muted uppercase tracking-wide">{label}</p>
       <p className="font-display text-2xl text-[var(--text)] mt-1">{value}</p>
     </div>

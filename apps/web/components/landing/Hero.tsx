@@ -120,7 +120,7 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
         ))}
         {/* Overlay plus léger — laisse les images respirer */}
         <div className="absolute inset-0 bg-black/40" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[var(--background)] via-[var(--background)]/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--background)] via-background/30 to-transparent" />
       </div>
 
       {/* ── CONTENU ─────────────────────────────────── */}
@@ -216,7 +216,7 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
                 onClick={() => setWizardOpen(true)}
                 className="mt-3 inline-flex items-center gap-2 text-[13px] text-white/80 hover:text-white transition-colors group"
               >
-                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-[var(--accent-luxury)]/20 text-[var(--accent-luxury)] group-hover:bg-[var(--accent-luxury)]/30 transition-colors">
+                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-accent-luxury/20 text-[var(--accent-luxury)] group-hover:bg-accent-luxury/30 transition-colors">
                   <Wand2 className="w-3.5 h-3.5" />
                 </span>
                 <span className="underline-offset-4 group-hover:underline">
@@ -279,7 +279,7 @@ export function Hero({ bgImages, featuredBiens }: { bgImages?: string[]; feature
             <div className="flex items-center gap-3 mt-3 flex-wrap">
               <Link
                 href="/offre-flash"
-                className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-[var(--accent-luxury)]/40 text-[var(--accent-luxury)] text-[13px] font-bold hover:bg-[var(--accent-luxury)]/12 transition-colors min-h-[44px]"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-full border border-accent-luxury/40 text-[var(--accent-luxury)] text-[13px] font-bold hover:bg-accent-luxury/12 transition-colors min-h-[44px]"
               >
                 <span className="relative flex w-2 h-2 shrink-0">
                   <span className="animate-ping absolute w-full h-full rounded-full bg-[var(--accent-luxury)] opacity-75" />
@@ -349,7 +349,7 @@ function FeaturedBienCards({ biens }: { biens: FeaturedBien[] }) {
           >
             <Link
               href={`/biens/${bien.id}`}
-              className="flex items-center gap-3 p-3 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 hover:border-[var(--accent-luxury)]/40 transition-all duration-300 group"
+              className="flex items-center gap-3 p-3 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 hover:border-accent-luxury/40 transition-all duration-300 group"
             >
               <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-white/5">
                 {bien.photo_url && (

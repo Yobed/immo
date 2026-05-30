@@ -31,7 +31,7 @@ export function MediaNavBar({
   bienId,
 }: MediaNavBarProps) {
   const pillClass =
-    'flex items-center gap-2 px-4 py-2.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[11px] font-semibold whitespace-nowrap hover:bg-slate-200 hover:text-slate-900 transition-all shrink-0'
+    'flex items-center gap-2 px-4 py-2.5 rounded-full bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--text-muted)] text-[11px] font-semibold whitespace-nowrap hover:bg-[var(--surface-hover)] hover:text-[var(--text)] transition-all shrink-0'
 
   const hasAny = photoCount > 0 || videoMedias.length > 0 || has360 || has3D
   if (!hasAny) return null

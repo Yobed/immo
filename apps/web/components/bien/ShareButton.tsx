@@ -33,7 +33,7 @@ export function ShareButton({ titre, url, className = '' }: Props) {
     <button
       onClick={share}
       aria-label="Partager ce bien"
-      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] hover:border-[var(--accent-luxury)]/50 text-[var(--text-muted)] hover:text-[var(--text)] transition-all text-sm font-bold active:scale-95 ${className}`}
+      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] hover:border-accent-luxury/50 text-[var(--text-muted)] hover:text-[var(--text)] transition-all text-sm font-bold active:scale-95 ${className}`}
     >
       {state === 'copied'
         ? <><Check className="w-4 h-4 text-emerald-500" /><span className="text-emerald-500">Lien copié !</span></>

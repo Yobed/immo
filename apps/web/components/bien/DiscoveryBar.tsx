@@ -40,7 +40,7 @@ export function DiscoveryBar({ bien, prix, userId }: DiscoveryBarProps) {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -100, opacity: 0 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed top-0 left-0 right-0 z-[100] w-full bg-[var(--background)]/85 backdrop-blur-2xl border-b border-[var(--accent-luxury)]/20 shadow-md"
+          className="fixed top-0 left-0 right-0 z-[100] w-full bg-background/85 backdrop-blur-2xl border-b border-accent-luxury/20 shadow-md"
         >
           <div className="max-w-[1920px] mx-auto px-6 h-20 md:h-24 flex items-center justify-between gap-6">
             

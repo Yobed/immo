@@ -24,7 +24,7 @@ export default function Loading() {
               {[Grid, List, MapIcon].map((Icon, i) => (
                 <div key={i} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/5">
                   <Icon className="w-4 h-4 text-[var(--text-muted)]" />
-                  <div className="h-3 w-10 bg-[var(--text-muted)]/20 rounded" />
+                  <div className="h-3 w-10 bg-muted/20 rounded" />
                 </div>
               ))}
             </div>

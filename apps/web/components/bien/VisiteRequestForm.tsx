@@ -107,7 +107,7 @@ export function VisiteRequestForm({ bienId, proprietaireId, isPremium = false, o
                 className={`h-14 rounded-xl text-[11px] border transition-all duration-300 font-black tracking-tight active:scale-[0.97] ${
                   creneau === c
                     ? 'border-[var(--accent-luxury)] bg-[var(--accent-luxury)] text-[var(--on-accent)] shadow-[0_8px_20px_var(--accent-glow)]'
-                    : 'border-[var(--border)] text-[var(--text-muted)] bg-[var(--surface-card)] hover:border-[var(--accent-luxury)]/40'
+                    : 'border-[var(--border)] text-[var(--text-muted)] bg-[var(--surface-card)] hover:border-accent-luxury/40'
                 }`}
               >
                 {c}
@@ -137,7 +137,7 @@ export function VisiteRequestForm({ bienId, proprietaireId, isPremium = false, o
       <Button 
         type="submit" 
         disabled={submitting || !date || !creneau} 
-        className="w-full h-16 bg-[var(--accent-luxury)] hover:bg-[var(--accent-luxury)]/90 text-[var(--on-accent)] font-black uppercase tracking-[0.25em] text-[12px] rounded-2xl shadow-[0_15px_35px_var(--accent-glow)] transition-all active:scale-[0.98] mt-4 border border-white/20 relative overflow-hidden group"
+        className="w-full h-16 bg-[var(--accent-luxury)] hover:bg-accent-luxury/90 text-[var(--on-accent)] font-black uppercase tracking-[0.25em] text-[12px] rounded-2xl shadow-[0_15px_35px_var(--accent-glow)] transition-all active:scale-[0.98] mt-4 border border-white/20 relative overflow-hidden group"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
         {submitting ? 'Traitement...' : 'Confirmer la visite'}

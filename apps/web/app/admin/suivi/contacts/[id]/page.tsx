@@ -123,27 +123,27 @@ export default async function ContactDetailPage({ params }: PageProps) {
   const ownerWa = waLink(ownerPhone)
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-[var(--surface-hover)]">
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-8">
         {/* Header */}
         <div className="mb-6">
           <Link
             href="/admin/suivi?tab=contacts"
-            className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 mb-3"
+            className="inline-flex items-center gap-1.5 text-sm text-[var(--text-muted)] hover:text-[var(--text)] mb-3"
           >
             <ArrowLeft className="w-4 h-4" />
             Retour au suivi
           </Link>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1">
+              <p className="text-[10px] uppercase tracking-widest text-[var(--text-subtle)] font-bold mb-1">
                 Demande de contact · {isFlash ? '⚡ Offre flash' : '✓ Bien vérifié'}
               </p>
-              <h1 className="text-2xl md:text-3xl font-display font-bold text-slate-900">
+              <h1 className="text-2xl md:text-3xl font-display font-bold text-[var(--text)]">
                 {titre}
               </h1>
               {lieu && (
-                <p className="flex items-center gap-1.5 text-sm text-slate-500 mt-1">
+                <p className="flex items-center gap-1.5 text-sm text-[var(--text-muted)] mt-1">
                   <MapPin className="w-3.5 h-3.5" />
                   {lieu}
                 </p>
@@ -157,17 +157,17 @@ export default async function ContactDetailPage({ params }: PageProps) {
           {/* Colonne principale */}
           <div className="lg:col-span-2 space-y-5">
             {/* Visiteur */}
-            <section className="bg-white rounded-2xl border border-slate-200 p-5">
-              <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
+            <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-5">
+              <h2 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-subtle)] mb-3 flex items-center gap-2">
                 <User className="w-3.5 h-3.5" />
                 Visiteur
               </h2>
               <div className="space-y-2">
-                <p className="text-lg font-bold text-slate-900">{req.visitor_name || '—'}</p>
+                <p className="text-lg font-bold text-[var(--text)]">{req.visitor_name || '—'}</p>
                 {req.visitor_phone && (
                   <div className="flex items-center gap-2 text-sm">
                     <Phone className="w-4 h-4 text-emerald-600" />
-                    <a href={`tel:${req.visitor_phone}`} className="text-slate-800 font-mono hover:underline">
+                    <a href={`tel:${req.visitor_phone}`} className="text-[var(--text)] font-mono hover:underline">
                       {req.visitor_phone}
                     </a>
                     {visitorWa && (
@@ -184,18 +184,18 @@ export default async function ContactDetailPage({ params }: PageProps) {
                 )}
                 {req.visitor_email && (
                   <div className="flex items-center gap-2 text-sm">
-                    <Mail className="w-4 h-4 text-slate-400" />
-                    <a href={`mailto:${req.visitor_email}`} className="text-slate-700 hover:underline">
+                    <Mail className="w-4 h-4 text-[var(--text-subtle)]" />
+                    <a href={`mailto:${req.visitor_email}`} className="text-[var(--text)] hover:underline">
                       {req.visitor_email}
                     </a>
                   </div>
                 )}
                 {req.reason && (
-                  <div className="pt-3 mt-3 border-t border-slate-100">
-                    <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-1.5">
+                  <div className="pt-3 mt-3 border-t border-[var(--border)]">
+                    <p className="text-[10px] uppercase tracking-widest text-[var(--text-subtle)] font-bold mb-1.5">
                       Message
                     </p>
-                    <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
+                    <p className="text-sm text-[var(--text)] leading-relaxed whitespace-pre-wrap">
                       {req.reason}
                     </p>
                   </div>
@@ -204,8 +204,8 @@ export default async function ContactDetailPage({ params }: PageProps) {
             </section>
 
             {/* Propriétaire */}
-            <section className="bg-white rounded-2xl border border-slate-200 p-5">
-              <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
+            <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-5">
+              <h2 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-subtle)] mb-3 flex items-center gap-2">
                 <Home className="w-3.5 h-3.5" />
                 Propriétaire {isFlash && <span className="text-orange-500">(scrapé WhatsApp)</span>}
               </h2>
@@ -221,7 +221,7 @@ export default async function ContactDetailPage({ params }: PageProps) {
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       <Phone className="w-4 h-4 text-orange-600" />
-                      <a href={`tel:${ownerPhone}`} className="text-slate-800 font-mono hover:underline">
+                      <a href={`tel:${ownerPhone}`} className="text-[var(--text)] font-mono hover:underline">
                         {ownerPhone}
                       </a>
                       {ownerWa && (
@@ -238,7 +238,7 @@ export default async function ContactDetailPage({ params }: PageProps) {
                     {req.locaux_id != null && (
                       <Link
                         href={`/offre-flash/${req.locaux_id}`}
-                        className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-900"
+                        className="inline-flex items-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text)]"
                       >
                         <ExternalLink className="w-3 h-3" />
                         Voir l&apos;offre flash
@@ -246,30 +246,30 @@ export default async function ContactDetailPage({ params }: PageProps) {
                     )}
                   </div>
                 ) : (
-                  <p className="text-sm text-slate-500 italic">
+                  <p className="text-sm text-[var(--text-muted)] italic">
                     Aucun numéro propriétaire enregistré pour cette offre.
                   </p>
                 )
               ) : req.biens?.id ? (
                 <Link
                   href={`/biens/${req.biens.id}`}
-                  className="inline-flex items-center gap-1.5 text-sm text-slate-700 hover:text-slate-900"
+                  className="inline-flex items-center gap-1.5 text-sm text-[var(--text)] hover:text-[var(--text)]"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                   Voir le bien
                 </Link>
               ) : (
-                <p className="text-sm text-slate-500 italic">Bien introuvable</p>
+                <p className="text-sm text-[var(--text-muted)] italic">Bien introuvable</p>
               )}
             </section>
 
             {/* Actions admin (uniquement si pending) */}
             {req.admin_validation_status === 'pending' && (
-              <section className="bg-white rounded-2xl border border-slate-200 p-5">
-                <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
+              <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-5">
+                <h2 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-subtle)] mb-3">
                   Décision admin
                 </h2>
-                <p className="text-sm text-slate-600 mb-4 leading-relaxed">
+                <p className="text-sm text-[var(--text-muted)] mb-4 leading-relaxed">
                   {isFlash
                     ? 'En approuvant, le visiteur recevra une confirmation. (Le proprio scrapé n&apos;est pas notifié automatiquement — contacte-le à la main.)'
                     : 'En approuvant, le visiteur recevra les coordonnées du propriétaire et celui-ci sera informé.'}
@@ -281,7 +281,7 @@ export default async function ContactDetailPage({ params }: PageProps) {
                     rows={2}
                     maxLength={500}
                     placeholder="Note interne (optionnelle)"
-                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 resize-none"
+                    className="w-full px-3 py-2 text-sm border border-[var(--border)] rounded-lg bg-[var(--surface-card)] text-[var(--text)] placeholder:text-[var(--text-subtle)] focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 resize-none"
                   />
                   <div className="flex gap-2">
                     <button
@@ -309,59 +309,59 @@ export default async function ContactDetailPage({ params }: PageProps) {
 
             {/* Notes admin (si déjà validé) */}
             {req.admin_validation_status !== 'pending' && req.admin_note && (
-              <section className="bg-white rounded-2xl border border-slate-200 p-5">
-                <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">
+              <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-5">
+                <h2 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-subtle)] mb-2">
                   Note admin
                 </h2>
-                <p className="text-sm text-slate-700 italic whitespace-pre-wrap">{req.admin_note}</p>
+                <p className="text-sm text-[var(--text)] italic whitespace-pre-wrap">{req.admin_note}</p>
               </section>
             )}
           </div>
 
           {/* Sidebar : métadonnées */}
           <aside className="space-y-4">
-            <section className="bg-white rounded-2xl border border-slate-200 p-5">
-              <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">
+            <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-5">
+              <h2 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-subtle)] mb-3">
                 Métadonnées
               </h2>
               <dl className="space-y-2.5 text-xs">
                 <div>
-                  <dt className="text-slate-400">Référence</dt>
-                  <dd className="font-mono text-slate-700 mt-0.5">#{req.id.slice(0, 8)}</dd>
+                  <dt className="text-[var(--text-subtle)]">Référence</dt>
+                  <dd className="font-mono text-[var(--text)] mt-0.5">#{req.id.slice(0, 8)}</dd>
                 </div>
                 <div>
-                  <dt className="text-slate-400">Source</dt>
-                  <dd className="text-slate-700 mt-0.5 flex items-center gap-1.5">
+                  <dt className="text-[var(--text-subtle)]">Source</dt>
+                  <dd className="text-[var(--text)] mt-0.5 flex items-center gap-1.5">
                     {isFlash && <Flame className="w-3 h-3 text-orange-500" />}
                     {req.source}
                   </dd>
                 </div>
                 <div>
-                  <dt className="text-slate-400">Créée le</dt>
-                  <dd className="text-slate-700 mt-0.5">{formatDateTime(req.created_at)}</dd>
+                  <dt className="text-[var(--text-subtle)]">Créée le</dt>
+                  <dd className="text-[var(--text)] mt-0.5">{formatDateTime(req.created_at)}</dd>
                 </div>
                 {req.admin_validated_at && (
                   <div>
-                    <dt className="text-slate-400">Validée le</dt>
-                    <dd className="text-slate-700 mt-0.5">{formatDateTime(req.admin_validated_at)}</dd>
+                    <dt className="text-[var(--text-subtle)]">Validée le</dt>
+                    <dd className="text-[var(--text)] mt-0.5">{formatDateTime(req.admin_validated_at)}</dd>
                   </div>
                 )}
                 {req.admin_notified_at && (
                   <div>
-                    <dt className="text-slate-400">Admin notifié</dt>
-                    <dd className="text-slate-700 mt-0.5">{formatDateTime(req.admin_notified_at)}</dd>
+                    <dt className="text-[var(--text-subtle)]">Admin notifié</dt>
+                    <dd className="text-[var(--text)] mt-0.5">{formatDateTime(req.admin_notified_at)}</dd>
                   </div>
                 )}
                 {req.visitor_notified_at && (
                   <div>
-                    <dt className="text-slate-400">Visiteur notifié</dt>
-                    <dd className="text-slate-700 mt-0.5">{formatDateTime(req.visitor_notified_at)}</dd>
+                    <dt className="text-[var(--text-subtle)]">Visiteur notifié</dt>
+                    <dd className="text-[var(--text)] mt-0.5">{formatDateTime(req.visitor_notified_at)}</dd>
                   </div>
                 )}
                 {req.owner_notified_at && (
                   <div>
-                    <dt className="text-slate-400">Proprio notifié</dt>
-                    <dd className="text-slate-700 mt-0.5">{formatDateTime(req.owner_notified_at)}</dd>
+                    <dt className="text-[var(--text-subtle)]">Proprio notifié</dt>
+                    <dd className="text-[var(--text)] mt-0.5">{formatDateTime(req.owner_notified_at)}</dd>
                   </div>
                 )}
               </dl>

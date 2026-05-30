@@ -47,7 +47,7 @@ function SocialProofBar() {
           </div>
         ))}
       </div>
-      <span className="text-slate-400">
+      <span className="text-[var(--text-subtle)]">
         <span className="text-orange-400 font-bold">{count.toLocaleString()}</span>
         {' '}personnes déjà inscrites
       </span>
@@ -71,7 +71,7 @@ function TrustBadges() {
         <div
           key={b.label}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full
-                     bg-white/5 border border-white/10 text-xs text-slate-300"
+                     bg-white/5 border border-white/10 text-xs text-[var(--text-subtle)]"
         >
           <span>{b.icon}</span>
           <span>{b.label}</span>
@@ -118,7 +118,7 @@ function FeatureCards() {
         >
           <div className="text-2xl mb-3">{f.icon}</div>
           <h3 className="font-semibold text-white mb-1 text-sm">{f.title}</h3>
-          <p className="text-slate-400 text-xs leading-relaxed">{f.desc}</p>
+          <p className="text-[var(--text-subtle)] text-xs leading-relaxed">{f.desc}</p>
         </div>
       ))}
     </div>
@@ -145,7 +145,7 @@ function SuccessState({ profil, contact }: { profil: Profil; contact: string }) 
 
       <div className="space-y-2">
         <h2 className="text-2xl font-bold text-white font-display">Vous êtes sur la liste !</h2>
-        <p className="text-slate-400 text-sm max-w-xs mx-auto">{messages[profil]}</p>
+        <p className="text-[var(--text-subtle)] text-sm max-w-xs mx-auto">{messages[profil]}</p>
       </div>
 
       {/* Partage WhatsApp */}
@@ -168,7 +168,7 @@ function SuccessState({ profil, contact }: { profil: Profil; contact: string }) 
         Partager sur WhatsApp
       </a>
 
-      <p className="text-slate-600 text-xs">
+      <p className="text-[var(--text-muted)] text-xs">
         Partagez avec vos proches qui cherchent un logement à Abidjan 🙏
       </p>
     </div>
@@ -240,7 +240,7 @@ export function WaitlistHero() {
         </div>
         <a
           href="/"
-          className="text-sm text-slate-400 hover:text-white transition-colors"
+          className="text-sm text-[var(--text-subtle)] hover:text-white transition-colors"
         >
           Voir les annonces →
         </a>
@@ -267,7 +267,7 @@ export function WaitlistHero() {
               <span className="text-[var(--accent-luxury)] italic font-light">sans arnaque</span>{' '}à Abidjan
             </h1>
 
-            <p className="text-lg text-slate-400 max-w-md mx-auto leading-relaxed">
+            <p className="text-lg text-[var(--text-subtle)] max-w-md mx-auto leading-relaxed">
               BOGBE'S GROUPE arrive. Photos 360°, paiement Wave en 30 secondes,
               contrat de bail légal automatique.
             </p>
@@ -284,7 +284,7 @@ export function WaitlistHero() {
 
                 {/* Profil selector */}
                 <div className="space-y-2">
-                  <label className="text-xs font-medium text-slate-400 uppercase tracking-wide">
+                  <label className="text-xs font-medium text-[var(--text-subtle)] uppercase tracking-wide">
                     Je suis…
                   </label>
                   <div className="grid grid-cols-3 gap-2">
@@ -297,7 +297,7 @@ export function WaitlistHero() {
                                     font-medium transition-all duration-200
                                     ${profil === opt.value
                                       ? 'border-orange-500/60 bg-orange-500/15 text-orange-300'
-                                      : 'border-white/10 bg-white/5 text-slate-400 hover:border-white/25 hover:text-slate-200'
+                                      : 'border-white/10 bg-white/5 text-[var(--text-subtle)] hover:border-white/25 hover:text-slate-200'
                                     }`}
                       >
                         <span className="text-xl">{opt.emoji}</span>
@@ -309,8 +309,8 @@ export function WaitlistHero() {
 
                 {/* Nom (optionnel) */}
                 <div className="space-y-1.5">
-                  <label htmlFor="wl-nom" className="text-xs font-medium text-slate-400 uppercase tracking-wide">
-                    Votre prénom <span className="normal-case text-slate-600">(facultatif)</span>
+                  <label htmlFor="wl-nom" className="text-xs font-medium text-[var(--text-subtle)] uppercase tracking-wide">
+                    Votre prénom <span className="normal-case text-[var(--text-muted)]">(facultatif)</span>
                   </label>
                   <input
                     id="wl-nom"
@@ -319,7 +319,7 @@ export function WaitlistHero() {
                     onChange={(e) => setNom(e.target.value)}
                     placeholder="Aminata, Konan, Marc…"
                     className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5
-                               text-white placeholder:text-slate-600 text-sm
+                               text-white placeholder:text-[var(--text-muted)] text-sm
                                focus:outline-none focus:border-orange-500/60 focus:bg-orange-500/5
                                transition-all"
                   />
@@ -328,7 +328,7 @@ export function WaitlistHero() {
                 {/* Contact type toggle */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-medium text-slate-400 uppercase tracking-wide">
+                    <label className="text-xs font-medium text-[var(--text-subtle)] uppercase tracking-wide">
                       Comment vous contacter ?
                     </label>
                     <div className="flex rounded-lg border border-white/10 overflow-hidden">
@@ -340,7 +340,7 @@ export function WaitlistHero() {
                           className={`px-3 py-1 text-xs font-medium transition-colors ${
                             contactType === t
                               ? 'bg-orange-500 text-white'
-                              : 'text-slate-400 hover:text-slate-200'
+                              : 'text-[var(--text-subtle)] hover:text-slate-200'
                           }`}
                         >
                           {t === 'whatsapp' ? '📱 WhatsApp' : '✉️ Email'}
@@ -351,7 +351,7 @@ export function WaitlistHero() {
 
                   {contactType === 'whatsapp' ? (
                     <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm select-none">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)] text-sm select-none">
                         🇨🇮 +225
                       </span>
                       <input
@@ -361,7 +361,7 @@ export function WaitlistHero() {
                         onChange={(e) => setContact(e.target.value)}
                         placeholder="07 12 34 56 78"
                         className="w-full pl-20 pr-4 py-3 rounded-xl border border-white/10 bg-white/5
-                                   text-white placeholder:text-slate-600 text-sm
+                                   text-white placeholder:text-[var(--text-muted)] text-sm
                                    focus:outline-none focus:border-orange-500/60 focus:bg-orange-500/5
                                    transition-all"
                         required
@@ -375,7 +375,7 @@ export function WaitlistHero() {
                       onChange={(e) => setContact(e.target.value)}
                       placeholder="votre@email.com"
                       className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5
-                                 text-white placeholder:text-slate-600 text-sm
+                                 text-white placeholder:text-[var(--text-muted)] text-sm
                                  focus:outline-none focus:border-orange-500/60 focus:bg-orange-500/5
                                  transition-all"
                       required
@@ -417,7 +417,7 @@ export function WaitlistHero() {
                   )}
                 </button>
 
-                <p className="text-center text-slate-600 text-xs">
+                <p className="text-center text-[var(--text-muted)] text-xs">
                   Gratuit · Sans spam · Désabonnement en 1 clic
                 </p>
               </form>
@@ -432,7 +432,7 @@ export function WaitlistHero() {
 
           {/* ── TESTIMONIAL ── */}
           <div className="text-center space-y-3">
-            <blockquote className="text-slate-300 italic text-base leading-relaxed max-w-sm mx-auto">
+            <blockquote className="text-[var(--text-subtle)] italic text-base leading-relaxed max-w-sm mx-auto">
               &ldquo;Enfin une plateforme qui comprend comment ça marche vraiment en Côte d&apos;Ivoire.
               Paiement Wave, contrat légal, photos de qualité — c&apos;est ce qu&apos;on attendait.&rdquo;
             </blockquote>
@@ -440,7 +440,7 @@ export function WaitlistHero() {
               <div className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-400 to-amber-600 flex items-center justify-center text-xs">
                 K
               </div>
-              <span className="text-slate-500">Konan B. · Propriétaire, Cocody</span>
+              <span className="text-[var(--text-muted)]">Konan B. · Propriétaire, Cocody</span>
             </div>
           </div>
 
@@ -448,7 +448,7 @@ export function WaitlistHero() {
       </div>
 
       {/* Footer minimaliste */}
-      <footer className="relative z-10 text-center py-5 text-slate-700 text-xs">
+      <footer className="relative z-10 text-center py-5 text-[var(--text)] text-xs">
         © 2026 BOGBE'S GROUPE · La plateforme immobilière de confiance en Côte d&apos;Ivoire
       </footer>
     </div>

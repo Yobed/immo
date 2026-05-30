@@ -15,11 +15,11 @@ interface PageProps {
 
 async function ErrorScreen({ message }: { message: string }) {
   return (
-    <main className="min-h-screen bg-slate-50 flex items-center justify-center px-6">
-      <div className="max-w-md w-full bg-white rounded-3xl p-8 shadow-xl border border-slate-200 text-center">
+    <main className="min-h-screen bg-[var(--surface-hover)] flex items-center justify-center px-6">
+      <div className="max-w-md w-full bg-[var(--surface-card)] rounded-3xl p-8 shadow-xl border border-[var(--border)] text-center">
         <XCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-        <h1 className="text-xl font-bold text-slate-900 mb-2">Lien invalide</h1>
-        <p className="text-slate-500 text-sm mb-6">{message}</p>
+        <h1 className="text-xl font-bold text-[var(--text)] mb-2">Lien invalide</h1>
+        <p className="text-[var(--text-muted)] text-sm mb-6">{message}</p>
         <Link
           href="/"
           className="inline-block px-5 py-3 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-colors"

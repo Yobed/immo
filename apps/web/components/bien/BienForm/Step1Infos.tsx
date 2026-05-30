@@ -22,7 +22,7 @@ export function Step1Infos({ form }: { form: UseFormReturn<BienFormData> }) {
           {TYPES_BIEN.map((type) => (
             <label key={type} className={`
               flex items-center justify-center p-3 rounded-btn border-2 cursor-pointer text-sm font-sans transition-colors
-              ${watch('type_bien') === type ? 'border-primary bg-primary-light text-primary' : 'border-[var(--border)] text-muted hover:border-primary/40'}
+              ${watch('type_bien') === type ? 'border-[var(--accent-luxury)] bg-[var(--accent-luxury-muted)] text-[var(--accent-luxury)] font-semibold' : 'border-[var(--border)] text-[var(--text-muted)] hover:border-accent-luxury/40'}
             `}>
               <input type="radio" value={type} {...register('type_bien')} className="sr-only" />
               {TYPES_BIEN_LABELS[type]}
@@ -35,7 +35,7 @@ export function Step1Infos({ form }: { form: UseFormReturn<BienFormData> }) {
         <label className="block text-sm font-sans font-medium text-[var(--text)] mb-2">Description</label>
         <textarea
           rows={4}
-          className="w-full rounded-btn border border-[var(--border)] px-3 py-2 text-sm font-sans focus:outline-none focus:ring-2 focus:ring-primary/30"
+          className="w-full rounded-btn border border-[var(--border)] bg-[var(--surface-card)] text-[var(--text)] placeholder:text-[var(--text-muted)] px-3 py-2 text-sm font-sans focus:outline-none focus:ring-2 focus:ring-primary/30"
           placeholder="Décrivez le bien, ses atouts, l'environnement..."
           {...register('description')}
         />
@@ -45,7 +45,7 @@ export function Step1Infos({ form }: { form: UseFormReturn<BienFormData> }) {
         <label className="block text-sm font-sans font-medium text-[var(--text)] mb-2">Commune *</label>
         <select
           {...register('commune')}
-          className="w-full rounded-btn border border-[var(--border)] px-3 py-2 text-sm font-sans focus:outline-none focus:ring-2 focus:ring-primary/30 bg-[var(--surface-card)]"
+          className="w-full rounded-btn border border-[var(--border)] px-3 py-2 text-sm font-sans focus:outline-none focus:ring-2 focus:ring-primary/30 bg-[var(--surface-card)] text-[var(--text)]"
         >
           <option value="">Sélectionner une commune...</option>
           {COMMUNES_CI.map((c) => <option key={c} value={c}>{c}</option>)}

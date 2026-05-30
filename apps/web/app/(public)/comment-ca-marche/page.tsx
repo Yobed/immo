@@ -79,7 +79,7 @@ export default function CommentCaMarchePage() {
         </section>
 
         {/* CTA final */}
-        <div className="text-center bg-[var(--midnight-muted)]/50 border border-[var(--border)] rounded-3xl p-8 md:p-12">
+        <div className="text-center bg-surface-raised/50 border border-[var(--border)] rounded-3xl p-8 md:p-12">
           <h3 className="font-display text-2xl font-bold text-[var(--text)] mb-3">
             Prêt à commencer ?
           </h3>
@@ -120,7 +120,7 @@ interface StepCardProps {
 
 function StepCard({ num, icon: Icon, title, desc, cta }: StepCardProps) {
   return (
-    <div className="relative bg-[var(--surface-card)] border border-[var(--border)] rounded-2xl p-6 hover:border-[var(--accent-luxury)]/40 transition-colors">
+    <div className="relative bg-[var(--surface-card)] border border-[var(--border)] rounded-2xl p-6 hover:border-accent-luxury/40 transition-colors">
       <div className="absolute -top-3 -left-3 w-10 h-10 rounded-full bg-[var(--accent-luxury)] text-[var(--on-accent)] flex items-center justify-center font-display font-black text-lg shadow-md">
         {num}
       </div>

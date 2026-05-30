@@ -67,7 +67,7 @@ export function UserMenu({ email, role = 'public', isAdmin = false }: UserMenuPr
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="relative min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-[var(--accent-luxury)] flex items-center justify-center text-[var(--on-accent)] font-display font-bold text-sm hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-[var(--accent-luxury)]/40 shadow-md"
+        className="relative min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-[var(--accent-luxury)] flex items-center justify-center text-[var(--on-accent)] font-display font-bold text-sm hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-accent-luxury/40 shadow-md"
         aria-expanded={open}
         aria-haspopup="true"
         aria-label={`Menu utilisateur (${email})${showBadge ? ` — ${pendingCount} demandes en attente` : ''}`}

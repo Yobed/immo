@@ -18,7 +18,7 @@ export function BackToHomeButton() {
       <Link
         href="/"
         prefetch={false}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] hover:border-[var(--accent-luxury)]/40 text-[11px] font-bold uppercase tracking-wider transition-all active:scale-95 cursor-pointer"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] hover:border-accent-luxury/40 text-[11px] font-bold uppercase tracking-wider transition-all active:scale-95 cursor-pointer"
       >
         <Home className="w-3 h-3" />
         Accueil

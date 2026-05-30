@@ -12,7 +12,7 @@ export function TestimonialsSection() {
   ]
   return (
     <section className="relative py-20 md:py-28 overflow-hidden bg-[var(--background)]">
-      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[500px] h-[500px] bg-[var(--accent-luxury)]/5 blur-[150px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[500px] h-[500px] bg-accent-luxury/5 blur-[150px] rounded-full pointer-events-none" />
 
       <div className="relative z-10 mx-auto px-4 md:px-6 max-w-7xl">
         <div className="text-center mb-14">
@@ -34,7 +34,7 @@ export function TestimonialsSection() {
               transition={{ duration: 0.6, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
               className="relative bg-[var(--surface-card)] border border-[var(--border)] rounded-3xl p-6 md:p-7"
             >
-              <Quote className="absolute top-5 right-5 w-6 h-6 text-[var(--accent-luxury)]/20" strokeWidth={1.5} />
+              <Quote className="absolute top-5 right-5 w-6 h-6 text-accent-luxury/20" strokeWidth={1.5} />
 
               <div className="flex gap-0.5 mb-4">
                 {Array.from({ length: t.rating }).map((_, s) => (

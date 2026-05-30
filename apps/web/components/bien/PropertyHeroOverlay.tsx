@@ -22,9 +22,9 @@ export function PropertyHeroOverlay({ urlVisite3d, videoMedias = [] }: PropertyH
               href="#visite-3d"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-3 px-8 py-5 bg-accent-luxury text-slate-950 rounded-2xl border-4 border-[#020617] shadow-[0_20px_50px_rgba(212,175,55,0.3)] transition-all hover:bg-white"
+              className="flex items-center gap-3 px-8 py-5 bg-accent-luxury text-[var(--text)] rounded-2xl border-4 border-[#020617] shadow-[0_20px_50px_rgba(212,175,55,0.3)] transition-all hover:bg-[var(--surface-card)]"
             >
-              <View size={20} className="text-slate-950" />
+              <View size={20} className="text-[var(--text)]" />
               <span className="text-[11px] uppercase font-black tracking-[0.2em]">Visite Virtuelle 3D</span>
             </motion.a>
           )}

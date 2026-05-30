@@ -96,7 +96,7 @@ export default async function CataloguePage({ searchParams }: PageProps) {
               </p>
             </div>
             <div className="h-10 w-px bg-[var(--border)]" />
-            <div className="flex gap-1 p-1 bg-[var(--midnight-muted)]/50 backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-inner">
+            <div className="flex gap-1 p-1 bg-surface-raised/50 backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-inner">
               <ViewToggle active={vue === 'grille'} href={buildHref(sp, { vue: 'grille' })} icon={Grid} label="Grille" />
               <ViewToggle active={vue === 'liste'} href={buildHref(sp, { vue: 'liste' })} icon={ListIcon} label="Liste" />
             </div>
@@ -242,7 +242,7 @@ function EmptyResults({ hasFilters, t }: { hasFilters: boolean; t: Awaited<Retur
       animate={{ opacity: 1, y: 0 }}
       className="text-center py-24 bg-[var(--midnight-muted)] rounded-3xl border border-dashed border-[var(--border)] px-6"
     >
-      <div className="w-20 h-20 bg-[var(--accent-luxury)]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+      <div className="w-20 h-20 bg-accent-luxury/10 rounded-full flex items-center justify-center mx-auto mb-6">
         <Compass className="w-8 h-8 text-[var(--accent-luxury)] animate-pulse" />
       </div>
       <h3 className="font-display text-2xl font-black text-[var(--text)] mb-3 uppercase tracking-tight">

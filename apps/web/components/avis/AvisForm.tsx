@@ -61,7 +61,7 @@ export function AvisForm({ reservationId, cibleId, cibleNom, onSuccess }: AvisFo
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-gray-50 rounded-lg">
+    <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-[var(--surface-hover)] rounded-lg">
       <h3 className="font-semibold text-white">Évaluer {cibleNom}</h3>
 
       <div>
@@ -80,9 +80,9 @@ export function AvisForm({ reservationId, cibleId, cibleNom, onSuccess }: AvisFo
           rows={3}
           maxLength={500}
           placeholder="Décrivez votre expérience..."
-          className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
+          className="w-full border border-[var(--border)] rounded-md px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
-        <p className="text-xs text-gray-400 text-right">{commentaire.length}/500</p>
+        <p className="text-xs text-[var(--text-subtle)] text-right">{commentaire.length}/500</p>
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}

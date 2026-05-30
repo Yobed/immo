@@ -111,7 +111,7 @@ export function CommuneAutocomplete({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           autoComplete="off"
-          className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)]/40 min-w-0"
+          className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-muted/40 min-w-0"
         />
         {value && (
           <button
@@ -143,7 +143,7 @@ export function CommuneAutocomplete({
                   className={cn(
                     'w-full text-left px-3 py-2 flex items-center justify-between gap-2 text-sm transition-colors',
                     idx === highlighted
-                      ? 'bg-[var(--accent-luxury)]/10 text-[var(--accent-luxury)]'
+                      ? 'bg-accent-luxury/10 text-[var(--accent-luxury)]'
                       : 'text-[var(--text)] hover:bg-[var(--surface)]',
                   )}
                 >

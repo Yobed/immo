@@ -491,10 +491,10 @@ function PageHeader({
       <div className="sticky top-0 z-50 bg-[#020617]/95 backdrop-blur-md border-b border-white/8">
         <div className="max-w-7xl mx-auto px-3 py-3">
           {/* Single pill search bar — citu.ci style */}
-          <div className="flex flex-col md:flex-row items-stretch md:items-center bg-white rounded-2xl md:rounded-full shadow-xl overflow-hidden border border-slate-200">
+          <div className="flex flex-col md:flex-row items-stretch md:items-center bg-[var(--surface-card)] rounded-2xl md:rounded-full shadow-xl overflow-hidden border border-[var(--border)]">
             {/* Commune */}
-            <div className="flex items-center gap-2 flex-1 px-4 md:px-6 py-3 md:py-3.5 border-b md:border-b-0 md:border-r border-slate-200">
-              <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
+            <div className="flex items-center gap-2 flex-1 px-4 md:px-6 py-3 md:py-3.5 border-b md:border-b-0 md:border-r border-[var(--border)]">
+              <MapPin className="w-4 h-4 text-[var(--text-subtle)] shrink-0" />
               <input
                 type="text"
                 list="biens-communes"
@@ -503,7 +503,7 @@ function PageHeader({
                 onChange={e => setCommuneVal(e.target.value)}
                 onBlur={() => { if (communeVal !== activeCommune) go({ commune: communeVal }) }}
                 onKeyDown={e => e.key === 'Enter' && go()}
-                className="w-full min-w-0 bg-transparent text-slate-900 placeholder-slate-400 text-sm outline-none font-medium"
+                className="w-full min-w-0 bg-transparent text-[var(--text)] placeholder-slate-400 text-sm outline-none font-medium"
               />
               <datalist id="biens-communes">
                 {COMMUNES.map(c => <option key={c} value={c} />)}
@@ -511,8 +511,8 @@ function PageHeader({
             </div>
 
             {/* Budget */}
-            <div className="flex items-center gap-2 flex-1 px-4 md:px-6 py-3 md:py-3.5 border-b md:border-b-0 md:border-r border-slate-200">
-              <span className="text-slate-400 text-xs font-bold shrink-0">FCFA</span>
+            <div className="flex items-center gap-2 flex-1 px-4 md:px-6 py-3 md:py-3.5 border-b md:border-b-0 md:border-r border-[var(--border)]">
+              <span className="text-[var(--text-subtle)] text-xs font-bold shrink-0">FCFA</span>
               <input
                 type="number"
                 placeholder="Budget max"
@@ -520,23 +520,23 @@ function PageHeader({
                 onChange={e => setBudgetVal(e.target.value)}
                 onBlur={() => { if (budgetVal !== activeBudget) go({ budget: budgetVal }) }}
                 onKeyDown={e => e.key === 'Enter' && go()}
-                className="w-full min-w-0 bg-transparent text-slate-900 placeholder-slate-400 text-sm outline-none font-medium"
+                className="w-full min-w-0 bg-transparent text-[var(--text)] placeholder-slate-400 text-sm outline-none font-medium"
               />
             </div>
 
             {/* Type */}
-            <div className="flex items-center gap-2 flex-1 px-4 md:px-6 py-3 md:py-3.5 md:border-r border-slate-200 relative border-b md:border-b-0">
+            <div className="flex items-center gap-2 flex-1 px-4 md:px-6 py-3 md:py-3.5 md:border-r border-[var(--border)] relative border-b md:border-b-0">
               <select
                 value={activeType}
                 onChange={e => go({ type: e.target.value })}
-                className="w-full bg-transparent text-slate-900 text-sm outline-none appearance-none cursor-pointer font-medium pr-6"
+                className="w-full bg-transparent text-[var(--text)] text-sm outline-none appearance-none cursor-pointer font-medium pr-6"
               >
                 <option value="">Tous les types</option>
                 {TYPE_FILTERS.filter(f => f.value && f.value !== 'near_me').map(f => (
                   <option key={f.value} value={f.value}>{f.label}</option>
                 ))}
               </select>
-              <ChevronDown className="w-4 h-4 text-slate-400 absolute right-4 md:right-5 pointer-events-none" />
+              <ChevronDown className="w-4 h-4 text-[var(--text-subtle)] absolute right-4 md:right-5 pointer-events-none" />
             </div>
 
             {/* Search + Mic */}
@@ -548,7 +548,7 @@ function PageHeader({
                   className={`shrink-0 p-2.5 rounded-full transition-all ${
                     isListening
                       ? 'bg-red-500 text-white animate-pulse'
-                      : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                      : 'bg-[var(--surface-hover)] hover:bg-[var(--surface-hover)] text-[var(--text-muted)]'
                   }`}
                 >
                   {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
@@ -557,7 +557,7 @@ function PageHeader({
               <button
                 onClick={() => go()}
                 aria-label="Rechercher"
-                className="shrink-0 flex items-center justify-center gap-2 flex-1 md:flex-none md:w-11 md:h-11 px-5 md:px-0 py-2.5 md:py-0 rounded-full bg-[var(--accent-luxury)] hover:opacity-90 text-black font-bold text-sm transition-all active:scale-95 shadow-md"
+                className="shrink-0 flex items-center justify-center gap-2 flex-1 md:flex-none md:w-11 md:h-11 px-5 md:px-0 py-2.5 md:py-0 rounded-full bg-[var(--accent-luxury)] hover:opacity-90 text-[var(--text)] font-bold text-sm transition-all active:scale-95 shadow-md"
               >
                 <Search className="w-4 h-4" />
                 <span className="md:hidden">Rechercher</span>
@@ -592,7 +592,7 @@ function EmptyState() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-2xl mx-auto mb-10">
         {suggestions.map((s) => (
           <a key={s.href} href={s.href}
-            className="flex flex-col gap-1 p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-[var(--accent-luxury)]/40 hover:bg-white/8 transition-all text-center active:scale-95"
+            className="flex flex-col gap-1 p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-accent-luxury/40 hover:bg-white/8 transition-all text-center active:scale-95"
           >
             <span className="text-white font-bold text-[12px]">{s.label}</span>
             <span className="text-white/40 text-[10px]">{s.desc}</span>

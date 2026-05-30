@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion, useReducedMotion } from 'framer-motion'
-import { MapPin, BedDouble, Maximize2, Flame, ShieldCheck, ArrowUpRight } from 'lucide-react'
+import { MapPin, BedDouble, Maximize2, Flame, ShieldCheck, ArrowUpRight, Clock } from 'lucide-react'
 import { useT } from '@/lib/i18n/client'
 import type { ConsolidatedBien } from '@/lib/catalogue/consolidated'
 
@@ -26,7 +26,7 @@ export function UnifiedBienListCard({ bien, index = 0 }: Props) {
     >
       <Link
         href={internalPath}
-        className="group flex gap-4 p-3 md:p-4 bg-[var(--surface-card)] border border-[var(--border)] rounded-2xl hover:border-[var(--accent-luxury)]/30 hover:shadow-[0_12px_30px_-15px_rgba(0,0,0,0.2)] transition-all duration-300"
+        className="group flex gap-4 p-3 md:p-4 bg-[var(--surface-card)] border border-[var(--border)] rounded-2xl hover:border-accent-luxury/30 hover:shadow-[0_12px_30px_-15px_rgba(0,0,0,0.2)] transition-all duration-300"
       >
         {/* Image carrée à gauche */}
         <div className="relative w-28 h-28 md:w-40 md:h-40 shrink-0 rounded-xl overflow-hidden bg-[var(--midnight-muted)]">
@@ -45,18 +45,24 @@ export function UnifiedBienListCard({ bien, index = 0 }: Props) {
             </div>
           )}
 
-          {/* Badge source (top-left) */}
+          {/* Badge source (top-left) : vérifié → bouclier ; offre flash → flamme ;
+              bien enregistré non encore validé → horloge « En validation ». */}
           {bien.is_verifie ? (
             <span className="absolute top-1.5 left-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-blue-500/95 text-white text-[8px] font-black uppercase tracking-wider shadow">
               <ShieldCheck className="w-2.5 h-2.5" />
               {t.card.verified}
             </span>
-          ) : (
+          ) : isFlash ? (
             <span className="absolute top-1.5 left-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-amber-500/95 text-white text-[8px] font-black uppercase tracking-wider shadow">
               <Flame className="w-2.5 h-2.5" />
               Flash
             </span>
-          )}
+          ) : bien.is_pending ? (
+            <span className="absolute top-1.5 left-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-slate-500/95 text-white text-[8px] font-black uppercase tracking-wider shadow">
+              <Clock className="w-2.5 h-2.5" />
+              En validation
+            </span>
+          ) : null}
         </div>
 
         {/* Contenu à droite */}
@@ -96,7 +102,7 @@ export function UnifiedBienListCard({ bien, index = 0 }: Props) {
                 </div>
               )}
             </div>
-            <div className="w-8 h-8 rounded-full bg-[var(--accent-luxury)]/10 flex items-center justify-center shrink-0 group-hover:bg-[var(--accent-luxury)] group-hover:text-white transition-all text-[var(--accent-luxury)]">
+            <div className="w-8 h-8 rounded-full bg-accent-luxury/10 flex items-center justify-center shrink-0 group-hover:bg-[var(--accent-luxury)] group-hover:text-white transition-all text-[var(--accent-luxury)]">
               <ArrowUpRight className="w-4 h-4" strokeWidth={2.5} />
             </div>
           </div>

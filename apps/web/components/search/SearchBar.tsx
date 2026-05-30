@@ -197,7 +197,7 @@ export function SearchBar({
               "flex items-center justify-center w-9 h-9 rounded-lg transition-all duration-300",
               isListening
                 ? "bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.6)] animate-[mic-blink_1s_infinite]"
-                : "text-[var(--accent-luxury)] bg-[var(--accent-luxury)]/10 hover:bg-[var(--accent-luxury)]/20 border border-transparent hover:border-[var(--accent-luxury)]/20",
+                : "text-[var(--accent-luxury)] bg-accent-luxury/10 hover:bg-accent-luxury/20 border border-transparent hover:border-accent-luxury/20",
               !isSupported && "hidden"
             )}
             title={isSupported ? "Recherche vocale" : "Recherche vocale non supportée par votre navigateur"}
@@ -232,7 +232,7 @@ export function SearchBar({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="absolute z-[200] top-full left-0 right-0 mt-2 overflow-hidden bg-[var(--surface-card)] border border-[var(--accent-luxury)]/30 rounded-2xl shadow-md p-6 text-center"
+            className="absolute z-[200] top-full left-0 right-0 mt-2 overflow-hidden bg-[var(--surface-card)] border border-accent-luxury/30 rounded-2xl shadow-md p-6 text-center"
           >
             <div className="flex justify-center gap-1.5 h-8 items-center mb-4">
               {[1, 2, 3, 4, 5, 4, 3, 2, 1].map((h, i) => (
@@ -277,12 +277,12 @@ export function SearchBar({
                     onMouseEnter={() => setHighlighted(idx)}
                     className={`w-full text-left px-4 py-3.5 flex items-center gap-4 rounded-xl transition-all duration-200 ${
                       idx === highlighted 
-                        ? 'bg-[var(--accent-luxury)]/10 text-[var(--accent-luxury)] translate-x-1' 
+                        ? 'bg-accent-luxury/10 text-[var(--accent-luxury)] translate-x-1' 
                         : 'text-[var(--text)] hover:bg-[var(--midnight-light)]'
                     }`}
                   >
                     <div className={`p-2.5 rounded-xl transition-colors ${
-                      idx === highlighted ? 'bg-[var(--accent-luxury)]/20' : 'bg-[var(--midnight-light)]'
+                      idx === highlighted ? 'bg-accent-luxury/20' : 'bg-[var(--midnight-light)]'
                     }`}>
                       <s.icon className="w-4 h-4" />
                     </div>

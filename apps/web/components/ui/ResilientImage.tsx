@@ -37,7 +37,7 @@ export function ResilientImage({
     return (
       <div
         className={cn(
-          'flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-slate-100 to-slate-200 text-slate-400',
+          'flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-slate-100 to-slate-200 text-[var(--text-subtle)]',
           fill && 'absolute inset-0',
           className
         )}

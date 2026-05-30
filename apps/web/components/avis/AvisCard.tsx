@@ -30,7 +30,7 @@ export function AvisCard({
       <div className="flex items-start justify-between mb-3">
         <div>
           <p className="font-semibold text-white">{auteurNom}</p>
-          <p className="text-xs text-gray-400">{dateLabel}</p>
+          <p className="text-xs text-[var(--text-subtle)]">{dateLabel}</p>
         </div>
         <StarRating value={note} size="sm" />
       </div>

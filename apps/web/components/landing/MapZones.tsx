@@ -201,7 +201,7 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Quartier, résidence, mot-clé..."
-                  className="w-full pl-14 pr-12 py-4 rounded-xl bg-[var(--background)]/50 border border-[var(--border)] text-[var(--text)] placeholder-[var(--text-subtle)] text-sm font-sans focus:outline-none focus:border-[var(--accent-luxury)] transition-all"
+                  className="w-full pl-14 pr-12 py-4 rounded-xl bg-background/50 border border-[var(--border)] text-[var(--text)] placeholder-[var(--text-subtle)] text-sm font-sans focus:outline-none focus:border-[var(--accent-luxury)] transition-all"
                 />
               </div>
             </div>
@@ -216,7 +216,7 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
                     value={searchQueryMinPrice}
                     onChange={(e) => setSearchQueryMinPrice(e.target.value === '' ? '' : Number(e.target.value))}
                     placeholder="Min"
-                    className="w-full px-5 py-4 rounded-xl bg-[var(--background)]/50 border border-[var(--border)] text-[var(--text)] placeholder-[var(--text-subtle)] text-sm font-sans focus:outline-none focus:border-[var(--accent-luxury)] transition-all"
+                    className="w-full px-5 py-4 rounded-xl bg-background/50 border border-[var(--border)] text-[var(--text)] placeholder-[var(--text-subtle)] text-sm font-sans focus:outline-none focus:border-[var(--accent-luxury)] transition-all"
                   />
                 </div>
                 <div className="relative flex-1">
@@ -225,7 +225,7 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
                     value={searchQueryMaxPrice}
                     onChange={(e) => setSearchQueryMaxPrice(e.target.value === '' ? '' : Number(e.target.value))}
                     placeholder="Max"
-                    className="w-full px-5 py-4 rounded-xl bg-[var(--background)]/50 border border-[var(--border)] text-[var(--text)] placeholder-[var(--text-subtle)] text-sm font-sans focus:outline-none focus:border-[var(--accent-luxury)] transition-all"
+                    className="w-full px-5 py-4 rounded-xl bg-background/50 border border-[var(--border)] text-[var(--text)] placeholder-[var(--text-subtle)] text-sm font-sans focus:outline-none focus:border-[var(--accent-luxury)] transition-all"
                   />
                 </div>
               </div>
@@ -243,7 +243,7 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
                       className={`px-4 py-2 rounded-lg border text-[9px] font-bold uppercase tracking-widest transition-all ${
                         isActive
                           ? 'bg-[var(--accent-luxury)] border-[var(--accent-luxury)] text-[var(--midnight)] shadow-lg'
-                          : 'bg-[var(--background)]/30 border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] hover:border-[var(--text-muted)]'
+                          : 'bg-background/30 border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] hover:border-[var(--text-muted)]'
                       }`}
                     >
                       {cat.label}
@@ -277,8 +277,8 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
                        }}
                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[8px] font-bold uppercase tracking-widest transition-all ${
                          isActive
-                           ? 'bg-[var(--accent-gold)]/20 border-[var(--accent-gold)] text-[var(--accent-gold)] shadow-[0_0_15px_rgba(197,160,89,0.2)]'
-                           : 'bg-[var(--background)]/30 border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--text-muted)]'
+                           ? 'bg-accent-gold/20 border-[var(--accent-gold)] text-[var(--accent-gold)] shadow-[0_0_15px_rgba(197,160,89,0.2)]'
+                           : 'bg-background/30 border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--text-muted)]'
                        }`}
                      >
                        <span>{eq.icon}</span>
@@ -288,13 +288,13 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
                  })}
                </div>
 
-               <div className="flex flex-wrap gap-2 border-t border-[var(--border)]/30 pt-4">
+               <div className="flex flex-wrap gap-2 border-t border-border/30 pt-4">
                  <button
                    onClick={() => setActiveCommune(null)}
                    className={`px-4 py-2 rounded-lg border text-[9px] font-bold uppercase tracking-widest transition-all ${
                      activeCommune === null
                        ? 'bg-[var(--text)] border-[var(--text)] text-[var(--background)]'
-                       : 'bg-[var(--background)]/30 border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)]'
+                       : 'bg-background/30 border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)]'
                    }`}
                  >
                    Tout Abidjan
@@ -312,7 +312,7 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
                            ? 'bg-[var(--accent-luxury)] border-[var(--accent-luxury)] text-[var(--midnight)]'
                            : count === 0
                            ? 'opacity-20 cursor-not-allowed border-[var(--border)]'
-                           : 'bg-[var(--background)]/30 border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)]'
+                           : 'bg-background/30 border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)]'
                        }`}
                      >
                        {commune} <span className="opacity-40 ml-1">{count}</span>
@@ -323,7 +323,7 @@ export function MapZones({ biens }: { biens: BienMarker[] }) {
             </div>
           </div>
 
-          <div className="flex items-center justify-between mt-8 pt-6 border-t border-[var(--border)]/50">
+          <div className="flex items-center justify-between mt-8 pt-6 border-t border-border/50">
             <div className="flex items-center gap-4">
               <div className="flex -space-x-2">
                 {[...Array(3)].map((_, i) => (

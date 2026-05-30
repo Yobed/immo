@@ -97,7 +97,7 @@ export function FeaturedCard({
                 </span>
               )}
             </div>
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--accent-luxury)] rounded-full text-[11px] font-bold text-black uppercase tracking-[0.2em] shadow-lg">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--accent-luxury)] rounded-full text-[11px] font-bold text-[var(--text)] uppercase tracking-[0.2em] shadow-lg">
               Voir ce bien
               <ArrowRight className="w-3.5 h-3.5" />
             </div>

@@ -146,7 +146,7 @@ function LoginContent() {
               autoComplete="email"
               aria-invalid={errors.email ? 'true' : 'false'}
               aria-describedby={errors.email ? 'login-email-error' : undefined}
-              className="w-full px-6 h-[64px] bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-[var(--text-muted)]/20"
+              className="w-full px-6 h-[64px] bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-muted/20"
             />
             {errors.email && (
               <p id="login-email-error" role="alert" className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.email.message}</p>
@@ -169,7 +169,7 @@ function LoginContent() {
               autoComplete="current-password"
               aria-invalid={errors.password ? 'true' : 'false'}
               aria-describedby={errors.password ? 'login-password-error' : undefined}
-              className="w-full px-6 h-[64px] bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-[var(--text-muted)]/20"
+              className="w-full px-6 h-[64px] bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-muted/20"
             />
             {errors.password && (
               <p id="login-password-error" role="alert" className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.password.message}</p>
@@ -180,7 +180,7 @@ function LoginContent() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex items-center justify-center gap-3 h-[64px] bg-[var(--accent-luxury)] hover:bg-[var(--accent-luxury)]/90 text-[var(--on-accent)] font-black uppercase tracking-[0.3em] text-[12px] rounded-2xl shadow-xl shadow-[var(--accent-glow)] transition-all active:scale-[0.98] disabled:opacity-50 border border-white/20 relative overflow-hidden group"
+          className="w-full flex items-center justify-center gap-3 h-[64px] bg-[var(--accent-luxury)] hover:bg-accent-luxury/90 text-[var(--on-accent)] font-black uppercase tracking-[0.3em] text-[12px] rounded-2xl shadow-xl shadow-[var(--accent-glow)] transition-all active:scale-[0.98] disabled:opacity-50 border border-white/20 relative overflow-hidden group"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
           {loading ? t.auth.loading : (
@@ -194,7 +194,7 @@ function LoginContent() {
       <div className="text-center pt-6">
         <p className="text-[13px] text-[var(--text-muted)] font-medium">
           {t.auth.noAccount}{' '}
-          <Link href="/register" className="text-[var(--text)] hover:text-[var(--accent-luxury)] font-black uppercase tracking-widest text-[11px] transition-colors border-b border-[var(--text)]/20 ml-1 pb-0.5">
+          <Link href="/register" className="text-[var(--text)] hover:text-[var(--accent-luxury)] font-black uppercase tracking-widest text-[11px] transition-colors border-b border-foreground/20 ml-1 pb-0.5">
             {t.auth.createAccount}
           </Link>
         </p>

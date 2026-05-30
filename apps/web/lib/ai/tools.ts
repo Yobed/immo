@@ -33,6 +33,7 @@ function formatBienBlock(b: ConsolidatedBien, i: number | null): string {
   const sourceTag = b.source === 'bogbes' ? "[CATALOGUE BOGBE'S]" : '[OFFRE FLASH WhatsApp]'
   const badges: string[] = []
   if (b.is_verifie) badges.push('✓ VÉRIFIÉ')
+  if (b.is_pending) badges.push("⏳ En cours de validation (enregistré, pas encore vérifié par BOGBE'S)")
   if (typeof b.score_ia === 'number' && b.score_ia >= 80) badges.push('★ Top qualité')
   if (b.source === 'flash') badges.push('⚡ Offre flash (récente, à valider rapidement)')
   if (b.is_recent) badges.push('🆕 Nouveau (< 24h)')
@@ -180,6 +181,7 @@ Dis au client que tu vas faire une recherche manuelle et que tu le recontactes r
     const sourceTag = b.source === 'bogbes' ? '[CATALOGUE BOGBE\'S]' : '[OFFRE FLASH WhatsApp]'
     const badges: string[] = []
     if (b.is_verifie) badges.push('✓ VÉRIFIÉ')
+    if (b.is_pending) badges.push("⏳ En cours de validation (enregistré, pas encore vérifié par BOGBE'S)")
     if (typeof b.score_ia === 'number' && b.score_ia >= 80) badges.push('★ Top qualité')
     if (b.source === 'flash') badges.push('⚡ Offre flash (récente, à valider rapidement)')
     if (b.is_recent) badges.push('🆕 Nouveau (< 24h)')
@@ -211,6 +213,13 @@ Les biens taggés [OFFRE FLASH WhatsApp] proviennent de canaux WhatsApp publics 
 - Ils tournent vite : annonce-les comme "à valider rapidement, possiblement déjà loué/vendu".
 - Le CTA n'est PAS un lien #reserver — c'est un lien wa.me direct vers notre conseiller, qui valide l'offre avant tout engagement.
 - Tu peux les présenter dans le même message que les biens BOGBE'S, mais signale la source avec ⚡.\n`
+  }
+
+  if (top.some((b) => b.is_pending)) {
+    context += `\nNOTE BIENS EN VALIDATION :
+Les biens taggés "⏳ En cours de validation" sont enregistrés sur la plateforme par leur propriétaire mais pas encore vérifiés par l'équipe BOGBE'S.
+- Présente-les normalement, mais précise honnêtement qu'ils sont "en cours de vérification par notre équipe".
+- Privilégie et mets en avant les biens "✓ VÉRIFIÉ" quand il y en a.\n`
   }
 
   if (demandeMedia) {

@@ -40,11 +40,11 @@ function statusBadge(statut: string) {
     publie: { label: 'Publié', cls: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
     en_attente: { label: 'En attente', cls: 'bg-amber-100 text-amber-700 border-amber-200' },
     refuse: { label: 'Refusé', cls: 'bg-red-100 text-red-700 border-red-200' },
-    brouillon: { label: 'Brouillon', cls: 'bg-slate-100 text-slate-600 border-slate-200' },
+    brouillon: { label: 'Brouillon', cls: 'bg-[var(--surface-hover)] text-[var(--text-muted)] border-[var(--border)]' },
     suspendu: { label: 'Suspendu', cls: 'bg-orange-100 text-orange-700 border-orange-200' },
-    archive: { label: 'Archivé', cls: 'bg-slate-100 text-slate-600 border-slate-200' },
+    archive: { label: 'Archivé', cls: 'bg-[var(--surface-hover)] text-[var(--text-muted)] border-[var(--border)]' },
   }
-  const s = map[statut] ?? { label: statut, cls: 'bg-slate-100 text-slate-600 border-slate-200' }
+  const s = map[statut] ?? { label: statut, cls: 'bg-[var(--surface-hover)] text-[var(--text-muted)] border-[var(--border)]' }
   return (
     <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${s.cls}`}>
       {s.label}
@@ -126,38 +126,38 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
   const isTrashView = statut === 'archive'
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-[var(--surface-hover)]">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
+      <div className="bg-[var(--surface-card)] border-b border-[var(--border)] sticky top-0 z-10">
         <div className="max-w-[1400px] mx-auto px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <ShieldCheck className="w-6 h-6 text-slate-700" />
+            <ShieldCheck className="w-6 h-6 text-[var(--text)]" />
             <div>
-              <h1 className="font-bold text-slate-900 text-lg leading-none">{isTrashView ? 'Corbeille' : 'Modération'}</h1>
-              <p className="text-slate-400 text-xs mt-1">
+              <h1 className="font-bold text-[var(--text)] text-lg leading-none">{isTrashView ? 'Corbeille' : 'Modération'}</h1>
+              <p className="text-[var(--text-subtle)] text-xs mt-1">
                 {stats.total} bien{stats.total > 1 ? 's' : ''} · {stats.publie} publiés · {stats.brouillon} brouillons · {stats.suspendu} suspendus · {stats.archive} corbeille
               </p>
             </div>
           </div>
-          <Link href="/" className="text-slate-400 hover:text-slate-700 text-xs font-medium">← Retour app</Link>
+          <Link href="/" className="text-[var(--text-subtle)] hover:text-[var(--text)] text-xs font-medium">← Retour app</Link>
         </div>
 
         {/* Filters */}
         <form className="max-w-[1400px] mx-auto px-6 pb-4 flex flex-wrap items-center gap-3">
           <div className="flex-1 min-w-[280px] relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-subtle)]" />
             <input
               type="text"
               name="q"
               defaultValue={q}
               placeholder="Numéro WhatsApp (+225...) ou titre / commune / quartier"
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-slate-400"
+              className="w-full pl-10 pr-4 py-2.5 bg-[var(--surface-hover)] border border-[var(--border)] rounded-xl text-sm focus:outline-none focus:border-slate-400"
             />
           </div>
           <select
             name="statut"
             defaultValue={statut}
-            className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:border-slate-400"
+            className="px-4 py-2.5 bg-[var(--surface-hover)] border border-[var(--border)] rounded-xl text-sm font-medium focus:outline-none focus:border-slate-400"
           >
             <option value="all">Tous statuts</option>
             <option value="en_attente">⏳ En attente</option>
@@ -171,7 +171,7 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
             Rechercher
           </button>
           {(q || statut !== 'all') && (
-            <Link href="/admin/moderation" className="px-4 py-2.5 text-slate-500 hover:text-slate-900 text-sm font-medium">Réinitialiser</Link>
+            <Link href="/admin/moderation" className="px-4 py-2.5 text-[var(--text-muted)] hover:text-[var(--text)] text-sm font-medium">Réinitialiser</Link>
           )}
         </form>
       </div>
@@ -179,8 +179,8 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
       {/* Liste */}
       <div className="max-w-[1400px] mx-auto px-6 py-6">
         {biens.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 border border-slate-200 text-center">
-            <p className="text-slate-400 text-sm">Aucun bien ne correspond aux critères.</p>
+          <div className="bg-[var(--surface-card)] rounded-2xl p-12 border border-[var(--border)] text-center">
+            <p className="text-[var(--text-subtle)] text-sm">Aucun bien ne correspond aux critères.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -194,13 +194,13 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
               })
 
               return (
-                <div key={bien.id} className="bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col">
+                <div key={bien.id} className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] overflow-hidden flex flex-col">
                   {/* Image */}
-                  <div className="aspect-video bg-slate-100 relative">
+                  <div className="aspect-video bg-[var(--surface-hover)] relative">
                     {cover ? (
                       <Image src={cover} alt={bien.titre} fill className="object-cover" sizes="400px" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-slate-300 text-xs">Pas de photo</div>
+                      <div className="w-full h-full flex items-center justify-center text-[var(--text-subtle)] text-xs">Pas de photo</div>
                     )}
                     <div className="absolute top-2 left-2">{statusBadge(bien.statut)}</div>
                     <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur text-white text-[10px] font-bold">
@@ -210,16 +210,16 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
 
                   {/* Body */}
                   <div className="p-4 flex flex-col flex-1">
-                    <h3 className="font-bold text-slate-900 text-sm mb-1 line-clamp-2">{bien.titre}</h3>
-                    <p className="text-slate-500 text-xs mb-2">
+                    <h3 className="font-bold text-[var(--text)] text-sm mb-1 line-clamp-2">{bien.titre}</h3>
+                    <p className="text-[var(--text-muted)] text-xs mb-2">
                       {bien.commune}{bien.quartier ? ` · ${bien.quartier}` : ''} · {bien.type_bien}
                     </p>
-                    <p className="text-slate-700 font-semibold text-sm mb-3">{priceDisplay(bien)}</p>
+                    <p className="text-[var(--text)] font-semibold text-sm mb-3">{priceDisplay(bien)}</p>
 
-                    <div className="space-y-1 text-xs text-slate-500 mb-3">
+                    <div className="space-y-1 text-xs text-[var(--text-muted)] mb-3">
                       <p className="flex items-center gap-1.5">
                         <Phone className="w-3 h-3" />
-                        <span className="font-medium text-slate-700">{phoneDisplay}</span>
+                        <span className="font-medium text-[var(--text)]">{phoneDisplay}</span>
                       </p>
                       <p className="flex items-center gap-1.5">
                         <Calendar className="w-3 h-3" />
@@ -228,11 +228,11 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
                     </div>
 
                     {/* Actions */}
-                    <div className="mt-auto flex flex-wrap gap-2 pt-3 border-t border-slate-100">
+                    <div className="mt-auto flex flex-wrap gap-2 pt-3 border-t border-[var(--border)]">
                       <Link
                         href={`/biens/${bien.id}`}
                         target="_blank"
-                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium transition-colors"
+                        className="flex items-center gap-1 px-3 py-1.5 bg-[var(--surface-hover)] hover:bg-[var(--surface-hover)] text-[var(--text)] rounded-lg text-xs font-medium transition-colors"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         Voir

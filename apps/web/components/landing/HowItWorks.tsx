@@ -56,7 +56,7 @@ export async function HowItWorks() {
         <div className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border)] p-6 md:p-8 lg:p-10">
           <div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start">
             <div className="md:max-w-xs">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--accent-luxury-muted)] border border-[var(--accent-luxury)]/30 text-[var(--accent-luxury)] text-[10px] font-bold uppercase tracking-wider mb-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--accent-luxury-muted)] border border-accent-luxury/30 text-[var(--accent-luxury)] text-[10px] font-bold uppercase tracking-wider mb-4">
                 <AlertTriangle className="w-3 h-3" />
                 {t.howItWorks.antiScamTag}
               </div>
@@ -90,8 +90,8 @@ interface PipelineProps {
 function Pipeline({ badge, title, subtitle, steps }: PipelineProps) {
   const tintClasses =
     badge.tint === 'success'
-      ? 'bg-[var(--success-soft)] text-[var(--success)] border-[var(--success)]/20'
-      : 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning)]/20'
+      ? 'bg-[var(--success-soft)] text-[var(--success)] border-success/20'
+      : 'bg-[var(--warning-soft)] text-[var(--warning)] border-[var(--warning-soft)]'
 
   return (
     <div className="rounded-3xl bg-[var(--surface-card)] border border-[var(--border)] p-6 md:p-8">
@@ -136,7 +136,7 @@ function Pipeline({ badge, title, subtitle, steps }: PipelineProps) {
 function TrustItem({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
     <div>
-      <div className="w-10 h-10 rounded-full bg-[var(--accent-luxury-muted)] border border-[var(--accent-luxury)]/20 flex items-center justify-center text-[var(--accent-luxury)] mb-3">
+      <div className="w-10 h-10 rounded-full bg-[var(--accent-luxury-muted)] border border-accent-luxury/20 flex items-center justify-center text-[var(--accent-luxury)] mb-3">
         {icon}
       </div>
       <h4 className="text-sm font-bold text-[var(--text)] mb-1.5">{title}</h4>

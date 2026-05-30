@@ -102,7 +102,7 @@ export default function AmbassadeurPage() {
         <ScrollReveal>
           <section className="relative overflow-hidden rounded-[2.5rem] bg-[var(--midnight-muted)] border border-[var(--border)] p-8 md:p-16 text-[var(--text)]">
             {/* Background Effects */}
-            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[var(--accent-luxury)]/10 blur-[130px] rounded-full -mr-80 -mt-80" />
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-accent-luxury/10 blur-[130px] rounded-full -mr-80 -mt-80" />
             <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-500/10 blur-[100px] rounded-full -ml-40 -mb-40" />
 
             <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
@@ -110,7 +110,7 @@ export default function AmbassadeurPage() {
                 <motion.div 
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="inline-flex items-center px-4 py-1.5 rounded-full bg-[var(--accent-luxury)]/10 text-[var(--accent-luxury)] text-[10px] font-bold tracking-[0.2em] uppercase border border-[var(--accent-luxury)]/20"
+                  className="inline-flex items-center px-4 py-1.5 rounded-full bg-accent-luxury/10 text-[var(--accent-luxury)] text-[10px] font-bold tracking-[0.2em] uppercase border border-accent-luxury/20"
                 >
                   <Gem className="w-3 h-3 mr-2" />
                   Programme Ambassadeur Elite
@@ -126,11 +126,11 @@ export default function AmbassadeurPage() {
                 </p>
 
                 <div className="flex flex-wrap gap-4 pt-4">
-                  <div className="flex items-center gap-3 bg-[var(--background)]/50 border border-[var(--border)] px-4 py-3 rounded-2xl backdrop-blur-sm">
+                  <div className="flex items-center gap-3 bg-background/50 border border-[var(--border)] px-4 py-3 rounded-2xl backdrop-blur-sm">
                     <Target className="w-5 h-5 text-[var(--accent-luxury)]" />
                     <span className="text-sm font-medium">2% de commission</span>
                   </div>
-                  <div className="flex items-center gap-3 bg-[var(--background)]/50 border border-[var(--border)] px-4 py-3 rounded-2xl backdrop-blur-sm">
+                  <div className="flex items-center gap-3 bg-background/50 border border-[var(--border)] px-4 py-3 rounded-2xl backdrop-blur-sm">
                     <Zap className="w-5 h-5 text-indigo-400" />
                     <span className="text-sm font-medium">Validation 24h</span>
                   </div>
@@ -150,7 +150,7 @@ export default function AmbassadeurPage() {
                     <div className="space-y-4">
                       <Button 
                         onClick={copyToClipboard}
-                        className="w-full h-16 bg-[var(--accent-luxury)] hover:bg-[var(--accent-luxury)]/90 text-[var(--midnight)] font-bold rounded-2xl transition-all shadow-xl shadow-[var(--accent-luxury)]/20 text-xs uppercase tracking-widest relative overflow-hidden group"
+                        className="w-full h-16 bg-[var(--accent-luxury)] hover:bg-accent-luxury/90 text-[var(--midnight)] font-bold rounded-2xl transition-all shadow-xl shadow-accent-luxury/20 text-xs uppercase tracking-widest relative overflow-hidden group"
                       >
                         <AnimatePresence mode="wait">
                           {copied ? (
@@ -215,7 +215,7 @@ export default function AmbassadeurPage() {
             }
           ].map((stat, i) => (
             <ScrollReveal key={i} delay={i * 0.1}>
-              <Card className="bg-[var(--midnight-muted)]/50 border-[var(--border)] hover:border-[var(--accent-luxury)]/30 transition-all rounded-3xl group">
+              <Card className="bg-surface-raised/50 border-[var(--border)] hover:border-accent-luxury/30 transition-all rounded-3xl group">
                 <CardContent className="p-8">
                   <div className="flex items-center justify-between mb-6">
                     <div className={`p-4 rounded-2xl bg-[var(--background)] border border-[var(--border)] group-hover:scale-110 transition-transform ${stat.color}`}>
@@ -241,8 +241,8 @@ export default function AmbassadeurPage() {
           {/* History / Earnings */}
           <div className="lg:col-span-12">
             <ScrollReveal>
-              <Card className="bg-[var(--midnight-muted)]/30 border-[var(--border)] rounded-[2rem] overflow-hidden">
-                <CardHeader className="p-8 border-b border-[var(--border)] bg-[var(--midnight-muted)]/50">
+              <Card className="bg-surface-raised/30 border-[var(--border)] rounded-[2rem] overflow-hidden">
+                <CardHeader className="p-8 border-b border-[var(--border)] bg-surface-raised/50">
                   <CardTitle className="text-xl font-display font-light flex items-center gap-3">
                     <TrendingUp className="w-5 h-5 text-[var(--accent-luxury)]" />
                     Historique des Commissions
@@ -259,9 +259,9 @@ export default function AmbassadeurPage() {
                           <th className="px-8 py-6 font-bold text-right">Statut</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[var(--border)]/50">
+                      <tbody className="divide-y divide-border/50">
                         {commissions.length > 0 ? commissions.map((c) => (
-                          <tr key={c.id} className="hover:bg-[var(--accent-luxury)]/5 transition-colors group">
+                          <tr key={c.id} className="hover:bg-accent-luxury/5 transition-colors group">
                             <td className="px-8 py-6 text-sm font-light text-[var(--text-muted)]">
                               {new Date(c.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
                             </td>
@@ -275,8 +275,8 @@ export default function AmbassadeurPage() {
                             <td className="px-8 py-6 text-right">
                               <span className={`inline-flex items-center px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${
                                 c.statut === 'paye' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                                c.statut === 'en_attente' ? 'bg-[var(--accent-luxury)]/10 text-[var(--accent-luxury)] border border-[var(--accent-luxury)]/20' :
-                                'bg-[var(--text-muted)]/10 text-[var(--text-muted)] border border-[var(--border)]'
+                                c.statut === 'en_attente' ? 'bg-accent-luxury/10 text-[var(--accent-luxury)] border border-accent-luxury/20' :
+                                'bg-muted/10 text-[var(--text-muted)] border border-[var(--border)]'
                               }`}>
                                 {c.statut}
                               </span>
@@ -313,7 +313,7 @@ export default function AmbassadeurPage() {
                 Consultez notre guide de l&apos;apporteur d&apos;affaires Elite pour maximiser vos gains et apprendre les meilleures techniques de parrainage digital.
               </p>
             </div>
-            <Button className="h-16 px-10 bg-white text-[var(--midnight)] hover:bg-[var(--accent-luxury)] hover:text-white font-bold rounded-2xl transition-all shadow-xl text-xs uppercase tracking-widest shrink-0">
+            <Button className="h-16 px-10 bg-[var(--surface-card)] text-[var(--midnight)] hover:bg-[var(--accent-luxury)] hover:text-white font-bold rounded-2xl transition-all shadow-xl text-xs uppercase tracking-widest shrink-0">
               Ouvrir le guide PRO <ArrowRight className="ml-3 w-4 h-4" />
             </Button>
           </section>

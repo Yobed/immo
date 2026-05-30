@@ -195,7 +195,7 @@ export const PropertyVideoShorts: React.FC<PropertyVideoShortsProps> = ({
               onClick={() => setShowStory(!showStory)}
               className="flex flex-col items-center gap-1 group"
             >
-              <div className={`w-12 h-12 rounded-full backdrop-blur-lg flex items-center justify-center text-white transition-all ${showStory ? 'bg-[var(--accent-luxury)] text-black' : 'bg-white/10'}`}>
+              <div className={`w-12 h-12 rounded-full backdrop-blur-lg flex items-center justify-center text-white transition-all ${showStory ? 'bg-[var(--accent-luxury)] text-[var(--text)]' : 'bg-white/10'}`}>
                 <Sparkles className="w-6 h-6" />
               </div>
               <span className="text-[10px] font-bold text-white shadow-sm">IA Story</span>
@@ -233,7 +233,7 @@ export const PropertyVideoShorts: React.FC<PropertyVideoShortsProps> = ({
                 
                 <Link 
                   href={`/biens/${currentVideo.propertyId}`}
-                  className="w-full inline-flex items-center justify-center gap-3 px-8 py-4 bg-white text-[var(--midnight)] rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-[var(--accent-luxury)] transition-all group"
+                  className="w-full inline-flex items-center justify-center gap-3 px-8 py-4 bg-[var(--surface-card)] text-[var(--midnight)] rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-[var(--accent-luxury)] transition-all group"
                 >
                   Voir les détails <ExternalLink className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>

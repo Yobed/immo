@@ -29,7 +29,7 @@ export function ShortsTrigger({ videos, className, children }: ShortsTriggerProp
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(true)}
-        className={`group relative flex items-center gap-6 px-10 py-5 bg-[var(--surface-card)] text-[var(--text)] rounded-[var(--radius-2xl)] font-bold text-[12px] uppercase tracking-[0.4em] font-display overflow-hidden shadow-md border border-[var(--accent-luxury)]/30 hover:border-[var(--accent-luxury)]/60 transition-colors ${className}`}
+        className={`group relative flex items-center gap-6 px-10 py-5 bg-[var(--surface-card)] text-[var(--text)] rounded-[var(--radius-2xl)] font-bold text-[12px] uppercase tracking-[0.4em] font-display overflow-hidden shadow-md border border-accent-luxury/30 hover:border-accent-luxury/60 transition-colors ${className}`}
       >
         {children || (
           <div className="relative z-10 flex items-center gap-3">

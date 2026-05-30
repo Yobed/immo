@@ -80,7 +80,7 @@ export function FeaturedProperties({ initialBiens = [] }: FeaturedPropertiesProp
           </h2>
           <Link
             href="/biens"
-            className="shrink-0 text-[11px] font-bold tracking-[0.2em] uppercase text-[var(--accent-luxury)] border-b border-[var(--accent-luxury)]/40 pb-0.5 hover:border-[var(--accent-luxury)] transition-colors"
+            className="shrink-0 text-[11px] font-bold tracking-[0.2em] uppercase text-[var(--accent-luxury)] border-b border-accent-luxury/40 pb-0.5 hover:border-[var(--accent-luxury)] transition-colors"
           >
             {t.featured.viewAll} →
           </Link>
@@ -146,7 +146,7 @@ export function FeaturedProperties({ initialBiens = [] }: FeaturedPropertiesProp
             </p>
             <Link
               href="/offre-flash"
-              className="shrink-0 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.25em] text-[var(--accent-luxury)] border-b border-[var(--accent-luxury)]/40 pb-0.5 hover:border-[var(--accent-luxury)] transition-colors"
+              className="shrink-0 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.25em] text-[var(--accent-luxury)] border-b border-accent-luxury/40 pb-0.5 hover:border-[var(--accent-luxury)] transition-colors"
             >
               <span className="relative flex w-1.5 h-1.5">
                 <span className="animate-ping absolute w-full h-full rounded-full bg-[var(--accent-luxury)] opacity-75" />

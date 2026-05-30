@@ -24,12 +24,12 @@ type BienRow = {
 }
 
 const STATUT_BADGE: Record<string, { label: string; cls: string }> = {
-  brouillon: { label: 'Brouillon', cls: 'bg-slate-100 text-slate-600 border-slate-200' },
+  brouillon: { label: 'Brouillon', cls: 'bg-[var(--surface-hover)] text-[var(--text-muted)] border-[var(--border)]' },
   en_attente: { label: 'En attente de validation', cls: 'bg-amber-100 text-amber-700 border-amber-200' },
   publie: { label: 'En ligne', cls: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
   refuse: { label: 'Refusée', cls: 'bg-red-100 text-red-700 border-red-200' },
   suspendu: { label: 'Suspendue', cls: 'bg-orange-100 text-orange-700 border-orange-200' },
-  archive: { label: 'Archivée', cls: 'bg-slate-100 text-slate-500 border-slate-200' },
+  archive: { label: 'Archivée', cls: 'bg-[var(--surface-hover)] text-[var(--text-muted)] border-[var(--border)]' },
   loue: { label: 'Loué/Vendu', cls: 'bg-blue-100 text-blue-700 border-blue-200' },
 }
 
@@ -121,7 +121,7 @@ export default async function MesAnnoncesPage({
 
                   {/* Statut de validation */}
                   {(() => {
-                    const s = STATUT_BADGE[bien.statut] ?? { label: bien.statut, cls: 'bg-slate-100 text-slate-600 border-slate-200' }
+                    const s = STATUT_BADGE[bien.statut] ?? { label: bien.statut, cls: 'bg-[var(--surface-hover)] text-[var(--text-muted)] border-[var(--border)]' }
                     return (
                       <div className="space-y-2">
                         <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border ${s.cls}`}>

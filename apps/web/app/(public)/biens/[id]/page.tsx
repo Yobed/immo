@@ -39,6 +39,7 @@ import { ExpandableText } from '@/components/bien/ExpandableText'
 import { ScrollToTop } from '@/components/bien/ScrollToTop'
 import { TrackView } from '@/components/bien/TrackView'
 import { ShareButton } from '@/components/bien/ShareButton'
+import { STATUTS_PUBLICS, estStatutPublic } from '@/lib/catalogue/statuts'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
@@ -48,7 +49,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     .from('biens')
     .select('titre, commune, quartier, type_bien, prix_mois_fcfa, prix_vente_fcfa, biens_medias(url, est_couverture, ordre)')
     .eq('id', id)
-    .eq('statut', 'publie')
+    .in('statut', [...STATUTS_PUBLICS])
     .limit(1)
     .single()
 
@@ -97,7 +98,8 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
   if (!bien) notFound()
 
   const isOwner = !!(user?.id && user.id === bien.proprietaire_id)
-  if (bien.statut !== 'publie' && !isOwner) notFound()
+  // Visible publiquement si validé OU en attente de validation ; sinon réservé au propriétaire.
+  if (!estStatutPublic(bien.statut) && !isOwner) notFound()
 
   // Fetch owner profile separately to avoid RLS conflicts on the join
   const { data: proprio } = await (supabase as any)
@@ -217,7 +219,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
   const prixLabel = prix ? `${prix.value}${prix.suffix}` : ''
 
   return (
-    <main className="bg-white min-h-screen selection:bg-accent-luxury/20 font-sans text-slate-800 antialiased overflow-x-hidden pb-20 lg:pb-0">
+    <main className="bg-[var(--surface-card)] min-h-screen selection:bg-accent-luxury/20 font-sans text-[var(--text)] antialiased overflow-x-hidden pb-20 lg:pb-0">
       <ScrollToTop />
       <TrackView
         id={bien.id}
@@ -253,7 +255,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
       />
 
       {/* ─── MAIN CONTENT — carte blanche arrondie style Airbnb ─── */}
-      <div className="bg-white rounded-t-[28px] -mt-3 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] relative z-10">
+      <div className="bg-[var(--surface-card)] rounded-t-[28px] -mt-3 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] relative z-10">
       <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-8 md:py-14">
 
         {/* Breadcrumb + proof social */}
@@ -299,7 +301,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             {/* DESCRIPTION */}
             {bien.description && (
               <section className="mb-8 pl-4 border-l-2 border-accent-luxury/50">
-                <h2 className="text-[10px] font-bold uppercase tracking-[0.4em] text-slate-400 mb-3">{t.bien.description}</h2>
+                <h2 className="text-[10px] font-bold uppercase tracking-[0.4em] text-[var(--text-subtle)] mb-3">{t.bien.description}</h2>
                 <ExpandableText text={bien.description} />
               </section>
             )}
@@ -307,10 +309,10 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             {/* ÉQUIPEMENTS */}
             {bien.equipements?.length > 0 && (
               <section className="mb-8">
-                <h2 className="text-[10px] font-bold uppercase tracking-[0.4em] text-slate-400 mb-3">{t.bien.equipments}</h2>
+                <h2 className="text-[10px] font-bold uppercase tracking-[0.4em] text-[var(--text-subtle)] mb-3">{t.bien.equipments}</h2>
                 <div className="flex flex-wrap gap-2">
                   {bien.equipements.map((eq: string) => (
-                    <span key={eq} className="px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-xs text-slate-600 font-medium">
+                    <span key={eq} className="px-3 py-1.5 rounded-full bg-[var(--surface-hover)] border border-[var(--border)] text-xs text-[var(--text-muted)] font-medium">
                       {EQUIPEMENTS_LABELS[eq] ?? eq}
                     </span>
                   ))}
@@ -322,7 +324,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             {avis.length > 0 && (
               <section className="mb-8">
                 <div className="flex items-center gap-3 mb-4">
-                  <h2 className="text-xl md:text-2xl font-display font-bold text-slate-900 tracking-tight">
+                  <h2 className="text-xl md:text-2xl font-display font-bold text-[var(--text)] tracking-tight">
                     {t.bien.ownerReviews}
                   </h2>
                   {avgNote && (
@@ -333,15 +335,15 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                 </div>
                 <div className="space-y-3">
                   {avis.map((a, i) => (
-                    <div key={i} className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                    <div key={i} className="p-4 rounded-2xl bg-[var(--surface-hover)] border border-[var(--border)]">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-bold text-slate-800 text-sm">{a.profiles?.full_name ?? 'Locataire vérifié'}</span>
+                        <span className="font-bold text-[var(--text)] text-sm">{a.profiles?.full_name ?? 'Locataire vérifié'}</span>
                         <span className="text-amber-500 text-sm">{'★'.repeat(a.note)}{'☆'.repeat(5 - a.note)}</span>
                       </div>
                       {a.commentaire && (
-                        <p className="text-slate-600 text-sm leading-relaxed">{a.commentaire}</p>
+                        <p className="text-[var(--text-muted)] text-sm leading-relaxed">{a.commentaire}</p>
                       )}
-                      <p className="text-slate-400 text-[10px] mt-2">
+                      <p className="text-[var(--text-subtle)] text-[10px] mt-2">
                         {new Date(a.created_at).toLocaleDateString('fr-CI', { month: 'long', year: 'numeric' })}
                       </p>
                     </div>
@@ -355,20 +357,20 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
               <section id="visite-3d" className="mb-8 scroll-mt-20">
                 <div className="flex items-center gap-3 mb-4">
                   <Eye className="w-4 h-4 text-accent-luxury/60" />
-                  <h2 className="text-xl md:text-2xl font-display font-bold text-slate-900 tracking-tight">
+                  <h2 className="text-xl md:text-2xl font-display font-bold text-[var(--text)] tracking-tight">
                     {t.bien.virtualTour}
                   </h2>
                 </div>
                 <div className="space-y-4">
                   {bien.url_visite_3d && (
-                    <div className="rounded-2xl overflow-hidden border border-slate-200">
+                    <div className="rounded-2xl overflow-hidden border border-[var(--border)]">
                       <VirtualTourViewer url={bien.url_visite_3d} title={bien.titre} />
                     </div>
                   )}
                   {vue360Medias.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {vue360Medias.map((media: any, i: number) => (
-                        <div key={media.id} className="relative aspect-[16/10] bg-slate-900 rounded-2xl overflow-hidden border border-slate-200">
+                        <div key={media.id} className="relative aspect-[16/10] bg-slate-900 rounded-2xl overflow-hidden border border-[var(--border)]">
                           <Bien360 panoramaUrl={media.url} />
                           <div className="absolute bottom-3 left-3 z-10 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full">
                             <span className="text-[8px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-1.5">
@@ -388,7 +390,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             <section className="mb-8">
               <div className="flex items-center gap-3 mb-3">
                 <MapPin className="w-4 h-4 text-accent-luxury/60" />
-                <h3 className="text-xl md:text-2xl font-display font-bold text-slate-900 tracking-tight">
+                <h3 className="text-xl md:text-2xl font-display font-bold text-[var(--text)] tracking-tight">
                   {t.bien.location}
                 </h3>
               </div>
@@ -404,15 +406,15 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
             {/* Owner management (desktop only — mobile shown above) */}
             {isOwner && (
               <section className="mb-8 space-y-2.5 hidden lg:block">
-                <p className="text-[10px] text-slate-400 uppercase tracking-widest font-medium mb-3">{t.bien.ownerManagement}</p>
+                <p className="text-[10px] text-[var(--text-subtle)] uppercase tracking-widest font-medium mb-3">{t.bien.ownerManagement}</p>
                 <Link href={`/mes-biens/${bien.id}/modifier`} className="flex items-center justify-center w-full py-3.5 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-accent-luxury transition-all">
                   {t.bien.editAd}
                 </Link>
-                <Link href={`/mes-biens/${bien.id}/modifier?step=medias`} className="flex items-center justify-center w-full py-3.5 bg-slate-100 border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all">
+                <Link href={`/mes-biens/${bien.id}/modifier?step=medias`} className="flex items-center justify-center w-full py-3.5 bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--text)] rounded-xl font-bold text-sm hover:bg-[var(--surface-hover)] transition-all">
                   {t.bien.manageMedia}
                 </Link>
                 <BroadcastButton bienId={bien.id} statut={bien.statut} />
-                <div className="pt-3 border-t border-slate-100">
+                <div className="pt-3 border-t border-[var(--border)]">
                   <DeleteBienButton bienId={bien.id} titre={bien.titre} />
                 </div>
               </section>
@@ -426,20 +428,20 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200 relative overflow-hidden"
+                className="bg-[var(--surface-card)] rounded-2xl p-6 shadow-lg border border-[var(--border)] relative overflow-hidden"
               >
                 <div className="relative z-10">
 
                   {/* PRIX */}
-                  <div className="mb-5 pb-5 border-b border-slate-100">
+                  <div className="mb-5 pb-5 border-b border-[var(--border)]">
                     <div className="flex items-baseline gap-2 mb-1">
-                      <span className="text-3xl font-display font-bold tracking-tighter text-slate-900">
+                      <span className="text-3xl font-display font-bold tracking-tighter text-[var(--text)]">
                         {prixValue ? formatFCFA(prixValue) : 'Sur Demande'}
                       </span>
-                      {prixSuffix && <span className="text-slate-400 text-sm">{prixSuffix}</span>}
+                      {prixSuffix && <span className="text-[var(--text-subtle)] text-sm">{prixSuffix}</span>}
                     </div>
                     {bien.charges_mois_fcfa > 0 && (
-                      <p className="text-slate-400 text-xs mt-1">+ {formatFCFA(bien.charges_mois_fcfa)} charges/mois</p>
+                      <p className="text-[var(--text-subtle)] text-xs mt-1">+ {formatFCFA(bien.charges_mois_fcfa)} charges/mois</p>
                     )}
                     <div className="flex items-center gap-2 mt-2">
                       <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -465,23 +467,23 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                             bienId={bien.id}
                           />
                           {/* Trust strip */}
-                          <div className="flex items-center gap-2 py-2.5 px-3 rounded-xl bg-slate-50 border border-slate-200">
+                          <div className="flex items-center gap-2 py-2.5 px-3 rounded-xl bg-[var(--surface-hover)] border border-[var(--border)]">
                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                            <span className="text-[11px] text-slate-600 leading-tight">
+                            <span className="text-[11px] text-[var(--text-muted)] leading-tight">
                               Un conseiller vous rappelle{' '}
-                              <strong className="text-slate-900">dans l&apos;heure</strong> — service gratuit
+                              <strong className="text-[var(--text)]">dans l&apos;heure</strong> — service gratuit
                             </span>
                           </div>
                           <div className="flex items-center gap-3">
-                            <div className="flex-1 h-px bg-slate-100" />
-                            <span className="text-[10px] text-slate-300 uppercase tracking-widest">ou</span>
-                            <div className="flex-1 h-px bg-slate-100" />
+                            <div className="flex-1 h-px bg-[var(--surface-hover)]" />
+                            <span className="text-[10px] text-[var(--text-subtle)] uppercase tracking-widest">ou</span>
+                            <div className="flex-1 h-px bg-[var(--surface-hover)]" />
                           </div>
                           <VisiteRequestForm bienId={bien.id} proprietaireId={bien.proprietaire_id as string} isPremium={true} />
                           <div className="flex items-center gap-3 pt-1">
-                            <div className="flex-1 h-px bg-slate-100" />
-                            <span className="text-[10px] text-slate-300 uppercase tracking-widest">ou</span>
-                            <div className="flex-1 h-px bg-slate-100" />
+                            <div className="flex-1 h-px bg-[var(--surface-hover)]" />
+                            <span className="text-[10px] text-[var(--text-subtle)] uppercase tracking-widest">ou</span>
+                            <div className="flex-1 h-px bg-[var(--surface-hover)]" />
                           </div>
                           <DemanderContactWhatsAppButton bienId={bien.id} isAuthenticated={!!user} />
                         </>
@@ -489,35 +491,35 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                     </div>
                   ) : (
                     <div className="space-y-2.5">
-                      <p className="text-[10px] text-slate-400 uppercase tracking-widest font-medium mb-3">Gestion</p>
+                      <p className="text-[10px] text-[var(--text-subtle)] uppercase tracking-widest font-medium mb-3">Gestion</p>
                       <Link href={`/mes-biens/${bien.id}/modifier`} className="flex items-center justify-center w-full py-3.5 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-accent-luxury transition-all">
                         Modifier l&apos;annonce
                       </Link>
-                      <Link href={`/mes-biens/${bien.id}/modifier?step=medias`} className="flex items-center justify-center w-full py-3.5 bg-slate-100 border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all">
+                      <Link href={`/mes-biens/${bien.id}/modifier?step=medias`} className="flex items-center justify-center w-full py-3.5 bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--text)] rounded-xl font-bold text-sm hover:bg-[var(--surface-hover)] transition-all">
                         Gérer les médias
                       </Link>
                       <BroadcastButton bienId={bien.id} statut={bien.statut} />
-                      <div className="pt-3 border-t border-slate-100">
+                      <div className="pt-3 border-t border-[var(--border)]">
                         <DeleteBienButton bienId={bien.id} titre={bien.titre} />
                       </div>
                     </div>
                   )}
 
                   {/* PROPRIÉTAIRE */}
-                  <div className="mt-5 pt-5 border-t border-slate-100">
+                  <div className="mt-5 pt-5 border-t border-[var(--border)]">
                     <div className="flex items-center gap-3">
-                      <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
+                      <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-[var(--surface-hover)] border border-[var(--border)] shrink-0">
                         {proprio?.avatar_url ? (
                           <Image src={proprio.avatar_url} alt={proprio.full_name || ''} fill className="object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <Sparkles className="w-4 h-4 text-slate-300" />
+                            <Sparkles className="w-4 h-4 text-[var(--text-subtle)]" />
                           </div>
                         )}
                       </div>
                       <div>
-                        <p className="text-[9px] text-slate-400 uppercase tracking-widest mb-0.5">Propriétaire</p>
-                        <p className="font-bold text-slate-800 text-sm">{proprio?.full_name || "BOGBE'S GROUPE"}</p>
+                        <p className="text-[9px] text-[var(--text-subtle)] uppercase tracking-widest mb-0.5">Propriétaire</p>
+                        <p className="font-bold text-[var(--text)] text-sm">{proprio?.full_name || "BOGBE'S GROUPE"}</p>
                         <div className="flex items-center gap-1.5 mt-0.5">
                           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                           <span className="text-[9px] text-emerald-600">Disponible</span>
@@ -533,12 +535,12 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
 
         {/* ─── BIENS SIMILAIRES ─── */}
         {similarBiens && similarBiens.length > 0 && (
-          <section className="mt-10 border-t border-slate-100 pt-8">
+          <section className="mt-10 border-t border-[var(--border)] pt-8">
             <div className="flex items-center justify-between gap-4 mb-5">
-              <h2 className="text-xl md:text-2xl font-display font-bold text-slate-800">
+              <h2 className="text-xl md:text-2xl font-display font-bold text-[var(--text)]">
                 {t.bien.similarIn} <span className="text-accent-luxury">{bien.commune}</span>
               </h2>
-              <Link href={`/recherche?commune=${bien.commune}`} className="flex items-center gap-1.5 text-slate-400 hover:text-slate-700 text-xs font-medium transition-colors shrink-0">
+              <Link href={`/recherche?commune=${bien.commune}`} className="flex items-center gap-1.5 text-[var(--text-subtle)] hover:text-[var(--text)] text-xs font-medium transition-colors shrink-0">
                 {t.bien.viewAll} <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
@@ -569,9 +571,9 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
         )}
 
         {/* ── CROSS-PROMO Flash — persona Recherche large ── */}
-        <div className="mt-12 py-6 px-6 rounded-3xl bg-[var(--accent-luxury)]/[0.03] border border-[var(--accent-luxury)]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm overflow-hidden relative group">
+        <div className="mt-12 py-6 px-6 rounded-3xl bg-[var(--accent-luxury)]/[0.03] border border-accent-luxury/10 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm overflow-hidden relative group">
           {/* Subtle background glow */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--accent-luxury)]/5 blur-3xl -mr-16 -mt-16 rounded-full" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-accent-luxury/5 blur-3xl -mr-16 -mt-16 rounded-full" />
           
           <div className="relative">
             <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--accent-luxury)] mb-2">{t.bien.alsoAvailable}</p>
@@ -581,7 +583,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
           </div>
           <Link
             href="/offre-flash"
-            className="relative shrink-0 flex items-center justify-center gap-2.5 px-6 py-3.5 bg-[var(--accent-luxury)] hover:bg-[var(--accent-luxury)]/90 text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all shadow-xl shadow-[var(--accent-glow)]/20 active:scale-95"
+            className="relative shrink-0 flex items-center justify-center gap-2.5 px-6 py-3.5 bg-[var(--accent-luxury)] hover:bg-accent-luxury/90 text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all shadow-xl shadow-[var(--accent-glow)] active:scale-95"
           >
             <Flame className="w-4 h-4" />
             {t.bien.promoCta}
@@ -589,7 +591,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
         </div>
       </div>
 
-      <footer className="border-t border-slate-100 py-8 text-center text-slate-400 text-xs">
+      <footer className="border-t border-[var(--border)] py-8 text-center text-[var(--text-subtle)] text-xs">
         © 2026 BOGBE&apos;S GROUPE Multi Services — Tous droits réservés
       </footer>
       </div>{/* /white-card */}

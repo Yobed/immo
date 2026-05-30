@@ -7,7 +7,7 @@ export function PublishChoiceTeaser() {
   return (
     <section className="relative py-16 md:py-24 bg-[var(--background)] overflow-hidden">
       {/* Decorative top divider */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--accent-luxury)]/30 to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent-luxury/30 to-transparent" />
 
       <div className="relative z-10 mx-auto px-4 md:px-6 max-w-7xl">
         {/* Header */}
@@ -19,7 +19,7 @@ export function PublishChoiceTeaser() {
             Mettez votre bien<br />
             <span className="italic font-light text-[var(--accent-luxury)]">en lumière</span>
           </h2>
-          <p className="text-slate-400 text-sm md:text-base mt-5 leading-relaxed">
+          <p className="text-[var(--text-subtle)] text-sm md:text-base mt-5 leading-relaxed">
             Deux parcours adaptés à votre profil. Vous choisissez la voie qui vous correspond.
           </p>
         </div>
@@ -29,27 +29,27 @@ export function PublishChoiceTeaser() {
           {/* PRO - Premium card */}
           <Link
             href="/login?next=/mes-biens/nouveau"
-            className="group relative bg-gradient-to-br from-[#1a1f2e] via-[#0f172a] to-[#020617] rounded-3xl p-7 md:p-9 border border-white/10 hover:border-[var(--accent-luxury)]/50 transition-all duration-500 overflow-hidden"
+            className="group relative bg-gradient-to-br from-[#1a1f2e] via-[#0f172a] to-[#020617] rounded-3xl p-7 md:p-9 border border-white/10 hover:border-accent-luxury/50 transition-all duration-500 overflow-hidden"
           >
             {/* Glow */}
-            <div className="absolute -top-20 -right-20 w-60 h-60 bg-[var(--accent-luxury)]/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            <div className="absolute -top-20 -right-20 w-60 h-60 bg-accent-luxury/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
             <div className="relative z-10">
               {/* Crown badge */}
-              <div className="absolute top-0 right-0 flex items-center gap-1 px-2.5 py-1 bg-[var(--accent-luxury)]/20 border border-[var(--accent-luxury)]/40 rounded-full">
+              <div className="absolute top-0 right-0 flex items-center gap-1 px-2.5 py-1 bg-accent-luxury/20 border border-accent-luxury/40 rounded-full">
                 <Crown className="w-3 h-3 text-[var(--accent-luxury)]" />
                 <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--accent-luxury)]">Premium</span>
               </div>
 
               {/* Icon */}
-              <div className="w-14 h-14 rounded-2xl bg-[var(--accent-luxury)]/10 border border-[var(--accent-luxury)]/30 flex items-center justify-center mb-6">
+              <div className="w-14 h-14 rounded-2xl bg-accent-luxury/10 border border-accent-luxury/30 flex items-center justify-center mb-6">
                 <Building2 className="w-6 h-6 text-[var(--accent-luxury)]" strokeWidth={1.5} />
               </div>
 
               <h3 className="font-display text-2xl md:text-3xl font-bold text-white mb-3 leading-tight">
                 Compte Propriétaire
               </h3>
-              <p className="text-slate-400 text-sm md:text-base leading-relaxed mb-6">
+              <p className="text-[var(--text-subtle)] text-sm md:text-base leading-relaxed mb-6">
                 Inscrivez-vous, gérez vos annonces, suivez les visites, signez les baux en ligne. Affichez le badge <span className="text-[var(--accent-luxury)] font-semibold">Vérifié</span>.
               </p>
 
@@ -96,7 +96,7 @@ export function PublishChoiceTeaser() {
               <h3 className="font-display text-2xl md:text-3xl font-bold text-white mb-3 leading-tight">
                 Publier via WhatsApp
               </h3>
-              <p className="text-slate-400 text-sm md:text-base leading-relaxed mb-6">
+              <p className="text-[var(--text-subtle)] text-sm md:text-base leading-relaxed mb-6">
                 Collez votre annonce, ajoutez des photos. Notre IA extrait les infos. Vous validez en 1 clic via WhatsApp.
               </p>
 

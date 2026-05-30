@@ -61,6 +61,12 @@ html, body {
   --warning-soft:    rgba(180, 83, 9, 0.10);
   --info:            #1d4ed8;
   --info-soft:       rgba(29, 78, 216, 0.10);
+
+  /* RGB channel triplets (theme-independent) — let Tailwind opacity modifiers
+     work on these brand/semantic colors via named tokens. */
+  --accent-gold-rgb: 197 160 89;   /* #C5A059 */
+  --success-rgb:     4 120 87;     /* #047857 */
+  --info-rgb:        29 78 216;    /* #1d4ed8 */
 }
 
 /* ═══════════════════════════════════════════════
@@ -78,6 +84,20 @@ html, body {
 
   --border:          rgba(255, 255, 255, 0.08);
   --border-hover:    rgba(255, 255, 255, 0.12);
+
+  /* RGB channel triplets — consumed by theme-aware Tailwind tokens
+     (surface / muted / subtle / border). Keep in sync with the hex values above. */
+  --surface-rgb:        11 17 33;     /* #0b1121 */
+  --surface-card-rgb:   15 23 42;     /* #0f172a */
+  --surface-raised-rgb: 30 41 59;     /* #1e293b */
+  --muted-rgb:          148 163 184;  /* #94a3b8 */
+  --subtle-rgb:         100 116 139;  /* #64748b */
+  --border-rgb:         51 65 85;     /* slate-700 — subtle on dark */
+  --border-hover-rgb:   71 85 105;    /* slate-600 */
+  --text-rgb:           248 250 252;  /* #f8fafc */
+  --background-rgb:     2 4 10;       /* #02040a */
+  --accent-luxury-rgb:  251 191 36;   /* #fbbf24 */
+  --on-primary-rgb:     255 255 255;  /* #ffffff */
 
   --accent-luxury:        #fbbf24;
   --accent-glow:          rgba(251, 191, 36, 0.25);
@@ -121,6 +141,20 @@ html, body {
 
   --border:          #e8e4db;   /* Champagne border */
   --border-hover:    #dcd7cc;
+
+  /* RGB channel triplets — consumed by theme-aware Tailwind tokens
+     (surface / muted / subtle / border). Keep in sync with the hex values above. */
+  --surface-rgb:        255 255 255;  /* #ffffff */
+  --surface-card-rgb:   255 255 255;  /* #ffffff */
+  --surface-raised-rgb: 247 245 240;  /* #f7f5f0 */
+  --muted-rgb:          100 116 139;  /* #64748b */
+  --subtle-rgb:         148 163 184;  /* #94a3b8 */
+  --border-rgb:         232 228 219;  /* #e8e4db */
+  --border-hover-rgb:   220 215 204;  /* #dcd7cc */
+  --text-rgb:           26 28 30;     /* #1a1c1e */
+  --background-rgb:     253 252 249;  /* #fdfcf9 */
+  --accent-luxury-rgb:  146 64 14;    /* #92400e */
+  --on-primary-rgb:     255 255 255;  /* #ffffff */
 
   --accent-luxury:        #92400e;
   --accent-glow:          rgba(146, 64, 14, 0.15);

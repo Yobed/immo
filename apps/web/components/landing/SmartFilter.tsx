@@ -50,7 +50,7 @@ export function SmartFilter({ onFilterChange }: SmartFilterProps) {
 
   return (
     <div className="w-full mb-10">
-      <div className="flex flex-wrap items-center gap-4 bg-[var(--midnight-muted)]/50 border border-[var(--border)] p-2 rounded-2xl backdrop-blur-md">
+      <div className="flex flex-wrap items-center gap-4 bg-surface-raised/50 border border-[var(--border)] p-2 rounded-2xl backdrop-blur-md">
         
         {/* Quick Range / Budget */}
         <div className="flex-1 min-w-[200px] relative group">
@@ -67,7 +67,7 @@ export function SmartFilter({ onFilterChange }: SmartFilterProps) {
               onFilterChange({ prixMax: e.target.value, commune, typeBien })
             }}
             placeholder="Budget max (FCFA)..."
-            className="w-full bg-[var(--midnight-light)]/40 border-none rounded-xl py-3.5 pl-12 pr-4 text-sm font-sans focus:ring-1 focus:ring-[var(--accent-luxury)]/30 transition-all placeholder:text-[var(--text-muted)]"
+            className="w-full bg-surface-raised/40 border-none rounded-xl py-3.5 pl-12 pr-4 text-sm font-sans focus:ring-1 focus:ring-accent-luxury/30 transition-all placeholder:text-[var(--text-muted)]"
           />
         </div>
 
@@ -141,7 +141,7 @@ export function SmartFilter({ onFilterChange }: SmartFilterProps) {
                 "flex items-center justify-center w-10 h-10 rounded-xl border transition-all duration-300 animate-pulse",
                 isListening 
                   ? "bg-red-500/20 border-red-500 text-red-500" 
-                  : "bg-[var(--midnight-light)]/40 border-[var(--accent-luxury)]/40 text-[var(--accent-luxury)] hover:border-[var(--accent-luxury)]"
+                  : "bg-surface-raised/40 border-accent-luxury/40 text-[var(--accent-luxury)] hover:border-[var(--accent-luxury)]"
               )}
               title="Recherche Vocale"
             >
@@ -155,7 +155,7 @@ export function SmartFilter({ onFilterChange }: SmartFilterProps) {
             {/* Listening Wave Interface Overlay */}
             {isListening && (
               <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm pointer-events-none">
-                 <div className="bg-[#0a0a18]/90 border border-[var(--accent-luxury)]/30 p-8 rounded-3xl flex flex-col items-center gap-6 shadow-[0_0_100px_rgba(212,175,55,0.1)]">
+                 <div className="bg-[#0a0a18]/90 border border-accent-luxury/30 p-8 rounded-3xl flex flex-col items-center gap-6 shadow-[0_0_100px_rgba(212,175,55,0.1)]">
                     <div className="flex gap-1.5 h-12 items-center">
                        {[1,2,3,4,5,6,3,2,4,2].map((h, i) => (
                          <div 
@@ -187,7 +187,7 @@ export function SmartFilter({ onFilterChange }: SmartFilterProps) {
               setTypeBien('')
               onFilterChange({ prixMax: '', commune: '', typeBien: '' })
             }}
-            className="flex items-center justify-center w-10 h-10 rounded-xl border border-[var(--danger)]/30 text-[var(--danger)] hover:bg-[var(--danger)]/10 transition-colors"
+            className="flex items-center justify-center w-10 h-10 rounded-xl border border-danger/30 text-danger hover:bg-danger/10 transition-colors"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="M18 6L6 18M6 6l12 12" />
@@ -210,7 +210,7 @@ export function SmartFilter({ onFilterChange }: SmartFilterProps) {
                 onFilterChange({ prixMax, commune: s, typeBien })
               }
             }}
-            className="text-[10px] text-[var(--accent-luxury)]/70 hover:text-[var(--accent-luxury)] transition-colors border-b border-transparent hover:border-[var(--accent-luxury)] pb-0.5"
+            className="text-[10px] text-accent-luxury/70 hover:text-[var(--accent-luxury)] transition-colors border-b border-transparent hover:border-[var(--accent-luxury)] pb-0.5"
            >
              {s}
            </button>

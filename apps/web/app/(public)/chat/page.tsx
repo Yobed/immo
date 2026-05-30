@@ -22,7 +22,7 @@ export default function ChatPage() {
           </p>
         </div>
         
-        <div className="flex-1 rounded-[2.5rem] overflow-hidden border border-off-white/10 shadow-2xl bg-[var(--midnight-muted)]/50 backdrop-blur-xl" style={{ minHeight: '650px' }}>
+        <div className="flex-1 rounded-[2.5rem] overflow-hidden border border-off-white/10 shadow-2xl bg-surface-raised/50 backdrop-blur-xl" style={{ minHeight: '650px' }}>
           <ChatBot />
         </div>
       </div>

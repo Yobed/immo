@@ -14,9 +14,9 @@ export function Step2Prix({ form }: { form: UseFormReturn<BienFormData> }) {
 
       {isNuitee ? (
         <>
-          <div className="px-4 py-3 bg-primary/5 border border-primary/20 rounded-card">
-            <p className="text-sm font-sans text-primary font-medium">Résidence meublée — location à la nuitée</p>
-            <p className="text-xs text-muted mt-0.5">Indiquer le tarif par nuit. Le total sera calculé automatiquement selon la durée du séjour.</p>
+          <div className="px-4 py-3 bg-[var(--accent-luxury-muted)] border border-accent-luxury/20 rounded-card">
+            <p className="text-sm font-sans text-[var(--accent-luxury)] font-medium">Résidence meublée — location à la nuitée</p>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">Indiquer le tarif par nuit. Le total sera calculé automatiquement selon la durée du séjour.</p>
           </div>
           <Input
             label="Prix par nuit (FCFA) *"
@@ -35,7 +35,7 @@ export function Step2Prix({ form }: { form: UseFormReturn<BienFormData> }) {
         </>
       ) : (
         <>
-          <p className="text-sm text-muted font-sans">Indiquer au moins un prix (location mensuelle ou vente)</p>
+          <p className="text-sm text-[var(--text-muted)] font-sans">Indiquer au moins un prix (location mensuelle ou vente)</p>
           <Input
             label="Loyer mensuel (FCFA)"
             type="number"

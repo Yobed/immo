@@ -15,7 +15,7 @@ export function RecentlyViewed() {
     <section className="py-12 px-4 md:px-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-[var(--accent-luxury)]/10 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-xl bg-accent-luxury/10 flex items-center justify-center">
             <Clock className="w-4 h-4 text-[var(--accent-luxury)]" />
           </div>
           <div>

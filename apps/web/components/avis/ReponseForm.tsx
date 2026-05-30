@@ -56,7 +56,7 @@ export function ReponseForm({ avisId }: ReponseFormProps) {
         rows={2}
         maxLength={500}
         placeholder="Votre réponse..."
-        className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
+        className="w-full border border-[var(--border)] rounded-md px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
         autoFocus
       />
       {error && <p className="text-xs text-red-600">{error}</p>}

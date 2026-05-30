@@ -55,7 +55,7 @@ export default async function VisitesPropriétairePage() {
         ) : (
           <div className="space-y-4">
             {(visites as any[]).map((visite) => (
-              <div key={visite.id} className="bg-white rounded-card border border-[var(--border)] p-5">
+              <div key={visite.id} className="bg-[var(--surface-card)] rounded-card border border-[var(--border)] p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">

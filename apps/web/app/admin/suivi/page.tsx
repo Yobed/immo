@@ -213,27 +213,27 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
   const qParam = q ? `&q=${encodeURIComponent(q)}` : ''
 
   return (
-    <main className="min-h-screen bg-slate-50">
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
+    <main className="min-h-screen bg-[var(--surface-hover)]">
+      <div className="bg-[var(--surface-card)] border-b border-[var(--border)] sticky top-0 z-10">
         <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <ShieldCheck className="w-6 h-6 text-slate-700" />
+            <ShieldCheck className="w-6 h-6 text-[var(--text)]" />
             <div>
-              <h1 className="font-bold text-slate-900 text-lg leading-none">Suivi & Intermédiation</h1>
-              <p className="text-slate-400 text-xs mt-1">
+              <h1 className="font-bold text-[var(--text)] text-lg leading-none">Suivi & Intermédiation</h1>
+              <p className="text-[var(--text-subtle)] text-xs mt-1">
                 {visitesPending ?? 0} visite{(visitesPending ?? 0) > 1 ? 's' : ''} · {reservationsPending ?? 0} réservation{(reservationsPending ?? 0) > 1 ? 's' : ''} en attente
               </p>
             </div>
           </div>
-          <Link href="/admin/moderation" className="text-slate-400 hover:text-slate-700 text-xs font-medium">Modération biens →</Link>
+          <Link href="/admin/moderation" className="text-[var(--text-subtle)] hover:text-[var(--text)] text-xs font-medium">Modération biens →</Link>
         </div>
 
         {/* Tabs */}
-        <div className="max-w-[1600px] mx-auto px-6 flex items-center gap-1 border-b border-slate-100">
+        <div className="max-w-[1600px] mx-auto px-6 flex items-center gap-1 border-b border-[var(--border)]">
           <Link
             href={`/admin/suivi?tab=visites&view=${view}${qParam}`}
             className={`px-4 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${
-              tab === 'visites' ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700'
+              tab === 'visites' ? 'border-slate-900 text-[var(--text)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text)]'
             }`}
           >
             <Home className="w-4 h-4" /> Visites
@@ -244,7 +244,7 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
           <Link
             href={`/admin/suivi?tab=reservations&view=${view}${qParam}`}
             className={`px-4 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${
-              tab === 'reservations' ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-500 hover:text-slate-700'
+              tab === 'reservations' ? 'border-slate-900 text-[var(--text)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text)]'
             }`}
           >
             <BedDouble className="w-4 h-4" /> Réservations
@@ -260,11 +260,11 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
           <input type="hidden" name="view" value={view} />
 
           {/* Toggle kanban / liste */}
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+          <div className="flex items-center gap-1 bg-[var(--surface-hover)] p-1 rounded-xl">
             <Link
               href={`/admin/suivi?tab=${tab}&view=kanban${qParam}`}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                view === 'kanban' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                view === 'kanban' ? 'bg-[var(--surface-card)] text-[var(--text)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text)]'
               }`}
             >
               <LayoutGrid className="w-3.5 h-3.5" /> Kanban
@@ -272,7 +272,7 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
             <Link
               href={`/admin/suivi?tab=${tab}&view=list&status=pending${qParam}`}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                view === 'list' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                view === 'list' ? 'bg-[var(--surface-card)] text-[var(--text)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text)]'
               }`}
             >
               <ListIcon className="w-3.5 h-3.5" /> Liste
@@ -281,13 +281,13 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
 
           {/* Filtre statut (uniquement en mode liste) */}
           {view === 'list' && (
-            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+            <div className="flex items-center gap-1 bg-[var(--surface-hover)] p-1 rounded-xl">
               {(['pending', 'approved', 'rejected', 'all'] as const).map((s) => (
                 <Link
                   key={s}
                   href={`/admin/suivi?tab=${tab}&view=list&status=${s}${qParam}`}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                    listStatus === s ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                    listStatus === s ? 'bg-[var(--surface-card)] text-[var(--text)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text)]'
                   }`}
                 >
                   {s === 'pending' && 'En attente'}
@@ -304,7 +304,7 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
             name="q"
             defaultValue={q}
             placeholder="Bien, commune, nom, téléphone..."
-            className="flex-1 min-w-[260px] px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-slate-400"
+            className="flex-1 min-w-[260px] px-4 py-2 bg-[var(--surface-hover)] border border-[var(--border)] rounded-xl text-sm focus:outline-none focus:border-slate-400"
           />
           <button type="submit" className="px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800">
             Filtrer
@@ -347,18 +347,18 @@ function KanbanView({
         return (
           <div
             key={status}
-            className={`bg-white rounded-2xl border border-slate-200 border-t-4 ${meta.col} flex flex-col min-h-[200px]`}
+            className={`bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] border-t-4 ${meta.col} flex flex-col min-h-[200px]`}
           >
-            <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+            <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Icon className="w-4 h-4 text-slate-500" />
-                <h2 className="font-bold text-slate-900 text-sm uppercase tracking-wide">{meta.label}</h2>
+                <Icon className="w-4 h-4 text-[var(--text-muted)]" />
+                <h2 className="font-bold text-[var(--text)] text-sm uppercase tracking-wide">{meta.label}</h2>
               </div>
-              <span className="text-xs font-bold text-slate-400">{items.length}</span>
+              <span className="text-xs font-bold text-[var(--text-subtle)]">{items.length}</span>
             </div>
             <div className="p-3 flex flex-col gap-3 max-h-[calc(100vh-260px)] overflow-y-auto">
               {items.length === 0 ? (
-                <p className="text-slate-300 text-xs italic text-center py-8">Vide</p>
+                <p className="text-[var(--text-subtle)] text-xs italic text-center py-8">Vide</p>
               ) : tab === 'visites' ? (
                 (items as VisiteRow[]).map((v) => <VisiteCard key={v.id} v={v} compact />)
               ) : (
@@ -399,8 +399,8 @@ function ListView({
 
 function EmptyState({ label }: { label: string }) {
   return (
-    <div className="bg-white rounded-2xl p-12 border border-slate-200 text-center">
-      <p className="text-slate-400 text-sm">{label}</p>
+    <div className="bg-[var(--surface-card)] rounded-2xl p-12 border border-[var(--border)] text-center">
+      <p className="text-[var(--text-subtle)] text-sm">{label}</p>
     </div>
   )
 }
@@ -411,12 +411,12 @@ function VisiteCard({ v, compact = false }: { v: VisiteRow; compact?: boolean })
   return (
     <Link
       href={`/admin/suivi/visites/${v.id}`}
-      className="bg-white rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all p-3 flex flex-col gap-2"
+      className="bg-[var(--surface-card)] rounded-xl border border-[var(--border)] hover:border-[var(--border)] hover:shadow-md transition-all p-3 flex flex-col gap-2"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <h3 className="font-bold text-slate-900 text-sm line-clamp-1">{v.biens?.titre || 'Bien'}</h3>
-          <p className="text-slate-500 text-xs flex items-center gap-1 mt-0.5">
+          <h3 className="font-bold text-[var(--text)] text-sm line-clamp-1">{v.biens?.titre || 'Bien'}</h3>
+          <p className="text-[var(--text-muted)] text-xs flex items-center gap-1 mt-0.5">
             <MapPin className="w-3 h-3" />
             {v.biens?.commune || '—'}
             {v.source === 'whatsapp' && <span className="ml-1 text-emerald-600">· WA</span>}
@@ -425,28 +425,28 @@ function VisiteCard({ v, compact = false }: { v: VisiteRow; compact?: boolean })
         {!compact && adminBadge(v.admin_validation_status)}
       </div>
 
-      <div className="space-y-0.5 text-xs text-slate-600">
+      <div className="space-y-0.5 text-xs text-[var(--text-muted)]">
         <p className="flex items-center gap-1.5">
-          <User className="w-3 h-3 text-slate-400" />
-          <span className="font-semibold text-slate-700 truncate">{visitorName}</span>
+          <User className="w-3 h-3 text-[var(--text-subtle)]" />
+          <span className="font-semibold text-[var(--text)] truncate">{visitorName}</span>
         </p>
         <p className="flex items-center gap-1.5">
-          <Phone className="w-3 h-3 text-slate-400" />
+          <Phone className="w-3 h-3 text-[var(--text-subtle)]" />
           <span className="truncate">{visitorPhone}</span>
         </p>
         <p className="flex items-center gap-1.5">
-          <Calendar className="w-3 h-3 text-slate-400" />
+          <Calendar className="w-3 h-3 text-[var(--text-subtle)]" />
           {formatDate(v.date_souhaitee)}
           {v.heure_debut && v.heure_fin && (
             <>
-              <Clock className="w-3 h-3 text-slate-400 ml-1" />
+              <Clock className="w-3 h-3 text-[var(--text-subtle)] ml-1" />
               {v.heure_debut} - {v.heure_fin}
             </>
           )}
         </p>
       </div>
 
-      <div className="flex items-center justify-between pt-1.5 border-t border-slate-100 text-[10px] text-slate-400">
+      <div className="flex items-center justify-between pt-1.5 border-t border-[var(--border)] text-[10px] text-[var(--text-subtle)]">
         <span>Reçue {formatDateTime(v.created_at)}</span>
         <NotifDots ownerNotified={!!v.owner_notified_at} visitorNotified={!!v.visitor_notified_at} />
       </div>
@@ -458,12 +458,12 @@ function ReservationCard({ r, compact = false }: { r: ReservationRow; compact?: 
   return (
     <Link
       href={`/admin/suivi/reservations/${r.id}`}
-      className="bg-white rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all p-3 flex flex-col gap-2"
+      className="bg-[var(--surface-card)] rounded-xl border border-[var(--border)] hover:border-[var(--border)] hover:shadow-md transition-all p-3 flex flex-col gap-2"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <h3 className="font-bold text-slate-900 text-sm line-clamp-1">{r.biens?.titre || 'Bien'}</h3>
-          <p className="text-slate-500 text-xs flex items-center gap-1 mt-0.5">
+          <h3 className="font-bold text-[var(--text)] text-sm line-clamp-1">{r.biens?.titre || 'Bien'}</h3>
+          <p className="text-[var(--text-muted)] text-xs flex items-center gap-1 mt-0.5">
             <MapPin className="w-3 h-3" />
             {r.biens?.commune || '—'}
           </p>
@@ -471,25 +471,25 @@ function ReservationCard({ r, compact = false }: { r: ReservationRow; compact?: 
         {!compact && adminBadge(r.admin_validation_status)}
       </div>
 
-      <div className="space-y-0.5 text-xs text-slate-600">
+      <div className="space-y-0.5 text-xs text-[var(--text-muted)]">
         <p className="flex items-center gap-1.5">
-          <User className="w-3 h-3 text-slate-400" />
-          <span className="font-semibold text-slate-700 truncate">{r.locataire?.full_name || 'Visiteur'}</span>
+          <User className="w-3 h-3 text-[var(--text-subtle)]" />
+          <span className="font-semibold text-[var(--text)] truncate">{r.locataire?.full_name || 'Visiteur'}</span>
         </p>
         <p className="flex items-center gap-1.5">
-          <Phone className="w-3 h-3 text-slate-400" />
+          <Phone className="w-3 h-3 text-[var(--text-subtle)]" />
           <span className="truncate">{r.locataire?.phone || '—'}</span>
         </p>
         <p className="flex items-center gap-1.5">
-          <Calendar className="w-3 h-3 text-slate-400" />
+          <Calendar className="w-3 h-3 text-[var(--text-subtle)]" />
           {formatDate(r.date_debut)} → {formatDate(r.date_fin)}
         </p>
-        <p className="font-bold text-slate-900 text-sm pt-1">
+        <p className="font-bold text-[var(--text)] text-sm pt-1">
           {formatFCFA(r.montant_total_fcfa ?? 0)}
         </p>
       </div>
 
-      <div className="flex items-center justify-between pt-1.5 border-t border-slate-100 text-[10px] text-slate-400">
+      <div className="flex items-center justify-between pt-1.5 border-t border-[var(--border)] text-[10px] text-[var(--text-subtle)]">
         <span>Reçue {formatDateTime(r.created_at)}</span>
         <NotifDots ownerNotified={!!r.owner_notified_at} visitorNotified={!!r.visitor_notified_at} />
       </div>

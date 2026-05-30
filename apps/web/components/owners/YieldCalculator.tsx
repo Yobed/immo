@@ -26,7 +26,7 @@ export default function YieldCalculator() {
         {/* Controls */}
         <div className="p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-[var(--border)]">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-[var(--accent-luxury)]/10 flex items-center justify-center text-[var(--accent-luxury)]">
+            <div className="w-10 h-10 rounded-xl bg-accent-luxury/10 flex items-center justify-center text-[var(--accent-luxury)]">
               <Calculator className="w-5 h-5" />
             </div>
             <div>
@@ -122,7 +122,7 @@ export default function YieldCalculator() {
         {/* Results */}
         <div className="bg-[var(--background)] p-8 lg:p-12 flex flex-col justify-center relative overflow-hidden">
           {/* Decorative background */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--accent-luxury)]/5 rounded-full blur-3xl -mr-32 -mt-32" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-accent-luxury/5 rounded-full blur-3xl -mr-32 -mt-32" />
           
           <div className="relative z-10 space-y-10">
             <div className="text-center">

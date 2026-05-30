@@ -36,7 +36,7 @@ export function AdminShell({ email, pendingCount = 0, children }: AdminShellProp
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[var(--surface-hover)]">
       <header className="relative z-30 bg-[#0a0e1a] text-white border-b border-white/10 shadow-md">
         <div className="max-w-[1400px] mx-auto px-4 lg:px-6 h-14 flex items-center gap-3">
           {/* Marque console admin */}

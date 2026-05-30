@@ -104,8 +104,8 @@ export function BienMap({ latitude, longitude, titre, commune, hauteur = 300 }: 
         disabled={loading}
         className={[
           size === 'lg'
-            ? 'flex items-center gap-2 px-5 py-3 bg-white rounded-2xl font-bold text-[13px] text-slate-800 shadow-xl border border-slate-200 active:scale-95 transition-all disabled:opacity-60'
-            : 'flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl font-bold text-[12px] text-slate-800 shadow-lg border border-slate-200 active:scale-95 transition-all disabled:opacity-60',
+            ? 'flex items-center gap-2 px-5 py-3 bg-[var(--surface-card)] rounded-2xl font-bold text-[13px] text-[var(--text)] shadow-xl border border-[var(--border)] active:scale-95 transition-all disabled:opacity-60'
+            : 'flex items-center gap-2 px-4 py-2.5 bg-[var(--surface-card)] rounded-xl font-bold text-[12px] text-[var(--text)] shadow-lg border border-[var(--border)] active:scale-95 transition-all disabled:opacity-60',
           !route && !loading ? 'shadow-amber-400/30' : '',
         ].join(' ')}
       >
@@ -125,7 +125,7 @@ export function BienMap({ latitude, longitude, titre, commune, hauteur = 300 }: 
       {/* ── CARTE INLINE ── */}
       {!fullscreen && (
         <div
-          className="w-full rounded-2xl overflow-hidden border border-slate-200 relative shadow-md"
+          className="w-full rounded-2xl overflow-hidden border border-[var(--border)] relative shadow-md"
           style={{ height: hauteur }}
         >
           <Map
@@ -151,7 +151,7 @@ export function BienMap({ latitude, longitude, titre, commune, hauteur = 300 }: 
 
           <button
             onClick={() => setFullscreen(true)}
-            className="absolute bottom-3 right-3 w-10 h-10 flex items-center justify-center bg-white rounded-xl shadow-lg border border-slate-200 text-slate-600 hover:text-slate-900 active:scale-95 transition-all"
+            className="absolute bottom-3 right-3 w-10 h-10 flex items-center justify-center bg-[var(--surface-card)] rounded-xl shadow-lg border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] active:scale-95 transition-all"
             title="Plein écran"
           >
             <Maximize2 className="w-4 h-4" />
@@ -165,7 +165,7 @@ export function BienMap({ latitude, longitude, titre, commune, hauteur = 300 }: 
 
           {!hasCoords && (
             <div className="absolute bottom-3 left-0 right-0 flex justify-center pointer-events-none">
-              <span className="bg-white/90 text-slate-600 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-full shadow border border-slate-200">
+              <span className="bg-white/90 text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-full shadow border border-[var(--border)]">
                 Position approximative{commune ? ` · ${commune}` : ''}
               </span>
             </div>
@@ -177,16 +177,16 @@ export function BienMap({ latitude, longitude, titre, commune, hauteur = 300 }: 
       {fullscreen && (
         <div className="fixed inset-0 z-[500] flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200 shrink-0 shadow-sm">
+          <div className="flex items-center justify-between px-4 py-3 bg-[var(--surface-card)] border-b border-[var(--border)] shrink-0 shadow-sm">
             <div>
-              <p className="font-bold text-slate-900 text-sm leading-none">{titre}</p>
-              {commune && <p className="text-slate-400 text-xs mt-0.5">{commune}</p>}
+              <p className="font-bold text-[var(--text)] text-sm leading-none">{titre}</p>
+              {commune && <p className="text-[var(--text-subtle)] text-xs mt-0.5">{commune}</p>}
             </div>
             <button
               onClick={() => setFullscreen(false)}
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition-colors"
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-[var(--surface-hover)] hover:bg-[var(--surface-hover)] transition-colors"
             >
-              <X className="w-5 h-5 text-slate-700" />
+              <X className="w-5 h-5 text-[var(--text)]" />
             </button>
           </div>
 
@@ -221,7 +221,7 @@ export function BienMap({ latitude, longitude, titre, commune, hauteur = 300 }: 
 
             {!hasCoords && (
               <div className="absolute bottom-8 left-0 right-0 flex justify-center pointer-events-none">
-                <span className="bg-white/90 text-slate-600 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-full shadow border border-slate-200">
+                <span className="bg-white/90 text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-full shadow border border-[var(--border)]">
                   Position approximative{commune ? ` · ${commune}` : ''}
                 </span>
               </div>

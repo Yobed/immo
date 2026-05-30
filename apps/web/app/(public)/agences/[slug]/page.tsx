@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { STATUTS_PUBLICS } from '@/lib/catalogue/statuts'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -64,7 +65,7 @@ export default async function AgencePublicPage({ params }: PageProps) {
       biens_medias(url, est_couverture, ordre)
     `)
     .eq('agence_id', a.id)
-    .eq('statut', 'publie')
+    .in('statut', [...STATUTS_PUBLICS])
     .order('created_at', { ascending: false })
     .limit(24)
 
@@ -98,7 +99,7 @@ export default async function AgencePublicPage({ params }: PageProps) {
             ) : (
               <div
                 aria-hidden
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-card bg-[var(--accent-luxury)]/15 text-[var(--accent-luxury)] flex items-center justify-center font-display text-3xl sm:text-4xl font-semibold shrink-0"
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-card bg-accent-luxury/15 text-[var(--accent-luxury)] flex items-center justify-center font-display text-3xl sm:text-4xl font-semibold shrink-0"
               >
                 {a.nom_commercial.charAt(0).toUpperCase()}
               </div>
@@ -109,7 +110,7 @@ export default async function AgencePublicPage({ params }: PageProps) {
                 <h1 className="font-display text-3xl sm:text-4xl text-[var(--text)] tracking-tight">
                   {a.nom_commercial}
                 </h1>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-pill bg-[var(--accent-luxury)]/10 text-[var(--accent-luxury)] text-xs font-sans font-medium">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-pill bg-accent-luxury/10 text-[var(--accent-luxury)] text-xs font-sans font-medium">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
@@ -165,7 +166,7 @@ export default async function AgencePublicPage({ params }: PageProps) {
         </div>
 
         {total === 0 ? (
-          <div className="bg-white rounded-card border border-[var(--border)] p-10 text-center">
+          <div className="bg-[var(--surface-card)] rounded-card border border-[var(--border)] p-10 text-center">
             <p className="font-sans text-muted">
               Aucun bien publié pour le moment.
             </p>

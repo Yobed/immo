@@ -42,7 +42,7 @@ const ServicesPage = () => {
     <div className="min-h-screen bg-[var(--midnight)] text-white pt-24 pb-20">
       {/* Hero Section */}
       <section className="relative px-6 lg:px-20 mb-32 overflow-hidden">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[var(--accent-luxury)]/10 blur-[150px] rounded-full -z-10 animate-pulse" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent-luxury/10 blur-[150px] rounded-full -z-10 animate-pulse" />
         <div className="max-w-4xl">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8 backdrop-blur-md">
             <Sparkles className="w-4 h-4 text-[var(--accent-luxury)]" />
@@ -63,7 +63,7 @@ const ServicesPage = () => {
           {services.map((service, index) => (
             <div 
               key={index}
-              className="group relative h-[600px] rounded-[40px] overflow-hidden border border-white/10 hover:border-[var(--accent-luxury)]/30 transition-all duration-700 hover:-translate-y-4 shadow-2xl"
+              className="group relative h-[600px] rounded-[40px] overflow-hidden border border-white/10 hover:border-accent-luxury/30 transition-all duration-700 hover:-translate-y-4 shadow-2xl"
             >
               <div className="absolute inset-0 z-0">
                 <img 
@@ -71,11 +71,11 @@ const ServicesPage = () => {
                   alt={service.title}
                   className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-40 group-hover:opacity-60"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[var(--midnight)] via-[var(--midnight)]/50 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[var(--midnight)] via-background/50 to-transparent" />
               </div>
 
               <div className="absolute inset-0 z-10 p-10 flex flex-col justify-end">
-                <div className="w-16 h-16 rounded-2xl bg-[var(--accent-luxury)]/20 border border-[var(--accent-luxury)]/30 flex items-center justify-center mb-8 backdrop-blur-xl group-hover:bg-[var(--accent-luxury)] group-hover:text-[var(--midnight)] transition-all duration-500">
+                <div className="w-16 h-16 rounded-2xl bg-accent-luxury/20 border border-accent-luxury/30 flex items-center justify-center mb-8 backdrop-blur-xl group-hover:bg-[var(--accent-luxury)] group-hover:text-[var(--midnight)] transition-all duration-500">
                   {service.icon}
                 </div>
                 <span className="text-[10px] uppercase tracking-widest font-bold text-[var(--accent-luxury)] mb-4">{service.tag}</span>
@@ -100,7 +100,7 @@ const ServicesPage = () => {
           </div>
 
           <div className="flex-1 space-y-10">
-            <div className="w-20 h-20 rounded-full bg-[var(--midnight)] border-2 border-[var(--accent-luxury)]/50 flex items-center justify-center animate-bounce duration-[3000ms]">
+            <div className="w-20 h-20 rounded-full bg-[var(--midnight)] border-2 border-accent-luxury/50 flex items-center justify-center animate-bounce duration-[3000ms]">
               <Sparkles className="w-10 h-10 text-[var(--accent-luxury)]" />
             </div>
             <div>
@@ -127,7 +127,7 @@ const ServicesPage = () => {
                {/* Mockup Chat UI */}
                <div className="space-y-6">
                  <div className="flex justify-end">
-                   <div className="bg-[var(--accent-luxury)]/10 text-[var(--accent-luxury)] p-4 rounded-2xl rounded-tr-none text-sm font-medium max-w-[80%] border border-[var(--accent-luxury)]/20">
+                   <div className="bg-accent-luxury/10 text-[var(--accent-luxury)] p-4 rounded-2xl rounded-tr-none text-sm font-medium max-w-[80%] border border-accent-luxury/20">
                      Je cherche une villa avec piscine à Marcory Zone 4.
                    </div>
                  </div>
@@ -155,7 +155,7 @@ const ServicesPage = () => {
             </div>
             
             {/* Visual element floating */}
-            <div className="absolute -bottom-8 -right-8 w-40 h-40 bg-[var(--accent-luxury)]/10 blur-3xl rounded-full" />
+            <div className="absolute -bottom-8 -right-8 w-40 h-40 bg-accent-luxury/10 blur-3xl rounded-full" />
           </div>
         </div>
       </section>

@@ -125,7 +125,7 @@ export function OnboardingChecklist({ userId }: Props) {
         <button
           onClick={dismiss}
           aria-label="Masquer la checklist"
-          className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-md text-slate-600 hover:text-slate-700 hover:bg-slate-100 transition-all"
+          className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-md text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-hover)] transition-all"
         >
           <X className="w-4 h-4" />
         </button>
@@ -136,7 +136,7 @@ export function OnboardingChecklist({ userId }: Props) {
           </div>
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-amber-700">Bienvenue</p>
-            <h3 className="font-display font-bold text-lg text-slate-900 leading-tight">
+            <h3 className="font-display font-bold text-lg text-[var(--text)] leading-tight">
               Active ton compte en {items.length} étapes
             </h3>
           </div>
@@ -145,7 +145,7 @@ export function OnboardingChecklist({ userId }: Props) {
         {/* Progress bar */}
         <div className="mt-4 mb-5">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-700">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text)]">
               {completed} / {items.length} terminées
             </span>
             <span className="text-[10px] font-bold text-amber-700">{progress}%</span>
@@ -167,22 +167,22 @@ export function OnboardingChecklist({ userId }: Props) {
                 href={item.href}
                 className={`flex items-center gap-3 p-3 rounded-xl transition-all border ${
                   item.done
-                    ? 'bg-emerald-50/50 border-emerald-100 text-slate-700'
-                    : 'bg-white border-slate-200 hover:border-amber-300 hover:shadow-sm text-slate-900'
+                    ? 'bg-emerald-50/50 border-emerald-100 text-[var(--text)]'
+                    : 'bg-[var(--surface-card)] border-[var(--border)] hover:border-amber-300 hover:shadow-sm text-[var(--text)]'
                 }`}
               >
                 {item.done ? (
                   <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" strokeWidth={2} />
                 ) : (
-                  <Circle className="w-5 h-5 text-slate-300 shrink-0" strokeWidth={2} />
+                  <Circle className="w-5 h-5 text-[var(--text-subtle)] shrink-0" strokeWidth={2} />
                 )}
                 <div className="flex-1 min-w-0">
                   <p className={`text-sm font-bold leading-tight ${item.done ? 'line-through opacity-60' : ''}`}>
                     {item.label}
                   </p>
-                  <p className="text-[11px] text-slate-700 mt-0.5 leading-relaxed">{item.desc}</p>
+                  <p className="text-[11px] text-[var(--text)] mt-0.5 leading-relaxed">{item.desc}</p>
                 </div>
-                {!item.done && <ArrowRight className="w-4 h-4 text-slate-600 shrink-0" />}
+                {!item.done && <ArrowRight className="w-4 h-4 text-[var(--text-muted)] shrink-0" />}
               </Link>
             </li>
           ))}

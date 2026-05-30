@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
         </p>
         <Link
           href="/login"
-          className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-[var(--accent-luxury)] border-b border-[var(--accent-luxury)]/20 pb-0.5 hover:border-[var(--accent-luxury)] transition-all"
+          className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-[var(--accent-luxury)] border-b border-accent-luxury/20 pb-0.5 hover:border-[var(--accent-luxury)] transition-all"
         >
           Retourner à la connexion <ArrowRight size={14} />
         </Link>
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
     >
       {/* Header */}
       <div className="text-center space-y-4">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-[var(--accent-luxury)]/10 text-[var(--accent-luxury)] mb-2 shadow-inner border border-[var(--accent-luxury)]/20">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-accent-luxury/10 text-[var(--accent-luxury)] mb-2 shadow-inner border border-accent-luxury/20">
           <KeyRound size={28} strokeWidth={2.5} />
         </div>
         <h1 className="text-3xl md:text-4xl font-black text-[var(--text)] font-display tracking-tight uppercase italic leading-none">
@@ -115,7 +115,7 @@ export default function ForgotPasswordPage() {
               aria-required="true"
               aria-invalid={errors.email ? 'true' : 'false'}
               aria-describedby={errors.email ? 'forgot-email-error' : undefined}
-              className="w-full px-6 h-[64px] bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-[var(--text-muted)]/20"
+              className="w-full px-6 h-[64px] bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-muted/20"
             />
             {errors.email && (
               <p id="forgot-email-error" role="alert" className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.email.message}</p>
@@ -126,7 +126,7 @@ export default function ForgotPasswordPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex items-center justify-center gap-3 h-[64px] bg-[var(--accent-luxury)] hover:bg-[var(--accent-luxury)]/90 text-[var(--on-accent)] font-black uppercase tracking-[0.3em] text-[12px] rounded-2xl shadow-xl shadow-[var(--accent-glow)] transition-all active:scale-[0.98] disabled:opacity-50 border border-white/20 relative overflow-hidden group"
+          className="w-full flex items-center justify-center gap-3 h-[64px] bg-[var(--accent-luxury)] hover:bg-accent-luxury/90 text-[var(--on-accent)] font-black uppercase tracking-[0.3em] text-[12px] rounded-2xl shadow-xl shadow-[var(--accent-glow)] transition-all active:scale-[0.98] disabled:opacity-50 border border-white/20 relative overflow-hidden group"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
           {loading ? 'Envoi...' : (

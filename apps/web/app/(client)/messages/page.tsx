@@ -36,7 +36,7 @@ export default async function MessagesPage({
           <aside className={`
             ${activeConvId ? 'hidden lg:flex' : 'flex'}
             w-full lg:w-72 lg:flex-shrink-0
-            flex-col border-r border-[var(--border)] bg-white
+            flex-col border-r border-[var(--border)] bg-[var(--surface-card)]
           `}>
             <div className="p-4 border-b border-[var(--border)]">
               <h1 className="font-display text-xl text-[var(--text)]">Messages</h1>
@@ -57,7 +57,7 @@ export default async function MessagesPage({
           `}>
             {/* Mobile back button */}
             {activeConvId && (
-              <div className="lg:hidden px-4 py-3 border-b border-[var(--border)] bg-white flex items-center gap-2">
+              <div className="lg:hidden px-4 py-3 border-b border-[var(--border)] bg-[var(--surface-card)] flex items-center gap-2">
                 <Link href="/messages" className="flex items-center gap-1.5 text-sm font-sans text-muted hover:text-primary transition-colors">
                   <svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
                     <path d="M19 12H5M5 12l7 7M5 12l7-7" strokeLinecap="round" strokeLinejoin="round"/>

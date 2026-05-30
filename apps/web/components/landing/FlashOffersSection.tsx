@@ -73,7 +73,7 @@ export async function FlashOffersSection() {
           </div>
           <Link
             href="/offre-flash"
-            className="hidden md:inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.25em] uppercase text-[var(--accent-luxury)] border-b border-[var(--accent-luxury)]/40 pb-1 hover:border-[var(--accent-luxury)] transition-colors"
+            className="hidden md:inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.25em] uppercase text-[var(--accent-luxury)] border-b border-accent-luxury/40 pb-1 hover:border-[var(--accent-luxury)] transition-colors"
           >
             {t.flash.viewAll} <ArrowUpRight className="w-3.5 h-3.5" />
           </Link>
@@ -85,7 +85,7 @@ export async function FlashOffersSection() {
             <Link
               key={b.id}
               href={`/offre-flash/${b.id}`}
-              className={`group relative rounded-2xl md:rounded-3xl overflow-hidden border border-[var(--border)] hover:border-[var(--accent-luxury)]/40 transition-all duration-500 bg-[var(--surface-card)] ${
+              className={`group relative rounded-2xl md:rounded-3xl overflow-hidden border border-[var(--border)] hover:border-accent-luxury/40 transition-all duration-500 bg-[var(--surface-card)] ${
                 i === 0 ? 'col-span-2 md:col-span-2 row-span-2 aspect-[16/13] md:aspect-auto' : 'aspect-[4/5]'
               }`}
             >
@@ -111,7 +111,7 @@ export async function FlashOffersSection() {
                     {t.common.new}
                   </span>
                 )}
-                <span className="absolute top-3 right-3 px-2.5 py-1 bg-white/95 backdrop-blur text-slate-900 text-[9px] font-bold uppercase tracking-wide rounded-full">
+                <span className="absolute top-3 right-3 px-2.5 py-1 bg-white/95 backdrop-blur text-[var(--text)] text-[9px] font-bold uppercase tracking-wide rounded-full">
                   {b.type_offre === 'location' ? t.footer.rentals : b.type_offre === 'vente' ? t.footer.sales : '—'}
                 </span>
 
@@ -139,7 +139,7 @@ export async function FlashOffersSection() {
         <div className="md:hidden mt-6 text-center">
           <Link
             href="/offre-flash"
-            className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.25em] uppercase text-[var(--accent-luxury)] border-b border-[var(--accent-luxury)]/40 pb-1"
+            className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.25em] uppercase text-[var(--accent-luxury)] border-b border-accent-luxury/40 pb-1"
           >
             {t.flash.viewAll} <ArrowUpRight className="w-3.5 h-3.5" />
           </Link>

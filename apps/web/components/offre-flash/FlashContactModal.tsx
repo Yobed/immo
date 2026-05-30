@@ -111,12 +111,12 @@ export function FlashContactModal({
             if (e.target === e.currentTarget) setOpen(false)
           }}
         >
-          <div className="relative w-full max-w-md bg-white text-slate-900 rounded-2xl shadow-md overflow-hidden max-h-[90vh] overflow-y-auto">
+          <div className="relative w-full max-w-md bg-[var(--surface-card)] text-[var(--text)] rounded-2xl shadow-md overflow-hidden max-h-[90vh] overflow-y-auto">
             <button
               type="button"
               onClick={() => setOpen(false)}
               aria-label="Fermer la fenêtre de contact"
-              className="absolute top-3 right-3 z-10 min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+              className="absolute top-3 right-3 z-10 min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center rounded-full bg-[var(--surface-hover)] hover:bg-[var(--surface-hover)] text-[var(--text)] transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -128,10 +128,10 @@ export function FlashContactModal({
                   <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-emerald-100 flex items-center justify-center">
                     <CheckCircle2 className="w-7 h-7 text-emerald-600" />
                   </div>
-                  <h2 className="font-display text-xl font-bold text-slate-900 mb-1">
+                  <h2 className="font-display text-xl font-bold text-[var(--text)] mb-1">
                     Demande envoyée !
                   </h2>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-[var(--text-muted)]">
                     On prend le relais. Voici la suite.
                   </p>
                 </div>
@@ -176,11 +176,11 @@ export function FlashContactModal({
               <form onSubmit={handleSubmit} className="p-6" noValidate>
                 <Honeypot />
                 <div className="mb-5">
-                  <h2 id="flash-contact-title" className="font-display text-xl font-bold text-slate-900 mb-1">
+                  <h2 id="flash-contact-title" className="font-display text-xl font-bold text-[var(--text)] mb-1">
                     Demander une visite
                   </h2>
-                  <p className="text-xs text-slate-700 leading-relaxed">
-                    Bien : <span className="font-semibold text-slate-900">{bienTitre}</span>
+                  <p className="text-xs text-[var(--text)] leading-relaxed">
+                    Bien : <span className="font-semibold text-[var(--text)]">{bienTitre}</span>
                   </p>
                 </div>
 
@@ -193,7 +193,7 @@ export function FlashContactModal({
 
                 <div className="space-y-3">
                   <div>
-                    <label htmlFor="fc-name" className="text-[10px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5 mb-1.5">
+                    <label htmlFor="fc-name" className="text-[10px] font-bold uppercase tracking-wider text-[var(--text)] flex items-center gap-1.5 mb-1.5">
                       <User className="w-3 h-3" /> Ton nom <span className="text-red-600" aria-hidden="true">*</span>
                     </label>
                     <input
@@ -205,12 +205,12 @@ export function FlashContactModal({
                       value={form.name}
                       onChange={(e) => setForm({ ...form, name: e.target.value })}
                       placeholder="Prénom Nom"
-                      className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+                      className="w-full px-4 py-2.5 bg-[var(--surface-card)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="fc-phone" className="text-[10px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5 mb-1.5">
+                    <label htmlFor="fc-phone" className="text-[10px] font-bold uppercase tracking-wider text-[var(--text)] flex items-center gap-1.5 mb-1.5">
                       <Phone className="w-3 h-3" /> Téléphone WhatsApp <span className="text-red-600" aria-hidden="true">*</span>
                     </label>
                     <input
@@ -222,13 +222,13 @@ export function FlashContactModal({
                       value={form.phone}
                       onChange={(e) => setForm({ ...form, phone: e.target.value })}
                       placeholder="07 12 34 56 78"
-                      className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+                      className="w-full px-4 py-2.5 bg-[var(--surface-card)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="fc-email" className="text-[10px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5 mb-1.5">
-                      <Mail className="w-3 h-3" /> Email <span className="text-slate-500 normal-case font-normal">(optionnel)</span>
+                    <label htmlFor="fc-email" className="text-[10px] font-bold uppercase tracking-wider text-[var(--text)] flex items-center gap-1.5 mb-1.5">
+                      <Mail className="w-3 h-3" /> Email <span className="text-[var(--text-muted)] normal-case font-normal">(optionnel)</span>
                     </label>
                     <input
                       id="fc-email"
@@ -237,13 +237,13 @@ export function FlashContactModal({
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
                       placeholder="prenom@email.com"
-                      className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
+                      className="w-full px-4 py-2.5 bg-[var(--surface-card)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="fc-reason" className="text-[10px] font-bold uppercase tracking-wider text-slate-700 mb-1.5 block">
-                      Message <span className="text-slate-500 normal-case font-normal">(optionnel)</span>
+                    <label htmlFor="fc-reason" className="text-[10px] font-bold uppercase tracking-wider text-[var(--text)] mb-1.5 block">
+                      Message <span className="text-[var(--text-muted)] normal-case font-normal">(optionnel)</span>
                     </label>
                     <textarea
                       id="fc-reason"
@@ -253,7 +253,7 @@ export function FlashContactModal({
                       rows={3}
                       maxLength={500}
                       aria-describedby={errorMsg ? 'fc-error' : undefined}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition resize-none"
+                      className="w-full px-4 py-2.5 bg-[var(--surface-hover)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition resize-none"
                     />
                   </div>
                 </div>
@@ -282,7 +282,7 @@ export function FlashContactModal({
                   )}
                 </button>
 
-                <p className="text-[10px] text-slate-400 text-center mt-3 leading-relaxed">
+                <p className="text-[10px] text-[var(--text-subtle)] text-center mt-3 leading-relaxed">
                   🔒 Tes coordonnées restent privées et ne sont partagées qu&apos;avec notre conseiller BOGBE&apos;S.
                 </p>
               </form>
@@ -297,16 +297,16 @@ export function FlashContactModal({
 /** Étape du roadmap post-envoi — numéro + emoji + titre + description courte */
 function RoadmapStep({ num, emoji, title, desc }: { num: number; emoji: string; title: string; desc: string }) {
   return (
-    <li className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200">
-      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white border border-slate-300 flex items-center justify-center text-xs font-bold text-slate-700">
+    <li className="flex items-start gap-3 p-3 rounded-xl bg-[var(--surface-hover)] border border-[var(--border)]">
+      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--surface-card)] border border-[var(--border)] flex items-center justify-center text-xs font-bold text-[var(--text)]">
         {num}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-bold text-slate-900 leading-tight mb-0.5">
+        <p className="text-sm font-bold text-[var(--text)] leading-tight mb-0.5">
           <span aria-hidden className="mr-1.5">{emoji}</span>
           {title}
         </p>
-        <p className="text-xs text-slate-600 leading-snug">{desc}</p>
+        <p className="text-xs text-[var(--text-muted)] leading-snug">{desc}</p>
       </div>
     </li>
   )

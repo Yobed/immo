@@ -33,16 +33,19 @@ const config: Config = {
           DEFAULT: 'oklch(75% 0.15 80)', // Gold/Yellow
           light: 'oklch(97% 0.03 80)',
         },
+        // Theme-aware neutral tokens — resolve to CSS variables that flip
+        // between the dark (default) and light themes via [data-theme].
+        // Channel-triplet form keeps Tailwind opacity modifiers (e.g. text-muted/70) working.
         surface: {
-          DEFAULT: 'oklch(100% 0 0)',
-          card: 'oklch(99% 0.005 260)',
-          raised: 'oklch(100% 0 0)',
+          DEFAULT: 'rgb(var(--surface-rgb) / <alpha-value>)',
+          card: 'rgb(var(--surface-card-rgb) / <alpha-value>)',
+          raised: 'rgb(var(--surface-raised-rgb) / <alpha-value>)',
         },
-        muted: 'oklch(45% 0.02 260)',
-        subtle: 'oklch(65% 0.01 260)',
+        muted: 'rgb(var(--muted-rgb) / <alpha-value>)',
+        subtle: 'rgb(var(--subtle-rgb) / <alpha-value>)',
         border: {
-          DEFAULT: 'oklch(92% 0.01 260)',
-          hover: 'oklch(85% 0.02 260)',
+          DEFAULT: 'rgb(var(--border-rgb) / <alpha-value>)',
+          hover: 'rgb(var(--border-hover-rgb) / <alpha-value>)',
         },
         midnight: {
           DEFAULT: 'var(--midnight)',
@@ -52,8 +55,16 @@ const config: Config = {
           DEFAULT: 'var(--off-white)',
           muted: 'var(--off-white-muted)',
         },
-        'accent-luxury': 'var(--accent-luxury)',
-        'accent-gold':   'var(--accent-gold)',
+        // Channel-triplet form so Tailwind opacity modifiers work
+        // (e.g. bg-accent-luxury/90, text-foreground/40). Values match the
+        // hex CSS vars exactly, so no color shift vs the arbitrary [var(--x)] form.
+        'accent-luxury': 'rgb(var(--accent-luxury-rgb) / <alpha-value>)',
+        'accent-gold':   'rgb(var(--accent-gold-rgb) / <alpha-value>)',
+        background:      'rgb(var(--background-rgb) / <alpha-value>)',
+        foreground:      'rgb(var(--text-rgb) / <alpha-value>)',
+        'on-primary':    'rgb(var(--on-primary-rgb) / <alpha-value>)',
+        success:         'rgb(var(--success-rgb) / <alpha-value>)',
+        info:            'rgb(var(--info-rgb) / <alpha-value>)',
       },
       fontFamily: {
         display: ['var(--font-display)', 'sans-serif'],

@@ -25,7 +25,7 @@ export function AgenceBadge({
   return (
     <Link
       href={`/agences/${slug}`}
-      className={`inline-flex items-center ${sizeClasses} rounded-pill border border-[var(--border)] bg-[var(--surface)] hover:border-[var(--accent-luxury)]/60 hover:bg-[var(--surface-card)] transition-colors font-sans text-[var(--text)]`}
+      className={`inline-flex items-center ${sizeClasses} rounded-pill border border-[var(--border)] bg-[var(--surface)] hover:border-accent-luxury/60 hover:bg-[var(--surface-card)] transition-colors font-sans text-[var(--text)]`}
       title={`Voir l'agence ${nom_commercial}`}
     >
       {logo_url ? (
@@ -39,7 +39,7 @@ export function AgenceBadge({
       ) : (
         <span
           aria-hidden
-          className="inline-flex items-center justify-center rounded-full bg-[var(--accent-luxury)]/15 text-[var(--accent-luxury)] font-display font-semibold"
+          className="inline-flex items-center justify-center rounded-full bg-accent-luxury/15 text-[var(--accent-luxury)] font-display font-semibold"
           style={{ width: logoSize, height: logoSize, fontSize: logoSize * 0.5 }}
         >
           {nom_commercial.charAt(0).toUpperCase()}

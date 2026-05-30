@@ -32,7 +32,7 @@ export const VirtualTourViewer = ({ url, title }: VirtualTourViewerProps) => {
         className="group relative cursor-pointer overflow-hidden rounded-[2.5rem] border border-white/10 bg-[var(--midnight-muted)] aspect-video"
         onClick={() => setIsOpen(true)}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent-luxury)]/20 to-transparent z-10 opacity-60 group-hover:opacity-100 transition-opacity" />
+        <div className="absolute inset-0 bg-gradient-to-br from-accent-luxury/20 to-transparent z-10 opacity-60 group-hover:opacity-100 transition-opacity" />
         
         {/* Background Animation */}
         <motion.div 
@@ -64,7 +64,7 @@ export const VirtualTourViewer = ({ url, title }: VirtualTourViewerProps) => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="fixed inset-0 z-[1000] flex items-center justify-center bg-[var(--midnight)]/95 backdrop-blur-2xl p-4 md:p-12"
+          className="fixed inset-0 z-[1000] flex items-center justify-center bg-background/95 backdrop-blur-2xl p-4 md:p-12"
         >
           <motion.div 
             initial={{ scale: 0.9, y: 40 }}

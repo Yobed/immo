@@ -179,17 +179,17 @@ export function BienForm({ defaultValues, bienId }: BienFormProps) {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <p className="text-[10px] uppercase tracking-widest text-muted font-bold">
+                <p className="text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-bold">
                   Étape {step} sur {TOTAL_STEPS}
                 </p>
                 <h2 className="font-display text-lg font-bold text-[var(--text)]">
                   {STEP_LABELS[step]?.label}
-                  <span className="ml-2 text-xs font-normal text-muted">
+                  <span className="ml-2 text-xs font-normal text-[var(--text-muted)]">
                     · {STEP_LABELS[step]?.sub}
                   </span>
                 </h2>
               </div>
-              <p className="text-[10px] uppercase tracking-widest text-muted font-bold">
+              <p className="text-[10px] uppercase tracking-widest text-[var(--text-muted)] font-bold">
                 {Math.round((step / TOTAL_STEPS) * 100)}%
               </p>
             </div>
@@ -208,7 +208,7 @@ export function BienForm({ defaultValues, bienId }: BienFormProps) {
                           ? 'bg-primary text-white'
                           : isCurrent
                             ? 'bg-primary text-white ring-4 ring-primary/20'
-                            : 'bg-[var(--border)] text-muted'
+                            : 'bg-[var(--border)] text-[var(--text-muted)]'
                       }`}
                     >
                       {isDone ? '✓' : stepNum}
@@ -226,7 +226,7 @@ export function BienForm({ defaultValues, bienId }: BienFormProps) {
             </div>
           </div>
 
-          <div className="bg-surface p-6 rounded-3xl border border-[var(--border)] shadow-sm">
+          <div className="bg-[var(--surface-card)] p-6 rounded-3xl border border-[var(--border)] shadow-sm">
             {step === 1 && <Step1Infos form={form} />}
             {step === 2 && <Step2Prix form={form} />}
             {step === 3 && <Step3Localisation form={form} />}
@@ -239,7 +239,7 @@ export function BienForm({ defaultValues, bienId }: BienFormProps) {
                   </svg>
                 </div>
                 <p className="font-display text-xl text-[var(--text)] mb-2">Prêt à ajouter les médias ?</p>
-                <p className="font-sans text-muted text-sm">
+                <p className="font-sans text-[var(--text-muted)] text-sm">
                   {bienId
                     ? "Les informations seront mises à jour. Vous pourrez gérer photos, vidéos et vue 360° à l'étape suivante."
                     : "L'annonce sera créée en brouillon. Vous pourrez ajouter photos, vidéos et vue 360° à l'étape suivante."}
@@ -248,7 +248,7 @@ export function BienForm({ defaultValues, bienId }: BienFormProps) {
             )}
 
             {submitError && (
-              <div className="mt-4 p-3 rounded-btn bg-red-50 border border-red-200 text-red-700 text-sm font-sans">
+              <div className="mt-4 p-3 rounded-btn bg-danger/10 border border-danger/30 text-danger text-sm font-sans">
                 {submitError}
               </div>
             )}
@@ -281,9 +281,9 @@ export function BienForm({ defaultValues, bienId }: BienFormProps) {
         <div className="lg:col-span-4 space-y-6">
           <AIQualityMeter analysis={aiAnalysis} />
           
-          <div className="p-5 rounded-3xl bg-indigo-600/5 border border-indigo-200/50 hidden lg:block">
-            <h4 className="text-sm font-display font-semibold text-indigo-900 dark:text-indigo-100 mb-2">Pourquoi un score élevé ?</h4>
-            <ul className="text-[11px] text-indigo-700/80 dark:text-indigo-300/80 space-y-2 list-disc pl-4">
+          <div className="p-5 rounded-3xl bg-[var(--accent-luxury-muted)] border border-[var(--border)] hidden lg:block">
+            <h4 className="text-sm font-display font-semibold text-[var(--text)] mb-2">Pourquoi un score élevé ?</h4>
+            <ul className="text-[11px] text-[var(--text-[var(--text-muted)])] space-y-2 list-disc pl-4">
               <li>Mise en avant prioritaire dans les recherches</li>
               <li>Éligibilité aux campagnes WhatsApp Pro</li>
               <li>Confiance accrue des locataires vérifiés</li>

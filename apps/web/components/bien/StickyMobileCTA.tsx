@@ -94,7 +94,7 @@ function FloatingBackButton() {
   return (
     <Link
       href="/biens"
-      className="fixed top-4 left-4 z-[110] flex items-center justify-center w-11 h-11 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200 text-slate-900 active:scale-90 transition-all"
+      className="fixed top-4 left-4 z-[110] flex items-center justify-center w-11 h-11 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-[var(--border)] text-[var(--text)] active:scale-90 transition-all"
       aria-label="Retour aux annonces"
     >
       <ArrowLeft className="w-6 h-6" strokeWidth={2.5} />
@@ -293,22 +293,22 @@ export function StickyMobileCTA({
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 32, stiffness: 320 }}
-              className="fixed bottom-0 left-0 right-0 z-[121] bg-white rounded-t-3xl lg:hidden shadow-2xl"
+              className="fixed bottom-0 left-0 right-0 z-[121] bg-[var(--surface-card)] rounded-t-3xl lg:hidden shadow-2xl"
               style={{ maxHeight: '88vh' }}
             >
               {/* Handle — plus large et premium */}
               <div className="flex justify-center pt-4 pb-2">
-                <div className="w-14 h-1.5 rounded-full bg-slate-200/80" />
+                <div className="w-14 h-1.5 rounded-full bg-surface-raised/80" />
               </div>
 
               {/* En-tête — Typographie plus forte */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100/60">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-border/60">
                 <div className="flex-1 min-w-0 pr-4">
-                  <h3 className="font-display font-bold text-slate-900 text-[16px] leading-tight line-clamp-1 uppercase tracking-tight">
+                  <h3 className="font-display font-bold text-[var(--text)] text-[16px] leading-tight line-clamp-1 uppercase tracking-tight">
                     {bienTitre}
                   </h3>
                   <div className="flex items-center gap-2 mt-1.5">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">
                       {bienLieu}
                     </span>
                     <span className="w-1 h-1 rounded-full bg-slate-300" />
@@ -321,20 +321,20 @@ export function StickyMobileCTA({
                   type="button"
                   aria-label="Fermer"
                   onClick={() => setSheetOpen(false)}
-                  className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-slate-100 flex items-center justify-center active:bg-slate-200 shrink-0"
+                  className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-[var(--surface-hover)] flex items-center justify-center active:bg-[var(--surface-hover)] shrink-0"
                 >
-                  <X className="w-5 h-5 text-slate-600" />
+                  <X className="w-5 h-5 text-[var(--text-muted)]" />
                 </button>
               </div>
 
               {/* Onglets */}
-              <div className="flex gap-1.5 mx-4 my-3 p-1 bg-slate-100 rounded-xl">
+              <div className="flex gap-1.5 mx-4 my-3 p-1 bg-[var(--surface-hover)] rounded-xl">
                 <button
                   onClick={() => setActiveTab('visite')}
                   className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all duration-200 ${
                     activeTab === 'visite'
-                      ? 'bg-white text-slate-900 shadow-sm'
-                      : 'text-slate-700 hover:text-slate-900'
+                      ? 'bg-[var(--surface-card)] text-[var(--text)] shadow-sm'
+                      : 'text-[var(--text)] hover:text-[var(--text)]'
                   }`}
                 >
                   <Calendar className="w-3.5 h-3.5" />
@@ -344,8 +344,8 @@ export function StickyMobileCTA({
                   onClick={() => setActiveTab('contact')}
                   className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all duration-200 ${
                     activeTab === 'contact'
-                      ? 'bg-white text-slate-900 shadow-sm'
-                      : 'text-slate-700 hover:text-slate-900'
+                      ? 'bg-[var(--surface-card)] text-[var(--text)] shadow-sm'
+                      : 'text-[var(--text)] hover:text-[var(--text)]'
                   }`}
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
@@ -368,8 +368,8 @@ export function StickyMobileCTA({
                 ) : activeTab === 'visite' ? (
                   <div className="py-8 text-center">
                     <CalendarCheck className="w-10 h-10 mx-auto mb-3 text-amber-500" />
-                    <p className="text-slate-600 text-sm font-medium mb-1">Connexion requise</p>
-                    <p className="text-slate-600 text-xs mb-4">Connectez-vous pour planifier une visite.</p>
+                    <p className="text-[var(--text-muted)] text-sm font-medium mb-1">Connexion requise</p>
+                    <p className="text-[var(--text-muted)] text-xs mb-4">Connectez-vous pour planifier une visite.</p>
                     <a href="/login" className="inline-block px-6 py-3 bg-slate-900 text-white rounded-xl text-sm font-bold">
                       Se connecter
                     </a>
@@ -378,15 +378,15 @@ export function StickyMobileCTA({
 
                 {activeTab === 'contact' && bienId ? (
                   <div className="py-2 space-y-4">
-                    <p className="text-xs text-slate-600 leading-relaxed">
+                    <p className="text-xs text-[var(--text-muted)] leading-relaxed">
                       Obtenez les coordonnées du propriétaire après validation par notre équipe.
                     </p>
                     <DemanderContactWhatsAppButton
                       bienId={bienId}
                       isAuthenticated={!!isAuthenticated}
                     />
-                    <div className="pt-2 border-t border-slate-100">
-                      <p className="text-[10px] text-slate-600 uppercase tracking-widest font-bold mb-3">Contacter directement</p>
+                    <div className="pt-2 border-t border-[var(--border)]">
+                      <p className="text-[10px] text-[var(--text-muted)] uppercase tracking-widest font-bold mb-3">Contacter directement</p>
                       <div className="flex flex-col gap-2">
                         <a
                           href={`https://wa.me/2250544872051?text=${waText}`}

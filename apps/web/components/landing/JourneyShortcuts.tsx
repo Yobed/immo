@@ -172,7 +172,7 @@ function SubJourneyCard({ label, title, description, cta, href, external, image 
         {...linkProps}
         aria-label={`${title} — ${label}`}
         title={`${title} — ${cta}`}
-        className="group relative block aspect-[4/3] sm:aspect-[5/4] rounded-2xl overflow-hidden border border-[var(--border)] bg-[var(--surface-card)] transition-all duration-500 hover:-translate-y-1 hover:border-[var(--accent-luxury)]/60 shadow-sm hover:shadow-md focus-visible:ring-2 focus-visible:ring-[var(--accent-luxury)] focus-visible:ring-offset-2"
+        className="group relative block aspect-[4/3] sm:aspect-[5/4] rounded-2xl overflow-hidden border border-[var(--border)] bg-[var(--surface-card)] transition-all duration-500 hover:-translate-y-1 hover:border-accent-luxury/60 shadow-sm hover:shadow-md focus-visible:ring-2 focus-visible:ring-[var(--accent-luxury)] focus-visible:ring-offset-2"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -197,7 +197,7 @@ function SubJourneyCard({ label, title, description, cta, href, external, image 
   return (
     <Link
       {...linkProps}
-      className="group relative flex flex-col aspect-[4/3] sm:aspect-[5/4] bg-[var(--surface-card)] rounded-2xl p-4 border border-[var(--border)] hover:border-[var(--accent-luxury)]/60 hover:shadow-md transition-all"
+      className="group relative flex flex-col aspect-[4/3] sm:aspect-[5/4] bg-[var(--surface-card)] rounded-2xl p-4 border border-[var(--border)] hover:border-accent-luxury/60 hover:shadow-md transition-all"
     >
       <p className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-2">
         {label}
@@ -232,7 +232,7 @@ interface PathCardProps {
 function PathCard({ accent, icon: Icon, label, title, desc, primary, secondary }: PathCardProps) {
   const accentColors = {
     luxury: {
-      iconBg: 'bg-[var(--accent-luxury)]/10 border-[var(--accent-luxury)]/30 text-[var(--accent-luxury)]',
+      iconBg: 'bg-accent-luxury/10 border-accent-luxury/30 text-[var(--accent-luxury)]',
       primaryBtn: 'bg-[var(--accent-luxury)] text-[var(--on-accent)] hover:opacity-90',
       label: 'text-[var(--accent-luxury)]',
     },
@@ -244,7 +244,7 @@ function PathCard({ accent, icon: Icon, label, title, desc, primary, secondary }
   }[accent]
 
   return (
-    <div className="relative flex flex-col bg-[var(--surface-card)] rounded-3xl p-6 md:p-8 border border-[var(--border)] hover:border-[var(--accent-luxury)]/30 hover:shadow-md transition-all duration-300">
+    <div className="relative flex flex-col bg-[var(--surface-card)] rounded-3xl p-6 md:p-8 border border-[var(--border)] hover:border-accent-luxury/30 hover:shadow-md transition-all duration-300">
       <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center mb-5 ${accentColors.iconBg}`}>
         <Icon className="w-6 h-6" />
       </div>

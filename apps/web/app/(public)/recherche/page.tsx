@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { STATUTS_PUBLICS } from '@/lib/catalogue/statuts'
 import { PremiumBienCard } from '@/components/bien/PremiumBienCard'
 import { PremiumBienListCard } from '@/components/bien/PremiumBienListCard'
 import { SearchBar } from '@/components/search/SearchBar'
@@ -56,7 +57,7 @@ export default async function RecherchePage({
       'id, titre, commune, quartier, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces, latitude, longitude',
       { count: 'exact' }
     )
-    .eq('statut', 'publie')
+    .in('statut', [...STATUTS_PUBLICS])
 
   if (params.q?.trim()) {
     dbQuery = dbQuery.textSearch('fts', params.q.trim(), { type: 'plain', config: 'french' })
@@ -112,7 +113,7 @@ export default async function RecherchePage({
               </p>
             </div>
             <div className="h-10 w-px bg-[var(--border)]" />
-            <div className="flex gap-1 p-1 bg-[var(--midnight-muted)]/50 backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-inner">
+            <div className="flex gap-1 p-1 bg-surface-raised/50 backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-inner">
               <ViewToggle active={vue === 'grille'} href={`/recherche?${new URLSearchParams({ ...params, vue: 'grille' }).toString()}`} icon={Grid} label="Grille" />
               <ViewToggle active={vue === 'liste'} href={`/recherche?${new URLSearchParams({ ...params, vue: 'liste' }).toString()}`} icon={List} label="Liste" />
               <ViewToggle active={vue === 'carte'} href={`/recherche?${new URLSearchParams({ ...params, vue: 'carte' }).toString()}`} icon={MapIcon} label="Carte" />
@@ -237,7 +238,7 @@ function ViewToggle({ active, href, icon: Icon, label }: { active: boolean; href
       href={href} 
       className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all duration-300 ${
         active 
-          ? 'bg-[var(--accent-luxury)] text-[var(--on-accent)] shadow-lg shadow-[var(--accent-luxury)]/20' 
+          ? 'bg-[var(--accent-luxury)] text-[var(--on-accent)] shadow-lg shadow-accent-luxury/20' 
           : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-white/5'
       }`}
     >
@@ -249,7 +250,7 @@ function ViewToggle({ active, href, icon: Icon, label }: { active: boolean; href
 
 function PaginationGroup({ params, page, totalPages }: { params: any; page: number; totalPages: number }) {
   return (
-    <nav className="flex items-center gap-2 p-2 bg-[var(--midnight-muted)]/50 backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-inner">
+    <nav className="flex items-center gap-2 p-2 bg-surface-raised/50 backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-inner">
       {page > 0 && <PageLink href={`/recherche?${new URLSearchParams({ ...params, page: String(page - 1) }).toString()}`} icon="←" />}
       <div className="flex gap-1 px-2">
         {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
@@ -258,7 +259,7 @@ function PaginationGroup({ params, page, totalPages }: { params: any; page: numb
             href={`/recherche?${new URLSearchParams({ ...params, page: String(i) }).toString()}`}
             className={`w-10 h-10 flex items-center justify-center rounded-xl text-[11px] font-black transition-all duration-300 ${
               i === page 
-                ? 'bg-[var(--accent-luxury)] text-[var(--on-accent)] shadow-lg shadow-[var(--accent-luxury)]/20' 
+                ? 'bg-[var(--accent-luxury)] text-[var(--on-accent)] shadow-lg shadow-accent-luxury/20' 
                 : 'text-[var(--text-muted)] hover:bg-white/5 hover:text-[var(--text)]'
             }`}
           >
@@ -289,7 +290,7 @@ function EmptyResults({ hasFilters }: { hasFilters: boolean }) {
       animate={{ opacity: 1, y: 0 }}
       className="text-center py-24 bg-[var(--midnight-muted)] rounded-[3rem] border border-dashed border-[var(--border)] px-6"
     >
-      <div className="w-24 h-24 bg-[var(--accent-luxury)]/10 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
+      <div className="w-24 h-24 bg-accent-luxury/10 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
         <Compass className="w-10 h-10 text-[var(--accent-luxury)] animate-pulse" />
       </div>
       <h3 className="font-display text-3xl font-black text-[var(--text)] mb-4 tracking-tight uppercase italic">
@@ -301,7 +302,7 @@ function EmptyResults({ hasFilters }: { hasFilters: boolean }) {
       {hasFilters && (
         <Link 
           href="/recherche" 
-          className="inline-flex items-center gap-3 px-10 py-4 bg-[var(--accent-luxury)] text-[var(--on-accent)] rounded-2xl font-black text-[13px] uppercase tracking-[0.2em] shadow-2xl shadow-[var(--accent-luxury)]/20 active:scale-95 transition-all"
+          className="inline-flex items-center gap-3 px-10 py-4 bg-[var(--accent-luxury)] text-[var(--on-accent)] rounded-2xl font-black text-[13px] uppercase tracking-[0.2em] shadow-2xl shadow-accent-luxury/20 active:scale-95 transition-all"
         >
           <X className="w-4 h-4" />
           Réinitialiser les filtres

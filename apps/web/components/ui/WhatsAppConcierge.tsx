@@ -39,7 +39,7 @@ export const WhatsAppConcierge = () => {
     >
       {/* Tooltip */}
       <div className="absolute bottom-full right-0 mb-4 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none transform translate-y-2 group-hover:translate-y-0">
-        <div className="bg-[var(--midnight)]/90 backdrop-blur-xl border border-emerald-500/20 px-4 py-2 rounded-2xl shadow-md text-xs font-bold text-emerald-400 whitespace-nowrap uppercase tracking-widest">
+        <div className="bg-background/90 backdrop-blur-xl border border-emerald-500/20 px-4 py-2 rounded-2xl shadow-md text-xs font-bold text-emerald-400 whitespace-nowrap uppercase tracking-widest">
           <span className="flex items-center">
             <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-2 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
             Sapphire WhatsApp

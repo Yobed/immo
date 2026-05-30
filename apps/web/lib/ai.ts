@@ -343,8 +343,12 @@ async function openRouterFetch(
 
 /**
  * Detect short greetings / pleasantries that don't need LLM reasoning.
- * Returning a hand-written reply avoids the Groq round-trip (and the
- * "Désolé, problème technique" fallback when Groq has a hiccup).
+ * Returning a hand-written reply avoids the LLM round-trip (and the
+ * fallback message when Groq has a hiccup).
+ *
+ * Includes "intent signal" markers like commune/budget keywords so we
+ * don't accidentally short-circuit a real request that happens to start
+ * with "Bonjour, je cherche…".
  */
 function detectGreeting(userMessage: string): string | null {
   const m = userMessage
@@ -353,67 +357,193 @@ function detectGreeting(userMessage: string): string | null {
     .replace(/[!?.,;:'"`]/g, '')
     .replace(/\s+/g, ' ')
 
-  // Word count > 4 → probably has intent, let Groq handle it
-  if (m.split(' ').length > 4) return null
+  // If the message contains a real-estate intent signal, send it to the LLM
+  // even if it starts with "Bonjour" — the user wants substantive help.
+  const intentSignals = /\b(cherche|cherchez|cherchent|veux|veut|voudrais|aimerais|besoin|louer|location|acheter|achat|vente|villa|appartement|appart|studio|maison|terrain|bureau|meubl|cocody|plateau|riviera|marcory|yopougon|treichville|bingerville|grand-bassam|assinie|abidjan|fcfa|million|millions|budget|prix|chambres?|pièces?)\b/i
+  if (intentSignals.test(m)) return null
+
+  // Word count > 5 → probably has intent worth sending to the LLM
+  if (m.split(' ').length > 5) return null
 
   const greetingPatterns = [
-    /^(bonjour|bonsoir|salut|coucou|hello|hi|hey)( .*)?$/,
-    /^(bonjour|bonsoir|salut|hello) (monsieur|madame|mademoiselle|mr|mme|messieurs|mesdames)$/,
-    /^(merci|thanks|thank you)( beaucoup)?$/,
-    /^(ok|d accord|daccord|parfait|super|cool|bien recu|bien reçu)$/,
-    /^(ça va|ca va|comment allez vous|comment ça va|comment ca va)( ?.*)?$/,
+    /^(bonjour|bonsoir|salut|coucou|hello|hi|hey|yo)( .*)?$/,
+    /^(bonjour|bonsoir|salut|hello) (monsieur|madame|mademoiselle|mr|mme|messieurs|mesdames|sapphire)$/,
+    /^(merci|thanks|thank you|thx)( beaucoup| infiniment)?$/,
+    /^(ok|d accord|daccord|parfait|super|cool|bien recu|bien reçu|noté|note|tres bien|c est noté|cest note)$/,
+    /^(ça va|ca va|comment allez vous|comment ça va|comment ca va|comment vas tu|tu vas bien|ca roule|ça roule)( ?.*)?$/,
+    /^(au revoir|bye|à bientôt|a bientot|à plus|a plus|bonne (journée|soiree|soirée|nuit))( .*)?$/,
   ]
 
   if (!greetingPatterns.some((p) => p.test(m))) return null
 
   const hour = new Date().getHours()
-  const timeOfDay = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bonjour' : 'Bonsoir'
+  const timeOfDay = hour < 12 ? 'Bonjour' : 'Bonsoir'
 
-  if (/^(merci|thanks|thank you)/.test(m)) {
+  if (/^(merci|thanks|thank you|thx)/.test(m)) {
     return `Avec plaisir 🙏\n\nDites-moi ce que vous cherchez : commune, type de bien, budget. Je vous oriente immédiatement.`
   }
-  if (/^(ok|d accord|daccord|parfait|super|cool|bien)/.test(m)) {
+  if (/^(ok|d accord|daccord|parfait|super|cool|bien|noté|note|tres bien|c est noté|cest note)/.test(m)) {
     return `Très bien 👍\n\nDécrivez-moi ce que vous cherchez (commune, type, budget) et je vous présente les biens disponibles.`
+  }
+  if (/^(au revoir|bye|à bientôt|a bientot|à plus|a plus|bonne)/.test(m)) {
+    return `À très bientôt 👋\n\nN'hésitez pas à me recontacter dès que vous voulez relancer votre recherche.`
+  }
+  if (/^(ça va|ca va|comment|tu vas|ca roule|ça roule)/.test(m)) {
+    return `Ça va très bien, merci 😊\n\nEt vous ? Dites-moi ce que vous cherchez : commune, type de bien, budget. Je m'occupe du reste.`
   }
 
   return `${timeOfDay} 👋\n\nJe suis Sapphire, conseillère BOGBE'S. Je vous aide à trouver votre bien à Abidjan.\n\nDécrivez-moi votre besoin :\n• La commune ou le quartier\n• Le type de bien (appartement, villa, studio…)\n• Votre budget\n\nJe vous présente les meilleures options.`
 }
 
+/**
+ * Safety filter applied to every LLM completion before sending to the user.
+ *
+ * Catches the rare cases where the model leaks:
+ *   - Internal terms ("WhatsApp scraping", "réseau d'agents WhatsApp", "scrapé")
+ *     → OPSEC, see commits f405cd5 + earlier
+ *   - Raw owner phone numbers (Ivorian formats: +225XX XX XX XX XX or 10 digits)
+ *   - Cloudinary asset URLs that should stay private
+ *   - Multiple blank lines (cosmetic)
+ *
+ * Returns the sanitized string. Logs when a redaction happened so we can
+ * tune the system prompt if a pattern keeps recurring.
+ */
+function sanitizeOutput(text: string): string {
+  let out = text
+  let redactionCount = 0
+
+  // Ivorian phone numbers: +225 XX XX XX XX XX, 0X XX XX XX XX, 10 raw digits, etc.
+  // We replace them with a neutral marker rather than removing — preserves sentence flow.
+  const phonePatterns: RegExp[] = [
+    /\+?225[\s.-]?\d{2}[\s.-]?\d{2}[\s.-]?\d{2}[\s.-]?\d{2}[\s.-]?\d{2}/g,
+    /\b0\d[\s.-]?\d{2}[\s.-]?\d{2}[\s.-]?\d{2}[\s.-]?\d{2}\b/g,
+    /\b\d{10}\b/g, // 10 raw digits — last resort
+  ]
+  for (const p of phonePatterns) {
+    if (p.test(out)) {
+      redactionCount += (out.match(p) ?? []).length
+      out = out.replace(p, '[contact via conseiller BOGBE\'S]')
+    }
+  }
+
+  // Internal scraping / OPSEC leaks — replace with neutral wording
+  const opsecPatterns: Array<{ from: RegExp; to: string }> = [
+    { from: /\bscrap(?:é|ée|és|ées|er|ing|e)\b/gi, to: 'capté' },
+    { from: /\bréseau (?:d['e]?)?agents? whatsapp\b/gi, to: 'marché ivoirien' },
+    { from: /\bgroupes? whatsapp(?: publics?)?\b/gi, to: 'sources tierces' },
+    { from: /\bcapt(?:e|é|ée|er|ent) en continu (?:dans|sur) (?:les?|des?) (?:groupes?|réseaux?) whatsapp\b/gi, to: 'capté sur le marché' },
+  ]
+  for (const { from, to } of opsecPatterns) {
+    if (from.test(out)) {
+      redactionCount += (out.match(from) ?? []).length
+      out = out.replace(from, to)
+    }
+  }
+
+  // Cloudinary URLs in body (système prompt already forbids them, but belt+braces)
+  const cloudinaryPattern = /https?:\/\/res\.cloudinary\.com\/[^\s)]+/g
+  if (cloudinaryPattern.test(out)) {
+    redactionCount += (out.match(cloudinaryPattern) ?? []).length
+    out = out.replace(cloudinaryPattern, '[photo dispo sur la fiche bien]')
+  }
+
+  // Normalize 3+ consecutive newlines down to 2 (one empty line max)
+  out = out.replace(/\n{3,}/g, '\n\n').trim()
+
+  if (redactionCount > 0) {
+    console.warn(`[Sapphire][safety] redacted ${redactionCount} items from completion`)
+  }
+  return out
+}
+
+/**
+ * Structured single-line log for each Sapphire call.
+ * Easy to grep / parse from Vercel logs.
+ */
+interface SapphireLog {
+  route: 'greeting' | 'groq' | 'openrouter' | 'fallback'
+  latency_ms: number
+  history_msgs: number
+  system_bytes: number
+  output_chars: number
+  redactions?: number
+}
+function logSapphireCall(entry: SapphireLog): void {
+  console.log(`[Sapphire] ${JSON.stringify(entry)}`)
+}
+
+const FALLBACK_REPLY =
+  `Un instant, je reçois beaucoup de demandes 🙏\n\nEn attendant, dites-moi simplement :\n• Quelle commune ? (Cocody, Plateau, Riviera…)\n• Quel budget ?\n\nJe reviens vers vous dans quelques secondes.`
+
 export async function chatImmobilier(messages: ChatMessage[], context?: string): Promise<string> {
-  // Greeting fast-path : pas besoin de Groq pour répondre à "Bonsoir".
-  // Évite le round-trip LLM (latence + risque de fallback erreur)
-  // et garantit une réponse instantanée même si Groq est indisponible.
+  const startedAt = Date.now()
+  const history_msgs = messages.length
+
+  // Greeting fast-path — works at ANY point in the conversation, not just the
+  // first 2 messages. The detector itself rejects messages with real-estate
+  // intent signals so we don't accidentally short-circuit a substantive query.
   const lastUserMsg = [...messages].reverse().find((m) => m.role === 'user')?.content
-  if (lastUserMsg && messages.length <= 2) {
+  if (lastUserMsg) {
     const greeting = detectGreeting(lastUserMsg)
-    if (greeting) return greeting
+    if (greeting) {
+      logSapphireCall({
+        route: 'greeting',
+        latency_ms: Date.now() - startedAt,
+        history_msgs,
+        system_bytes: 0,
+        output_chars: greeting.length,
+      })
+      return greeting
+    }
   }
 
   const system = context
     ? `${SYSTEM_PROMPT_IMMOBILIER_CI}\n\n== CATALOGUE DES BIENS DISPONIBLES ==\n${context}`
-    : SYSTEM_PROMPT_IMMOBILIER_CI;
+    : SYSTEM_PROMPT_IMMOBILIER_CI
 
   // Garde-fou : limiter l'historique aux 6 derniers messages pour rester sous le budget tokens
-  const trimmed = messages.length > 6 ? messages.slice(-6) : messages;
+  const trimmed = messages.length > 6 ? messages.slice(-6) : messages
 
-  // Étage 1 — Groq (primary, le plus rapide)
-  const groqResult = await groqFetch(trimmed, system);
+  // Stage 1 — Groq (primary, ultra rapide)
+  const groqResult = await groqFetch(trimmed, system)
   if (groqResult) {
-    console.log('[Sapphire] route=groq');
-    return groqResult;
+    const cleaned = sanitizeOutput(groqResult)
+    logSapphireCall({
+      route: 'groq',
+      latency_ms: Date.now() - startedAt,
+      history_msgs,
+      system_bytes: system.length,
+      output_chars: cleaned.length,
+      redactions: groqResult.length !== cleaned.length ? 1 : 0,
+    })
+    return cleaned
   }
 
-  // Étage 2 — OpenRouter (Gemini Flash :free) en backup
-  console.warn(`[Sapphire] Groq failed → trying OpenRouter. sysLen=${system.length} historyMsgs=${trimmed.length}`);
-  const openRouterResult = await openRouterFetch(trimmed, system);
+  // Stage 2 — OpenRouter (Gemini Flash :free) backup
+  console.warn(`[Sapphire] Groq KO → OpenRouter fallback. sysLen=${system.length} histMsgs=${trimmed.length}`)
+  const openRouterResult = await openRouterFetch(trimmed, system)
   if (openRouterResult) {
-    console.log('[Sapphire] route=openrouter');
-    return openRouterResult;
+    const cleaned = sanitizeOutput(openRouterResult)
+    logSapphireCall({
+      route: 'openrouter',
+      latency_ms: Date.now() - startedAt,
+      history_msgs,
+      system_bytes: system.length,
+      output_chars: cleaned.length,
+      redactions: openRouterResult.length !== cleaned.length ? 1 : 0,
+    })
+    return cleaned
   }
 
-  // Étage 3 — Hand-written fallback (dernier recours)
-  console.error('[Sapphire] route=fallback (both Groq + OpenRouter failed)');
-  return `Un instant, je reçois beaucoup de demandes 🙏\n\nEn attendant, dites-moi simplement :\n• Quelle commune ? (Cocody, Plateau, Riviera…)\n• Quel budget ?\n\nJe reviens vers vous dans quelques secondes.`
+  // Stage 3 — Hand-written fallback (both providers down)
+  logSapphireCall({
+    route: 'fallback',
+    latency_ms: Date.now() - startedAt,
+    history_msgs,
+    system_bytes: system.length,
+    output_chars: FALLBACK_REPLY.length,
+  })
+  return FALLBACK_REPLY
 }
 
 export async function chatImmobilierStream(messages: ChatMessage[], context?: string): Promise<ReadableStream | null> {

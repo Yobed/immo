@@ -119,7 +119,7 @@ export function PremiumBienListCard({
               </div>
               
               {score_ia && score_ia > 90 && (
-                <div className="bg-[var(--accent-luxury)]/90 backdrop-blur-md px-2 py-2 rounded-full border border-white/20 shadow-xl">
+                <div className="bg-accent-luxury/90 backdrop-blur-md px-2 py-2 rounded-full border border-white/20 shadow-xl">
                   <Star className="w-3 h-3 fill-black stroke-black" />
                 </div>
               )}
@@ -157,7 +157,7 @@ export function PremiumBienListCard({
                     {titre}
                   </h3>
                   {prix && (
-                    <div className="bg-[var(--accent-luxury)]/10 px-3 py-1.5 rounded-xl border border-[var(--accent-luxury)]/20 shrink-0 shadow-sm backdrop-blur-sm">
+                    <div className="bg-accent-luxury/10 px-3 py-1.5 rounded-xl border border-accent-luxury/20 shrink-0 shadow-sm backdrop-blur-sm">
                       <span className="text-[15px] font-sans font-extrabold text-[var(--accent-luxury)] tracking-tight">
                         {prix.value}
                       </span>
@@ -201,7 +201,7 @@ export function PremiumBienListCard({
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-[var(--border)]/50 flex items-center justify-end">
+            <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-end">
               <div className="w-7 h-7 rounded-full bg-[var(--midnight-muted)] border border-[var(--border)] flex items-center justify-center transition-all duration-500 group-hover:bg-[var(--accent-luxury)] group-hover:text-[var(--on-accent)]">
                 <ArrowUpRight className="w-3 h-3" />
               </div>

@@ -32,7 +32,7 @@ interface OutreachStats {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  new: 'bg-slate-100 text-slate-700 border-slate-200',
+  new: 'bg-[var(--surface-hover)] text-[var(--text)] border-[var(--border)]',
   queued: 'bg-amber-50 text-amber-700 border-amber-200',
   invited: 'bg-blue-50 text-blue-700 border-blue-200',
   responded: 'bg-violet-50 text-violet-700 border-violet-200',
@@ -107,11 +107,11 @@ export default async function AdminOutreachPage() {
     : '0.0'
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-[var(--surface-hover)]">
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
         <header className="mb-8">
-          <h1 className="text-2xl font-bold text-slate-900 mb-1">Outreach agents WhatsApp</h1>
-          <p className="text-sm text-slate-500">Agents identifiés dans les groupes publics et statut de leurs invitations.</p>
+          <h1 className="text-2xl font-bold text-[var(--text)] mb-1">Outreach agents WhatsApp</h1>
+          <p className="text-sm text-[var(--text-muted)]">Agents identifiés dans les groupes publics et statut de leurs invitations.</p>
         </header>
 
         {/* Stats grid */}
@@ -125,14 +125,14 @@ export default async function AdminOutreachPage() {
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-            <h2 className="text-sm font-bold text-slate-800">Prospects récents (100 derniers)</h2>
-            <span className="text-[10px] text-slate-400 uppercase tracking-widest">Trié par dernière activité</span>
+        <div className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] overflow-hidden">
+          <div className="px-5 py-4 border-b border-[var(--border)] flex items-center justify-between">
+            <h2 className="text-sm font-bold text-[var(--text)]">Prospects récents (100 derniers)</h2>
+            <span className="text-[10px] text-[var(--text-subtle)] uppercase tracking-widest">Trié par dernière activité</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500">
+              <thead className="bg-[var(--surface-hover)] text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
                 <tr>
                   <th className="text-left px-4 py-2.5 font-semibold">Téléphone</th>
                   <th className="text-left px-4 py-2.5 font-semibold">Nom</th>
@@ -143,29 +143,29 @@ export default async function AdminOutreachPage() {
                   <th className="text-left px-4 py-2.5 font-semibold">Vu</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-[var(--border)]">
                 {prospects.map((p) => (
-                  <tr key={p.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3 font-mono text-xs text-slate-700">+{p.phone}</td>
-                    <td className="px-4 py-3 text-slate-800 font-medium">{p.display_name || '—'}</td>
-                    <td className="px-4 py-3 text-xs text-slate-600">
+                  <tr key={p.id} className="hover:bg-[var(--surface-hover)] transition-colors">
+                    <td className="px-4 py-3 font-mono text-xs text-[var(--text)]">+{p.phone}</td>
+                    <td className="px-4 py-3 text-[var(--text)] font-medium">{p.display_name || '—'}</td>
+                    <td className="px-4 py-3 text-xs text-[var(--text-muted)]">
                       {p.last_extraction
                         ? `${p.last_extraction.type_bien ?? '?'} · ${p.last_extraction.commune ?? '?'}`
                         : '—'}
                     </td>
-                    <td className="px-4 py-3 text-center text-slate-700 font-bold">{p.ad_count}</td>
-                    <td className="px-4 py-3 text-center text-slate-700">{p.invite_count}</td>
+                    <td className="px-4 py-3 text-center text-[var(--text)] font-bold">{p.ad_count}</td>
+                    <td className="px-4 py-3 text-center text-[var(--text)]">{p.invite_count}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${STATUS_COLORS[p.status] ?? STATUS_COLORS.new}`}>
                         {p.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-[11px] text-slate-500">{formatDate(p.last_seen_at)}</td>
+                    <td className="px-4 py-3 text-[11px] text-[var(--text-muted)]">{formatDate(p.last_seen_at)}</td>
                   </tr>
                 ))}
                 {prospects.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center text-slate-400 text-sm">
+                    <td colSpan={7} className="px-4 py-12 text-center text-[var(--text-subtle)] text-sm">
                       Aucun prospect détecté pour le moment.
                     </td>
                   </tr>
@@ -188,7 +188,7 @@ interface StatCardProps {
 }
 
 const COLOR_MAP: Record<StatCardProps['color'], string> = {
-  slate: 'bg-slate-50 text-slate-700 border-slate-200',
+  slate: 'bg-[var(--surface-hover)] text-[var(--text)] border-[var(--border)]',
   amber: 'bg-amber-50 text-amber-700 border-amber-200',
   blue: 'bg-blue-50 text-blue-700 border-blue-200',
   violet: 'bg-violet-50 text-violet-700 border-violet-200',

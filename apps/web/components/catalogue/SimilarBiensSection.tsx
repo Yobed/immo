@@ -63,14 +63,14 @@ export async function SimilarBiensSection({
   if (similar.length === 0) return null
 
   return (
-    <section className="mt-12 pt-10 border-t border-slate-100">
+    <section className="mt-12 pt-10 border-t border-[var(--border)]">
       <div className="flex items-center gap-3 mb-6">
         <Sparkles className="w-5 h-5 text-accent-luxury" />
         <div>
-          <h2 className="text-xl md:text-2xl font-display font-bold text-slate-900 tracking-tight">
+          <h2 className="text-xl md:text-2xl font-display font-bold text-[var(--text)] tracking-tight">
             {title}
           </h2>
-          <p className="text-xs text-slate-700 mt-0.5">{subtitle}</p>
+          <p className="text-xs text-[var(--text)] mt-0.5">{subtitle}</p>
         </div>
       </div>
 

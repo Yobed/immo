@@ -32,7 +32,7 @@ export function Step3Localisation({ form }: { form: UseFormReturn<BienFormData> 
         <label className="block text-sm font-sans font-medium text-[var(--text)] mb-2">Commune *</label>
         <select
           {...register('commune')}
-          className="w-full rounded-btn border border-[var(--border)] px-3 py-2 text-sm font-sans focus:outline-none focus:ring-2 focus:ring-primary/30 bg-[var(--surface-card)]"
+          className="w-full rounded-btn border border-[var(--border)] px-3 py-2 text-sm font-sans focus:outline-none focus:ring-2 focus:ring-primary/30 bg-[var(--surface-card)] text-[var(--text)]"
         >
           <option value="">Sélectionner une commune...</option>
           {COMMUNES_CI.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -53,14 +53,14 @@ export function Step3Localisation({ form }: { form: UseFormReturn<BienFormData> 
           longitude={typeof longitude === 'number' ? longitude : null}
           onChange={handlePickerChange}
         />
-        <p className="text-xs text-muted font-sans mt-2">
+        <p className="text-xs text-[var(--text-muted)] font-sans mt-2">
           Recherchez une adresse, cliquez sur la carte, ou utilisez le bouton 🎯 pour votre position. Le marqueur est déplaçable.
         </p>
       </div>
 
       {/* Inputs manuels (cachés mais accessibles si besoin de saisie précise) */}
       <details className="text-xs">
-        <summary className="cursor-pointer text-slate-500 hover:text-slate-700 font-medium">
+        <summary className="cursor-pointer text-[var(--text-muted)] hover:text-[var(--text)] font-medium">
           Saisir manuellement les coordonnées
         </summary>
         <div className="grid grid-cols-2 gap-4 mt-3">

@@ -56,7 +56,7 @@ export default async function MesReservationsPage() {
                 <Link
                   key={resa.id}
                   href={`/reservations/${resa.id}`}
-                  className="block bg-white rounded-card border border-[var(--border)] p-5 hover:border-primary/40 transition-colors"
+                  className="block bg-[var(--surface-card)] rounded-card border border-[var(--border)] p-5 hover:border-primary/40 transition-colors"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">

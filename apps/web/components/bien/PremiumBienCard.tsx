@@ -152,18 +152,18 @@ export function PremiumBienCard({
                   <button
                     onClick={prevPhoto}
                     aria-label="Photo précédente"
-                    className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/90 hover:bg-white items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/90 hover:bg-[var(--surface-card)] items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
                   >
-                    <ChevronLeft className="w-4 h-4 text-slate-900" strokeWidth={2.5} />
+                    <ChevronLeft className="w-4 h-4 text-[var(--text)]" strokeWidth={2.5} />
                   </button>
                 )}
                 {photoIdx < gallery.length - 1 && (
                   <button
                     onClick={nextPhoto}
                     aria-label="Photo suivante"
-                    className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/90 hover:bg-white items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/90 hover:bg-[var(--surface-card)] items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
                   >
-                    <ChevronRight className="w-4 h-4 text-slate-900" strokeWidth={2.5} />
+                    <ChevronRight className="w-4 h-4 text-[var(--text)]" strokeWidth={2.5} />
                   </button>
                 )}
                 {/* Dots indicator */}
@@ -172,7 +172,7 @@ export function PremiumBienCard({
                     <span
                       key={i}
                       className={`block rounded-full transition-all ${
-                        i === photoIdx ? 'w-3 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/50'
+                        i === photoIdx ? 'w-3 h-1.5 bg-[var(--surface-card)]' : 'w-1.5 h-1.5 bg-white/50'
                       }`}
                     />
                   ))}
@@ -193,7 +193,7 @@ export function PremiumBienCard({
                 aria-label={isSelected ? 'Retirer de la comparaison' : 'Ajouter à la comparaison'}
                 className={`absolute bottom-2 right-2 z-30 flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider backdrop-blur-md border transition-all active:scale-90 ${
                   isSelected
-                    ? 'bg-[var(--accent-luxury)] text-black border-[var(--accent-luxury)] shadow-lg'
+                    ? 'bg-[var(--accent-luxury)] text-[var(--text)] border-[var(--accent-luxury)] shadow-lg'
                     : 'bg-black/55 text-white border-white/20 hover:bg-black/75'
                 }`}
               >
@@ -283,7 +283,7 @@ export function PremiumBienCard({
               </div>
             ) : null}
 
-            <div className="md:hidden mt-auto pt-2.5 border-t border-[var(--border)]/30">
+            <div className="md:hidden mt-auto pt-2.5 border-t border-border/30">
               <button
                 onClick={(e) => {
                   e.preventDefault();
@@ -296,7 +296,7 @@ export function PremiumBienCard({
                     window.location.href = `/biens/${id}?action=visiter`;
                   }
                 }}
-                className="w-full min-h-[44px] h-11 rounded-[var(--radius-md)] bg-[var(--accent-luxury)] text-[var(--on-accent)] flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all hover:bg-[var(--accent-luxury)]/90"
+                className="w-full min-h-[44px] h-11 rounded-[var(--radius-md)] bg-[var(--accent-luxury)] text-[var(--on-accent)] flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all hover:bg-accent-luxury/90"
               >
                 {type_bien.toLowerCase().includes('meublee') || type_bien.toLowerCase().includes('nuit') ? (
                   <>

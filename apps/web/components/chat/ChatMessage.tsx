@@ -14,12 +14,12 @@ export function ChatMessage({ role, content }: Props) {
       <div className={`flex items-center gap-3 mb-2 px-1 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
         <div className={`w-6 h-6 rounded-lg flex items-center justify-center border ${
           isUser 
-            ? 'bg-[var(--text)]/5 border-[var(--text)]/10' 
-            : 'bg-[var(--accent-luxury)]/20 border-[var(--accent-luxury)]/30'
+            ? 'bg-foreground/5 border-foreground/10' 
+            : 'bg-accent-luxury/20 border-accent-luxury/30'
         }`}>
-          {isUser ? <User className="w-3.5 h-3.5 text-[var(--text)]/40" /> : <Sparkles className="w-3.5 h-3.5 text-[var(--accent-luxury)]" />}
+          {isUser ? <User className="w-3.5 h-3.5 text-foreground/40" /> : <Sparkles className="w-3.5 h-3.5 text-[var(--accent-luxury)]" />}
         </div>
-        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--text)]/20">
+        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-foreground/20">
           {isUser ? 'Client Privilégié' : 'Sapphire Intelligence'}
         </span>
       </div>
@@ -28,7 +28,7 @@ export function ChatMessage({ role, content }: Props) {
         className={`max-w-[90%] px-6 py-4 rounded-[1.5rem] text-sm leading-relaxed transition-all duration-500 ${
           isUser
             ? 'bg-[var(--accent-luxury)] border border-[var(--accent-luxury)] text-[var(--midnight)] rounded-tr-sm shadow-xl'
-            : 'bg-[var(--off-white)]/5 border border-[var(--off-white)]/10 text-[var(--text)]/90 rounded-tl-sm backdrop-blur-md'
+            : 'bg-surface-raised/70 border border-[var(--border)] text-foreground/90 rounded-tl-sm backdrop-blur-md'
         }`}
       >
         {renderContent(content)}
@@ -158,7 +158,7 @@ function renderInlineLinks(text: string, keyPrefix: string): React.ReactNode {
         href={link.url}
         target={link.url.startsWith('http') ? '_blank' : undefined}
         rel="noopener noreferrer"
-        className="text-[var(--accent-luxury)] underline decoration-[var(--accent-luxury)]/40 underline-offset-2 hover:decoration-[var(--accent-luxury)] font-semibold break-all"
+        className="text-[var(--accent-luxury)] underline decoration-accent-luxury/40 underline-offset-2 hover:decoration-[var(--accent-luxury)] font-semibold break-all"
       >
         {link.label}
       </a>

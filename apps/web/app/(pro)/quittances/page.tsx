@@ -105,7 +105,7 @@ export default async function QuittancesPage({ searchParams }: PageProps) {
               className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
                 (filtreStatut ?? 'tous') === f.value
                   ? 'bg-primary text-white border-primary'
-                  : 'bg-white text-[var(--text)] border-[var(--border)] hover:border-primary'
+                  : 'bg-[var(--surface-card)] text-[var(--text)] border-[var(--border)] hover:border-primary'
               }`}
             >
               {f.label}

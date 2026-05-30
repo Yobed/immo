@@ -9,7 +9,7 @@ export function OwnerTeaser() {
   return (
     <section className="py-32 bg-[var(--surface-card)] relative overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[var(--accent-luxury)]/5 to-transparent pointer-events-none" />
+      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-accent-luxury/5 to-transparent pointer-events-none" />
       
       <div className="container mx-auto px-6 relative z-10">
         <div className="grid lg:grid-cols-2 gap-24 items-center">
@@ -64,8 +64,8 @@ export function OwnerTeaser() {
             </div>
             
             {/* Floating decorative elements */}
-            <div className="absolute -top-12 -right-12 w-48 h-48 bg-[var(--accent-luxury)]/10 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-[var(--accent-luxury)]/20 rounded-full blur-2xl animate-bounce duration-[5s]" />
+            <div className="absolute -top-12 -right-12 w-48 h-48 bg-accent-luxury/10 rounded-full blur-3xl animate-pulse" />
+            <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-accent-luxury/20 rounded-full blur-2xl animate-bounce duration-[5s]" />
           </div>
         </div>
       </div>

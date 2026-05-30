@@ -1,6 +1,7 @@
 'use client'
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { STATUTS_PUBLICS } from '@/lib/catalogue/statuts'
 import { MapPin, Navigation, Loader2, Car, ExternalLink, ChevronRight, ArrowUpRight, ShieldCheck } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
@@ -59,8 +60,8 @@ function NearCard({
     <div
       className={`w-[192px] md:w-[240px] shrink-0 rounded-2xl md:rounded-[1.5rem] overflow-hidden border cursor-pointer transition-all duration-300 flex flex-col ${
         isSelected
-          ? 'border-[var(--accent-luxury)] ring-2 ring-[var(--accent-luxury)]/50'
-          : 'border-[var(--border)] hover:border-[var(--accent-luxury)]/40'
+          ? 'border-[var(--accent-luxury)] ring-2 ring-accent-luxury/50'
+          : 'border-[var(--border)] hover:border-accent-luxury/40'
       }`}
       onClick={onSelect}
       onMouseEnter={() => onHover(b.id)}
@@ -99,7 +100,7 @@ function NearCard({
           <p className="text-[12px] font-display font-bold text-[var(--accent-luxury)] tracking-tight">
             {formatPrice(b)}
           </p>
-          <Link href={`/biens/${b.id}`} onClick={e => e.stopPropagation()} className="w-7 h-7 flex items-center justify-center rounded-full bg-[var(--accent-luxury)]/10 hover:bg-[var(--accent-luxury)] transition-all">
+          <Link href={`/biens/${b.id}`} onClick={e => e.stopPropagation()} className="w-7 h-7 flex items-center justify-center rounded-full bg-accent-luxury/10 hover:bg-[var(--accent-luxury)] transition-all">
             <ExternalLink className="w-3.5 h-3.5 text-[var(--accent-luxury)]" />
           </Link>
         </div>
@@ -253,7 +254,7 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
       const { data } = await supabase
         .from('biens')
         .select('id, titre, commune, quartier, type_bien, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces, latitude, longitude, est_disponible, is_verifie, score_ia')
-        .eq('statut', 'publie')
+        .in('statut', [...STATUTS_PUBLICS])
       
       const rows = data || []
       
@@ -392,7 +393,7 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
   return (
     <section className="relative py-20 overflow-hidden bg-[var(--background)]">
       {/* Ambient glow */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[var(--accent-luxury)]/5 blur-[150px] rounded-full -mr-64 -mt-32 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-accent-luxury/5 blur-[150px] rounded-full -mr-64 -mt-32 pointer-events-none" />
 
       <div className="relative z-10 mx-auto px-4 md:px-6 max-w-7xl">
 
@@ -400,7 +401,7 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
         <div className="flex flex-col gap-6 mb-10">
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-[var(--accent-luxury)]/10 flex items-center justify-center border border-[var(--accent-luxury)]/20">
+              <div className="w-10 h-10 rounded-xl bg-accent-luxury/10 flex items-center justify-center border border-accent-luxury/20">
                 <Navigation className={`w-5 h-5 text-[var(--accent-luxury)] ${locating ? 'animate-spin' : ''}`} />
               </div>
               <span className="text-[var(--accent-luxury)] font-sans tracking-[0.4em] uppercase text-[11px] font-bold">
@@ -487,7 +488,7 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
                   className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium border transition-colors ${
                     active
                       ? 'bg-[var(--accent-luxury)] text-[var(--on-accent)] border-[var(--accent-luxury)]'
-                      : 'bg-transparent text-[var(--text-muted)] border-[var(--border)] hover:border-[var(--accent-luxury)]/40 hover:text-[var(--text)]'
+                      : 'bg-transparent text-[var(--text-muted)] border-[var(--border)] hover:border-accent-luxury/40 hover:text-[var(--text)]'
                   }`}
                 >
                   {cat.label}
@@ -554,7 +555,7 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
 
             {/* Loading overlay — sits above the map, doesn't unmount it */}
             {loading && biens.length === 0 && (
-              <div className="absolute inset-0 bg-[var(--background)]/80 backdrop-blur-sm flex items-center justify-center z-30">
+              <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-30">
                 <div className="flex flex-col items-center gap-4">
                   <Loader2 className="w-10 h-10 text-[var(--accent-luxury)] animate-spin" />
                   <p className="text-[var(--text-muted)] text-sm font-sans uppercase tracking-[0.2em] font-bold">Chargement complet…</p>
@@ -565,7 +566,7 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
             {/* Map overlay badges */}
             <div className="absolute top-5 left-5 z-10 flex gap-2 flex-wrap">
               {userPos && (
-                <div className="px-5 py-2.5 bg-black/60 backdrop-blur-xl rounded-full border border-[var(--accent-luxury)]/30 flex items-center gap-3">
+                <div className="px-5 py-2.5 bg-black/60 backdrop-blur-xl rounded-full border border-accent-luxury/30 flex items-center gap-3">
                   <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(96,165,250,0.8)]" />
                   <span className="text-[var(--accent-luxury)] text-[10px] font-bold uppercase tracking-widest">Ma position Géo</span>
                 </div>
@@ -584,7 +585,7 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
 
             {/* Route info badge — desktop only (mobile handled by PropertiesMap compact bar) */}
             {selectedBien && (
-              <div className="hidden sm:flex absolute bottom-5 left-1/2 -translate-x-1/2 z-10 px-5 py-3 bg-black/80 backdrop-blur-xl rounded-full border border-[var(--accent-luxury)]/40 items-center gap-4 shadow-md">
+              <div className="hidden sm:flex absolute bottom-5 left-1/2 -translate-x-1/2 z-10 px-5 py-3 bg-black/80 backdrop-blur-xl rounded-full border border-accent-luxury/40 items-center gap-4 shadow-md">
                 <div className="w-2 h-2 rounded-full bg-[var(--accent-luxury)] animate-pulse" />
                 <span className="text-white text-[10px] font-bold uppercase tracking-widest">
                   Itinéraire vers : {selectedBien.titre}
@@ -636,7 +637,7 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
                         </div>
                         <Link
                           href={`/catalogue?type_bien=${cat.key}${filterOffre !== 'all' ? `&type_offre=${filterOffre}` : ''}${filterMaxPrice !== null ? `&prix_max=${filterMaxPrice}` : ''}`}
-                          className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--accent-luxury)] border-b border-[var(--accent-luxury)]/40 pb-0.5 hover:border-[var(--accent-luxury)] transition-colors"
+                          className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--accent-luxury)] border-b border-accent-luxury/40 pb-0.5 hover:border-[var(--accent-luxury)] transition-colors"
                         >
                           {tx.near.viewAll} <ChevronRight className="w-3 h-3" />
                         </Link>
@@ -663,10 +664,10 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
               </div>
 
               <div className="mt-10 text-center">
-                <Link href={cataloguePath} className="inline-flex items-center gap-3 px-8 py-3 rounded-full border border-[var(--accent-luxury)] text-[var(--accent-luxury)] text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-[var(--accent-luxury)] hover:text-black transition-all">
+                <Link href={cataloguePath} className="inline-flex items-center gap-3 px-8 py-3 rounded-full border border-[var(--accent-luxury)] text-[var(--accent-luxury)] text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-[var(--accent-luxury)] hover:text-[var(--text)] transition-all">
                   {tx.near.exploreCatalogue}
                   {activeFilterCount > 0 && (
-                    <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[var(--accent-luxury)] text-black text-[8px]">
+                    <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[var(--accent-luxury)] text-[var(--text)] text-[8px]">
                       {activeFilterCount}
                     </span>
                   )}
@@ -678,7 +679,7 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
             <div className="text-center py-20 border border-dashed border-[var(--border)] rounded-[2rem] bg-[var(--surface-card)]">
               <MapPin className="w-12 h-12 text-[var(--accent-luxury)] opacity-50 mx-auto mb-4" />
               <p className="text-[var(--text-muted)] mb-6 font-sans">{tx.near.noBien}</p>
-              <Link href="/biens" className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border border-[var(--accent-luxury)] text-[var(--accent-luxury)] text-xs font-bold uppercase tracking-widest hover:bg-[var(--accent-luxury)] hover:text-black transition-all">
+              <Link href="/biens" className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border border-[var(--accent-luxury)] text-[var(--accent-luxury)] text-xs font-bold uppercase tracking-widest hover:bg-[var(--accent-luxury)] hover:text-[var(--text)] transition-all">
                 {tx.near.viewCatalogue}
               </Link>
             </div>

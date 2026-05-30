@@ -12,17 +12,17 @@ interface BadgeProps {
 // no "bg-accent-light" / "text-off-white" undefined classes.
 const variants: Record<BadgeVariant, string> = {
   default:   'bg-[var(--surface)] text-[var(--text-muted)] border border-[var(--border)]',
-  success:   'bg-[var(--success-soft)] text-[var(--success)] border border-[var(--success)]/20',
-  warning:   'bg-[var(--warning-soft)] text-[var(--warning)] border border-[var(--warning)]/20',
+  success:   'bg-[var(--success-soft)] text-[var(--success)] border border-success/20',
+  warning:   'bg-[var(--warning-soft)] text-[var(--warning)] border border-[var(--warning-soft)]',
   danger:    'bg-red-50 text-red-700 border border-red-200 dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/20',
-  info:      'bg-[var(--info-soft)] text-[var(--info)] border border-[var(--info)]/20',
+  info:      'bg-[var(--info-soft)] text-[var(--info)] border border-info/20',
   photo:     'bg-[var(--surface-hover)] text-[var(--text-muted)] border border-[var(--border)]',
   video:     'bg-[var(--surface-hover)] text-[var(--text-muted)] border border-[var(--border)]',
-  vue360:    'bg-[var(--accent-luxury-muted)] text-[var(--accent-luxury)] border border-[var(--accent-luxury)]/20',
+  vue360:    'bg-[var(--accent-luxury-muted)] text-[var(--accent-luxury)] border border-accent-luxury/20',
   plan:      'bg-[var(--surface-hover)] text-[var(--text-muted)] border border-[var(--border)]',
-  luxury:    'bg-[var(--accent-luxury-muted)] text-[var(--accent-luxury)] border border-[var(--accent-luxury)]/20',
-  premium:   'bg-[var(--secondary)]/15 text-[var(--secondary)] border border-[var(--secondary)]/25',
-  exclusive: 'bg-[var(--surface-card)] text-[var(--accent-luxury)] border border-[var(--accent-luxury)]/30',
+  luxury:    'bg-[var(--accent-luxury-muted)] text-[var(--accent-luxury)] border border-accent-luxury/20',
+  premium:   'bg-secondary/15 text-secondary border border-secondary/25',
+  exclusive: 'bg-[var(--surface-card)] text-[var(--accent-luxury)] border border-accent-luxury/30',
 }
 
 export function Badge({ variant = 'default', children, className }: BadgeProps) {

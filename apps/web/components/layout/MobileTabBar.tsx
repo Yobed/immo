@@ -47,7 +47,7 @@ export function MobileTabBar() {
               >
                 <div className={cn(
                   "relative p-2.5 rounded-2xl transition-all duration-500",
-                  isActive && "bg-[var(--accent-luxury)]/15 shadow-[0_0_20px_var(--accent-glow)]"
+                  isActive && "bg-accent-luxury/15 shadow-[0_0_20px_var(--accent-glow)]"
                 )}>
                   <Icon className={cn(
                     "w-6 h-6 transition-transform duration-300",

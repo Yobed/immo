@@ -71,28 +71,28 @@ export function DemanderContactWhatsAppButton({ bienId, isAuthenticated, classNa
 
   if (state.kind === 'form') {
     return (
-      <div className={`p-4 rounded-xl bg-white border border-slate-200 space-y-3 ${className ?? ''}`}>
-        <p className="font-bold text-slate-900 text-sm">Pour recevoir le contact :</p>
+      <div className={`p-4 rounded-xl bg-[var(--surface-card)] border border-[var(--border)] space-y-3 ${className ?? ''}`}>
+        <p className="font-bold text-[var(--text)] text-sm">Pour recevoir le contact :</p>
         <input
           type="text"
           placeholder="Votre nom complet"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400"
+          className="w-full px-3 py-2 border border-[var(--border)] rounded-lg text-sm focus:outline-none focus:border-slate-400"
         />
         <input
           type="tel"
           placeholder="Votre WhatsApp (+225...)"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400"
+          className="w-full px-3 py-2 border border-[var(--border)] rounded-lg text-sm focus:outline-none focus:border-slate-400"
         />
         <textarea
           placeholder="Motif (optionnel)"
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           rows={2}
-          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400"
+          className="w-full px-3 py-2 border border-[var(--border)] rounded-lg text-sm focus:outline-none focus:border-slate-400"
         />
         <div className="flex gap-2">
           <button
@@ -112,7 +112,7 @@ export function DemanderContactWhatsAppButton({ bienId, isAuthenticated, classNa
           <button
             type="button"
             onClick={() => setState({ kind: 'idle' })}
-            className="px-4 py-2.5 text-slate-500 hover:text-slate-900 text-sm font-medium"
+            className="px-4 py-2.5 text-[var(--text-muted)] hover:text-[var(--text)] text-sm font-medium"
           >
             Annuler
           </button>

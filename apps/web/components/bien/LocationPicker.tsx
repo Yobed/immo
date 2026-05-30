@@ -149,7 +149,7 @@ export function LocationPicker({ latitude, longitude, onChange }: LocationPicker
         type="button"
         onClick={handleLocateMe}
         disabled={locating}
-        className="absolute top-3 right-3 w-10 h-10 flex items-center justify-center bg-white rounded-xl shadow-lg border border-slate-200 text-slate-600 hover:text-slate-900 active:scale-95 transition-all disabled:opacity-60"
+        className="absolute top-3 right-3 w-10 h-10 flex items-center justify-center bg-[var(--surface-card)] rounded-xl shadow-lg border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] active:scale-95 transition-all disabled:opacity-60"
         title="Utiliser ma position GPS"
       >
         {locating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crosshair className="w-4 h-4" />}
@@ -159,7 +159,7 @@ export function LocationPicker({ latitude, longitude, onChange }: LocationPicker
       <button
         type="button"
         onClick={() => setFullscreen(f => !f)}
-        className="absolute top-3 right-15 w-10 h-10 flex items-center justify-center bg-white rounded-xl shadow-lg border border-slate-200 text-slate-600 hover:text-slate-900 active:scale-95 transition-all"
+        className="absolute top-3 right-15 w-10 h-10 flex items-center justify-center bg-[var(--surface-card)] rounded-xl shadow-lg border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] active:scale-95 transition-all"
         style={{ right: '60px' }}
         title={fullscreen ? 'Quitter le plein écran' : 'Plein écran'}
       >
@@ -167,8 +167,8 @@ export function LocationPicker({ latitude, longitude, onChange }: LocationPicker
       </button>
 
       {!marker && (
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur px-4 py-2 rounded-xl shadow-lg border border-slate-200 pointer-events-none">
-          <p className="text-xs font-bold text-slate-700">Cliquez sur la carte pour placer un marqueur</p>
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur px-4 py-2 rounded-xl shadow-lg border border-[var(--border)] pointer-events-none">
+          <p className="text-xs font-bold text-[var(--text)]">Cliquez sur la carte pour placer un marqueur</p>
         </div>
       )}
     </div>
@@ -179,8 +179,8 @@ export function LocationPicker({ latitude, longitude, onChange }: LocationPicker
       {/* Recherche d'adresse */}
       <div className="relative">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          {searching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 animate-spin" />}
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-subtle)]" />
+          {searching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-subtle)] animate-spin" />}
           <input
             type="text"
             value={search}
@@ -191,16 +191,16 @@ export function LocationPicker({ latitude, longitude, onChange }: LocationPicker
           />
         </div>
         {searchOpen && results.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-20 overflow-hidden max-h-[260px] overflow-y-auto">
+          <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--surface-card)] border border-[var(--border)] rounded-xl shadow-lg z-20 overflow-hidden max-h-[260px] overflow-y-auto">
             {results.map((f) => (
               <button
                 key={f.id}
                 type="button"
                 onClick={() => handleResultClick(f)}
-                className="w-full flex items-start gap-2 px-3 py-2.5 text-left hover:bg-slate-50 border-b border-slate-100 last:border-0 transition-colors"
+                className="w-full flex items-start gap-2 px-3 py-2.5 text-left hover:bg-[var(--surface-hover)] border-b border-[var(--border)] last:border-0 transition-colors"
               >
                 <MapPin className="w-3.5 h-3.5 mt-0.5 text-accent-luxury shrink-0" />
-                <span className="text-xs text-slate-700 leading-snug">{f.place_name}</span>
+                <span className="text-xs text-[var(--text)] leading-snug">{f.place_name}</span>
               </button>
             ))}
           </div>
@@ -208,50 +208,50 @@ export function LocationPicker({ latitude, longitude, onChange }: LocationPicker
       </div>
 
       {/* Carte inline (cachée si plein écran) */}
-      {!fullscreen && mapJSX('h-[360px] rounded-2xl border border-slate-200 shadow-md')}
+      {!fullscreen && mapJSX('h-[360px] rounded-2xl border border-[var(--border)] shadow-md')}
 
       {/* Plein écran modal */}
       {fullscreen && (
         <div className="fixed inset-0 z-[500] bg-black flex flex-col">
-          <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200 shrink-0">
+          <div className="flex items-center justify-between px-4 py-3 bg-[var(--surface-card)] border-b border-[var(--border)] shrink-0">
             <div>
-              <p className="font-bold text-slate-900 text-sm leading-none">Choisir l'emplacement</p>
-              <p className="text-slate-400 text-xs mt-0.5">Cliquez ou recherchez une adresse</p>
+              <p className="font-bold text-[var(--text)] text-sm leading-none">Choisir l'emplacement</p>
+              <p className="text-[var(--text-subtle)] text-xs mt-0.5">Cliquez ou recherchez une adresse</p>
             </div>
             <button
               type="button"
               onClick={() => setFullscreen(false)}
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition-colors"
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-[var(--surface-hover)] hover:bg-[var(--surface-hover)] transition-colors"
             >
-              <X className="w-5 h-5 text-slate-700" />
+              <X className="w-5 h-5 text-[var(--text)]" />
             </button>
           </div>
 
           {/* Search dans le modal */}
-          <div className="px-4 py-3 bg-white border-b border-slate-100 relative shrink-0">
+          <div className="px-4 py-3 bg-[var(--surface-card)] border-b border-[var(--border)] relative shrink-0">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              {searching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 animate-spin" />}
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-subtle)]" />
+              {searching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-subtle)] animate-spin" />}
               <input
                 type="text"
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setSearchOpen(true) }}
                 onFocus={() => setSearchOpen(true)}
                 placeholder="Rechercher une adresse, un quartier..."
-                className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full pl-10 pr-10 py-2.5 bg-[var(--surface-hover)] border border-[var(--border)] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
             {searchOpen && results.length > 0 && (
-              <div className="absolute top-full left-4 right-4 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-30 overflow-hidden max-h-[260px] overflow-y-auto">
+              <div className="absolute top-full left-4 right-4 mt-1 bg-[var(--surface-card)] border border-[var(--border)] rounded-xl shadow-lg z-30 overflow-hidden max-h-[260px] overflow-y-auto">
                 {results.map((f) => (
                   <button
                     key={f.id}
                     type="button"
                     onClick={() => handleResultClick(f)}
-                    className="w-full flex items-start gap-2 px-3 py-2.5 text-left hover:bg-slate-50 border-b border-slate-100 last:border-0 transition-colors"
+                    className="w-full flex items-start gap-2 px-3 py-2.5 text-left hover:bg-[var(--surface-hover)] border-b border-[var(--border)] last:border-0 transition-colors"
                   >
                     <MapPin className="w-3.5 h-3.5 mt-0.5 text-accent-luxury shrink-0" />
-                    <span className="text-xs text-slate-700 leading-snug">{f.place_name}</span>
+                    <span className="text-xs text-[var(--text)] leading-snug">{f.place_name}</span>
                   </button>
                 ))}
               </div>

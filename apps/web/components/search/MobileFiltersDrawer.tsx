@@ -16,7 +16,7 @@ export function MobileFiltersDrawer({ activeCount }: { activeCount: number }) {
         className="lg:hidden flex items-center justify-between w-full px-5 py-4 rounded-2xl border border-[var(--border)] bg-[var(--midnight-muted)] shadow-xl active:scale-[0.98] transition-all"
       >
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-[var(--accent-luxury)]/10 text-[var(--accent-luxury)]">
+          <div className="p-2 rounded-xl bg-accent-luxury/10 text-[var(--accent-luxury)]">
             <SlidersHorizontal size={18} strokeWidth={2.5} />
           </div>
           <span className="font-black text-xs uppercase tracking-[0.2em] text-[var(--text)]">Filtres de recherche</span>
@@ -24,7 +24,7 @@ export function MobileFiltersDrawer({ activeCount }: { activeCount: number }) {
         
         <div className="flex items-center gap-3">
           {activeCount > 0 && (
-            <span className="flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-[var(--accent-luxury)] text-[var(--on-accent)] text-[10px] font-black shadow-lg shadow-[var(--accent-luxury)]/20">
+            <span className="flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full bg-[var(--accent-luxury)] text-[var(--on-accent)] text-[10px] font-black shadow-lg shadow-accent-luxury/20">
               {activeCount}
             </span>
           )}

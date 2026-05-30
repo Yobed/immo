@@ -97,7 +97,7 @@ function RegisterContent() {
         </p>
         <Link
           href="/login"
-          className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-[var(--accent-luxury)] border-b border-[var(--accent-luxury)]/20 pb-0.5 hover:border-[var(--accent-luxury)] transition-all"
+          className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-[var(--accent-luxury)] border-b border-accent-luxury/20 pb-0.5 hover:border-[var(--accent-luxury)] transition-all"
         >
           {t.auth.backToLogin} <ArrowRight size={14} />
         </Link>
@@ -114,7 +114,7 @@ function RegisterContent() {
     >
       {/* Header */}
       <div className="text-center space-y-3">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-[var(--accent-luxury)]/10 text-[var(--accent-luxury)] mb-2 shadow-inner border border-[var(--accent-luxury)]/20">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-accent-luxury/10 text-[var(--accent-luxury)] mb-2 shadow-inner border border-accent-luxury/20">
           <UserPlus size={28} strokeWidth={2.5} />
         </div>
         <h1 className="text-3xl md:text-4xl font-black text-[var(--text)] font-display tracking-tight uppercase italic leading-none">
@@ -168,7 +168,7 @@ function RegisterContent() {
               aria-required="true"
               aria-invalid={errors.full_name ? 'true' : 'false'}
               aria-describedby={errors.full_name ? 'reg-fullname-error' : undefined}
-              className="w-full px-6 py-4 bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-[var(--text-muted)]/20"
+              className="w-full px-6 py-4 bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-muted/20"
             />
             {errors.full_name && (
               <p id="reg-fullname-error" role="alert" className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.full_name.message}</p>
@@ -187,7 +187,7 @@ function RegisterContent() {
               aria-required="true"
               aria-invalid={errors.email ? 'true' : 'false'}
               aria-describedby={errors.email ? 'reg-email-error' : undefined}
-              className="w-full px-6 py-4 bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-[var(--text-muted)]/20"
+              className="w-full px-6 py-4 bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-muted/20"
             />
             {errors.email && (
               <p id="reg-email-error" role="alert" className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.email.message}</p>
@@ -206,7 +206,7 @@ function RegisterContent() {
               aria-required="true"
               aria-invalid={errors.password ? 'true' : 'false'}
               aria-describedby={errors.password ? 'reg-password-error' : undefined}
-              className="w-full px-6 py-4 bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-[var(--text-muted)]/20"
+              className="w-full px-6 py-4 bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-muted/20"
             />
             {errors.password && (
               <p id="reg-password-error" role="alert" className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.password.message}</p>
@@ -220,19 +220,19 @@ function RegisterContent() {
             <div className="grid grid-cols-3 gap-3">
               <label className="relative group cursor-pointer">
                 <input type="radio" value="locataire" {...register('role')} className="sr-only peer" />
-                <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-center peer-checked:border-[var(--accent-luxury)] peer-checked:bg-[var(--accent-luxury)]/5 transition-all">
+                <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-center peer-checked:border-[var(--accent-luxury)] peer-checked:bg-accent-luxury/5 transition-all">
                   <span className="text-[11px] font-black uppercase tracking-widest text-[var(--text-muted)] peer-checked:text-[var(--accent-luxury)]">{t.auth.renter}</span>
                 </div>
               </label>
               <label className="relative group cursor-pointer">
                 <input type="radio" value="proprietaire" {...register('role')} className="sr-only peer" />
-                <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-center peer-checked:border-[var(--accent-luxury)] peer-checked:bg-[var(--accent-luxury)]/5 transition-all">
+                <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-center peer-checked:border-[var(--accent-luxury)] peer-checked:bg-accent-luxury/5 transition-all">
                   <span className="text-[11px] font-black uppercase tracking-widest text-[var(--text-muted)] peer-checked:text-[var(--accent-luxury)]">{t.auth.owner}</span>
                 </div>
               </label>
               <label className="relative group cursor-pointer">
                 <input type="radio" value="agence" {...register('role')} className="sr-only peer" />
-                <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-center peer-checked:border-[var(--accent-luxury)] peer-checked:bg-[var(--accent-luxury)]/5 transition-all">
+                <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-center peer-checked:border-[var(--accent-luxury)] peer-checked:bg-accent-luxury/5 transition-all">
                   <span className="text-[11px] font-black uppercase tracking-widest text-[var(--text-muted)] peer-checked:text-[var(--accent-luxury)]">Agence</span>
                 </div>
               </label>
@@ -243,7 +243,7 @@ function RegisterContent() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex items-center justify-center gap-3 py-5 bg-[var(--accent-luxury)] hover:bg-[var(--accent-luxury)]/90 text-[var(--on-accent)] font-black uppercase tracking-[0.3em] text-[11px] rounded-2xl shadow-xl shadow-[var(--accent-glow)] transition-all active:scale-[0.98] disabled:opacity-50 border border-white/20"
+          className="w-full flex items-center justify-center gap-3 py-5 bg-[var(--accent-luxury)] hover:bg-accent-luxury/90 text-[var(--on-accent)] font-black uppercase tracking-[0.3em] text-[11px] rounded-2xl shadow-xl shadow-[var(--accent-glow)] transition-all active:scale-[0.98] disabled:opacity-50 border border-white/20"
         >
           {loading ? t.auth.creating : (
             <>

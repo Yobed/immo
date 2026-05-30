@@ -40,7 +40,7 @@ export default function GlobalError({
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
           <button
             onClick={reset}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[var(--accent-luxury)] text-black font-display font-bold text-[11px] uppercase tracking-[0.2em] hover:scale-105 transition-transform"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[var(--accent-luxury)] text-[var(--text)] font-display font-bold text-[11px] uppercase tracking-[0.2em] hover:scale-105 transition-transform"
           >
             <RotateCw className="w-4 h-4" />
             {t.errors.retry}

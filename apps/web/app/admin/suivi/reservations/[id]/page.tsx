@@ -119,15 +119,15 @@ export default async function ReservationDetailPage({ params }: PageProps) {
   const nbJours = diffDays(reservation.date_debut, reservation.date_fin)
 
   return (
-    <main className="min-h-screen bg-slate-50">
-      <div className="bg-white border-b border-slate-200">
+    <main className="min-h-screen bg-[var(--surface-hover)]">
+      <div className="bg-[var(--surface-card)] border-b border-[var(--border)]">
         <div className="max-w-[1200px] mx-auto px-6 py-4 flex items-center justify-between gap-4">
-          <Link href="/admin/suivi?tab=reservations" className="flex items-center gap-2 text-slate-500 hover:text-slate-900 text-sm font-medium">
+          <Link href="/admin/suivi?tab=reservations" className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text)] text-sm font-medium">
             <ArrowLeft className="w-4 h-4" /> Retour suivi
           </Link>
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-slate-700" />
-            <span className="font-bold text-slate-900 text-sm">Réservation #{id.slice(0, 8)}</span>
+            <ShieldCheck className="w-5 h-5 text-[var(--text)]" />
+            <span className="font-bold text-[var(--text)] text-sm">Réservation #{id.slice(0, 8)}</span>
             {adminBadge(reservation.admin_validation_status)}
           </div>
         </div>
@@ -136,32 +136,32 @@ export default async function ReservationDetailPage({ params }: PageProps) {
       <div className="max-w-[1200px] mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           {/* Bien */}
-          <section className="bg-white rounded-2xl border border-slate-200 p-6">
-            <h2 className="text-xs font-bold uppercase tracking-wide text-slate-400 mb-3 flex items-center gap-2">
+          <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-6">
+            <h2 className="text-xs font-bold uppercase tracking-wide text-[var(--text-subtle)] mb-3 flex items-center gap-2">
               <Home className="w-4 h-4" /> Bien concerné
             </h2>
-            <h3 className="font-bold text-slate-900 text-lg">{reservation.biens?.titre || 'Bien sans titre'}</h3>
-            <p className="text-slate-500 text-sm flex items-center gap-1 mt-1">
+            <h3 className="font-bold text-[var(--text)] text-lg">{reservation.biens?.titre || 'Bien sans titre'}</h3>
+            <p className="text-[var(--text-muted)] text-sm flex items-center gap-1 mt-1">
               <MapPin className="w-4 h-4" />
               {reservation.biens?.commune || '—'}
               {reservation.biens?.quartier && ` · ${reservation.biens.quartier}`}
             </p>
             {reservation.bien_id && (
-              <Link href={`/biens/${reservation.bien_id}`} target="_blank" className="mt-3 inline-block text-sm font-bold text-slate-700 hover:text-slate-900 underline">
+              <Link href={`/biens/${reservation.bien_id}`} target="_blank" className="mt-3 inline-block text-sm font-bold text-[var(--text)] hover:text-[var(--text)] underline">
                 Voir la fiche →
               </Link>
             )}
           </section>
 
           {/* Visiteur */}
-          <section className="bg-white rounded-2xl border border-slate-200 p-6">
-            <h2 className="text-xs font-bold uppercase tracking-wide text-slate-400 mb-3 flex items-center gap-2">
+          <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-6">
+            <h2 className="text-xs font-bold uppercase tracking-wide text-[var(--text-subtle)] mb-3 flex items-center gap-2">
               <User className="w-4 h-4" /> Visiteur
             </h2>
-            <p className="font-bold text-slate-900 text-lg">{visitorName}</p>
+            <p className="font-bold text-[var(--text)] text-lg">{visitorName}</p>
             <div className="mt-3 flex flex-wrap items-center gap-3">
-              <span className="flex items-center gap-2 text-sm text-slate-700">
-                <Phone className="w-4 h-4 text-slate-400" />
+              <span className="flex items-center gap-2 text-sm text-[var(--text)]">
+                <Phone className="w-4 h-4 text-[var(--text-subtle)]" />
                 {visitorPhone || '—'}
               </span>
               {visitorPhone && (
@@ -173,14 +173,14 @@ export default async function ReservationDetailPage({ params }: PageProps) {
           </section>
 
           {/* Propriétaire */}
-          <section className="bg-white rounded-2xl border border-slate-200 p-6">
-            <h2 className="text-xs font-bold uppercase tracking-wide text-slate-400 mb-3 flex items-center gap-2">
+          <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-6">
+            <h2 className="text-xs font-bold uppercase tracking-wide text-[var(--text-subtle)] mb-3 flex items-center gap-2">
               <User className="w-4 h-4" /> Propriétaire
             </h2>
-            <p className="font-bold text-slate-900 text-lg">{ownerName}</p>
+            <p className="font-bold text-[var(--text)] text-lg">{ownerName}</p>
             <div className="mt-3 flex flex-wrap items-center gap-3">
-              <span className="flex items-center gap-2 text-sm text-slate-700">
-                <Phone className="w-4 h-4 text-slate-400" />
+              <span className="flex items-center gap-2 text-sm text-[var(--text)]">
+                <Phone className="w-4 h-4 text-[var(--text-subtle)]" />
                 {ownerPhone || '—'}
               </span>
               {ownerPhone && (
@@ -198,49 +198,49 @@ export default async function ReservationDetailPage({ params }: PageProps) {
           </section>
 
           {/* Période + montants */}
-          <section className="bg-white rounded-2xl border border-slate-200 p-6">
-            <h2 className="text-xs font-bold uppercase tracking-wide text-slate-400 mb-3 flex items-center gap-2">
+          <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-6">
+            <h2 className="text-xs font-bold uppercase tracking-wide text-[var(--text-subtle)] mb-3 flex items-center gap-2">
               <Calendar className="w-4 h-4" /> Période
             </h2>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-slate-900 font-semibold">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[var(--text)] font-semibold">
               <span>{formatDateFR(reservation.date_debut)}</span>
-              <span className="text-slate-400">→</span>
+              <span className="text-[var(--text-subtle)]">→</span>
               <span>{formatDateFR(reservation.date_fin)}</span>
             </div>
-            <p className="text-slate-500 text-xs mt-1">{nbJours} jour{nbJours > 1 ? 's' : ''}</p>
+            <p className="text-[var(--text-muted)] text-xs mt-1">{nbJours} jour{nbJours > 1 ? 's' : ''}</p>
 
-            <div className="mt-5 pt-5 border-t border-slate-100">
-              <h3 className="text-xs font-bold uppercase tracking-wide text-slate-400 mb-3 flex items-center gap-2">
+            <div className="mt-5 pt-5 border-t border-[var(--border)]">
+              <h3 className="text-xs font-bold uppercase tracking-wide text-[var(--text-subtle)] mb-3 flex items-center gap-2">
                 <Wallet className="w-4 h-4" /> Montants
               </h3>
               <dl className="grid grid-cols-2 gap-y-2 text-sm">
-                <dt className="text-slate-500">Loyer</dt>
-                <dd className="text-right font-medium text-slate-900">{formatFCFA(reservation.montant_loyer_fcfa ?? 0)}</dd>
-                <dt className="text-slate-500">Charges</dt>
-                <dd className="text-right font-medium text-slate-900">{formatFCFA(reservation.charges_fcfa ?? 0)}</dd>
-                <dt className="text-slate-500">Dépôt de garantie</dt>
-                <dd className="text-right font-medium text-slate-900">{formatFCFA(reservation.depot_garantie_fcfa ?? 0)}</dd>
-                <dt className="text-slate-500">Commission plateforme</dt>
-                <dd className="text-right font-medium text-slate-900">{formatFCFA(reservation.commission_fcfa ?? 0)}</dd>
-                <dt className="font-bold text-slate-900 pt-2 border-t border-slate-100 mt-2">Total</dt>
-                <dd className="text-right font-bold text-slate-900 pt-2 border-t border-slate-100 mt-2">{formatFCFA(reservation.montant_total_fcfa ?? 0)}</dd>
+                <dt className="text-[var(--text-muted)]">Loyer</dt>
+                <dd className="text-right font-medium text-[var(--text)]">{formatFCFA(reservation.montant_loyer_fcfa ?? 0)}</dd>
+                <dt className="text-[var(--text-muted)]">Charges</dt>
+                <dd className="text-right font-medium text-[var(--text)]">{formatFCFA(reservation.charges_fcfa ?? 0)}</dd>
+                <dt className="text-[var(--text-muted)]">Dépôt de garantie</dt>
+                <dd className="text-right font-medium text-[var(--text)]">{formatFCFA(reservation.depot_garantie_fcfa ?? 0)}</dd>
+                <dt className="text-[var(--text-muted)]">Commission plateforme</dt>
+                <dd className="text-right font-medium text-[var(--text)]">{formatFCFA(reservation.commission_fcfa ?? 0)}</dd>
+                <dt className="font-bold text-[var(--text)] pt-2 border-t border-[var(--border)] mt-2">Total</dt>
+                <dd className="text-right font-bold text-[var(--text)] pt-2 border-t border-[var(--border)] mt-2">{formatFCFA(reservation.montant_total_fcfa ?? 0)}</dd>
               </dl>
             </div>
 
             {reservation.notes && (
-              <div className="mt-5 pt-5 border-t border-slate-100">
-                <p className="text-xs font-bold uppercase tracking-wide text-slate-400 mb-2">Note du visiteur</p>
-                <p className="text-slate-700 text-sm whitespace-pre-wrap">{reservation.notes}</p>
+              <div className="mt-5 pt-5 border-t border-[var(--border)]">
+                <p className="text-xs font-bold uppercase tracking-wide text-[var(--text-subtle)] mb-2">Note du visiteur</p>
+                <p className="text-[var(--text)] text-sm whitespace-pre-wrap">{reservation.notes}</p>
               </div>
             )}
           </section>
 
           {reservation.admin_note && (
-            <section className="bg-slate-100 rounded-2xl border border-slate-200 p-6">
-              <h2 className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-2">Note admin</h2>
-              <p className="text-slate-700 text-sm whitespace-pre-wrap">{reservation.admin_note}</p>
+            <section className="bg-[var(--surface-hover)] rounded-2xl border border-[var(--border)] p-6">
+              <h2 className="text-xs font-bold uppercase tracking-wide text-[var(--text-muted)] mb-2">Note admin</h2>
+              <p className="text-[var(--text)] text-sm whitespace-pre-wrap">{reservation.admin_note}</p>
               {reservation.admin_validated_at && (
-                <p className="text-xs text-slate-500 mt-2">
+                <p className="text-xs text-[var(--text-muted)] mt-2">
                   {reservation.admin_validation_status === 'approved' ? 'Validée' : 'Refusée'} le {formatDateTime(reservation.admin_validated_at)}
                 </p>
               )}
@@ -250,9 +250,9 @@ export default async function ReservationDetailPage({ params }: PageProps) {
 
         <aside className="space-y-6">
           {isPending ? (
-            <section className="bg-white rounded-2xl border-2 border-amber-300 p-6 sticky top-6">
-              <h2 className="font-bold text-slate-900 mb-1">Action requise</h2>
-              <p className="text-slate-500 text-xs mb-4">
+            <section className="bg-[var(--surface-card)] rounded-2xl border-2 border-amber-300 p-6 sticky top-6">
+              <h2 className="font-bold text-[var(--text)] mb-1">Action requise</h2>
+              <p className="text-[var(--text-muted)] text-xs mb-4">
                 Le propriétaire et le visiteur attendent votre validation.
               </p>
               <form action={validateReservationAction} className="space-y-3">
@@ -261,32 +261,32 @@ export default async function ReservationDetailPage({ params }: PageProps) {
                   name="note"
                   rows={2}
                   placeholder="Note interne (optionnelle)"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-slate-400"
+                  className="w-full px-3 py-2 border border-[var(--border)] rounded-lg text-sm focus:outline-none focus:border-slate-400"
                 />
                 <button type="submit" name="action" value="approve" className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold transition-colors">
                   <CheckCircle2 className="w-4 h-4" /> Valider et notifier
                 </button>
-                <button type="submit" name="action" value="reject" className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-bold transition-colors">
+                <button type="submit" name="action" value="reject" className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[var(--surface-card)] hover:bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-bold transition-colors">
                   <XCircle className="w-4 h-4" /> Refuser
                 </button>
               </form>
-              <div className="mt-4 pt-4 border-t border-slate-100 text-[11px] text-slate-500 space-y-1">
+              <div className="mt-4 pt-4 border-t border-[var(--border)] text-[11px] text-[var(--text-muted)] space-y-1">
                 <p>✅ Validation → notif WhatsApp au proprio + visiteur</p>
                 <p>❌ Refus → notif WhatsApp au visiteur uniquement</p>
               </div>
             </section>
           ) : (
-            <section className="bg-white rounded-2xl border border-slate-200 p-6 sticky top-6">
-              <h2 className="font-bold text-slate-900 mb-2">Statut</h2>
+            <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-6 sticky top-6">
+              <h2 className="font-bold text-[var(--text)] mb-2">Statut</h2>
               {adminBadge(reservation.admin_validation_status)}
-              <p className="text-slate-500 text-xs mt-3">Cette demande a déjà été traitée.</p>
+              <p className="text-[var(--text-muted)] text-xs mt-3">Cette demande a déjà été traitée.</p>
             </section>
           )}
 
-          <section className="bg-white rounded-2xl border border-slate-200 p-6">
-            <h2 className="text-xs font-bold uppercase tracking-wide text-slate-400 mb-4">Journal WhatsApp</h2>
+          <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-6">
+            <h2 className="text-xs font-bold uppercase tracking-wide text-[var(--text-subtle)] mb-4">Journal WhatsApp</h2>
             {notifLogs.length === 0 ? (
-              <p className="text-slate-400 text-xs italic">Aucune notification envoyée.</p>
+              <p className="text-[var(--text-subtle)] text-xs italic">Aucune notification envoyée.</p>
             ) : (
               <ol className="space-y-3">
                 {notifLogs.map((n) => (
@@ -301,9 +301,9 @@ export default async function ReservationDetailPage({ params }: PageProps) {
                       }`}
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-slate-700 capitalize">{n.recipient_role}</p>
-                      <p className="text-slate-500 truncate">{n.to_phone}</p>
-                      <p className="text-slate-400 text-[10px] mt-0.5">
+                      <p className="font-semibold text-[var(--text)] capitalize">{n.recipient_role}</p>
+                      <p className="text-[var(--text-muted)] truncate">{n.to_phone}</p>
+                      <p className="text-[var(--text-subtle)] text-[10px] mt-0.5">
                         {n.template} · {n.status}
                         {n.sent_at && ` · ${formatDateTime(n.sent_at)}`}
                       </p>

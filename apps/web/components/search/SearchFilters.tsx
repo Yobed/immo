@@ -252,7 +252,7 @@ export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
               {/* Listening Wave Interface Overlay */}
               {isListening && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md pointer-events-none">
-                  <div className="bg-[#0a0a18]/95 border border-[var(--accent-luxury)]/30 p-10 rounded-[2.5rem] flex flex-col items-center gap-8 shadow-[0_0_120px_rgba(212,175,55,0.15)]">
+                  <div className="bg-[#0a0a18]/95 border border-accent-luxury/30 p-10 rounded-[2.5rem] flex flex-col items-center gap-8 shadow-[0_0_120px_rgba(212,175,55,0.15)]">
                     <div className="flex gap-2 h-16 items-center">
                       {[1,2,3,4,5,6,5,4,3,2].map((h, i) => (
                         <div 
@@ -281,7 +281,7 @@ export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
 
           {hasActiveFilters && (
             <button onClick={clearFilters}
-              className="flex items-center gap-1 text-xs text-[var(--danger)] hover:text-[var(--danger)]/80 font-sans font-medium transition-colors duration-150">
+              className="flex items-center gap-1 text-xs text-danger hover:text-danger/80 font-sans font-medium transition-colors duration-150">
               <IconClose />
               Effacer tout
             </button>
@@ -301,7 +301,7 @@ export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Mots-clés (ex: avec piscine...)"
-              className="w-full pl-10 pr-4 py-2.5 text-sm font-sans border border-[var(--border)] rounded-xl bg-[var(--surface)] text-[var(--text)] placeholder:text-[var(--text-subtle)] focus:border-[var(--accent-luxury)]/50 transition-all outline-none"
+              className="w-full pl-10 pr-4 py-2.5 text-sm font-sans border border-[var(--border)] rounded-xl bg-[var(--surface)] text-[var(--text)] placeholder:text-[var(--text-subtle)] focus:border-accent-luxury/50 transition-all outline-none"
             />
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] group-focus-within:text-[var(--accent-luxury)] transition-colors" />
           </div>
@@ -341,7 +341,7 @@ export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
             className={cn(
               'w-full flex items-center gap-2.5 px-3 py-2 rounded-btn text-sm font-sans transition-all duration-150',
               !typeBien
-                ? 'bg-[var(--accent-luxury)] text-[var(--on-accent)] font-medium shadow-lg shadow-[var(--accent-luxury)]/20'
+                ? 'bg-[var(--accent-luxury)] text-[var(--on-accent)] font-medium shadow-lg shadow-accent-luxury/20'
                 : 'text-[var(--text-muted)] hover:bg-[var(--midnight-light)] hover:text-[var(--off-white)]'
             )}>
             <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none">
@@ -359,7 +359,7 @@ export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
                   ? 'bg-[var(--primary)] text-[var(--on-primary)] font-medium'
                   : 'text-[var(--text-muted)] hover:bg-[var(--surface)] hover:text-[var(--text)]'
               )}>
-              <span className={typeBien === t ? 'text-[var(--on-primary)]/80' : 'text-[var(--primary)]/50'}>
+              <span className={typeBien === t ? 'text-on-primary/80' : 'text-[var(--text-muted)]'}>
                 {TYPE_ICONS[t]}
               </span>
               {TYPES_BIEN_LABELS[t]}
@@ -407,8 +407,8 @@ export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
                 className={cn(
                   'px-3 py-1.5 rounded-pill text-xs font-sans border transition-all duration-150 select-none',
                   equipements.includes(eq)
-                    ? 'bg-[var(--accent-luxury)] border-[var(--accent-luxury)] text-[var(--midnight)] font-medium shadow-lg shadow-[var(--accent-luxury)]/20'
-                    : 'border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--accent-luxury)]/50 hover:text-[var(--off-white)] bg-[var(--midnight-light)]'
+                    ? 'bg-[var(--accent-luxury)] border-[var(--accent-luxury)] text-[var(--midnight)] font-medium shadow-lg shadow-accent-luxury/20'
+                    : 'border-[var(--border)] text-[var(--text-muted)] hover:border-accent-luxury/50 hover:text-[var(--off-white)] bg-[var(--midnight-light)]'
                 )}>
                 {EQUIPEMENTS_LABELS[eq]}
               </button>
@@ -420,7 +420,7 @@ export function SearchFilters({ onApply }: { onApply?: () => void } = {}) {
         <div className="px-5 py-4 bg-[var(--midnight-muted)] border-t border-[var(--border)]">
           <button
             onClick={applyFilters}
-            className="w-full flex items-center justify-center gap-2 py-3 bg-[var(--accent-luxury)] text-[var(--on-accent)] text-sm font-sans font-semibold rounded-btn hover:opacity-90 transition-all shadow-xl shadow-[var(--accent-luxury)]/20 active:scale-[0.98]"
+            className="w-full flex items-center justify-center gap-2 py-3 bg-[var(--accent-luxury)] text-[var(--on-accent)] text-sm font-sans font-semibold rounded-btn hover:opacity-90 transition-all shadow-xl shadow-accent-luxury/20 active:scale-[0.98]"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" fill="none">
               <polyline points="20 6 9 17 4 12"/>

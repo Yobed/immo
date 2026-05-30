@@ -30,7 +30,7 @@ export function ComparatorBar({ selected, onRemove, onClear }: Props) {
         exit={{ y: 100, opacity: 0 }}
         className="fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 z-[200] w-[calc(100%-2rem)] max-w-xl"
       >
-        <div className="bg-[var(--surface-card)]/95 backdrop-blur-xl border border-[var(--accent-luxury)]/30 rounded-2xl shadow-md px-4 py-3 flex items-center gap-3">
+        <div className="bg-surface-card/95 backdrop-blur-xl border border-accent-luxury/30 rounded-2xl shadow-md px-4 py-3 flex items-center gap-3">
           <GitCompare className="w-4 h-4 text-[var(--accent-luxury)] shrink-0" />
           <div className="flex items-center gap-2 flex-1 min-w-0">
             {selected.map(b => (
@@ -54,7 +54,7 @@ export function ComparatorBar({ selected, onRemove, onClear }: Props) {
             {selected.length >= 2 && (
               <button
                 onClick={() => setOpen(true)}
-                className="flex items-center gap-1.5 bg-[var(--accent-luxury)] text-black px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all"
+                className="flex items-center gap-1.5 bg-[var(--accent-luxury)] text-[var(--text)] px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all"
               >
                 Comparer <ArrowRight className="w-3 h-3" />
               </button>
@@ -123,7 +123,7 @@ export function ComparatorBar({ selected, onRemove, onClear }: Props) {
 
                     <Link
                       href={`/biens/${b.id}`}
-                      className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[var(--accent-luxury)] text-black text-[11px] font-black uppercase tracking-widest hover:opacity-90 transition-opacity"
+                      className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[var(--accent-luxury)] text-[var(--text)] text-[11px] font-black uppercase tracking-widest hover:opacity-90 transition-opacity"
                     >
                       Voir la fiche <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
