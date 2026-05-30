@@ -263,7 +263,7 @@ export function SearchBar({
             initial={{ opacity: 0, y: 10, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
-            className="absolute z-[200] top-full left-0 right-0 mt-2 overflow-hidden bg-slate-900 border border-white/10 rounded-2xl shadow-md p-2"
+            className="absolute z-[200] top-full left-0 right-0 mt-2 overflow-hidden bg-[var(--surface-card)] border border-[var(--border)] rounded-2xl shadow-lg p-2"
           >
             <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] px-4 py-3 mb-1">
               Suggestions de recherche
@@ -276,13 +276,13 @@ export function SearchBar({
                     onMouseDown={(e) => { e.preventDefault(); selectSuggestion(s.label) }}
                     onMouseEnter={() => setHighlighted(idx)}
                     className={`w-full text-left px-4 py-3.5 flex items-center gap-4 rounded-xl transition-all duration-200 ${
-                      idx === highlighted 
-                        ? 'bg-accent-luxury/10 text-[var(--accent-luxury)] translate-x-1' 
-                        : 'text-[var(--text)] hover:bg-[var(--midnight-light)]'
+                      idx === highlighted
+                        ? 'bg-[var(--accent-luxury-muted)] text-[var(--accent-luxury)] translate-x-1'
+                        : 'text-[var(--text)] hover:bg-[var(--surface-hover)]'
                     }`}
                   >
                     <div className={`p-2.5 rounded-xl transition-colors ${
-                      idx === highlighted ? 'bg-accent-luxury/20' : 'bg-[var(--midnight-light)]'
+                      idx === highlighted ? 'bg-[var(--accent-luxury)]/20 text-[var(--accent-luxury)]' : 'bg-[var(--surface-hover)] text-[var(--accent-luxury)]'
                     }`}>
                       <s.icon className="w-4 h-4" />
                     </div>
