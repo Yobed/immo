@@ -30,7 +30,8 @@ const OFFRE_FILTERS = [
   { id: 'vente',    label: 'À vendre',         icon: HomeIcon, offre: 'vente' },
 ] as const
 
-const COMMUNE_FILTERS = [
+/** Communes par défaut (fallback si aucune liste dynamique n'est fournie). */
+const DEFAULT_COMMUNE_FILTERS = [
   { id: 'cocody',      label: 'Cocody',       commune: 'Cocody' },
   { id: 'riviera',     label: 'Riviera',      commune: 'Riviera' },
   { id: 'plateau',     label: 'Plateau',      commune: 'Plateau' },
@@ -40,7 +41,7 @@ const COMMUNE_FILTERS = [
   { id: 'songon',      label: 'Songon',       commune: 'Songon' },
   { id: 'abobo',       label: 'Abobo',        commune: 'Abobo' },
   { id: 'treichville', label: 'Treichville',  commune: 'Treichville' },
-] as const
+]
 
 /** Tranches budget mensuel (location) — adapté au marché ivoirien */
 const BUDGET_FILTERS = [
@@ -53,7 +54,15 @@ const BUDGET_FILTERS = [
 
 const SUPPORTED_PAGES = ['/recherche', '/catalogue', '/offre-flash'] as const
 
-export function QuickFilters() {
+interface QuickFiltersProps {
+  /**
+   * Communes réellement présentes dans le catalogue (vérifiés + flash),
+   * fournies par la page serveur. Si absent/vide → liste par défaut.
+   */
+  communes?: string[]
+}
+
+export function QuickFilters({ communes }: QuickFiltersProps = {}) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -78,6 +87,12 @@ export function QuickFilters() {
   }
 
   const verifiedActive = currentSource === 'bogbes'
+
+  // Puces commune : dynamiques (issues des biens réels) si fournies, sinon défaut.
+  const communeChips =
+    communes && communes.length > 0
+      ? communes.map((c) => ({ id: c.toLowerCase().replace(/\s+/g, '-'), label: c, commune: c }))
+      : DEFAULT_COMMUNE_FILTERS
 
   return (
     <div className="flex flex-col gap-3">
@@ -150,7 +165,7 @@ export function QuickFilters() {
         <div className="flex items-center px-2.5 py-2 bg-white/5 rounded-lg border border-white/10 shrink-0">
           <MapPin className="w-3.5 h-3.5 text-[var(--accent-luxury)]" />
         </div>
-        {COMMUNE_FILTERS.map((f) => {
+        {communeChips.map((f) => {
           const isActive = currentCommune?.toLowerCase() === f.commune.toLowerCase()
           return (
             <Chip

@@ -381,6 +381,90 @@ export async function getConsolidatedCatalogue(
   }
 }
 
+// ─── Communes dynamiques ─────────────────────────────────────────────────────
+
+/** Met une chaîne en Title Case (gère espaces et traits d'union) : "grand-bassam" → "Grand-Bassam". */
+function titleCaseCommune(s: string): string {
+  return s.toLowerCase().replace(/\b\p{L}/gu, (c) => c.toUpperCase())
+}
+
+/**
+ * Liste des communes RÉELLEMENT présentes dans le catalogue, agrégées depuis
+ * les deux sources (biens vérifiés BOGBE'S + offres flash). Triées par nombre
+ * de biens décroissant (les communes les plus actives en premier).
+ *
+ * Utilisé pour alimenter dynamiquement les puces de filtre commune, au lieu
+ * d'une liste figée qui ne reflète pas l'offre réelle (Assinie, Grand-Bassam…).
+ *
+ * @param source  null = les deux sources ; 'bogbes' / 'flash' pour restreindre.
+ * @param limit   nombre max de communes renvoyées (par fréquence décroissante).
+ */
+export async function getCatalogueCommunes(
+  source: 'bogbes' | 'flash' | null = null,
+  limit = 16,
+): Promise<string[]> {
+  const counts = new Map<string, { label: string; n: number }>()
+  const add = (raw: unknown) => {
+    if (typeof raw !== 'string') return
+    const trimmed = raw.trim()
+    if (!trimmed) return
+    const key = trimmed.toLowerCase()
+    const cur = counts.get(key)
+    if (cur) cur.n += 1
+    else counts.set(key, { label: titleCaseCommune(trimmed), n: 1 })
+  }
+
+  const tasks: Promise<void>[] = []
+
+  if (source !== 'flash') {
+    tasks.push(
+      (async () => {
+        try {
+          const supabase = await createClient()
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data } = await (supabase as any)
+            .from('biens')
+            .select('commune')
+            .eq('statut', 'publie')
+            .limit(5000)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          for (const r of (data ?? []) as any[]) add(r.commune)
+        } catch {
+          /* source indisponible — on ignore */
+        }
+      })(),
+    )
+  }
+
+  if (source !== 'bogbes') {
+    tasks.push(
+      (async () => {
+        try {
+          const sb = createLocauxClient()
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data } = await (sb as any)
+            .from('locaux')
+            .select('commune')
+            .not('status', 'eq', 'inactive')
+            .not('is_duplicate', 'is', true)
+            .limit(5000)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          for (const r of (data ?? []) as any[]) add(r.commune)
+        } catch {
+          /* source indisponible — on ignore */
+        }
+      })(),
+    )
+  }
+
+  await Promise.all(tasks)
+
+  return [...counts.values()]
+    .sort((a, b) => b.n - a.n || a.label.localeCompare(b.label))
+    .slice(0, limit)
+    .map((c) => c.label)
+}
+
 // ─── Fetch by ID ────────────────────────────────────────────────────────────
 
 /** Détecte une URL de bien dans un message texte et retourne {source, id}. */

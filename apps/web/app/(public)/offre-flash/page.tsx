@@ -6,7 +6,7 @@ import { QuickFilters } from '@/components/search/QuickFilters'
 import { UnifiedBienCard } from '@/components/catalogue/UnifiedBienCard'
 import { UnifiedBienListCard } from '@/components/catalogue/UnifiedBienListCard'
 import { Pagination } from '@/components/ui/Pagination'
-import { getConsolidatedCatalogue, type ConsolidatedFilters } from '@/lib/catalogue/consolidated'
+import { getConsolidatedCatalogue, getCatalogueCommunes, type ConsolidatedFilters } from '@/lib/catalogue/consolidated'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 60
@@ -46,7 +46,10 @@ export default async function OffreFlashPage({ searchParams }: PageProps) {
     limitPerSource: 1000,
   }
 
-  const { items } = await getConsolidatedCatalogue(filters)
+  const [{ items }, communes] = await Promise.all([
+    getConsolidatedCatalogue(filters),
+    getCatalogueCommunes('flash'),
+  ])
   const total = items.length
   const paginated = items.slice(pageIdx * PAGE_SIZE, (pageIdx + 1) * PAGE_SIZE)
   const totalPages = Math.ceil(total / PAGE_SIZE)
@@ -94,7 +97,7 @@ export default async function OffreFlashPage({ searchParams }: PageProps) {
         {/* Filtres rapides — pleine largeur du conteneur (jusqu'à 1600px) pour
             que toutes les rangées de chips s'étalent sans être coupées sur PC */}
         <div className="mb-8">
-          <QuickFilters />
+          <QuickFilters communes={communes} />
         </div>
 
         {/* Bandeau avertissement intermédiation */}
