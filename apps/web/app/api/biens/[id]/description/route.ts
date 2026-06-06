@@ -22,7 +22,6 @@ export async function POST(
     const description = await genererDescription(bien)
     return NextResponse.json({ description })
   } catch (error: any) {
-    console.error("Generation Error:", error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Description generation failed' }, { status: 500 })
   }
 }

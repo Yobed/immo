@@ -35,7 +35,6 @@ export async function POST(req: NextRequest) {
       },
     })
   } catch (error: any) {
-    console.error("API Chat Error:", error)
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 })
+    return new Response(JSON.stringify({ error: 'Chat processing failed' }), { status: 500 })
   }
 }

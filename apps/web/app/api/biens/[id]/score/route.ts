@@ -27,7 +27,6 @@ export async function POST(
     const scoreResult = await scorerAnnonce({ ...bien, nb_photos: nbPhotos ?? 0 })
     return NextResponse.json(scoreResult)
   } catch (error: any) {
-    console.error("Scoring Error:", error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Scoring failed' }, { status: 500 })
   }
 }

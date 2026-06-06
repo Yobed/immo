@@ -78,9 +78,9 @@ export async function POST(req: NextRequest) {
     const rawBody = await req.text();
     const signature = req.headers.get('x-webhook-signature');
 
-    // Log signature mismatch but don't block — Wasender may omit signature in some cases
+    // Verify signature if present
     if (signature && !verifyWasenderSignature(rawBody, signature)) {
-      console.warn('[WhatsApp Webhook] Signature mismatch — continuing anyway for diagnostics');
+      return NextResponse.json({error: 'Invalid signature'}, {status: 401})
     }
 
     const body = JSON.parse(rawBody);
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
       msg.text ||
       '';
 
-    console.log(`[WhatsApp Webhook] event=${body.event} jid=${jid} senderPn=${senderPn} msg="${userMessage.slice(0,80)}"`);
+    // Remove: user message content must not be logged in production
 
     if (!senderPn || !userMessage) {
       return NextResponse.json({ status: 'ignored' });
@@ -325,7 +325,7 @@ Message client : "${userMessage.slice(0, 200)}"`;
 
     return NextResponse.json({ status: 'ok' });
   } catch (error: any) {
-    console.error('WhatsApp Webhook Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    // Don't log error details — may contain user data
+    return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 });
   }
 }

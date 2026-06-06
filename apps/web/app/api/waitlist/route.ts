@@ -46,7 +46,6 @@ export async function POST(req: NextRequest) {
       )
 
     if (error) {
-      console.error('[Waitlist API]', error)
       // Doublon = succès silencieux
       if (error.code === '23505') {
         return NextResponse.json({ success: true, already: true })
@@ -56,7 +55,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (err) {
-    console.error('[Waitlist API] parse error', err)
     return NextResponse.json({ error: 'Requête invalide.' }, { status: 400 })
   }
 }

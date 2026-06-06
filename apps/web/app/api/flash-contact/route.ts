@@ -190,7 +190,7 @@ export async function POST(req: NextRequest) {
     }
     await notifyAdminContactRequest(admin, ctx)
   } catch (e) {
-    console.error('[flash-contact] notifyAdmin failed:', (e as Error).message)
+    // Notification failure is non-critical
   }
 
   return NextResponse.json(

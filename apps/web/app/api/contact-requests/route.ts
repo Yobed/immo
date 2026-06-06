@@ -150,8 +150,7 @@ export async function POST(req: NextRequest) {
   try {
     notif = await notifyAdminContactRequest(admin, ctx)
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error('[contact-requests] notifyAdmin failed', err)
+    // Notification failure is non-critical — request still succeeds
   }
 
   return NextResponse.json(

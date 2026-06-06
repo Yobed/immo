@@ -114,8 +114,7 @@ export async function POST(req: NextRequest) {
   try {
     notif = await notifyAdminReservationRequest(supabase, ctx)
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error('[reservations] notifyAdmin failed', err)
+    // Notification failure is non-critical
   }
 
   return NextResponse.json(

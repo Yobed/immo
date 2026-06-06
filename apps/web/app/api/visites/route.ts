@@ -89,8 +89,7 @@ export async function POST(request: Request) {
   try {
     notifAdmin = await notifyAdminVisitRequest(supabase, ctx)
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error('[visites] notifyAdmin failed', err)
+    // Notification failure is non-critical
   }
 
   // Notif propriétaire
@@ -107,8 +106,7 @@ export async function POST(request: Request) {
     try {
       await notifyOwnerVisitApproved(supabase, ctx)
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error('[visites] notifyOwner failed', err)
+      // Notification failure is non-critical
     }
   }
 
