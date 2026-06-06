@@ -17,6 +17,33 @@ const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-exp:free';
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
+// Vercel functions cap at 10 s. Budgeting for the worst case:
+//   Greeting fast-path: ~5 ms
+//   Groq attempt:       up to 5 s   (then retry once → up to 5 s more if needed)
+//   OpenRouter attempt: up to 5 s
+//   DB writes / send:    ~1 s
+// Keeping each LLM call at 5 s leaves room for the cascade to bail out gracefully
+// instead of hitting Vercel's hard kill at 10 s.
+const PROVIDER_TIMEOUT_MS = 5000;
+
+/**
+ * Wraps fetch with an AbortController + timeout. Throws on timeout so callers
+ * can treat it as a transient failure (and retry / fall back).
+ */
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+  timeoutMs = PROVIDER_TIMEOUT_MS,
+): Promise<Response> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    return await fetch(url, { ...init, signal: controller.signal })
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bogbes-groupe.vercel.app';
 
 function requireGroqKey(): string {
@@ -229,7 +256,7 @@ async function groqFetchOnce(
 ): Promise<string | 'retry' | null> {
   let response: Response
   try {
-    response = await fetch(GROQ_BASE_URL, {
+    response = await fetchWithTimeout(GROQ_BASE_URL, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${requireGroqKey()}`,
@@ -246,8 +273,10 @@ async function groqFetchOnce(
       }),
     })
   } catch (e) {
-    // Network failure — transient, worth retrying once
-    console.error('[Groq] fetch failed (network):', (e as Error).message)
+    // Network failure or timeout — both transient, worth retrying once
+    const err = e as Error
+    const isAbort = err.name === 'AbortError'
+    console.error(`[Groq] fetch failed (${isAbort ? 'timeout' : 'network'}):`, err.message)
     return 'retry'
   }
 
@@ -269,6 +298,7 @@ async function groqFetchOnce(
 }
 
 async function groqFetch(messages: ChatMessage[], system: string): Promise<string | null> {
+  const startedAt = Date.now()
   const first = await groqFetchOnce(messages, system)
   // CRITICAL: check the 'retry' sentinel BEFORE the typeof string check,
   // otherwise the sentinel itself would be returned as a valid completion.
@@ -276,9 +306,16 @@ async function groqFetch(messages: ChatMessage[], system: string): Promise<strin
     return first // string completion or null (permanent failure)
   }
 
-  // Transient failure → wait briefly then retry once.
-  // 700ms is enough to clear most rate-limit/timeouts without blowing Vercel's
-  // 10s function budget (we still have ~9s for the retry + DB writes).
+  // If the first attempt already ate >2.5 s (likely a timeout), don't retry —
+  // we need to leave room for the OpenRouter fallback. Treat as null and let
+  // the cascade move on.
+  const elapsed = Date.now() - startedAt
+  if (elapsed > 2500) {
+    console.warn(`[Groq] skipping retry — first attempt took ${elapsed}ms, going straight to fallback`)
+    return null
+  }
+
+  // Transient failure with budget left → wait briefly then retry once.
   await new Promise((r) => setTimeout(r, 700))
   console.warn('[Groq] retrying after transient failure')
   const second = await groqFetchOnce(messages, system)
@@ -302,7 +339,7 @@ async function openRouterFetch(
 
   let response: Response;
   try {
-    response = await fetch(OPENROUTER_BASE_URL, {
+    response = await fetchWithTimeout(OPENROUTER_BASE_URL, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
@@ -322,7 +359,9 @@ async function openRouterFetch(
       }),
     });
   } catch (e) {
-    console.error('[OpenRouter] fetch failed:', (e as Error).message);
+    const err = e as Error
+    const isAbort = err.name === 'AbortError'
+    console.error(`[OpenRouter] fetch failed (${isAbort ? 'timeout' : 'network'}):`, err.message);
     return null;
   }
 

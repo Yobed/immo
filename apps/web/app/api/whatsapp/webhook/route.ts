@@ -7,8 +7,28 @@ import { extractBienFromWhatsApp } from '@/lib/extractors/whatsapp-bien-extracto
 import { upsertProspect, recordOptOut } from '@/lib/outreach/agent-prospects';
 import { tryInviteProspect } from '@/lib/outreach/dispatch';
 import { notifyOwnerVisitPending } from '@/lib/notifications/whatsapp-notifier';
+import { markSeen } from '@/lib/idempotency';
 
 const MIN_EXTRACTION_CONFIDENCE = 0.7;
+
+/**
+ * Build a deduplication key for a Wasender inbound message.
+ * Preference order:
+ *   1. msg.key.id — Wasender's own message id (most reliable)
+ *   2. (jid + body fingerprint) — fallback when id is missing
+ *
+ * The 30 s TTL window covers Wasender's retry burst without blocking
+ * a user who legitimately sends the same short message twice (e.g. "ok").
+ */
+function buildDedupKey(msgId: string | undefined, jid: string | undefined, body: string): string {
+  if (msgId) return `wam:${msgId}`
+  // Cheap stable hash for the body — no crypto needed
+  let h = 0
+  for (let i = 0; i < body.length; i++) {
+    h = ((h << 5) - h + body.charCodeAt(i)) | 0
+  }
+  return `wam-body:${jid ?? 'unknown'}:${h.toString(16)}`
+}
 const OPT_OUT_REGEX = /^\s*(stop|stopper|arrete|arrêter|unsubscribe|désabonner|desabonner)\s*$/i;
 
 const getSupabase = () => createClient(
@@ -116,6 +136,14 @@ export async function POST(req: NextRequest) {
 
     if (!senderPn || !userMessage) {
       return NextResponse.json({ status: 'ignored' });
+    }
+
+    // Idempotency: short-circuit if Wasender retried the same message within 30 s.
+    // Prevents duplicate DB writes, double LLM calls, and double Sapphire replies.
+    const dedupKey = buildDedupKey(msg.key?.id, jid, userMessage)
+    if (!markSeen(dedupKey, 30_000)) {
+      console.warn(`[webhook] duplicate inbound suppressed key=${dedupKey}`)
+      return NextResponse.json({ status: 'ok', branch: 'duplicate' })
     }
 
     const supabase = getSupabase();
