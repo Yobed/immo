@@ -11,7 +11,7 @@ interface VIPConciergeButtonProps {
 
 export function VIPConciergeButton({ bienTitre, bienLieu, bienPrix, bienId, className }: VIPConciergeButtonProps) {
   const t = useT()
-  const WHATSAPP_NUMBER = '2250544872051'
+  const WHATSAPP_NUMBER = '2250574243752'
 
   const handleWhatsApp = () => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://bogbes-groupe.vercel.app'

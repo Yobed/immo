@@ -413,7 +413,7 @@ function BiensContent() {
         style={{ background: 'linear-gradient(to top, var(--background) 40%, transparent)' }}
       >
         <a
-          href="https://wa.me/2250544872051?text=Bonjour%2C%20je%20cherche%20un%20bien%20%C3%A0%20Abidjan"
+          href="https://wa.me/2250574243752?text=Bonjour%2C%20je%20cherche%20un%20bien%20%C3%A0%20Abidjan"
           target="_blank"
           rel="noopener noreferrer"
           className="pointer-events-auto flex items-center gap-3 px-5 py-3.5 bg-emerald-600 rounded-2xl shadow-2xl shadow-emerald-950/50 w-full active:scale-95 transition-transform duration-150"
@@ -601,7 +601,7 @@ function EmptyState() {
       </div>
       <div className="text-center">
         <a
-          href={`https://wa.me/2250544872051?text=${encodeURIComponent("Bonjour, je cherche un bien qui ne figure pas encore dans votre catalogue. Pouvez-vous m'aider ?")}`}
+          href={`https://wa.me/2250574243752?text=${encodeURIComponent("Bonjour, je cherche un bien qui ne figure pas encore dans votre catalogue. Pouvez-vous m'aider ?")}`}
           target="_blank" rel="noopener noreferrer"
           className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full text-[12px] font-bold uppercase tracking-widest transition-all active:scale-95"
         >

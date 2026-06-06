@@ -16,7 +16,7 @@ export default async function PartenariatsPage() {
         <p className="text-[var(--text-muted)] text-sm leading-relaxed mb-8">
           {t.partners.subtitle}
         </p>
-        <a href="https://wa.me/2250544872051" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[var(--accent-luxury)] font-bold text-sm hover:underline mb-4 block">
+        <a href="https://wa.me/2250574243752" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[var(--accent-luxury)] font-bold text-sm hover:underline mb-4 block">
           {t.partners.contactWhatsapp}
         </a>
         <Link href="/" className="inline-flex items-center gap-2 text-[var(--text-muted)] font-bold text-sm hover:underline">

@@ -10,7 +10,7 @@ import Image from 'next/image';
  * Intègre un comportement "smart scroll" et une animation de flottaison.
  */
 export const WhatsAppConcierge = () => {
-  const WHATSAPP_NUMBER = "2250544872051";
+  const WHATSAPP_NUMBER = "2250574243752";
   const MESSAGE = encodeURIComponent("Bonjour BOGBE'S GROUPE, je souhaiterais obtenir des informations sur un bien immobilier.");
 
   const { scrollY } = useScroll();

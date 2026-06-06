@@ -7,7 +7,7 @@ import { useT } from '@/lib/i18n/client'
 import { CommuneAutocomplete } from '@/components/ui/CommuneAutocomplete'
 import { formatFCFACompact } from '@/lib/format'
 
-const ADVISOR_PHONE = '2250544872051' // Sapphire advisor (also in WhatsAppConcierge)
+const ADVISOR_PHONE = '2250574243752' // Sapphire advisor (also in WhatsAppConcierge)
 
 interface GuidedSearchWizardProps {
   open: boolean

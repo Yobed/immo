@@ -21,7 +21,7 @@ export default async function SupportPage() {
 
         <div className="space-y-4">
           <a
-            href="https://wa.me/2250544872051"
+            href="https://wa.me/2250574243752"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-4 p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] hover:border-emerald-500/40 transition-all group"
@@ -31,7 +31,7 @@ export default async function SupportPage() {
             </div>
             <div className="text-left">
               <p className="font-bold text-[var(--text)] text-sm">{t.support.whatsappPrimary}</p>
-              <p className="text-[var(--text-muted)] text-xs">+225 05 44 87 20 51</p>
+              <p className="text-[var(--text-muted)] text-xs">+225 05 74 24 37 52</p>
             </div>
           </a>
 

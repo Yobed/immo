@@ -33,7 +33,7 @@ export default async function ConfidentialitePage() {
 
           <section>
             <h2 className="font-bold text-base mb-3 uppercase tracking-wider text-[var(--accent-luxury)]">{t.legal.privacyDataRights}</h2>
-            <p>{t.legal.privacyRightsBody} <a href="https://wa.me/2250544872051" className="text-[var(--accent-luxury)] hover:underline">+225 05 44 87 20 51</a>.</p>
+            <p>{t.legal.privacyRightsBody} <a href="https://wa.me/2250574243752" className="text-[var(--accent-luxury)] hover:underline">+225 05 74 24 37 52</a>.</p>
           </section>
         </div>
       </div>

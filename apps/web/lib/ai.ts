@@ -8,11 +8,26 @@
 // Le greeting fast-path (détection "Bonjour", "Merci"…) court-circuite tout
 // pour les conversations neuves.
 
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
+/**
+ * Nettoie une clé API des caractères invisibles (BOM U+FEFF, zero-width space,
+ * whitespace). Vercel ou un copier-coller peut introduire ces caractères
+ * en début/fin de valeur — ils cassent silencieusement le header Authorization.
+ */
+function sanitizeKey(raw: string | undefined): string | undefined {
+  if (!raw) return undefined;
+  // Garde uniquement les caracteres ASCII imprimables (0x21-0x7E) valides pour
+  // une cle API. Retire BOM, zero-width spaces, espaces, sauts de ligne, etc.
+  // Ces caracteres invisibles peuvent s"incruster lors d"un copier-coller
+  // depuis le dashboard et casser silencieusement le header Authorization.
+  // eslint-disable-next-line no-control-regex
+  return raw.replace(/[^!-~]/g, "");
+}
+
+const GROQ_API_KEY = sanitizeKey(process.env.GROQ_API_KEY);
 const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 const GROQ_BASE_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+const OPENROUTER_API_KEY = sanitizeKey(process.env.OPENROUTER_API_KEY);
 // Modèle gratuit, robuste en FR, ~30 req/min sur le tier free
 const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-exp:free';
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
@@ -590,31 +605,61 @@ export async function chatImmobilierStream(messages: ChatMessage[], context?: st
     ? `${SYSTEM_PROMPT_IMMOBILIER_CI}\n\n== CATALOGUE DES BIENS DISPONIBLES ==\n${context}`
     : SYSTEM_PROMPT_IMMOBILIER_CI;
 
-  const response = await fetch(GROQ_BASE_URL, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${requireGroqKey()}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: GROQ_MODEL,
-      messages: [
-        { role: 'system', content: system },
-        ...messages,
-      ],
-      temperature: 0.3,
-      max_tokens: 800,
-      stream: true,
-    }),
-  });
-
-  if (!response.ok) {
-    const err = await response.text();
-    console.error('Groq Stream Error:', err);
-    throw new Error(`Groq API error: ${response.status}`);
+  // Stage 1 — Try Groq stream
+  if (GROQ_API_KEY) {
+    try {
+      const groqResp = await fetch(GROQ_BASE_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${GROQ_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: GROQ_MODEL,
+          messages: [{ role: 'system', content: system }, ...messages],
+          temperature: 0.3,
+          max_tokens: 800,
+          stream: true,
+        }),
+      });
+      if (groqResp.ok && groqResp.body) return groqResp.body;
+      // 401 / 402 / 429 etc. → log + fall through to OpenRouter
+      const errBody = await groqResp.text().catch(() => '<no body>');
+      console.warn(`[Sapphire stream] Groq KO ${groqResp.status} ${errBody.slice(0, 200)} → OpenRouter fallback`);
+    } catch (e) {
+      console.warn('[Sapphire stream] Groq fetch failed:', (e as Error).message);
+    }
   }
 
-  return response.body;
+  // Stage 2 — OpenRouter stream fallback (Gemini Flash :free)
+  if (OPENROUTER_API_KEY) {
+    try {
+      const orResp = await fetch(OPENROUTER_BASE_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': SITE_URL,
+          'X-Title': "BOGBE'S GROUPE Sapphire",
+        },
+        body: JSON.stringify({
+          model: OPENROUTER_MODEL,
+          messages: [{ role: 'system', content: system }, ...messages],
+          temperature: 0.3,
+          max_tokens: 800,
+          stream: true,
+        }),
+      });
+      if (orResp.ok && orResp.body) return orResp.body;
+      const errBody = await orResp.text().catch(() => '<no body>');
+      console.error(`[Sapphire stream] OpenRouter KO ${orResp.status} ${errBody.slice(0, 200)}`);
+    } catch (e) {
+      console.error('[Sapphire stream] OpenRouter fetch failed:', (e as Error).message);
+    }
+  }
+
+  // Stage 3 — Both providers down : retourner null (le caller affichera un fallback texte)
+  return null;
 }
 
 export async function scorerAnnonce(bienData: Record<string, unknown>) {
