@@ -90,8 +90,12 @@ import { AnalyticsProvider } from '@/components/providers/AnalyticsProvider'
 import { I18nProvider } from '@/lib/i18n/client'
 import { getLocale } from '@/lib/i18n/server'
 import { ToastProvider } from '@/components/ui/Toast'
+import { validateEnv } from '@/lib/env'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Validate required environment variables on app startup
+  validateEnv()
+
   const locale = await getLocale()
   return (
     <html
