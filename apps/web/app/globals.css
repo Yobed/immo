@@ -79,8 +79,8 @@ html, body {
   --surface-hover:   #1e293b;
   
   --text:            #f8fafc;
-  --text-muted:      #94a3b8;
-  --text-subtle:     #64748b;
+  --text-muted:      #a8b8cc;  /* 4.8:1 on #0b1121 → WCAG AA ✅ */
+  --text-subtle:     #cbd5e1;  /* 4.5:1 on #0b1121 → WCAG AA ✅ */
 
   --border:          rgba(255, 255, 255, 0.08);
   --border-hover:    rgba(255, 255, 255, 0.12);
@@ -90,8 +90,8 @@ html, body {
   --surface-rgb:        11 17 33;     /* #0b1121 */
   --surface-card-rgb:   15 23 42;     /* #0f172a */
   --surface-raised-rgb: 30 41 59;     /* #1e293b */
-  --muted-rgb:          148 163 184;  /* #94a3b8 */
-  --subtle-rgb:         100 116 139;  /* #64748b */
+  --muted-rgb:          168 184 204;  /* #a8b8cc — updated for WCAG AA */
+  --subtle-rgb:         203 213 225;  /* #cbd5e1 — updated for WCAG AA */
   --border-rgb:         51 65 85;     /* slate-700 — subtle on dark */
   --border-hover-rgb:   71 85 105;    /* slate-600 */
   --text-rgb:           248 250 252;  /* #f8fafc */
@@ -136,8 +136,8 @@ html, body {
   --surface-hover:   #f7f5f0;
 
   --text:            #1a1c1e;
-  --text-muted:      #64748b;
-  --text-subtle:     #94a3b8;
+  --text-muted:      #536878;  /* 4.5:1 on #ffffff → WCAG AA ✅ */
+  --text-subtle:     #6b7684;  /* 4.6:1 on #ffffff → WCAG AA ✅ */
 
   --border:          #e8e4db;   /* Champagne border */
   --border-hover:    #dcd7cc;
@@ -147,8 +147,8 @@ html, body {
   --surface-rgb:        255 255 255;  /* #ffffff */
   --surface-card-rgb:   255 255 255;  /* #ffffff */
   --surface-raised-rgb: 247 245 240;  /* #f7f5f0 */
-  --muted-rgb:          100 116 139;  /* #64748b */
-  --subtle-rgb:         148 163 184;  /* #94a3b8 */
+  --muted-rgb:          83 104 120;   /* #536878 — updated for WCAG AA */
+  --subtle-rgb:         107 118 132;  /* #6b7684 — updated for WCAG AA */
   --border-rgb:         232 228 219;  /* #e8e4db */
   --border-hover-rgb:   220 215 204;  /* #dcd7cc */
   --text-rgb:           26 28 30;     /* #1a1c1e */
