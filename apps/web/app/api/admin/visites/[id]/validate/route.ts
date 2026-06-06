@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerUser } from '@/lib/server-auth'
+import { requireAuth, requireAdmin, safeErrorResponse } from '@/lib/auth/server'
+import { createClient } from '@/lib/supabase/server'
 import {
   notifyOwnerVisitApproved,
   notifyVisitorVisitApproved,
@@ -11,31 +12,20 @@ import {
  * POST /api/admin/visites/[id]/validate
  * Body: { action: 'approve' | 'reject', note?: string }
  *
- * Réservé aux profils role='admin' (toi + associé).
- * - approve : notifie le propriétaire ET le visiteur
- * - reject  : notifie uniquement le visiteur (le proprio n'a jamais été averti)
+ * Admin only - approves or rejects visit requests
  */
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params
-  const { user, supabase } = await getServerUser(request)
-  if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+  try {
+    const { user } = await requireAuth(request)
+    await requireAdmin(user.id)
 
-  // Vérifier rôle admin
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: profile } = await (supabase as any)
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
+    const { id } = await params
+    const supabase = await createClient()
 
-  if (!profile || profile.role !== 'admin') {
-    return NextResponse.json({ error: 'Accès admin requis' }, { status: 403 })
-  }
-
-  const body = await request.json()
+    const body = await request.json()
   const action = body?.action as 'approve' | 'reject'
   const note = (body?.note as string) ?? null
 
@@ -127,9 +117,12 @@ export async function POST(
     }
   }
 
-  return NextResponse.json({
-    id,
-    admin_validation_status: newStatus,
-    notifications: results,
-  })
+    return NextResponse.json({
+      id,
+      admin_validation_status: newStatus,
+      notifications: results,
+    })
+  } catch (error) {
+    return safeErrorResponse(error)
+  }
 }
