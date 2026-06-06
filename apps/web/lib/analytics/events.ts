@@ -26,10 +26,10 @@ type FbqFunction = (
 
 declare global {
   interface Window {
-    gtag: GtagFunction
-    fbq: FbqFunction
-    _fbq: unknown
-    dataLayer: unknown[]
+    gtag?: GtagFunction
+    fbq?: FbqFunction
+    _fbq?: unknown
+    dataLayer?: unknown[]
   }
 }
 
@@ -38,6 +38,10 @@ declare global {
 function gtagEvent(name: string, params: Record<string, unknown> = {}) {
   if (typeof window === 'undefined') return
   if (!ANALYTICS_CONFIG.GA_ID) return
+
+  // Check cookie consent
+  const consent = typeof window !== 'undefined' ? localStorage.getItem('cookie-consent') : null
+  if (consent !== 'accepted') return
 
   if (ANALYTICS_CONFIG.DEBUG) {
     console.log(`[GA4] ${name}`, params)
@@ -55,6 +59,10 @@ function pixelEvent(
 ) {
   if (typeof window === 'undefined') return
   if (!ANALYTICS_CONFIG.META_PIXEL_ID) return
+
+  // Check cookie consent
+  const consent = typeof window !== 'undefined' ? localStorage.getItem('cookie-consent') : null
+  if (consent !== 'accepted') return
 
   if (ANALYTICS_CONFIG.DEBUG) {
     console.log(`[Meta Pixel] ${isCustom ? 'Custom: ' : ''}${name}`, params)
