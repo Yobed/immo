@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Image from 'next/image'
+import { generatePropertySchema } from '@/lib/schema/property-schema'
 import Link from 'next/link'
 import { formatFCFA } from '@/lib/format'
 import { Badge } from '@/components/ui'
@@ -43,11 +44,19 @@ import { STATUTS_PUBLICS, estStatutPublic } from '@/lib/catalogue/statuts'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bogbes-groupe.vercel.app'
   const supabase = await createClient()
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: bien } = await (supabase as any)
     .from('biens')
-    .select('titre, commune, quartier, type_bien, prix_mois_fcfa, prix_vente_fcfa, biens_medias(url, est_couverture, ordre)')
+    .select(`
+      titre, description, commune, quartier, adresse, type_bien,
+      prix_mois_fcfa, prix_vente_fcfa, surface_m2, nbr_chambre, nbr_salle_bain,
+      note_moyenne,
+      biens_medias(url, est_couverture, ordre),
+      profiles!proprietaire_id(full_name, phone)
+    `)
     .eq('id', id)
     .in('statut', [...STATUTS_PUBLICS])
     .limit(1)
@@ -55,20 +64,46 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
   if (!bien) return { title: "Bien introuvable — BOGBE'S GROUPE" }
 
-  const photo = (bien.biens_medias as { url: string; est_couverture: boolean; ordre: number }[] | null)
-    ?.sort((a, b) => (b.est_couverture ? 1 : 0) - (a.est_couverture ? 1 : 0))[0]?.url
+  const medias = (bien.biens_medias as any[] | null) ?? []
+  const photo = medias.sort((a, b) => (b.est_couverture ? 1 : 0) - (a.est_couverture ? 1 : 0))[0]?.url
+  const allPhotos = medias.map(m => m.url)
+
   const lieu = [bien.quartier, bien.commune].filter(Boolean).join(', ')
   const prix = bien.prix_vente_fcfa
     ? formatFCFA(bien.prix_vente_fcfa)
     : bien.prix_mois_fcfa ? `${formatFCFA(bien.prix_mois_fcfa)}/mois` : ''
   const desc = `${bien.type_bien} à ${lieu}${prix ? ` — ${prix}` : ''}. Découvrez ce bien sur BOGBE'S GROUPE, la plateforme immobilière N°1 en Côte d'Ivoire.`
 
+  // Generate JSON-LD Property schema for rich snippets
+  const proprietaire = (bien as any)['profiles!proprietaire_id'] as any
+  const schemaInput = {
+    id,
+    titre: bien.titre,
+    description: bien.description,
+    commune: bien.commune,
+    quartier: bien.quartier,
+    adresse: bien.adresse,
+    type_bien: bien.type_bien,
+    prix_vente_fcfa: bien.prix_vente_fcfa,
+    prix_mois_fcfa: bien.prix_mois_fcfa,
+    surface_m2: bien.surface_m2,
+    nbr_chambre: bien.nbr_chambre,
+    nbr_salle_bain: bien.nbr_salle_bain,
+    note_moyenne: bien.note_moyenne,
+    avis_count: 0, // Could be fetched from avis table
+    coverImage: photo,
+    allImages: allPhotos,
+    proprietaire_nom: proprietaire?.full_name,
+    proprietaire_telephone: proprietaire?.phone,
+  }
+  const jsonLdSchema = generatePropertySchema(schemaInput, siteUrl)
+
   return {
     title: `${bien.titre} — ${lieu} | BOGBE'S GROUPE`,
     description: desc,
     keywords: [`immobilier luxe Abidjan`, `location meublée ${bien.commune}`, `achat appartement ${bien.commune}`, `BOGBE'S GROUPE prestige`, bien.titre],
     authors: [{ name: "BOGBE'S GROUPE" }],
-    alternates: { canonical: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bogbes-groupe.vercel.app'}/biens/${id}` },
+    alternates: { canonical: `${siteUrl}/biens/${id}` },
     openGraph: {
       title: bien.titre,
       description: desc,
@@ -76,6 +111,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       type: 'article',
     },
     twitter: { card: 'summary_large_image', title: bien.titre, description: desc },
+    other: {
+      'application/ld+json': JSON.stringify(jsonLdSchema),
+    },
   }
 }
 
