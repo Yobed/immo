@@ -120,12 +120,15 @@ export function OnboardingChecklist({ userId }: Props) {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 16 }}
+        // ⚠️ Fond CLAIR fixe (amber-50/white) — donc tous les textes doivent
+        // utiliser des couleurs FONCÉES en dur (slate-900 et amber-700),
+        // sans var(--text) qui serait blanc en dark mode et invisible.
         className="relative bg-gradient-to-br from-amber-50 to-white border border-amber-200 rounded-2xl p-5 md:p-6 mb-6 overflow-hidden"
       >
         <button
           onClick={dismiss}
           aria-label="Masquer la checklist"
-          className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-md text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-hover)] transition-all"
+          className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-md text-slate-500 hover:text-slate-900 hover:bg-amber-100/60 transition-all"
         >
           <X className="w-4 h-4" />
         </button>
@@ -136,7 +139,7 @@ export function OnboardingChecklist({ userId }: Props) {
           </div>
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-amber-700">Bienvenue</p>
-            <h3 className="font-display font-bold text-lg text-[var(--text)] leading-tight">
+            <h3 className="font-display font-bold text-lg text-slate-900 leading-tight">
               Active ton compte en {items.length} étapes
             </h3>
           </div>
@@ -145,7 +148,7 @@ export function OnboardingChecklist({ userId }: Props) {
         {/* Progress bar */}
         <div className="mt-4 mb-5">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text)]">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-700">
               {completed} / {items.length} terminées
             </span>
             <span className="text-[10px] font-bold text-amber-700">{progress}%</span>
@@ -165,24 +168,26 @@ export function OnboardingChecklist({ userId }: Props) {
             <li key={i}>
               <Link
                 href={item.href}
+                // Fond clair fixe (banner amber-50) → couleurs fixées en dur,
+                // pas de var(--text) qui serait blanc en dark mode.
                 className={`flex items-center gap-3 p-3 rounded-xl transition-all border ${
                   item.done
-                    ? 'bg-emerald-50/50 border-emerald-100 text-[var(--text)]'
-                    : 'bg-[var(--surface-card)] border-[var(--border)] hover:border-amber-300 hover:shadow-sm text-[var(--text)]'
+                    ? 'bg-emerald-50/70 border-emerald-200 text-slate-900'
+                    : 'bg-white/80 border-amber-200/60 hover:border-amber-400 hover:shadow-sm text-slate-900'
                 }`}
               >
                 {item.done ? (
                   <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" strokeWidth={2} />
                 ) : (
-                  <Circle className="w-5 h-5 text-[var(--text-subtle)] shrink-0" strokeWidth={2} />
+                  <Circle className="w-5 h-5 text-slate-400 shrink-0" strokeWidth={2} />
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-bold leading-tight ${item.done ? 'line-through opacity-60' : ''}`}>
+                  <p className={`text-sm font-bold leading-tight text-slate-900 ${item.done ? 'line-through opacity-60' : ''}`}>
                     {item.label}
                   </p>
-                  <p className="text-[11px] text-[var(--text)] mt-0.5 leading-relaxed">{item.desc}</p>
+                  <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">{item.desc}</p>
                 </div>
-                {!item.done && <ArrowRight className="w-4 h-4 text-[var(--text-muted)] shrink-0" />}
+                {!item.done && <ArrowRight className="w-4 h-4 text-slate-400 shrink-0" />}
               </Link>
             </li>
           ))}

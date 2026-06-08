@@ -83,7 +83,8 @@ export default async function ClientLayout({ children }: { children: React.React
         </div>
       </header>
 
-      <BackToHomeButton />
+      {/* Sur l'espace CLIENT, "Accueil" = retour à son tableau de bord */}
+      <BackToHomeButton href="/dashboard" label="Tableau de bord" />
       <main className="pb-20 lg:pb-0">{children}</main>
       <MobileTabBar />
     </div>

@@ -8,6 +8,9 @@ import { MobileTabBar } from '@/components/layout/MobileTabBar'
 import { BackToHomeButton } from '@/components/layout/BackToHomeButton'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
 
+// Top nav PRO : "Accueil" pointe vers la page d'accueil PUBLIQUE / (le site
+// vitrine). Le retour au tableau de bord PRO se fait via la pill "Tableau de
+// bord" sous le header (BackToHomeButton).
 const navLinks = [
   { href: '/', label: 'Accueil' },
   { href: '/recherche', label: 'Rechercher' },
@@ -98,7 +101,8 @@ export default async function ProLayout({ children }: { children: React.ReactNod
         </div>
       </header>
 
-      <BackToHomeButton />
+      {/* Sur l'espace PRO, "Accueil" = retour au tableau de bord (pas au site public) */}
+      <BackToHomeButton href="/dashboard" label="Tableau de bord" />
       <main className="pb-20 lg:pb-0">{children}</main>
       <MobileTabBar />
     </div>
