@@ -14,6 +14,7 @@ interface AdminShellProps {
 
 const ADMIN_NAV = [
   { href: '/admin/validation', label: 'Validation', icon: ClipboardCheck, badge: true },
+  { href: '/admin/kyc', label: 'KYC', icon: ShieldCheck, badge: false },
   { href: '/admin/suivi', label: 'Suivi & Intermédiation', icon: CheckSquare, badge: false },
   { href: '/admin/moderation', label: 'Modération', icon: ShieldCheck, badge: false },
   { href: '/admin/flash', label: 'Offres flash', icon: Flame, badge: false },

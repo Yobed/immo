@@ -200,7 +200,7 @@ export default async function DashboardPage() {
       id:      'reservations-attente',
       type:    'urgent',
       message: `${(reservationsAttente ?? []).length} reservation(s) en attente de confirmation`,
-      lien:    '/reservations',
+      lien:    '/reservations-recues',
     })
   }
 
