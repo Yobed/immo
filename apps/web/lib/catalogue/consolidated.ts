@@ -359,8 +359,18 @@ function dedupConsolidated(items: ConsolidatedBien[]): ConsolidatedBien[] {
   const map = new Map<string, ConsolidatedBien>()
   const passthrough: ConsolidatedBien[] = []
   for (const item of items) {
-    // Si on n'a ni prix ni surface, on ne peut pas dédupliquer fiablement → on garde tel quel
+    // Si on n'a ni prix ni surface, on ne peut pas dédupliquer fiablement → passthrough
     if (item.prix_value == null && item.surface_m2 == null) {
+      passthrough.push(item)
+      continue
+    }
+    // ⚠️ RÈGLE IMPORTANTE : on ne dédoublonne JAMAIS deux biens BOGBE'S entre eux.
+    // Un propriétaire peut très légitimement publier 2 studios identiques au même
+    // prix dans le même immeuble (chambres différentes). Le dédoublonnage est
+    // strictement INTER-SOURCES (bogbes ↔ flash) pour éviter qu'une annonce
+    // vérifiée et son scraping WhatsApp ne s'affichent en double.
+    // → Les biens BOGBE'S passent en passthrough (jamais dédupliqués entre eux).
+    if (item.source === 'bogbes') {
       passthrough.push(item)
       continue
     }
@@ -370,12 +380,11 @@ function dedupConsolidated(items: ConsolidatedBien[]): ConsolidatedBien[] {
       map.set(key, item)
       continue
     }
-    // Conflit : on garde le meilleur
+    // Conflit entre 2 flash : on garde le meilleur (récent, photo, ID/A score)
     const score = (b: ConsolidatedBien): number => {
       let s = 0
       if (b.is_verifie) s += 100
       if (b.source === 'bogbes') s += 50
-      // Un bien validé prime sur un doublon encore en attente de validation
       if (b.is_pending) s -= 25
       if (b.photo_url) s += 10
       if (b.score_ia) s += b.score_ia / 10
@@ -386,7 +395,16 @@ function dedupConsolidated(items: ConsolidatedBien[]): ConsolidatedBien[] {
       map.set(key, item)
     }
   }
-  return [...map.values(), ...passthrough]
+  // Après collecte, suppression des FLASH qui dupliquent un BOGBE'S.
+  // (commune+type+prix+surface+pièces identiques entre un flash et un bogbes
+  // = très probablement la même annonce scrapée).
+  const bogbesFingerprints = new Set(
+    passthrough
+      .filter((b) => b.prix_value != null || b.surface_m2 != null)
+      .map(fingerprint),
+  )
+  const flashUnique = [...map.values()].filter((f) => !bogbesFingerprints.has(fingerprint(f)))
+  return [...passthrough, ...flashUnique]
 }
 
 // ─── Merge + tri unifié ─────────────────────────────────────────────────────
