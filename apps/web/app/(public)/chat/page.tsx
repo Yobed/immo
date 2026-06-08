@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function ChatPage() {
   return (
-    <div className="min-h-screen bg-[var(--midnight)] flex flex-col pt-32 pb-20">
+    <div className="min-h-screen bg-[var(--midnight)] flex flex-col pt-8 sm:pt-14 lg:pt-20 pb-16">
       <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col px-6">
         <div className="text-center mb-10">
           <div className="flex items-center justify-center gap-4 mb-4">

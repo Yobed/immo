@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { Grid, List as ListIcon, Compass, X, ShieldCheck, Flame, Layers } from 'lucide-react'
+import dynamicImport from 'next/dynamic'
+import { Grid, List as ListIcon, Compass, X, ShieldCheck, Flame, Layers, Map as MapIcon } from 'lucide-react'
 import * as motion from 'framer-motion/client'
 import { SearchBar } from '@/components/search/SearchBar'
 import { QuickFilters } from '@/components/search/QuickFilters'
@@ -8,6 +9,17 @@ import { UnifiedBienListCard } from '@/components/catalogue/UnifiedBienListCard'
 import { Pagination } from '@/components/ui/Pagination'
 import { getConsolidatedCatalogue, getCatalogueCommunes, type ConsolidatedFilters } from '@/lib/catalogue/consolidated'
 import { getDictionary } from '@/lib/i18n/server'
+
+// Map view chargée en dynamic — Mapbox = gros bundle, on ne le charge que
+// quand l'utilisateur switche sur la vue carte.
+const CatalogueMapView = dynamicImport(
+  () => import('@/components/catalogue/CatalogueMapView').then(m => m.CatalogueMapView),
+  { ssr: false, loading: () => (
+    <div className="w-full h-[60vh] flex items-center justify-center bg-[var(--surface-card)] rounded-2xl border border-[var(--border)]">
+      <p className="text-[var(--text-muted)] text-sm">Chargement de la carte...</p>
+    </div>
+  )},
+)
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 60
@@ -25,6 +37,8 @@ interface PageProps {
     type_offre?: string
     prix_min?: string
     prix_max?: string
+    /** Équipements en CSV (ex: "piscine,parking,climatisation") */
+    equipements?: string
     sort?: string
     vue?: string
     page?: string
@@ -36,11 +50,18 @@ const PAGE_SIZE = 24
 export default async function CataloguePage({ searchParams }: PageProps) {
   const sp = await searchParams
   const t = await getDictionary()
-  const vue = ['grille', 'liste'].includes(sp.vue as string) ? sp.vue : 'grille'
+  const vue = ['grille', 'liste', 'carte'].includes(sp.vue as string) ? sp.vue : 'grille'
   const pageIdx = Math.max(0, parseInt(sp.page ?? '0', 10))
 
   const typeOffre =
     sp.type_offre === 'vente' || sp.type_offre === 'location' ? sp.type_offre : undefined
+
+  // Équipements en CSV → array (filtre "contains" sur les biens BOGBE'S,
+  // texte libre matché sur les caractéristiques des offres flash)
+  const equipementsArr = sp.equipements
+    ?.split(',')
+    .map(s => s.trim())
+    .filter(Boolean)
 
   const filters: ConsolidatedFilters = {
     source: sp.source === 'bogbes' || sp.source === 'flash' ? sp.source : null,
@@ -48,6 +69,7 @@ export default async function CataloguePage({ searchParams }: PageProps) {
     type_bien: sp.type_bien?.trim() || undefined,
     type_offre: typeOffre,
     q: sp.q?.trim() || undefined,
+    equipements: equipementsArr && equipementsArr.length > 0 ? equipementsArr : undefined,
     prix_min: sp.prix_min ? Number(sp.prix_min) : undefined,
     prix_max: sp.prix_max ? Number(sp.prix_max) : undefined,
     sort: (sp.sort as ConsolidatedFilters['sort']) || 'verified_first',
@@ -66,12 +88,12 @@ export default async function CataloguePage({ searchParams }: PageProps) {
   const hasFilters = !!(sp.q || sp.commune || sp.prix_min || sp.prix_max || sp.type_bien)
 
   return (
-    <main className="bg-[var(--background)] min-h-screen pt-24 pb-16">
+    <main className="bg-[var(--background)] min-h-screen pt-6 sm:pt-10 lg:pt-16 pb-16">
       <div className="max-w-[1600px] mx-auto px-4 lg:px-8">
         {/* Header — titre + recherche à gauche, compteur + vue à droite */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 lg:gap-8 mb-4 lg:mb-6">
           <div className="flex-1 max-w-3xl">
-            <div className="inline-flex items-center gap-2 mb-3">
+            <div className="inline-flex items-center gap-2 mb-2">
               <span className="relative flex w-2 h-2">
                 <span className="animate-ping absolute inline-flex w-full h-full rounded-full bg-[var(--accent-luxury)] opacity-75" />
                 <span className="relative rounded-full w-2 h-2 bg-[var(--accent-luxury)]" />
@@ -80,7 +102,7 @@ export default async function CataloguePage({ searchParams }: PageProps) {
                 Catalogue consolidé
               </p>
             </div>
-            <h1 className="font-display text-3xl md:text-5xl font-bold text-[var(--text)] mb-4 tracking-tight">
+            <h1 className="font-display text-2xl md:text-5xl font-bold text-[var(--text)] mb-3 lg:mb-4 tracking-tight">
               Trouvez votre <span className="italic font-serif text-[var(--accent-luxury)]">bien idéal</span>
             </h1>
             <SearchBar className="w-full" initialQuery={sp.q ?? ''} />
@@ -96,9 +118,22 @@ export default async function CataloguePage({ searchParams }: PageProps) {
               </p>
             </div>
             <div className="h-10 w-px bg-[var(--border)]" />
-            <div className="flex gap-1 p-1 bg-surface-raised/50 backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-inner">
-              <ViewToggle active={vue === 'grille'} href={buildHref(sp, { vue: 'grille' })} icon={Grid} label="Grille" />
+            {/* Desktop : 3 toggles (Grille / Liste / Carte) */}
+            <div className="hidden lg:flex gap-1 p-1 bg-surface-raised/50 backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-inner">
+              <ViewToggle active={vue === 'grille'} href={buildHref(sp, { vue: '' })} icon={Grid} label="Grille" />
               <ViewToggle active={vue === 'liste'} href={buildHref(sp, { vue: 'liste' })} icon={ListIcon} label="Liste" />
+              <ViewToggle active={vue === 'carte'} href={buildHref(sp, { vue: 'carte' })} icon={MapIcon} label="Carte" />
+            </div>
+            {/* Mobile : 2 toggles (Liste / Carte) — Grille est masquée car son rendu mobile
+                est identique à Liste (1 colonne horizontale). On affiche Liste comme défaut. */}
+            <div className="flex lg:hidden gap-1 p-1 bg-surface-raised/50 backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-inner">
+              <ViewToggle
+                active={vue !== 'carte'}
+                href={buildHref(sp, { vue: '' })}
+                icon={ListIcon}
+                label="Liste"
+              />
+              <ViewToggle active={vue === 'carte'} href={buildHref(sp, { vue: 'carte' })} icon={MapIcon} label="Carte" />
             </div>
           </div>
         </div>
@@ -137,9 +172,13 @@ export default async function CataloguePage({ searchParams }: PageProps) {
           />
         </div>
 
-        {/* Grille ou Liste — selon ?vue= */}
-        {paginated.length === 0 ? (
+        {/* Grille / Liste / Carte — selon ?vue=
+            Carte = exploration géographique pure (les détails sont dans le popup).
+            Grille/Liste = comparaison visuelle des biens. */}
+        {paginated.length === 0 && vue !== 'carte' ? (
           <EmptyResults hasFilters={hasFilters} t={t} />
+        ) : vue === 'carte' ? (
+          <CatalogueMapView items={items} />
         ) : vue === 'liste' ? (
           <div className="flex flex-col gap-3">
             {paginated.map((b, i) => (
@@ -147,19 +186,32 @@ export default async function CataloguePage({ searchParams }: PageProps) {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
-            {paginated.map((b, i) => (
-              <UnifiedBienCard key={b.id} bien={b} index={i} />
-            ))}
-          </div>
+          <>
+            {/* Vue "Grille" responsive :
+                - Mobile (<lg) : layout liste (1 colonne horizontale, lisible, prix mis en avant)
+                - Desktop (lg+) : vraie grille 4-5 colonnes
+                C'est le pattern standard immobilier mobile (Booking, Airbnb, SeLoger). */}
+            <div className="flex flex-col gap-3 lg:hidden">
+              {paginated.map((b, i) => (
+                <UnifiedBienListCard key={`m-${b.id}`} bien={b} index={i} />
+              ))}
+            </div>
+            <div className="hidden lg:grid lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {paginated.map((b, i) => (
+                <UnifiedBienCard key={`d-${b.id}`} bien={b} index={i} />
+              ))}
+            </div>
+          </>
         )}
 
-        {/* Pagination ellipsis-aware */}
-        <Pagination
-          pageIdx={pageIdx}
-          totalPages={totalPages}
-          buildHref={(p) => buildHref(sp, { page: String(p) })}
-        />
+        {/* Pagination — masquée en vue carte (la carte montre TOUS les biens) */}
+        {vue !== 'carte' && (
+          <Pagination
+            pageIdx={pageIdx}
+            totalPages={totalPages}
+            buildHref={(p) => buildHref(sp, { page: String(p) })}
+          />
+        )}
       </div>
     </main>
   )

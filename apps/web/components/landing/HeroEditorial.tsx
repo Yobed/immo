@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Search, ArrowRight, MapPin, ChevronRight, Wand2 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useScroll, useTransform, useReducedMotion } from 'framer-motion'
 import { SearchBar } from '@/components/search/SearchBar'
 import { useT } from '@/lib/i18n/client'
 import { GuidedSearchWizard } from './GuidedSearchWizard'
@@ -35,6 +35,17 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
   ]
   const [headlineIdx, setHeadlineIdx] = useState(0)
   const [wizardOpen, setWizardOpen] = useState(false)
+  const sectionRef = useRef<HTMLElement>(null)
+  const prefersReducedMotion = useReducedMotion()
+
+  // Parallax scroll : le fond bouge ~20% moins vite que la page → effet cinéma
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start start', 'end start'],
+  })
+  const bgY = useTransform(scrollYProgress, [0, 1], ['0%', '20%'])
+  const bgScale = useTransform(scrollYProgress, [0, 1], [1.05, 1.18])
+  const contentY = useTransform(scrollYProgress, [0, 1], ['0%', '-12%'])
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -45,9 +56,13 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
   }, [])
 
   return (
-    <section className="relative w-full md:min-h-[720px] md:h-[100svh] md:max-h-[980px] bg-[#0a0e1a] overflow-x-hidden">
-      {/* Single image — dimmed strongly on mobile for legibility */}
-      <div className="absolute inset-0">
+    <section ref={sectionRef} className="relative w-full md:min-h-[720px] md:h-[100svh] md:max-h-[980px] bg-[#0a0e1a] overflow-x-hidden overflow-y-hidden">
+      {/* Image de fond avec parallax + zoom subtil au scroll
+          → effet cinématographique. Désactivé si l'utilisateur préfère reduced motion. */}
+      <motion.div
+        className="absolute inset-0 will-change-transform"
+        style={prefersReducedMotion ? undefined : { y: bgY, scale: bgScale }}
+      >
         <Image
           src={bgImage}
           alt="Résidence de prestige Côte d'Ivoire"
@@ -56,7 +71,7 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
           sizes="100vw"
           className="object-cover scale-105 opacity-30 md:opacity-100"
         />
-      </div>
+      </motion.div>
 
       {/* Strong dark overlay on mobile, refined gradient on desktop */}
       <div className="absolute inset-0 bg-[#020617]/70 md:hidden" />
@@ -87,22 +102,30 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
             {/* Left Column: Text and Search */}
             <div className="flex-1 max-w-3xl">
               <h1 className="font-display text-[36px] sm:text-6xl md:text-7xl lg:text-[88px] xl:text-[104px] leading-[1.02] text-white tracking-tighter mb-4 md:mb-8">
-                <span className="block uppercase">{tx.hero.lineOne}</span>
+                <StaggeredWords
+                  text={tx.hero.lineOne}
+                  className="block uppercase"
+                  delay={0.1}
+                />
                 <span className="block font-editorial text-[#C5A059] lowercase text-[1.1em] -mt-2 -mb-2 h-[1.2em] overflow-hidden">
                   <AnimatePresence mode="wait">
                     <motion.span
                       key={headlineIdx}
-                      initial={{ y: '100%', opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      exit={{ y: '-100%', opacity: 0 }}
-                      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                      initial={{ y: '100%', opacity: 0, rotate: 2 }}
+                      animate={{ y: 0, opacity: 1, rotate: 0 }}
+                      exit={{ y: '-100%', opacity: 0, rotate: -2 }}
+                      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                       className="block"
                     >
                       {HEADLINE_WORDS[headlineIdx]}
                     </motion.span>
                   </AnimatePresence>
                 </span>
-                <span className="block uppercase">{tx.hero.lineTwo}</span>
+                <StaggeredWords
+                  text={tx.hero.lineTwo}
+                  className="block uppercase"
+                  delay={0.5}
+                />
               </h1>
               <p className="hidden md:block font-sans text-base md:text-lg text-white/80 max-w-xl leading-relaxed mb-10">
                 {tx.hero.intro}
@@ -213,15 +236,71 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
   )
 }
 
+/**
+ * Animation cinématique d'un titre : chaque MOT entre par le bas avec stagger.
+ * Utilise un overflow-hidden parent pour effet "rideau qui se lève".
+ */
+interface StaggeredWordsProps {
+  text: string
+  className?: string
+  delay?: number
+}
+
+function StaggeredWords({ text, className = '', delay = 0 }: StaggeredWordsProps) {
+  const words = text.split(' ')
+  return (
+    <span className={className} aria-label={text}>
+      {words.map((word, i) => (
+        <span key={i} className="inline-block overflow-hidden align-bottom" aria-hidden="true">
+          <motion.span
+            className="inline-block"
+            initial={{ y: '110%', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{
+              duration: 0.85,
+              delay: delay + i * 0.07,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+          >
+            {word}
+            {i < words.length - 1 ? ' ' : ''}
+          </motion.span>
+        </span>
+      ))}
+    </span>
+  )
+}
+
 function FeaturedBienCards({ biens }: { biens: FeaturedBien[] }) {
+  const prefersReducedMotion = useReducedMotion()
   return (
     <>
       {biens.map((bien, i) => (
         <motion.div
           key={bien.id}
           initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.7, delay: 0.5 + i * 0.12 }}
+          animate={
+            prefersReducedMotion
+              ? { opacity: 1, x: 0 }
+              : {
+                  opacity: 1,
+                  x: 0,
+                  // Bobbing infini : ±4px verticalement, désynchronisé par index
+                  y: [0, -4, 0],
+                }
+          }
+          transition={{
+            opacity: { duration: 0.7, delay: 0.5 + i * 0.12 },
+            x: { duration: 0.7, delay: 0.5 + i * 0.12 },
+            y: prefersReducedMotion
+              ? undefined
+              : {
+                  duration: 4 + i * 0.3,
+                  delay: 1 + i * 0.5,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                },
+          }}
         >
           <Link
             href={`/biens/${bien.id}`}

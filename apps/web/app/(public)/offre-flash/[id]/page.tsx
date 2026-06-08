@@ -13,6 +13,7 @@ import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { getDictionary } from '@/lib/i18n/server'
 import { SimilarBiensSection } from '@/components/catalogue/SimilarBiensSection'
 import { FlashContactModal } from '@/components/offre-flash/FlashContactModal'
+import { FlashPlaceholder } from '@/components/offre-flash/FlashPlaceholder'
 import { ViewCount } from '@/components/bien/ViewCount'
 import { createClient as createSupabaseServer } from '@/lib/supabase/server'
 
@@ -57,6 +58,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     `Réf ${bien.ref}. Annonce non vérifiée — validation par notre conseiller avant tout engagement.`
 
   const canonical = `${SITE_URL}/offre-flash/${bien.id}`
+  // Si pas d'image réelle scrapée → on utilise le logo BOGBE'S générique.
+  // JAMAIS une image stock d'un autre bien : ça créerait une fausse promesse
+  // dans l'aperçu WhatsApp qui serait démentie par la fiche détail.
   const image = bien.image_url || `${SITE_URL}/og-image.jpg`
 
   return {
@@ -164,8 +168,12 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr,380px] gap-6">
           {/* Colonne gauche */}
           <div className="space-y-5">
-            {/* Image principale */}
-            <div className="relative aspect-[16/10] bg-gradient-to-br from-slate-200 to-slate-300 rounded-2xl overflow-hidden border border-[var(--border)]">
+            {/* Image principale — placeholder honnête si pas de photo.
+                viewTransitionName : reçoit le morph venant de la card cliquée sur /catalogue. */}
+            <div
+              className="relative aspect-[4/3] sm:aspect-[16/10] bg-gradient-to-br from-slate-200 to-slate-300 rounded-2xl overflow-hidden border border-[var(--border)]"
+              style={{ viewTransitionName: 'bien-hero' }}
+            >
               {bien.image_url ? (
                 <Image
                   src={bien.image_url}
@@ -176,9 +184,12 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
                   unoptimized
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-[var(--text-subtle)]">
-                  <Flame className="w-20 h-20" />
-                </div>
+                <FlashPlaceholder
+                  typeBien={bien.type_bien}
+                  commune={bien.commune}
+                  quartier={bien.quartier}
+                  variant="hero"
+                />
               )}
               {bien.is_recent && (
                 <span className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 bg-red-600 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-lg">

@@ -15,9 +15,13 @@ export function VIPConciergeButton({ bienTitre, bienLieu, bienPrix, bienId, clas
 
   const handleWhatsApp = () => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://bogbes-groupe.vercel.app'
-    const linkLine = bienId ? `\n\n🔗 ${origin}/biens/${bienId}` : ''
+    const linkLine = bienId ? `\n\n${origin}/biens/${bienId}` : ''
+    // Format ASCII-safe : utilise « • » (bullet U+2022) au lieu d'emojis qui
+    // peuvent ne pas s'afficher sur certains clients WhatsApp (Web/Desktop sans
+    // support emoji complet → affiche « � » à la place).
+    // Apostrophe typographique « ’ » (U+2019) ne nécessite pas d'encoding HTML.
     const text = encodeURIComponent(
-      `Bonjour, je suis intéressé(e) par ce bien :\n\n🏠 *${bienTitre}*\n📍 ${bienLieu}\n💰 ${bienPrix}${linkLine}\n\nPouvez-vous me donner plus d'informations ?`
+      `Bonjour, je suis intéressé(e) par ce bien :\n\n• *${bienTitre}*\n• ${bienLieu}\n• ${bienPrix}${linkLine}\n\nPouvez-vous me donner plus d’informations ?`
     )
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${text}`, '_blank')
   }

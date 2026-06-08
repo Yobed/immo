@@ -121,10 +121,12 @@ export function MobileMenu({ links, user }: MobileMenuProps) {
             </div>
           )}
 
-          {/* NAVIGATION */}
+          {/* NAVIGATION — fusionne les links du header desktop + items mobile uniques
+              (Favoris, Compte) pour avoir une parité complète avec la MobileTabBar */}
           <nav className="px-5 pt-5 pb-3">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] mb-3 px-1">Navigation</p>
             <ul className="space-y-1">
+              {/* Links standards du header (Accueil / Annonces / Flash / Services) */}
               {links.map((link) => {
                 const Icon = iconForHref(link.href)
                 return (
@@ -143,6 +145,36 @@ export function MobileMenu({ links, user }: MobileMenuProps) {
                   </li>
                 )
               })}
+
+              {/* Favoris — toujours visible sur mobile (équivalent du tab "FAVORIS") */}
+              <li>
+                <Link
+                  href="/favoris"
+                  onClick={close}
+                  className="flex items-center gap-3 px-3 py-3.5 rounded-xl text-[15px] font-semibold text-[var(--text)] hover:bg-[var(--surface-card)] active:bg-[var(--surface-card)] active:scale-[0.98] transition-all group"
+                >
+                  <span className="w-9 h-9 rounded-lg bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center group-hover:border-accent-luxury/40 group-hover:bg-accent-luxury/5 transition-colors shrink-0">
+                    <Heart size={16} className="text-[var(--text-muted)] group-hover:text-[var(--accent-luxury)]" />
+                  </span>
+                  <span className="flex-1">Favoris</span>
+                  <ChevronRight size={16} className="text-muted/40 shrink-0" />
+                </Link>
+              </li>
+
+              {/* Comment ça marche — utile à promouvoir partout */}
+              <li>
+                <Link
+                  href="/comment-ca-marche"
+                  onClick={close}
+                  className="flex items-center gap-3 px-3 py-3.5 rounded-xl text-[15px] font-semibold text-[var(--text)] hover:bg-[var(--surface-card)] active:bg-[var(--surface-card)] active:scale-[0.98] transition-all group"
+                >
+                  <span className="w-9 h-9 rounded-lg bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center group-hover:border-accent-luxury/40 group-hover:bg-accent-luxury/5 transition-colors shrink-0">
+                    <HelpCircle size={16} className="text-[var(--text-muted)] group-hover:text-[var(--accent-luxury)]" />
+                  </span>
+                  <span className="flex-1">Comment ça marche</span>
+                  <ChevronRight size={16} className="text-muted/40 shrink-0" />
+                </Link>
+              </li>
             </ul>
           </nav>
 

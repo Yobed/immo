@@ -103,7 +103,7 @@ export const LifestyleMatcher = () => {
           <div className="lg:w-[40%] xl:w-[35%] sticky top-24">
             <motion.div
               style={{ y: textTranslateY }}
-              className="mb-20"
+              className="mb-10 md:mb-16"
             >
               <div className="flex items-center gap-6 mb-10">
                 <span className="w-12 h-px bg-[var(--border)]" />

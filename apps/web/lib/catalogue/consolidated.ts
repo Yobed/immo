@@ -152,11 +152,17 @@ async function fetchBogbes(filters: ConsolidatedFilters): Promise<ConsolidatedBi
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const videos: string[] = medias.filter((m: any) => m.type === 'video').map((m: any) => m.url).slice(0, 2)
 
+    // ⚠️ Règle métier : une résidence meublée se loue à la NUITÉE, pas au mois.
+    // Si on a un prix_mois_fcfa renseigné par erreur sur un meublé sans prix_nuit_fcfa,
+    // on affiche « Prix sur demande » plutôt qu'un prix /mois incohérent qui détruit
+    // la confiance (ex: « 15 000 FCFA/mois » pour un meublé tout équipé).
+    const isMeuble = b.type_bien === 'residence_meublee'
     const { value, period, label } = (() => {
       if (b.prix_nuit_fcfa) return { value: b.prix_nuit_fcfa as number, period: 'nuit' as const, label: `${formatFCFA(b.prix_nuit_fcfa)} / nuit` }
       if (b.prix_vente_fcfa) return { value: b.prix_vente_fcfa as number, period: 'vente' as const, label: `${formatFCFA(b.prix_vente_fcfa)}` }
-      if (b.prix_mois_fcfa) return { value: b.prix_mois_fcfa as number, period: 'mois' as const, label: `${formatFCFA(b.prix_mois_fcfa)} / mois` }
-      return { value: null, period: 'unknown' as const, label: 'Sur demande' }
+      if (b.prix_mois_fcfa && !isMeuble) return { value: b.prix_mois_fcfa as number, period: 'mois' as const, label: `${formatFCFA(b.prix_mois_fcfa)} / mois` }
+      // Meublé sans prix_nuit → erreur de saisie probable → on masque le prix
+      return { value: null, period: 'unknown' as const, label: 'Prix sur demande' }
     })()
 
     const dateIso = b.created_at ?? new Date().toISOString()
@@ -219,6 +225,33 @@ async function fetchLocaux(filters: ConsolidatedFilters): Promise<ConsolidatedBi
     if (filters.q?.trim()) {
       const term = filters.q.trim()
       q = q.or(`caracteristiques.ilike.%${term}%,message_initial.ilike.%${term}%,quartier.ilike.%${term}%`)
+    }
+    // Équipements : les locaux n'ont pas de colonne structurée, on cherche le
+    // mot-clé dans caracteristiques + message_initial. Chaque équipement ajoute
+    // un .or() (Supabase chaîne les .or en AND entre eux → tous demandés).
+    if (filters.equipements && filters.equipements.length > 0) {
+      // Mapping code interne → mots-clés FR à chercher dans le texte brut
+      const EQ_PATTERNS: Record<string, string[]> = {
+        piscine: ['piscine'],
+        parking: ['parking', 'garage'],
+        climatisation: ['clim'],
+        gardien: ['gardien', 'vigile'],
+        groupe_electrogene: ['groupe', 'electrogene', 'generateur'],
+        eau_chaude: ['eau chaude'],
+        internet_fibre: ['internet', 'fibre', 'wifi'],
+        cuisine_equipee: ['cuisine equipee', 'cuisine équipée'],
+        terrasse: ['terrasse'],
+        balcon: ['balcon'],
+      }
+      for (const eq of filters.equipements) {
+        const patterns = EQ_PATTERNS[eq] ?? [eq]
+        const orParts: string[] = []
+        for (const p of patterns) {
+          orParts.push(`caracteristiques.ilike.%${p}%`)
+          orParts.push(`message_initial.ilike.%${p}%`)
+        }
+        q = q.or(orParts.join(','))
+      }
     }
     // ⚠️ Filtre prix appliqué APRÈS mapping (prix_value est dérivé de prix_normalise
     // OU du parsing du champ texte `prix`) — sinon on exclut tous les biens dont
@@ -525,11 +558,17 @@ export async function getConsolidatedBienById(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const videos: string[] = medias.filter((m: any) => m.type === 'video').map((m: any) => m.url).slice(0, 2)
 
+    // ⚠️ Règle métier : une résidence meublée se loue à la NUITÉE, pas au mois.
+    // Si on a un prix_mois_fcfa renseigné par erreur sur un meublé sans prix_nuit_fcfa,
+    // on affiche « Prix sur demande » plutôt qu'un prix /mois incohérent qui détruit
+    // la confiance (ex: « 15 000 FCFA/mois » pour un meublé tout équipé).
+    const isMeuble = b.type_bien === 'residence_meublee'
     const { value, period, label } = (() => {
       if (b.prix_nuit_fcfa) return { value: b.prix_nuit_fcfa as number, period: 'nuit' as const, label: `${formatFCFA(b.prix_nuit_fcfa)} / nuit` }
       if (b.prix_vente_fcfa) return { value: b.prix_vente_fcfa as number, period: 'vente' as const, label: `${formatFCFA(b.prix_vente_fcfa)}` }
-      if (b.prix_mois_fcfa) return { value: b.prix_mois_fcfa as number, period: 'mois' as const, label: `${formatFCFA(b.prix_mois_fcfa)} / mois` }
-      return { value: null, period: 'unknown' as const, label: 'Sur demande' }
+      if (b.prix_mois_fcfa && !isMeuble) return { value: b.prix_mois_fcfa as number, period: 'mois' as const, label: `${formatFCFA(b.prix_mois_fcfa)} / mois` }
+      // Meublé sans prix_nuit → erreur de saisie probable → on masque le prix
+      return { value: null, period: 'unknown' as const, label: 'Prix sur demande' }
     })()
 
     const dateIso = b.created_at ?? new Date().toISOString()

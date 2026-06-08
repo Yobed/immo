@@ -59,7 +59,10 @@ export function CookieConsent() {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shadow-lg">
+    // Mobile : positionné AU-DESSUS de la MobileTabBar (76px) pour ne pas la cacher.
+    // Desktop : bottom-0 classique. z-[110] > MobileTabBar (z-[100]) pour rester
+    // au-dessus si l'utilisateur scrolle, sans masquer la navigation tab.
+    <div className="cookie-banner fixed bottom-[76px] lg:bottom-0 left-0 right-0 z-[110] bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex-1">

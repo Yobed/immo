@@ -76,7 +76,7 @@ export function FurnishedRentalsSection() {
   ]
 
   return (
-    <section className="relative py-24 bg-[var(--midnight-muted)] overflow-hidden">
+    <section className="relative py-12 md:py-20 bg-[var(--midnight-muted)] overflow-hidden">
       {/* Abstract Background Decoration */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent-luxury/5 blur-[120px] rounded-full -mr-64 -mt-64" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent-luxury/5 blur-[120px] rounded-full -ml-64 -mb-64" />

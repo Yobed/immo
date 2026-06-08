@@ -255,7 +255,7 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Quick Actions */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <Link href="/publier" className="group bg-primary text-white p-6 rounded-card shadow-lg hover:shadow-primary/20 transition-all flex flex-col items-center justify-center gap-3 text-center">
+            <Link href="/mes-biens/nouveau" className="group bg-primary text-white p-6 rounded-card shadow-lg hover:shadow-primary/20 transition-all flex flex-col items-center justify-center gap-3 text-center">
               <div className="p-3 bg-white/20 rounded-full group-hover:scale-110 transition-transform">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
               </div>

@@ -40,6 +40,7 @@ import { ExpandableText } from '@/components/bien/ExpandableText'
 import { ScrollToTop } from '@/components/bien/ScrollToTop'
 import { TrackView } from '@/components/bien/TrackView'
 import { ShareButton } from '@/components/bien/ShareButton'
+import { BienNotesPanel } from '@/components/bien/BienNotesPanel'
 import { STATUTS_PUBLICS, estStatutPublic } from '@/lib/catalogue/statuts'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -62,7 +63,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     .limit(1)
     .single()
 
-  if (!bien) return { title: "Bien introuvable — BOGBE'S GROUPE" }
+  if (!bien) return { title: "Bien introuvable — BOGBE’S GROUPE" }
 
   const medias = (bien.biens_medias as any[] | null) ?? []
   const photo = medias.sort((a, b) => (b.est_couverture ? 1 : 0) - (a.est_couverture ? 1 : 0))[0]?.url
@@ -72,7 +73,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const prix = bien.prix_vente_fcfa
     ? formatFCFA(bien.prix_vente_fcfa)
     : bien.prix_mois_fcfa ? `${formatFCFA(bien.prix_mois_fcfa)}/mois` : ''
-  const desc = `${bien.type_bien} à ${lieu}${prix ? ` — ${prix}` : ''}. Découvrez ce bien sur BOGBE'S GROUPE, la plateforme immobilière N°1 en Côte d'Ivoire.`
+  const desc = `${bien.type_bien} à ${lieu}${prix ? ` — ${prix}` : ''}. Découvrez ce bien sur BOGBE’S GROUPE, la plateforme immobilière N°1 en Côte d’Ivoire.`
 
   // Generate JSON-LD Property schema for rich snippets
   const proprietaire = (bien as any)['profiles!proprietaire_id'] as any
@@ -99,10 +100,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const jsonLdSchema = generatePropertySchema(schemaInput, siteUrl)
 
   return {
-    title: `${bien.titre} — ${lieu} | BOGBE'S GROUPE`,
+    title: `${bien.titre} — ${lieu} | BOGBE’S GROUPE`,
     description: desc,
-    keywords: [`immobilier luxe Abidjan`, `location meublée ${bien.commune}`, `achat appartement ${bien.commune}`, `BOGBE'S GROUPE prestige`, bien.titre],
-    authors: [{ name: "BOGBE'S GROUPE" }],
+    keywords: [`immobilier luxe Abidjan`, `location meublée ${bien.commune}`, `achat appartement ${bien.commune}`, `BOGBE’S GROUPE prestige`, bien.titre],
+    authors: [{ name: "BOGBE’S GROUPE" }],
     alternates: { canonical: `${siteUrl}/biens/${id}` },
     openGraph: {
       title: bien.titre,
@@ -146,12 +147,17 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
     .eq('id', bien.proprietaire_id)
     .maybeSingle()
 
-  const [{ data: favoriRow }] = await Promise.all([
+  const [{ data: favoriRow }, { data: userProfile }] = await Promise.all([
     user?.id
       ? supabase.from('favoris').select('id').eq('user_id', user.id).eq('bien_id', id).maybeSingle()
       : Promise.resolve({ data: null }),
+    user?.id
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ? (supabase as any).from('profiles').select('role').eq('id', user.id).maybeSingle()
+      : Promise.resolve({ data: null }),
   ])
   const initialIsFavori = !!favoriRow
+  const isAdminUser = userProfile?.role === 'admin'
 
   const medias = ((bien.biens_medias as any[]) ?? []).sort((a: any, b: any) => a.ordre - b.ordre)
   let videoMedias = medias.filter((m: any) => m.type === 'video')
@@ -166,12 +172,17 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
   }
 
   const vue360Medias = medias.filter((m: any) => m.type === '360')
-  const isNuitee = bien.type_bien?.toLowerCase().includes('meublee') || 
-                   bien.type_bien?.toLowerCase().includes('meublé') || 
-                   bien.type_bien?.toLowerCase().includes('nuit') || 
+  const isNuitee = bien.type_bien?.toLowerCase().includes('meublee') ||
+                   bien.type_bien?.toLowerCase().includes('meublé') ||
+                   bien.type_bien?.toLowerCase().includes('nuit') ||
                    bien.type_bien === 'residence_meublee'
 
-  const prixValue = isNuitee && bien.prix_nuit_fcfa ? bien.prix_nuit_fcfa : bien.prix_mois_fcfa ? bien.prix_mois_fcfa : bien.prix_vente_fcfa
+  // Règle métier : résidence meublée = prix par nuit. Si seul prix_mois rempli sur
+  // un meublé (erreur de saisie probable), on n'affiche PAS un prix /mois absurde.
+  // → Prix masqué « Sur demande » jusqu'à ce que le proprio corrige la donnée.
+  const prixValue = isNuitee
+    ? (bien.prix_nuit_fcfa ?? null)  // meublé : exige prix_nuit explicite
+    : (bien.prix_mois_fcfa ?? bien.prix_vente_fcfa ?? null)
   const prixSuffix = isNuitee ? '/nuit' : bien.prix_mois_fcfa ? '/mois' : ''
 
   const stats = [
@@ -274,7 +285,10 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
         <DiscoveryBar bien={bien} prix={prix} userId={user?.id ?? null} />
       </div>
 
-      {/* ─── HERO + ONGLETS MÉDIAS + STATS ─── */}
+      {/* ─── HERO + ONGLETS MÉDIAS + STATS ───
+          viewTransitionName : reçoit le morph venant de la card cliquée sur /catalogue.
+          Chrome/Safari uniquement, fallback gracieux ailleurs (pas d'erreur). */}
+      <div style={{ viewTransitionName: 'bien-hero' }}>
       <BienMediaGallery
         medias={medias.map((m: any) => ({
           id: m.id, type: m.type, url: m.url,
@@ -291,6 +305,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
         typeLabel={TYPES_BIEN_LABELS[bien.type_bien] || bien.type_bien}
         userId={user?.id ?? null}
       />
+      </div>
 
       {/* ─── MAIN CONTENT — carte blanche arrondie style Airbnb ─── */}
       <div className="bg-[var(--surface-card)] rounded-t-[28px] -mt-3 shadow-[0_-4px_20px_rgba(0,0,0,0.12)] relative z-10">
@@ -440,6 +455,18 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                 hauteur={400}
               />
             </section>
+
+            {/* Notes & commentaires — visible uniquement aux utilisateurs connectés.
+                Client : notes privées sur ses favoris. Admin : notes internes commerciales. */}
+            {user?.id && (
+              <section className="mb-8">
+                <BienNotesPanel
+                  bienId={bien.id}
+                  userId={user.id}
+                  isAdmin={isAdminUser}
+                />
+              </section>
+            )}
 
             {/* Owner management (desktop only — mobile shown above) */}
             {isOwner && (

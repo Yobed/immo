@@ -11,6 +11,8 @@ import { MobileTabBar } from '@/components/layout/MobileTabBar'
 import { PageTransition } from '@/components/layout/PageTransition'
 import { OnboardingModal } from '@/components/ui/OnboardingModal'
 import { BackToHomeButton } from '@/components/layout/BackToHomeButton'
+import { HeaderScrollDetector } from '@/components/layout/HeaderScrollDetector'
+import { ActivityFeed } from '@/components/ui/ActivityFeed'
 
 // Cache-bust: 2026-04-20T13:42:00Z
 
@@ -64,6 +66,9 @@ export default async function PublicLayout({ children }: { children: React.React
 
   return (
     <>
+      {/* Détecteur de scroll qui active le mode "header compact glassmorphism".
+          Voir globals.css → règles `html[data-header-scrolled]`. */}
+      <HeaderScrollDetector />
       {/* ── Header ── */}
       <header className="sticky top-0 z-40 glass border-b border-[var(--border)] anim-fade-down"
         style={{ boxShadow: 'var(--shadow-sm)' }}>
@@ -160,6 +165,7 @@ export default async function PublicLayout({ children }: { children: React.React
 
       <MobileTabBar />
       <OnboardingModal />
+      <ActivityFeed />
     </>
   )
 }

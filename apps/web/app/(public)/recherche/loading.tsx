@@ -4,7 +4,7 @@ import { Grid, List, Map as MapIcon } from 'lucide-react'
 
 export default function Loading() {
   return (
-    <main className="bg-[var(--background)] min-h-screen pt-24 pb-16">
+    <main className="bg-[var(--background)] min-h-screen pt-6 sm:pt-10 lg:pt-16 pb-16">
       <div className="max-w-[1600px] mx-auto px-4 lg:px-8">
         
         {/* Header Skeleton */}

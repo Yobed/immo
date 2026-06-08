@@ -46,7 +46,7 @@ export function CTAFinal() {
         {/* Professional Actions */}
         <motion.div
           variants={itemVariants}
-          className="flex flex-col sm:flex-row gap-8 justify-center items-center mb-24"
+          className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12 md:mb-20"
         >
           <MagneticWrapper>
             <Link

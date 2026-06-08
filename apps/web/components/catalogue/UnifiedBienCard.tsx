@@ -5,6 +5,9 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { MapPin, BedDouble, Maximize2, Flame, ShieldCheck, Radio, Clock } from 'lucide-react'
 import { useT } from '@/lib/i18n/client'
 import type { ConsolidatedBien } from '@/lib/catalogue/consolidated'
+import { FlashPlaceholder } from '@/components/offre-flash/FlashPlaceholder'
+import { TiltCard } from '@/components/ui/TiltCard'
+import { ViewTransitionLink } from '@/components/ui/ViewTransitionLink'
 
 interface Props {
   bien: ConsolidatedBien
@@ -39,14 +42,20 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
       transition={prefersReduced ? { duration: 0 } : { duration: 0.4, delay: (index % 4) * 0.04, ease: [0.16, 1, 0.3, 1] }}
       className="group relative h-full @container/card"
     >
-      <Link
+      <TiltCard maxTilt={6} depth={10} className="h-full">
+      <ViewTransitionLink
         // Lien relatif explicite vers la fiche source (évite tout problème
         // de mismatch env entre client/server). flash → /offre-flash/<id>,
         // bogbes → /biens/<uuid>.
+        // ViewTransitionLink anime l'image de la card → image hero de la fiche
+        // via l'API View Transitions native (Chrome/Safari).
         href={bien.source === 'flash' ? `/offre-flash/${bien.sourceId}` : `/biens/${bien.sourceId}`}
-        className="flex flex-col h-full bg-[var(--surface-card)] border border-[var(--border)] rounded-xl overflow-hidden hover:border-accent-luxury/40 hover:shadow-md transition-all duration-300"
+        transitionName="bien-hero"
+        className="flex flex-col h-full bg-[var(--surface-card)] border border-[var(--border)] rounded-xl overflow-hidden hover:border-accent-luxury/40 hover:shadow-xl hover:shadow-black/10 transition-all duration-300"
       >
-        {/* Image — ratio 4:3 (au lieu de 4:5) → 25% plus court */}
+        {/* Image — ratio 4:3 (au lieu de 4:5) → 25% plus court.
+            Flash sans photo : on affiche un PLACEHOLDER honnête (carte d'identité)
+            au lieu d'une image stock qui créerait une fausse attente. */}
         <div className="relative aspect-[4/3] overflow-hidden bg-[var(--midnight-muted)]">
           {bien.photo_url ? (
             <Image
@@ -57,14 +66,23 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
               className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
               unoptimized={isFlash}
             />
+          ) : isFlash ? (
+            <FlashPlaceholder
+              typeBien={bien.type_bien}
+              commune={bien.commune}
+              quartier={bien.quartier}
+              variant="card"
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center opacity-25">
               <MapPin className="w-7 h-7 text-[var(--text-muted)]" />
             </div>
           )}
 
-          {/* Gradient bottom — plus discret */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent pointer-events-none" />
+          {/* Gradient bottom — plus discret (caché si placeholder pour ne pas l'assombrir) */}
+          {bien.photo_url && (
+            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent pointer-events-none" />
+          )}
 
           {/* Top-left : type bien (icône + label compact) */}
           <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-md bg-black/55 backdrop-blur-md text-white text-[9px] font-bold uppercase tracking-wider">
@@ -100,13 +118,16 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
             </span>
           ) : null}
 
-          {/* Bottom : ville + badges temps (très compact) */}
+          {/* Bottom : ville + badges temps (très compact).
+              Couleur ville adaptée : blanc sur photo réelle, slate sur placeholder. */}
           <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-end justify-between gap-1.5">
-            <span className="text-white text-[10px] font-bold uppercase tracking-wide drop-shadow-sm">
-              {bien.commune}
-            </span>
+            {bien.photo_url && (
+              <span className="text-white text-[10px] font-bold uppercase tracking-wide drop-shadow-sm">
+                {bien.commune}
+              </span>
+            )}
             {bien.is_recent && (
-              <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-500/90 text-white text-[8px] font-bold uppercase">
+              <span className="ml-auto flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-500/90 text-white text-[8px] font-bold uppercase">
                 <span className="w-1 h-1 bg-[var(--surface-card)] rounded-full animate-pulse" />
                 {t.common.new}
               </span>
@@ -150,7 +171,8 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
             </div>
           )}
         </div>
-      </Link>
+      </ViewTransitionLink>
+      </TiltCard>
     </motion.div>
   )
 }

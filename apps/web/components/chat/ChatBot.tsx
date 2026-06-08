@@ -190,10 +190,15 @@ export function ChatBot({ context, onClose, isFloating = false }: ChatBotProps) 
         {loading && messages[messages.length - 1]?.role === 'assistant' &&
           messages[messages.length - 1]?.content === '' && (
           <div className="flex justify-start items-center gap-4">
-             <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-                <div className="w-1.5 h-1.5 bg-[var(--accent-luxury)] rounded-full animate-pulse" />
-             </div>
-             <p className="text-[10px] uppercase font-bold tracking-[0.3em] text-foreground/20">Analyse en cours...</p>
+            <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+              <div className="w-1.5 h-1.5 bg-[var(--accent-luxury)] rounded-full animate-pulse" />
+            </div>
+            {/* 3 dots qui bouncent en staggered — Sapphire "réfléchit" */}
+            <div className="flex items-center gap-1.5">
+              <span className="block w-1.5 h-1.5 rounded-full bg-[var(--accent-luxury)]/70 animate-[typing_1.2s_ease-in-out_infinite]" />
+              <span className="block w-1.5 h-1.5 rounded-full bg-[var(--accent-luxury)]/70 animate-[typing_1.2s_ease-in-out_0.15s_infinite]" />
+              <span className="block w-1.5 h-1.5 rounded-full bg-[var(--accent-luxury)]/70 animate-[typing_1.2s_ease-in-out_0.3s_infinite]" />
+            </div>
           </div>
         )}
         <div ref={bottomRef} className="h-4" />

@@ -20,13 +20,17 @@ export function ProfileEditForm({ initialNom, initialTelephone, userId }: Profil
     setLoading(true)
     setError(null)
     const supabase = createClient()
+    // ⚠️ La colonne en base s'appelle `phone` (pas `telephone`).
+    // Bug historique : utiliser le mauvais nom de colonne renvoie une erreur
+    // PostgreSQL "column does not exist" → affichait juste un message générique.
     const { error: err } = await supabase
       .from('profiles')
-      .update({ full_name: nom.trim(), telephone: telephone.trim() })
+      .update({ full_name: nom.trim(), phone: telephone.trim() })
       .eq('id', userId)
 
     if (err) {
-      setError('Erreur lors de la sauvegarde. Veuillez réessayer.')
+      // Expose le vrai message d'erreur pour débugger plus vite côté utilisateur
+      setError(`Erreur : ${err.message}`)
     } else {
       setSuccess(true)
       setEditing(false)

@@ -57,12 +57,12 @@ export default async function OffreFlashPage({ searchParams }: PageProps) {
   const hasFilters = !!(sp.q || sp.commune || sp.prix_min || sp.prix_max || sp.type_bien)
 
   return (
-    <main className="bg-[var(--background)] min-h-screen pt-24 pb-16">
+    <main className="bg-[var(--background)] min-h-screen pt-6 sm:pt-10 lg:pt-16 pb-16">
       <div className="max-w-[1600px] mx-auto px-4 lg:px-8">
         {/* Header — titre + recherche à gauche, compteur + vue à droite */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 lg:gap-8 mb-4 lg:mb-6">
           <div className="flex-1 max-w-3xl">
-            <div className="inline-flex items-center gap-2 mb-3">
+            <div className="inline-flex items-center gap-2 mb-2">
               <span className="relative flex w-2 h-2">
                 <span className="animate-ping absolute inline-flex w-full h-full rounded-full bg-orange-500 opacity-75" />
                 <span className="relative rounded-full w-2 h-2 bg-orange-500" />
@@ -71,7 +71,7 @@ export default async function OffreFlashPage({ searchParams }: PageProps) {
                 Bons plans WhatsApp
               </p>
             </div>
-            <h1 className="font-display text-3xl md:text-5xl font-bold text-[var(--text)] mb-4 tracking-tight">
+            <h1 className="font-display text-2xl md:text-5xl font-bold text-[var(--text)] mb-3 lg:mb-4 tracking-tight">
               Trouvez votre <span className="italic font-serif text-[var(--accent-luxury)]">offre flash</span>
             </h1>
             <SearchBar className="w-full" initialQuery={sp.q ?? ''} />

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createLocauxClient } from '@/lib/supabase/locaux'
 import { Clock, MapPin, ShieldCheck, Flame } from 'lucide-react'
+import { AnimatedCounter, AnimatedLabel } from './AnimatedCounter'
 
 /**
  * Formate une durée en minutes pour affichage humain :
@@ -175,11 +176,13 @@ export async function StatsRibbon() {
               </div>
               <div className="min-w-0">
                 <p className="font-display text-2xl md:text-3xl font-black text-[var(--text)] tabular-nums leading-none mb-1">
-                  {'isLiteral' in s && s.isLiteral
-                    ? s.value
-                    : typeof s.value === 'number'
-                      ? s.value.toLocaleString('fr-FR')
-                      : s.value}
+                  {'isLiteral' in s && s.isLiteral ? (
+                    <AnimatedLabel label={String(s.value)} />
+                  ) : typeof s.value === 'number' ? (
+                    <AnimatedCounter to={s.value} />
+                  ) : (
+                    s.value
+                  )}
                 </p>
                 <p className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] truncate">
                   {s.label}

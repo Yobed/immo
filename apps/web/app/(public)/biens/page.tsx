@@ -105,7 +105,14 @@ function BiensContent() {
     if (f.commune) p.set('commune', f.commune)
     if (f.budgetMax) p.set('budget_max', f.budgetMax)
     if (f.offre) p.set('offre', f.offre)
-    router.push(`/biens${p.toString() ? `?${p.toString()}` : ''}`)
+    // Propage les équipements demandés (ex: "maison avec piscine" → equipements=piscine)
+    if (f.equipements && f.equipements.length > 0) {
+      p.set('equipements', f.equipements.join(','))
+    }
+    // Conserve un q=<transcript> pour que la recherche full-text catch le mot
+    // au cas où l'équipement n'est pas dans la colonne structurée des biens.
+    if (transcript.trim()) p.set('q', transcript.trim())
+    router.push(`/catalogue${p.toString() ? `?${p.toString()}` : ''}`)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transcript])
 

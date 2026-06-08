@@ -8,7 +8,7 @@ export const metadata = { title: 'Support' }
 export default async function SupportPage() {
   const t = await getDictionary()
   return (
-    <main className="min-h-screen bg-[var(--background)] pt-32 pb-24 px-6">
+    <main className="min-h-screen bg-[var(--background)] pt-8 sm:pt-14 lg:pt-20 pb-16 px-6">
       <div className="max-w-lg mx-auto text-center">
         <Link href="/" className="inline-flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text)] text-sm mb-10 transition-colors">
           <ArrowLeft className="w-4 h-4" /> {t.common.back}

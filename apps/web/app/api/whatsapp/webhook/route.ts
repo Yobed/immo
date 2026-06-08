@@ -98,16 +98,23 @@ export async function POST(req: NextRequest) {
     const rawBody = await req.text();
     const signature = req.headers.get('x-webhook-signature');
 
-    // Verify signature if present
+    // Verify signature if present.
+    // Log entry pour diagnostiquer les 401 silencieux : on saura toujours
+    // qu'un payload est arrivé même quand la signature ne matche pas.
+    console.log(`[Webhook] POST received bodyLen=${rawBody.length} hasSig=${!!signature} sigPrefix=${signature?.slice(0, 8) ?? 'none'}`);
     if (signature && !verifyWasenderSignature(rawBody, signature)) {
+      console.warn('[Webhook] Signature invalid — rejecting with 401');
       return NextResponse.json({error: 'Invalid signature'}, {status: 401})
     }
 
     const body = JSON.parse(rawBody);
     const { event, data } = body;
 
-    if (event !== 'messages.received' && event !== 'messages.upsert') {
-      return NextResponse.json({ status: 'ignored' });
+    // Wasender envoie 2 events pour chaque message entrant (messages.received
+    // ET messages.upsert). On NE traite QUE messages.upsert pour éviter de
+    // répondre 2 fois au même message. Les autres events sont ignorés silencieusement.
+    if (event !== 'messages.upsert') {
+      return NextResponse.json({ status: 'ignored', reason: `event=${event} not processed (only messages.upsert)` });
     }
 
     const messages = data?.messages;

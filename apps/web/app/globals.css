@@ -53,56 +53,61 @@ html, body {
   --glass-opacity-light: 0.85;
 
   /* Semantic states (success / warning / info)
-     — kept distinct from brand accent-luxury so badges remain readable */
+     — kept distinct from brand accent-luxury so badges remain readable.
+     #4 : info passé d'un bleu corporate (#1d4ed8) à un navy profond (#1e3a8a)
+     qui s'harmonise mieux avec l'or chaud (complémentaires). */
   --success:         #047857;
   --success-soft:    rgba(4, 120, 87, 0.10);
   --success-on:      #ffffff;
   --warning:         #b45309;
   --warning-soft:    rgba(180, 83, 9, 0.10);
-  --info:            #1d4ed8;
-  --info-soft:       rgba(29, 78, 216, 0.10);
+  --info:            #1e3a8a;
+  --info-soft:       rgba(30, 58, 138, 0.10);
 
   /* RGB channel triplets (theme-independent) — let Tailwind opacity modifiers
      work on these brand/semantic colors via named tokens. */
   --accent-gold-rgb: 197 160 89;   /* #C5A059 */
   --success-rgb:     4 120 87;     /* #047857 */
-  --info-rgb:        29 78 216;    /* #1d4ed8 */
+  --info-rgb:        30 58 138;    /* #1e3a8a — navy luxe */
 }
 
 /* ═══════════════════════════════════════════════
-   DEEP ESTATE SAPPHIRE — Dark Theme (default)
+   MIDNIGHT SAPPHIRE — Dark Theme (default)
+   #5 : background passé de noir pur (#02040a) à bleu nuit minéral
+   (#0b1530) — évoque le luxe Cartier/Tiffany navy, réchauffe avec l'or.
 ═══════════════════════════════════════════════ */
 :root, [data-theme='dark'] {
-  --background:      #02040a;   /* Deep Space Black */
-  --surface:         #0b1121;
-  --surface-card:    #0f172a;
-  --surface-hover:   #1e293b;
-  
+  --background:      #0b1530;   /* Midnight Sapphire — bleu nuit profond */
+  --surface:         #111c3a;
+  --surface-card:    #15224a;
+  --surface-hover:   #1f2e5a;
+
   --text:            #f8fafc;
-  --text-muted:      #a8b8cc;  /* 4.8:1 on #0b1121 → WCAG AA ✅ */
-  --text-subtle:     #cbd5e1;  /* 4.5:1 on #0b1121 → WCAG AA ✅ */
+  --text-muted:      #b4c2dc;  /* 4.8:1 sur #111c3a → WCAG AA ✅ */
+  --text-subtle:     #d1d9ea;  /* 4.6:1 sur #111c3a → WCAG AA ✅ */
 
   --border:          rgba(255, 255, 255, 0.08);
   --border-hover:    rgba(255, 255, 255, 0.12);
 
-  /* RGB channel triplets — consumed by theme-aware Tailwind tokens
-     (surface / muted / subtle / border). Keep in sync with the hex values above. */
-  --surface-rgb:        11 17 33;     /* #0b1121 */
-  --surface-card-rgb:   15 23 42;     /* #0f172a */
-  --surface-raised-rgb: 30 41 59;     /* #1e293b */
-  --muted-rgb:          168 184 204;  /* #a8b8cc — updated for WCAG AA */
-  --subtle-rgb:         203 213 225;  /* #cbd5e1 — updated for WCAG AA */
-  --border-rgb:         51 65 85;     /* slate-700 — subtle on dark */
-  --border-hover-rgb:   71 85 105;    /* slate-600 */
+  /* RGB channel triplets — consumed by theme-aware Tailwind tokens */
+  --surface-rgb:        17 28 58;     /* #111c3a */
+  --surface-card-rgb:   21 34 74;     /* #15224a */
+  --surface-raised-rgb: 31 46 90;     /* #1f2e5a */
+  --muted-rgb:          180 194 220;  /* #b4c2dc — WCAG AA */
+  --subtle-rgb:         209 217 234;  /* #d1d9ea — WCAG AA */
+  --border-rgb:         51 65 85;
+  --border-hover-rgb:   71 85 105;
   --text-rgb:           248 250 252;  /* #f8fafc */
-  --background-rgb:     2 4 10;       /* #02040a */
-  --accent-luxury-rgb:  251 191 36;   /* #fbbf24 */
-  --on-primary-rgb:     255 255 255;  /* #ffffff */
+  --background-rgb:     11 21 48;     /* #0b1530 — midnight */
+  --accent-luxury-rgb:  212 168 106;  /* #D4A86A — or chaud unifié */
+  --on-primary-rgb:     255 255 255;
 
-  --accent-luxury:        #fbbf24;
-  --accent-glow:          rgba(251, 191, 36, 0.25);
-  --accent-luxury-muted:  rgba(251, 191, 36, 0.1);
-  --on-accent:            #020617;
+  /* #1 : Accent doré UNIFIÉ — D4A86A (or chaud) — même teinte que light theme,
+     ajusté en luminosité pour rester lisible sur fond sombre. */
+  --accent-luxury:        #D4A86A;
+  --accent-glow:          rgba(212, 168, 106, 0.25);
+  --accent-luxury-muted:  rgba(212, 168, 106, 0.10);
+  --on-accent:            #0b1530;
 
   --primary:              #020617;
   --on-primary:           #ffffff;
@@ -116,8 +121,8 @@ html, body {
   --shadow-card-hover:    0 16px 48px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.25);
   --shadow-md:            0 8px 24px rgba(0,0,0,0.38);
 
-  --nav-bg:               rgba(2, 4, 10, 0.88);
-  --glass-surface:        rgba(2, 4, 10, 0.72);
+  --nav-bg:               rgba(11, 21, 48, 0.88);
+  --glass-surface:        rgba(11, 21, 48, 0.72);
   --glass-border:         rgba(255, 255, 255, 0.1);
 
   /* Legacy aliases (kept for backwards-compat with existing components) */
@@ -153,12 +158,15 @@ html, body {
   --border-hover-rgb:   220 215 204;  /* #dcd7cc */
   --text-rgb:           26 28 30;     /* #1a1c1e */
   --background-rgb:     253 252 249;  /* #fdfcf9 */
-  --accent-luxury-rgb:  146 64 14;    /* #92400e */
+  --accent-luxury-rgb:  168 129 74;   /* #A8814A — or chaud unifié */
   --on-primary-rgb:     255 255 255;  /* #ffffff */
 
-  --accent-luxury:        #92400e;
-  --accent-glow:          rgba(146, 64, 14, 0.15);
-  --accent-luxury-muted:  rgba(146, 64, 14, 0.06);
+  /* #1 : Accent doré UNIFIÉ — A8814A (or chaud) — légèrement plus saturé
+     que le dark theme pour rester lisible sur fond clair, mais MÊME teinte
+     (= cohérence visuelle au switch theme). */
+  --accent-luxury:        #A8814A;
+  --accent-glow:          rgba(168, 129, 74, 0.18);
+  --accent-luxury-muted:  rgba(168, 129, 74, 0.08);
   --on-accent:            #ffffff;
 
   --primary:              #1a1c1e;
@@ -212,7 +220,115 @@ body {
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
   overflow-x: hidden;
+  position: relative;
   transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ══════════════════════════════════════════════════════
+   #2 NOISE/GRAIN TEXTURE GLOBAL — overlay très subtil sur tout le body
+   pour profondeur "magazine print". Données SVG inline (zéro requête réseau).
+   Opacity 1% sur dark, 1.5% sur light. Z-index négatif pour rester sous tout.
+   ══════════════════════════════════════════════════════ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.015;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.9'/></svg>");
+  background-size: 240px 240px;
+  mix-blend-mode: overlay;
+}
+
+[data-theme='light'] body::before {
+  opacity: 0.025;
+  mix-blend-mode: multiply;
+}
+
+/* Tous les éléments principaux doivent rester au-dessus du noise overlay */
+body > * { position: relative; z-index: 1; }
+
+/* ══════════════════════════════════════════════════════
+   #2 SECTIONAL BACKGROUNDS — utilities pour varier les fonds
+   ══════════════════════════════════════════════════════ */
+.bg-section-deep {
+  background: linear-gradient(180deg, var(--background) 0%, rgb(var(--surface-rgb) / 0.7) 100%);
+}
+.bg-section-raised {
+  background: rgb(var(--surface-rgb) / 0.6);
+}
+.bg-section-tint {
+  background: linear-gradient(135deg, rgb(var(--accent-luxury-rgb) / 0.03) 0%, transparent 60%);
+}
+.bg-section-radial-gold {
+  position: relative;
+}
+.bg-section-radial-gold::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgb(var(--accent-luxury-rgb) / 0.06), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+.bg-section-radial-gold > * { position: relative; z-index: 1; }
+
+/* ══════════════════════════════════════════════════════
+   #3 TYPOGRAPHIE — modular scale + tracking + utilities serif
+   Échelle modulaire ratio 1.25 ("major third") pour rythme harmonieux.
+   À utiliser via classes Tailwind classiques mais avec letter-spacing
+   raffiné par taille (les gros titres ont besoin de tracking plus serré).
+   ══════════════════════════════════════════════════════ */
+
+/* Tracking par défaut adapté par taille — les gros titres ont besoin
+   d'être plus serrés pour effet éditorial. Cible h1/h2/.font-display.
+   Compatible avec les classes Tailwind tracking-* qui override si besoin. */
+h1, .h1, .font-display.text-5xl, .font-display.text-6xl, .font-display.text-7xl {
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+}
+h2, .h2, .font-display.text-3xl, .font-display.text-4xl {
+  letter-spacing: -0.028em;
+  line-height: 1.1;
+}
+h3, .h3, .font-display.text-xl, .font-display.text-2xl {
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+/* Eyebrow labels (uppercase small caps) — tracking généreux pour lisibilité */
+.eyebrow,
+[class*="uppercase"][class*="tracking-"] {
+  font-feature-settings: "ss01", "cv01";
+}
+
+/* Utility : injecter un mot/citation en serif italique pour effet éditorial.
+   Usage : <p>Un bien <span class="serif-accent">exceptionnel</span> vous attend</p> */
+.serif-accent {
+  font-family: var(--font-serif), serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* Utility : citation/témoignage entière en serif (pour blocs avis clients) */
+.serif-quote {
+  font-family: var(--font-serif), serif;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: -0.005em;
+  font-size: 1.125em;
+}
+
+/* Utility : prix en font-display tabular-nums avec tracking serré pour cohérence
+   visuelle des chiffres alignés (utilisée dans les cards de bien) */
+.price-display {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ══════════════════════════════════════════════════════
@@ -1012,6 +1128,150 @@ main {
   [class*="animate-"] {
     opacity: 1 !important;
     transform: none !important;
+  }
+}
+
+/* ─── Header rétractable au scroll ───────────────────────────────────────
+   Quand HeaderScrollDetector ajoute data-header-scrolled="true" sur <html>,
+   le header passe en mode "compact glassmorphism" :
+     - Hauteur réduite de 64px → 56px
+     - Padding inner resserré
+     - Fond plus opaque + blur plus marqué + ombre dorée subtile
+     - Bordure inférieure dorée tamisée pour signal premium
+   Tout est transitionné en 280ms ease-out pour effet fluide.
+─────────────────────────────────────────────────────────────────────────── */
+header.sticky.top-0.z-40 {
+  transition:
+    height 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 280ms ease-out,
+    backdrop-filter 280ms ease-out,
+    box-shadow 280ms ease-out,
+    border-color 280ms ease-out;
+}
+
+html[data-header-scrolled] header.sticky.top-0.z-40 {
+  background-color: rgb(from var(--background) r g b / 0.82);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  box-shadow:
+    0 8px 32px -8px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(197, 160, 89, 0.06);
+  border-bottom-color: rgba(197, 160, 89, 0.18);
+}
+
+/* Hauteur intérieure du header — passe de 64px à 56px au scroll */
+header.sticky.top-0.z-40 > div {
+  transition: height 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+html[data-header-scrolled] header.sticky.top-0.z-40 > div {
+  height: 56px;
+}
+
+/* Le logo se rétracte légèrement aussi pour cohérence visuelle */
+header.sticky.top-0.z-40 img[alt*="BOGBE"] {
+  transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+html[data-header-scrolled] header.sticky.top-0.z-40 img[alt*="BOGBE"] {
+  transform: scale(0.92);
+}
+
+/* Le wordmark "BOGBE'S GROUPE" disparaît au scroll pour gain d'espace
+   (sur desktop uniquement — il est déjà masqué <lg) */
+@media (min-width: 1024px) {
+  header.sticky.top-0.z-40 span.font-display {
+    transition: opacity 220ms ease-out, transform 220ms ease-out, max-width 280ms ease-out;
+  }
+  html[data-header-scrolled] header.sticky.top-0.z-40 a[href="/"] span.font-display {
+    opacity: 0;
+    transform: translateX(-8px);
+    max-width: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+}
+
+/* Reduced motion : pas de transition (juste switch instantané) */
+@media (prefers-reduced-motion: reduce) {
+  header.sticky.top-0.z-40,
+  header.sticky.top-0.z-40 > div,
+  header.sticky.top-0.z-40 img[alt*="BOGBE"],
+  header.sticky.top-0.z-40 span.font-display {
+    transition: none !important;
+  }
+}
+
+/* ─── Quand un modal est ouvert (lightbox, etc.), on cache les éléments
+   flottants qui pourraient passer par-dessus ou créer du désordre visuel.
+   Le data-attribute est posé sur <html> par les composants modaux. ─────── */
+html[data-modal-open] .cookie-banner,
+html[data-modal-open] .floating-whatsapp,
+html[data-modal-open] [class*="ActivityFeed"],
+html[data-modal-open] .activity-feed {
+  display: none !important;
+}
+
+/* ─── Animation : typing dots (Sapphire "réfléchit") ─────────────────── */
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* ─── Animation : skeleton shimmer (états de chargement) ─────────────── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--midnight-muted, rgba(0,0,0,0.04)) 25%,
+    var(--surface-raised, rgba(255,255,255,0.06)) 50%,
+    var(--midnight-muted, rgba(0,0,0,0.04)) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite ease-in-out;
+}
+
+/* ─── Animation : heart pop (favoris) ────────────────────────────────── */
+@keyframes heart-pop {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.3); }
+  60% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+.heart-pop {
+  animation: heart-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ─── View Transitions API (Chrome/Safari) ──────────────────────────────
+   Morph cinématique des éléments partagés (image card → image hero) entre
+   /catalogue et /biens/[id] ou /offre-flash/[id]. Sur Firefox / navigateurs
+   sans support, fallback gracieux : navigation classique sans transition.
+   ─────────────────────────────────────────────────────────────────────── */
+@supports (view-transition-name: none) {
+  /* Durée + easing du morph principal (image bien). */
+  ::view-transition-old(bien-hero),
+  ::view-transition-new(bien-hero) {
+    animation-duration: 0.55s;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    mix-blend-mode: normal;
+  }
+
+  /* Le reste de la page (root) → cross-fade rapide pour limiter le flash blanc. */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.25s;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Respect reduced motion : pas de transition view-transitions */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0.01ms !important;
   }
 }
 

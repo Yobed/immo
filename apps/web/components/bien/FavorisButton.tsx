@@ -13,6 +13,7 @@ interface FavorisButtonProps {
 export function FavorisButton({ bienId, userId, initialIsFavori = false, className }: FavorisButtonProps) {
   const [isFavori, setIsFavori] = useState(initialIsFavori)
   const [loading, setLoading] = useState(false)
+  const [popKey, setPopKey] = useState(0)
   const supabase = createClient()
 
   const handleToggle = async (e: React.MouseEvent) => {
@@ -23,6 +24,9 @@ export function FavorisButton({ bienId, userId, initialIsFavori = false, classNa
       window.location.href = '/login'
       return
     }
+
+    // Pop animation au clic (changement de clé = re-trigger CSS animation)
+    setPopKey(k => k + 1)
 
     setLoading(true)
     if (isFavori) {
@@ -61,6 +65,7 @@ export function FavorisButton({ bienId, userId, initialIsFavori = false, classNa
       )}
     >
       <svg
+        key={popKey}
         width="18"
         height="18"
         viewBox="0 0 24 24"
@@ -69,6 +74,7 @@ export function FavorisButton({ bienId, userId, initialIsFavori = false, classNa
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
+        className={popKey > 0 ? 'heart-pop' : undefined}
       >
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
       </svg>

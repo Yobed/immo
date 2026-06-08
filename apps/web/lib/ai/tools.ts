@@ -54,7 +54,10 @@ function formatBienBlock(b: ConsolidatedBien, i: number | null): string {
   else out += `Pas de photos dans le catalogue pour ce bien.\n`
   if (b.videos.length > 0) out += `Vidéos disponibles (${b.videos.length}): ${b.videos.slice(0, 2).join(' | ')}\n`
   out += `Lien fiche: ${b.url}\n`
-  out += `CTA visite/contact: ${b.cta_url}\n`
+  // ⚠️ `cta_url` (wa.me) volontairement RETIRÉ du contexte LLM : Sapphire
+  // hallucinait des templates avec placeholders (`https://wa.me/[contact via...`).
+  // À la place, on lui dit dans le prompt de pointer vers la fiche (où il y a
+  // un vrai bouton "Demander une visite").
   return out
 }
 
@@ -203,7 +206,7 @@ Dis au client que tu vas faire une recherche manuelle et que tu le recontactes r
     if (b.videos.length > 0) context += `Vidéos disponibles (${b.videos.length}): ${b.videos.slice(0, 2).join(' | ')}\n`
     if (b.date_scraping) context += `Récupéré dans notre système : ${new Date(b.date_scraping).toISOString()}\n`
     context += `Lien fiche: ${b.url}\n`
-    context += `CTA visite/contact: ${b.cta_url}\n`
+    // cta_url retiré : voir formatBienBlock ci-dessus pour le rationnel.
     context += '\n'
   })
 

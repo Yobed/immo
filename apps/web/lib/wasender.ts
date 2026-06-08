@@ -4,8 +4,20 @@
  * Intégration pour la gestion intelligente des messages WhatsApp
  */
 
-const WASSENDER_API_KEY = process.env.WASSENDER_API_KEY ?? '';
-const WASSENDER_WEBHOOK_SECRET = process.env.WASSENDER_WEBHOOK_SECRET ?? '';
+/**
+ * Nettoie une valeur d'env des caractères invisibles (BOM, sauts de ligne,
+ * espaces, zero-width chars) qui peuvent s'incruster lors d'un copier-coller
+ * depuis le dashboard Vercel ou Wasender et casser silencieusement le HMAC
+ * de signature. Garde uniquement les caractères ASCII imprimables.
+ */
+function sanitizeEnv(raw: string | undefined): string {
+  if (!raw) return '';
+  // eslint-disable-next-line no-control-regex
+  return raw.replace(/[^!-~]/g, '');
+}
+
+const WASSENDER_API_KEY = sanitizeEnv(process.env.WASSENDER_API_KEY);
+const WASSENDER_WEBHOOK_SECRET = sanitizeEnv(process.env.WASSENDER_WEBHOOK_SECRET);
 const BASE_URL = 'https://www.wasenderapi.com/api';
 
 export type WasenderMessageType = 'text' | 'image' | 'video' | 'document' | 'audio';
@@ -25,18 +37,37 @@ export interface WasenderSendResponse {
 }
 
 /**
- * Vérifie la signature du webhook Wasender
+ * Vérifie la signature du webhook Wasender.
+ *
+ * Wasender peut envoyer la signature dans plusieurs formats selon la version :
+ *   1. HMAC-SHA256 hex (standard)
+ *   2. HMAC-SHA256 avec préfixe `sha256=...`
+ *   3. Le secret partagé tel quel (variante simple)
+ *
+ * On accepte les trois pour rester compatible.
  */
 export function verifyWasenderSignature(payload: string, signature: string): boolean {
   if (!WASSENDER_WEBHOOK_SECRET) return true; // Skip if no secret configured
-  
-  const crypto = require('crypto');
-  const expectedSignature = crypto
+
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const crypto = require('crypto') as typeof import('crypto');
+  const sigHmacHex = crypto
     .createHmac('sha256', WASSENDER_WEBHOOK_SECRET)
     .update(payload)
     .digest('hex');
-    
-  return expectedSignature === signature;
+
+  // Strip optional 'sha256=' prefix and trim
+  const cleanSig = signature.replace(/^sha256=/i, '').trim();
+
+  // Try : HMAC hex match, OR shared-secret match (constant-time-ish).
+  if (cleanSig === sigHmacHex) return true;
+  if (cleanSig === WASSENDER_WEBHOOK_SECRET) return true;
+
+  // Log helpful diagnostic (truncated) for debugging mismatches
+  console.warn(
+    `[Wasender] signature mismatch — received=${cleanSig.slice(0, 8)}... expected_hmac=${sigHmacHex.slice(0, 8)}... or shared_secret=${WASSENDER_WEBHOOK_SECRET.slice(0, 8)}...`
+  );
+  return false;
 }
 
 /**

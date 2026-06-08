@@ -391,7 +391,7 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
     : 'mapbox://styles/mapbox/satellite-streets-v12'
 
   return (
-    <section className="relative py-20 overflow-hidden bg-[var(--background)]">
+    <section className="relative py-10 md:py-16 overflow-hidden bg-[var(--background)]">
       {/* Ambient glow */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-accent-luxury/5 blur-[150px] rounded-full -mr-64 -mt-32 pointer-events-none" />
 

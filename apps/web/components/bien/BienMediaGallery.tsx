@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { BienCarousel } from './BienCarousel'
 import { ShortsTrigger } from './ShortsTrigger'
 import { FavorisButton } from './FavorisButton'
+import { ImageLightbox } from './ImageLightbox'
 import {
   MapPin, ArrowLeft, ShieldCheck, Sparkles,
   Camera, Play, RotateCcw, Map as MapIcon, LayoutGrid,
@@ -226,67 +227,14 @@ export function BienMediaGallery({
         )}
       </AnimatePresence>
 
-      {/* ── LIGHTBOX ── */}
-      <AnimatePresence>
-        {lightboxIndex !== null && (
-          <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-label="Photo agrandie"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-[210] bg-black flex items-center justify-center"
-            onClick={() => setLightboxIndex(null)}
-          >
-            {/* Image */}
-            <Image
-              src={photos[lightboxIndex]?.url || ''}
-              alt={`Photo ${lightboxIndex + 1} sur ${photos.length}`}
-              width={1920}
-              height={1080}
-              className="max-w-full max-h-full object-contain"
-              onClick={e => e.stopPropagation()}
-            />
-
-            {/* Fermer */}
-            <button
-              type="button"
-              aria-label="Fermer la photo"
-              onClick={() => setLightboxIndex(null)}
-              className="absolute top-4 right-4 min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            {/* Précédent */}
-            {lightboxIndex > 0 && (
-              <button
-                onClick={e => { e.stopPropagation(); setLightboxIndex(i => i !== null ? i - 1 : 0) }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-            )}
-
-            {/* Suivant */}
-            {lightboxIndex < photos.length - 1 && (
-              <button
-                onClick={e => { e.stopPropagation(); setLightboxIndex(i => i !== null ? i + 1 : 0) }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            )}
-
-            {/* Compteur */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-black/60 rounded-full text-white text-xs font-bold">
-              {lightboxIndex + 1} / {photos.length}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* ── LIGHTBOX premium (swipe mobile, zoom, clavier, thumbnails) ── */}
+      <ImageLightbox
+        images={photos.map(p => p.url)}
+        initialIndex={lightboxIndex ?? 0}
+        open={lightboxIndex !== null}
+        onClose={() => setLightboxIndex(null)}
+        alt="Photo du bien"
+      />
 
       {/* ─── ONGLETS MÉDIAS ─── */}
       {tabKeys.length > 0 && (

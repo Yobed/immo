@@ -39,9 +39,9 @@ const ServicesPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[var(--midnight)] text-white pt-24 pb-20">
+    <div className="min-h-screen bg-[var(--midnight)] text-white pt-8 sm:pt-14 lg:pt-20 pb-16">
       {/* Hero Section */}
-      <section className="relative px-6 lg:px-20 mb-32 overflow-hidden">
+      <section className="relative px-6 lg:px-20 mb-16 lg:mb-24 overflow-hidden">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent-luxury/10 blur-[150px] rounded-full -z-10 animate-pulse" />
         <div className="max-w-4xl">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8 backdrop-blur-md">

@@ -97,7 +97,7 @@ export function Features() {
       
       <div className="relative container mx-auto px-6 max-w-7xl">
         {/* Header */}
-        <div className="grid lg:grid-cols-2 gap-12 items-end mb-20">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-end mb-10 md:mb-16">
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}

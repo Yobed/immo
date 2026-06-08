@@ -88,13 +88,13 @@ export default async function RecherchePage({
   const activeFilterCount = [params.commune, params.prix_min, params.prix_max, params.type_bien, params.equipements].filter(Boolean).length
 
   return (
-    <main className="bg-[var(--background)] min-h-screen pt-24 pb-16">
+    <main className="bg-[var(--background)] min-h-screen pt-6 sm:pt-10 lg:pt-16 pb-16">
       <div className="max-w-[1600px] mx-auto px-4 lg:px-8">
-        
+
         {/* Superior Search & Stats Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-12">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 lg:gap-8 mb-6 lg:mb-12">
           <div className="flex-1 max-w-3xl">
-            <h1 className="font-display text-3xl md:text-5xl font-bold text-off-white mb-4 tracking-tight">
+            <h1 className="font-display text-2xl md:text-5xl font-bold text-off-white mb-3 lg:mb-4 tracking-tight">
               Trouvez votre résidence
             </h1>
             <SearchBar className="w-full" initialQuery={params.q ?? ''} />

@@ -22,13 +22,20 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
     isMeuble = true
   }
 
-  // French aliases not covered by TYPES_BIEN raw strings
+  // French aliases not covered by TYPES_BIEN raw strings.
+  // ⚠️ Duplex est mappé sur 'villa' (catégorie la plus proche en CI : maison à
+  // étage). La recherche full-text complémentaire (q) trouvera celles dont le
+  // titre/description mentionne explicitement "duplex".
   const TYPE_ALIASES: Record<string, string> = {
     'résidence': 'residence_meublee',
     'residence': 'residence_meublee',
     'appart ': 'appartement',
     'appart,': 'appartement',
     'appart.': 'appartement',
+    'duplex': 'villa',
+    'triplex': 'villa',
+    'penthouse': 'appartement',
+    'loft': 'appartement',
   }
   for (const [alias, mapped] of Object.entries(TYPE_ALIASES)) {
     if (lower.includes(alias) && !result.type_bien) {

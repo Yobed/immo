@@ -51,6 +51,18 @@ export function FlashContactModal({
       // Reset success message when reopening
       setStatus('idle')
       setErrorMsg(null)
+      // Lock body scroll pendant que la modal est ouverte
+      // (évite le scroll arrière-plan visible derrière le backdrop sur mobile).
+      const prevOverflow = document.body.style.overflow
+      const prevPaddingRight = document.body.style.paddingRight
+      // Compense la barre de scroll qui disparaît pour éviter le shift de mise en page
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+      document.body.style.overflow = 'hidden'
+      if (scrollbarWidth > 0) document.body.style.paddingRight = `${scrollbarWidth}px`
+      return () => {
+        document.body.style.overflow = prevOverflow
+        document.body.style.paddingRight = prevPaddingRight
+      }
     }
   }, [open])
 
@@ -106,7 +118,7 @@ export function FlashContactModal({
           role="dialog"
           aria-modal="true"
           aria-labelledby="flash-contact-title"
-          className="fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-[200] flex items-center justify-center px-4 bg-black/75 backdrop-blur-md"
           onClick={(e) => {
             if (e.target === e.currentTarget) setOpen(false)
           }}
