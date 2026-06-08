@@ -221,7 +221,15 @@ async function fetchLocaux(filters: ConsolidatedFilters): Promise<ConsolidatedBi
 
     if (filters.commune) q = q.ilike('commune', `%${filters.commune}%`)
     if (filters.type_bien) q = q.ilike('type_de_bien', `%${filters.type_bien}%`)
-    if (filters.type_offre) q = q.eq('type_offre', filters.type_offre)
+    // ⚠️ `type_offre` est stocké en variantes par le scraper WhatsApp :
+    // 'vente', 'Vente', 'à vendre', 'achat', 'location', 'à louer', etc.
+    // → tolérance large via ilike + multiples patterns OR pour matcher
+    //    tous les biens qui correspondent réellement à l'intention du client.
+    if (filters.type_offre === 'vente') {
+      q = q.or('type_offre.ilike.%vent%,type_offre.ilike.%achat%,type_offre.ilike.%vendre%')
+    } else if (filters.type_offre === 'location') {
+      q = q.or('type_offre.ilike.%loc%,type_offre.ilike.%louer%,type_offre.ilike.%loyer%')
+    }
     if (filters.q?.trim()) {
       const term = filters.q.trim()
       q = q.or(`caracteristiques.ilike.%${term}%,message_initial.ilike.%${term}%,quartier.ilike.%${term}%`)
