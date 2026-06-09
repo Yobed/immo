@@ -206,17 +206,22 @@ function ReservationCard({ reservation: r, bien, compact = false }: ReservationC
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          {/* Bien */}
-          <p className="font-display font-bold text-[var(--text)] truncate inline-flex items-center gap-1.5">
+          {/* Bien — flex avec min-w-0 + truncate sur le span text pour
+              que la troncature fonctionne (truncate ne marche pas avec inline-flex) */}
+          <div className="flex items-center gap-1.5 min-w-0">
             <BedDouble className="w-3.5 h-3.5 text-[var(--accent-luxury)] shrink-0" />
-            {bien?.titre || '—'}
-          </p>
+            <span className="font-display font-bold text-[var(--text)] truncate min-w-0">
+              {bien?.titre || '—'}
+            </span>
+          </div>
           {bien && (
-            <p className="text-xs text-[var(--text-muted)] inline-flex items-center gap-1 mt-0.5">
-              <MapPin className="w-3 h-3" />
-              {bien.commune}
-              {bien.quartier ? ` · ${bien.quartier}` : ''}
-            </p>
+            <div className="flex items-center gap-1 mt-0.5 text-xs text-[var(--text-muted)] min-w-0">
+              <MapPin className="w-3 h-3 shrink-0" />
+              <span className="truncate">
+                {bien.commune}
+                {bien.quartier ? ` · ${bien.quartier}` : ''}
+              </span>
+            </div>
           )}
 
           {/* Détails resa — uniquement infos non personnelles du client */}
