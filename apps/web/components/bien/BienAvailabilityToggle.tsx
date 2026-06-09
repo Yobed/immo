@@ -10,33 +10,59 @@ interface BienAvailabilityToggleProps {
   initialValue: boolean
 }
 
+/**
+ * Toggle "Disponibilité" sur la fiche d'un bien (espace proprio).
+ *
+ * Modifie 2 champs solidairement :
+ *   - `est_disponible` (boolean) — drapeau métier
+ *   - `statut` ('publie' ↔ 'loue') — visibilité dans le catalogue public
+ *
+ * Effet immédiat :
+ *   - "Occupé" → statut='loue' → le bien DISPARAÎT du catalogue + de Sapphire
+ *   - "Disponible" → statut='publie' → le bien REVIENT dans le catalogue
+ *
+ * On utilise les états 'publie' et 'loue' déjà autorisés par la contrainte
+ * `biens_statut_check` (cf migration 021). Pas besoin de revalidation admin
+ * pour le passage occupé → disponible : c'est un retour d'état, pas un
+ * changement de publication.
+ */
 export function BienAvailabilityToggle({ bienId, initialValue }: BienAvailabilityToggleProps) {
   const [isAvailable, setIsAvailable] = useState(initialValue)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
   const router = useRouter()
 
   const handleToggle = async () => {
     if (loading) return
-    
+
     setLoading(true)
+    setError(null)
     const newValue = !isAvailable
-    
+
     try {
-      const { error } = await (supabase as any)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error: err } = await (supabase as any)
         .from('biens')
-        .update({ est_disponible: newValue })
+        .update({
+          est_disponible: newValue,
+          // ⚠ Synchronise le statut : 'publie' quand disponible, 'loue' quand occupé.
+          // Le RLS exige l'auteur ou admin → géré côté policy. Le check constraint
+          // (migration 021) autorise les 2 valeurs.
+          statut: newValue ? 'publie' : 'loue',
+        })
         .eq('id', bienId)
 
-      if (error) {
-        console.error('Error updating availability:', error)
+      if (err) {
+        setError(err.message)
         return
       }
 
       setIsAvailable(newValue)
+      // Force le re-fetch des données serveur (dashboard, mes-biens, etc.)
       router.refresh()
-    } catch (err) {
-      console.error('Failed to toggle availability:', err)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Erreur réseau')
     } finally {
       setLoading(false)
     }
@@ -49,8 +75,11 @@ export function BienAvailabilityToggle({ bienId, initialValue }: BienAvailabilit
           Disponibilité
         </span>
         <span className={`text-[10px] font-medium ${isAvailable ? 'text-emerald-500' : 'text-rose-500'}`}>
-          {isAvailable ? 'En ligne' : 'Occupé'}
+          {isAvailable ? 'En ligne' : 'Occupé · masqué du catalogue'}
         </span>
+        {error && (
+          <span className="text-[10px] text-rose-500 mt-0.5">{error}</span>
+        )}
       </div>
       
       <button
