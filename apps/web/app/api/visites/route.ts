@@ -105,9 +105,42 @@ export async function POST(request: Request) {
     ctx.ownerPhone = owner.phone
     try {
       await notifyOwnerVisitApproved(supabase, ctx)
-    } catch (err) {
+    } catch {
       // Notification failure is non-critical
     }
+  }
+
+  // ─── Notification in-app pour le PROPRIO ────────────────────────────────
+  // Visible dans son bell. Aucune info personnelle du visiteur — uniquement
+  // les détails de la visite (bien, date souhaitée). Le contact est géré
+  // ensuite par notre équipe.
+  try {
+    const fmtDateTime = (iso: string | undefined) => {
+      if (!iso) return 'à préciser'
+      const d = new Date(iso)
+      if (isNaN(d.getTime())) return iso
+      return d.toLocaleString('fr-FR', {
+        day: '2-digit', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+      })
+    }
+    const contenu = [
+      `Bien : ${ctx.bienTitre}${ctx.bienCommune ? ` — ${ctx.bienCommune}` : ''}`,
+      `Date souhaitée : ${fmtDateTime(ctx.dateSouhaitee)}`,
+      ``,
+      `Notre équipe vérifie la demande et vous tient informé.`,
+    ].join('\n')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase.from('notifications') as any).insert({
+      user_id:   bien.proprietaire_id,
+      type:      'visite_demandee',
+      titre:     'Nouvelle demande de visite',
+      contenu,
+      lien_type: 'visite',
+      lien_id:   data.id,
+    })
+  } catch {
+    // non-critique
   }
 
   return NextResponse.json(

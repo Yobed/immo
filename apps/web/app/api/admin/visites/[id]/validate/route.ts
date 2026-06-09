@@ -117,6 +117,45 @@ export async function POST(
     }
   }
 
+  // ─── Notification in-app pour le PROPRIO (sans PII visiteur) ───────────
+  try {
+    const fmtDateTime = (iso: string | undefined) => {
+      if (!iso) return 'à préciser'
+      const d = new Date(iso)
+      if (isNaN(d.getTime())) return iso
+      return d.toLocaleString('fr-FR', {
+        day: '2-digit', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+      })
+    }
+    const isApprove = action === 'approve'
+    const titre = isApprove ? 'Visite confirmée par l’équipe' : 'Visite refusée'
+    const contenu = isApprove
+      ? [
+          `Bien : ${ctx.bienTitre}${ctx.bienCommune ? ` — ${ctx.bienCommune}` : ''}`,
+          `Date : ${fmtDateTime(ctx.dateSouhaitee)}`,
+          ``,
+          `Notre équipe accompagne la visite. Vous serez recontacté pour les modalités.`,
+        ].join('\n')
+      : [
+          `Bien : ${ctx.bienTitre}${ctx.bienCommune ? ` — ${ctx.bienCommune}` : ''}`,
+          `Date demandée : ${fmtDateTime(ctx.dateSouhaitee)}`,
+          ``,
+          note ? `Motif : ${note}` : `Demande non confirmée par notre équipe.`,
+        ].join('\n')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any).from('notifications').insert({
+      user_id:   visite.proprietaire_id,
+      type:      isApprove ? 'visite_confirmee' : 'visite_refusee',
+      titre,
+      contenu,
+      lien_type: 'visite',
+      lien_id:   visite.id,
+    })
+  } catch {
+    // non-critique
+  }
+
     return NextResponse.json({
       id,
       admin_validation_status: newStatus,
