@@ -113,8 +113,42 @@ export async function POST(req: NextRequest) {
   let notif: { sent: number; total: number } = { sent: 0, total: 0 }
   try {
     notif = await notifyAdminReservationRequest(supabase, ctx)
-  } catch (err) {
+  } catch {
     // Notification failure is non-critical
+  }
+
+  // ─── Notification in-app pour le PROPRIO ────────────────────────────────
+  // Le propriétaire reçoit une notification avec les détails de la réservation
+  // mais SANS les références du prospect (nom, téléphone, email).
+  // → Tant que l'admin n'a pas validé la réservation, le proprio voit juste
+  //   "Une demande de réservation a été reçue sur votre bien X pour les
+  //    dates Y du Z FCFA total".
+  try {
+    const fmtDate = (iso: string) =>
+      new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
+
+    const titre = `Nouvelle demande de réservation`
+    const isMeuble = bien.type_bien === 'residence_meublee'
+    const unite = isMeuble ? `${nbNuits} nuit${nbNuits > 1 ? 's' : ''}` : '1 mois'
+    const contenu = [
+      `Bien : ${bien.titre || 'Sans titre'}${bien.commune ? ` — ${bien.commune}` : ''}`,
+      `Période : du ${fmtDate(body.dateDebut)} au ${fmtDate(body.dateFin)} (${unite})`,
+      `Montant total : ${total.toLocaleString('fr-FR')} FCFA`,
+      ``,
+      `Notre équipe vérifie la demande. Vous serez notifié dès qu'elle sera confirmée.`,
+    ].join('\n')
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase.from('notifications') as any).insert({
+      user_id:   bien.proprietaire_id,
+      type:      'reservation_nouvelle',
+      titre,
+      contenu,
+      lien_type: 'reservation',
+      lien_id:   reservation.id,
+    })
+  } catch {
+    // Échec notification non-critique — la réservation est créée quoi qu'il arrive
   }
 
   return NextResponse.json(

@@ -111,6 +111,44 @@ export async function POST(
       }
     }
 
+    // ─── Notification in-app pour le PROPRIO ────────────────────────────
+    // Sans aucune info personnelle du locataire (pas de nom, pas de téléphone).
+    try {
+      const fmtDate = (iso: string) =>
+        new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
+
+      const isApprove = action === 'approve'
+      const titre = isApprove
+        ? 'Réservation confirmée par l’équipe'
+        : 'Réservation refusée'
+      const contenu = isApprove
+        ? [
+            `Bien : ${ctx.bienTitre}${ctx.bienCommune ? ` — ${ctx.bienCommune}` : ''}`,
+            `Période : du ${fmtDate(ctx.dateDebut)} au ${fmtDate(ctx.dateFin)}`,
+            `Montant total : ${(ctx.montantTotal ?? 0).toLocaleString('fr-FR')} FCFA`,
+            ``,
+            `Le locataire a été notifié. Notre équipe prend contact pour la suite.`,
+          ].join('\n')
+        : [
+            `Bien : ${ctx.bienTitre}${ctx.bienCommune ? ` — ${ctx.bienCommune}` : ''}`,
+            `Période demandée : du ${fmtDate(ctx.dateDebut)} au ${fmtDate(ctx.dateFin)}`,
+            ``,
+            note ? `Motif : ${note}` : `Demande non confirmée par notre équipe.`,
+          ].join('\n')
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase as any).from('notifications').insert({
+        user_id:   reservation.proprietaire_id,
+        type:      isApprove ? 'reservation_validee' : 'reservation_refusee',
+        titre,
+        contenu,
+        lien_type: 'reservation',
+        lien_id:   reservation.id,
+      })
+    } catch {
+      // non-critique
+    }
+
     return NextResponse.json({
       id,
       admin_validation_status: newStatus,
