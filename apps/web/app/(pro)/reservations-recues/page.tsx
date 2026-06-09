@@ -17,49 +17,53 @@ export default async function ReservationsPropPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login?redirect=/reservations-recues')
 
-  // 1. Récupère les IDs des biens du proprio
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: biens } = await (supabase as any)
-    .from('biens')
-    .select('id, titre, commune, quartier, type_bien, prix_nuit_fcfa, prix_mois_fcfa')
-    .eq('proprietaire_id', user.id)
-
-  const bienIds = (biens ?? []).map((b: { id: string }) => b.id)
-  const bienMap = new Map(
-    (biens ?? []).map((b: { id: string }) => [b.id, b]),
-  )
-
-  // 2. Récupère toutes les réservations sur ces biens.
+  // 1. Récupère TOUTES les réservations du proprio directement.
   // ⚠ INTERMEDIATION TOTALE : on ne SELECT PAS les infos client (profiles).
-  // Le proprio ne doit JAMAIS voir nom/téléphone/email du locataire. Le
-  // contact est exclusivement géré par notre équipe après validation admin.
+  // Le RLS de `reservations` filtre déjà sur proprietaire_id = auth.uid()
+  // (cf migration 004) — donc le filtre .eq() est de la défense en profondeur.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: reservationsRaw } = bienIds.length > 0
-    ? await (supabase as any)
-        .from('reservations')
-        .select(`
-          id, bien_id, statut, date_debut, date_fin, nb_nuits,
-          montant_total_fcfa, created_at, admin_validation_status
-        `)
-        .in('bien_id', bienIds)
-        .order('created_at', { ascending: false })
-    : { data: [] }
+  const { data: reservationsRaw, error: resErr } = await (supabase as any)
+    .from('reservations')
+    .select(`
+      id, bien_id, statut, date_debut, date_fin, duree_mois,
+      montant_total_fcfa, montant_loyer_fcfa, created_at
+    `)
+    .eq('proprietaire_id', user.id)
+    .order('created_at', { ascending: false })
+
+  if (resErr) {
+    console.error('[reservations-recues] fetch error:', resErr.message)
+  }
 
   const reservations = (reservationsRaw ?? []) as Array<{
     id: string
     bien_id: string
     statut: string
     date_debut: string
-    date_fin: string
-    nb_nuits: number | null
+    date_fin: string | null
+    duree_mois: number | null
     montant_total_fcfa: number | null
+    montant_loyer_fcfa: number | null
     created_at: string
-    admin_validation_status: string | null
   }>
 
+  // 2. Récupère les biens concernés (uniquement les fields utiles à l'affichage)
+  const uniqueBienIds = Array.from(new Set(reservations.map((r) => r.bien_id)))
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: biens } = uniqueBienIds.length > 0
+    ? await (supabase as any)
+        .from('biens')
+        .select('id, titre, commune, quartier, type_bien, prix_nuit_fcfa, prix_mois_fcfa')
+        .in('id', uniqueBienIds)
+    : { data: [] }
+
+  const bienMap = new Map(
+    (biens ?? []).map((b: { id: string }) => [b.id, b]),
+  )
+
   const enAttente = reservations.filter((r) => r.statut === 'en_attente')
-  const confirmees = reservations.filter((r) => r.statut === 'confirmee')
-  const refusees = reservations.filter((r) => r.statut === 'refusee' || r.statut === 'annulee')
+  const confirmees = reservations.filter((r) => r.statut === 'confirmee' || r.statut === 'terminee')
+  const refusees = reservations.filter((r) => r.statut === 'annulee')
 
   return (
     <main className="max-w-5xl mx-auto px-4 py-6 lg:py-10">
@@ -159,10 +163,9 @@ interface ReservationCardProps {
     id: string
     statut: string
     date_debut: string
-    date_fin: string
-    nb_nuits: number | null
+    date_fin: string | null
+    duree_mois: number | null
     montant_total_fcfa: number | null
-    admin_validation_status: string | null
   }
   bien: Bien | undefined
   compact?: boolean
@@ -174,11 +177,24 @@ function ReservationCard({ reservation: r, bien, compact = false }: ReservationC
     month: 'short',
     year: 'numeric',
   })
-  const fin = new Date(r.date_fin).toLocaleDateString('fr-FR', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  })
+  const fin = r.date_fin
+    ? new Date(r.date_fin).toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      })
+    : null
+
+  // Calcule la durée selon le contexte (meublé = nuits, classique = mois)
+  const isMeuble = bien?.type_bien === 'residence_meublee'
+  const nbNuits = isMeuble && r.date_fin
+    ? Math.max(1, Math.ceil((new Date(r.date_fin).getTime() - new Date(r.date_debut).getTime()) / 86400000))
+    : null
+  const dureeLabel = isMeuble && nbNuits
+    ? `${nbNuits} nuit${nbNuits > 1 ? 's' : ''}`
+    : r.duree_mois
+      ? `${r.duree_mois} mois`
+      : null
 
   return (
     <li
@@ -205,10 +221,19 @@ function ReservationCard({ reservation: r, bien, compact = false }: ReservationC
 
           {/* Détails resa — uniquement infos non personnelles du client */}
           <div className="mt-2 text-xs text-[var(--text)] space-y-0.5">
-            <p className="inline-flex items-center gap-1.5">
-              <Calendar className="w-3 h-3 text-[var(--text-muted)]" />
-              Du <strong>{debut}</strong> au <strong>{fin}</strong>
-              {r.nb_nuits ? ` (${r.nb_nuits} nuit${r.nb_nuits > 1 ? 's' : ''})` : ''}
+            <p className="inline-flex items-center gap-1.5 flex-wrap">
+              <Calendar className="w-3 h-3 text-[var(--text-muted)] shrink-0" />
+              {fin ? (
+                <>
+                  Du <strong>{debut}</strong> au <strong>{fin}</strong>
+                  {dureeLabel && ` (${dureeLabel})`}
+                </>
+              ) : (
+                <>
+                  À partir du <strong>{debut}</strong>
+                  {dureeLabel && ` · ${dureeLabel}`}
+                </>
+              )}
             </p>
           </div>
 
