@@ -228,11 +228,13 @@ export default async function DashboardPage() {
             titre="Reservations en attente"
             valeur={String((reservationsAttente ?? []).length)}
             alerte={(reservationsAttente ?? []).length > 0}
+            href="/reservations-recues"
           />
           <KPICard
             titre="Messages non lus"
             valeur={String((messagesNonLus ?? []).length)}
             alerte={(messagesNonLus ?? []).length > 0}
+            href="/messages"
           />
         </div>
 
