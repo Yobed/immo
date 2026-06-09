@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import { Calendar, Clock, CheckCircle2, XCircle, BedDouble, MapPin, User } from 'lucide-react'
+import { Calendar, Clock, CheckCircle2, XCircle, BedDouble, MapPin, ShieldCheck, Hourglass } from 'lucide-react'
 import { formatFCFA } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
@@ -30,15 +29,17 @@ export default async function ReservationsPropPage() {
     (biens ?? []).map((b: { id: string }) => [b.id, b]),
   )
 
-  // 2. Récupère toutes les réservations sur ces biens
+  // 2. Récupère toutes les réservations sur ces biens.
+  // ⚠ INTERMEDIATION TOTALE : on ne SELECT PAS les infos client (profiles).
+  // Le proprio ne doit JAMAIS voir nom/téléphone/email du locataire. Le
+  // contact est exclusivement géré par notre équipe après validation admin.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: reservationsRaw } = bienIds.length > 0
     ? await (supabase as any)
         .from('reservations')
         .select(`
           id, bien_id, statut, date_debut, date_fin, nb_nuits,
-          montant_total_fcfa, client_id, created_at,
-          profiles!client_id(full_name, phone, email)
+          montant_total_fcfa, created_at, admin_validation_status
         `)
         .in('bien_id', bienIds)
         .order('created_at', { ascending: false })
@@ -52,9 +53,8 @@ export default async function ReservationsPropPage() {
     date_fin: string
     nb_nuits: number | null
     montant_total_fcfa: number | null
-    client_id: string | null
     created_at: string
-    profiles: { full_name: string | null; phone: string | null; email: string | null } | null
+    admin_validation_status: string | null
   }>
 
   const enAttente = reservations.filter((r) => r.statut === 'en_attente')
@@ -162,7 +162,7 @@ interface ReservationCardProps {
     date_fin: string
     nb_nuits: number | null
     montant_total_fcfa: number | null
-    profiles: { full_name: string | null; phone: string | null; email: string | null } | null
+    admin_validation_status: string | null
   }
   bien: Bien | undefined
   compact?: boolean
@@ -179,7 +179,6 @@ function ReservationCard({ reservation: r, bien, compact = false }: ReservationC
     month: 'short',
     year: 'numeric',
   })
-  const client = r.profiles?.full_name || 'Client'
 
   return (
     <li
@@ -204,17 +203,12 @@ function ReservationCard({ reservation: r, bien, compact = false }: ReservationC
             </p>
           )}
 
-          {/* Détails resa */}
+          {/* Détails resa — uniquement infos non personnelles du client */}
           <div className="mt-2 text-xs text-[var(--text)] space-y-0.5">
             <p className="inline-flex items-center gap-1.5">
               <Calendar className="w-3 h-3 text-[var(--text-muted)]" />
               Du <strong>{debut}</strong> au <strong>{fin}</strong>
               {r.nb_nuits ? ` (${r.nb_nuits} nuit${r.nb_nuits > 1 ? 's' : ''})` : ''}
-            </p>
-            <p className="inline-flex items-center gap-1.5">
-              <User className="w-3 h-3 text-[var(--text-muted)]" />
-              <strong>{client}</strong>
-              {r.profiles?.phone ? ` · ${r.profiles.phone}` : ''}
             </p>
           </div>
 
@@ -226,13 +220,12 @@ function ReservationCard({ reservation: r, bien, compact = false }: ReservationC
           )}
         </div>
 
+        {/* Statut en attente — pas d'action proprio (admin valide) */}
         {!compact && r.statut === 'en_attente' && (
-          <Link
-            href={`/reservations/${r.id}`}
-            className="shrink-0 px-3 py-1.5 rounded-lg bg-[var(--accent-luxury)] text-[var(--on-accent)] text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-opacity"
-          >
-            Voir & confirmer
-          </Link>
+          <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-700 border border-amber-500/30 text-[10px] font-bold uppercase tracking-wider">
+            <Hourglass className="w-3 h-3" />
+            Validation équipe
+          </span>
         )}
         {compact && (
           <span
@@ -246,6 +239,18 @@ function ReservationCard({ reservation: r, bien, compact = false }: ReservationC
           </span>
         )}
       </div>
+
+      {/* Info workflow en bas — uniquement sur la carte détaillée */}
+      {!compact && r.statut === 'en_attente' && (
+        <div className="mt-3 pt-3 border-t border-[var(--border)] flex items-start gap-2 text-[11px] text-[var(--text-muted)]">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+          <p className="leading-relaxed">
+            Notre équipe vérifie la demande et organise la suite (acompte, contrat, remise des clés).
+            Vous serez recontacté(e) dès que la réservation est validée.
+            Pour des raisons de confidentialité, les coordonnées du locataire ne sont pas affichées ici.
+          </p>
+        </div>
+      )}
     </li>
   )
 }
