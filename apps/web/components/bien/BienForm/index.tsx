@@ -127,38 +127,27 @@ export function BienForm({ defaultValues, bienId }: BienFormProps) {
   }
 
   const handleFinalSubmit = async () => {
-    console.log('Final submit triggered');
-    if (!validateAll()) {
-      console.warn('Validation failed before final submit');
-      return
-    }
+    if (!validateAll()) return
     setIsSubmitting(true)
     setSubmitError(null)
     try {
       const data = {
         ...form.getValues(),
-        score_ia: aiAnalysis.score
+        score_ia: aiAnalysis.score,
       } as unknown as Record<string, unknown>
-      
-      console.log('Sending data to action:', data);
+
       const result = bienId
         ? await updateBien(bienId, data)
         : await createBien(data)
-      
-      console.log('Action result:', result);
 
       if ('error' in result) {
-        console.error('Server action error:', result.error);
         setSubmitError(result.error)
         return
       }
-      
-      const targetUrl = `/mes-biens/${result.id}/modifier?step=medias`;
-      console.log('Redirecting to:', targetUrl);
-      window.location.href = targetUrl;
+
+      window.location.href = `/mes-biens/${result.id}/modifier?step=medias`
     } catch (err) {
-      console.error('Submission exception:', err);
-      setSubmitError(String(err))
+      setSubmitError(err instanceof Error ? err.message : 'Erreur inattendue lors de la sauvegarde')
     } finally {
       setIsSubmitting(false)
     }

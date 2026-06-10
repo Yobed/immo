@@ -21,33 +21,43 @@ export function FavorisButton({ bienId, userId, initialIsFavori = false, classNa
     e.stopPropagation()
 
     if (!userId) {
-      window.location.href = '/login'
+      // Redirige vers login en mémorisant la page de retour
+      const redirect = typeof window !== 'undefined' ? window.location.pathname : '/'
+      window.location.href = `/login?redirect=${encodeURIComponent(redirect)}`
       return
     }
 
     // Pop animation au clic (changement de clé = re-trigger CSS animation)
     setPopKey(k => k + 1)
 
+    // Optimistic update : on change l'UI tout de suite, on rollback si erreur
+    const wasFavori = isFavori
+    setIsFavori(!wasFavori)
     setLoading(true)
-    if (isFavori) {
-      // Retrait du favori
-      await supabase
-        .from('favoris')
-        .delete()
-        .eq('user_id', userId)
-        .eq('bien_id', bienId)
-      setIsFavori(false)
-    } else {
-      // Ajout en favori — upsert pour éviter duplicate key sur unique(user_id, bien_id)
-      await supabase
-        .from('favoris')
-        .upsert(
-          { user_id: userId, bien_id: bienId },
-          { onConflict: 'user_id,bien_id', ignoreDuplicates: true }
-        )
-      setIsFavori(true)
+    try {
+      if (wasFavori) {
+        const { error } = await supabase
+          .from('favoris')
+          .delete()
+          .eq('user_id', userId)
+          .eq('bien_id', bienId)
+        if (error) throw error
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await (supabase as any)
+          .from('favoris')
+          .upsert(
+            { user_id: userId, bien_id: bienId },
+            { onConflict: 'user_id,bien_id', ignoreDuplicates: true }
+          )
+        if (error) throw error
+      }
+    } catch {
+      // Rollback en cas d'erreur — l'utilisateur voit le bouton revenir à son état
+      setIsFavori(wasFavori)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   return (

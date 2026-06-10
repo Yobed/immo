@@ -25,14 +25,16 @@ export function DeleteBienButton({ bienId, titre }: DeleteBienButtonProps) {
         method: 'DELETE',
       })
       if (!res.ok) {
-        const err = await res.json()
-        alert(`Erreur: ${err.error}`)
-      } else {
-        router.refresh()
+        const err = await res.json().catch(() => ({}))
+        alert(`Erreur lors de la suppression : ${err.error || res.statusText}`)
+        setLoading(false)
+        return
       }
+      // Succès : on redirige vers la liste des biens (la fiche n'existe plus)
+      router.push('/mes-biens')
+      router.refresh()
     } catch (err) {
-      alert("Une erreur est survenue lors de la suppression.")
-    } finally {
+      alert(`Erreur réseau : ${err instanceof Error ? err.message : 'connexion impossible'}`)
       setLoading(false)
     }
   }

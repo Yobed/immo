@@ -1,6 +1,7 @@
 'use client'
 import { authFetch } from '@/lib/auth-fetch'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { DatePicker }     from './DatePicker'
 import { PaiementButton } from '@/components/paiements/PaiementButton'
 
@@ -26,6 +27,7 @@ export function ReservationFlow({ bienId, bienTitre, prixMoisFcfa, prixNuitFcfa 
   const [reservationId, setReservationId] = useState<string | null>(null)
   const [error,         setError]         = useState<string | null>(null)
   const [loading,       setLoading]       = useState(false)
+  const router = useRouter()
 
   function handleDatesSelected(debut: string, fin: string) {
     setDateDebut(debut)
@@ -50,15 +52,27 @@ export function ReservationFlow({ bienId, bienTitre, prixMoisFcfa, prixNuitFcfa 
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ bienId, dateDebut, dateFin }),
       })
-      const data = await res.json()
+
+      if (res.status === 401) {
+        // Non authentifié : redirige vers login + retour vers cette page
+        const redirect = typeof window !== 'undefined' ? window.location.pathname : '/'
+        router.push(`/login?redirect=${encodeURIComponent(redirect)}`)
+        return
+      }
+      if (res.status === 429) {
+        setError('Trop de réservations en peu de temps. Patientez quelques minutes.')
+        return
+      }
+
+      const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        setError(data.error ?? 'Erreur lors de la création de la réservation')
+        setError(data.error ?? `Erreur (${res.status}) lors de la création de la réservation`)
         return
       }
       setReservationId(data.id)
       setStep('paiement')
-    } catch {
-      setError('Impossible de contacter le serveur')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Impossible de contacter le serveur')
     } finally {
       setLoading(false)
     }
