@@ -13,7 +13,7 @@ interface SapphireHubProps {
 
 export function SapphireHub({ bien, videoMedias }: SapphireHubProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const WHATSAPP_NUMBER = '2250574243752'
+  const WHATSAPP_NUMBER = '2250544872051'
 
   const handleWhatsApp = () => {
     const origin = typeof window !== 'undefined' ? window.location.origin : 'https://bogbes-groupe.vercel.app'

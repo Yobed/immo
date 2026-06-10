@@ -88,7 +88,7 @@ export function DiscoveryBar({ bien, prix, userId }: DiscoveryBarProps) {
                {/* Primary CTA */}
                <div className="flex items-center gap-3">
                   <a
-                    href={`https://wa.me/2250574243752?text=${encodeURIComponent(`Bonjour, je suis intéressé(e) par ce bien : *${bien.titre}* — ${bien.commune}. Pouvez-vous me donner plus d’informations ?\n\n${typeof window !== 'undefined' ? window.location.origin : 'https://bogbes-groupe.vercel.app'}/biens/${bien.id}`)}`}
+                    href={`https://wa.me/2250544872051?text=${encodeURIComponent(`Bonjour, je suis intéressé(e) par ce bien : *${bien.titre}* — ${bien.commune}. Pouvez-vous me donner plus d’informations ?\n\n${typeof window !== 'undefined' ? window.location.origin : 'https://bogbes-groupe.vercel.app'}/biens/${bien.id}`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 px-5 lg:px-8 py-3 bg-emerald-600 rounded-full hover:bg-emerald-500 transition-all shadow-[0_10px_30px_rgba(16,185,129,0.3)] shrink-0"

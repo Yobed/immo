@@ -17,16 +17,16 @@
  *   when rotating: this is the safety net if either env var is unset.
  *
  * Format
- *   Always returns E.164 without the leading '+' (e.g. '2250574243752'),
+ *   Always returns E.164 without the leading '+' (e.g. '2250544872051'),
  *   which is what wa.me URLs expect. Use {@link advisorPhoneE164} if you
  *   need the '+225…' variant for display.
  */
 
-const DEFAULT_ADVISOR_PHONE = '2250574243752'
+const DEFAULT_ADVISOR_PHONE = '2250544872051'
 
 /**
- * Strip every char except digits — accepts '+225 05 74 24 37 52', '225057...',
- * '0574243752', etc. and returns the canonical digits string.
+ * Strip every char except digits — accepts '+225 05 44 87 20 51', '225054...',
+ * '0544872051', etc. and returns the canonical digits string.
  */
 function digitsOnly(input: string): string {
   return input.replace(/\D/g, '')

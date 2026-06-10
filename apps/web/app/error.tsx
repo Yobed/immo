@@ -53,7 +53,7 @@ export default function GlobalError({
             {t.nav.home}
           </Link>
           <a
-            href="https://wa.me/2250574243752"
+            href="https://wa.me/2250544872051"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 font-sans text-[11px] uppercase tracking-[0.2em] transition-colors"

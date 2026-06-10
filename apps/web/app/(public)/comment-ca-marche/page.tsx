@@ -44,7 +44,7 @@ export default function CommentCaMarchePage() {
             icon={MessageCircle}
             title="BOGBE'S coordonne"
             desc="Tu cliques 'Demander une visite', tu laisses ton nom + téléphone. Notre conseiller vérifie la disponibilité avec le propriétaire et organise le créneau."
-            cta={{ label: 'Parler à Sapphire', href: 'https://wa.me/2250574243752', external: true }}
+            cta={{ label: 'Parler à Sapphire', href: 'https://wa.me/2250544872051', external: true }}
           />
           <StepCard
             num={3}
@@ -95,7 +95,7 @@ export default function CommentCaMarchePage() {
               <ArrowRight className="w-4 h-4" />
             </Link>
             <a
-              href="https://wa.me/2250574243752?text=Bonjour%20BOGBE%27S%2C%20je%20cherche%20un%20bien"
+              href="https://wa.me/2250544872051?text=Bonjour%20BOGBE%27S%2C%20je%20cherche%20un%20bien"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-sm transition-all"

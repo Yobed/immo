@@ -314,7 +314,7 @@ async function fetchLocaux(filters: ConsolidatedFilters): Promise<ConsolidatedBi
           videos: [],
           equipements: [],
           score_ia: null,
-          cta_url: `https://wa.me/2250574243752?text=${encodeURIComponent(
+          cta_url: `https://wa.me/2250544872051?text=${encodeURIComponent(
             `Bonjour, je suis intéressé(e) par l'offre flash ${b.ref} (${b.titre} à ${b.commune})`,
           )}`,
         }
@@ -674,7 +674,7 @@ export async function getConsolidatedBienById(
       videos: [],
       equipements: [],
       score_ia: null,
-      cta_url: `https://wa.me/2250574243752?text=${encodeURIComponent(
+      cta_url: `https://wa.me/2250544872051?text=${encodeURIComponent(
         `Bonjour, je suis intéressé(e) par l'offre flash ${b.ref} (${b.titre} à ${b.commune})`,
       )}`,
     }

@@ -37,7 +37,7 @@ export default async function NotFound() {
             {t.nav.biens}
           </Link>
           <a
-            href="https://wa.me/2250574243752?text=Bonjour%2C%20je%20cherche%20un%20bien%20%C3%A0%20Abidjan"
+            href="https://wa.me/2250544872051?text=Bonjour%2C%20je%20cherche%20un%20bien%20%C3%A0%20Abidjan"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 font-sans text-[11px] uppercase tracking-[0.2em] transition-colors"

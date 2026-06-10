@@ -41,7 +41,7 @@ export function Footer() {
       title: t.footer.contact,
       links: [
         { label: t.footer.support, href: '/support' },
-        { label: 'WhatsApp', href: 'https://wa.me/2250574243752' },
+        { label: 'WhatsApp', href: 'https://wa.me/2250544872051' },
         { label: 'Email', href: 'mailto:commercial@bogbesgroup.com' },
         { label: t.footer.partners, href: '/partenariats' },
       ],

@@ -82,7 +82,7 @@ function detectRdvConfirmation(aiText: string): { confirmed: boolean; bienId?: s
 /**
  * Normalise les numéros ivoiriens en format E.164 10 chiffres.
  * Wasender renvoie parfois l'ancien format 8 chiffres (ex: 22544872051)
- * au lieu du format actuel 10 chiffres (2250574243752).
+ * au lieu du format actuel 10 chiffres (2250544872051).
  */
 function normalizeCIPhone(phone: string): string {
   // Retirer les caractères non numériques sauf le +
@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
 
     const jid = msg.key?.remoteJid;
     const rawPn = msg.key?.cleanedSenderPn || jid?.split('@')[0] || '';
-    // Normalize Ivory Coast 8-digit legacy format (22544872051) → 10-digit (2250574243752)
+    // Normalize Ivory Coast 8-digit legacy format (22544872051) → 10-digit (2250544872051)
     const senderPn = normalizeCIPhone(rawPn);
     const contactName = msg.pushName || 'Client';
 
@@ -290,7 +290,7 @@ export async function POST(req: NextRequest) {
       } else {
         // Offre flash → pas de FK valide vers la table biens.
         // On notifie le conseiller humain par Wasender pour qu'il prenne le relais.
-        const advisorPhone = process.env.SAPPHIRE_ADVISOR_PHONE || '+2250574243752';
+        const advisorPhone = process.env.SAPPHIRE_ADVISOR_PHONE || '+2250544872051';
         const flashUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://bogbes-groupe.vercel.app'}/offre-flash/${rdvCheck.bienId}`;
         const advisorMsg = `🔔 RDV demandé sur OFFRE FLASH #${rdvCheck.bienId}
 👤 ${contactName} — ${senderPn}

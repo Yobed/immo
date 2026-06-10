@@ -183,7 +183,7 @@ export function StickyMobileCTA({
   
               {/* WhatsApp */}
               <a
-                href={`https://wa.me/2250574243752?text=${waText}`}
+                href={`https://wa.me/2250544872051?text=${waText}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="pointer-events-auto w-[52px] h-[52px] flex items-center justify-center rounded-xl bg-[#25D366] shadow-[0_6px_20px_rgba(37,211,102,0.3)] active:scale-95 transition-transform shrink-0 border border-white/20"
@@ -252,7 +252,7 @@ export function StickyMobileCTA({
 
               {/* WhatsApp discret à l'intérieur de la pilule */}
               <a
-                href={`https://wa.me/2250574243752?text=${waText}`}
+                href={`https://wa.me/2250544872051?text=${waText}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-[56px] h-[56px] flex items-center justify-center rounded-2xl bg-white/5 hover:bg-white/10 transition-colors ml-2"
@@ -389,13 +389,13 @@ export function StickyMobileCTA({
                       <p className="text-[10px] text-[var(--text-muted)] uppercase tracking-widest font-bold mb-3">Contacter directement</p>
                       <div className="flex flex-col gap-2">
                         <a
-                          href={`https://wa.me/2250574243752?text=${waText}`}
+                          href={`https://wa.me/2250544872051?text=${waText}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-3 px-4 py-3 bg-[#25D366]/10 border border-[#25D366]/30 rounded-xl text-[#25D366] text-xs font-bold active:scale-95 transition-transform"
                         >
                           <Image src="/whatsapp-icon.svg" alt="" width={20} height={20} className="w-5 h-5" />
-                          <span>Principal — +225 05 74 24 37 52</span>
+                          <span>Principal — +225 05 44 87 20 51</span>
                         </a>
                         <a
                           href={`https://wa.me/2250778311541?text=${waText}`}
