@@ -70,7 +70,7 @@ function requireGroqKey(): string {
   return GROQ_API_KEY;
 }
 
-export const SYSTEM_PROMPT_IMMOBILIER_CI = `Tu es **Sapphire**, conseillère immobilière de **BOGBE'S GROUPE** (Abidjan, Côte d'Ivoire). Tu interviens sur WhatsApp et le chat. Ton style : pro, posé, factuel.
+export const SYSTEM_PROMPT_IMMOBILIER_CI = `Tu es **Sapphire**, conseillère immobilière de **BOGBE'S GROUPE** (Côte d'Ivoire — Abidjan + intérieur du pays : Bouaké, Yamoussoukro, Grand-Bassam, San-Pédro, Korhogo, Daloa, Bingerville, Songon, Anyama, etc.). Tu interviens sur WhatsApp et le chat. Ton style : pro, posé, factuel.
 
 ⚠️ RÈGLE DE LECTURE DU CONTEXTE :
 Le bloc \`== CATALOGUE DES BIENS DISPONIBLES ==\` est une BASE DE DONNÉES BRUTE, PAS un template de réponse.
@@ -245,7 +245,7 @@ Pas d'invention, pas de fausse promesse. Une seule question pour qualifier l'urg
   QUAND ON A BESOIN DE PLUS D'INFOS
 ═══════════════════════════════════════════════════════════
 Si tu n'as ni zone, ni type, ni budget, pose UNE SEULE question, dans l'ordre :
-- Zone d'abord : *"Sur quelle commune ou quartier d'Abidjan tu cherches ?"*
+- Zone d'abord : *"Sur quelle ville, commune ou quartier vous cherchez (Abidjan, Bouaké, Yamoussoukro, Bassam, San-Pédro… ou ailleurs en Côte d'Ivoire) ?"*
 - Puis type : *"Tu cherches plutôt un appartement, une villa, un studio ?"*
 - Puis budget : *"Quel est ton budget mensuel maximum ?"*
 
@@ -534,7 +534,7 @@ function detectGreeting(userMessage: string): string | null {
     return `Ça va très bien, merci 😊\n\nEt vous ? Dites-moi ce que vous cherchez : commune, type de bien, budget. Je m'occupe du reste.`
   }
 
-  return `${timeOfDay} 👋\n\nJe suis Sapphire, conseillère BOGBE'S. Je vous aide à trouver votre bien à Abidjan.\n\nDécrivez-moi votre besoin :\n• La commune ou le quartier\n• Le type de bien (appartement, villa, studio…)\n• Votre budget\n\nJe vous présente les meilleures options.`
+  return `${timeOfDay} 👋\n\nJe suis Sapphire, conseillère BOGBE'S. Je vous aide à trouver votre bien à Abidjan et partout en Côte d'Ivoire (Bouaké, Yamoussoukro, Grand-Bassam, San-Pédro, Korhogo, Daloa, Bingerville…).\n\nDécrivez-moi votre besoin :\n• La ville, commune ou quartier\n• Le type de bien (appartement, villa, studio, terrain…)\n• Votre budget\n\nJe vous présente les meilleures options.`
 }
 
 /**
