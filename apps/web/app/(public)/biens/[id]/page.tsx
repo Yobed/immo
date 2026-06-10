@@ -287,8 +287,10 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
 
       {/* ─── HERO + ONGLETS MÉDIAS + STATS ───
           viewTransitionName : reçoit le morph venant de la card cliquée sur /catalogue.
-          Chrome/Safari uniquement, fallback gracieux ailleurs (pas d'erreur). */}
-      <div style={{ viewTransitionName: 'bien-hero' }}>
+          Chrome/Safari uniquement, fallback gracieux ailleurs (pas d'erreur).
+          ⚠ w-full + overflow-hidden : sinon le viewTransitionName peut élargir
+            le conteneur au-delà du viewport sur mobile → scroll horizontal cassé. */}
+      <div className="w-full overflow-hidden" style={{ viewTransitionName: 'bien-hero' }}>
       <BienMediaGallery
         medias={medias.map((m: any) => ({
           id: m.id, type: m.type, url: m.url,
