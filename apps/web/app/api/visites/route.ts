@@ -31,8 +31,10 @@ export async function POST(request: Request) {
   if (bienError || !bien) {
     return NextResponse.json({ error: 'Bien introuvable' }, { status: 404 })
   }
-  if (bien.statut !== 'publie') {
-    return NextResponse.json({ error: 'Ce bien n\'est pas disponible' }, { status: 400 })
+  // Autoriser les demandes de visite sur les biens publiés ET ceux en attente
+  // de validation admin (visibles publiquement depuis migration 022).
+  if (!['publie', 'en_attente'].includes(bien.statut)) {
+    return NextResponse.json({ error: 'Ce bien n\'est plus disponible (statut: ' + bien.statut + ')' }, { status: 400 })
   }
   if (bien.proprietaire_id === user.id) {
     return NextResponse.json({ error: 'Vous ne pouvez pas demander une visite pour votre propre bien' }, { status: 400 })

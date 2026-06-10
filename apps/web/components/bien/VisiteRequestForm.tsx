@@ -2,8 +2,8 @@
 import { authFetch } from '@/lib/auth-fetch'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button, Input } from '@/components/ui'
-import { CheckCircle2, Calendar, Clock, MessageSquare } from 'lucide-react'
+import { Button } from '@/components/ui'
+import { CheckCircle2, Calendar, Clock, MessageSquare, AlertCircle } from 'lucide-react'
 
 interface VisiteRequestFormProps {
   bienId: string
@@ -29,6 +29,7 @@ export function VisiteRequestForm({ bienId, proprietaireId, isPremium = false, o
   const [message, setMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   const tomorrow = new Date()
@@ -37,22 +38,38 @@ export function VisiteRequestForm({ bienId, proprietaireId, isPremium = false, o
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!date || !creneau) return
+    setError(null)
+    if (!date || !creneau) {
+      setError('Sélectionnez une date et un créneau horaire.')
+      return
+    }
 
     setSubmitting(true)
-    const res = await authFetch('/api/visites', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ bien_id: bienId, proprietaire_id: proprietaireId, date_souhaitee: date, creneau, message }),
-    })
+    try {
+      const res = await authFetch('/api/visites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bien_id: bienId, proprietaire_id: proprietaireId, date_souhaitee: date, creneau, message }),
+      })
 
-    if (res.ok) {
-      setSuccess(true)
-      onSuccess?.()
-    } else if (res.status === 401) {
-      router.push('/login')
+      if (res.ok) {
+        setSuccess(true)
+        onSuccess?.()
+      } else if (res.status === 401) {
+        // Pas authentifié : on redirige avec un retour vers la fiche
+        router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`)
+      } else if (res.status === 429) {
+        setError('Trop de demandes envoyées. Patientez quelques minutes avant de réessayer.')
+      } else {
+        // Erreur métier (400 / 404 / 500) : on extrait le message renvoyé
+        const json = await res.json().catch(() => ({}))
+        setError(json.error || `Erreur (${res.status}). Réessayez ou contactez le support.`)
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Erreur réseau, vérifiez votre connexion.')
+    } finally {
+      setSubmitting(false)
     }
-    setSubmitting(false)
   }
 
   if (success) {
@@ -134,9 +151,17 @@ export function VisiteRequestForm({ bienId, proprietaireId, isPremium = false, o
         </div>
       </div>
 
-      <Button 
-        type="submit" 
-        disabled={submitting || !date || !creneau} 
+      {/* Message d'erreur visible — corrige le bug "rien ne se passe quand on clique" */}
+      {error && (
+        <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600">
+          <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+          <p className="text-xs font-medium leading-relaxed">{error}</p>
+        </div>
+      )}
+
+      <Button
+        type="submit"
+        disabled={submitting || !date || !creneau}
         className="w-full h-16 bg-[var(--accent-luxury)] hover:bg-accent-luxury/90 text-[var(--on-accent)] font-black uppercase tracking-[0.25em] text-[12px] rounded-2xl shadow-[0_15px_35px_var(--accent-glow)] transition-all active:scale-[0.98] mt-4 border border-white/20 relative overflow-hidden group"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
