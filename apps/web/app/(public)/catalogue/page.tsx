@@ -22,7 +22,6 @@ const CatalogueMapView = dynamicImport(
 )
 
 export const dynamic = 'force-dynamic'
-export const revalidate = 60
 export const metadata = {
   title: 'Catalogue complet',
   description: 'Tous les biens : vérifiés BOGBE\'S + offres flash WhatsApp en temps réel.',

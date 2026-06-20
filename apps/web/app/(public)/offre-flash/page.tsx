@@ -9,7 +9,6 @@ import { Pagination } from '@/components/ui/Pagination'
 import { getLocauxPagedItems, getCatalogueCommunes, type ConsolidatedFilters } from '@/lib/catalogue/consolidated'
 
 export const dynamic = 'force-dynamic'
-export const revalidate = 60
 export const metadata = {
   title: 'Offres flash — Bons plans immobiliers en temps réel',
   description: 'Bons plans immobiliers captés en temps réel sur le marché ivoirien. Validation conseiller incluse avant chaque visite.',
