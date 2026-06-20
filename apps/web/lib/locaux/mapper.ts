@@ -207,17 +207,16 @@ function isRecent(date: string | null): boolean {
 
 function isStillActive(row: LocauxRow): boolean {
   // ⚠️ Politique permissive : on remonte TOUS les biens scrapés sauf cas explicitement disqualifiants.
+  // Doit rester STRICTEMENT alignée sur getLocauxCount/getLocauxPagedItems (consolidated.ts),
+  // sinon le compteur (badge) et la grille divergent (ex: badge 15, grille 0).
   // - status === 'inactive' explicite → exclu (mais NULL/manquant → accepté)
   // - is_duplicate === true → exclu (mais NULL → accepté)
   // - disponible === 'non' explicite → exclu (mais NULL ou 'oui' ou tout autre → accepté)
-  // - date_expiration dépassée → exclu (NULL = pas d'expiration → accepté)
+  // NB: date_expiration N'EST PAS un critère d'exclusion — la quasi-totalité des biens
+  // scrapés ont une date_expiration dépassée (7948+), les exclure vidait le catalogue.
   if (row.status && row.status.toLowerCase() === 'inactive') return false
   if (row.is_duplicate === true) return false
   if (row.disponible && row.disponible.toLowerCase().trim() === 'non') return false
-  if (row.date_expiration) {
-    const exp = new Date(row.date_expiration).getTime()
-    if (!isNaN(exp) && exp < Date.now()) return false
-  }
   return true
 }
 
