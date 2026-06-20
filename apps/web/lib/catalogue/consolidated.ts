@@ -540,6 +540,106 @@ export async function getCatalogueCommunes(
     .map((c) => c.label)
 }
 
+// ─── Pagination serveur pour les offres flash ────────────────────────────────
+
+/**
+ * Fetch paginé côté serveur des offres flash (locaux).
+ * Envoie exactement `pageSize` lignes depuis Supabase — aucune pagination mémoire.
+ * Supporte tous les filtres de ConsolidatedFilters applicables à locaux.
+ */
+export async function getLocauxPagedItems(
+  filters: ConsolidatedFilters,
+  pageIdx: number,
+  pageSize: number,
+): Promise<{ items: ConsolidatedBien[]; total: number }> {
+  try {
+    const sb = createLocauxClient()
+    const from = pageIdx * pageSize
+    const to = from + pageSize - 1
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let q = (sb as any)
+      .from('locaux')
+      .select(
+        'id,ref_bien,type_de_bien,type_offre,zone_geographique,commune,quartier,prix,prix_normalise,caracteristiques,meubles,chambre,disponible,surface,date_publication,lien_image,message_initial,status,is_duplicate,date_expiration,created_at',
+        { count: 'exact' },
+      )
+      // Filtres isStillActive poussés côté DB
+      .not('status', 'eq', 'inactive')
+      .not('is_duplicate', 'is', true)
+      .not('disponible', 'eq', 'non')
+      .or('date_expiration.is.null,date_expiration.gt.' + new Date().toISOString())
+      .order('date_publication', { ascending: false })
+      .range(from, to)
+
+    if (filters.commune) q = q.ilike('commune', `%${filters.commune}%`)
+    if (filters.type_bien) q = q.ilike('type_de_bien', `%${filters.type_bien}%`)
+    if (filters.type_offre === 'vente') {
+      q = q.or('type_offre.ilike.%vent%,type_offre.ilike.%achat%,type_offre.ilike.%vendre%')
+    } else if (filters.type_offre === 'location') {
+      q = q.or('type_offre.ilike.%loc%,type_offre.ilike.%louer%,type_offre.ilike.%loyer%')
+    }
+    if (filters.q?.trim()) {
+      const term = filters.q.trim()
+      q = q.or(`caracteristiques.ilike.%${term}%,message_initial.ilike.%${term}%,quartier.ilike.%${term}%`)
+    }
+    if (filters.prix_min != null) {
+      q = q.or(`prix_normalise.is.null,prix_normalise.gte.${filters.prix_min}`)
+    }
+    if (filters.prix_max != null) {
+      q = q.or(`prix_normalise.is.null,prix_normalise.lte.${filters.prix_max}`)
+    }
+
+    const { data, error, count } = await q
+    if (error || !data) return { items: [], total: 0 }
+
+    const items: ConsolidatedBien[] = (data as LocauxRow[]).map((row) => {
+      const b = mapLocauxRow(row)
+      const period =
+        b.prix_unit === 'fcfa_par_mois'
+          ? ('mois' as const)
+          : b.type_offre === 'vente'
+            ? ('vente' as const)
+            : b.type_offre === 'location'
+              ? ('mois' as const)
+              : ('unknown' as const)
+      return {
+        id: `flash:${b.id}`,
+        source: 'flash' as const,
+        sourceId: String(b.id),
+        titre: b.titre,
+        commune: b.commune,
+        quartier: b.quartier ?? null,
+        type_bien: b.type_bien,
+        prix_label: b.prix_label ?? (b.prix_value ? formatFCFA(b.prix_value) : 'Sur demande'),
+        prix_value: b.prix_value,
+        prix_period: period,
+        surface_m2: b.surface_m2,
+        nb_pieces: b.nb_chambres,
+        description: b.description || b.caracteristiques,
+        photo_url: b.image_url,
+        is_verifie: false,
+        is_pending: false,
+        url: `${SITE_URL}/offre-flash/${b.id}`,
+        date_publication: b.date_publication,
+        date_scraping: b.date_scraping,
+        is_recent: b.is_recent,
+        photos: b.image_url ? [b.image_url] : [],
+        videos: [],
+        equipements: [],
+        score_ia: null,
+        cta_url: `https://wa.me/2250544872051?text=${encodeURIComponent(
+          `Bonjour, je suis intéressé(e) par l'offre flash ${b.ref} (${b.titre} à ${b.commune})`,
+        )}`,
+      }
+    })
+
+    return { items, total: count ?? 0 }
+  } catch {
+    return { items: [], total: 0 }
+  }
+}
+
 // ─── Fetch by ID ────────────────────────────────────────────────────────────
 
 /** Détecte une URL de bien dans un message texte et retourne {source, id}. */

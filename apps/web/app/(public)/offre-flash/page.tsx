@@ -6,7 +6,7 @@ import { QuickFilters } from '@/components/search/QuickFilters'
 import { UnifiedBienCard } from '@/components/catalogue/UnifiedBienCard'
 import { UnifiedBienListCard } from '@/components/catalogue/UnifiedBienListCard'
 import { Pagination } from '@/components/ui/Pagination'
-import { getConsolidatedCatalogue, getCatalogueCommunes, type ConsolidatedFilters } from '@/lib/catalogue/consolidated'
+import { getLocauxPagedItems, getCatalogueCommunes, type ConsolidatedFilters } from '@/lib/catalogue/consolidated'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 60
@@ -42,16 +42,12 @@ export default async function OffreFlashPage({ searchParams }: PageProps) {
     prix_min: sp.prix_min ? Number(sp.prix_min) : undefined,
     prix_max: sp.prix_max ? Number(sp.prix_max) : undefined,
     sort: 'recent',
-    // On veut TOUTES les offres flash actives remontées — pas de plafonnement artificiel
-    limitPerSource: 1000,
   }
 
-  const [{ items }, communes] = await Promise.all([
-    getConsolidatedCatalogue(filters),
+  const [{ items: paginated, total }, communes] = await Promise.all([
+    getLocauxPagedItems(filters, pageIdx, PAGE_SIZE),
     getCatalogueCommunes('flash'),
   ])
-  const total = items.length
-  const paginated = items.slice(pageIdx * PAGE_SIZE, (pageIdx + 1) * PAGE_SIZE)
   const totalPages = Math.ceil(total / PAGE_SIZE)
 
   const hasFilters = !!(sp.q || sp.commune || sp.prix_min || sp.prix_max || sp.type_bien)

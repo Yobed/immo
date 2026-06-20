@@ -7,9 +7,12 @@ import { retirerFlashAction, restaurerFlashAction } from './actions'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
+const PAGE_SIZE = 100
+
 interface SearchParams {
   q?: string
   show?: string
+  page?: string
 }
 interface PageProps {
   searchParams: Promise<SearchParams>
@@ -40,23 +43,41 @@ export default async function AdminFlashPage({ searchParams }: PageProps) {
   const sp = await searchParams
   const q = sp.q?.trim() ?? ''
   const showInactive = sp.show === 'inactive'
+  const page = Math.max(0, parseInt(sp.page ?? '0', 10) || 0)
+  const from = page * PAGE_SIZE
+  const to = from + PAGE_SIZE - 1
 
   let rows: LocalRow[] = []
+  let total = 0
   let err: string | null = null
   try {
     const sb = createLocauxAdminClient()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let query = (sb.from('locaux') as any)
-      .select('id, ref_bien, type_de_bien, commune, quartier, prix, prix_normalise, status, is_duplicate, disponible, date_publication, lien_image, message_initial')
+      .select('id, ref_bien, type_de_bien, commune, quartier, prix, prix_normalise, status, is_duplicate, disponible, date_publication, lien_image, message_initial', { count: 'exact' })
       .order('date_publication', { ascending: false })
-      .limit(60)
+      .range(from, to)
     if (showInactive) query = query.eq('status', 'inactive')
-    else query = query.not('status', 'eq', 'inactive')
+    else query = query.not('status', 'eq', 'inactive').eq('is_duplicate', false)
     if (q) query = query.or(`commune.ilike.%${q}%,type_de_bien.ilike.%${q}%,ref_bien.ilike.%${q}%`)
-    const { data } = await query
+    const { data, count } = await query
     rows = (data ?? []) as LocalRow[]
+    total = count ?? 0
   } catch {
     err = "Clé service-role locaux indisponible (LOCAUX_SUPABASE_SERVICE_ROLE_KEY). Configure-la sur Vercel."
+  }
+
+  const totalPages = Math.ceil(total / PAGE_SIZE)
+  const hasPrev = page > 0
+  const hasNext = page < totalPages - 1
+
+  function pageUrl(p: number) {
+    const params = new URLSearchParams()
+    if (q) params.set('q', q)
+    if (showInactive) params.set('show', 'inactive')
+    if (p > 0) params.set('page', String(p))
+    const s = params.toString()
+    return `/admin/flash${s ? '?' + s : ''}`
   }
 
   return (
@@ -68,7 +89,7 @@ export default async function AdminFlashPage({ searchParams }: PageProps) {
             <h1 className="font-bold text-[var(--text)] text-lg leading-none">Offres flash</h1>
           </div>
           <p className="text-[var(--text-muted)] text-xs mb-3">
-            {showInactive ? 'Offres masquées (restaurables)' : 'Offres actives'} — {rows.length} affichée{rows.length > 1 ? 's' : ''}.
+            {showInactive ? 'Offres masquées (restaurables)' : 'Offres actives (non-doublons)'} — {total.toLocaleString('fr-FR')} au total, page {page + 1}/{totalPages || 1}.
             Le retrait masque l&apos;offre partout (réversible).
           </p>
           <form className="flex flex-wrap items-center gap-3">
@@ -93,6 +114,25 @@ export default async function AdminFlashPage({ searchParams }: PageProps) {
               {showInactive ? '← Offres actives' : 'Voir les masquées'}
             </Link>
           </form>
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2 mt-3">
+              {hasPrev ? (
+                <Link href={pageUrl(page - 1)} className="px-4 py-2 text-xs font-semibold text-[var(--text)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-hover)]">
+                  ← Précédent
+                </Link>
+              ) : (
+                <span className="px-4 py-2 text-xs text-[var(--text-subtle)] border border-[var(--border)] rounded-lg opacity-40">← Précédent</span>
+              )}
+              <span className="text-xs text-[var(--text-muted)]">{page + 1} / {totalPages}</span>
+              {hasNext ? (
+                <Link href={pageUrl(page + 1)} className="px-4 py-2 text-xs font-semibold text-[var(--text)] border border-[var(--border)] rounded-lg hover:bg-[var(--surface-hover)]">
+                  Suivant →
+                </Link>
+              ) : (
+                <span className="px-4 py-2 text-xs text-[var(--text-subtle)] border border-[var(--border)] rounded-lg opacity-40">Suivant →</span>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

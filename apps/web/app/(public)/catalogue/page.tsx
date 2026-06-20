@@ -7,7 +7,7 @@ import { QuickFilters } from '@/components/search/QuickFilters'
 import { UnifiedBienCard } from '@/components/catalogue/UnifiedBienCard'
 import { UnifiedBienListCard } from '@/components/catalogue/UnifiedBienListCard'
 import { Pagination } from '@/components/ui/Pagination'
-import { getConsolidatedCatalogue, getCatalogueCommunes, type ConsolidatedFilters } from '@/lib/catalogue/consolidated'
+import { getConsolidatedCatalogue, getLocauxPagedItems, getCatalogueCommunes, type ConsolidatedFilters } from '@/lib/catalogue/consolidated'
 import { getDictionary } from '@/lib/i18n/server'
 
 // Map view chargée en dynamic — Mapbox = gros bundle, on ne le charge que
@@ -63,8 +63,9 @@ export default async function CataloguePage({ searchParams }: PageProps) {
     .map(s => s.trim())
     .filter(Boolean)
 
+  const sourceFilter = sp.source === 'bogbes' || sp.source === 'flash' ? sp.source : null
   const filters: ConsolidatedFilters = {
-    source: sp.source === 'bogbes' || sp.source === 'flash' ? sp.source : null,
+    source: sourceFilter,
     commune: sp.commune?.trim() || undefined,
     type_bien: sp.type_bien?.trim() || undefined,
     type_offre: typeOffre,
@@ -73,18 +74,41 @@ export default async function CataloguePage({ searchParams }: PageProps) {
     prix_min: sp.prix_min ? Number(sp.prix_min) : undefined,
     prix_max: sp.prix_max ? Number(sp.prix_max) : undefined,
     sort: (sp.sort as ConsolidatedFilters['sort']) || 'verified_first',
-    // On veut TOUS les biens (vérifiés + flash actifs) remontés — pas de plafonnement
-    limitPerSource: 1000,
   }
 
-  const [{ items, counts }, communes] = await Promise.all([
-    getConsolidatedCatalogue(filters),
-    getCatalogueCommunes(filters.source),
-  ])
-  const total = items.length
-  const paginated = items.slice(pageIdx * PAGE_SIZE, (pageIdx + 1) * PAGE_SIZE)
-  const totalPages = Math.ceil(total / PAGE_SIZE)
-  const currentSource = filters.source ?? 'all'
+  // Vue "flash only" : pagination serveur directe (tous les biens, sans cap mémoire).
+  // Vue "bogbes" ou "all" : consolidation en mémoire (peu de biens vérifiés, tolérable).
+  let items: Awaited<ReturnType<typeof getConsolidatedCatalogue>>['items'] = []
+  let counts = { bogbes: 0, flash: 0, total: 0 }
+  let total = 0
+  let paginated: typeof items = []
+  let totalPages = 0
+
+  if (sourceFilter === 'flash') {
+    const [{ items: flashItems, total: flashTotal }, communes_] = await Promise.all([
+      getLocauxPagedItems(filters, pageIdx, PAGE_SIZE),
+      getCatalogueCommunes('flash'),
+    ])
+    items = flashItems
+    paginated = flashItems
+    total = flashTotal
+    totalPages = Math.ceil(flashTotal / PAGE_SIZE)
+    counts = { bogbes: 0, flash: flashTotal, total: flashTotal }
+    var communes = communes_
+  } else {
+    const [catalogue, communes_] = await Promise.all([
+      getConsolidatedCatalogue({ ...filters, limitPerSource: 500 }),
+      getCatalogueCommunes(sourceFilter),
+    ])
+    items = catalogue.items
+    counts = catalogue.counts
+    total = catalogue.items.length
+    paginated = catalogue.items.slice(pageIdx * PAGE_SIZE, (pageIdx + 1) * PAGE_SIZE)
+    totalPages = Math.ceil(total / PAGE_SIZE)
+    var communes = communes_
+  }
+
+  const currentSource = sourceFilter ?? 'all'
   const hasFilters = !!(sp.q || sp.commune || sp.prix_min || sp.prix_max || sp.type_bien)
 
   return (
