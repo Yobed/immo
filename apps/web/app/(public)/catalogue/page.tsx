@@ -7,7 +7,7 @@ import { QuickFilters } from '@/components/search/QuickFilters'
 import { UnifiedBienCard } from '@/components/catalogue/UnifiedBienCard'
 import { UnifiedBienListCard } from '@/components/catalogue/UnifiedBienListCard'
 import { Pagination } from '@/components/ui/Pagination'
-import { getConsolidatedCatalogue, getLocauxPagedItems, getCatalogueCommunes, type ConsolidatedFilters } from '@/lib/catalogue/consolidated'
+import { getConsolidatedCatalogue, getLocauxPagedItems, getLocauxCount, getCatalogueCommunes, type ConsolidatedFilters } from '@/lib/catalogue/consolidated'
 import { getDictionary } from '@/lib/i18n/server'
 
 // Map view chargée en dynamic — Mapbox = gros bundle, on ne le charge que
@@ -96,12 +96,13 @@ export default async function CataloguePage({ searchParams }: PageProps) {
     counts = { bogbes: 0, flash: flashTotal, total: flashTotal }
     var communes = communes_
   } else {
-    const [catalogue, communes_] = await Promise.all([
+    const [catalogue, communes_, flashTotal] = await Promise.all([
       getConsolidatedCatalogue({ ...filters, limitPerSource: 500 }),
       getCatalogueCommunes(sourceFilter),
+      getLocauxCount(filters),
     ])
     items = catalogue.items
-    counts = catalogue.counts
+    counts = { bogbes: catalogue.counts.bogbes, flash: flashTotal, total: catalogue.counts.bogbes + flashTotal }
     total = catalogue.items.length
     paginated = catalogue.items.slice(pageIdx * PAGE_SIZE, (pageIdx + 1) * PAGE_SIZE)
     totalPages = Math.ceil(total / PAGE_SIZE)

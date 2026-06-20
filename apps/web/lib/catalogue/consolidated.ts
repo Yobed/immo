@@ -644,6 +644,32 @@ export async function getLocauxPagedItems(
   }
 }
 
+/** Retourne uniquement le nombre total de biens flash actifs (sans charger les lignes). */
+export async function getLocauxCount(filters: ConsolidatedFilters): Promise<number> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let q = (createLocauxClient() as any)
+      .from('locaux')
+      .select('id', { count: 'exact', head: true })
+      .not('status', 'eq', 'inactive')
+      .not('is_duplicate', 'is', true)
+      .not('disponible', 'eq', 'non')
+      .or('date_expiration.is.null,date_expiration.gt.' + new Date().toISOString())
+    if (filters.commune) q = q.ilike('commune', `%${filters.commune}%`)
+    if (filters.type_bien) q = q.ilike('type_de_bien', `%${filters.type_bien}%`)
+    if (filters.type_offre === 'vente') q = q.or('type_offre.ilike.%vent%,type_offre.ilike.%achat%,type_offre.ilike.%vendre%')
+    else if (filters.type_offre === 'location') q = q.or('type_offre.ilike.%loc%,type_offre.ilike.%louer%,type_offre.ilike.%loyer%')
+    if (filters.q?.trim()) {
+      const term = filters.q.trim()
+      q = q.or(`caracteristiques.ilike.%${term}%,message_initial.ilike.%${term}%,quartier.ilike.%${term}%`)
+    }
+    const { count, error } = await q
+    return error ? 0 : (count ?? 0)
+  } catch {
+    return 0
+  }
+}
+
 // ─── Fetch by ID ────────────────────────────────────────────────────────────
 
 /** Détecte une URL de bien dans un message texte et retourne {source, id}. */
