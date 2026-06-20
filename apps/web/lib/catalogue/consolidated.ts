@@ -570,7 +570,6 @@ export async function getLocauxPagedItems(
       .not('status', 'eq', 'inactive')
       .not('is_duplicate', 'is', true)
       .not('disponible', 'eq', 'non')
-      .or('date_expiration.is.null,date_expiration.gt.' + new Date().toISOString())
       .order('date_publication', { ascending: false })
       .range(from, to)
 
@@ -654,7 +653,6 @@ export async function getLocauxCount(filters: ConsolidatedFilters): Promise<numb
       .not('status', 'eq', 'inactive')
       .not('is_duplicate', 'is', true)
       .not('disponible', 'eq', 'non')
-      .or('date_expiration.is.null,date_expiration.gt.' + new Date().toISOString())
     if (filters.commune) q = q.ilike('commune', `%${filters.commune}%`)
     if (filters.type_bien) q = q.ilike('type_de_bien', `%${filters.type_bien}%`)
     if (filters.type_offre === 'vente') q = q.or('type_offre.ilike.%vent%,type_offre.ilike.%achat%,type_offre.ilike.%vendre%')
