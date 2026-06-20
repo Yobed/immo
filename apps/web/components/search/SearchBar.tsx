@@ -54,7 +54,7 @@ export function SearchBar({
   const [open, setOpen] = useState(false)
   const [highlighted, setHighlighted] = useState(0)
   const [isPending, startTransition] = useTransition()
-  const { isListening, transcript, startListening, stopListening, isSupported } = useVoiceSearch()
+  const { isListening, transcript, error: voiceError, startListening, stopListening, isSupported } = useVoiceSearch()
   const [focused, setFocused] = useState(false)
   const [displayed, setDisplayed]     = useState('')
   const [phraseIdx, setPhraseIdx]     = useState(0)
@@ -251,8 +251,27 @@ export function SearchBar({
               À votre écoute...
             </p>
             <p className="text-[var(--text-muted)] text-[10px] italic">
-              "Appartement de luxe à Cocody"
+              &ldquo;Appartement de luxe à Cocody&rdquo;
             </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Erreur micro — affichée 5s puis disparaît */}
+      <AnimatePresence>
+        {voiceError && !isListening && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="absolute z-[200] top-full left-0 right-0 mt-2 bg-red-50 border border-red-200 rounded-2xl shadow-md p-4 flex items-start gap-2.5"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-red-500 shrink-0 mt-0.5">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <p className="text-red-700 text-xs font-medium leading-relaxed">{voiceError}</p>
           </motion.div>
         )}
       </AnimatePresence>
