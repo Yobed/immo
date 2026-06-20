@@ -80,7 +80,8 @@ export default async function CataloguePage({ searchParams }: PageProps) {
   // Vue "bogbes" ou "all" : consolidation en mémoire (peu de biens vérifiés, tolérable).
   let items: Awaited<ReturnType<typeof getConsolidatedCatalogue>>['items'] = []
   let counts = { bogbes: 0, flash: 0, total: 0 }
-  let total = 0
+  let total = 0        // pour la pagination (items chargés)
+  let displayTotal = 0 // pour le compteur affiché (vrai total DB)
   let paginated: typeof items = []
   let totalPages = 0
 
@@ -92,6 +93,7 @@ export default async function CataloguePage({ searchParams }: PageProps) {
     items = flashItems
     paginated = flashItems
     total = flashTotal
+    displayTotal = flashTotal
     totalPages = Math.ceil(flashTotal / PAGE_SIZE)
     counts = { bogbes: 0, flash: flashTotal, total: flashTotal }
     var communes = communes_
@@ -104,6 +106,7 @@ export default async function CataloguePage({ searchParams }: PageProps) {
     items = catalogue.items
     counts = { bogbes: catalogue.counts.bogbes, flash: flashTotal, total: catalogue.counts.bogbes + flashTotal }
     total = catalogue.items.length
+    displayTotal = counts.total
     paginated = catalogue.items.slice(pageIdx * PAGE_SIZE, (pageIdx + 1) * PAGE_SIZE)
     totalPages = Math.ceil(total / PAGE_SIZE)
     var communes = communes_
@@ -136,7 +139,7 @@ export default async function CataloguePage({ searchParams }: PageProps) {
           <div className="flex items-center gap-6 self-end lg:self-center">
             <div className="text-right">
               <p className="text-4xl font-display font-black text-[var(--accent-luxury)] tabular-nums leading-none">
-                {total}
+                {displayTotal}
               </p>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] mt-1">
                 Résultats
