@@ -57,8 +57,10 @@ export default async function AdminFlashPage({ searchParams }: PageProps) {
       .select('id, ref_bien, type_de_bien, commune, quartier, prix, prix_normalise, status, is_duplicate, disponible, date_publication, lien_image, message_initial', { count: 'exact' })
       .order('date_publication', { ascending: false })
       .range(from, to)
+    // Vue admin alignée sur le catalogue public (consolidated.ts) : NULL = accepté,
+    // pour que le total admin reflète le total affiché aux visiteurs.
     if (showInactive) query = query.eq('status', 'inactive')
-    else query = query.not('status', 'eq', 'inactive').eq('is_duplicate', false)
+    else query = query.not('status', 'eq', 'inactive').not('is_duplicate', 'is', true)
     if (q) query = query.or(`commune.ilike.%${q}%,type_de_bien.ilike.%${q}%,ref_bien.ilike.%${q}%`)
     const { data, count } = await query
     rows = (data ?? []) as LocalRow[]

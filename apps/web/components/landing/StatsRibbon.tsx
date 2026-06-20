@@ -108,8 +108,10 @@ export async function StatsRibbon() {
   const flashQ = (locaux as any)
     .from('locaux')
     .select('id, commune', { count: 'exact' })
-    .eq('status', 'active')
-    .eq('is_duplicate', false)
+    // Politique permissive alignée sur le catalogue (consolidated.ts) : NULL accepté.
+    .not('status', 'eq', 'inactive')
+    .not('is_duplicate', 'is', true)
+    .or('disponible.is.null,disponible.neq.non')
 
   const [biensRes, flashRes, delay] = await Promise.all([
     biensQ,

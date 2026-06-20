@@ -55,8 +55,11 @@ export async function FlashOffersInline({ filters, limit = 6 }: FlashOffersInlin
     .from('locaux')
     // SECURITY: telephone, telephone_bien, publie_par, groupe_whatsapp_origine omis
     .select('id,ref_bien,type_de_bien,type_offre,zone_geographique,commune,quartier,prix,prix_normalise,caracteristiques,meubles,chambre,disponible,surface,date_publication,lien_image,message_initial,status,is_duplicate,date_expiration,created_at')
-    .eq('status', 'active')
-    .eq('is_duplicate', false)
+    // ⚠️ Politique permissive alignée sur le catalogue (consolidated.ts) : on exclut
+    // seulement les cas explicitement disqualifiants. NULL = accepté. Utiliser
+    // .eq('status','active') / .eq('is_duplicate',false) excluait à tort tous les NULL.
+    .not('status', 'eq', 'inactive')
+    .not('is_duplicate', 'is', true)
     .order('date_publication', { ascending: false, nullsFirst: false })
     .limit(limit * 2) // marge pour filtrer is_actif après mapping
 
@@ -66,10 +69,12 @@ export async function FlashOffersInline({ filters, limit = 6 }: FlashOffersInlin
     const term = filters.q.trim()
     q = q.or(`caracteristiques.ilike.%${term}%,message_initial.ilike.%${term}%,quartier.ilike.%${term}%`)
   }
+  // Prix : on garde les biens sans prix_normalise (NULL → "Prix sur demande"),
+  // comme le catalogue. .gte/.lte stricts excluaient tous les NULL.
   const prixMin = filters.prix_min ? parseInt(filters.prix_min, 10) : NaN
   const prixMax = filters.prix_max ? parseInt(filters.prix_max, 10) : NaN
-  if (!isNaN(prixMin)) q = q.gte('prix_normalise', prixMin)
-  if (!isNaN(prixMax)) q = q.lte('prix_normalise', prixMax)
+  if (!isNaN(prixMin)) q = q.or(`prix_normalise.is.null,prix_normalise.gte.${prixMin}`)
+  if (!isNaN(prixMax)) q = q.or(`prix_normalise.is.null,prix_normalise.lte.${prixMax}`)
 
   const { data: rows } = await q
   if (!rows || rows.length === 0) return null

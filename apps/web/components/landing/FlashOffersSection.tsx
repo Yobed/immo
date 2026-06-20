@@ -33,15 +33,18 @@ export async function FlashOffersSection() {
     // SECURITY: telephone, telephone_bien, publie_par, groupe_whatsapp_origine
     // omis — données identifiantes propriétaire/source.
     .select('id,ref_bien,type_de_bien,type_offre,zone_geographique,commune,quartier,prix,prix_normalise,caracteristiques,meubles,chambre,disponible,surface,date_publication,lien_image,message_initial,status,is_duplicate,date_expiration,created_at')
-    .eq('status', 'active')
-    .eq('is_duplicate', false)
+    // ⚠️ Politique permissive alignée sur le catalogue (consolidated.ts) : NULL = accepté.
+    // .eq('status','active') / .eq('is_duplicate',false) excluait à tort tous les NULL.
+    // (lien_image requis car cette vitrine landing affiche des cartes avec photo.)
+    .not('status', 'eq', 'inactive')
+    .not('is_duplicate', 'is', true)
     .neq('lien_image', '')
     .not('lien_image', 'is', null)
     .order('date_publication', { ascending: false, nullsFirst: false })
-    .limit(6)
+    .limit(12)
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const biens = ((rows ?? []) as any as LocauxRow[]).map(mapLocauxRow)
+  const biens = ((rows ?? []) as any as LocauxRow[]).map(mapLocauxRow).filter((b) => b.is_actif).slice(0, 6)
   if (biens.length === 0) return null
 
   return (

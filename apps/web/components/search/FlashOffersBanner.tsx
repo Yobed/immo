@@ -19,8 +19,10 @@ export async function FlashOffersBanner({ filters }: { filters: Filters }) {
   let q = c
     .from('locaux')
     .select('id', { count: 'exact', head: true })
-    .eq('status', 'active')
-    .eq('is_duplicate', false)
+    // Politique permissive alignée sur le catalogue (consolidated.ts) : NULL accepté.
+    .not('status', 'eq', 'inactive')
+    .not('is_duplicate', 'is', true)
+    .or('disponible.is.null,disponible.neq.non')
 
   if (filters.commune) q = q.ilike('commune', `%${filters.commune}%`)
   if (filters.type_bien) q = q.ilike('type_de_bien', `%${filters.type_bien}%`)
