@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/server-auth'
 import { notifyAdminVisitRequest, notifyOwnerVisitApproved, type VisitContext } from '@/lib/notifications/whatsapp-notifier'
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
+import { logError } from '@/lib/error-logger'
 
 // POST — créer une demande de visite (workflow admin-first)
 // Le propriétaire EST notifié à ce stade pour vérifier sa disponibilité.
@@ -62,7 +63,15 @@ export async function POST(request: Request) {
     .select('id')
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+  if (error) {
+    await logError(error, {
+      source: 'api',
+      route: '/api/visites',
+      userId: user.id,
+      extra: { bien_id, date_souhaitee, creneau },
+    })
+    return NextResponse.json({ error: error.message }, { status: 400 })
+  }
 
   // Récupérer les infos visiteur pour la notif admin
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

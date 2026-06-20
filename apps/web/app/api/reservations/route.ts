@@ -5,6 +5,7 @@ import {
   type ReservationContext,
 } from '@/lib/notifications/whatsapp-notifier'
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
+import { logError } from '@/lib/error-logger'
 
 export async function POST(req: NextRequest) {
   // Rate limit : max 5 réservations par IP / 5 minutes
@@ -88,7 +89,15 @@ export async function POST(req: NextRequest) {
     .select('id, bien_id, date_debut, date_fin, montant_loyer_fcfa, montant_total_fcfa, statut')
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+  if (error) {
+    await logError(error, {
+      source: 'api',
+      route: '/api/reservations',
+      userId: user.id,
+      extra: { bienId: body.bienId, dateDebut: body.dateDebut, dateFin: body.dateFin },
+    })
+    return NextResponse.json({ error: error.message }, { status: 400 })
+  }
 
   // Récupérer le visiteur pour la notif admin
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
