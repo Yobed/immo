@@ -53,6 +53,11 @@ export function getBienPrix(bien: {
   return null
 }
 
+/** Formate un nombre entier avec séparateurs de milliers (ex: 9831 → "9 831") */
+export function formatCount(n: number): string {
+  return new Intl.NumberFormat('fr-CI', { style: 'decimal', maximumFractionDigits: 0 }).format(n)
+}
+
 /** Parse un entier de searchParam URL, retourne null si NaN */
 export function parseIntParam(value: string | undefined): number | null {
   if (!value) return null

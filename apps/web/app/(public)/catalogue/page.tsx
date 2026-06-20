@@ -9,6 +9,7 @@ import { UnifiedBienListCard } from '@/components/catalogue/UnifiedBienListCard'
 import { Pagination } from '@/components/ui/Pagination'
 import { getConsolidatedCatalogue, getLocauxPagedItems, getLocauxCount, getCatalogueCommunes, type ConsolidatedFilters } from '@/lib/catalogue/consolidated'
 import { getDictionary } from '@/lib/i18n/server'
+import { formatCount } from '@/lib/format'
 
 // Map view chargée en dynamic — Mapbox = gros bundle, on ne le charge que
 // quand l'utilisateur switche sur la vue carte.
@@ -138,7 +139,7 @@ export default async function CataloguePage({ searchParams }: PageProps) {
           <div className="flex items-center gap-6 self-end lg:self-center">
             <div className="text-right">
               <p className="text-4xl font-display font-black text-[var(--accent-luxury)] tabular-nums leading-none">
-                {displayTotal}
+                {formatCount(displayTotal)}
               </p>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] mt-1">
                 Résultats
@@ -298,7 +299,7 @@ function SourceTab({ href, active, color, icon: Icon, label, count }: SourceTabP
     >
       <Icon className="w-3 h-3" />
       {label}
-      <span className="opacity-60 ml-1">({count})</span>
+      <span className="opacity-60 ml-1">({formatCount(count)})</span>
     </Link>
   )
 }

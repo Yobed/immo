@@ -7,6 +7,7 @@ import { UnifiedBienCard } from '@/components/catalogue/UnifiedBienCard'
 import { UnifiedBienListCard } from '@/components/catalogue/UnifiedBienListCard'
 import { Pagination } from '@/components/ui/Pagination'
 import { getLocauxPagedItems, getCatalogueCommunes, type ConsolidatedFilters } from '@/lib/catalogue/consolidated'
+import { formatCount } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
 export const metadata = {
@@ -75,7 +76,7 @@ export default async function OffreFlashPage({ searchParams }: PageProps) {
           <div className="flex items-center gap-6 self-end lg:self-center">
             <div className="text-right">
               <p className="text-4xl font-display font-black text-[var(--accent-luxury)] tabular-nums leading-none">
-                {total}
+                {formatCount(total)}
               </p>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] mt-1">
                 Offres flash
