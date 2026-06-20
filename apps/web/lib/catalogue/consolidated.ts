@@ -297,7 +297,9 @@ async function fetchLocaux(filters: ConsolidatedFilters): Promise<ConsolidatedBi
           commune: b.commune,
           quartier: b.quartier ?? null,
           type_bien: b.type_bien,
-          prix_label: b.prix_label ?? (b.prix_value ? formatFCFA(b.prix_value) : 'Sur demande'),
+          prix_label: b.prix_value
+            ? formatFCFA(b.prix_value) + (period === 'mois' ? ' / mois' : '')
+            : (b.prix_label ?? 'Sur demande'),
           prix_value: b.prix_value,
           prix_period: period,
           surface_m2: b.surface_m2,
@@ -611,7 +613,9 @@ export async function getLocauxPagedItems(
         commune: b.commune,
         quartier: b.quartier ?? null,
         type_bien: b.type_bien,
-        prix_label: b.prix_label ?? (b.prix_value ? formatFCFA(b.prix_value) : 'Sur demande'),
+        prix_label: b.prix_value
+          ? formatFCFA(b.prix_value) + (period === 'mois' ? ' / mois' : '')
+          : (b.prix_label ?? 'Sur demande'),
         prix_value: b.prix_value,
         prix_period: period,
         surface_m2: b.surface_m2,
