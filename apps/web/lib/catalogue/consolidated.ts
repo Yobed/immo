@@ -8,7 +8,7 @@
 // Note : pas d'import 'server-only' (package non installé sur Vercel) — la
 // protection est implicite via les appels Supabase server-side dans createClient().
 import { createClient } from '@/lib/supabase/server'
-import { createLocauxClient } from '@/lib/supabase/locaux'
+import { createLocauxClient, createLocauxAdminClient } from '@/lib/supabase/locaux'
 import { mapLocauxRow, type LocauxRow } from '@/lib/locaux/mapper'
 import { formatFCFA } from '@/lib/format'
 import { STATUTS_PUBLICS } from './statuts'
@@ -555,7 +555,7 @@ export async function getLocauxPagedItems(
   pageSize: number,
 ): Promise<{ items: ConsolidatedBien[]; total: number }> {
   try {
-    const sb = createLocauxClient()
+    const sb = createLocauxAdminClient()
     const from = pageIdx * pageSize
     const to = from + pageSize - 1
 
@@ -647,7 +647,7 @@ export async function getLocauxPagedItems(
 export async function getLocauxCount(filters: ConsolidatedFilters): Promise<number> {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let q = (createLocauxClient() as any)
+    let q = (createLocauxAdminClient() as any)
       .from('locaux')
       .select('id', { count: 'exact', head: true })
       .not('status', 'eq', 'inactive')
