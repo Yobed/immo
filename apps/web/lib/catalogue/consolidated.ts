@@ -55,6 +55,9 @@ export interface ConsolidatedBien {
   score_ia: number | null
   /** CTA conduisant à la réservation/contact (page bien #reserver, ou wa.me conseiller pour flash) */
   cta_url: string
+  /** Vues réelles sur 7 jours (biens BOGBE'S uniquement). Optionnel : rempli à la
+   *  demande par la page catalogue après pagination (cf. getViewCounts7d). */
+  vues_7j?: number | null
 }
 
 export interface ConsolidatedFilters {

@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion, useReducedMotion } from 'framer-motion'
-import { MapPin, BedDouble, Maximize2, Flame, ShieldCheck, Radio, Clock } from 'lucide-react'
+import { MapPin, BedDouble, Maximize2, Flame, ShieldCheck, Radio, Clock, Eye } from 'lucide-react'
 import { useT } from '@/lib/i18n/client'
 import type { ConsolidatedBien } from '@/lib/catalogue/consolidated'
 import { FlashPlaceholder } from '@/components/offre-flash/FlashPlaceholder'
@@ -145,6 +145,14 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
           <p className="text-[13px] @[260px]/card:text-[15px] @[340px]/card:text-[17px] font-display font-bold text-[var(--accent-luxury)] tracking-tight mb-1.5 leading-none">
             {bien.prix_label}
           </p>
+
+          {/* Preuve sociale réelle — vues 7j (≥3 seulement, jamais de chiffre gonflé) */}
+          {typeof bien.vues_7j === 'number' && bien.vues_7j >= 3 && (
+            <p className="flex items-center gap-1 text-[9px] @[260px]/card:text-[10px] font-semibold text-amber-600 mb-1.5">
+              <Eye className="w-2.5 h-2.5 shrink-0" strokeWidth={2.5} />
+              {bien.vues_7j} vues cette semaine
+            </p>
+          )}
 
           {(bien.nb_pieces || bien.surface_m2 || bien.date_scraping) && (
             <div className="flex items-center gap-2 mt-auto pt-1.5 border-t border-border/30 text-[9px] text-[var(--text-muted)]">

@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion, useReducedMotion } from 'framer-motion'
-import { MapPin, BedDouble, Maximize2, Flame, ShieldCheck, ArrowUpRight, Clock } from 'lucide-react'
+import { MapPin, BedDouble, Maximize2, Flame, ShieldCheck, ArrowUpRight, Clock, Eye } from 'lucide-react'
 import { useT } from '@/lib/i18n/client'
 import type { ConsolidatedBien } from '@/lib/catalogue/consolidated'
 
@@ -78,6 +78,13 @@ export function UnifiedBienListCard({ bien, index = 0 }: Props) {
               <MapPin className="w-3 h-3" />
               {bien.commune}{bien.quartier ? ` · ${bien.quartier}` : ''}
             </p>
+            {/* Preuve sociale réelle — vues 7j (≥3 seulement) */}
+            {typeof bien.vues_7j === 'number' && bien.vues_7j >= 3 && (
+              <p className="flex items-center gap-1 text-[10px] font-semibold text-amber-600 mb-2">
+                <Eye className="w-3 h-3 shrink-0" strokeWidth={2.5} />
+                {bien.vues_7j} vues cette semaine
+              </p>
+            )}
           </div>
 
           <div className="flex items-end justify-between gap-2 mt-auto">

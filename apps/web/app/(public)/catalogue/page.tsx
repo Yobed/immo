@@ -8,6 +8,7 @@ import { UnifiedBienCard } from '@/components/catalogue/UnifiedBienCard'
 import { UnifiedBienListCard } from '@/components/catalogue/UnifiedBienListCard'
 import { Pagination } from '@/components/ui/Pagination'
 import { getConsolidatedCatalogue, getLocauxPagedItems, getLocauxCount, getCatalogueCommunes, type ConsolidatedFilters } from '@/lib/catalogue/consolidated'
+import { getViewCounts7d } from '@/lib/analytics/view-counts'
 import { getDictionary } from '@/lib/i18n/server'
 import { formatCount } from '@/lib/format'
 
@@ -117,6 +118,16 @@ export default async function CataloguePage({ searchParams }: PageProps) {
     paginated = catalogue.items.slice(pageIdx * PAGE_SIZE, (pageIdx + 1) * PAGE_SIZE)
     totalPages = Math.ceil(total / PAGE_SIZE)
     var communes = communes_
+  }
+
+  // Preuve sociale RÉELLE : vues 7j des biens BOGBE'S visibles (1 requête sur la
+  // page courante, ≤ 24 ids — jamais N appels). Flash exclu (pas de tracking vue_bien).
+  const bogbesIds = paginated.filter(b => b.source === 'bogbes').map(b => b.sourceId)
+  if (bogbesIds.length > 0) {
+    const viewCounts = await getViewCounts7d(bogbesIds)
+    paginated = paginated.map(b =>
+      b.source === 'bogbes' ? { ...b, vues_7j: viewCounts[b.sourceId] ?? 0 } : b,
+    )
   }
 
   const currentSource = sourceFilter ?? 'all'
