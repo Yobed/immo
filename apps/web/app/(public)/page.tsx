@@ -113,24 +113,26 @@ export default async function HomePage() {
       {/* 4. Bandeau confiance — gratuit/vérifié/anti-arnaque, juste après les biens */}
       <TrustStrip />
 
-      {/* 5. Chiffres clés — preuve sociale par les nombres (consensus) */}
-      <StatsRibbon />
-
-      {/* 6. ⚠️ Comment ça marche — le méfiant veut le mécanisme anti-arnaque
-            (coordonnées masquées, conseiller, KYC) AVANT qu'on lui demande d'agir */}
-      <HowItWorks />
-
-      {/* 7. Témoignages — preuve sociale humaine (visages/noms) > chiffres, identification */}
-      <TestimonialsSection />
-
-      {/* 8. Près de chez moi (carte interactive) — ré-engagement produit */}
-      <NearMeSection initialBiens={biensWithPhoto} />
-
-      {/* 9. Parcours utilisateurs — routage locataire/proprio une fois réchauffé */}
+      {/* 5. 🚪 Parcours — les 2 portes « je cherche » / « je publie ». Remonté ici :
+            auto-segmentation tôt + sortie immédiate pour le propriétaire (sinon il
+            scrolle du contenu locataire et part). Après biens+confiance = on ne force
+            pas un choix avant le désir. Sert les inscriptions des 2 publics. */}
       <JourneyShortcuts />
 
-      {/* 10. Déroulé visuel des 3 étapes du wizard */}
+      {/* 6. Déroulé visuel des 3 étapes — montre au « je cherche » que c'est rapide */}
       <GuidedSearchSteps />
+
+      {/* 7. Chiffres clés — preuve sociale par les nombres (consensus) */}
+      <StatsRibbon />
+
+      {/* 8. ⚠️ Comment ça marche — mécanisme anti-arnaque (coordonnées masquées, conseiller, KYC) */}
+      <HowItWorks />
+
+      {/* 9. Témoignages — preuve sociale humaine (visages/noms) > chiffres, identification */}
+      <TestimonialsSection />
+
+      {/* 10. Près de chez moi (carte interactive) — ré-engagement produit */}
+      <NearMeSection initialBiens={biensWithPhoto} />
 
       {/* 11. Marché en direct — rareté/urgence (aversion à la perte), proche de la décision */}
       <FlashOffersSection />
