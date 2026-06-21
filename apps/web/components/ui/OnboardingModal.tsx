@@ -18,20 +18,26 @@ const CHOICES: Choice[] = [
   {
     emoji: '🏠',
     title: 'Je cherche à louer',
-    description: 'Appartements, studios, maisons à louer',
-    href: '/biens?type_bien=appartement',
+    description: 'Villas, appartements, studios, maisons',
+    href: '/catalogue?type_offre=location',
+  },
+  {
+    emoji: '💰',
+    title: 'Je veux acheter',
+    description: 'Biens en vente : villas, terrains, immeubles',
+    href: '/catalogue?type_offre=vente',
   },
   {
     emoji: '🌟',
-    title: 'Je cherche une résidence meublée',
-    description: 'Court et moyen séjour, tout équipé',
-    href: '/biens?type_bien=residence_meublee',
+    title: 'Une résidence meublée',
+    description: 'Court ou moyen séjour, tout équipé',
+    href: '/catalogue?type_bien=residence_meublee',
   },
   {
     emoji: '📋',
     title: 'Je suis propriétaire',
     description: 'Publier et gérer mes annonces',
-    href: '/register',
+    href: '/proprietaires',
   },
 ]
 
