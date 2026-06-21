@@ -30,7 +30,9 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const protectedRoutes = ['/pro', '/client', '/admin', '/dashboard', '/mes-biens', '/mes-avis', '/mes-visites', '/visites', '/quittances', '/profil', '/avis-recus', '/reservations']
+  // Routes protégées par login. Liste explicite, pas de match large : '/pro'
+  // matchait à tort /proprietaires (page publique d'explication offre).
+  const protectedRoutes = ['/client', '/admin', '/dashboard', '/mes-biens', '/mes-avis', '/mes-visites', '/visites', '/quittances', '/profil', '/avis-recus', '/reservations']
   const isProtected = protectedRoutes.some((route) =>
     request.nextUrl.pathname.startsWith(route)
   )

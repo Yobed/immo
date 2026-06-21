@@ -52,7 +52,9 @@ export function SearchBar({
   const router = useRouter()
   const [query, setQuery] = useState(initialQuery)
   const [open, setOpen] = useState(false)
-  const [highlighted, setHighlighted] = useState(0)
+  // -1 = aucune suggestion sélectionnée (Enter envoie la query tapée).
+  // Devient >=0 quand l'utilisateur appuie sur flèche bas/haut.
+  const [highlighted, setHighlighted] = useState(-1)
   const [isPending, startTransition] = useTransition()
   const { isListening, transcript, error: voiceError, startListening, stopListening, isSupported } = useVoiceSearch()
   const [focused, setFocused] = useState(false)
@@ -145,10 +147,17 @@ export function SearchBar({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!open && e.key === 'ArrowDown') { setOpen(true); return }
-    if (!open) return
     if (e.key === 'ArrowDown') { e.preventDefault(); setHighlighted((h) => Math.min(h + 1, suggestions.length - 1)) }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); setHighlighted((h) => Math.max(h - 1, 0)) }
-    else if (e.key === 'Enter' && suggestions[highlighted]) { e.preventDefault(); selectSuggestion(suggestions[highlighted].label) }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setHighlighted((h) => Math.max(h - 1, -1)) }
+    else if (e.key === 'Enter') {
+      // Si l'utilisateur a explicitement choisi une suggestion via flèches : la prend.
+      // Sinon : on ne preventDefault PAS — le form submit (handleSubmit) prend le relais
+      // et lance navigate(query) avec ce que l'utilisateur a tapé.
+      if (highlighted >= 0 && suggestions[highlighted]) {
+        e.preventDefault()
+        selectSuggestion(suggestions[highlighted].label)
+      }
+    }
     else if (e.key === 'Escape') setOpen(false)
   }
 
@@ -168,7 +177,7 @@ export function SearchBar({
               ref={inputRef}
               type="text"
               value={query}
-              onChange={(e) => { setQuery(e.target.value); setHighlighted(0); setOpen(true) }}
+              onChange={(e) => { setQuery(e.target.value); setHighlighted(-1); setOpen(true) }}
               onFocus={() => { setFocused(true); setOpen(true) }}
               onBlur={() => setFocused(false)}
               onKeyDown={handleKeyDown}

@@ -1,4 +1,4 @@
-import { cookies, headers } from 'next/headers'
+import { cookies } from 'next/headers'
 import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale, type Locale } from './config'
 import frDict from './dictionaries/fr.json'
 import enDict from './dictionaries/en.json'
@@ -10,16 +10,18 @@ const DICTIONARIES: Record<Locale, Dictionary> = {
   en: enDict,
 }
 
-/** Detect locale: cookie first, then Accept-Language header, then default. */
+/** Detect locale: cookie first, then DEFAULT_LOCALE (fr).
+ *
+ *  On NE détecte PAS Accept-Language : sur le marché ivoirien, beaucoup de
+ *  téléphones sont configurés en en-US par défaut alors que l'utilisateur
+ *  est francophone. Basculer en EN sans son consentement explicite fait
+ *  bouncer 40-60% des visiteurs. Seul le toggle FR/EN du header (qui pose
+ *  le cookie NEXT_LOCALE) doit faire passer en EN.
+ */
 export async function getLocale(): Promise<Locale> {
   const cookieStore = await cookies()
   const fromCookie = cookieStore.get(LOCALE_COOKIE)?.value
   if (isLocale(fromCookie)) return fromCookie
-
-  const headerStore = await headers()
-  const accept = headerStore.get('accept-language') ?? ''
-  const primary = accept.split(',')[0]?.split('-')[0]?.toLowerCase()
-  if (isLocale(primary)) return primary
 
   return DEFAULT_LOCALE
 }
