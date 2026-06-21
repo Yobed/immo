@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import { generatePropertySchema } from '@/lib/schema/property-schema'
+import { SITE_URL } from '@/lib/env'
 import Link from 'next/link'
 import { formatFCFA } from '@/lib/format'
 import { Badge } from '@/components/ui'
@@ -45,7 +46,7 @@ import { STATUTS_PUBLICS, estStatutPublic } from '@/lib/catalogue/statuts'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bogbes-groupe.vercel.app'
+  const siteUrl = SITE_URL
   const supabase = await createClient()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

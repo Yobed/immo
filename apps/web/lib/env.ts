@@ -70,3 +70,19 @@ export const isProduction = process.env.NODE_ENV === 'production'
  * Check if we're in development
  */
 export const isDevelopment = process.env.NODE_ENV === 'development'
+
+/**
+ * URL canonique du site, normalisée :
+ *  - trim() retire les \r\n trailing (artefact de copy-paste depuis le
+ *    dashboard Vercel — bug constaté en juin 2026 qui cassait sitemap.xml,
+ *    canonical, og:image et JSON-LD).
+ *  - retire trailing slash pour permettre la concat `${SITE_URL}/foo`.
+ *  - fallback alias Vercel si l'env var n'est pas définie.
+ *
+ *  TOUS les fichiers qui génèrent du HTML SEO-visible (sitemap, robots,
+ *  metadata canonical, openGraph images, JSON-LD) DOIVENT utiliser cette
+ *  constante au lieu de lire `process.env.NEXT_PUBLIC_SITE_URL` directement.
+ */
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bogbes-groupe.vercel.app')
+  .trim()
+  .replace(/\/$/, '')

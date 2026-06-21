@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Bricolage_Grotesque, EB_Garamond, Manrope, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
+import { SITE_URL } from '@/lib/env'
 
 // Distinctive typographic system — deliberately off the "AI default" list
 // (no Inter, Outfit, Playfair, Plus Jakarta, DM Sans, Instrument, Fraunces, Newsreader).
@@ -49,8 +50,6 @@ export const viewport: Viewport = {
     { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
   ],
 }
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXT_PUBLIC_URL ?? 'https://bogbes-groupe.vercel.app'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

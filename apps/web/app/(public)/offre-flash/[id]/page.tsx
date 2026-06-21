@@ -16,6 +16,7 @@ import { FlashContactModal } from '@/components/offre-flash/FlashContactModal'
 import { FlashPlaceholder } from '@/components/offre-flash/FlashPlaceholder'
 import { ViewCount } from '@/components/bien/ViewCount'
 import { createClient as createSupabaseServer } from '@/lib/supabase/server'
+import { SITE_URL } from '@/lib/env'
 
 export const revalidate = 60
 export const dynamic = 'force-dynamic'
@@ -23,8 +24,6 @@ export const dynamic = 'force-dynamic'
 interface PageProps {
   params: Promise<{ id: string }>
 }
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bogbes-groupe.vercel.app'
 
 /**
  * Metadata Open Graph pour preview WhatsApp / réseaux sociaux.
