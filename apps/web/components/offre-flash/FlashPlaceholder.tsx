@@ -1,12 +1,18 @@
 import { MapPin, Home, Building2, Palmtree, Briefcase, Store, Shovel, Warehouse, BedDouble, Info } from 'lucide-react'
+import { getStaticMapUrl } from '@/lib/mapbox-static'
+import { getCommuneCoords, hasKnownCoords } from '@/lib/commune-coords'
 
 /**
  * Placeholder visuel honnête pour les offres flash sans photo.
  *
  * Principe : ne JAMAIS afficher une image stock générique qui créerait
- * une fausse attente. À la place, une carte d'identité minimaliste qui
- * montre exactement ce qu'on sait. L'absence de photo devient un signal
- * de transparence, pas un défaut.
+ * une fausse attente. À la place :
+ *  1. Une map du quartier en arrière-plan (visualisation spatiale = la 2e
+ *     info la plus puissante après le visuel intérieur).
+ *  2. Une carte d'identité minimaliste qui montre exactement ce qu'on sait.
+ *  3. Un disclaimer clair : "Photos non disponibles, position approximative".
+ *
+ * L'absence de photo devient un signal de transparence, pas un défaut.
  *
  * Variant :
  *   - 'card'  : affichage compact (utilisé dans la grille)
@@ -47,37 +53,64 @@ export function FlashPlaceholder({
   const typeLabel = typeBien.replace(/_/g, ' ')
   const lieu = [quartier, commune].filter(Boolean).join(' · ')
 
+  const coords = getCommuneCoords(commune, quartier)
+  const knownLocation = hasKnownCoords(commune, quartier)
+
   if (variant === 'hero') {
+    const mapUrl = getStaticMapUrl({
+      lat: coords.lat,
+      lng: coords.lng,
+      zoom: knownLocation ? 14 : 11,
+      width: 1200,
+      height: 600,
+      pin: knownLocation ? { color: 'f97316', size: 'l' } : false,
+    })
+
     return (
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4 py-4 sm:p-6 md:p-10 text-center overflow-auto">
-        {/* Hairline grid background — texture sobre */}
-        <div
-          className="absolute inset-0 opacity-[0.04] pointer-events-none"
-          style={{
-            backgroundImage:
-              'linear-gradient(to right, #0F172A 1px, transparent 1px), linear-gradient(to bottom, #0F172A 1px, transparent 1px)',
-            backgroundSize: '32px 32px',
-          }}
-        />
-        <div className="relative z-10 flex flex-col items-center max-w-md w-full">
-          {/* Icône — tailles réduites sur mobile pour laisser place au texte */}
-          <div className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-xl sm:rounded-2xl bg-slate-900 text-white flex items-center justify-center mb-3 sm:mb-6 shadow-sm shrink-0">
-            <Icon className="w-7 h-7 sm:w-10 sm:h-10 md:w-12 md:h-12" />
+      <div className="absolute inset-0 overflow-hidden bg-slate-100">
+        {/* Map en arrière-plan, ou gradient sobre si pas de token Mapbox */}
+        {mapUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={mapUrl}
+            alt={`Carte de ${lieu || 'la zone'}`}
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-slate-100" />
+        )}
+
+        {/* Overlay sombre pour lisibilité de l'info par-dessus la map */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/20 via-slate-900/40 to-slate-900/85" />
+
+        {/* Contenu en bas — type + lieu + disclaimer */}
+        <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6 md:p-8 text-white">
+          <div className="flex items-end justify-between gap-3 max-w-3xl">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-white text-slate-900 flex items-center justify-center shadow-md shrink-0">
+                  <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                </div>
+                <p className="font-display text-lg sm:text-2xl md:text-3xl font-bold capitalize tracking-tight truncate">
+                  {typeLabel}
+                </p>
+              </div>
+              {lieu && (
+                <p className="inline-flex items-center gap-1 text-sm sm:text-base text-white/90">
+                  <MapPin className="w-4 h-4 shrink-0" />
+                  <span className="truncate">{lieu}</span>
+                </p>
+              )}
+            </div>
           </div>
-          <p className="font-display text-lg sm:text-2xl md:text-3xl font-bold text-slate-900 capitalize tracking-tight mb-1 sm:mb-2">
-            {typeLabel}
-          </p>
-          {lieu && (
-            <p className="inline-flex items-center gap-1 text-xs sm:text-sm text-slate-600 mb-3 sm:mb-6">
-              <MapPin className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" />
-              <span className="truncate">{lieu}</span>
-            </p>
-          )}
-          <div className="w-full flex items-start gap-2 px-3 py-2.5 sm:px-4 sm:py-3 rounded-lg sm:rounded-xl bg-amber-50 border border-amber-200 text-left">
-            <Info className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-700 shrink-0 mt-0.5" />
-            <div className="text-[11px] sm:text-xs text-amber-900 leading-relaxed min-w-0 break-words">
-              <strong className="block mb-0.5">Photos non disponibles</strong>
-              Annonce provenant d&apos;un groupe WhatsApp public sans média. Notre conseiller peut les solliciter auprès du propriétaire.
+
+          {/* Disclaimer compact */}
+          <div className="mt-4 inline-flex items-start gap-2 px-3 py-2 rounded-lg bg-amber-500/95 text-amber-950 max-w-md backdrop-blur-sm">
+            <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+            <div className="text-[11px] sm:text-xs leading-snug">
+              <strong className="block mb-0.5">Photos non disponibles · Position approximative</strong>
+              Annonce sans média (groupe WhatsApp public). Notre conseiller peut solliciter les photos auprès du propriétaire.
             </div>
           </div>
         </div>
@@ -85,27 +118,47 @@ export function FlashPlaceholder({
     )
   }
 
-  // Variant 'card' (compact pour la grille)
+  // Variant 'card' (compact pour la grille) — map en background + overlay sobre
+  const cardMapUrl = getStaticMapUrl({
+    lat: coords.lat,
+    lng: coords.lng,
+    zoom: knownLocation ? 13 : 11,
+    width: 400,
+    height: 300,
+    pin: knownLocation ? { color: 'f97316', size: 's' } : false,
+  })
+
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 p-3">
-      <div
-        className="absolute inset-0 opacity-[0.04] pointer-events-none"
-        style={{
-          backgroundImage:
-            'linear-gradient(to right, #0F172A 1px, transparent 1px), linear-gradient(to bottom, #0F172A 1px, transparent 1px)',
-          backgroundSize: '24px 24px',
-        }}
-      />
-      <div className="relative z-10 flex flex-col items-center text-center">
-        <div className="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center mb-2">
-          <Icon className="w-6 h-6" />
+    <div className="absolute inset-0 overflow-hidden bg-slate-100">
+      {cardMapUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={cardMapUrl}
+          alt={`Carte de ${lieu || 'la zone'}`}
+          className="absolute inset-0 w-full h-full object-cover"
+          loading="lazy"
+        />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-slate-100" />
+      )}
+
+      {/* Overlay sombre pour lisibilité */}
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-900/10 via-slate-900/30 to-slate-900/80" />
+
+      <div className="absolute inset-x-0 bottom-0 p-2.5 text-white">
+        <div className="flex items-center gap-1.5">
+          <div className="w-7 h-7 rounded-lg bg-white text-slate-900 flex items-center justify-center shadow-sm shrink-0">
+            <Icon className="w-3.5 h-3.5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="font-display text-xs font-bold capitalize truncate">
+              {typeLabel}
+            </p>
+            <p className="text-[9px] uppercase tracking-widest text-white/70 font-semibold">
+              Sans photo
+            </p>
+          </div>
         </div>
-        <p className="font-display text-xs font-bold text-slate-900 capitalize mb-0.5">
-          {typeLabel}
-        </p>
-        <p className="text-[9px] uppercase tracking-widest text-slate-400 font-semibold">
-          Sans photo
-        </p>
       </div>
     </div>
   )
