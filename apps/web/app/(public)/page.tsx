@@ -113,25 +113,26 @@ export default async function HomePage() {
       {/* 4. Bandeau confiance — gratuit/vérifié/anti-arnaque, juste après les biens */}
       <TrustStrip />
 
-      {/* 5. Chiffres clés — preuves de valeur tangibles */}
+      {/* 5. Chiffres clés — preuve sociale par les nombres (consensus) */}
       <StatsRibbon />
 
-      {/* 6. Parcours utilisateurs — 2 voies "Je suis…" (locataire vs proprio) */}
-      <JourneyShortcuts />
-
-      {/* 7. Déroulé visuel des 3 étapes du wizard */}
-      <GuidedSearchSteps />
-
-      {/* 8. ⚠️ Comment ça marche — bloc anti-arnaque (badges, KYC, coordonnées masquées) */}
+      {/* 6. ⚠️ Comment ça marche — le méfiant veut le mécanisme anti-arnaque
+            (coordonnées masquées, conseiller, KYC) AVANT qu'on lui demande d'agir */}
       <HowItWorks />
 
-      {/* 9. Témoignages clients — preuve sociale */}
+      {/* 7. Témoignages — preuve sociale humaine (visages/noms) > chiffres, identification */}
       <TestimonialsSection />
 
-      {/* 10. Près de chez moi (carte interactive avec filtres rapides) */}
+      {/* 8. Près de chez moi (carte interactive) — ré-engagement produit */}
       <NearMeSection initialBiens={biensWithPhoto} />
 
-      {/* 11. Marché en direct — opportunités captées par notre équipe veille */}
+      {/* 9. Parcours utilisateurs — routage locataire/proprio une fois réchauffé */}
+      <JourneyShortcuts />
+
+      {/* 10. Déroulé visuel des 3 étapes du wizard */}
+      <GuidedSearchSteps />
+
+      {/* 11. Marché en direct — rareté/urgence (aversion à la perte), proche de la décision */}
       <FlashOffersSection />
 
       {/* 9. Footer */}
