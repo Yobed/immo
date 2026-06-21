@@ -27,6 +27,7 @@ import {
   Eye,
   ArrowRight,
   Flame,
+  ShieldCheck,
 } from 'lucide-react'
 import * as motion from 'framer-motion/client'
 import { DiscoveryBar } from '@/components/bien/DiscoveryBar'
@@ -521,6 +522,16 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                       <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                       <span className="text-emerald-600 text-xs font-medium">Disponible</span>
                     </div>
+                    {!isOwner && (
+                      <p className="mt-3 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] text-[var(--text-muted)] leading-snug">
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" strokeWidth={2.5} />
+                        <span>Visite accompagnée</span>
+                        <span className="text-[var(--border)]">·</span>
+                        <span>0 frais pour vous</span>
+                        <span className="text-[var(--border)]">·</span>
+                        <span>paiement Mobile Money</span>
+                      </p>
+                    )}
                   </div>
 
                   {!isOwner ? (

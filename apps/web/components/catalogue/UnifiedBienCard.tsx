@@ -95,10 +95,11 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
               avec une offre flash). */}
           {bien.is_verifie ? (
             <span
-              className="absolute top-1.5 right-1.5 flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white shadow-md"
-              title={t.card.verified}
+              className="absolute top-1.5 right-1.5 flex items-center gap-0.5 @[260px]/card:gap-1 px-1.5 @[260px]/card:px-2 py-0.5 rounded-full bg-blue-600 text-white text-[8px] @[260px]/card:text-[10px] font-black uppercase tracking-wider shadow-md"
+              title="Propriétaire et documents contrôlés par notre équipe"
             >
-              <ShieldCheck className="w-3.5 h-3.5" strokeWidth={2.5} />
+              <ShieldCheck className="w-2.5 h-2.5 @[260px]/card:w-3 @[260px]/card:h-3" strokeWidth={2.5} />
+              Vérifié
             </span>
           ) : isFlash ? (
             <span

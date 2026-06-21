@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-import { X, Calendar, CalendarCheck, MessageCircle, BedDouble, ArrowLeft } from 'lucide-react'
+import { X, Calendar, CalendarCheck, MessageCircle, BedDouble, ArrowLeft, ShieldCheck } from 'lucide-react'
 import { VisiteRequestForm } from './VisiteRequestForm'
 import { useT } from '@/lib/i18n/client'
 import { DemanderContactWhatsAppButton } from './DemanderContactWhatsAppButton'
@@ -115,7 +115,21 @@ export function StickyMobileCTA({
   const [visible, setVisible] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>('visite')
+  const [weekViews, setWeekViews] = useState<number | null>(null)
   const t = useT()
+
+  // Vraies vues sur 7 jours (jamais de chiffre inventé). Masqué si < 3.
+  useEffect(() => {
+    if (!bienId) return
+    let cancelled = false
+    fetch(`/api/biens/${bienId}/view`, { method: 'GET' })
+      .then((r) => r.json())
+      .then((d: { count?: number }) => {
+        if (!cancelled && typeof d?.count === 'number') setWeekViews(d.count)
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [bienId])
 
   useEffect(() => {
     const handler = () => setVisible(window.scrollY > 100)
@@ -261,14 +275,16 @@ export function StickyMobileCTA({
               </a>
             </div>
 
-            {/* Hint text contextuel (optionnel mais incite au clic) */}
-            <motion.p 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.6 }}
-              className="text-[9px] font-bold uppercase tracking-[0.3em] text-white/40 drop-shadow-md"
-            >
-              Plus de 12 personnes intéressées cette semaine
-            </motion.p>
+            {/* Preuve sociale RÉELLE — uniquement si ≥ 3 vues sur 7 jours */}
+            {weekViews !== null && weekViews >= 3 && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.6 }}
+                className="text-[9px] font-bold uppercase tracking-[0.3em] text-white/40 drop-shadow-md"
+              >
+                {weekViews} personnes ont vu ce bien cette semaine
+              </motion.p>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -325,6 +341,16 @@ export function StickyMobileCTA({
                 >
                   <X className="w-5 h-5 text-[var(--text-muted)]" />
                 </button>
+              </div>
+
+              {/* Réassurance — répond aux peurs (frais, sécurité) au moment de décider */}
+              <div className="mx-4 mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-[var(--text)] leading-snug">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" strokeWidth={2.5} />
+                <span className="font-semibold">Visite accompagnée</span>
+                <span className="text-[var(--text-muted)]">·</span>
+                <span>0 frais pour vous</span>
+                <span className="text-[var(--text-muted)]">·</span>
+                <span>paiement Mobile Money</span>
               </div>
 
               {/* Onglets */}
