@@ -84,8 +84,8 @@ export default async function PublicLayout({ children }: { children: React.React
                 height={36}
                 className="w-9 h-9 object-contain transition-transform duration-200 group-hover:scale-105"
               />
-              <span className="font-display text-sm xl:text-base font-bold text-[var(--text)] hidden lg:inline-flex items-baseline gap-1 whitespace-nowrap tracking-tight">
-                BOGBE&apos;S<span className="text-[var(--secondary)]">GROUPE</span>
+              <span className="font-display text-sm xl:text-base font-bold text-[var(--text)] hidden lg:inline whitespace-nowrap tracking-tight">
+                BOGBE&apos;S <span className="text-[var(--secondary)]">GROUPE</span>
               </span>
             </Link>
           </MagneticWrapper>
