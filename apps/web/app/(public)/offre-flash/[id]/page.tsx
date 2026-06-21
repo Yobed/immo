@@ -49,12 +49,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     ? formatFCFA(bien.prix_value) + (bien.prix_unit === 'fcfa_par_mois' ? '/mois' : bien.prix_unit === 'fcfa_par_m2' ? '/m²' : '')
     : bien.prix_label ?? 'Prix sur demande'
 
-  const title = `${bien.titre} — ${prix}`
+  // Title : ~45 chars max pour rester sous 60 chars avec le suffix
+  // " | BOGBE'S GROUPE" ajouté par le template du layout.
+  const title = `${bien.type_bien} ${bien.commune ?? ''} — ${prix}`.trim().slice(0, 45)
+  // Description : ~150 chars max pour ne pas être tronquée mobile/Google.
   const description =
-    `🔥 Offre flash WhatsApp : ${bien.type_bien} à ${lieu}. ${prix}. ` +
-    `${bien.surface_m2 ? `${bien.surface_m2} m². ` : ''}` +
-    `${bien.nb_chambres ? `${bien.nb_chambres} chambre${bien.nb_chambres > 1 ? 's' : ''}. ` : ''}` +
-    `Réf ${bien.ref}. Annonce non vérifiée — validation par notre conseiller avant tout engagement.`
+    `🔥 ${bien.type_bien} à ${lieu}, ${prix}. ` +
+    `${bien.nb_chambres ? `${bien.nb_chambres} ch. ` : ''}` +
+    `Validation conseiller avant visite. Pas d'arnaque.`.slice(0, 150)
 
   const canonical = `${SITE_URL}/offre-flash/${bien.id}`
 

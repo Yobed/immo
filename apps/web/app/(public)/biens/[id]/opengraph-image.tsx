@@ -96,13 +96,28 @@ export default async function BienOg({ params }: { params: { id: string } }) {
           width: '100%',
           height: '100%',
           display: 'flex',
-          background: data.photo_url ? `url(${data.photo_url})` : 'linear-gradient(135deg, #020617 0%, #0f172a 100%)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          background: 'linear-gradient(135deg, #020617 0%, #0f172a 100%)',
           position: 'relative',
           fontFamily: 'system-ui, sans-serif',
         }}
       >
+        {/* Photo en arrière-plan (img tag - Satori-compatible vs background:url) */}
+        {data.photo_url && (
+          <img
+            src={data.photo_url}
+            alt=""
+            width={1200}
+            height={630}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            }}
+          />
+        )}
+
         {/* Overlay sombre pour lisibilité du texte */}
         <div
           style={{

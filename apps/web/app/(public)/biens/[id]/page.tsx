@@ -74,7 +74,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const prix = bien.prix_vente_fcfa
     ? formatFCFA(bien.prix_vente_fcfa)
     : bien.prix_mois_fcfa ? `${formatFCFA(bien.prix_mois_fcfa)}/mois` : ''
-  const desc = `${bien.type_bien} à ${lieu}${prix ? ` — ${prix}` : ''}. Découvrez ce bien sur BOGBE’S GROUPE, la plateforme immobilière N°1 en Côte d’Ivoire.`
+  // Description : ~155 chars max pour ne pas être tronquée mobile/Google.
+  const desc = `${bien.type_bien} à ${lieu}${prix ? ` — ${prix}` : ''}. Annonce vérifiée BOGBE'S GROUPE, sans arnaque.`.slice(0, 155)
 
   // Generate JSON-LD Property schema for rich snippets
   const proprietaire = (bien as any)['profiles!proprietaire_id'] as any
@@ -101,7 +102,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const jsonLdSchema = generatePropertySchema(schemaInput, siteUrl)
 
   return {
-    title: `${bien.titre} — ${lieu} | BOGBE’S GROUPE`,
+    // Title : ~45 chars max pour rester sous 60 chars avec le suffix
+    // " | BOGBE'S GROUPE" ajouté par le template du layout.
+    title: `${bien.type_bien} ${bien.commune ?? ''} — ${prix}`.trim().slice(0, 45),
     description: desc,
     keywords: [`immobilier luxe Abidjan`, `location meublée ${bien.commune}`, `achat appartement ${bien.commune}`, `BOGBE’S GROUPE prestige`, bien.titre],
     authors: [{ name: "BOGBE’S GROUPE" }],

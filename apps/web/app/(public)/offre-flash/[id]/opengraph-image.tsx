@@ -61,13 +61,28 @@ export default async function FlashOg({ params }: { params: { id: string } }) {
           width: '100%',
           height: '100%',
           display: 'flex',
-          background: mapUrl ? `url(${mapUrl})` : 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
           position: 'relative',
           fontFamily: 'system-ui, sans-serif',
         }}
       >
+        {/* Map du quartier en arrière-plan (img tag - Satori-compatible) */}
+        {mapUrl && (
+          <img
+            src={mapUrl}
+            alt=""
+            width={1200}
+            height={630}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+            }}
+          />
+        )}
+
         {/* Overlay sombre */}
         <div
           style={{
