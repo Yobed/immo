@@ -14,7 +14,7 @@ import {
 import Link from 'next/link';
 
 export const metadata = {
-  title: "Services BOGBE'S GROUPE — Gestion locative, estimation, conciergerie à Abidjan",
+  title: "Services premium — Gestion locative, estimation, conciergerie à Abidjan",
   description: "Au-delà des annonces : gestion locative complète, estimation gratuite, conciergerie VIP et marketing immobilier de luxe pour vos biens à Abidjan et en Côte d'Ivoire.",
   keywords: ['gestion locative abidjan', 'estimation immobilière côte d\'ivoire', 'conciergerie immobilière luxe', 'agence immobilière premium abidjan'],
   alternates: { canonical: '/services' },

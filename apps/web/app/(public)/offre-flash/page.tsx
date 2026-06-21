@@ -11,7 +11,7 @@ import { formatCount } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
 export const metadata = {
-  title: "Offres flash WhatsApp — bons plans immobiliers en temps réel | BOGBE'S GROUPE",
+  title: "Offres flash WhatsApp — bons plans immobiliers en temps réel",
   description: "9 000+ annonces immobilières captées sur les groupes WhatsApp de Côte d'Ivoire. Validation conseiller incluse avant chaque visite. Pas d'arnaque, pas d'intermédiaires douteux.",
   keywords: ['annonces whatsapp immobilier abidjan', 'bons plans location ci', 'urgent appartement cocody', 'offres flash immobilier abidjan'],
   alternates: { canonical: '/offre-flash' },

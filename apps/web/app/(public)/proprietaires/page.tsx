@@ -4,7 +4,7 @@ import * as motionClient from 'framer-motion/client';
 import YieldCalculator from '@/components/owners/YieldCalculator';
 
 export const metadata: Metadata = {
-  title: "Confiez-nous votre bien immobilier | BOGBE'S GROUPE",
+  title: "Confiez-nous votre bien immobilier",
   description: "Vous êtes propriétaire à Abidjan ? Vendez ou louez votre bien avec BOGBE'S GROUPE. Gestion locative, estimation gratuite et marketing de luxe pour vos villas et appartements.",
   keywords: ['vendre bien immobilier abidjan', 'gestion locative abidjan', 'mettre en location appartement abidjan', "estimation immobilière côte d'ivoire", 'agence immobilière de luxe abidjan'],
   openGraph: {
