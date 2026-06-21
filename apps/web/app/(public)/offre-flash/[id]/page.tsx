@@ -57,10 +57,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     `Réf ${bien.ref}. Annonce non vérifiée — validation par notre conseiller avant tout engagement.`
 
   const canonical = `${SITE_URL}/offre-flash/${bien.id}`
-  // Si pas d'image réelle scrapée → on utilise le logo BOGBE'S générique.
-  // JAMAIS une image stock d'un autre bien : ça créerait une fausse promesse
-  // dans l'aperçu WhatsApp qui serait démentie par la fiche détail.
-  const image = bien.image_url || `${SITE_URL}/og-image.jpg`
 
   return {
     title,
@@ -72,13 +68,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title,
       description,
       siteName: "BOGBE'S GROUPE",
-      images: [{ url: image, width: 1200, height: 630, alt: bien.titre }],
+      // images: auto-detected via app/(public)/offre-flash/[id]/opengraph-image.tsx
+      // qui génère un visuel branded (map du quartier + overlay prix + badge
+      // "à valider"), beaucoup plus impactant qu'une image générique pour
+      // les previews WhatsApp.
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [image],
     },
   }
 }

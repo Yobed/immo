@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "BOGBE'S GROUPE — Accès Anticipé",
     description: "La première plateforme immobilière de confiance en Côte d'Ivoire. Inscrivez-vous pour l'accès en avant-première.",
-    images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
+    // images: auto-detected via app/opengraph-image.tsx convention.
   },
 }
 

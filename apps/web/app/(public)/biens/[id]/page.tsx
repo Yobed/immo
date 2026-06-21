@@ -109,7 +109,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     openGraph: {
       title: bien.titre,
       description: desc,
-      images: photo ? [{ url: photo, width: 1200, height: 800, alt: bien.titre }] : [],
+      // images: auto-detected via app/(public)/biens/[id]/opengraph-image.tsx
+      // qui génère un visuel branded (photo + overlay prix + commune + badge
+      // BOGBE'S Vérifié), beaucoup plus impactant que la photo brute pour les
+      // previews WhatsApp/Facebook.
       type: 'article',
     },
     twitter: { card: 'summary_large_image', title: bien.titre, description: desc },

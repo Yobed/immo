@@ -77,7 +77,8 @@ export const metadata: Metadata = {
     siteName: "BOGBE’S GROUPE",
     title: "BOGBE’S GROUPE — Immobilier en Côte d’Ivoire",
     description: "Trouvez votre bien immobilier en Côte d’Ivoire. Location, vente à Abidjan.",
-    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: "BOGBE’S GROUPE" }],
+    // images: auto-detected via app/opengraph-image.tsx convention.
+    // Les pages /biens/[id] et /offre-flash/[id] ont leur propre OG dynamique.
   },
   twitter: {
     card: 'summary_large_image',
@@ -120,7 +121,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 legalName: "BOGBE'S GROUPE",
                 url: SITE_URL,
                 logo: `${SITE_URL}/bogbes-logo.png`,
-                image: `${SITE_URL}/og-image.jpg`,
+                image: `${SITE_URL}/opengraph-image`,
                 description: "Plateforme immobilière premium de Côte d'Ivoire. Location, vente et résidences meublées à Abidjan, sans arnaque.",
                 address: {
                   '@type': 'PostalAddress',
