@@ -54,3 +54,6 @@ build/
 # Misc
 .DS_Store
 *.pem
+
+# Outil tiers vendorise (repo git nested, hors projet)
+everything-claude-code/
