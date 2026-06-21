@@ -20,10 +20,11 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run start',
+    // En CI : build prealable + start. En local : dev qui lit .env.local.
+    command: process.env.CI ? 'npm run start' : 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    timeout: 180_000,
     // stdout: 'pipe', // activer pour debug
   },
 })

@@ -8,6 +8,14 @@
 
 import { test, expect } from '@playwright/test'
 
+// Cookie banner + onboarding modal — on les marque comme vus avant chaque test
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    window.localStorage.setItem('cookie-consent', 'accepted')
+    window.localStorage.setItem('bgp_onboarded', '1')
+  })
+})
+
 test.describe('Smoke tests — pages publiques répondent', () => {
   const routes = [
     { path: '/', name: 'home' },
