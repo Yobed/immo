@@ -56,7 +56,7 @@ export function HeroEditorial({ bgImage = DEFAULT_BG, featuredBiens = [] }: Hero
   }, [])
 
   return (
-    <section ref={sectionRef} className="relative w-full md:min-h-[720px] md:h-[100svh] md:max-h-[980px] bg-[#0a0e1a] overflow-x-hidden overflow-y-hidden">
+    <section ref={sectionRef} className="relative w-full md:min-h-[680px] md:h-[88vh] md:max-h-[920px] bg-[#0a0e1a] overflow-x-hidden overflow-y-hidden">
       {/* Image de fond avec parallax + zoom subtil au scroll
           → effet cinématographique. Désactivé si l'utilisateur préfère reduced motion. */}
       <motion.div

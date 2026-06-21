@@ -103,38 +103,35 @@ export default async function HomePage() {
       {/* 1. Hero éditorial — search + wizard CTA */}
       <HeroEditorial bgImage={HERO_BG} featuredBiens={premiumProperties} />
 
-      {/* 1bis. Bandeau confiance — répond aux peurs novice (gratuit/vérifié/anti-arnaque)
-            avant tout, mobile inclus (l'intro du hero est masquée < md) */}
-      <TrustStrip />
-
-      {/* 1ter. Chiffres clés — preuves de valeur tangibles juste sous le hero */}
-      <StatsRibbon />
-
-      {/* 2. Dernières visites — auto-hidden if no localStorage history */}
+      {/* 2. Dernières visites — auto-hidden si pas d'historique (retour visiteur) */}
       <RecentlyViewed />
 
-      {/* 3. Parcours utilisateurs — 2 voies "Je suis…" (locataire vs proprio) */}
-      <JourneyShortcuts />
-
-      {/* 3bis. Déroulé visuel des 3 étapes du wizard — rend visible la promesse
-              "30 secondes" annoncée dans le Hero CTA */}
-      <GuidedSearchSteps />
-
-      {/* 4. ⚠️ Comment ça marche — bloc anti-arnaque AVANT les annonces.
-            Adresse la méfiance immédiate du marché ivoirien : badges, KYC,
-            coordonnées masquées, deux pipelines clairement étiquetés. */}
-      <HowItWorks />
-
-      {/* 5. Témoignages clients juste après la promesse anti-arnaque — preuve sociale immédiate */}
-      <TestimonialsSection />
-
-      {/* 6. Près de chez moi (carte interactive avec filtres rapides) */}
-      <NearMeSection initialBiens={biensWithPhoto} />
-
-      {/* 7. Sélection éditoriale */}
+      {/* 3. 🏠 BIENS RÉELS EN PREMIER — un novice doit voir le produit (photos + prix)
+            dès le 1er scroll, sinon il décroche en < 8s. Remonté tout en haut. */}
       <FeaturedProperties initialBiens={biensWithPhoto} />
 
-      {/* 8. Marché en direct — opportunités captées par notre équipe veille */}
+      {/* 4. Bandeau confiance — gratuit/vérifié/anti-arnaque, juste après les biens */}
+      <TrustStrip />
+
+      {/* 5. Chiffres clés — preuves de valeur tangibles */}
+      <StatsRibbon />
+
+      {/* 6. Parcours utilisateurs — 2 voies "Je suis…" (locataire vs proprio) */}
+      <JourneyShortcuts />
+
+      {/* 7. Déroulé visuel des 3 étapes du wizard */}
+      <GuidedSearchSteps />
+
+      {/* 8. ⚠️ Comment ça marche — bloc anti-arnaque (badges, KYC, coordonnées masquées) */}
+      <HowItWorks />
+
+      {/* 9. Témoignages clients — preuve sociale */}
+      <TestimonialsSection />
+
+      {/* 10. Près de chez moi (carte interactive avec filtres rapides) */}
+      <NearMeSection initialBiens={biensWithPhoto} />
+
+      {/* 11. Marché en direct — opportunités captées par notre équipe veille */}
       <FlashOffersSection />
 
       {/* 9. Footer */}
