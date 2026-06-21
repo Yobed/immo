@@ -137,7 +137,12 @@ export default async function HomePage() {
       {/* 11. Marché en direct — rareté/urgence (aversion à la perte), proche de la décision */}
       <FlashOffersSection />
 
-      {/* 9. Footer */}
+      {/* 12. CTA final propriétaire (2 voies : compte Premium / WhatsApp 1 min).
+            Peak-end + répétition de l'action signup pour le 2e public ; catche
+            le proprio qui a parcouru toute la page. */}
+      <PublishChoiceTeaser />
+
+      {/* 13. Footer */}
       <Footer />
     </main>
   )
