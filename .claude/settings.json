@@ -3,7 +3,21 @@
     "allow": [
       "Bash(git check-ignore *)",
       "Bash(git rm *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(curl -sI \"https://bogbes-groupe.vercel.app/dashboard\")",
+      "Bash(git commit -m 'fix\\(catalogue\\): filtre type_offre flash tolerant aux variantes scraping *)",
+      "Bash(git commit -m 'fix\\(catalogue\\): ne plus dedupliquer 2 biens BOGBE'\\\\''S entre eux *)",
+      "Bash(npx next *)",
+      "Bash(git commit -m 'feat\\(admin\\): page de validation KYC + page proprio reservations recues *)",
+      "Bash(git commit -m 'feat\\(notif\\): proprio notifie lors de chaque etape reservation sans PII locataire *)",
+      "Bash(cat \"C:\\\\\\\\Users\\\\\\\\WILFRIED\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\claude\\\\\\\\c--Users-WILFRIED-OneDrive---Gravel-Ivoire-Bureau-immo\\\\\\\\18f5e58a-9afe-4d23-a190-2a14672058bc\\\\\\\\tasks\\\\\\\\blh3y7hs5.output\")",
+      "Bash(git commit -m 'feat\\(notif\\): proprio notifie aussi pour visites \\(creation + validation admin\\) sans PII *)",
+      "Bash(git commit -m 'fix\\(pro\\): page reservations-recues respecte l'\\\\''intermediation totale *)",
+      "Bash(git commit -m 'feat\\(dashboard\\): KPI cards cliquables avec href + chevron *)",
+      "Bash(git commit -m 'fix\\(pro\\): reservations-recues query directe par proprietaire_id + schema correct *)",
+      "Bash(git commit -m 'fix\\(ui\\): titre bien tronque proprement sur cartes reservation *)"
     ]
   }
 }
