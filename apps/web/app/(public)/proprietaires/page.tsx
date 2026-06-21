@@ -17,7 +17,7 @@ const valueProps = [
   {
     icon: <ShieldCheck className="w-8 h-8" />,
     title: "Sérénité Totale",
-    description: "Nous filtrons rigoureusement chaque locataire et gérons l'intégralité des aspects juridiques et financiers sous le cadre OHADA."
+    description: "Nous filtrons rigoureusement chaque locataire et gérons l'intégralité des aspects juridiques et financiers dans le cadre légal en vigueur en Côte d'Ivoire (droit OHADA)."
   },
   {
     icon: <TrendingUp className="w-8 h-8" />,
@@ -89,6 +89,49 @@ export default function ProprietairesPage() {
               <p className="text-[var(--text-muted)] leading-relaxed font-light">{prop.description}</p>
             </motionClient.div>
           ))}
+        </div>
+      </section>
+
+      {/* Transparence tarifaire — répond à LA question du propriétaire novice
+          (« combien ça me coûte ? ») au lieu de la laisser sans réponse.
+          Le taux de commission est négocié au cas par cas : volontairement non
+          chiffré ici, on annonce le principe (gratuit à déposer, commission au
+          résultat) et que le taux est convenu avec le propriétaire. */}
+      <section className="py-24 bg-[var(--surface-card)] border-y border-[var(--border)]">
+        <div className="container mx-auto px-6">
+          <div className="max-w-3xl mx-auto text-center mb-16">
+            <h2 className="text-[var(--accent-luxury)] font-sans tracking-[0.5em] uppercase text-[10px] font-bold mb-6 block">En toute transparence</h2>
+            <h3 className="font-display text-4xl md:text-5xl font-bold text-[var(--text)] tracking-tight">
+              Combien ça vous coûte ?
+            </h3>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {[
+              {
+                icon: <Banknote className="w-7 h-7" />,
+                title: 'Déposer votre bien : gratuit',
+                desc: "Pas de frais d'inscription, pas d'abonnement. Vous publiez votre bien sans rien payer.",
+              },
+              {
+                icon: <Award className="w-7 h-7" />,
+                title: 'Une seule commission, sur la transaction',
+                desc: "Notre rémunération est une commission sur la location ou la vente — jamais de frais cachés. Le taux est convenu avec vous selon votre bien, puis confirmé par écrit avant tout engagement.",
+              },
+              {
+                icon: <ShieldCheck className="w-7 h-7" />,
+                title: 'Vous recevez le net, par Mobile Money',
+                desc: "Votre part vous est reversée directement par Wave ou Orange Money, avec un reporting clair sur votre espace.",
+              },
+            ].map((item, i) => (
+              <div key={i} className="p-8 bg-[var(--background)] border border-[var(--border)] rounded-2xl">
+                <div className="w-14 h-14 rounded-2xl bg-accent-luxury/10 flex items-center justify-center mb-6 text-[var(--accent-luxury)]">
+                  {item.icon}
+                </div>
+                <h4 className="font-display text-xl font-bold text-[var(--text)] mb-3 tracking-tight">{item.title}</h4>
+                <p className="text-[var(--text-muted)] leading-relaxed font-light text-sm">{item.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

@@ -118,8 +118,8 @@ const ServicesPage = () => {
             <div>
               <h2 className="text-4xl lg:text-6xl font-display font-medium mb-6">Sapphire <br/><span className="text-[var(--accent-luxury)] underline decoration-1 underline-offset-8">Intelligence 24/7</span></h2>
               <p className="text-xl text-white/50 leading-relaxed font-light">
-                Oubliez les recherches fastidieuses. Votre Assistant de Prestige, <span className="text-white font-medium">Sapphire Intelligence</span>, connaît chaque bien sur le bout des doigts. 
-                Une recherche par critères, une recommandation de quartier ou une planification de visite : votre assistant personnel est toujours disponible.
+                <span className="text-white font-medium">Sapphire</span> est notre assistante intelligente sur WhatsApp : elle comprend ce que vous cherchez et vous propose des biens en quelques secondes, à toute heure.
+                Dès que vous voulez visiter, <span className="text-white font-medium">un conseiller humain BOGBE’S prend le relais</span> et vous accompagne jusqu’à la signature.
               </p>
             </div>
             <div className="flex flex-wrap gap-6 pt-4">
@@ -129,7 +129,7 @@ const ServicesPage = () => {
               </div>
               <div className="flex items-center gap-3 px-6 py-4 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl">
                 <Waves className="w-5 h-5 text-[var(--accent-luxury)]" />
-                <span className="text-sm font-medium">RAG Real-Time Search</span>
+                <span className="text-sm font-medium">Recherche en temps réel</span>
               </div>
             </div>
           </div>

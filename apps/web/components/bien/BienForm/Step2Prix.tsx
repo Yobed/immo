@@ -61,8 +61,9 @@ export function Step2Prix({ form }: { form: UseFormReturn<BienFormData> }) {
           <Input
             label="Dépôt de garantie (FCFA)"
             type="number"
-            placeholder="Ex: 500000"
+            placeholder="Ex: 500000 (souvent 1 à 3 mois de loyer)"
             {...register('depot_garantie_fcfa', { valueAsNumber: true })}
+            hint="Caution versée par le locataire à l'entrée, restituée à son départ s'il n'y a pas de dégâts. Ce n'est pas une commission BOGBE'S."
           />
         </>
       )}

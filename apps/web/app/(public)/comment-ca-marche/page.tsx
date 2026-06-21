@@ -43,7 +43,7 @@ export default function CommentCaMarchePage() {
             num={1}
             icon={Search}
             title="Tu cherches"
-            desc="Parcours notre catalogue (biens vérifiés + offres flash WhatsApp) ou écris à Sapphire sur WhatsApp pour qu'elle te propose 5 biens correspondant à tes critères."
+            desc="Parcours notre catalogue (biens vérifiés + offres flash WhatsApp) ou écris à Sapphire, notre assistante IA, sur WhatsApp : elle te propose 5 biens selon tes critères, puis un conseiller humain prend le relais."
             cta={{ label: 'Voir le catalogue', href: '/catalogue' }}
           />
           <StepCard

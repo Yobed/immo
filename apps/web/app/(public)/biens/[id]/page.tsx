@@ -526,14 +526,22 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
                   {!isOwner ? (
                     <div className="space-y-3">
                       {isNuitee ? (
-                        <Link
-                          href={`/reservations/nouvelle?bienId=${bien.id}`}
-                          className="flex items-center justify-center w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-accent-luxury transition-all duration-300 active:scale-[0.98]"
-                        >
-                          Demander une visite
-                        </Link>
+                        <>
+                          <Link
+                            href={`/reservations/nouvelle?bienId=${bien.id}`}
+                            className="flex items-center justify-center w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-accent-luxury transition-all duration-300 active:scale-[0.98]"
+                          >
+                            Réserver ce séjour
+                          </Link>
+                          <p className="text-[11px] text-[var(--text-muted)] leading-snug text-center">
+                            Choisissez vos dates, puis réglez en ligne pour bloquer la réservation. Un conseiller confirme avec le propriétaire.
+                          </p>
+                        </>
                       ) : (
                         <>
+                          <p className="text-[11px] text-[var(--text-muted)] leading-snug mb-1">
+                            Intéressé ? <strong className="text-[var(--text)]">Trois façons d&apos;avancer, toutes gratuites</strong> — choisissez la plus simple pour vous :
+                          </p>
                           <VIPConciergeButton
                             bienTitre={bien.titre}
                             bienLieu={`${bien.commune}${bien.quartier ? `, ${bien.quartier}` : ''}`}

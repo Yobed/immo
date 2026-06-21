@@ -7,6 +7,7 @@ import { FeaturedProperties } from '@/components/landing/FeaturedProperties'
 import { PrestigeCommunes } from '@/components/landing/PrestigeCommunes'
 import { FlashOffersSection } from '@/components/landing/FlashOffersSection'
 import { HowItWorks } from '@/components/landing/HowItWorks'
+import { TrustStrip } from '@/components/landing/TrustStrip'
 import { ServicesPillars } from '@/components/landing/ServicesPillars'
 import { PublishChoiceTeaser } from '@/components/landing/PublishChoiceTeaser'
 import { MapZones } from '@/components/landing/MapZones'
@@ -102,7 +103,11 @@ export default async function HomePage() {
       {/* 1. Hero éditorial — search + wizard CTA */}
       <HeroEditorial bgImage={HERO_BG} featuredBiens={premiumProperties} />
 
-      {/* 1bis. Chiffres clés — preuves de valeur tangibles juste sous le hero */}
+      {/* 1bis. Bandeau confiance — répond aux peurs novice (gratuit/vérifié/anti-arnaque)
+            avant tout, mobile inclus (l'intro du hero est masquée < md) */}
+      <TrustStrip />
+
+      {/* 1ter. Chiffres clés — preuves de valeur tangibles juste sous le hero */}
       <StatsRibbon />
 
       {/* 2. Dernières visites — auto-hidden if no localStorage history */}
