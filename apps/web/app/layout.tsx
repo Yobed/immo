@@ -104,6 +104,56 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       suppressHydrationWarning
     >
       <body className="font-sans bg-[var(--background)] text-[var(--text)] antialiased overflow-x-hidden" suppressHydrationWarning>
+        {/* JSON-LD global : Organization + WebSite avec SearchAction.
+            Permet à Google d'afficher le sitelinks search box dans la
+            SERP "BOGBE'S GROUPE" et fournit les infos officielles de
+            l'entreprise (logo, nom légal, contact, réseaux). */}
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([
+              {
+                '@context': 'https://schema.org',
+                '@type': 'Organization',
+                name: "BOGBE'S GROUPE",
+                legalName: "BOGBE'S GROUPE",
+                url: SITE_URL,
+                logo: `${SITE_URL}/bogbes-logo.png`,
+                image: `${SITE_URL}/og-image.jpg`,
+                description: "Plateforme immobilière premium de Côte d'Ivoire. Location, vente et résidences meublées à Abidjan, sans arnaque.",
+                address: {
+                  '@type': 'PostalAddress',
+                  addressLocality: 'Abidjan',
+                  addressCountry: 'CI',
+                },
+                contactPoint: {
+                  '@type': 'ContactPoint',
+                  telephone: '+225 05 44 87 20 51',
+                  contactType: 'customer service',
+                  availableLanguage: ['fr', 'en'],
+                  areaServed: 'CI',
+                },
+                areaServed: { '@type': 'Country', name: "Côte d'Ivoire" },
+              },
+              {
+                '@context': 'https://schema.org',
+                '@type': 'WebSite',
+                url: SITE_URL,
+                name: "BOGBE'S GROUPE",
+                inLanguage: 'fr-CI',
+                potentialAction: {
+                  '@type': 'SearchAction',
+                  target: {
+                    '@type': 'EntryPoint',
+                    urlTemplate: `${SITE_URL}/recherche?q={search_term_string}`,
+                  },
+                  'query-input': 'required name=search_term_string',
+                },
+              },
+            ]),
+          }}
+        />
         <I18nProvider locale={locale}>
           <ToastProvider>
             <ThemeProvider>

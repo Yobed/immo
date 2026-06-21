@@ -1,7 +1,17 @@
 import Link from 'next/link'
 import { ArrowLeft, Clock } from 'lucide-react'
 
-export const metadata = { title: 'À propos' }
+export const metadata = {
+  title: "À propos de BOGBE'S GROUPE — La plateforme immobilière sans arnaque de Côte d'Ivoire",
+  description: "Notre mission : sécuriser le marché immobilier ivoirien. Découvrez notre équipe, notre méthode et notre engagement pour des transactions sans intermédiaires douteux.",
+  keywords: ['bogbes groupe à propos', 'agence immobilière abidjan', 'plateforme immobilière côte d\'ivoire', 'équipe immobilière ci'],
+  alternates: { canonical: '/a-propos' },
+  openGraph: {
+    title: "À propos de BOGBE'S GROUPE — Sécuriser l'immobilier ivoirien",
+    description: "Une équipe, une méthode anti-arnaque, une promesse : que chaque transaction immobilière en Côte d'Ivoire se déroule sans accroc.",
+    type: 'website' as const,
+  },
+}
 
 export default function AProposPage() {
   return (

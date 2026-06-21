@@ -2,8 +2,15 @@ import Link from 'next/link'
 import { Search, MessageCircle, Home, ShieldCheck, Flame, ArrowRight } from 'lucide-react'
 
 export const metadata = {
-  title: 'Comment ça marche',
-  description: 'Le parcours simple en 3 étapes pour trouver, contacter et visiter votre futur bien immobilier avec BOGBE\'S GROUPE.',
+  title: "Comment ça marche — Le parcours BOGBE'S GROUPE en 3 étapes",
+  description: "Trouvez, contactez, visitez : 3 étapes simples pour louer ou acheter sereinement votre bien immobilier en Côte d'Ivoire. Coordonnées masquées, intermédiation totale, zéro arnaque.",
+  keywords: ['comment louer abidjan', 'parcours achat immobilier ci', 'sécurité location appartement', 'bogbes groupe méthode'],
+  alternates: { canonical: '/comment-ca-marche' },
+  openGraph: {
+    title: "Comment trouver un bien à Abidjan sans se faire arnaquer — BOGBE'S GROUPE",
+    description: "3 étapes simples : trouver, contacter (coordonnées masquées), visiter avec un conseiller. La méthode anti-arnaque qui fait nos résultats.",
+    type: 'article',
+  },
 }
 
 export default function CommentCaMarchePage() {

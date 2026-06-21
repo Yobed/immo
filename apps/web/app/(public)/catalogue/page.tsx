@@ -24,8 +24,15 @@ const CatalogueMapView = dynamicImport(
 
 export const dynamic = 'force-dynamic'
 export const metadata = {
-  title: 'Catalogue complet',
-  description: 'Tous les biens : vérifiés BOGBE\'S + offres flash WhatsApp en temps réel.',
+  title: "Catalogue immobilier complet à Abidjan — 9000+ biens | BOGBE'S GROUPE",
+  description: "Trouvez votre bien à Abidjan : villas, appartements, studios et résidences meublées à Cocody, Plateau, Marcory, Yopougon. Catalogue vérifié BOGBE'S + offres flash WhatsApp en temps réel.",
+  keywords: ['immobilier abidjan', 'location appartement abidjan', 'villa cocody', 'achat bien côte d\'ivoire', 'studio meublé abidjan', 'catalogue immobilier ci'],
+  alternates: { canonical: '/catalogue' },
+  openGraph: {
+    title: "Catalogue immobilier complet à Abidjan — BOGBE'S GROUPE",
+    description: "Villas, appartements, studios et résidences meublées dans toutes les communes d'Abidjan. Vérifiés + offres flash en temps réel.",
+    type: 'website',
+  },
 }
 
 interface PageProps {
