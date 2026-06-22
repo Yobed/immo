@@ -14,23 +14,30 @@ import { createClient } from '@supabase/supabase-js'
 export async function getViewCounts7d(bienIds: string[]): Promise<Record<string, number>> {
   if (bienIds.length === 0) return {}
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!.trim(),
-    process.env.SUPABASE_SERVICE_ROLE_KEY!.trim(),
-  )
-  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  // Non-bloquant : la preuve sociale est un bonus, elle ne doit JAMAIS casser une
+  // page. Toute erreur (env manquant, requête KO, RLS) → on rend {} silencieusement.
+  try {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!url || !key) return {}
 
-  const { data } = await supabase
-    .from('analytics_events')
-    .select('bien_id')
-    .eq('event_type', 'vue_bien')
-    .gte('created_at', since)
-    .in('bien_id', bienIds)
-    .limit(20000)
+    const supabase = createClient(url.trim(), key.trim())
+    const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
 
-  const counts: Record<string, number> = {}
-  for (const r of (data ?? []) as { bien_id: string }[]) {
-    if (r.bien_id) counts[r.bien_id] = (counts[r.bien_id] ?? 0) + 1
+    const { data } = await supabase
+      .from('analytics_events')
+      .select('bien_id')
+      .eq('event_type', 'vue_bien')
+      .gte('created_at', since)
+      .in('bien_id', bienIds)
+      .limit(20000)
+
+    const counts: Record<string, number> = {}
+    for (const r of (data ?? []) as { bien_id: string }[]) {
+      if (r.bien_id) counts[r.bien_id] = (counts[r.bien_id] ?? 0) + 1
+    }
+    return counts
+  } catch {
+    return {}
   }
-  return counts
 }

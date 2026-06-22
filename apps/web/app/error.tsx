@@ -15,6 +15,40 @@ export default function GlobalError({
   useEffect(() => {
     // eslint-disable-next-line no-console
     console.error('[error.tsx]', error)
+
+    // Cause #1 d'erreur "fantôme" : un déploiement a changé les hash des chunks JS
+    // pendant que l'utilisateur naviguait → l'ancien chunk n'existe plus (ChunkLoadError).
+    // Un simple rechargement récupère les nouveaux chunks. Garde anti-boucle (10 s).
+    const msg = `${error?.name ?? ''} ${error?.message ?? ''}`
+    const isChunkError = /ChunkLoadError|Loading chunk [\d]+ failed|dynamically imported module|module script failed/i.test(msg)
+    if (isChunkError) {
+      try {
+        const last = Number(sessionStorage.getItem('chunkReloadAt') || '0')
+        if (Date.now() - last > 10000) {
+          sessionStorage.setItem('chunkReloadAt', String(Date.now()))
+          window.location.reload()
+          return
+        }
+      } catch { /* sessionStorage indispo — on affiche l'écran d'erreur */ }
+    }
+
+    // Sinon : on logge la VRAIE erreur côté serveur (error_logs) — sans ça on est
+    // aveugles ("On a noté l'incident" était un mensonge jusqu'ici).
+    try {
+      fetch('/api/client-error', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: error?.message ?? 'unknown',
+          name: error?.name ?? null,
+          digest: error?.digest ?? null,
+          stack: error?.stack ?? null,
+          url: typeof window !== 'undefined' ? window.location.href : null,
+          ua: typeof navigator !== 'undefined' ? navigator.userAgent : null,
+        }),
+        keepalive: true,
+      }).catch(() => {})
+    } catch { /* non-bloquant */ }
   }, [error])
 
   return (
