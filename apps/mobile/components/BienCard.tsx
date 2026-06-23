@@ -3,6 +3,7 @@ import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { formatFCFA } from '@immo-ci/shared'
 import type { Database } from '@immo-ci/shared'
+import { FavoriteButton } from './FavoriteButton'
 import { colors, spacing, borderRadius, typography } from '../constants/theme'
 
 // Type Bien depuis la base de données réelle (pas de prix unique ni photo_principale_url)
@@ -41,13 +42,16 @@ export function BienCard({ bien }: BienCardProps) {
       onPress={() => router.push(`/bien/${bien.id}`)}
       activeOpacity={0.85}
     >
-      <Image
-        source={{ uri: bien.cover_url ?? 'https://via.placeholder.com/300x200?text=Immo+CI' }}
-        style={styles.image}
-        contentFit="cover"
-        transition={200}
-        placeholder={{ blurhash: 'L6PZfSi_.AyE_3t7t7R**0o#DgR4' }}
-      />
+      <View>
+        <Image
+          source={{ uri: bien.cover_url ?? 'https://via.placeholder.com/300x200?text=Immo+CI' }}
+          style={styles.image}
+          contentFit="cover"
+          transition={200}
+          placeholder={{ blurhash: 'L6PZfSi_.AyE_3t7t7R**0o#DgR4' }}
+        />
+        <FavoriteButton bienId={bien.id} onImage style={styles.fav} />
+      </View>
       <View style={styles.body}>
         <Text style={styles.titre} numberOfLines={2}>{bien.titre}</Text>
         <Text style={styles.commune}>{bien.commune} · {bien.type_bien}</Text>
@@ -71,6 +75,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   image: { width: '100%', height: 180 },
+  fav: { position: 'absolute', top: spacing.sm, right: spacing.sm },
   body: { padding: spacing.md },
   titre: { ...typography.h3, color: colors.text, marginBottom: spacing.xs },
   commune: { ...typography.caption, color: colors.textLight, marginBottom: spacing.sm },

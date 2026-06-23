@@ -1,4 +1,6 @@
-export type { CommuneAbidjan, TypeBien, RoleUtilisateur } from '../constants/communes'
+export type { CommuneAbidjan, RoleUtilisateur } from '../constants/communes'
+// TypeBien vient de ../constants/biens (réexporté par l'index racine) — pas ici, sinon doublon.
+export type { Database } from './database'
 
 // Types de base plateforme (types complets dans database.ts — généré par Supabase CLI en plan 01-02)
 export interface PaginatedResponse<T> {

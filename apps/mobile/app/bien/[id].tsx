@@ -7,32 +7,44 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
+  Linking,
 } from 'react-native'
 import { Image } from 'expo-image'
+import { Ionicons } from '@expo/vector-icons'
 import { useLocalSearchParams } from 'expo-router'
 import { supabase } from '../../lib/supabase'
 import { useSession } from '../../hooks/useAuth'
+import { pickCover, type MediaRow } from '../../lib/media'
+import { FavoriteButton } from '../../components/FavoriteButton'
 import { formatFCFA } from '@immo-ci/shared'
 import type { Database } from '@immo-ci/shared'
 import { colors, spacing, typography, borderRadius } from '../../constants/theme'
 
 type BienRow = Database['public']['Tables']['biens']['Row']
 
+// Numéro conseiller BOGBE'S — modèle d'intermédiation : pas de contact direct proprio
+const CONSEILLER_WA = '2250544872051'
+
 export default function FicheBienScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const { session } = useSession()
   const [bien, setBien] = useState<BienRow | null>(null)
+  const [cover, setCover] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!id) return
     supabase
       .from('biens')
-      .select('*')
+      .select('*, biens_medias(url, est_couverture, ordre, type)')
       .eq('id', id)
       .single()
       .then(({ data }) => {
-        if (data) setBien(data)
+        if (data) {
+          const { biens_medias, ...row } = data as BienRow & { biens_medias?: MediaRow[] | null }
+          setBien(row as BienRow)
+          setCover(pickCover(biens_medias))
+        }
         setLoading(false)
       })
   }, [id])
@@ -46,6 +58,14 @@ export default function FicheBienScreen() {
     Alert.alert(
       'Réservation',
       `Réservez "${bien?.titre}" depuis l'application web pour finaliser le paiement CinetPay.`
+    )
+  }
+
+  function handleContact() {
+    const msg = `Bonjour, je suis intéressé(e) par "${bien?.titre}" à ${bien?.commune}. Pouvez-vous m'aider ?`
+    const url = `https://wa.me/${CONSEILLER_WA}?text=${encodeURIComponent(msg)}`
+    Linking.openURL(url).catch(() =>
+      Alert.alert('WhatsApp', "Impossible d'ouvrir WhatsApp. Numéro conseiller : +225 05 44 87 20 51")
     )
   }
 
@@ -74,13 +94,16 @@ export default function FicheBienScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Image
-        source={{ uri: 'https://via.placeholder.com/400x250?text=Immo+CI' }}
-        style={styles.image}
-        contentFit="cover"
-        transition={300}
-        placeholder={{ blurhash: 'L6PZfSi_.AyE_3t7t7R**0o#DgR4' }}
-      />
+      <View>
+        <Image
+          source={{ uri: cover ?? 'https://via.placeholder.com/400x250?text=Immo+CI' }}
+          style={styles.image}
+          contentFit="cover"
+          transition={300}
+          placeholder={{ blurhash: 'L6PZfSi_.AyE_3t7t7R**0o#DgR4' }}
+        />
+        <FavoriteButton bienId={bien.id} onImage size={24} style={styles.fav} />
+      </View>
       <View style={styles.content}>
         <Text style={styles.prix}>{prixLabel}</Text>
         <Text style={styles.titre}>{bien.titre}</Text>
@@ -123,6 +146,14 @@ export default function FicheBienScreen() {
         <TouchableOpacity style={styles.ctaButton} onPress={handleReserver}>
           <Text style={styles.ctaText}>Réserver ce bien</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity style={styles.waButton} onPress={handleContact} activeOpacity={0.85}>
+          <Ionicons name="logo-whatsapp" size={20} color={colors.white} />
+          <Text style={styles.waText}>Contacter un conseiller</Text>
+        </TouchableOpacity>
+        <Text style={styles.contactHint}>
+          Réponse rapide · service gratuit · vos coordonnées restent protégées
+        </Text>
       </View>
     </ScrollView>
   )
@@ -137,6 +168,7 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
   },
   image: { width: '100%', height: 260 },
+  fav: { position: 'absolute', top: spacing.md, right: spacing.md },
   content: { padding: spacing.lg },
   prix: {
     fontSize: 24,
@@ -160,4 +192,21 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
   },
   ctaText: { color: colors.white, fontWeight: '700', fontSize: 16 },
+  waButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    backgroundColor: '#25D366',
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
+    marginTop: spacing.sm,
+  },
+  waText: { color: colors.white, fontWeight: '700', fontSize: 16 },
+  contactHint: {
+    ...typography.caption,
+    color: colors.textLight,
+    textAlign: 'center',
+    marginTop: spacing.sm,
+  },
 })

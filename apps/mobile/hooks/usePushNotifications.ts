@@ -9,7 +9,8 @@ import { useSession } from './useAuth'
 // Configurer le handler en dehors du hook pour qu'il soit global
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
   }),

@@ -9,8 +9,20 @@ import {
   RefreshControl,
 } from 'react-native'
 import { supabase } from '../../lib/supabase'
+import { pickCover, type MediaRow } from '../../lib/media'
 import { BienCard, BienListItem } from '../../components/BienCard'
 import { colors, spacing } from '../../constants/theme'
+
+type BienListRow = {
+  id: string
+  titre: string
+  prix_mois_fcfa: number | null
+  prix_vente_fcfa: number | null
+  commune: string
+  type_bien: string
+  statut: string
+  biens_medias?: MediaRow[] | null
+}
 
 export default function AccueilScreen() {
   const [biens, setBiens] = useState<BienListItem[]>([])
@@ -21,7 +33,7 @@ export default function AccueilScreen() {
   async function fetchBiens(searchText = '') {
     let query = supabase
       .from('biens')
-      .select('id, titre, prix_mois_fcfa, prix_vente_fcfa, commune, type_bien, statut')
+      .select('id, titre, prix_mois_fcfa, prix_vente_fcfa, commune, type_bien, statut, biens_medias(url, est_couverture, ordre, type)')
       .eq('statut', 'publie')
       .order('created_at', { ascending: false })
       .limit(20)
@@ -32,9 +44,8 @@ export default function AccueilScreen() {
 
     const { data, error } = await query
     if (!error && data) {
-      // Mapper vers BienListItem (sans cover_url — v1 sans jointure médias)
       setBiens(
-        data.map((b) => ({
+        (data as unknown as BienListRow[]).map((b) => ({
           id: b.id,
           titre: b.titre,
           prix_mois_fcfa: b.prix_mois_fcfa,
@@ -42,7 +53,7 @@ export default function AccueilScreen() {
           commune: b.commune,
           type_bien: b.type_bien,
           statut: b.statut,
-          cover_url: null,
+          cover_url: pickCover(b.biens_medias),
         }))
       )
     }

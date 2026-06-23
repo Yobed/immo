@@ -3,7 +3,7 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator }
 import { useRouter } from 'expo-router'
 import { supabase } from '../lib/supabase'
 import { useSession } from '../hooks/useAuth'
-import { formatDate } from '@immo-ci/shared'
+import { formatDateCI } from '@immo-ci/shared'
 import { colors, spacing, typography } from '../constants/theme'
 
 interface Notification {
@@ -77,7 +77,7 @@ export default function NotificationsScreen() {
           <View style={styles.itemContent}>
             <Text style={styles.itemTitle}>{item.titre}</Text>
             <Text style={styles.itemBody} numberOfLines={2}>{item.message}</Text>
-            <Text style={styles.itemDate}>{formatDate(item.created_at)}</Text>
+            <Text style={styles.itemDate}>{formatDateCI(item.created_at)}</Text>
           </View>
         </TouchableOpacity>
       )}

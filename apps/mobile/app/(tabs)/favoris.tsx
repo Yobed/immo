@@ -8,6 +8,7 @@ import {
   RefreshControl,
 } from 'react-native'
 import { supabase } from '../../lib/supabase'
+import { pickCover, type MediaRow } from '../../lib/media'
 import { useSession } from '../../hooks/useAuth'
 import { BienCard, BienListItem } from '../../components/BienCard'
 import { colors, spacing } from '../../constants/theme'
@@ -23,7 +24,7 @@ export default function FavorisScreen() {
 
     const { data, error } = await supabase
       .from('favoris')
-      .select('bien_id, biens(id, titre, prix_mois_fcfa, prix_vente_fcfa, commune, type_bien, statut)')
+      .select('bien_id, biens(id, titre, prix_mois_fcfa, prix_vente_fcfa, commune, type_bien, statut, biens_medias(url, est_couverture, ordre, type))')
       .eq('user_id', session.user.id)
       .order('created_at', { ascending: false })
 
@@ -31,7 +32,7 @@ export default function FavorisScreen() {
       const items: BienListItem[] = data
         .filter((f) => f.biens)
         .map((f) => {
-          const b = f.biens as {
+          const b = f.biens as unknown as {
             id: string
             titre: string
             prix_mois_fcfa: number | null
@@ -39,6 +40,7 @@ export default function FavorisScreen() {
             commune: string
             type_bien: string
             statut: string
+            biens_medias?: MediaRow[] | null
           }
           return {
             id: b.id,
@@ -48,7 +50,7 @@ export default function FavorisScreen() {
             commune: b.commune,
             type_bien: b.type_bien,
             statut: b.statut,
-            cover_url: null,
+            cover_url: pickCover(b.biens_medias),
           }
         })
       setFavoris(items)

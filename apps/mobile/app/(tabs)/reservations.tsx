@@ -11,7 +11,7 @@ import {
 import { supabase } from '../../lib/supabase'
 import { useSession } from '../../hooks/useAuth'
 import { StatutBadge } from '../../components/StatutBadge'
-import { formatDate, formatFCFA } from '@immo-ci/shared'
+import { formatDateCI, formatFCFA } from '@immo-ci/shared'
 import { colors, spacing, borderRadius, typography } from '../../constants/theme'
 
 interface ReservationItem {
@@ -81,8 +81,8 @@ export default function ReservationsScreen() {
             </View>
             <Text style={styles.commune}>{item.biens?.commune ?? '—'}</Text>
             <Text style={styles.dates}>
-              Du {formatDate(item.date_debut)}
-              {item.date_fin ? ` au ${formatDate(item.date_fin)}` : ''}
+              Du {formatDateCI(item.date_debut)}
+              {item.date_fin ? ` au ${formatDateCI(item.date_fin)}` : ''}
             </Text>
             <Text style={styles.montant}>{formatFCFA(item.montant_loyer_fcfa)}/mois</Text>
           </View>

@@ -8,7 +8,32 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": false,
-    "plugins": ["expo-router"],
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "bundleIdentifier": "com.bogbesgroupe.immoci",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.bogbesgroupe.immoci",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1A5276"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#1A5276"
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true
     }
