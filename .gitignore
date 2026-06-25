@@ -4,6 +4,12 @@ dist/
 .turbo/
 *.tsbuildinfo
 
+# Scripts/brouillons temporaires & outillage local (hors repo)
+.codex/
+scratch_*.js
+scratch_*.py
+_cap_*.mjs
+
 # Environment variables — JAMAIS commit de secrets
 # Seuls les .env.example sont autorisés (templates sans valeurs)
 .env
