@@ -563,25 +563,7 @@ export function NearMeSection({ initialBiens = [] }: { initialBiens?: any[] }) {
               </div>
             )}
 
-            {/* Map overlay badges */}
-            <div className="absolute top-5 left-5 z-10 flex gap-2 flex-wrap">
-              {userPos && (
-                <div className="px-5 py-2.5 bg-black/60 backdrop-blur-xl rounded-full border border-accent-luxury/30 flex items-center gap-3">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(96,165,250,0.8)]" />
-                  <span className="text-[var(--accent-luxury)] text-[10px] font-bold uppercase tracking-widest">Ma position Géo</span>
-                </div>
-              )}
-              {filteredBiens.length > 0 && (
-                <div className="px-5 py-2.5 bg-black/60 backdrop-blur-xl rounded-full border border-white/10 flex items-center gap-3">
-                  <div className="w-2 h-2 bg-[var(--accent-luxury)] rounded-full animate-pulse" />
-                  <span className="text-white text-[10px] font-bold uppercase tracking-widest">
-                    {filteredBiens.length}
-                    {activeFilterCount > 0 && biens.length !== filteredBiens.length ? ` / ${biens.length}` : ''}
-                    {' '}biens
-                  </span>
-                </div>
-              )}
-            </div>
+            {/* ponytail: stats overlay (Ma position + N biens) déjà rendu par PropertiesMap, pas de duplicate ici */}
 
             {/* Route info badge — desktop only (mobile handled by PropertiesMap compact bar) */}
             {selectedBien && (
