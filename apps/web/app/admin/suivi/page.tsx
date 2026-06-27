@@ -180,7 +180,7 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
       v.client_name, v.client_phone,
       v.proprietaire?.full_name, v.proprietaire?.phone,
     ])
-  } else {
+  } else if (tab === 'reservations') {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let query = (admin as any)
       .from('reservations')
@@ -202,6 +202,27 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
       r.locataire?.full_name, r.locataire?.phone,
       r.proprietaire?.full_name, r.proprietaire?.phone,
     ])
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let query = (admin as any)
+      .from('contact_requests')
+      .select(`
+        id, visitor_name, visitor_phone, visitor_email, reason, source,
+        admin_validation_status, admin_validated_at, owner_notified_at, visitor_notified_at, created_at,
+        biens ( titre, commune ),
+        proprietaire:profiles!contact_requests_proprietaire_id_fkey ( full_name, phone )
+      `)
+      .order('created_at', { ascending: false })
+      .limit(view === 'kanban' ? 200 : 100)
+
+    if (view === 'list' && listStatus !== 'all') {
+      query = query.eq('admin_validation_status', listStatus)
+    }
+    const { data } = await query
+    contacts = applySearch((data ?? []) as ContactRow[], q, (c) => [
+      c.visitor_name, c.visitor_phone, c.visitor_email,
+      c.proprietaire?.full_name, c.proprietaire?.phone,
+    ])
   }
 
   // Groupage kanban
@@ -209,6 +230,8 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
   for (const v of visites) visitesByStatus[v.admin_validation_status]?.push(v)
   const reservationsByStatus: Record<AdminStatus, ReservationRow[]> = { pending: [], approved: [], rejected: [] }
   for (const r of reservations) reservationsByStatus[r.admin_validation_status]?.push(r)
+  const contactsByStatus: Record<AdminStatus, ContactRow[]> = { pending: [], approved: [], rejected: [] }
+  for (const c of contacts) contactsByStatus[c.admin_validation_status]?.push(c)
 
   const qParam = q ? `&q=${encodeURIComponent(q)}` : ''
 
@@ -221,7 +244,7 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
             <div>
               <h1 className="font-bold text-[var(--text)] text-lg leading-none">Suivi & Intermédiation</h1>
               <p className="text-[var(--text-subtle)] text-xs mt-1">
-                {visitesPending ?? 0} visite{(visitesPending ?? 0) > 1 ? 's' : ''} · {reservationsPending ?? 0} réservation{(reservationsPending ?? 0) > 1 ? 's' : ''} en attente
+                {visitesPending ?? 0} visite{(visitesPending ?? 0) > 1 ? 's' : ''} · {reservationsPending ?? 0} réservation{(reservationsPending ?? 0) > 1 ? 's' : ''} · {contactsPending ?? 0} contact{(contactsPending ?? 0) > 1 ? 's' : ''} en attente
               </p>
             </div>
           </div>
@@ -250,6 +273,17 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
             <BedDouble className="w-4 h-4" /> Réservations
             {(reservationsPending ?? 0) > 0 && (
               <span className="px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px]">{reservationsPending}</span>
+            )}
+          </Link>
+          <Link
+            href={`/admin/suivi?tab=contacts&view=${view}${qParam}`}
+            className={`px-4 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${
+              tab === 'contacts' ? 'border-slate-900 text-[var(--text)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text)]'
+            }`}
+          >
+            <MessageCircle className="w-4 h-4" /> Contacts
+            {(contactsPending ?? 0) > 0 && (
+              <span className="px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px]">{contactsPending}</span>
             )}
           </Link>
         </div>
@@ -319,9 +353,10 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
             tab={tab}
             visitesByStatus={visitesByStatus}
             reservationsByStatus={reservationsByStatus}
+            contactsByStatus={contactsByStatus}
           />
         ) : (
-          <ListView tab={tab} visites={visites} reservations={reservations} />
+          <ListView tab={tab} visites={visites} reservations={reservations} contacts={contacts} />
         )}
       </div>
     </main>
@@ -332,10 +367,12 @@ function KanbanView({
   tab,
   visitesByStatus,
   reservationsByStatus,
+  contactsByStatus,
 }: {
   tab: Tab
   visitesByStatus: Record<AdminStatus, VisiteRow[]>
   reservationsByStatus: Record<AdminStatus, ReservationRow[]>
+  contactsByStatus: Record<AdminStatus, ContactRow[]>
 }) {
   const cols: AdminStatus[] = ['pending', 'approved', 'rejected']
   return (
@@ -343,7 +380,10 @@ function KanbanView({
       {cols.map((status) => {
         const meta = STATUS_META[status]
         const Icon = meta.icon
-        const items = tab === 'visites' ? visitesByStatus[status] : reservationsByStatus[status]
+        const items =
+          tab === 'visites' ? visitesByStatus[status]
+          : tab === 'reservations' ? reservationsByStatus[status]
+          : contactsByStatus[status]
         return (
           <div
             key={status}
@@ -361,8 +401,10 @@ function KanbanView({
                 <p className="text-[var(--text-subtle)] text-xs italic text-center py-8">Vide</p>
               ) : tab === 'visites' ? (
                 (items as VisiteRow[]).map((v) => <VisiteCard key={v.id} v={v} compact />)
-              ) : (
+              ) : tab === 'reservations' ? (
                 (items as ReservationRow[]).map((r) => <ReservationCard key={r.id} r={r} compact />)
+              ) : (
+                (items as ContactRow[]).map((c) => <ContactCard key={c.id} c={c} compact />)
               )}
             </div>
           </div>
@@ -376,10 +418,12 @@ function ListView({
   tab,
   visites,
   reservations,
+  contacts,
 }: {
   tab: Tab
   visites: VisiteRow[]
   reservations: ReservationRow[]
+  contacts: ContactRow[]
 }) {
   if (tab === 'visites') {
     if (visites.length === 0) return <EmptyState label="Aucune visite ne correspond aux filtres." />
@@ -389,11 +433,61 @@ function ListView({
       </div>
     )
   }
-  if (reservations.length === 0) return <EmptyState label="Aucune réservation ne correspond aux filtres." />
+  if (tab === 'reservations') {
+    if (reservations.length === 0) return <EmptyState label="Aucune réservation ne correspond aux filtres." />
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {reservations.map((r) => <ReservationCard key={r.id} r={r} />)}
+      </div>
+    )
+  }
+  if (contacts.length === 0) return <EmptyState label="Aucune demande de contact ne correspond aux filtres." />
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {reservations.map((r) => <ReservationCard key={r.id} r={r} />)}
+      {contacts.map((c) => <ContactCard key={c.id} c={c} />)}
     </div>
+  )
+}
+
+function ContactCard({ c, compact = false }: { c: ContactRow; compact?: boolean }) {
+  return (
+    <Link
+      href={`/admin/suivi/contacts/${c.id}`}
+      className="bg-[var(--surface-card)] rounded-xl border border-[var(--border)] hover:border-[var(--border)] hover:shadow-md transition-all p-3 flex flex-col gap-2"
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <h3 className="font-bold text-[var(--text)] text-sm line-clamp-1">{c.biens?.titre || 'Bien'}</h3>
+          <p className="text-[var(--text-muted)] text-xs flex items-center gap-1 mt-0.5">
+            <MapPin className="w-3 h-3" />
+            {c.biens?.commune || '—'}
+          </p>
+        </div>
+        {!compact && adminBadge(c.admin_validation_status)}
+      </div>
+
+      <div className="space-y-0.5 text-xs text-[var(--text-muted)]">
+        <p className="flex items-center gap-1.5">
+          <User className="w-3 h-3 text-[var(--text-subtle)]" />
+          <span className="font-semibold text-[var(--text)] truncate">{c.visitor_name || 'Visiteur'}</span>
+        </p>
+        <p className="flex items-center gap-1.5">
+          <Phone className="w-3 h-3 text-[var(--text-subtle)]" />
+          <span className="truncate">{c.visitor_phone || '—'}</span>
+        </p>
+        {c.reason && (
+          <p className="flex items-start gap-1.5 line-clamp-2">
+            <MessageCircle className="w-3 h-3 text-[var(--text-subtle)] mt-0.5 shrink-0" />
+            <span className="line-clamp-2">{c.reason}</span>
+          </p>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between pt-1.5 border-t border-[var(--border)] text-[10px] text-[var(--text-subtle)]">
+        <span>Reçue {formatDateTime(c.created_at)}</span>
+        <NotifDots ownerNotified={!!c.owner_notified_at} visitorNotified={!!c.visitor_notified_at} />
+      </div>
+    </Link>
   )
 }
 
