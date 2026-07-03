@@ -25,6 +25,10 @@ function sanitizeKey(raw: string | undefined): string | undefined {
 
 const GROQ_API_KEY = sanitizeKey(process.env.GROQ_API_KEY);
 const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+// Les quotas Groq (TPM/TPD) sont PAR MODÈLE : quand le 70b sature sous la
+// charge (prompt ~5k tokens × chaque message), le 8b-instant a un bucket
+// séparé et un quota jour bien plus grand. Réponse un peu moins fine ≫ fallback générique.
+const GROQ_FALLBACK_MODEL = process.env.GROQ_FALLBACK_MODEL || 'llama-3.1-8b-instant';
 const GROQ_BASE_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 const OPENROUTER_API_KEY = sanitizeKey(process.env.OPENROUTER_API_KEY);
@@ -356,6 +360,7 @@ export type ChatMessage = { role: 'user' | 'assistant' | 'system'; content: stri
 async function groqFetchOnce(
   messages: ChatMessage[],
   system: string,
+  model: string = GROQ_MODEL,
 ): Promise<string | 'retry' | null> {
   let response: Response
   try {
@@ -366,7 +371,7 @@ async function groqFetchOnce(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: GROQ_MODEL,
+        model,
         messages: [
           { role: 'system', content: system },
           ...messages,
@@ -385,7 +390,7 @@ async function groqFetchOnce(
 
   if (!response.ok) {
     const err = await response.text().catch(() => '<no body>')
-    console.error(`[Groq] HTTP ${response.status} - body: ${err.slice(0, 300)} - msgs=${messages.length} sysLen=${system.length}`)
+    console.error(`[Groq] HTTP ${response.status} model=${model} - body: ${err.slice(0, 300)} - msgs=${messages.length} sysLen=${system.length}`)
     // 429 (rate limit) and 5xx (Groq downtime) are transient → retry
     if (response.status === 429 || response.status >= 500) return 'retry'
     return null
@@ -414,14 +419,15 @@ async function groqFetch(messages: ChatMessage[], system: string): Promise<strin
   // the cascade move on.
   const elapsed = Date.now() - startedAt
   if (elapsed > 2500) {
-    console.warn(`[Groq] skipping retry — first attempt took ${elapsed}ms, going straight to fallback`)
+    console.warn(`[Groq] skipping model cascade — first attempt took ${elapsed}ms, going straight to fallback`)
     return null
   }
 
-  // Transient failure with budget left → wait briefly then retry once.
-  await new Promise((r) => setTimeout(r, 700))
-  console.warn('[Groq] retrying after transient failure')
-  const second = await groqFetchOnce(messages, system)
+  // Échec transitoire (429 = quota TPM/TPD du modèle primaire épuisé, ou 5xx).
+  // Re-tenter le MÊME modèle 700 ms plus tard est inutile contre un quota :
+  // on bascule sur le modèle de secours (bucket de quota séparé chez Groq).
+  console.warn(`[Groq] ${GROQ_MODEL} KO → cascade vers ${GROQ_FALLBACK_MODEL}`)
+  const second = await groqFetchOnce(messages, system, GROQ_FALLBACK_MODEL)
   if (second === 'retry' || second === null) return null
   return second
 }
