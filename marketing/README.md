@@ -8,6 +8,10 @@ Storyboard + visuels réseaux sociaux + Reel, générés à partir de captures r
 | Élément | Quoi | Usage |
 |---|---|---|
 | `pub-tiktok.mp4` | **Pub grand public 1080×1920 (9:16), ~21 s** — vraie vidéo motion : app plein cadre, texte cinétique, sous-titres, fondus, effets | TikTok / Reels / Shorts / pub payante |
+| `pub-fonctionnalites.mp4` | **Pub fonctionnalités 1080×1920 (9:16), ~19 s** — biens vérifiés, recherche vocale 🎤, géoloc « près de moi » 📍 | TikTok / Reels / Shorts / pub payante |
+| `pub-confiance.mp4` | **Pub confiance 1080×1920 (9:16), ~18 s** — anti-galère : fini les fausses annonces, zéro frais, accompagné | TikTok / Reels / Shorts / pub payante |
+| `pub-whatsapp.mp4` | **Pub WhatsApp 1080×1920 (9:16), ~19 s** — recherche multi-critères sur WhatsApp, biens en quasi temps réel, sans appli, 100% gratuit | TikTok / Reels / Shorts / **statut WhatsApp** / pub payante |
+| `pub-whatsapp-anim.mp4` | **Pub WhatsApp animée 1080×1920 (9:16), ~18 s** — la conversation se joue **en direct** (bulles une à une, "écrit…", carte-résultat qui tombe). Produite via **OpenMontage / HyperFrames**. | TikTok / Reels / Shorts / **statut WhatsApp** |
 | `storyboard-presentation.mp4` | **Présentation 1920×1080 (16:9), ~37 s** — défilement paginé : s'arrête et tient sur chaque section | Pitch, réunion, écran de salon, YouTube, site |
 | `storyboard-motion.mp4` | **Vertical 1080×1920 (9:16), ~35 s** — mêmes arrêts, format social | Stories / Reels / statut WhatsApp |
 | `reel.mp4` | **Reel vidéo 1080×1920, ~20 s**, 8 cartes en fondu enchaîné | Instagram Reels / TikTok / Facebook / Stories. Ajoute une musique tendance dans l'app. |
@@ -82,6 +86,29 @@ Direct, chaleureux, ivoirien • Prix en FCFA, quartiers nommés • 1 émoji d'
 
 Script (6 plans, 0–21 s) : STOP SCROLL → PROBLÈME → SOLUTION → PREUVE → CONFIANCE → CTA.
 **Ajoute une musique tendance dans TikTok/Reels** (la vidéo est sans audio) — ça booste fortement la portée.
+
+## Pub fonctionnalités (`pub-fonctionnalites.mp4`) — légende à poster
+> 🎤 Cherche un bien à la voix. 📍 Vois les biens autour de toi en temps réel. ✅ Des milliers de biens vérifiés, photos + prix + temps de trajet. BOGBE'S GROUPE, l'appli immobilière de Côte d'Ivoire 👉 bogbes-groupe.vercel.app
+>
+> `#ImmobilierCI #Abidjan225 #BogbesGroupe #RechercheVocale #Géolocalisation #PropTech #Cocody #CôtedIvoire`
+
+Plans : Hook → **Les biens** → **Recherche vocale** → **Géolocalisation** → CTA. Captures réelles : `10-vocale`, `11-geoloc`, `12-biens`.
+**Ajoute une musique tendance** au moment de poster (vidéo sans audio).
+
+## Pub confiance (`pub-confiance.mp4`) — légende à poster
+> Trouver un logement à Abidjan sans la galère, c'est possible. ✅ Biens vérifiés sur place ❌ Fini les fausses annonces 💸 Zéro frais pour visiter 🤝 Un conseiller t'accompagne jusqu'à la signature. BOGBE'S GROUPE 👉 bogbes-groupe.vercel.app
+>
+> `#ImmobilierCI #Abidjan225 #BogbesGroupe #SansArnaque #LocationAbidjan #Cocody #CôtedIvoire`
+
+Plans : Hook → ✅ Vérifié → 💸 Zéro frais → 🤝 Accompagné → CTA. **Ajoute une musique tendance** au moment de poster.
+
+## Pub WhatsApp (`pub-whatsapp.mp4`) — légende à poster
+> 💬 Pas le temps de chercher ? Trouve ton bien sur WhatsApp. Écris tes critères en une phrase (« 3 pièces meublé à Cocody, max 300k ») → on t'envoie les biens qui matchent en quelques secondes. Sans appli, sans inscription, **100% gratuit**. 📲 +225 05 44 87 20 51 — BOGBE'S GROUPE
+>
+> `#ImmobilierCI #Abidjan225 #BogbesGroupe #WhatsApp #LocationAbidjan #Cocody #100PourCentGratuit #CôtedIvoire`
+
+Plans : Hook → 🔎 Multi-critères → ⚡ Quasi temps réel → ✅ 100% gratuit → CTA (numéro WhatsApp).
+Mockups WhatsApp réels (`13-wa-search`, `14-wa-results`) avec le **vrai numéro** +225 05 44 87 20 51. **Ajoute une musique tendance** au moment de poster.
 
 ## Notes
 - **Favoris & réservations** : les tableaux de bord réels sont derrière la connexion. Ils sont représentés ici par l'écran **compte** (carte 7) et la carte **visite** (carte 5, le booking public). Donne-moi un compte de test si tu veux les vraies captures du tableau de bord connecté.
