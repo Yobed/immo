@@ -31,6 +31,12 @@ const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 const GROQ_FALLBACK_MODEL = process.env.GROQ_FALLBACK_MODEL || 'llama-3.1-8b-instant';
 const GROQ_BASE_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
+// Google AI Studio (Gemini) — quota gratuit par jour ≫ Groq free (le vrai
+// filet de sécurité sous forte demande). Modèle 2.5 requis : le free tier
+// de gemini-2.0-flash est à 0 depuis le passage aux 2.5 (vérifié en live).
+const GEMINI_API_KEY = sanitizeKey(process.env.GEMINI_API_KEY);
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+
 const OPENROUTER_API_KEY = sanitizeKey(process.env.OPENROUTER_API_KEY);
 // Modèle gratuit, robuste en FR, ~20 req/min sur le tier free.
 // openai/gpt-oss-120b:free = large modèle 120B stable, bonne qualité FR.
@@ -433,6 +439,74 @@ async function groqFetch(messages: ChatMessage[], system: string): Promise<strin
 }
 
 /**
+ * Étage Gemini (Google AI Studio) — REST natif, format différent d'OpenAI :
+ * system → systemInstruction, assistant → model, contents[].parts[].text.
+ * thinkingBudget: 0 = désactive le raisonnement interne (latence + tokens),
+ * inutile pour des réponses WhatsApp courtes et ancrées sur le catalogue.
+ */
+async function geminiFetch(
+  messages: ChatMessage[],
+  system: string,
+): Promise<string | null> {
+  if (!GEMINI_API_KEY) return null
+
+  const contents = messages
+    .filter((m) => m.role !== 'system' && m.content)
+    .map((m) => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }],
+    }))
+  if (contents.length === 0) return null
+
+  let response: Response
+  try {
+    response = await fetchWithTimeout(
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
+      {
+        method: 'POST',
+        headers: {
+          'x-goog-api-key': GEMINI_API_KEY,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: system }] },
+          contents,
+          generationConfig: {
+            temperature: 0.15,
+            maxOutputTokens: 800,
+            thinkingConfig: { thinkingBudget: 0 },
+          },
+        }),
+      },
+    )
+  } catch (e) {
+    const err = e as Error
+    console.error(`[Gemini] fetch failed (${err.name === 'AbortError' ? 'timeout' : 'network'}):`, err.message)
+    return null
+  }
+
+  if (!response.ok) {
+    const err = await response.text().catch(() => '<no body>')
+    console.error(`[Gemini] HTTP ${response.status} model=${GEMINI_MODEL} - body: ${err.slice(0, 300)}`)
+    return null
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data: any = await response.json().catch(() => null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const content = (data?.candidates?.[0]?.content?.parts ?? [])
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .map((p: any) => (typeof p?.text === 'string' ? p.text : ''))
+    .join('')
+    .trim()
+  if (!content) {
+    console.error('[Gemini] empty completion. data=', JSON.stringify(data).slice(0, 300))
+    return null
+  }
+  return content
+}
+
+/**
  * Fallback completion via OpenRouter (Gemini 2.0 Flash :free).
  * Used when Groq is rate-limited or down.
  * Same OpenAI-compatible request shape — only base URL + model change.
@@ -609,7 +683,7 @@ function sanitizeOutput(text: string): string {
  * Easy to grep / parse from Vercel logs.
  */
 interface SapphireLog {
-  route: 'greeting' | 'groq' | 'openrouter' | 'fallback'
+  route: 'greeting' | 'groq' | 'gemini' | 'openrouter' | 'fallback'
   latency_ms: number
   history_msgs: number
   system_bytes: number
@@ -685,8 +759,25 @@ export async function chatImmobilier(messages: ChatMessage[], context?: string):
     return cleaned
   }
 
-  // Stage 2 — OpenRouter (Gemini Flash :free) backup
-  console.warn(`[Sapphire] Groq KO → OpenRouter fallback. sysLen=${system.length} histMsgs=${trimmed.length}`)
+  // Stage 2 — Gemini (Google AI Studio) : gros quota gratuit journalier,
+  // le vrai filet quand les quotas Groq sont épuisés par la demande.
+  console.warn(`[Sapphire] Groq KO → Gemini. sysLen=${system.length} histMsgs=${trimmed.length}`)
+  const geminiResult = await geminiFetch(trimmed, system)
+  if (geminiResult) {
+    const cleaned = sanitizeOutput(geminiResult)
+    logSapphireCall({
+      route: 'gemini',
+      latency_ms: Date.now() - startedAt,
+      history_msgs,
+      system_bytes: system.length,
+      output_chars: cleaned.length,
+      redactions: geminiResult.length !== cleaned.length ? 1 : 0,
+    })
+    return cleaned
+  }
+
+  // Stage 3 — OpenRouter backup (actif seulement si OPENROUTER_API_KEY est définie)
+  console.warn(`[Sapphire] Gemini KO → OpenRouter fallback`)
   const openRouterResult = await openRouterFetch(trimmed, system)
   if (openRouterResult) {
     const cleaned = sanitizeOutput(openRouterResult)
@@ -701,7 +792,7 @@ export async function chatImmobilier(messages: ChatMessage[], context?: string):
     return cleaned
   }
 
-  // Stage 3 — Hand-written fallback (both providers down)
+  // Stage 4 — Hand-written fallback (tous les providers KO)
   logSapphireCall({
     route: 'fallback',
     latency_ms: Date.now() - startedAt,
