@@ -614,8 +614,26 @@ function logSapphireCall(entry: SapphireLog): void {
   console.log(`[Sapphire] ${JSON.stringify(entry)}`)
 }
 
+// Honnête : pas de « je reviens dans quelques secondes » (rien ne rappelle),
+// et on ne redemande PAS commune/budget que le client vient souvent de donner.
 const FALLBACK_REPLY =
-  `Un instant, je reçois beaucoup de demandes 🙏\n\nEn attendant, dites-moi simplement :\n• Quelle commune ? (Cocody, Plateau, Riviera…)\n• Quel budget ?\n\nJe reviens vers vous dans quelques secondes.`
+  `Désolé, je rencontre un petit souci technique 🙏\n\nVotre message est bien reçu. Renvoyez-le dans quelques minutes, ou un conseiller vous répondra directement.`
+
+/** Message d'escalade envoyé au 2e échec IA consécutif (un humain prend le relais). */
+export const SAPPHIRE_ESCALATION =
+  `Je transmets votre demande à un conseiller humain qui vous répond directement 👍\n\nMerci de votre patience.`
+
+/**
+ * Détecte si un texte est une réponse de secours Sapphire (échec des providers IA).
+ * Matche l'ancien ET le nouveau libellé — l'historique DB contient encore l'ancien.
+ */
+export function isSapphireFallback(text: string | null | undefined): boolean {
+  if (!text) return false
+  return (
+    text.startsWith('Un instant, je reçois beaucoup de demandes') ||
+    text.startsWith('Désolé, je rencontre un petit souci technique')
+  )
+}
 
 export async function chatImmobilier(messages: ChatMessage[], context?: string): Promise<string> {
   const startedAt = Date.now()

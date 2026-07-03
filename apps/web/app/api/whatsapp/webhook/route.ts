@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { wasenderSendMessage, verifyWasenderSignature } from '@/lib/wasender';
-import { chatImmobilier } from '@/lib/ai';
+import { chatImmobilier, isSapphireFallback, SAPPHIRE_ESCALATION } from '@/lib/ai';
 import { getAIBienContext } from '@/lib/ai/tools';
 import { extractBienFromWhatsApp } from '@/lib/extractors/whatsapp-bien-extractor';
 import { upsertProspect, recordOptOut } from '@/lib/outreach/agent-prospects';
@@ -238,6 +238,36 @@ export async function POST(req: NextRequest) {
 
     if (!aiResponse) {
       return NextResponse.json({ status: 'ok' });
+    }
+
+    // 5b. Garde anti-boucle : ne JAMAIS spammer le fallback technique.
+    //     1er échec IA  → fallback envoyé une seule fois (flux normal ci-dessous)
+    //     2e échec consécutif → escalade : conseiller humain notifié + message d'escalade
+    //     échecs suivants     → silence (le conseiller a déjà le dossier)
+    if (isSapphireFallback(aiResponse)) {
+      const lastAssistant =
+        [...formattedHistory].reverse().find((m) => m.role === 'assistant')?.content ?? '';
+
+      if (lastAssistant === SAPPHIRE_ESCALATION) {
+        return NextResponse.json({ status: 'ok', branch: 'fallback_muted' });
+      }
+
+      if (isSapphireFallback(lastAssistant)) {
+        const advisorPhone = process.env.SAPPHIRE_ADVISOR_PHONE || '+2250544872051';
+        const advisorMsg = `⚠️ Sapphire KO (IA indisponible) — reprendre la main
+👤 ${contactName} — ${senderPn}
+💬 "${userMessage.slice(0, 300)}"`;
+        await wasenderSendMessage(advisorPhone, advisorMsg, 'text').catch(() => null);
+        await wasenderSendMessage(senderPn, SAPPHIRE_ESCALATION, 'text');
+        await supabase.from('whatsapp_messages').insert({
+          jid,
+          direction: 'outbound',
+          body: SAPPHIRE_ESCALATION,
+          metadata: { type: 'fallback_escalation' },
+        });
+        return NextResponse.json({ status: 'ok', branch: 'fallback_escalated' });
+      }
+      // 1er échec → le fallback passe par le flux normal (envoyé + loggé une fois)
     }
 
     // 6. Détecter confirmation RDV et sauvegarder la visite
