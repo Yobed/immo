@@ -85,6 +85,11 @@ export const metadata: Metadata = {
     title: "BOGBE’S GROUPE — Immobilier en Côte d’Ivoire",
     description: "La plateforme immobilière premium de Côte d’Ivoire",
   },
+  // Preuve de propriété Google Search Console (propriété https://www.bogbesgroup.com).
+  // Ne pas supprimer : Google révoque l'accès Search Console si la balise disparaît.
+  verification: {
+    google: 'k3vHpgHzwPRl5_skYFkwf5kueFXebOR8w1_y_RGfTsw',
+  },
 }
 
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
