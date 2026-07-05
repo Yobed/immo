@@ -1,19 +1,23 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { SEO_COMMUNES } from '@/lib/seo/communes'
+import { BLOG_SLUGS } from '@/lib/blog/posts'
 
 const SEO_COMMUNE_SLUGS = new Set(SEO_COMMUNES.map((c) => c.slug))
 
 export async function middleware(request: NextRequest) {
-  // Pages SEO /location/[commune] et /vente/[commune] : les slugs inconnus
-  // doivent renvoyer un VRAI HTTP 404. Le notFound() de la page ne suffit pas :
-  // le loading.tsx de (public) fait streamer un 200 avant qu'il se déclenche.
-  // → rewrite vers une route inexistante = 404 natif + page "introuvable".
-  const communeMatch = request.nextUrl.pathname.match(/^\/(?:location|vente)\/([^/]+)$/)
-  if (communeMatch && !SEO_COMMUNE_SLUGS.has(communeMatch[1].toLowerCase())) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/__not-found__'
-    return NextResponse.rewrite(url)
+  // Pages SEO /location/[commune], /vente/[commune] et /blog/[slug] : les slugs
+  // inconnus doivent renvoyer un VRAI HTTP 404. Le notFound() de la page ne
+  // suffit pas : le loading.tsx de (public) fait streamer un 200 avant qu'il
+  // se déclenche. → rewrite vers une route inexistante = 404 natif.
+  const seoMatch = request.nextUrl.pathname.match(/^\/(location|vente|blog)\/([^/]+)$/)
+  if (seoMatch) {
+    const slugs = seoMatch[1] === 'blog' ? BLOG_SLUGS : SEO_COMMUNE_SLUGS
+    if (!slugs.has(seoMatch[2].toLowerCase())) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/__not-found__'
+      return NextResponse.rewrite(url)
+    }
   }
 
   let supabaseResponse = NextResponse.next({ request })

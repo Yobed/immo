@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { STATUTS_PUBLICS } from '@/lib/catalogue/statuts'
 import { SEO_COMMUNES } from '@/lib/seo/communes'
+import { BLOG_POSTS } from '@/lib/blog/posts'
 
 // .trim() defensive : Vercel env vars peuvent contenir un trailing \r\n
 // (artefact courant de copy-paste depuis le dashboard) qui casse les URLs.
@@ -19,9 +20,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/services`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${SITE_URL}/comment-ca-marche`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
     { url: `${SITE_URL}/a-propos`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
-    // /equipe, /blog, /partenariats, /presse sont des placeholders sans
-    // contenu — retirés du sitemap tant qu'ils n'ont pas de contenu publié,
-    // pour ne pas faire indexer du vide par Google (pénalité "thin content").
+    { url: `${SITE_URL}/blog`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
+    // /equipe, /partenariats, /presse sont des placeholders sans contenu —
+    // retirés du sitemap tant qu'ils n'ont pas de contenu publié, pour ne pas
+    // faire indexer du vide par Google (pénalité "thin content").
     // Toujours accessibles via le footer.
     { url: `${SITE_URL}/support`, lastModified: now, changeFrequency: 'monthly', priority: 0.4 },
     { url: `${SITE_URL}/login`, lastModified: now, changeFrequency: 'monthly', priority: 0.3 },
@@ -37,6 +39,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/location/${c.slug}`, lastModified: now, changeFrequency: 'daily' as const, priority: 0.8 },
     { url: `${SITE_URL}/vente/${c.slug}`, lastModified: now, changeFrequency: 'daily' as const, priority: 0.8 },
   ])
+
+  // Articles du blog (contenu statique versionné dans lib/blog/posts.ts).
+  const blogRoutes: MetadataRoute.Sitemap = BLOG_POSTS.map((p) => ({
+    url: `${SITE_URL}/blog/${p.slug}`,
+    lastModified: new Date(p.datePublication),
+    changeFrequency: 'monthly' as const,
+    priority: 0.6,
+  }))
 
   // Fiches biens individuelles (essentiel pour SEO immobilier).
   // Cap à 1000 pour rester sous la limite Google de 50k URLs / sitemap
@@ -65,5 +75,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // plutôt que de planter le sitemap complet.
   }
 
-  return [...staticRoutes, ...communeRoutes, ...bienRoutes]
+  return [...staticRoutes, ...communeRoutes, ...blogRoutes, ...bienRoutes]
 }
