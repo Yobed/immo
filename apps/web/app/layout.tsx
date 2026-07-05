@@ -143,7 +143,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 areaServed: { '@type': 'Country', name: "Côte d'Ivoire" },
                 // Profils officiels — relie l'entreprise à ses réseaux pour Google.
                 // Ajouter ici Instagram/TikTok/LinkedIn quand les comptes existeront.
-                sameAs: ['https://www.facebook.com/edenbogbe.97'],
+                sameAs: [
+                  'https://www.facebook.com/edenbogbe.97',
+                  'https://www.tiktok.com/@bogbes.groupe.mul',
+                ],
               },
               {
                 '@context': 'https://schema.org',
