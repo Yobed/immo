@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { STATUTS_PUBLICS } from '@/lib/catalogue/statuts'
+import { SEO_COMMUNES } from '@/lib/seo/communes'
 
 // .trim() defensive : Vercel env vars peuvent contenir un trailing \r\n
 // (artefact courant de copy-paste depuis le dashboard) qui casse les URLs.
@@ -30,6 +31,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/confidentialite`, lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
   ]
 
+  // Pages d'atterrissage par commune ("location à Cocody", "vente à Marcory"…)
+  // — cibles des recherches locales longue traîne.
+  const communeRoutes: MetadataRoute.Sitemap = SEO_COMMUNES.flatMap((c) => [
+    { url: `${SITE_URL}/location/${c.slug}`, lastModified: now, changeFrequency: 'daily' as const, priority: 0.8 },
+    { url: `${SITE_URL}/vente/${c.slug}`, lastModified: now, changeFrequency: 'daily' as const, priority: 0.8 },
+  ])
+
   // Fiches biens individuelles (essentiel pour SEO immobilier).
   // Cap à 1000 pour rester sous la limite Google de 50k URLs / sitemap
   // et ne pas faire exploser le build.
@@ -57,5 +65,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // plutôt que de planter le sitemap complet.
   }
 
-  return [...staticRoutes, ...bienRoutes]
+  return [...staticRoutes, ...communeRoutes, ...bienRoutes]
 }
