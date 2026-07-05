@@ -12,7 +12,9 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { commune } = await params
   const c = getSeoCommune(commune)
-  if (!c) return {}
+  // notFound() ici (et pas seulement dans la page) : generateMetadata s'exécute
+  // avant le streaming du loading.tsx → l'HTTP 404 est réellement envoyé.
+  if (!c) notFound()
   return communePageMeta('location', c)
 }
 
