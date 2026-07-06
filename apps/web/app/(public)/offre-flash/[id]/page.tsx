@@ -56,7 +56,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const description =
     `🔥 ${bien.type_bien} à ${lieu}, ${prix}. ` +
     `${bien.nb_chambres ? `${bien.nb_chambres} ch. ` : ''}` +
-    `Validation conseiller avant visite. Pas d'arnaque.`.slice(0, 150)
+    // « Zéro arnaque » sans apostrophe : le générateur d'aperçu WhatsApp
+    // affiche l'entité HTML brute (d&#x27;arnaque) au lieu de la décoder.
+    `Validation conseiller avant visite. Zéro arnaque.`.slice(0, 150)
 
   const canonical = `${SITE_URL}/offre-flash/${bien.id}`
 

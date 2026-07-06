@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { wasenderSendMessage, verifyWasenderSignature } from '@/lib/wasender';
+import { createLocauxClient } from '@/lib/supabase/locaux';
 import { chatImmobilier, isSapphireFallback, SAPPHIRE_ESCALATION } from '@/lib/ai';
 import { getAIBienContext } from '@/lib/ai/tools';
 import { extractBienFromWhatsApp } from '@/lib/extractors/whatsapp-bien-extractor';
@@ -378,6 +379,50 @@ Message client : "${userMessage.slice(0, 200)}"`;
         isVideo ? 'video' : 'image',
         url
       );
+    }
+
+    // 9b. Preuve visuelle garantie : si l'IA n'a joint aucune photo, attacher
+    // la couverture du PREMIER bien proposé dans la réponse. L'aperçu de lien
+    // WhatsApp saute souvent la vignette (budget fetch ~3 s) — une vraie image
+    // jointe est fiable. Une seule photo : protection compte Wasender (1 msg/5 s).
+    if (mediaUrls.length === 0 && cleanText) {
+      const linkRe = new RegExp(`${siteUrlEscaped}/(biens|offre-flash)/([a-zA-Z0-9-]+)`, 'g');
+      const links: Array<{ kind: string; id: string }> = [];
+      let lm: RegExpExecArray | null;
+      while ((lm = linkRe.exec(cleanText)) !== null && links.length < 3) {
+        links.push({ kind: lm[1], id: lm[2] });
+      }
+      let photo: string | null = null;
+      for (const l of links) {
+        if (photo) break;
+        if (l.kind === 'biens') {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: med } = await (supabase as any)
+            .from('biens_medias')
+            .select('url')
+            .eq('bien_id', l.id)
+            .eq('type', 'photo')
+            .order('est_couverture', { ascending: false })
+            .order('ordre', { ascending: true })
+            .limit(1);
+          photo = med?.[0]?.url ?? null;
+        } else {
+          try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { data: loc } = await (createLocauxClient() as any)
+              .from('locaux')
+              .select('lien_image')
+              .eq('id', Number(l.id))
+              .maybeSingle();
+            photo = loc?.lien_image || null;
+          } catch {
+            // source locaux indisponible — on continue sans photo
+          }
+        }
+      }
+      if (photo) {
+        await wasenderSendMessage(senderPn, '', 'image', photo).catch(() => null);
+      }
     }
 
     // 10. Sauvegarder la réponse sortante

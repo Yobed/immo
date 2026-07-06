@@ -13,10 +13,11 @@
 export async function fetchOgImage(url: string | null | undefined): Promise<string | null> {
   if (!url) return null
 
-  // Cloudinary : demander directement une version 1200x630 compressée en JPEG
+  // Cloudinary : version aux dimensions exactes du canevas OG (800x420),
+  // compressée JPEG — fetch + encodage PNG plus rapides (budget aperçu WhatsApp ~3 s)
   const src =
     url.includes('res.cloudinary.com') && url.includes('/upload/')
-      ? url.replace('/upload/', '/upload/w_1200,h_630,c_fill,q_70,f_jpg/')
+      ? url.replace('/upload/', '/upload/w_800,h_420,c_fill,q_60,f_jpg/')
       : url
 
   try {
