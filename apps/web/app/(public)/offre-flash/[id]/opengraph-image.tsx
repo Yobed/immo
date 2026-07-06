@@ -183,7 +183,8 @@ export default async function FlashOg({ params }: { params: { id: string } }) {
           <div
             style={{
               marginTop: '12px',
-              display: 'inline-flex',
+              // Satori ne supporte pas inline-flex (flex/block/none uniquement)
+              display: 'flex',
               alignItems: 'center',
               alignSelf: 'flex-start',
               padding: '10px 16px',
