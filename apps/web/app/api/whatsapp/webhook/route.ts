@@ -10,7 +10,24 @@ import { tryInviteProspect } from '@/lib/outreach/dispatch';
 import { notifyOwnerVisitPending } from '@/lib/notifications/whatsapp-notifier';
 import { markSeen } from '@/lib/idempotency';
 
+// Le délai anti-ban (humanReplyDelay) + l'appel LLM peuvent dépasser les 10-15 s
+// par défaut d'une fonction Vercel → on s'octroie 60 s.
+export const maxDuration = 60;
+
 const MIN_EXTRACTION_CONFIDENCE = 0.7;
+
+/**
+ * Anti-ban : délai « humain » avant l'envoi de la réponse.
+ * Une réponse instantanée et mécanique est un signal de bot pour WhatsApp
+ * (canal non-officiel). On simule un temps de frappe proportionnel à la
+ * longueur du message + un peu d'aléa : ~3 s pour un « Bonjour », ~10-13 s
+ * pour une liste de biens. Cumulé au temps de génération (1-5 s), la réponse
+ * arrive dans la fenêtre 5-15 s recommandée.
+ */
+async function humanReplyDelay(text: string): Promise<void> {
+  const typingMs = Math.min(10_000, 1_500 + text.length * 12) + Math.random() * 2_500;
+  await new Promise((r) => setTimeout(r, typingMs));
+}
 
 /**
  * Build a deduplication key for a Wasender inbound message.
@@ -259,6 +276,7 @@ export async function POST(req: NextRequest) {
 👤 ${contactName} — ${senderPn}
 💬 "${userMessage.slice(0, 300)}"`;
         await wasenderSendMessage(advisorPhone, advisorMsg, 'text').catch(() => null);
+        await humanReplyDelay(SAPPHIRE_ESCALATION);
         await wasenderSendMessage(senderPn, SAPPHIRE_ESCALATION, 'text');
         await supabase.from('whatsapp_messages').insert({
           jid,
@@ -424,6 +442,7 @@ Message client : "${userMessage.slice(0, 200)}"`;
     // trouvée (légende WhatsApp plafonnée ~1024 chars → repli texte au-delà),
     // sinon texte seul. Si l'envoi avec image échoue, repli texte.
     if (cleanText) {
+      await humanReplyDelay(cleanText);
       const canCaption = !!coverPhoto && cleanText.length <= 950;
       const sentWithPhoto = canCaption
         ? await wasenderSendMessage(senderPn, cleanText, 'image', coverPhoto!)
