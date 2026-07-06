@@ -160,18 +160,21 @@ export default async function FlashOg({ params }: { params: { id: string } }) {
             {prix}
           </div>
 
-          {/* Type + lieu */}
+          {/* Type + lieu — Satori exige display:flex explicite dès qu'un élément
+              a plusieurs enfants (texte brut + span = crash silencieux sinon) */}
           <div
             style={{
+              display: 'flex',
+              gap: '10px',
               fontSize: '36px',
               fontWeight: 600,
               textTransform: 'capitalize',
               textShadow: '0 2px 8px rgba(0,0,0,0.6)',
             }}
           >
-            {typeLabel}
+            <span>{typeLabel}</span>
             {lieu && (
-              <span style={{ color: 'rgba(255,255,255,0.8)' }}> · {lieu}</span>
+              <span style={{ color: 'rgba(255,255,255,0.8)' }}>· {lieu}</span>
             )}
           </div>
 
