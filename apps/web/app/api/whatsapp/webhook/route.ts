@@ -359,37 +359,26 @@ Message client : "${userMessage.slice(0, 200)}"`;
       'g',
     );
     const cleanText = rawText.replace(linkRegex, (_match, base, existingQs) => {
+      // Normalisation : le LLM recopie les URLs de l'historique, parfois avec
+      // des prefill_* déjà dupliqués → on purge tout prefill_* existant et on
+      // remet UN seul jeu propre (les autres params éventuels sont conservés).
+      const kept = new URLSearchParams();
       if (existingQs) {
-        // Déjà pré-rempli : le LLM recopie souvent les URLs de l'historique
-        // (qui contiennent déjà prefill_*) → ne pas dupliquer les paramètres.
-        if (existingQs.includes('prefill_phone=')) {
-          return `${base}${existingQs}`;
+        for (const [k, v] of new URLSearchParams(String(existingQs).slice(1))) {
+          if (!k.startsWith('prefill_') && !kept.has(k)) kept.append(k, v);
         }
-        return `${base}${existingQs}&${prefillParams}`;
       }
-      return `${base}?${prefillParams}`;
+      kept.set('prefill_phone', senderPn);
+      kept.set('prefill_name', contactName || '');
+      return `${base}?${kept.toString()}`;
     });
 
-    // 8. Envoyer le texte principal
-    if (cleanText) {
-      await wasenderSendMessage(senderPn, cleanText, 'text');
-    }
-
-    // 9. Envoyer les médias (max 3) en séquence
-    for (const url of mediaUrls.slice(0, 3)) {
-      const isVideo = /\.(mp4|mov|avi|webm)$/i.test(url);
-      await wasenderSendMessage(
-        senderPn,
-        '',
-        isVideo ? 'video' : 'image',
-        url
-      );
-    }
-
-    // 9b. Preuve visuelle garantie : si l'IA n'a joint aucune photo, attacher
-    // la couverture du PREMIER bien proposé dans la réponse. L'aperçu de lien
-    // WhatsApp saute souvent la vignette (budget fetch ~3 s) — une vraie image
-    // jointe est fiable. Une seule photo : protection compte Wasender (1 msg/5 s).
+    // 8a. Preuve visuelle : couverture du premier bien proposé dans la réponse.
+    // Biens BOGBE'S en priorité (photos curées garanties) — les flash scrapées
+    // sont quasi toujours sans image. Cherché AVANT l'envoi car la photo part
+    // dans la MÊME bulle que le texte (légende) : la protection de compte
+    // Wasender (1 msg/5 s) rejette un envoi séparé texte puis image.
+    let coverPhoto: string | null = null;
     if (mediaUrls.length === 0 && cleanText) {
       const linkRe = new RegExp(`${siteUrlEscaped}/(biens|offre-flash)/([a-zA-Z0-9-]+)`, 'g');
       const links: Array<{ kind: string; id: string }> = [];
@@ -401,13 +390,9 @@ Message client : "${userMessage.slice(0, 200)}"`;
           links.push({ kind: lm[1], id: lm[2] });
         }
       }
-      // Biens BOGBE'S d'abord : photos curées garanties, alors que les flash
-      // scrapées sont quasi toujours sans image (cf. capture: 3 flash sans
-      // photo devant, le bien avec photos en 4e position).
       links.sort((a, b) => (a.kind === 'biens' ? 0 : 1) - (b.kind === 'biens' ? 0 : 1));
-      let photo: string | null = null;
       for (const l of links) {
-        if (photo) break;
+        if (coverPhoto) break;
         if (l.kind === 'biens') {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const { data: med } = await (supabase as any)
@@ -418,7 +403,7 @@ Message client : "${userMessage.slice(0, 200)}"`;
             .order('est_couverture', { ascending: false })
             .order('ordre', { ascending: true })
             .limit(1);
-          photo = med?.[0]?.url ?? null;
+          coverPhoto = med?.[0]?.url ?? null;
         } else {
           try {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -427,15 +412,38 @@ Message client : "${userMessage.slice(0, 200)}"`;
               .select('lien_image')
               .eq('id', Number(l.id))
               .maybeSingle();
-            photo = loc?.lien_image || null;
+            coverPhoto = loc?.lien_image || null;
           } catch {
             // source locaux indisponible — on continue sans photo
           }
         }
       }
-      if (photo) {
-        await wasenderSendMessage(senderPn, '', 'image', photo).catch(() => null);
+    }
+
+    // 8b. Envoi principal — image + texte en légende dans UNE bulle si photo
+    // trouvée (légende WhatsApp plafonnée ~1024 chars → repli texte au-delà),
+    // sinon texte seul. Si l'envoi avec image échoue, repli texte.
+    if (cleanText) {
+      const canCaption = !!coverPhoto && cleanText.length <= 950;
+      const sentWithPhoto = canCaption
+        ? await wasenderSendMessage(senderPn, cleanText, 'image', coverPhoto!)
+            .then((r) => !!r?.success)
+            .catch(() => false)
+        : false;
+      if (!sentWithPhoto) {
+        await wasenderSendMessage(senderPn, cleanText, 'text');
       }
+    }
+
+    // 9. Envoyer les médias [MEDIA] de l'IA (max 3) en séquence
+    for (const url of mediaUrls.slice(0, 3)) {
+      const isVideo = /\.(mp4|mov|avi|webm)$/i.test(url);
+      await wasenderSendMessage(
+        senderPn,
+        '',
+        isVideo ? 'video' : 'image',
+        url
+      );
     }
 
     // 10. Sauvegarder la réponse sortante
