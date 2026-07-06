@@ -2,6 +2,7 @@
 import { ImageResponse } from 'next/og'
 import { createClient } from '@/lib/supabase/server'
 import { STATUTS_PUBLICS } from '@/lib/catalogue/statuts'
+import { fetchOgImage } from '@/lib/og/safe-image'
 
 export const runtime = 'edge'
 export const alt = "Bien immobilier - BOGBE'S GROUPE"
@@ -71,7 +72,9 @@ export default async function BienOg({ params }: { params: { id: string } }) {
   }
 
   const medias = (bien.biens_medias as { url: string; est_couverture: boolean; ordre: number }[] | null) ?? []
-  const photo = medias.sort((a, b) => (b.est_couverture ? 1 : 0) - (a.est_couverture ? 1 : 0))[0]?.url ?? null
+  const photoUrl = medias.sort((a, b) => (b.est_couverture ? 1 : 0) - (a.est_couverture ? 1 : 0))[0]?.url ?? null
+  // Data URI (fetch contrôlé) — une URL distante brute fait planter Satori en silence
+  const photo = await fetchOgImage(photoUrl)
 
   const data: BienOgData = {
     titre: bien.titre,

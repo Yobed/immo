@@ -4,6 +4,7 @@ import { createLocauxClient } from '@/lib/supabase/locaux'
 import { mapLocauxRow, type LocauxRow } from '@/lib/locaux/mapper'
 import { getStaticMapUrl } from '@/lib/mapbox-static'
 import { getCommuneCoords, hasKnownCoords } from '@/lib/commune-coords'
+import { fetchOgImage } from '@/lib/og/safe-image'
 
 export const runtime = 'edge'
 export const alt = "Offre flash immobilière - BOGBE'S GROUPE"
@@ -42,10 +43,11 @@ export default async function FlashOg({ params }: { params: { id: string } }) {
        bien.prix_unit === 'fcfa_par_m2' ? ' / m²' : '')
     : (bien.prix_label ?? 'Prix sur demande')
 
-  // Map du quartier en arrière-plan (compense l'absence de photo)
+  // Fond : photo scrapée si dispo, sinon map du quartier.
+  // Data URI (fetch contrôlé) — une URL distante brute fait planter Satori en silence.
   const coords = getCommuneCoords(bien.commune, bien.quartier)
   const knownLoc = hasKnownCoords(bien.commune, bien.quartier)
-  const mapUrl = getStaticMapUrl({
+  const rawMapUrl = getStaticMapUrl({
     lat: coords.lat,
     lng: coords.lng,
     zoom: knownLoc ? 14 : 11,
@@ -53,6 +55,7 @@ export default async function FlashOg({ params }: { params: { id: string } }) {
     height: 630,
     pin: knownLoc ? { color: 'f97316', size: 'l' } : false,
   })
+  const mapUrl = (await fetchOgImage(bien.image_url)) ?? (await fetchOgImage(rawMapUrl))
 
   return new ImageResponse(
     (
