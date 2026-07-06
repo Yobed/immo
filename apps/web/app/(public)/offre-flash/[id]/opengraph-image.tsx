@@ -113,7 +113,8 @@ export default async function FlashOg({ params }: { params: { id: string } }) {
             boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
           }}
         >
-          🔥 OFFRE FLASH
+          {/* pas d'emoji : Satori crashe sur les glyphes hors police (🔥/⚠) */}
+          OFFRE FLASH
         </div>
 
         {/* Logo marque en haut à droite */}
@@ -193,7 +194,7 @@ export default async function FlashOg({ params }: { params: { id: string } }) {
               borderRadius: '10px',
             }}
           >
-            ⚠ À valider par notre conseiller avant visite
+            À valider par notre conseiller avant visite
           </div>
         </div>
       </div>
