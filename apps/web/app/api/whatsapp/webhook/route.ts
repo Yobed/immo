@@ -360,6 +360,11 @@ Message client : "${userMessage.slice(0, 200)}"`;
     );
     const cleanText = rawText.replace(linkRegex, (_match, base, existingQs) => {
       if (existingQs) {
+        // Déjà pré-rempli : le LLM recopie souvent les URLs de l'historique
+        // (qui contiennent déjà prefill_*) → ne pas dupliquer les paramètres.
+        if (existingQs.includes('prefill_phone=')) {
+          return `${base}${existingQs}`;
+        }
         return `${base}${existingQs}&${prefillParams}`;
       }
       return `${base}?${prefillParams}`;
@@ -388,10 +393,18 @@ Message client : "${userMessage.slice(0, 200)}"`;
     if (mediaUrls.length === 0 && cleanText) {
       const linkRe = new RegExp(`${siteUrlEscaped}/(biens|offre-flash)/([a-zA-Z0-9-]+)`, 'g');
       const links: Array<{ kind: string; id: string }> = [];
+      const seenIds = new Set<string>();
       let lm: RegExpExecArray | null;
-      while ((lm = linkRe.exec(cleanText)) !== null && links.length < 3) {
-        links.push({ kind: lm[1], id: lm[2] });
+      while ((lm = linkRe.exec(cleanText)) !== null && links.length < 8) {
+        if (!seenIds.has(lm[2])) {
+          seenIds.add(lm[2]);
+          links.push({ kind: lm[1], id: lm[2] });
+        }
       }
+      // Biens BOGBE'S d'abord : photos curées garanties, alors que les flash
+      // scrapées sont quasi toujours sans image (cf. capture: 3 flash sans
+      // photo devant, le bien avec photos en 4e position).
+      links.sort((a, b) => (a.kind === 'biens' ? 0 : 1) - (b.kind === 'biens' ? 0 : 1));
       let photo: string | null = null;
       for (const l of links) {
         if (photo) break;
