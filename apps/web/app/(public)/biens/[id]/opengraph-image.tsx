@@ -6,7 +6,9 @@ import { fetchOgImage } from '@/lib/og/safe-image'
 
 export const runtime = 'edge'
 export const alt = "Bien immobilier - BOGBE'S GROUPE"
-export const size = { width: 1200, height: 630 }
+// 800x420 (pas 1200x630) : le PNG photo plein cadre pèse sinon >700Ko et
+// WhatsApp abandonne la vignette au-delà de ~600Ko.
+export const size = { width: 800, height: 420 }
 export const contentType = 'image/png'
 
 interface BienOgData {
