@@ -35,7 +35,9 @@ const GROQ_BASE_URL = 'https://api.groq.com/openai/v1/chat/completions';
 // filet de sécurité sous forte demande). Modèle 2.5 requis : le free tier
 // de gemini-2.0-flash est à 0 depuis le passage aux 2.5 (vérifié en live).
 const GEMINI_API_KEY = sanitizeKey(process.env.GEMINI_API_KEY);
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+// gemini-flash-latest : bucket de quota séparé de gemini-2.5-flash (qui sature
+// vite sous les rafales de trafic pub). Vérifié en live : 200 vs 429.
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-flash-latest';
 
 const OPENROUTER_API_KEY = sanitizeKey(process.env.OPENROUTER_API_KEY);
 // Modèle gratuit, robuste en FR, ~20 req/min sur le tier free.
@@ -594,6 +596,14 @@ function detectGreeting(userMessage: string): string | null {
   const intentSignals = /\b(cherche|cherchez|cherchent|veux|veut|voudrais|aimerais|besoin|louer|location|acheter|achat|vente|villa|appartement|appart|studio|maison|terrain|bureau|meubl|cocody|plateau|riviera|marcory|yopougon|treichville|bingerville|grand-bassam|assinie|abidjan|fcfa|million|millions|budget|prix|chambres?|pièces?)\b/i
   if (intentSignals.test(m)) return null
 
+  // Ouverture générique : pub Facebook Click-to-WhatsApp (« Puis-je en savoir
+  // plus à ce sujet ? »), ou demande vague sans aucun critère. L'intentSignals
+  // ci-dessus a déjà écarté les vrais besoins → ici il n'y a RIEN à traiter :
+  // une IA ne ferait qu'accueillir + qualifier. Réponse pré-écrite = increvable
+  // même quand les moteurs IA sont saturés par les rafales de trafic pub.
+  const genericInquiry = /\b(en savoir plus|savoir plus|plus d ?infos?|plus d ?informations?|(?:des|d) (?:informations?|renseignements?|detail|details)|obtenir des informations?|interesse|intéress|ce sujet|votre (?:annonce|offre|pub|publicite|bien))\b/
+  if (genericInquiry.test(m)) return welcomeReply()
+
   // Word count > 5 → probably has intent worth sending to the LLM
   if (m.split(' ').length > 5) return null
 
@@ -608,9 +618,6 @@ function detectGreeting(userMessage: string): string | null {
 
   if (!greetingPatterns.some((p) => p.test(m))) return null
 
-  const hour = new Date().getHours()
-  const timeOfDay = hour < 12 ? 'Bonjour' : 'Bonsoir'
-
   if (/^(merci|thanks|thank you|thx)/.test(m)) {
     return `Avec plaisir 🙏\n\nDites-moi ce que vous cherchez : commune, type de bien, budget. Je vous oriente immédiatement.`
   }
@@ -624,6 +631,12 @@ function detectGreeting(userMessage: string): string | null {
     return `Ça va très bien, merci 😊\n\nEt vous ? Dites-moi ce que vous cherchez : commune, type de bien, budget. Je m'occupe du reste.`
   }
 
+  return welcomeReply()
+}
+
+/** Message d'accueil + qualification (pré-écrit, aucun appel IA). */
+function welcomeReply(): string {
+  const timeOfDay = new Date().getHours() < 12 ? 'Bonjour' : 'Bonsoir'
   return `${timeOfDay} 👋\n\nJe suis Sapphire, conseillère BOGBE'S. Je vous aide à trouver votre bien à Abidjan et partout en Côte d'Ivoire (Bouaké, Yamoussoukro, Grand-Bassam, San-Pédro, Korhogo, Daloa, Bingerville…).\n\nDécrivez-moi votre besoin :\n• La ville, commune ou quartier\n• Le type de bien (appartement, villa, studio, terrain…)\n• Votre budget\n\nJe vous présente les meilleures options.`
 }
 
