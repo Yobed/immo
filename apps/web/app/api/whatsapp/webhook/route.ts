@@ -270,12 +270,26 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ status: 'ok', branch: 'fallback_muted' });
       }
 
-      if (isSapphireFallback(lastAssistant)) {
-        const advisorPhone = process.env.SAPPHIRE_ADVISOR_PHONE || '+2250544872051';
-        const advisorMsg = `⚠️ Sapphire KO (IA indisponible) — reprendre la main
+      // Notifier les admins DÈS LE 1er échec : on vient de promettre au prospect
+      // « un conseiller prend le relais », donc un humain doit vraiment être
+      // alerté immédiatement. Lien wa.me cliquable pour répondre en 1 tap.
+      // SAPPHIRE_ADMIN_PHONES = liste séparée par virgules (plusieurs admins),
+      // fallback sur SAPPHIRE_ADVISOR_PHONE (numéro unique).
+      const adminPhones = (
+        process.env.SAPPHIRE_ADMIN_PHONES || process.env.SAPPHIRE_ADVISOR_PHONE || '+2250544872051'
+      ).split(',').map((s) => s.trim()).filter(Boolean);
+      const waLink = `https://wa.me/${senderPn.replace(/[^0-9]/g, '')}`;
+      const advisorMsg = `🔔 Sapphire n'a pas pu répondre — prendre la main
 👤 ${contactName} — ${senderPn}
-💬 "${userMessage.slice(0, 300)}"`;
-        await wasenderSendMessage(advisorPhone, advisorMsg, 'text').catch(() => null);
+💬 "${userMessage.slice(0, 300)}"
+➡️ Répondre directement : ${waLink}`;
+      for (const p of adminPhones) {
+        await wasenderSendMessage(p, advisorMsg, 'text').catch(() => null);
+      }
+
+      if (isSapphireFallback(lastAssistant)) {
+        // 2e échec consécutif → message d'escalade au prospect (les admins
+        // viennent d'être re-notifiés ci-dessus).
         await humanReplyDelay(SAPPHIRE_ESCALATION);
         await wasenderSendMessage(senderPn, SAPPHIRE_ESCALATION, 'text');
         await supabase.from('whatsapp_messages').insert({
@@ -286,7 +300,8 @@ export async function POST(req: NextRequest) {
         });
         return NextResponse.json({ status: 'ok', branch: 'fallback_escalated' });
       }
-      // 1er échec → le fallback passe par le flux normal (envoyé + loggé une fois)
+      // 1er échec → admins notifiés ci-dessus ; le message « conseiller prend
+      // le relais » part par le flux normal (envoyé + loggé une fois).
     }
 
     // 6. Détecter confirmation RDV et sauvegarder la visite

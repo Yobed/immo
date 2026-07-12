@@ -46,9 +46,11 @@ const OPENROUTER_API_KEY = sanitizeKey(process.env.OPENROUTER_API_KEY);
 const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct';
 // Modèles GRATUITS de dernier secours, essayés après le payant (providers
 // diversifiés → si un est saturé, un autre passe). Surchargeable via env.
+// hermes-405b retiré : trop lourd/lent (risque de timeout quand il répond).
+// Les 2 restants échouent vite (429 < 1s) quand le tier free est saturé.
 const OPENROUTER_FREE_MODELS = (
   process.env.OPENROUTER_FREE_MODELS ||
-  'meta-llama/llama-3.3-70b-instruct:free,qwen/qwen3-next-80b-a3b-instruct:free,nousresearch/hermes-3-llama-3.1-405b:free'
+  'meta-llama/llama-3.3-70b-instruct:free,qwen/qwen3-next-80b-a3b-instruct:free'
 ).split(',').map((s) => s.trim()).filter(Boolean);
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
