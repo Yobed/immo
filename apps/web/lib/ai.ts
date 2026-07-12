@@ -552,7 +552,10 @@ async function openRouterFetch(
         temperature: 0.15,
         max_tokens: 800,
       }),
-    });
+    // ponytail: dernier recours = 18s (le free gpt-oss-120b est lent/en file).
+    // maxDuration webhook = 60s, Groq+Gemini ont déjà échoué vite → marge OK.
+    // Couper à 5s ici transformait chaque OpenRouter lent en fallback inutile.
+    }, 18000);
   } catch (e) {
     const err = e as Error
     const isAbort = err.name === 'AbortError'
