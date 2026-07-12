@@ -34,21 +34,36 @@ function priceDisplay(b: BienRow): string {
 export default async function AdminValidationPage() {
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: biensRaw } = await (admin.from('biens') as any)
+  const { data: biensRaw, error: biensErr } = await (admin.from('biens') as any)
     .select(`
       id, titre, commune, quartier, type_bien,
       prix_mois_fcfa, prix_vente_fcfa, prix_nuit_fcfa,
       soumis_le, created_at, proprietaire_id,
-      profiles!biens_proprietaire_id_fkey(phone, full_name, email),
       biens_medias(url, est_couverture)
     `)
     .eq('statut', 'en_attente')
     .order('soumis_le', { ascending: true, nullsFirst: true })
     .order('created_at', { ascending: true })
     .limit(100)
+  if (biensErr) console.error('[admin/validation] biens query:', biensErr)
+
+  // Second appel pour les profils propriétaire : evite le join FK explicite
+  // (qui foirait silencieusement quand le nom de la contrainte diffère).
+  const proprietaireIds = Array.from(new Set((biensRaw ?? []).map((b: { proprietaire_id: string }) => b.proprietaire_id)))
+  let profilesById: Record<string, { phone: string | null; full_name: string | null; email: string | null }> = {}
+  if (proprietaireIds.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: profs } = await (admin.from('profiles') as any)
+      .select('id, phone, full_name, email')
+      .in('id', proprietaireIds)
+    profilesById = Object.fromEntries((profs ?? []).map((p: { id: string; phone: string | null; full_name: string | null; email: string | null }) => [p.id, p]))
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const biens = (biensRaw ?? []) as any as BienRow[]
+  const biens = ((biensRaw ?? []) as any as Omit<BienRow, 'profiles'>[]).map((b) => ({
+    ...b,
+    profiles: profilesById[b.proprietaire_id] ?? null,
+  })) as BienRow[]
 
   return (
     <main className="min-h-screen bg-[var(--surface-hover)]">
