@@ -40,10 +40,16 @@ const GEMINI_API_KEY = sanitizeKey(process.env.GEMINI_API_KEY);
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-flash-latest';
 
 const OPENROUTER_API_KEY = sanitizeKey(process.env.OPENROUTER_API_KEY);
-// Modèle gratuit, robuste en FR, ~20 req/min sur le tier free.
-// openai/gpt-oss-120b:free = large modèle 120B stable, bonne qualité FR.
-// Alternatives testées valides : moonshotai/kimi-k2.6:free, google/gemma-4-31b-it:free.
-const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'openai/gpt-oss-120b:free';
+// Modèle PAYANT très bon marché (~$0.001/msg) = filet fiable quand Groq/Gemini
+// sont quota-out. llama-3.3-70b-instruct = même modèle que le Groq primaire,
+// donc réponses cohérentes. Surchargeable via env OPENROUTER_MODEL.
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct';
+// Modèles GRATUITS de dernier secours, essayés après le payant (providers
+// diversifiés → si un est saturé, un autre passe). Surchargeable via env.
+const OPENROUTER_FREE_MODELS = (
+  process.env.OPENROUTER_FREE_MODELS ||
+  'meta-llama/llama-3.3-70b-instruct:free,qwen/qwen3-next-80b-a3b-instruct:free,nousresearch/hermes-3-llama-3.1-405b:free'
+).split(',').map((s) => s.trim()).filter(Boolean);
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 // Vercel functions cap at 10 s. Budgeting for the worst case:
@@ -523,6 +529,56 @@ async function geminiFetch(
  * Used when Groq is rate-limited or down.
  * Same OpenAI-compatible request shape — only base URL + model change.
  */
+/** Un seul appel OpenRouter pour un modèle donné. null = échec (à cascader). */
+async function openRouterFetchModel(
+  messages: ChatMessage[],
+  system: string,
+  model: string,
+  timeoutMs: number,
+): Promise<string | null> {
+  let response: Response;
+  try {
+    response = await fetchWithTimeout(OPENROUTER_BASE_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': SITE_URL,
+        'X-Title': "BOGBE'S Sapphire",
+      },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'system', content: system }, ...messages],
+        temperature: 0.15,
+        max_tokens: 800,
+      }),
+    }, timeoutMs);
+  } catch (e) {
+    const err = e as Error
+    console.error(`[OpenRouter] ${model} fetch failed (${err.name === 'AbortError' ? 'timeout' : 'network'}):`, err.message);
+    return null;
+  }
+  if (!response.ok) {
+    const err = await response.text().catch(() => '<no body>');
+    console.error(`[OpenRouter] ${model} HTTP ${response.status} - ${err.slice(0, 200)}`);
+    return null;
+  }
+  const data = await response.json().catch(() => null);
+  const content = data?.choices?.[0]?.message?.content;
+  if (!content) {
+    console.error(`[OpenRouter] ${model} empty completion.`);
+    return null;
+  }
+  return content;
+}
+
+/**
+ * Cascade OpenRouter : modèle payant bon marché d'abord (fiable), puis modèles
+ * gratuits de secours. On s'arrête au premier qui répond. But : ne quasiment
+ * JAMAIS atteindre le message d'indisponibilité qui énerve les prospects.
+ * Payant = 18s (peut être un peu lent), gratuits = 12s chacun (sinon on épuise
+ * le budget des 60s webhook).
+ */
 async function openRouterFetch(
   messages: ChatMessage[],
   system: string,
@@ -531,51 +587,16 @@ async function openRouterFetch(
     console.warn('[OpenRouter] OPENROUTER_API_KEY not configured — skipping fallback');
     return null;
   }
-
-  let response: Response;
-  try {
-    response = await fetchWithTimeout(OPENROUTER_BASE_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        // Recommandé par OpenRouter pour identifier l'app dans leur dashboard
-        'HTTP-Referer': SITE_URL,
-        'X-Title': "BOGBE'S Sapphire",
-      },
-      body: JSON.stringify({
-        model: OPENROUTER_MODEL,
-        messages: [
-          { role: 'system', content: system },
-          ...messages,
-        ],
-        temperature: 0.15,
-        max_tokens: 800,
-      }),
-    // ponytail: dernier recours = 18s (le free gpt-oss-120b est lent/en file).
-    // maxDuration webhook = 60s, Groq+Gemini ont déjà échoué vite → marge OK.
-    // Couper à 5s ici transformait chaque OpenRouter lent en fallback inutile.
-    }, 18000);
-  } catch (e) {
-    const err = e as Error
-    const isAbort = err.name === 'AbortError'
-    console.error(`[OpenRouter] fetch failed (${isAbort ? 'timeout' : 'network'}):`, err.message);
-    return null;
+  const chain = [
+    { model: OPENROUTER_MODEL, timeout: 18000 },
+    ...OPENROUTER_FREE_MODELS.map((model) => ({ model, timeout: 12000 })),
+  ];
+  for (const { model, timeout } of chain) {
+    const out = await openRouterFetchModel(messages, system, model, timeout);
+    if (out) return out;
+    console.warn(`[OpenRouter] ${model} KO → modèle suivant`);
   }
-
-  if (!response.ok) {
-    const err = await response.text().catch(() => '<no body>');
-    console.error(`[OpenRouter] HTTP ${response.status} - body: ${err.slice(0, 300)}`);
-    return null;
-  }
-
-  const data = await response.json().catch(() => null);
-  const content = data?.choices?.[0]?.message?.content;
-  if (!content) {
-    console.error('[OpenRouter] empty completion. data=', JSON.stringify(data).slice(0, 300));
-    return null;
-  }
-  return content;
+  return null;
 }
 
 /**
@@ -720,10 +741,12 @@ function logSapphireCall(entry: SapphireLog): void {
   console.log(`[Sapphire] ${JSON.stringify(entry)}`)
 }
 
-// Honnête : pas de « je reviens dans quelques secondes » (rien ne rappelle),
-// et on ne redemande PAS commune/budget que le client vient souvent de donner.
+// Dernier recours (toutes les IA KO). Formulé comme un PASSAGE DE RELAIS
+// premium, jamais comme une panne : le prospect lit « un humain s'occupe de
+// moi », pas « le robot est cassé ». Le préfixe distinctif sert de marqueur
+// à isSapphireFallback (anti-boucle).
 const FALLBACK_REPLY =
-  `Désolé, je rencontre un petit souci technique 🙏\n\nVotre message est bien reçu. Renvoyez-le dans quelques minutes, ou un conseiller vous répondra directement.`
+  `Un conseiller BOGBE'S prend le relais et revient vers vous directement dans un instant 🙏\n\nVotre demande est bien enregistrée, merci de patienter quelques minutes.`
 
 /** Message d'escalade envoyé au 2e échec IA consécutif (un humain prend le relais). */
 export const SAPPHIRE_ESCALATION =
@@ -737,7 +760,8 @@ export function isSapphireFallback(text: string | null | undefined): boolean {
   if (!text) return false
   return (
     text.startsWith('Un instant, je reçois beaucoup de demandes') ||
-    text.startsWith('Désolé, je rencontre un petit souci technique')
+    text.startsWith('Désolé, je rencontre un petit souci technique') ||
+    text.startsWith("Un conseiller BOGBE'S prend le relais")
   )
 }
 
