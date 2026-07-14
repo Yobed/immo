@@ -14,7 +14,7 @@ import { UserPlus, Mail, Lock, User, CheckCircle2, ArrowRight } from 'lucide-rea
 const registerSchema = z.object({
   full_name: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
   email: z.string().email('Adresse e-mail invalide'),
-  password: z.string().min(8, 'Le mot de passe doit contenir au moins 8 caractères'),
+  password: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
   role: z.enum(['locataire', 'proprietaire', 'agence']),
 })
 
@@ -57,28 +57,34 @@ function RegisterContent() {
     setLoading(true)
     setError(null)
 
-    const origin = window.location.origin
-    const { error } = await supabase.auth.signUp({
+    // Inscription via notre route serveur (compte confirmé d'office — évite le
+    // rate limit e-mail Supabase qui bloquait les inscriptions sous trafic pub).
+    const res = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...data, referral_code: referralCode }),
+    })
+    const payload = await res.json().catch(() => ({}))
+
+    if (!res.ok) {
+      setError(payload.error === 'already'
+        ? 'Cette adresse e-mail est déjà utilisée.'
+        : (payload.error || "Une erreur est survenue lors de l'inscription."))
+      setLoading(false)
+      return
+    }
+
+    // Compte créé + confirmé → connexion immédiate, puis redirection.
+    const { error: signInError } = await supabase.auth.signInWithPassword({
       email: data.email,
       password: data.password,
-      options: {
-        // Lien dans l'email de confirmation — doit pointer vers notre handler /callback
-        // qui échange le code contre une session avant de rediriger vers /profil.
-        emailRedirectTo: `${origin}/callback?next=/profil`,
-        data: {
-          full_name: data.full_name,
-          role: data.role,
-          referral_code: referralCode,
-        },
-      },
     })
-
-    if (error) {
-      setError(error.message.includes('already registered') 
-        ? 'Cette adresse e-mail est déjà utilisée.' 
-        : "Une erreur est survenue lors de l'inscription.")
-    } else {
+    if (signInError) {
+      // Compte bien créé mais connexion auto KO → on invite à se connecter.
       setSuccess(true)
+    } else {
+      window.location.assign('/profil')
+      return
     }
     setLoading(false)
   }
