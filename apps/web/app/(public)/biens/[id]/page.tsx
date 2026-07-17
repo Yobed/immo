@@ -65,7 +65,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     .limit(1)
     .single()
 
-  if (!bien) return { title: "Bien introuvable — BOGBE’S GROUPE" }
+  // noindex : un bien supprimé/expiré rend une page « introuvable » en HTTP 200
+  // (streaming loading.tsx) → sans cette directive, Google/Bing indexent ces
+  // coquilles vides comme de vraies pages (soft 404 constaté sur Bing).
+  if (!bien) return { title: 'Bien introuvable', robots: { index: false, follow: false } }
 
   const medias = (bien.biens_medias as any[] | null) ?? []
   const photo = medias.sort((a, b) => (b.est_couverture ? 1 : 0) - (a.est_couverture ? 1 : 0))[0]?.url

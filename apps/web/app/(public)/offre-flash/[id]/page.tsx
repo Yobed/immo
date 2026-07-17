@@ -32,7 +32,10 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params
   const numId = parseInt(id, 10)
-  if (isNaN(numId)) return { title: 'Offre flash introuvable' }
+  // noindex : offre supprimée/expirée = page « introuvable » servie en HTTP 200
+  // (streaming loading.tsx) → sans cette directive, les moteurs indexent ces
+  // coquilles vides (soft 404).
+  if (isNaN(numId)) return { title: 'Offre flash introuvable', robots: { index: false, follow: false } }
 
   const locaux = createLocauxClient()
   const { data: row } = await locaux
@@ -41,7 +44,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .eq('id', numId)
     .single()
 
-  if (!row) return { title: 'Offre flash introuvable' }
+  if (!row) return { title: 'Offre flash introuvable', robots: { index: false, follow: false } }
 
   const bien = mapLocauxRow(row as LocauxRow)
   const lieu = [bien.quartier, bien.commune].filter(Boolean).join(', ')
