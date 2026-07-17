@@ -1,0 +1,23 @@
+# Config minimale : synchronise UNIQUEMENT les URLs d'auth avec le nouveau
+# hebergement. Les autres champs declares ci-dessous ne font que FIGER les
+# valeurs remote existantes (sinon config push les ecraserait avec ses defauts).
+project_id = "tjvozbcnkimfgwonslzm"
+
+[auth]
+site_url = "https://www.bogbesgroup.com"
+additional_redirect_urls = [
+  "https://www.bogbesgroup.com/**",
+  "https://bogbesgroup.com/**",
+  "https://immo-kassiowifriedgmailcoms-projects.vercel.app/**",
+  "http://localhost:3000/**",
+]
+
+# — valeurs remote existantes, figées telles quelles —
+[auth.email]
+enable_confirmations = true
+max_frequency = "1m0s"
+otp_length = 8
+
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
