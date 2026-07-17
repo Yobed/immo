@@ -30,6 +30,37 @@ async function humanReplyDelay(text: string): Promise<void> {
 }
 
 /**
+ * Acquittements / politesses de clôture (« ok », « merci », « bonne journée »).
+ * Un humain ne répond pas à ça → le bot se tait. Le message reste loggé.
+ * NB : « oui » n'y est PAS (c'est une vraie réponse, ex. confirmation de visite).
+ */
+const ACK_REGEX = /^\s*((ok(ay)?|d\s?'?accord|daccord|parfait|super|top|merci( beaucoup| bien| infiniment)?|thanks?|thx|bien re[cç]u|re[cç]u|c\s?'?est not[ée]|not[ée]|[cç]a marche|pas de (souci|probl[eè]me)|au revoir|bye|[àa] (bient[ôo]t|plus( tard)?)|bonne (journ[ée]e|soir[ée]e|nuit)|👍|🙏)[\s!.…,]*)+$/i;
+
+/**
+ * Détecte une ANNONCE immobilière entrante : un démarcheur/agent qui PROPOSE
+ * un bien (prix + type + « à louer/vendre » + tél…), à ne surtout pas traiter
+ * comme un client qui cherche. Heuristique sans IA : ≥3 signaux typiques des
+ * annonces WhatsApp CI.
+ * ponytail: regex; passer à extractBienFromWhatsApp (IA) si trop d'angles morts.
+ */
+function looksLikeListing(text: string): boolean {
+  if (text.length < 60) return false;
+  let score = 0;
+  if (/\b[àa]\s+(louer|vendre)\b|\bdisponibles?\b|\bdispo\b/i.test(text)) score++;
+  if (/\d[\d\s.,]*\s*(fcfa|f\s?cfa|francs?|millions?)\b/i.test(text)) score++;
+  if (/\b(villas?|studios?|appartements?|duplex|triplex|terrains?|magasins?|bureaux?|entrep[ôo]ts?|r\+\d|pi[èe]ces?|chambres?)\b/i.test(text)) score++;
+  if (/\b(caution|avance|mois de loyer|superficie|m2|m²|titre foncier|acd|loti[es]?)\b/i.test(text)) score++;
+  if (/(\+?225[\s.]?\d{2}|\b0[157][\s.]?\d{2})[\s.]?\d{2}[\s.]?\d{2}/.test(text) || /\b\d{10}\b/.test(text)) score++;
+  return score >= 3;
+}
+
+/** Réponse unique aux démarcheurs qui proposent un bien — aiguillage dépôt. */
+const PARTNER_REPLY = `Merci pour votre proposition 🙏 Nous sommes toujours preneurs de nouveaux biens.
+
+Notre conseiller va vous recontacter. Vous pouvez aussi déposer votre bien directement ici (2 minutes) :
+https://www.bogbesgroup.com/proprietaires`;
+
+/**
  * Build a deduplication key for a Wasender inbound message.
  * Preference order:
  *   1. msg.key.id — Wasender's own message id (most reliable)
@@ -140,22 +171,47 @@ export async function POST(req: NextRequest) {
 
     const msg = Array.isArray(messages) ? messages[0] : messages;
 
-    if (msg.key?.fromMe) {
-      return NextResponse.json({ status: 'ignored' });
-    }
-
     const jid = msg.key?.remoteJid;
-    const rawPn = msg.key?.cleanedSenderPn || jid?.split('@')[0] || '';
-    // Normalize Ivory Coast 8-digit legacy format (22544872051) → 10-digit (2250544872051)
-    const senderPn = normalizeCIPhone(rawPn);
-    const contactName = msg.pushName || 'Client';
-
     const userMessage =
       msg.messageBody ||
       msg.message?.conversation ||
       msg.message?.extendedTextMessage?.text ||
       msg.text ||
       '';
+
+    // ─── Priorité à l'humain : un conseiller répond À LA MAIN depuis le téléphone ───
+    // Les envois de notre API réapparaissent aussi en fromMe ; on les reconnaît car
+    // ils sont déjà loggés en outbound. Un fromMe TEXTE inconnu = humain au clavier
+    // → marqueur HUMAN_TAKEOVER : le bot se taira 60 min dans cette conversation.
+    if (msg.key?.fromMe) {
+      if (jid && typeof userMessage === 'string' && userMessage.trim()) {
+        const sb = getSupabase();
+        const { data: recentOut } = await sb
+          .from('whatsapp_messages')
+          .select('body')
+          .eq('jid', jid)
+          .eq('direction', 'outbound')
+          .gte('created_at', new Date(Date.now() - 5 * 60_000).toISOString())
+          .limit(10);
+        const isOurBot = (((recentOut as unknown) as { body: string }[]) ?? []).some(
+          (r) => r.body === userMessage,
+        );
+        if (!isOurBot) {
+          await sb.from('whatsapp_messages').insert({
+            jid,
+            direction: 'system',
+            body: 'HUMAN_TAKEOVER',
+            metadata: { preview: String(userMessage).slice(0, 80) },
+          });
+        }
+      }
+      return NextResponse.json({ status: 'ignored' });
+    }
+
+    const rawPn = msg.key?.cleanedSenderPn || jid?.split('@')[0] || '';
+    // Normalize Ivory Coast 8-digit legacy format (22544872051) → 10-digit (2250544872051)
+    const senderPn = normalizeCIPhone(rawPn);
+    const contactName = msg.pushName || 'Client';
 
     // Remove: user message content must not be logged in production
 
@@ -218,6 +274,26 @@ export async function POST(req: NextRequest) {
       metadata: { contactName },
     });
 
+    // 1b. Acquittement (« ok », « merci », « bonne journée »…) → silence total.
+    // Un humain ne répond pas à ça ; relancer la qualification est pire que rien.
+    if (ACK_REGEX.test(userMessage)) {
+      return NextResponse.json({ status: 'ok', branch: 'ack_silent' });
+    }
+
+    // 1c. Reprise humaine active (marqueur < 60 min) → le conseiller a la main,
+    // le bot se tait. Chaque nouveau message humain renouvelle le mute.
+    const { data: takeover } = await supabase
+      .from('whatsapp_messages')
+      .select('id')
+      .eq('jid', jid)
+      .eq('direction', 'system')
+      .eq('body', 'HUMAN_TAKEOVER')
+      .gte('created_at', new Date(Date.now() - 60 * 60_000).toISOString())
+      .limit(1);
+    if (takeover && takeover.length > 0) {
+      return NextResponse.json({ status: 'ok', branch: 'human_takeover_mute' });
+    }
+
     // 2. Historique de conversation (10 derniers messages)
     const { data: history } = await supabase
       .from('whatsapp_messages')
@@ -232,6 +308,35 @@ export async function POST(req: NextRequest) {
         role: m.direction === 'inbound' ? ('user' as const) : ('assistant' as const),
         content: m.body,
       }));
+
+    // 2b. ANNONCE entrante (démarcheur/agent qui PROPOSE un bien) → ne JAMAIS
+    // proposer des biens en retour. Aiguillage dépôt (une seule fois par
+    // conversation) + notification conseiller (lead fournisseur potentiel).
+    if (looksLikeListing(userMessage)) {
+      const alreadyReplied = formattedHistory.some(
+        (m) => m.role === 'assistant' && m.content.startsWith('Merci pour votre proposition'),
+      );
+      if (!alreadyReplied) {
+        const advisorPhone = process.env.SAPPHIRE_ADVISOR_PHONE || '+2250544872051';
+        await wasenderSendMessage(
+          advisorPhone,
+          `📥 Annonce reçue en DM (démarcheur/agence ?)\n👤 ${contactName} — ${senderPn}\n💬 "${userMessage.slice(0, 300)}"`,
+          'text',
+        ).catch(() => null);
+        await humanReplyDelay(PARTNER_REPLY);
+        await wasenderSendMessage(senderPn, PARTNER_REPLY, 'text');
+        await supabase.from('whatsapp_messages').insert({
+          jid,
+          direction: 'outbound',
+          body: PARTNER_REPLY,
+          metadata: { type: 'listing_partner_reply' },
+        });
+      }
+      return NextResponse.json({
+        status: 'ok',
+        branch: alreadyReplied ? 'listing_muted' : 'listing_partner',
+      });
+    }
 
     // 3. Contexte immobilier (biens + médias) — historique passé pour retrouver commune/type des échanges précédents
     const context = await getAIBienContext(userMessage, formattedHistory);
