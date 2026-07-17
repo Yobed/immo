@@ -27,6 +27,9 @@ function LoginContent() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [googleLoading, setGoogleLoading] = useState(false)
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendSuccess, setResendSuccess] = useState(false)
 
   const supabase = createClient()
 
@@ -45,6 +48,8 @@ function LoginContent() {
   const onSubmit = async (data: LoginFormData) => {
     setLoading(true)
     setError(null)
+    setUnconfirmedEmail(null)
+    setResendSuccess(false)
 
     const { error } = await supabase.auth.signInWithPassword({
       email: data.email,
@@ -52,13 +57,46 @@ function LoginContent() {
     })
 
     if (error) {
-      setError('Identifiants incorrects. Veuillez réessayer.')
+      if (error.code === 'email_not_confirmed') {
+        setUnconfirmedEmail(data.email)
+        setError("Votre adresse e-mail n'a pas encore été confirmée. Veuillez vérifier votre boîte de réception (et vos spams) pour confirmer votre inscription.")
+      } else {
+        setError('Identifiants incorrects. Veuillez réessayer.')
+      }
       setLoading(false)
     } else {
       const path = await resolvePostLoginPath(explicitRedirect)
       router.push(path)
       router.refresh()
     }
+  }
+
+  const handleResendConfirmation = async () => {
+    if (!unconfirmedEmail) return
+    setResendLoading(true)
+    setError(null)
+    setResendSuccess(false)
+
+    const origin = window.location.origin
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: unconfirmedEmail,
+      options: {
+        emailRedirectTo: `${origin}/callback?next=/profil`
+      }
+    })
+
+    if (error) {
+      if (error.status === 429 || error.message.toLowerCase().includes('rate limit') || error.message.toLowerCase().includes('limit')) {
+        setError("Trop de tentatives de renvoi d'e-mail. Veuillez patienter une minute avant de réessayer.")
+      } else {
+        setError(error.message || "Une erreur est survenue lors de l'envoi du lien de confirmation.")
+      }
+    } else {
+      setResendSuccess(true)
+      setError(null) // Clear error on success to avoid double messages
+    }
+    setResendLoading(false)
   }
 
   const handleGoogleLogin = async () => {
@@ -128,9 +166,28 @@ function LoginContent() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-[11px] font-black text-center uppercase tracking-wider"
+            className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-[11px] font-black text-center uppercase tracking-wider space-y-3"
           >
-            {error}
+            <div>{error}</div>
+            {unconfirmedEmail && !resendSuccess && (
+              <button
+                type="button"
+                onClick={handleResendConfirmation}
+                disabled={resendLoading}
+                className="inline-block mt-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-500 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-[0.98] disabled:opacity-50"
+              >
+                {resendLoading ? "Envoi en cours..." : "Renvoyer l'e-mail de confirmation"}
+              </button>
+            )}
+          </motion.div>
+        )}
+        {resendSuccess && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[11px] font-black text-center uppercase tracking-wider"
+          >
+            L'e-mail de confirmation a été renvoyé avec succès. Veuillez vérifier votre boîte de réception et vos spams.
           </motion.div>
         )}
 

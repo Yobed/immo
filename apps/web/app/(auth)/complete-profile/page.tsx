@@ -9,7 +9,7 @@ export default function CompleteProfilePage() {
   const supabase = createClient()
 
   const [fullName, setFullName] = useState('')
-  const [role, setRole] = useState<'visiteur' | 'locataire' | 'proprietaire'>('visiteur')
+  const [role, setRole] = useState<'visiteur' | 'locataire' | 'proprietaire' | 'agence'>('visiteur')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [checking, setChecking] = useState(true)
@@ -51,7 +51,7 @@ export default function CompleteProfilePage() {
     }
 
     // Rediriger selon le rôle choisi
-    window.location.href = role === 'proprietaire' ? '/dashboard' : '/'
+    window.location.href = (role === 'proprietaire' || role === 'agence') ? '/dashboard' : '/'
   }
 
   if (checking) {
@@ -104,7 +104,7 @@ export default function CompleteProfilePage() {
           <label className="block text-sm font-medium text-[var(--text)] mb-2">
             Je suis un(e)
           </label>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <button
               type="button"
               onClick={() => setRole('visiteur')}
@@ -163,6 +163,31 @@ export default function CompleteProfilePage() {
                   </svg>
                 </div>
                 <span className="text-sm font-medium text-[var(--text)]">Propriétaire</span>
+              </div>
+            </button>
+            <button
+              type="button"
+              onClick={() => setRole('agence')}
+              className={`flex items-center justify-center p-4 border-2 rounded-card transition-colors ${
+                role === 'agence'
+                  ? 'border-primary bg-primary/5'
+                  : 'border-[var(--border)] hover:border-primary/40'
+              }`}
+            >
+              <div className="text-center">
+                <div className="flex justify-center mb-1">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                    <rect x="4" y="2" width="16" height="20" rx="2" ry="2"/>
+                    <line x1="9" y1="22" x2="9" y2="16"/>
+                    <line x1="15" y1="22" x2="15" y2="16"/>
+                    <line x1="9" y1="16" x2="15" y2="16"/>
+                    <path d="M8 6h.01"/>
+                    <path d="M16 6h.01"/>
+                    <path d="M8 10h.01"/>
+                    <path d="M16 10h.01"/>
+                  </svg>
+                </div>
+                <span className="text-sm font-medium text-[var(--text)]">Agence</span>
               </div>
             </button>
           </div>

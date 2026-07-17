@@ -345,7 +345,9 @@ export async function POST(req: NextRequest) {
     const hasVisiteIntent = detectVisiteIntent(userMessage);
     const detectedDate = extractDateFromMessage(userMessage);
 
-    let enrichedContext = context || undefined;
+    // Marqueur de canal : active la consigne [SILENCE] du prompt (WhatsApp
+    // uniquement — le chat web repose sa question au lieu de se taire).
+    let enrichedContext = (context || '') + '\n\nCANAL: WhatsApp';
     if (hasVisiteIntent) {
       const rdvInstructions = `\n\nINSTRUCTION RDV: Le client veut visiter un bien.${detectedDate ? ` Il a mentionné la date/heure : "${detectedDate}".` : ''}
 - Si tu connais le bien dont il parle (depuis le catalogue), confirme le RDV et ajoute EXACTEMENT ce tag en fin de réponse :
@@ -361,6 +363,12 @@ export async function POST(req: NextRequest) {
 
     if (!aiResponse) {
       return NextResponse.json({ status: 'ok' });
+    }
+
+    // Consigne de silence du LLM (client impatient / refuse un critère) :
+    // aucune réponse envoyée, un conseiller humain prend le relais.
+    if (aiResponse.trim().startsWith('[SILENCE]')) {
+      return NextResponse.json({ status: 'ok', branch: 'llm_silence' });
     }
 
     // 5b. Garde anti-boucle : ne JAMAIS spammer le fallback technique.
