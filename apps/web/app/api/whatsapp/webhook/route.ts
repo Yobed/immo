@@ -59,11 +59,14 @@ function listingSignals(text: string): number {
   return score;
 }
 
-/** Réponse unique aux démarcheurs qui proposent un bien — aiguillage dépôt. */
-const PARTNER_REPLY = `Merci pour votre proposition 🙏 Nous sommes toujours preneurs de nouveaux biens.
+/** Message UNIQUE et courtois pour tout bien confié sur WhatsApp :
+ *  orientation plateforme (créer un compte + publier) — rien de plus. */
+const PARTNER_REPLY = `Merci pour votre proposition 🙏
 
-Notre conseiller va vous recontacter. Vous pouvez aussi déposer votre bien directement ici (2 minutes) :
-https://www.bogbesgroup.com/proprietaires`;
+Pour une prise en charge et un meilleur suivi de votre bien, créez votre compte et publiez-le directement sur notre plateforme :
+https://www.bogbesgroup.com/register
+
+Notre équipe le validera rapidement.`;
 
 /**
  * Build a deduplication key for a Wasender inbound message.
@@ -181,6 +184,10 @@ export async function POST(req: NextRequest) {
       msg.messageBody ||
       msg.message?.conversation ||
       msg.message?.extendedTextMessage?.text ||
+      // Légendes photo/vidéo : les démarcheurs envoient souvent leur annonce
+      // en média avec le texte en légende — indispensable pour la détection.
+      msg.message?.imageMessage?.caption ||
+      msg.message?.videoMessage?.caption ||
       msg.text ||
       '';
 
