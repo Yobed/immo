@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { PremiumBienCard } from '@/components/bien/PremiumBienCard'
 import { SmartFilter } from './SmartFilter'
@@ -41,6 +41,43 @@ const CATEGORIES = [
 export function FeaturedProperties({ initialBiens = [] }: FeaturedPropertiesProps) {
   const t = useT()
   const [filteredRows, setFilteredRows] = useState<BienRow[]>(initialBiens)
+  const trackRef = useRef<HTMLDivElement>(null)
+
+  // Défilement auto en boucle : la liste est rendue 2x, on avance scrollLeft
+  // en continu et on soustrait la moitié quand on la dépasse → boucle sans
+  // couture. Pause au survol/toucher, le scroll manuel reste fonctionnel.
+  useEffect(() => {
+    const el = trackRef.current
+    if (!el) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    let paused = false
+    let raf = 0
+    const onEnter = () => { paused = true }
+    const onLeave = () => { paused = false }
+    el.addEventListener('pointerenter', onEnter)
+    el.addEventListener('pointerleave', onLeave)
+    el.addEventListener('touchstart', onEnter, { passive: true })
+    el.addEventListener('touchend', onLeave, { passive: true })
+
+    const step = () => {
+      if (!paused) {
+        el.scrollLeft += 0.6
+        const half = el.scrollWidth / 2
+        if (el.scrollLeft >= half) el.scrollLeft -= half
+      }
+      raf = requestAnimationFrame(step)
+    }
+    raf = requestAnimationFrame(step)
+
+    return () => {
+      cancelAnimationFrame(raf)
+      el.removeEventListener('pointerenter', onEnter)
+      el.removeEventListener('pointerleave', onLeave)
+      el.removeEventListener('touchstart', onEnter)
+      el.removeEventListener('touchend', onLeave)
+    }
+  }, [filteredRows])
 
   const handleFilter = (filters: { prixMax: string; commune: string; typeBien: string }) => {
     let result = [...initialBiens]
@@ -106,31 +143,38 @@ export function FeaturedProperties({ initialBiens = [] }: FeaturedPropertiesProp
             {/* ── SINGLE ROW FOR LATEST PROPERTIES ── */}
             <div className="space-y-8">
               <div>
-                {/* Scroll horizontal — déborde du padding parent sur les bords */}
+                {/* Scroll horizontal auto-défilant en boucle — liste rendue 2x
+                    pour une boucle sans couture. Clones en aria-hidden. */}
                 <div className="overflow-hidden">
-                <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 md:-mx-6 md:px-6 snap-x snap-mandatory">
-                  {latestProperties.map((bien, i) => (
-                    <div key={bien.id} className="w-[192px] md:w-[240px] shrink-0 snap-start">
-                      <PremiumBienCard
-                        id={bien.id}
-                        titre={bien.titre}
-                        commune={bien.commune}
-                        quartier={bien.quartier}
-                        type_bien={bien.type_bien}
-                        prix_mois_fcfa={bien.prix_mois_fcfa}
-                        prix_nuit_fcfa={bien.prix_nuit_fcfa}
-                        prix_vente_fcfa={bien.prix_vente_fcfa}
-                        surface_m2={bien.surface_m2}
-                        nb_pieces={bien.nb_pieces}
-                        photo_url={bien.photo_url ?? null}
-                        est_disponible={bien.est_disponible}
-                        is_verifie={bien.is_verifie}
-                        score_ia={bien.score_ia}
-                        url_visite_3d={bien.url_visite_3d}
-                        index={i}
-                      />
-                    </div>
-                  ))}
+                <div ref={trackRef} className="flex gap-4 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 md:-mx-6 md:px-6">
+                  {[false, true].map((isClone) =>
+                    latestProperties.map((bien, i) => (
+                      <div
+                        key={`${isClone ? 'clone-' : ''}${bien.id}`}
+                        className="w-[192px] md:w-[240px] shrink-0"
+                        aria-hidden={isClone || undefined}
+                      >
+                        <PremiumBienCard
+                          id={bien.id}
+                          titre={bien.titre}
+                          commune={bien.commune}
+                          quartier={bien.quartier}
+                          type_bien={bien.type_bien}
+                          prix_mois_fcfa={bien.prix_mois_fcfa}
+                          prix_nuit_fcfa={bien.prix_nuit_fcfa}
+                          prix_vente_fcfa={bien.prix_vente_fcfa}
+                          surface_m2={bien.surface_m2}
+                          nb_pieces={bien.nb_pieces}
+                          photo_url={bien.photo_url ?? null}
+                          est_disponible={bien.est_disponible}
+                          is_verifie={bien.is_verifie}
+                          score_ia={bien.score_ia}
+                          url_visite_3d={bien.url_visite_3d}
+                          index={i}
+                        />
+                      </div>
+                    ))
+                  )}
                 </div>
                 </div>
               </div>
