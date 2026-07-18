@@ -293,7 +293,9 @@ export async function POST(req: NextRequest) {
     ...(stableBienId && { id: stableBienId }),
     proprietaire_id: userId,
     statut: 'brouillon' as const,
-    titre: extracted?.titre || 'Annonce en attente de validation',
+    // Jamais « Annonce en attente de validation » : ce placeholder s'affichait
+    // comme TITRE public et faisait croire aux admins que la validation échouait.
+    titre: extracted?.titre || `${extracted?.type_bien ?? 'Appartement'} — ${extracted?.commune ?? 'Abidjan'} (à compléter)`,
     description: extracted?.description || rawText.slice(0, 1800),
     type_bien: extracted?.type_bien || 'appartement',
     commune: extracted?.commune || 'Abidjan',
