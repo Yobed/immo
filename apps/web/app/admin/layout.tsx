@@ -2,6 +2,7 @@ import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { AdminShell } from '@/components/admin/AdminShell'
+import { AutoRefreshOnFocus } from '@/components/admin/AutoRefreshOnFocus'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,6 +39,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <AdminShell email={user.email ?? ''} pendingCount={pendingCount}>
+      <AutoRefreshOnFocus />
       {children}
     </AdminShell>
   )
