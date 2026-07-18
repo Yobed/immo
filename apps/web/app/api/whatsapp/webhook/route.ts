@@ -37,21 +37,26 @@ async function humanReplyDelay(text: string): Promise<void> {
 const ACK_REGEX = /^\s*((ok(ay)?|d\s?'?accord|daccord|parfait|super|top|merci( beaucoup| bien| infiniment)?|thanks?|thx|bien re[cç]u|re[cç]u|c\s?'?est not[ée]|not[ée]|[cç]a marche|pas de (souci|probl[eè]me)|au revoir|bye|[àa] (bient[ôo]t|plus( tard)?)|bonne (journ[ée]e|soir[ée]e|nuit)|👍|🙏)[\s!.…,]*)+$/i;
 
 /**
- * Détecte une ANNONCE immobilière entrante : un démarcheur/agent qui PROPOSE
- * un bien (prix + type + « à louer/vendre » + tél…), à ne surtout pas traiter
- * comme un client qui cherche. Heuristique sans IA : ≥3 signaux typiques des
- * annonces WhatsApp CI.
- * ponytail: regex; passer à extractBienFromWhatsApp (IA) si trop d'angles morts.
+ * Signaux d'ANNONCE immobilière entrante : un agent/propriétaire/démarcheur
+ * qui CONFIE un bien, à ne surtout pas traiter comme un client qui cherche.
+ * Vocabulaire réel des annonces WhatsApp CI (cf. captures terrain) :
+ * « 8.000.000/ lot », « 700milles * 5mois », « Com : 40% », « mandataire
+ * exclusif », « morcelable », « TF », prix au m², hectares…
+ * ≥3 signaux = annonce sûre ; 1-2 signaux sur message long = confirmation IA.
  */
-function looksLikeListing(text: string): boolean {
-  if (text.length < 60) return false;
+function listingSignals(text: string): number {
   let score = 0;
   if (/\b[àa]\s+(louer|vendre)\b|\bdisponibles?\b|\bdispo\b/i.test(text)) score++;
-  if (/\d[\d\s.,]*\s*(fcfa|f\s?cfa|francs?|millions?)\b/i.test(text)) score++;
-  if (/\b(villas?|studios?|appartements?|duplex|triplex|terrains?|magasins?|bureaux?|entrep[ôo]ts?|r\+\d|pi[èe]ces?|chambres?)\b/i.test(text)) score++;
-  if (/\b(caution|avance|mois de loyer|superficie|m2|m²|titre foncier|acd|loti[es]?)\b/i.test(text)) score++;
+  if (
+    /\d[\d\s.,]*\s*(fcfa|f\s?cfa|francs?|millions?|milles?)\b/i.test(text) ||
+    /\b\d{1,3}(?:[.,]\d{3}){2,}\b/.test(text) || // 8.000.000 sans devise
+    /\d\s*\/\s*(m²|m2|lot|mois)\b/i.test(text) // prix au m² / au lot
+  ) score++;
+  if (/\b(villas?|studios?|appartements?|duplex|triplex|terrains?|magasins?|bureaux?|entrep[ôo]ts?|r\+\d|pi[èe]ces?|chambres?|lots?|hectares?)\b/i.test(text)) score++;
+  if (/\b(caution|avances?|loyers?|mois de loyer|superficie|m2|m²|titre foncier|tf\b|acd|loti[es]?|morcelable|documents?)\b/i.test(text)) score++;
+  if (/\b(commissions?|com\s*[:.]?\s*\d{1,2}\s*%|mandataires?|d[ée]marcheurs?|je suis directe?|apporteur)\b/i.test(text)) score++;
   if (/(\+?225[\s.]?\d{2}|\b0[157][\s.]?\d{2})[\s.]?\d{2}[\s.]?\d{2}/.test(text) || /\b\d{10}\b/.test(text)) score++;
-  return score >= 3;
+  return score;
 }
 
 /** Réponse unique aux démarcheurs qui proposent un bien — aiguillage dépôt. */
@@ -280,18 +285,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: 'ok', branch: 'ack_silent' });
     }
 
-    // 1c. Reprise humaine active (marqueur < 60 min) → le conseiller a la main,
-    // le bot se tait. Chaque nouveau message humain renouvelle le mute.
-    const { data: takeover } = await supabase
+    // 1c. Mutes actifs : reprise humaine (60 min) OU fournisseur de biens
+    // identifié (24 h — un démarcheur envoie souvent son annonce en PLUSIEURS
+    // messages : texte, photos, « Com : 40% »… tous doivent rester sans réponse).
+    const { data: sysMarks } = await supabase
       .from('whatsapp_messages')
-      .select('id')
+      .select('body, created_at')
       .eq('jid', jid)
       .eq('direction', 'system')
-      .eq('body', 'HUMAN_TAKEOVER')
-      .gte('created_at', new Date(Date.now() - 60 * 60_000).toISOString())
-      .limit(1);
-    if (takeover && takeover.length > 0) {
+      .in('body', ['HUMAN_TAKEOVER', 'LISTING_PROVIDER'])
+      .gte('created_at', new Date(Date.now() - 24 * 3_600_000).toISOString())
+      .order('created_at', { ascending: false })
+      .limit(5);
+    const now = Date.now();
+    const marks = ((sysMarks as unknown) as { body: string; created_at: string }[]) ?? [];
+    if (marks.some((m) => m.body === 'HUMAN_TAKEOVER' && now - new Date(m.created_at).getTime() < 3_600_000)) {
       return NextResponse.json({ status: 'ok', branch: 'human_takeover_mute' });
+    }
+    if (marks.some((m) => m.body === 'LISTING_PROVIDER')) {
+      return NextResponse.json({ status: 'ok', branch: 'listing_provider_mute' });
     }
 
     // 2. Historique de conversation (10 derniers messages)
@@ -309,10 +321,25 @@ export async function POST(req: NextRequest) {
         content: m.body,
       }));
 
-    // 2b. ANNONCE entrante (démarcheur/agent qui PROPOSE un bien) → ne JAMAIS
-    // proposer des biens en retour. Aiguillage dépôt (une seule fois par
-    // conversation) + notification conseiller (lead fournisseur potentiel).
-    if (looksLikeListing(userMessage)) {
+    // 2b. ANNONCE entrante (agent/proprio/démarcheur qui CONFIE un bien) → ne
+    // JAMAIS proposer des biens en retour. Détection 2 étages : ≥3 signaux =
+    // annonce sûre ; 1-2 signaux sur message long = confirmation par le même
+    // extracteur IA que le scraping des groupes (il reconnaît les annonces).
+    const sig = listingSignals(userMessage);
+    let isListing = sig >= 3;
+    if (!isListing && sig >= 1 && userMessage.length >= 80) {
+      const { data: extracted } = await extractBienFromWhatsApp(userMessage).catch(() => ({ data: null }));
+      isListing = !!extracted && extracted.confidence >= MIN_EXTRACTION_CONFIDENCE;
+    }
+    if (isListing) {
+      // Marqueur fournisseur → mute 24 h (couvre les fragments suivants :
+      // photos, « Com : 40% », vidéos…). Le conseiller reprend la main.
+      await supabase.from('whatsapp_messages').insert({
+        jid,
+        direction: 'system',
+        body: 'LISTING_PROVIDER',
+        metadata: { signals: sig },
+      });
       const alreadyReplied = formattedHistory.some(
         (m) => m.role === 'assistant' && m.content.startsWith('Merci pour votre proposition'),
       );
