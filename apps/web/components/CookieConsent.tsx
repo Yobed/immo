@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { X } from 'lucide-react'
 
 type ConsentState = 'pending' | 'accepted' | 'rejected'
@@ -9,10 +10,16 @@ type ConsentState = 'pending' | 'accepted' | 'rejected'
  * Cookie Consent Banner — RGPD Compliant
  * Blocks GA4 and Meta Pixel until user consents
  * Stores choice in localStorage for 365 days
+ *
+ * ⚠️ Jamais sur /admin : la bannière (fixed bottom, z-110) interceptait les
+ * taps sur les boutons Valider du back-office mobile — les admins croyaient
+ * que la validation était cassée (prouvé par reproduction Playwright).
  */
 export function CookieConsent() {
+  const pathname = usePathname()
   const [consent, setConsent] = useState<ConsentState | null>(null)
   const [mounted, setMounted] = useState(false)
+  const isAdmin = pathname?.startsWith('/admin')
 
   useEffect(() => {
     setMounted(true)
@@ -54,7 +61,7 @@ export function CookieConsent() {
   }
 
   // Don't render on server or if consent is already decided
-  if (!mounted || (consent && consent !== 'pending')) {
+  if (isAdmin || !mounted || (consent && consent !== 'pending')) {
     return null
   }
 
