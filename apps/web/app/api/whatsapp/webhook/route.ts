@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { wasenderSendMessage, verifyWasenderSignature } from '@/lib/wasender';
 import { locauxClientForId } from '@/lib/supabase/locaux';
-import { chatImmobilier, isSapphireFallback, SAPPHIRE_ESCALATION } from '@/lib/ai';
+import { chatImmobilier, isSapphireFallback, SAPPHIRE_ESCALATION, getLastSapphireRoute } from '@/lib/ai';
 import { getAIBienContext } from '@/lib/ai/tools';
 import { extractBienFromWhatsApp } from '@/lib/extractors/whatsapp-bien-extractor';
 import { upsertProspect, recordOptOut } from '@/lib/outreach/agent-prospects';
@@ -24,8 +24,14 @@ const MIN_EXTRACTION_CONFIDENCE = 0.7;
  * pour une liste de biens. Cumulé au temps de génération (1-5 s), la réponse
  * arrive dans la fenêtre 5-15 s recommandée.
  */
-async function humanReplyDelay(text: string): Promise<void> {
-  const typingMs = Math.min(10_000, 1_500 + text.length * 12) + Math.random() * 2_500;
+async function humanReplyDelay(text: string, requestStartedAt?: number): Promise<void> {
+  let typingMs = Math.min(10_000, 1_500 + text.length * 12) + Math.random() * 2_500;
+  // Si la cascade IA a déjà mangé le budget des 60 s Vercel, on raccourcit le
+  // délai anti-ban plutôt que de mourir en 504 — un 504 déclenche un retry
+  // Wasender, donc une DOUBLE réponse au prospect (observé le 22/07).
+  if (requestStartedAt) {
+    typingMs = Math.max(0, Math.min(typingMs, 50_000 - (Date.now() - requestStartedAt)));
+  }
   await new Promise((r) => setTimeout(r, typingMs));
 }
 
@@ -35,6 +41,32 @@ async function humanReplyDelay(text: string): Promise<void> {
  * NB : « oui » n'y est PAS (c'est une vraie réponse, ex. confirmation de visite).
  */
 const ACK_REGEX = /^\s*((ok(ay)?|d\s?'?accord|daccord|parfait|super|top|merci( beaucoup| bien| infiniment)?|thanks?|thx|bien re[cç]u|re[cç]u|c\s?'?est not[ée]|not[ée]|[cç]a marche|pas de (souci|probl[eè]me)|au revoir|bye|[àa] (bient[ôo]t|plus( tard)?)|bonne (journ[ée]e|soir[ée]e|nuit)|👍|🙏)[\s!.…,]*)+$/i;
+
+/**
+ * Cas [SILENCE] garantis SANS dépendre du LLM : refus d'un critère (« peu
+ * importe le budget »), impatience (« montrez-moi ce que vous avez ») ou
+ * agacement (« si vous pouvez pas m'aider », 😒). Les étages de secours de la
+ * cascade (8b, free tiers) ignorent parfois la consigne du prompt — observé en
+ * prod le 22/07 — donc ces cas canoniques sont interceptés AVANT l'appel IA.
+ * Un conseiller humain reprend la main (le message reste loggé en inbound).
+ */
+const SILENCE_GUARD_REGEX = new RegExp(
+  [
+    /peu\s+importe\s+(le\s+|la\s+)?(budget|prix|montant)/.source,
+    /(pas\s+de|aucun|sans)\s+budget/.source,
+    /n[’']?importe\s+quel(le)?\s+(prix|budget|montant)/.source,
+    /montre[zr]?[-\s]*(moi|nous)?\s+(tout|ce\s+que\s+vous\s+avez)/.source,
+    /(qu[’']?est[-\s]?ce\s+que\s+)?vous\s+avez\s+quoi/.source,
+    /(si\s+)?vous\s+(ne\s+)?pouvez\s+pas\s+m[’']?aider?/.source,
+    /laisse[zr]?\s+tomber/.source,
+    /c[’']?est\s+pas\s+s[ée]rieux/.source,
+    /😒|😤|🙄|😡/.source,
+    // Refus doux en message isolé (« non », « non pas pour le moment ») :
+    // un humain n'y répond pas — relancer est pire que le silence.
+    /^\s*non\b[\s,.!]*((pas\s+)?pour\s+le\s+moment|pas\s+maintenant|merci)?\s*$/.source,
+  ].join('|'),
+  'i',
+);
 
 /**
  * Signaux d'ANNONCE immobilière entrante : un agent/propriétaire/démarcheur
@@ -151,6 +183,7 @@ function normalizeCIPhone(phone: string): string {
 }
 
 export async function POST(req: NextRequest) {
+  const requestStartedAt = Date.now();
   try {
     const rawBody = await req.text();
     const signature = req.headers.get('x-webhook-signature');
@@ -292,6 +325,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: 'ok', branch: 'ack_silent' });
     }
 
+    // 1b-bis. Cas [SILENCE] déterministes (refus de critère, impatience,
+    // agacement) → aucun appel IA, aucun envoi : les superviseurs reprennent.
+    if (SILENCE_GUARD_REGEX.test(userMessage)) {
+      return NextResponse.json({ status: 'ok', branch: 'guard_silence' });
+    }
+
     // 1c. Mutes actifs : reprise humaine (60 min) OU fournisseur de biens
     // identifié (24 h — un démarcheur envoie souvent son annonce en PLUSIEURS
     // messages : texte, photos, « Com : 40% »… tous doivent rester sans réponse).
@@ -357,7 +396,7 @@ export async function POST(req: NextRequest) {
           `📥 Annonce reçue en DM (démarcheur/agence ?)\n👤 ${contactName} — ${senderPn}\n💬 "${userMessage.slice(0, 300)}"`,
           'text',
         ).catch(() => null);
-        await humanReplyDelay(PARTNER_REPLY);
+        await humanReplyDelay(PARTNER_REPLY, requestStartedAt);
         await wasenderSendMessage(senderPn, PARTNER_REPLY, 'text');
         await supabase.from('whatsapp_messages').insert({
           jid,
@@ -437,7 +476,7 @@ export async function POST(req: NextRequest) {
       if (isSapphireFallback(lastAssistant)) {
         // 2e échec consécutif → message d'escalade au prospect (les admins
         // viennent d'être re-notifiés ci-dessus).
-        await humanReplyDelay(SAPPHIRE_ESCALATION);
+        await humanReplyDelay(SAPPHIRE_ESCALATION, requestStartedAt);
         await wasenderSendMessage(senderPn, SAPPHIRE_ESCALATION, 'text');
         await supabase.from('whatsapp_messages').insert({
           jid,
@@ -604,7 +643,7 @@ Message client : "${userMessage.slice(0, 200)}"`;
     // trouvée (légende WhatsApp plafonnée ~1024 chars → repli texte au-delà),
     // sinon texte seul. Si l'envoi avec image échoue, repli texte.
     if (cleanText) {
-      await humanReplyDelay(cleanText);
+      await humanReplyDelay(cleanText, requestStartedAt);
       const canCaption = !!coverPhoto && cleanText.length <= 950;
       const sentWithPhoto = canCaption
         ? await wasenderSendMessage(senderPn, cleanText, 'image', coverPhoto!)
@@ -632,7 +671,7 @@ Message client : "${userMessage.slice(0, 200)}"`;
       jid,
       direction: 'outbound',
       body: cleanText || aiResponse,
-      metadata: { mediaUrls },
+      metadata: { mediaUrls, model: getLastSapphireRoute() },
     });
 
     return NextResponse.json({ status: 'ok' });

@@ -757,9 +757,28 @@ interface SapphireLog {
   output_chars: number
   redactions?: number
 }
+// Dernier étage de cascade réellement utilisé — exposé pour que le webhook
+// WhatsApp journalise QUEL modèle a répondu (metadata.model). Sans ça,
+// impossible de diagnostiquer les réponses hors-règles des petits modèles.
+let _lastRoute = 'none'
+export function getLastSapphireRoute(): string {
+  return _lastRoute
+}
 function logSapphireCall(entry: SapphireLog): void {
+  _lastRoute = entry.route
   console.log(`[Sapphire] ${JSON.stringify(entry)}`)
 }
+
+// Rappel court APRÈS le catalogue : les règles critiques doivent être la
+// DERNIÈRE chose lue par le modèle — les étages de secours de la cascade
+// (8b-instant, free tiers) perdent les consignes noyées avant un long contexte.
+const FINAL_RULES_REMINDER = `
+
+== RAPPEL FINAL — PRIORITÉ ABSOLUE ==
+- MAX 3 biens par réponse, uniquement ceux du catalogue ci-dessus. N'invente RIEN.
+- Critères manquants (zone/type/budget) → UNE seule bulle courte qui les regroupe TOUS.
+- Jamais de lien wa.me ; seul le "Lien fiche" du contexte est autorisé.
+- Si le contexte contient « CANAL: WhatsApp » : client impatient sans critères, client qui refuse un critère (budget…), ou annonce qu'on te CONFIE → réponds EXACTEMENT [SILENCE].`
 
 // Dernier recours (toutes les IA KO). Formulé comme un PASSAGE DE RELAIS
 // premium, jamais comme une panne : le prospect lit « un humain s'occupe de
@@ -807,9 +826,9 @@ export async function chatImmobilier(messages: ChatMessage[], context?: string):
     }
   }
 
-  const system = context
+  const system = (context
     ? `${SYSTEM_PROMPT_IMMOBILIER_CI}\n\n== CATALOGUE DES BIENS DISPONIBLES ==\n${context}`
-    : SYSTEM_PROMPT_IMMOBILIER_CI
+    : SYSTEM_PROMPT_IMMOBILIER_CI) + FINAL_RULES_REMINDER
 
   // Garde-fou : limiter l'historique aux 6 derniers messages pour rester sous le budget tokens
   const trimmed = messages.length > 6 ? messages.slice(-6) : messages
@@ -874,9 +893,9 @@ export async function chatImmobilier(messages: ChatMessage[], context?: string):
 }
 
 export async function chatImmobilierStream(messages: ChatMessage[], context?: string): Promise<ReadableStream | null> {
-  const system = context
+  const system = (context
     ? `${SYSTEM_PROMPT_IMMOBILIER_CI}\n\n== CATALOGUE DES BIENS DISPONIBLES ==\n${context}`
-    : SYSTEM_PROMPT_IMMOBILIER_CI;
+    : SYSTEM_PROMPT_IMMOBILIER_CI) + FINAL_RULES_REMINDER;
 
   // Stage 1 — Try Groq stream
   if (GROQ_API_KEY) {
