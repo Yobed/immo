@@ -1,7 +1,9 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-const URL = 'https://udyfhzyvalansmhkynnc.supabase.co'
-const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkeWZoenl2YWxhbnNtaGt5bm5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTYzNTcsImV4cCI6MjA4Njc3MjM1N30.blMJPyp5n_j22AJn6cwKwrTeuxFbMutsnCfDd2AR_pI'
+// Projet mignebexvzrpfxgbhjuf depuis juil. 2026 (l'ancien udyfhzyvalansmhkynnc
+// a saturé son quota free — seules les NOUVELLES offres arrivent ici).
+const URL = 'https://mignebexvzrpfxgbhjuf.supabase.co'
+const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pZ25lYmV4dnpycGZ4Z2JoanVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1NjA5NzksImV4cCI6MjEwMDEzNjk3OX0.jiERuKejm7D96ILlnBfWQKcRnCLjVkKaxR-2Rz_hBek'
 
 let _client: SupabaseClient | null = null
 let _admin: SupabaseClient | null = null

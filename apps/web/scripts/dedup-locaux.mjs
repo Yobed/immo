@@ -1,9 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
 import { argv, exit } from 'node:process'
 
+const key = process.env.LOCAUX_SUPABASE_SERVICE_ROLE_KEY
+if (!key) {
+  console.error('LOCAUX_SUPABASE_SERVICE_ROLE_KEY manquante (voir apps/web/.env.local)')
+  exit(1)
+}
 const c = createClient(
-  'https://udyfhzyvalansmhkynnc.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkeWZoenl2YWxhbnNtaGt5bm5jIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTE5NjM1NywiZXhwIjoyMDg2NzcyMzU3fQ.XToUDvcD-crlO0bA8HuJ5g1GjhqTl790fHG6H8bujAk',
+  'https://mignebexvzrpfxgbhjuf.supabase.co',
+  key,
   { auth: { autoRefreshToken: false, persistSession: false } }
 )
 

@@ -25,8 +25,8 @@ const MAIN_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const MAIN_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 // ---- BASE LOCAUX (offres flash) ----
-const LOCAUX_URL = 'https://udyfhzyvalansmhkynnc.supabase.co'
-const LOCAUX_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkeWZoenl2YWxhbnNtaGt5bm5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTYzNTcsImV4cCI6MjA4Njc3MjM1N30.blMJPyp5n_j22AJn6cwKwrTeuxFbMutsnCfDd2AR_pI'
+const LOCAUX_URL = 'https://mignebexvzrpfxgbhjuf.supabase.co'
+const LOCAUX_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pZ25lYmV4dnpycGZ4Z2JoanVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1NjA5NzksImV4cCI6MjEwMDEzNjk3OX0.jiERuKejm7D96ILlnBfWQKcRnCLjVkKaxR-2Rz_hBek'
 
 console.log('\n🔍 === DIAGNOSTIC BASES SUPABASE SAPPHIRE ===\n')
 console.log('Main DB URL:', MAIN_URL)
