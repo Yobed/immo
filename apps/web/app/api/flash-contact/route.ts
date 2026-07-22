@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/server-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { locauxAdminForId } from '@/lib/supabase/locaux'
+import { locauxClientForId } from '@/lib/supabase/locaux'
 import {
   notifyAdminContactRequest,
   type ContactRequestContext,
@@ -73,8 +73,10 @@ export async function POST(req: NextRequest) {
   } | null = null
 
   try {
-    // Routage par id : offres historiques (id ≤ 99999) → ancien projet
-    const locauxAdmin = locauxAdminForId(locauxId)
+    // Routage par id : offres historiques (id ≤ 99999) → ancien projet.
+    // Lecture anon (les grants colonnes couvrent telephone_bien sur les deux
+    // projets) — pas de dépendance aux clés service pour ce chemin prospect.
+    const locauxAdmin = locauxClientForId(locauxId)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data } = await (locauxAdmin as any)
       .from('locaux')
