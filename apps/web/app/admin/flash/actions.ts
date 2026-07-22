@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import { createLocauxAdminClient } from '@/lib/supabase/locaux'
+import { locauxAdminForId } from '@/lib/supabase/locaux'
 
 /** Vérifie que l'utilisateur courant est admin. */
 async function assertAdmin(): Promise<void> {
@@ -26,7 +26,8 @@ export async function retirerFlashAction(formData: FormData): Promise<void> {
   await assertAdmin()
   const id = formData.get('id') as string
   if (!id) return
-  const sb = createLocauxAdminClient()
+  // Routage par id : les offres historiques (id ≤ 99999) vivent dans l'ancien projet
+  const sb = locauxAdminForId(Number(id))
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (sb.from('locaux') as any).update({ status: 'inactive' }).eq('id', Number(id))
   revalidatePath('/admin/flash')
@@ -37,7 +38,7 @@ export async function restaurerFlashAction(formData: FormData): Promise<void> {
   await assertAdmin()
   const id = formData.get('id') as string
   if (!id) return
-  const sb = createLocauxAdminClient()
+  const sb = locauxAdminForId(Number(id))
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (sb.from('locaux') as any).update({ status: 'active' }).eq('id', Number(id))
   revalidatePath('/admin/flash')

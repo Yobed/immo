@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Flame, MapPin, BedDouble, Maximize, ArrowUpRight, AlertCircle, Radio, Clock } from 'lucide-react'
-import { createLocauxClient } from '@/lib/supabase/locaux'
+import { locauxReadClients, byDatePubDesc } from '@/lib/supabase/locaux'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { mapLocauxRow, type LocauxRow, type BienExterne } from '@/lib/locaux/mapper'
 import { formatFCFA } from '@/lib/format'
 
@@ -48,8 +49,8 @@ function priceLine(b: BienExterne): string {
  * Server component — fait son propre fetch.
  */
 export async function FlashOffersInline({ filters, limit = 6 }: FlashOffersInlineProps) {
-  const sb = createLocauxClient()
-
+  // Ancien + nouveau projet locaux fusionnés (historique conservé).
+  const fetchFrom = async (sb: SupabaseClient): Promise<LocauxRow[]> => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let q = (sb as any)
     .from('locaux')
@@ -77,9 +78,16 @@ export async function FlashOffersInline({ filters, limit = 6 }: FlashOffersInlin
   if (!isNaN(prixMax)) q = q.or(`prix_normalise.is.null,prix_normalise.lte.${prixMax}`)
 
   const { data: rows } = await q
-  if (!rows || rows.length === 0) return null
+  return (rows ?? []) as LocauxRow[]
+  }
 
-  const biens = (rows as LocauxRow[])
+  const parts = await Promise.all(
+    locauxReadClients().map((sb) => fetchFrom(sb).catch(() => [] as LocauxRow[])),
+  )
+  const rows = parts.flat().sort(byDatePubDesc)
+  if (rows.length === 0) return null
+
+  const biens = rows
     .map(mapLocauxRow)
     .filter((b) => b.is_actif)
     .slice(0, limit)

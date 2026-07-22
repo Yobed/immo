@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/server-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { createLocauxAdminClient } from '@/lib/supabase/locaux'
+import { locauxAdminForId } from '@/lib/supabase/locaux'
 import {
   notifyAdminContactRequest,
   type ContactRequestContext,
@@ -73,7 +73,8 @@ export async function POST(req: NextRequest) {
   } | null = null
 
   try {
-    const locauxAdmin = createLocauxAdminClient()
+    // Routage par id : offres historiques (id ≤ 99999) → ancien projet
+    const locauxAdmin = locauxAdminForId(locauxId)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data } = await (locauxAdmin as any)
       .from('locaux')

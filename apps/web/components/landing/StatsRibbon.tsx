@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { createLocauxClient } from '@/lib/supabase/locaux'
+import { locauxReadClients } from '@/lib/supabase/locaux'
 import { Clock, MapPin, ShieldCheck, Flame } from 'lucide-react'
 import { AnimatedCounter, AnimatedLabel } from './AnimatedCounter'
 
@@ -96,7 +96,6 @@ async function computeAdvisorResponseDelay(
  */
 export async function StatsRibbon() {
   const supabase = await createClient()
-  const locaux = createLocauxClient()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const biensQ = (supabase as any)
@@ -104,31 +103,37 @@ export async function StatsRibbon() {
     .select('id, commune', { count: 'exact' })
     .eq('statut', 'publie')
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const flashQ = (locaux as any)
-    .from('locaux')
-    .select('id, commune', { count: 'exact' })
-    // Politique permissive alignée sur le catalogue (consolidated.ts) : NULL accepté.
-    .not('status', 'eq', 'inactive')
-    .not('is_duplicate', 'is', true)
-    .or('disponible.is.null,disponible.neq.non')
+  // Offres flash : ancien + nouveau projet locaux fusionnés.
+  const flashQs = locauxReadClients().map((locaux) =>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (locaux as any)
+      .from('locaux')
+      .select('id, commune', { count: 'exact' })
+      // Politique permissive alignée sur le catalogue (consolidated.ts) : NULL accepté.
+      .not('status', 'eq', 'inactive')
+      .not('is_duplicate', 'is', true)
+      .or('disponible.is.null,disponible.neq.non'),
+  )
 
-  const [biensRes, flashRes, delay] = await Promise.all([
+  const [biensRes, flashNew, flashLegacy, delay] = await Promise.all([
     biensQ,
-    flashQ,
+    flashQs[0],
+    flashQs[1],
     computeAdvisorResponseDelay(supabase),
   ])
 
   const biensCount = biensRes?.count ?? 0
-  const flashCount = flashRes?.count ?? 0
+  const flashCount = (flashNew?.count ?? 0) + (flashLegacy?.count ?? 0)
 
-  // Communes uniques (union des deux sources)
+  // Communes uniques (union des trois sources)
   const communes = new Set<string>()
   for (const row of (biensRes?.data ?? []) as { commune?: string | null }[]) {
     if (row.commune) communes.add(row.commune.trim().toLowerCase())
   }
-  for (const row of (flashRes?.data ?? []) as { commune?: string | null }[]) {
-    if (row.commune) communes.add(row.commune.trim().toLowerCase())
+  for (const res of [flashNew, flashLegacy]) {
+    for (const row of (res?.data ?? []) as { commune?: string | null }[]) {
+      if (row.commune) communes.add(row.commune.trim().toLowerCase())
+    }
   }
   const communesCount = communes.size
 

@@ -8,7 +8,14 @@
 // Note : pas d'import 'server-only' (package non installé sur Vercel) — la
 // protection est implicite via les appels Supabase server-side dans createClient().
 import { createClient } from '@/lib/supabase/server'
-import { createLocauxClient, createLocauxAdminClient } from '@/lib/supabase/locaux'
+import {
+  createLocauxAdminClient,
+  createLocauxLegacyClient,
+  locauxReadClients,
+  locauxClientForId,
+  byDatePubDesc,
+} from '@/lib/supabase/locaux'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { mapLocauxRow, type LocauxRow } from '@/lib/locaux/mapper'
 import { formatFCFA } from '@/lib/format'
 import { STATUTS_PUBLICS } from './statuts'
@@ -204,7 +211,9 @@ async function fetchBogbes(filters: ConsolidatedFilters): Promise<ConsolidatedBi
 async function fetchLocaux(filters: ConsolidatedFilters): Promise<ConsolidatedBien[]> {
   if (filters.source === 'bogbes') return []
   try {
-    const sb = createLocauxClient()
+    // Ancien + nouveau projet fusionnés : les offres historiques restent
+    // visibles sans avoir été copiées dans le nouveau projet.
+    const fetchFrom = async (sb: SupabaseClient): Promise<LocauxRow[]> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let q = (sb as any)
       .from('locaux')
@@ -269,9 +278,15 @@ async function fetchLocaux(filters: ConsolidatedFilters): Promise<ConsolidatedBi
     // le scraper n'a pas pu remplir prix_normalise.
 
     const { data, error } = await q
-    if (error || !data) return []
+    return error || !data ? [] : (data as LocauxRow[])
+    }
 
-    return (data as LocauxRow[])
+    const parts = await Promise.all(
+      locauxReadClients().map((sb) => fetchFrom(sb).catch(() => [] as LocauxRow[])),
+    )
+    return parts
+      .flat()
+      .sort(byDatePubDesc)
       .map(mapLocauxRow)
       .filter((b) => b.is_actif)
       .filter((b) => {
@@ -517,24 +532,25 @@ export async function getCatalogueCommunes(
   }
 
   if (source !== 'bogbes') {
-    tasks.push(
-      (async () => {
-        try {
-          const sb = createLocauxClient()
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data } = await (sb as any)
-            .from('locaux')
-            .select('commune')
-            .not('status', 'eq', 'inactive')
-            .not('is_duplicate', 'is', true)
-            .limit(5000)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          for (const r of (data ?? []) as any[]) add(r.commune)
-        } catch {
-          /* source indisponible — on ignore */
-        }
-      })(),
-    )
+    for (const sb of locauxReadClients()) {
+      tasks.push(
+        (async () => {
+          try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { data } = await (sb as any)
+              .from('locaux')
+              .select('commune')
+              .not('status', 'eq', 'inactive')
+              .not('is_duplicate', 'is', true)
+              .limit(5000)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            for (const r of (data ?? []) as any[]) add(r.commune)
+          } catch {
+            /* source indisponible — on ignore */
+          }
+        })(),
+      )
+    }
   }
 
   await Promise.all(tasks)
@@ -558,46 +574,58 @@ export async function getLocauxPagedItems(
   pageSize: number,
 ): Promise<{ items: ConsolidatedBien[]; total: number }> {
   try {
-    const sb = createLocauxAdminClient()
     const from = pageIdx * pageSize
     const to = from + pageSize - 1
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let q = (sb as any)
-      .from('locaux')
-      .select(
-        'id,ref_bien,type_de_bien,type_offre,zone_geographique,commune,quartier,prix,prix_normalise,caracteristiques,meubles,chambre,disponible,surface,date_publication,lien_image,message_initial,status,is_duplicate,date_expiration,created_at',
-        { count: 'exact' },
-      )
-      // Filtres isStillActive poussés côté DB
-      .not('status', 'eq', 'inactive')
-      .not('is_duplicate', 'is', true)
-      .or('disponible.is.null,disponible.neq.non')
-      .order('date_publication', { ascending: false })
-      .range(from, to)
+    // ponytail: over-fetch 0..to sur chaque projet puis merge-tri-slice —
+    // simple et correct ; à optimiser (curseurs) si la pagination profonde
+    // devient un vrai usage.
+    const runOn = async (sb: SupabaseClient): Promise<{ rows: LocauxRow[]; count: number }> => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let q = (sb as any)
+        .from('locaux')
+        .select(
+          'id,ref_bien,type_de_bien,type_offre,zone_geographique,commune,quartier,prix,prix_normalise,caracteristiques,meubles,chambre,disponible,surface,date_publication,lien_image,message_initial,status,is_duplicate,date_expiration,created_at',
+          { count: 'exact' },
+        )
+        // Filtres isStillActive poussés côté DB
+        .not('status', 'eq', 'inactive')
+        .not('is_duplicate', 'is', true)
+        .or('disponible.is.null,disponible.neq.non')
+        .order('date_publication', { ascending: false })
+        .range(0, to)
 
-    if (filters.commune) q = q.ilike('commune', `%${filters.commune}%`)
-    if (filters.type_bien) q = q.ilike('type_de_bien', `%${filters.type_bien}%`)
-    if (filters.type_offre === 'vente') {
-      q = q.or('type_offre.ilike.%vent%,type_offre.ilike.%achat%,type_offre.ilike.%vendre%')
-    } else if (filters.type_offre === 'location') {
-      q = q.or('type_offre.ilike.%loc%,type_offre.ilike.%louer%,type_offre.ilike.%loyer%')
-    }
-    if (filters.q?.trim()) {
-      const term = filters.q.trim()
-      q = q.or(`caracteristiques.ilike.%${term}%,message_initial.ilike.%${term}%,quartier.ilike.%${term}%`)
-    }
-    if (filters.prix_min != null) {
-      q = q.or(`prix_normalise.is.null,prix_normalise.gte.${filters.prix_min}`)
-    }
-    if (filters.prix_max != null) {
-      q = q.or(`prix_normalise.is.null,prix_normalise.lte.${filters.prix_max}`)
+      if (filters.commune) q = q.ilike('commune', `%${filters.commune}%`)
+      if (filters.type_bien) q = q.ilike('type_de_bien', `%${filters.type_bien}%`)
+      if (filters.type_offre === 'vente') {
+        q = q.or('type_offre.ilike.%vent%,type_offre.ilike.%achat%,type_offre.ilike.%vendre%')
+      } else if (filters.type_offre === 'location') {
+        q = q.or('type_offre.ilike.%loc%,type_offre.ilike.%louer%,type_offre.ilike.%loyer%')
+      }
+      if (filters.q?.trim()) {
+        const term = filters.q.trim()
+        q = q.or(`caracteristiques.ilike.%${term}%,message_initial.ilike.%${term}%,quartier.ilike.%${term}%`)
+      }
+      if (filters.prix_min != null) {
+        q = q.or(`prix_normalise.is.null,prix_normalise.gte.${filters.prix_min}`)
+      }
+      if (filters.prix_max != null) {
+        q = q.or(`prix_normalise.is.null,prix_normalise.lte.${filters.prix_max}`)
+      }
+
+      const { data, error, count } = await q
+      if (error || !data) return { rows: [], count: 0 }
+      return { rows: data as LocauxRow[], count: count ?? 0 }
     }
 
-    const { data, error, count } = await q
-    if (error || !data) return { items: [], total: 0 }
+    // Nouveau projet (admin) + ancien projet (anon lecture) fusionnés.
+    const [neu, legacy] = await Promise.all([
+      runOn(createLocauxAdminClient()).catch(() => ({ rows: [] as LocauxRow[], count: 0 })),
+      runOn(createLocauxLegacyClient()).catch(() => ({ rows: [] as LocauxRow[], count: 0 })),
+    ])
+    const merged = [...neu.rows, ...legacy.rows].sort(byDatePubDesc).slice(from, to + 1)
 
-    const items: ConsolidatedBien[] = (data as LocauxRow[]).map((row) => {
+    const items: ConsolidatedBien[] = merged.map((row) => {
       const b = mapLocauxRow(row)
       const period =
         b.prix_unit === 'fcfa_par_mois'
@@ -640,7 +668,7 @@ export async function getLocauxPagedItems(
       }
     })
 
-    return { items, total: count ?? 0 }
+    return { items, total: neu.count + legacy.count }
   } catch {
     return { items: [], total: 0 }
   }
@@ -648,9 +676,9 @@ export async function getLocauxPagedItems(
 
 /** Retourne uniquement le nombre total de biens flash actifs (sans charger les lignes). */
 export async function getLocauxCount(filters: ConsolidatedFilters): Promise<number> {
-  try {
+  const countOn = async (sb: SupabaseClient): Promise<number> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let q = (createLocauxAdminClient() as any)
+    let q = (sb as any)
       .from('locaux')
       .select('id', { count: 'exact', head: true })
       .not('status', 'eq', 'inactive')
@@ -666,9 +694,11 @@ export async function getLocauxCount(filters: ConsolidatedFilters): Promise<numb
     }
     const { count, error } = await q
     return error ? 0 : (count ?? 0)
-  } catch {
-    return 0
   }
+  const counts = await Promise.all(
+    locauxReadClients().map((sb) => countOn(sb).catch(() => 0)),
+  )
+  return counts.reduce((a, b) => a + b, 0)
 }
 
 // ─── Fetch by ID ────────────────────────────────────────────────────────────
@@ -760,7 +790,8 @@ export async function getConsolidatedBienById(
 
   // source === 'flash'
   try {
-    const sb = createLocauxClient()
+    // Routage par id : ancien projet pour les offres historiques (id ≤ 99999)
+    const sb = locauxClientForId(Number(id))
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: row } = await (sb as any)
       .from('locaux')

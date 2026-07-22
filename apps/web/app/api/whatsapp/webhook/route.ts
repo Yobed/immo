@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { wasenderSendMessage, verifyWasenderSignature } from '@/lib/wasender';
-import { createLocauxClient } from '@/lib/supabase/locaux';
+import { locauxClientForId } from '@/lib/supabase/locaux';
 import { chatImmobilier, isSapphireFallback, SAPPHIRE_ESCALATION } from '@/lib/ai';
 import { getAIBienContext } from '@/lib/ai/tools';
 import { extractBienFromWhatsApp } from '@/lib/extractors/whatsapp-bien-extractor';
@@ -587,7 +587,7 @@ Message client : "${userMessage.slice(0, 200)}"`;
         } else {
           try {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { data: loc } = await (createLocauxClient() as any)
+            const { data: loc } = await (locauxClientForId(Number(l.id)) as any)
               .from('locaux')
               .select('lien_image')
               .eq('id', Number(l.id))

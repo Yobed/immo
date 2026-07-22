@@ -1,7 +1,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Search, Flame, EyeOff, RotateCcw, MapPin, Calendar, AlertTriangle } from 'lucide-react'
-import { createLocauxAdminClient } from '@/lib/supabase/locaux'
+import { locauxReadClients, byDatePubDesc } from '@/lib/supabase/locaux'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { retirerFlashAction, restaurerFlashAction } from './actions'
 
 export const runtime = 'nodejs'
@@ -51,22 +52,30 @@ export default async function AdminFlashPage({ searchParams }: PageProps) {
   let total = 0
   let err: string | null = null
   try {
-    const sb = createLocauxAdminClient()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let query = (sb.from('locaux') as any)
-      .select('id, ref_bien, type_de_bien, commune, quartier, prix, prix_normalise, status, is_duplicate, disponible, date_publication, lien_image, message_initial', { count: 'exact' })
-      .order('date_publication', { ascending: false })
-      .range(from, to)
-    // Vue admin alignée sur le catalogue public (consolidated.ts) : NULL = accepté,
-    // pour que le total admin reflète le total affiché aux visiteurs.
-    if (showInactive) query = query.eq('status', 'inactive')
-    else query = query.not('status', 'eq', 'inactive').not('is_duplicate', 'is', true)
-    if (q) query = query.or(`commune.ilike.%${q}%,type_de_bien.ilike.%${q}%,ref_bien.ilike.%${q}%`)
-    const { data, count } = await query
-    rows = (data ?? []) as LocalRow[]
-    total = count ?? 0
+    // Ancien + nouveau projet locaux fusionnés — lecture anon (RLS ouverte en
+    // SELECT), la clé service n'est requise que pour retirer/restaurer.
+    // ponytail: over-fetch 0..to sur chaque projet puis merge-tri-slice.
+    const runOn = async (sb: SupabaseClient): Promise<{ rows: LocalRow[]; count: number }> => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let query = (sb.from('locaux') as any)
+        .select('id, ref_bien, type_de_bien, commune, quartier, prix, prix_normalise, status, is_duplicate, disponible, date_publication, lien_image, message_initial', { count: 'exact' })
+        .order('date_publication', { ascending: false })
+        .range(0, to)
+      // Vue admin alignée sur le catalogue public (consolidated.ts) : NULL = accepté,
+      // pour que le total admin reflète le total affiché aux visiteurs.
+      if (showInactive) query = query.eq('status', 'inactive')
+      else query = query.not('status', 'eq', 'inactive').not('is_duplicate', 'is', true)
+      if (q) query = query.or(`commune.ilike.%${q}%,type_de_bien.ilike.%${q}%,ref_bien.ilike.%${q}%`)
+      const { data, count } = await query
+      return { rows: (data ?? []) as LocalRow[], count: count ?? 0 }
+    }
+    const parts = await Promise.all(
+      locauxReadClients().map((sb) => runOn(sb).catch(() => ({ rows: [] as LocalRow[], count: 0 }))),
+    )
+    rows = parts.flatMap((p) => p.rows).sort(byDatePubDesc).slice(from, to + 1)
+    total = parts.reduce((a, p) => a + p.count, 0)
   } catch {
-    err = "Clé service-role locaux indisponible (LOCAUX_SUPABASE_SERVICE_ROLE_KEY). Configure-la sur Vercel."
+    err = 'Sources locaux indisponibles — réessaie dans un instant.'
   }
 
   const totalPages = Math.ceil(total / PAGE_SIZE)

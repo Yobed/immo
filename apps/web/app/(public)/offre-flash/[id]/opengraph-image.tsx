@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { ImageResponse } from 'next/og'
-import { createLocauxClient } from '@/lib/supabase/locaux'
+import { locauxClientForId } from '@/lib/supabase/locaux'
 import { mapLocauxRow, type LocauxRow } from '@/lib/locaux/mapper'
 import { getStaticMapUrl } from '@/lib/mapbox-static'
 import { getCommuneCoords, hasKnownCoords } from '@/lib/commune-coords'
@@ -26,7 +26,7 @@ export default async function FlashOg({ params }: { params: { id: string } }) {
   const numId = parseInt(params.id, 10)
   if (isNaN(numId)) return fallbackOg()
 
-  const locaux = createLocauxClient()
+  const locaux = locauxClientForId(numId)
   const { data: row } = await locaux
     .from('locaux')
     .select('id,ref_bien,type_de_bien,type_offre,commune,quartier,prix,prix_normalise,caracteristiques,meubles,chambre,disponible,surface,date_publication,lien_image,message_initial,status,is_duplicate,date_expiration,created_at,zone_geographique')

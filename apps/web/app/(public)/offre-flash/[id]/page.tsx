@@ -6,7 +6,7 @@ import {
   ArrowLeft, Flame, MapPin, BedDouble, Maximize,
   Calendar, Tag, AlertTriangle,
 } from 'lucide-react'
-import { createLocauxClient } from '@/lib/supabase/locaux'
+import { locauxClientForId } from '@/lib/supabase/locaux'
 import { mapLocauxRow, type LocauxRow } from '@/lib/locaux/mapper'
 import { formatFCFA } from '@/lib/format'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   // coquilles vides (soft 404).
   if (isNaN(numId)) return { title: 'Offre flash introuvable', robots: { index: false, follow: false } }
 
-  const locaux = createLocauxClient()
+  const locaux = locauxClientForId(numId)
   const { data: row } = await locaux
     .from('locaux')
     .select('id,ref_bien,type_de_bien,type_offre,commune,quartier,prix,prix_normalise,caracteristiques,meubles,chambre,disponible,surface,date_publication,lien_image,message_initial,status,is_duplicate,date_expiration,created_at,zone_geographique')
@@ -107,7 +107,7 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
   const numId = parseInt(id, 10)
   if (isNaN(numId)) notFound()
 
-  const locaux = createLocauxClient()
+  const locaux = locauxClientForId(numId)
   // SECURITY: whitelist explicite, JAMAIS de select('*') ici.
   // Les colonnes telephone/telephone_bien sont volontairement omises.
   const { data: row } = await locaux

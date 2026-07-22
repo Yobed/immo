@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Flame, ArrowRight } from 'lucide-react'
-import { createLocauxClient } from '@/lib/supabase/locaux'
+import { locauxReadClients } from '@/lib/supabase/locaux'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 interface Filters {
   q?: string
@@ -14,26 +15,33 @@ interface Filters {
  * les mêmes filtres pré-appliqués.
  */
 export async function FlashOffersBanner({ filters }: { filters: Filters }) {
-  const c = createLocauxClient()
+  // Ancien + nouveau projet locaux : somme des deux compteurs.
+  const countOn = async (c: SupabaseClient): Promise<number> => {
+    let q = c
+      .from('locaux')
+      .select('id', { count: 'exact', head: true })
+      // Politique permissive alignée sur le catalogue (consolidated.ts) : NULL accepté.
+      .not('status', 'eq', 'inactive')
+      .not('is_duplicate', 'is', true)
+      .or('disponible.is.null,disponible.neq.non')
 
-  let q = c
-    .from('locaux')
-    .select('id', { count: 'exact', head: true })
-    // Politique permissive alignée sur le catalogue (consolidated.ts) : NULL accepté.
-    .not('status', 'eq', 'inactive')
-    .not('is_duplicate', 'is', true)
-    .or('disponible.is.null,disponible.neq.non')
+    if (filters.commune) q = q.ilike('commune', `%${filters.commune}%`)
+    if (filters.type_bien) q = q.ilike('type_de_bien', `%${filters.type_bien}%`)
+    if (filters.q) {
+      q = q.or(
+        `message_initial.ilike.%${filters.q}%,caracteristiques.ilike.%${filters.q}%,quartier.ilike.%${filters.q}%`
+      )
+    }
 
-  if (filters.commune) q = q.ilike('commune', `%${filters.commune}%`)
-  if (filters.type_bien) q = q.ilike('type_de_bien', `%${filters.type_bien}%`)
-  if (filters.q) {
-    q = q.or(
-      `message_initial.ilike.%${filters.q}%,caracteristiques.ilike.%${filters.q}%,quartier.ilike.%${filters.q}%`
-    )
+    const { count } = await q
+    return count ?? 0
   }
 
-  const { count } = await q
-  if (!count || count === 0) return null
+  const counts = await Promise.all(
+    locauxReadClients().map((c) => countOn(c).catch(() => 0)),
+  )
+  const count = counts.reduce((a, b) => a + b, 0)
+  if (count === 0) return null
 
   // Reconstruit l'URL /offre-flash avec les filtres équivalents
   const params = new URLSearchParams()
