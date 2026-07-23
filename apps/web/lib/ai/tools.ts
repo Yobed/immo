@@ -30,6 +30,40 @@ const SAPPHIRE_MAX_RESULTS = 5
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bogbesgroup.com'
 
+/** Normalisation zone : minuscules sans accents pour comparer commune/quartier. */
+const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+
+/**
+ * Quartiers fréquemment cités → commune de rattachement. Le parseur ne connaît
+ * que les COMMUNES : « Angré 8ème tranche » n'activait AUCUN filtre de zone et
+ * Sapphire proposait des biens d'autres communes (observé : Divo/Koumassi pour
+ * une demande Angré). ponytail: liste courte des quartiers réels du flux —
+ * enrichir quand un quartier manquant se présente.
+ */
+const QUARTIER_COMMUNE: Record<string, string> = {
+  angre: 'Cocody',
+  riviera: 'Cocody',
+  bonoumin: 'Cocody',
+  palmeraie: 'Cocody',
+  'deux plateaux': 'Cocody',
+  '2 plateaux': 'Cocody',
+  vallon: 'Cocody',
+  cocovico: 'Cocody',
+  synacass: 'Cocody',
+  djorobite: 'Cocody',
+  akouedo: 'Cocody',
+  danga: 'Cocody',
+  'zone 4': 'Marcory',
+  bietry: 'Marcory',
+  anoumabo: 'Marcory',
+  niangon: 'Yopougon',
+  selmer: 'Yopougon',
+  'toits rouges': 'Yopougon',
+  vridi: 'Port-Bouët',
+  gonzagueville: 'Port-Bouët',
+  abatta: 'Bingerville',
+}
+
 function formatBienBlock(b: ConsolidatedBien, i: number | null): string {
   const sourceTag = b.source === 'bogbes' ? "[CATALOGUE BOGBE'S]" : '[OFFRE FLASH WhatsApp]'
   const badges: string[] = []
@@ -133,6 +167,25 @@ export async function getAIBienContext(
     if (pFromHistory.equipements?.length) p.equipements = pFromHistory.equipements
   }
 
+  // ZONE STRICTE — étape 1 : si le client cite un quartier connu sans commune,
+  // on retient les termes de zone (quartier + sa commune) pour le filtre final.
+  // On ne force PAS le filtre commune en DB : les offres scrapées ont parfois
+  // le quartier dans le champ commune (« Angré ») — le post-filtre gère.
+  const zoneTerms: string[] = []
+  if (p.commune) {
+    zoneTerms.push(norm(p.commune))
+  } else {
+    const msgNorm = norm(
+      userMessage + ' ' + (history?.slice(-8).map((m) => m.content).join(' ') ?? ''),
+    )
+    for (const [quartier, commune] of Object.entries(QUARTIER_COMMUNE)) {
+      if (msgNorm.includes(quartier)) {
+        zoneTerms.push(quartier, norm(commune))
+        break
+      }
+    }
+  }
+
   // Si toujours aucun critère et pas de demande de média, pas de recherche
   if (!p.commune && !p.type_bien && !p.prix_max && !p.q && !demandeMedia) {
     return null
@@ -158,11 +211,23 @@ export async function getAIBienContext(
     limitPerSource: MAX_PER_SOURCE,
   })
 
-  const top = items.slice(0, SAPPHIRE_MAX_RESULTS)
+  // ZONE STRICTE — étape 2 (règle Wilfried 23/07) : JAMAIS un bien d'une autre
+  // zone, même présenté comme « autre option ». Filtre code, pas prompt : un
+  // bien passe seulement si sa commune/quartier/titre contient un terme de la
+  // zone demandée. Le quartier exact est classé en premier.
+  let zoned = items
+  if (zoneTerms.length > 0) {
+    const bienZone = (b: ConsolidatedBien) => norm(`${b.commune ?? ''} ${b.quartier ?? ''} ${b.titre}`)
+    zoned = items.filter((b) => zoneTerms.some((t) => bienZone(b).includes(t)))
+    const quartierExact = zoneTerms[0]
+    zoned.sort((a, b) => Number(bienZone(b).includes(quartierExact)) - Number(bienZone(a).includes(quartierExact)))
+  }
+
+  const top = zoned.slice(0, SAPPHIRE_MAX_RESULTS)
 
   if (top.length === 0) {
-    return `Aucun bien ne correspond exactement à ces critères, ni dans le catalogue BOGBE'S, ni dans les offres flash WhatsApp.
-INSTRUCTION : remercie brièvement le client puis dis EXACTEMENT : "Un conseiller commercial va prendre le relais et vous recontacter." Rien d'autre.`
+    return `Aucun bien ne correspond exactement à ces critères (zone comprise), ni dans le catalogue BOGBE'S, ni dans les offres flash WhatsApp.
+INSTRUCTION : remercie brièvement le client puis dis EXACTEMENT : "Un conseiller commercial va prendre le relais et vous recontacter." Rien d'autre. Ne propose JAMAIS un bien d'une autre zone.`
   }
 
   // En-tête avec récap des critères
