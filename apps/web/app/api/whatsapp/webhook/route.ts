@@ -69,6 +69,32 @@ const SILENCE_GUARD_REGEX = new RegExp(
 );
 
 /**
+ * Suivi post-clôture (règle Wilfried 23/07) : après « un conseiller commercial
+ * va prendre le relais/la relève », Sapphire ne répond PLUS — le conseiller
+ * humain gère. Exceptions qui rendent la parole au bot : le client SÉLECTIONNE
+ * un bien précis (numéro, lien, réf, « le premier », demande de visite) ou
+ * exprime un NOUVEAU besoin (critères immobiliers). Garanti par code, pas par
+ * le prompt (même logique que SILENCE_GUARD_REGEX).
+ */
+const HANDOFF_REGEX = /conseiller commercial va prendre (le relais|la rel[eè]ve)/i;
+
+const SELECTS_BIEN_REGEX = new RegExp(
+  [
+    /\b(bien|option|num[ée]ro|choix)\s*(n[°o]\s*)?[1-9]\b/.source,
+    /\b(le|la)\s+(premier|premi[eè]re|deuxi[eè]me|troisi[eè]me|dernier|derni[eè]re)\b/.source,
+    /\bcelui\s+(de|du|d'|à|a)\b/.source,
+    /offre-flash\/\d+/.source,
+    /\/biens\/[a-f0-9-]{8}/.source,
+    /\b[A-Z]{3}-[A-Z]{2,4}-[VL]-[A-Z0-9]{4,}\b/.source, // réf type TRX-COC-V-XXXX
+    /\b(visite|visiter|rendez[-\s]?vous|rdv)\b/.source,
+    /\b(je\s+(prends|choisis|veux|pr[ée]f[eè]re)|[cç]a\s+m[’']int[ée]resse|int[ée]ress[ée]e?\s+par)\b/.source,
+  ].join('|'),
+  'i',
+);
+
+const NEW_NEED_REGEX = /\b(cherche|voudrais|aimerais|besoin|louer|acheter|autre\s+(bien|chose|option)|plut[ôo]t|finalement|villas?|appartements?|apparts?|studios?|maisons?|terrains?|bureaux?|duplex|triplex|magasins?|chambres?|cocody|plateau|riviera|marcory|yopougon|treichville|bingerville|koumassi|abobo|adjam[ée]|port[-\s]?bou[eë]t|attecoub[ée]|songon|anyama|bassam|assinie|bouak[ée]|yamoussoukro|san[-\s]?p[ée]dro|korhogo|daloa|budget|fcfa|millions?|milles?)\b/i;
+
+/**
  * Signaux d'ANNONCE immobilière entrante : un agent/propriétaire/démarcheur
  * qui CONFIE un bien, à ne surtout pas traiter comme un client qui cherche.
  * Vocabulaire réel des annonces WhatsApp CI (cf. captures terrain) :
@@ -409,6 +435,18 @@ export async function POST(req: NextRequest) {
         status: 'ok',
         branch: alreadyReplied ? 'listing_muted' : 'listing_partner',
       });
+    }
+
+    // 2c. Suivi post-clôture : le dernier message Sapphire annonçait la reprise
+    // par un conseiller → silence, SAUF sélection d'un bien ou nouveau besoin.
+    const lastAssistantMsg = [...formattedHistory].reverse().find((m) => m.role === 'assistant');
+    if (
+      lastAssistantMsg &&
+      HANDOFF_REGEX.test(lastAssistantMsg.content) &&
+      !SELECTS_BIEN_REGEX.test(userMessage) &&
+      !NEW_NEED_REGEX.test(userMessage)
+    ) {
+      return NextResponse.json({ status: 'ok', branch: 'handoff_silence' });
     }
 
     // 3. Contexte immobilier (biens + médias) — historique passé pour retrouver commune/type des échanges précédents

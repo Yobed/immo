@@ -19,8 +19,9 @@ import {
  * voient exactement les mêmes biens.
  */
 
-/** Marge budgétaire appliquée autour du budget client (±15%). */
-const BUDGET_MARGIN_PCT = 0.15
+/** Plafond budgétaire strict (règle Wilfried 23/07) : on ne propose JAMAIS un
+ *  bien à plus de 2× le budget client. Moins cher = toujours proposable. */
+const BUDGET_CAP_FACTOR = 2
 
 /** Max biens retournés par source (BOGBE'S + offres flash) */
 const MAX_PER_SOURCE = 3
@@ -137,10 +138,10 @@ export async function getAIBienContext(
     return null
   }
 
-  // Marge budgétaire : ±15%
+  // Plafond budgétaire : ≤ 2× le budget client, aucun plancher
   const budget = p.prix_max ? parseInt(p.prix_max) : null
-  const budgetMin = budget ? Math.round(budget * (1 - BUDGET_MARGIN_PCT)) : undefined
-  const budgetMax = budget ? Math.round(budget * (1 + BUDGET_MARGIN_PCT)) : undefined
+  const budgetMin = undefined
+  const budgetMax = budget ? budget * BUDGET_CAP_FACTOR : undefined
 
   // ─── Unique appel au catalogue consolidé ────────────────────────────────────
   // ⚠️ ON NE PASSE PAS `p.q` au catalogue : c'est une recherche full-text trop stricte
@@ -161,16 +162,16 @@ export async function getAIBienContext(
 
   if (top.length === 0) {
     return `Aucun bien ne correspond exactement à ces critères, ni dans le catalogue BOGBE'S, ni dans les offres flash WhatsApp.
-Dis au client que tu vas faire une recherche manuelle et que tu le recontactes rapidement.`
+INSTRUCTION : remercie brièvement le client puis dis EXACTEMENT : "Un conseiller commercial va prendre le relais et vous recontacter." Rien d'autre.`
   }
 
   // En-tête avec récap des critères
   const critereLines: string[] = []
   if (p.commune) critereLines.push(`- Zone : ${p.commune}`)
   if (p.type_bien) critereLines.push(`- Type : ${p.type_bien}`)
-  if (budget && budgetMin != null && budgetMax != null) {
+  if (budget && budgetMax != null) {
     critereLines.push(
-      `- Budget client : ${formatFCFA(budget)} (intervalle accepté ±15% : ${formatFCFA(budgetMin)} – ${formatFCFA(budgetMax)})`,
+      `- Budget client : ${formatFCFA(budget)} (plafond strict appliqué : aucun bien au-delà de ${formatFCFA(budgetMax)} = 2× le budget)`,
     )
   }
   if (p.equipements?.length) critereLines.push(`- Équipements : ${p.equipements.join(', ')}`)
@@ -246,6 +247,10 @@ Le client demande des photos/vidéos.
 
   context += `\nLIEN DE RECHERCHE PERSONNALISÉ (CATALOGUE CONSOLIDÉ) :
 Propose ce lien au client pour qu'il explore l'intégralité de notre catalogue (biens vérifiés BOGBE'S + offres flash WhatsApp) correspondant à sa recherche : ${catalogueUrl}\n`
+
+  context += `\nINSTRUCTION PRÉSENTATION OBLIGATOIRE :
+- Introduis les biens par EXACTEMENT : "Voici ce qui est disponible dans notre catalogue correspondant à votre recherche :"
+- Termine le message par EXACTEMENT : "Merci de patienter, un conseiller commercial va prendre la relève pour la suite."\n`
 
   return context
 }
