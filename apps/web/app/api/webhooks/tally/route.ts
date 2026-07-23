@@ -226,6 +226,8 @@ Ce lien valide votre numéro et publie votre annonce en 1 clic. Valide 7 jours.`
   await wasenderSendMessage(phone, text, 'text')
 }
 
+import { waitUntil } from '@vercel/functions'
+
 export async function POST(req: NextRequest) {
   // Rate limit Tally : max 30 publications par IP / 1h (anti-abus)
   const rl = checkRateLimit(req, { scope: 'tally-webhook', max: 30, windowMs: 60 * 60_000 })
@@ -261,18 +263,9 @@ export async function POST(req: NextRequest) {
     null
   const stableBienId = submissionKey ? deriveBienId(submissionKey) : null
 
-  const extResult = await extractBienFromWhatsApp(rawText).catch((e: Error) => ({
-    data: null,
-    trace: [`fatal:${e.message?.slice(0, 100)}`],
-  }))
-  const extracted = extResult.data
-  const lowConfidence = !extracted || extracted.confidence < 0.5
-
-  const userId = await findOrCreateUserByPhone(phone)
-  const admin = createAdminClient()
-
   // Idempotence: si on a déjà un bien avec cet ID stable, c'est un retry Tally.
-  // On retourne le bien existant sans rien refaire (pas de re-upload, pas de re-WhatsApp).
+  // On répond tout de suite sans rien refaire (pas de re-upload, pas de re-WhatsApp).
+  const admin = createAdminClient()
   if (stableBienId) {
     const { data: existing } = await admin
       .from('biens')
@@ -288,6 +281,37 @@ export async function POST(req: NextRequest) {
       })
     }
   }
+
+  // ACK immédiat (< 1 s) : Tally coupe à 10 s puis rejoue 5 fois — chaque
+  // soumission apparaissait « Failed » alors que le serveur finissait le
+  // travail après la coupure. Le traitement lourd (extraction IA, création
+  // compte, upload photos, confirmation WhatsApp) part en tâche de fond ;
+  // l'id stable neutralise les retries qui se croiseraient malgré tout.
+  waitUntil(
+    processTallySubmission({ phone, rawText, imageUrls, stableBienId }).catch((e: Error) =>
+      console.error('[tally-webhook] traitement de fond échoué:', e?.message),
+    ),
+  )
+  return NextResponse.json({ ok: true, accepted: true, submission_key: submissionKey })
+}
+
+/** Traitement complet d'une soumission Tally, exécuté après l'ACK HTTP. */
+async function processTallySubmission(args: {
+  phone: string
+  rawText: string
+  imageUrls: string[]
+  stableBienId: string | null
+}): Promise<void> {
+  const { phone, rawText, imageUrls, stableBienId } = args
+
+  const extResult = await extractBienFromWhatsApp(rawText).catch((e: Error) => ({
+    data: null,
+    trace: [`fatal:${e.message?.slice(0, 100)}`],
+  }))
+  const extracted = extResult.data
+
+  const userId = await findOrCreateUserByPhone(phone)
+  const admin = createAdminClient()
 
   const bienInsert = {
     ...(stableBienId && { id: stableBienId }),
@@ -319,23 +343,13 @@ export async function POST(req: NextRequest) {
     .select('id, titre')
     .single()
 
-  // Race condition: 2e webhook arrive entre le SELECT et le INSERT → conflit PK
-  if (bienErr?.code === '23505' && stableBienId) {
-    const { data: existing } = await admin
-      .from('biens')
-      .select('id, titre')
-      .eq('id', stableBienId)
-      .single()
-    return NextResponse.json({
-      ok: true,
-      bien_id: existing?.id ?? stableBienId,
-      dedup: 'tally_retry_race_detected',
-      submission_key: submissionKey,
-    })
-  }
+  // Race condition: 2e retry arrivé entre le SELECT et le INSERT → conflit PK,
+  // l'autre exécution a déjà tout pris en charge.
+  if (bienErr?.code === '23505' && stableBienId) return
 
   if (bienErr || !bien) {
-    return NextResponse.json({ error: 'bien_insert_failed', detail: bienErr?.message }, { status: 500 })
+    console.error('[tally-webhook] insertion bien échouée:', bienErr?.message)
+    return
   }
 
   const uploadTrace: string[] = []
@@ -367,17 +381,10 @@ export async function POST(req: NextRequest) {
 
   await sendConfirmationWhatsApp(phone, bien.id, userId, bien.titre).catch(() => null)
 
-  return NextResponse.json({
-    ok: true,
-    bien_id: bien.id,
-    user_id: userId,
-    extraction_confidence: extracted?.confidence ?? 0,
-    low_confidence: lowConfidence,
-    images_received: imageUrls.length,
-    images_uploaded: uploadedCount,
-    upload_trace: uploadTrace,
-    trace: extResult.trace,
-  })
+  console.log(
+    `[tally-webhook] bien ${bien.id} créé — confiance ${extracted?.confidence ?? 0}, photos ${uploadedCount}/${imageUrls.length}`,
+    uploadTrace.length ? uploadTrace.join(',') : '',
+  )
 }
 
 export async function GET() {
