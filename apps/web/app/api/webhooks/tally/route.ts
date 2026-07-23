@@ -292,7 +292,10 @@ export async function POST(req: NextRequest) {
   const bienInsert = {
     ...(stableBienId && { id: stableBienId }),
     proprietaire_id: userId,
-    statut: 'brouillon' as const,
+    // en_attente (pas brouillon) : les offres du formulaire doivent apparaître
+    // dans la file de validation admin — le proprio « téléphone » ne se
+    // connectera jamais pour promouvoir un brouillon lui-même.
+    statut: 'en_attente' as const,
     // Jamais « Annonce en attente de validation » : ce placeholder s'affichait
     // comme TITRE public et faisait croire aux admins que la validation échouait.
     titre: extracted?.titre || `${extracted?.type_bien ?? 'Appartement'} — ${extracted?.commune ?? 'Abidjan'} (à compléter)`,
