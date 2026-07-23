@@ -78,7 +78,15 @@ export default async function AdminValidationPage() {
       </div>
 
       <div className="max-w-[1400px] mx-auto px-6 py-6">
-        {biens.length === 0 ? (
+        {biensErr ? (
+          // Jamais « 0 annonce 🎉 » quand la requête a ÉCHOUÉ : le badge du
+          // header peut afficher un compte > 0 pendant que la page dit vide —
+          // les admins croyaient la file cassée (capture du 23/07).
+          <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-8 text-center">
+            <p className="text-sm font-bold mb-1">Erreur de chargement de la file.</p>
+            <p className="text-xs">Actualisez la page (tirez vers le bas sur mobile). Si ça persiste, signalez-le.</p>
+          </div>
+        ) : biens.length === 0 ? (
           <div className="bg-[var(--surface-card)] rounded-2xl p-12 border border-[var(--border)] text-center">
             <Inbox className="w-10 h-10 text-[var(--text-subtle)] mx-auto mb-3" />
             <p className="text-[var(--text-muted)] text-sm font-medium">Aucune annonce en attente de validation. 🎉</p>
