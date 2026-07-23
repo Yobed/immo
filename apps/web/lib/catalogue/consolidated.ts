@@ -20,7 +20,7 @@ import { mapLocauxRow, type LocauxRow } from '@/lib/locaux/mapper'
 import { formatFCFA } from '@/lib/format'
 import { STATUTS_PUBLICS } from './statuts'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bogbes-groupe.vercel.app'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bogbesgroup.com'
 
 export interface ConsolidatedBien {
   /** ID unique inter-sources, préfixé : "bogbes:UUID" ou "flash:1234" */

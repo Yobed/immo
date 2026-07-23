@@ -579,7 +579,7 @@ export async function POST(req: NextRequest) {
         // Offre flash → pas de FK valide vers la table biens.
         // On notifie le conseiller humain par Wasender pour qu'il prenne le relais.
         const advisorPhone = process.env.SAPPHIRE_ADVISOR_PHONE || '+2250544872051';
-        const flashUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://bogbes-groupe.vercel.app'}/offre-flash/${rdvCheck.bienId}`;
+        const flashUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bogbesgroup.com'}/offre-flash/${rdvCheck.bienId}`;
         const advisorMsg = `🔔 RDV demandé sur OFFRE FLASH #${rdvCheck.bienId}
 👤 ${contactName} — ${senderPn}
 📅 ${rdvCheck.date || 'date à préciser'}
@@ -605,7 +605,7 @@ Message client : "${userMessage.slice(0, 200)}"`;
     // 7b. Pré-remplir les liens /biens/<id> et /offre-flash/<id> avec le tél
     // + le nom du client. Le formulaire "Demander une visite" lit ces params
     // et pré-remplit ses champs → 0 friction pour le client venu via Sapphire.
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bogbes-groupe.vercel.app';
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bogbesgroup.com';
     const siteUrlEscaped = siteUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const prefillParams = new URLSearchParams({
       prefill_phone: senderPn,

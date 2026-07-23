@@ -59,7 +59,7 @@ export default async function ConfirmerPage({ params }: PageProps) {
   if (wasDraft) {
     await admin.from('biens').update({ statut: 'publie' }).eq('id', bien.id)
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/^﻿/, '') || 'https://bogbes-groupe.vercel.app'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/^﻿/, '') || 'https://www.bogbesgroup.com'
     const lieu = [bien.quartier, bien.commune].filter(Boolean).join(', ')
     const text = `✅ *BOGBE'S GROUPE* — Votre annonce est publiée !
 

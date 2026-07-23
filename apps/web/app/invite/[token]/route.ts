@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { markInviteClicked } from '@/lib/outreach/agent-prospects'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://bogbes-groupe.vercel.app'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://www.bogbesgroup.com'
 
 /**
  * Landing du lien d'invitation envoyé par WhatsApp aux agents.

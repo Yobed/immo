@@ -6,7 +6,7 @@ import { BLOG_POSTS } from '@/lib/blog/posts'
 
 // .trim() defensive : Vercel env vars peuvent contenir un trailing \r\n
 // (artefact courant de copy-paste depuis le dashboard) qui casse les URLs.
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bogbes-groupe.vercel.app').trim().replace(/\/$/, '')
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bogbesgroup.com').trim().replace(/\/$/, '')
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date()

@@ -6,7 +6,7 @@ import {
   logInviteSent,
 } from './agent-prospects'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://bogbes-groupe.vercel.app'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://www.bogbesgroup.com'
 const TEMPLATE_KEY = 'invite_v1'
 
 function generateInviteToken(): string {

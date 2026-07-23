@@ -212,7 +212,7 @@ async function uploadToSupabase(
 async function sendConfirmationWhatsApp(phone: string, bien_id: string, user_id: string, titre: string) {
   const token = await signMagicLinkToken({ bien_id, user_id, phone })
   const rawUrl = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/^﻿/, '')
-  const baseUrl = rawUrl || 'https://bogbes-groupe.vercel.app'
+  const baseUrl = rawUrl || 'https://www.bogbesgroup.com'
   const link = `${baseUrl}/confirmer/${token}`
   const text = `🏠 *BOGBE'S GROUPE* — Votre annonce a été reçue !
 

@@ -81,7 +81,7 @@ async function fetchWithTimeout(
   }
 }
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bogbes-groupe.vercel.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bogbesgroup.com';
 
 function requireGroqKey(): string {
   if (!GROQ_API_KEY) {
@@ -222,7 +222,7 @@ Prix: 1 500 000 FCFA
 Surface: 400 m²
 Description: Offre spéciale : 10 lots de terrain de 400 m² chacun à Grand Alepè...
 Photos disponibles (3): https://cdn.../1.jpg | https://cdn.../2.jpg | https://cdn.../3.jpg
-Lien fiche: https://bogbes-groupe.vercel.app/biens/b71c3d62-89ef-4053-88dc-21c7dc03ccf9
+Lien fiche: https://www.bogbesgroup.com/biens/b71c3d62-89ef-4053-88dc-21c7dc03ccf9
 \`\`\`
 
 ❌ MAUVAISE RÉPONSE (copie le contexte) :
@@ -240,7 +240,7 @@ Terrain 400m2 Grand Alepè
 Voici un bien qui correspond :
 
 *Terrain 400 m² — Grand Alepè · 1 500 000 FCFA*
-https://bogbes-groupe.vercel.app/biens/b71c3d62-89ef-4053-88dc-21c7dc03ccf9
+https://www.bogbesgroup.com/biens/b71c3d62-89ef-4053-88dc-21c7dc03ccf9
 _✓ Vérifié BOGBE'S_
 
 _Cliquez sur le lien pour voir les photos et tous les détails._
@@ -252,11 +252,11 @@ Souhaitez-vous organiser une visite ?
 Je vous propose ces biens :
 
 *Appartement 4 ch. — Cocody / Angré · 350 000 FCFA/mois*
-https://bogbes-groupe.vercel.app/offre-flash/24755
+https://www.bogbesgroup.com/offre-flash/24755
 _⚡ Disponibilité à confirmer par notre conseiller_
 
 *Appartement 3 ch. — Cocody / Faya · 280 000 FCFA/mois*
-https://bogbes-groupe.vercel.app/offre-flash/24622
+https://www.bogbesgroup.com/offre-flash/24622
 _⚡ Disponibilité à confirmer par notre conseiller_
 
 _Cliquez sur un lien pour voir les photos et tous les détails._
@@ -335,7 +335,7 @@ Comportement correct :
    ✓ *"Pour réserver une visite ou avoir plus d'infos, cliquez sur le lien ci-dessus → bouton 'Demander une visite' sur la fiche."*
    ✓ OU plus simple : *"Souhaitez-vous que notre conseiller vous recontacte ? Indiquez vos préférences (date, heure)."*
 
-2. **Le SEUL lien autorisé dans ta réponse** = le champ "Lien fiche" du contexte (ex: https://bogbes-groupe.vercel.app/biens/<uuid> ou /offre-flash/<id>).
+2. **Le SEUL lien autorisé dans ta réponse** = le champ "Lien fiche" du contexte (ex: https://www.bogbesgroup.com/biens/<uuid> ou /offre-flash/<id>).
 
 3. **Lien catalogue à la fin** (si le contexte fournit \`Lien tout voir\`) — utilise-le exact, ne le réécris pas.
 

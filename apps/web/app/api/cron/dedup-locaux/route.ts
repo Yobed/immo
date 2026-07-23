@@ -9,7 +9,7 @@ export const maxDuration = 300
  *
  * Appelé:
  * - Auto par Vercel Cron (configuré dans vercel.json) — header `Authorization: Bearer ${CRON_SECRET}`
- * - Manuellement: curl -H "Authorization: Bearer <CRON_SECRET>" https://bogbes-groupe.vercel.app/api/cron/dedup-locaux
+ * - Manuellement: curl -H "Authorization: Bearer <CRON_SECRET>" https://www.bogbesgroup.com/api/cron/dedup-locaux
  */
 export async function GET(req: NextRequest) {
   const auth = req.headers.get('authorization') || ''

@@ -69,7 +69,7 @@ async function extractAndSendMedia(jid: string, text: string) {
  * Reformate les réponses AI pour une meilleure expérience sur WhatsApp
  */
 function formatForWhatsApp(text: string): string {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bogbes-groupe.vercel.app';
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bogbesgroup.com';
     return text
         // Remplacer les liens Markdown [Titre](/chemin) par l'URL dynamique (fallback)
         .replace(/\[([^\]]+)\]\(\/([^\)]+)\)/g, (match, title, path) => {

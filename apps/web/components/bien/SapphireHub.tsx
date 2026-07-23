@@ -16,7 +16,7 @@ export function SapphireHub({ bien, videoMedias }: SapphireHubProps) {
   const WHATSAPP_NUMBER = '2250544872051'
 
   const handleWhatsApp = () => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://bogbes-groupe.vercel.app'
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.bogbesgroup.com'
     const text = encodeURIComponent(
       `Bonjour Sapphire Intelligence,\n\nJe souhaiterais obtenir des informations exclusives sur le bien suivant :\n\n💎 *${bien.titre}*\n📍 ${bien.commune}\n💰 ${bien.prix_vente_fcfa || bien.prix_mois_fcfa}\n\n🔗 ${origin}/biens/${bien.id}\n\nMerci.`
     )

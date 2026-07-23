@@ -14,7 +14,7 @@ export function VIPConciergeButton({ bienTitre, bienLieu, bienPrix, bienId, clas
   const WHATSAPP_NUMBER = '2250544872051'
 
   const handleWhatsApp = () => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://bogbes-groupe.vercel.app'
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.bogbesgroup.com'
     const linkLine = bienId ? `\n\n${origin}/biens/${bienId}` : ''
     // Format ASCII-safe : utilise « • » (bullet U+2022) au lieu d'emojis qui
     // peuvent ne pas s'afficher sur certains clients WhatsApp (Web/Desktop sans

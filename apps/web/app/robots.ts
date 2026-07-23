@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 // .trim() defensive : Vercel env vars peuvent contenir un trailing \r\n
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bogbes-groupe.vercel.app').trim().replace(/\/$/, '')
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bogbesgroup.com').trim().replace(/\/$/, '')
 
 export default function robots(): MetadataRoute.Robots {
   return {

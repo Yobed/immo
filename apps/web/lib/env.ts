@@ -83,6 +83,6 @@ export const isDevelopment = process.env.NODE_ENV === 'development'
  *  metadata canonical, openGraph images, JSON-LD) DOIVENT utiliser cette
  *  constante au lieu de lire `process.env.NEXT_PUBLIC_SITE_URL` directement.
  */
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bogbes-groupe.vercel.app')
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.bogbesgroup.com')
   .trim()
   .replace(/\/$/, '')

@@ -59,7 +59,7 @@ export async function POST(
         ? `${(bien.prix_mois_fcfa as number).toLocaleString()} FCFA/mois`
         : 'Prix à confirmer'
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.trim() || 'https://bogbes-groupe.vercel.app'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.trim() || 'https://www.bogbesgroup.com'
   const message = `Bonjour 👋 Nouveau bien disponible qui pourrait vous intéresser !
 
 🏠 *${bien.titre}*

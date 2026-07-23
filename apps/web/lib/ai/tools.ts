@@ -28,7 +28,7 @@ const MAX_PER_SOURCE = 3
 /** Total max envoyé à l'IA (toutes sources confondues) */
 const SAPPHIRE_MAX_RESULTS = 5
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bogbes-groupe.vercel.app'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bogbesgroup.com'
 
 function formatBienBlock(b: ConsolidatedBien, i: number | null): string {
   const sourceTag = b.source === 'bogbes' ? "[CATALOGUE BOGBE'S]" : '[OFFRE FLASH WhatsApp]'
@@ -67,7 +67,7 @@ export async function getAIBienContext(
   history?: { role: string; content: string }[],
 ) {
   // ─── PRIORITÉ 1 : URL d'un bien dans le message ────────────────────────────
-  // Si le client envoie un lien comme bogbes-groupe.vercel.app/biens/<UUID> ou
+  // Si le client envoie un lien comme www.bogbesgroup.com/biens/<UUID> ou
   // /offre-flash/<id>, on fetch CE bien et on cherche aussi des similaires.
   const detected = extractBienIdFromText(userMessage)
   if (detected) {

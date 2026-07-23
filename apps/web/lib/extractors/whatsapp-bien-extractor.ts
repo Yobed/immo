@@ -93,7 +93,7 @@ async function callOpenRouter(
     headers: {
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://bogbes-groupe.vercel.app',
+      'HTTP-Referer': 'https://www.bogbesgroup.com',
       'X-Title': "BOGBE'S GROUPE Tally Webhook",
     },
     body: JSON.stringify({

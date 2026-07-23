@@ -115,7 +115,7 @@ export default async function OpengraphImage() {
             fontWeight: 500,
           }}
         >
-          bogbes-groupe.vercel.app
+          www.bogbesgroup.com
         </div>
       </div>
     ),

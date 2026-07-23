@@ -162,7 +162,7 @@ export function StickyMobileCTA({
   const SITE_URL =
     typeof window !== 'undefined'
       ? window.location.origin
-      : (process.env.NEXT_PUBLIC_SITE_URL || 'https://bogbes-groupe.vercel.app')
+      : (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bogbesgroup.com')
   const bienUrl = bienId ? `${SITE_URL}/biens/${bienId}` : null
   const waText = encodeURIComponent(
     `Bonjour, je souhaite ${isNuitee ? 'réserver' : "plus d'infos sur"} *${bienTitre}* à ${bienLieu} (${prix}${prixSuffix})${bienUrl ? `\n\n🔗 ${bienUrl}` : ''}`

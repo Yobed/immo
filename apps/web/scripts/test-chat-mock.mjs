@@ -40,8 +40,8 @@ Pièces/chambres: 5
 Surface: 300 m²
 Description: Belle villa neuve 4 chambres autonomes, grand salon, cuisine européenne.
 Photos disponibles (1): https://res.cloudinary.com/demo/image/upload/v1/villa.jpg
-Lien fiche: https://bogbes-groupe.vercel.app/biens/e62a123-abc-123
-CTA visite/contact: https://bogbes-groupe.vercel.app/biens/e62a123-abc-123#reserver
+Lien fiche: https://www.bogbesgroup.com/biens/e62a123-abc-123
+CTA visite/contact: https://www.bogbesgroup.com/biens/e62a123-abc-123#reserver
 `
 
 async function test() {
