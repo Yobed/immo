@@ -43,3 +43,30 @@ export async function restaurerFlashAction(formData: FormData): Promise<void> {
   await (sb.from('locaux') as any).update({ status: 'active' }).eq('id', Number(id))
   revalidatePath('/admin/flash')
 }
+
+/**
+ * Marque une offre flash comme OCCUPÉE : disponible='Non'.
+ * La plupart des biens scrapés sont déjà loués/vendus quand on appelle le
+ * démarcheur. `disponible='non'` exclut le bien du catalogue ET des
+ * propositions Sapphire (isStillActive → false), sans supprimer la ligne.
+ */
+export async function marquerOccupeAction(formData: FormData): Promise<void> {
+  await assertAdmin()
+  const id = formData.get('id') as string
+  if (!id) return
+  const sb = locauxAdminForId(Number(id))
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (sb.from('locaux') as any).update({ disponible: 'Non' }).eq('id', Number(id))
+  revalidatePath('/admin/flash')
+}
+
+/** Marque une offre flash comme DISPONIBLE : disponible='Oui' (réintègre le catalogue). */
+export async function marquerDisponibleAction(formData: FormData): Promise<void> {
+  await assertAdmin()
+  const id = formData.get('id') as string
+  if (!id) return
+  const sb = locauxAdminForId(Number(id))
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (sb.from('locaux') as any).update({ disponible: 'Oui' }).eq('id', Number(id))
+  revalidatePath('/admin/flash')
+}
