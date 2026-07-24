@@ -55,18 +55,22 @@ export async function marquerOccupeAction(formData: FormData): Promise<void> {
   const id = formData.get('id') as string
   if (!id) return
   const sb = locauxAdminForId(Number(id))
+  // ⚠️ 'non' EN MINUSCULE obligatoire : le filtre DB du catalogue paginé
+  // (consolidated.ts) compare `disponible.neq.non` de façon SENSIBLE à la casse.
+  // 'Non' (majuscule) était exclu par le mapper JS (Sapphire) mais PAS par ce
+  // filtre DB → l'offre restait visible dans le catalogue paginé.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (sb.from('locaux') as any).update({ disponible: 'Non' }).eq('id', Number(id))
+  await (sb.from('locaux') as any).update({ disponible: 'non' }).eq('id', Number(id))
   revalidatePath('/admin/flash')
 }
 
-/** Marque une offre flash comme DISPONIBLE : disponible='Oui' (réintègre le catalogue). */
+/** Marque une offre flash comme DISPONIBLE : disponible='oui' (réintègre le catalogue). */
 export async function marquerDisponibleAction(formData: FormData): Promise<void> {
   await assertAdmin()
   const id = formData.get('id') as string
   if (!id) return
   const sb = locauxAdminForId(Number(id))
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (sb.from('locaux') as any).update({ disponible: 'Oui' }).eq('id', Number(id))
+  await (sb.from('locaux') as any).update({ disponible: 'oui' }).eq('id', Number(id))
   revalidatePath('/admin/flash')
 }
