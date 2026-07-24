@@ -116,11 +116,30 @@ export default async function ContactDetailPage({ params }: PageProps) {
   const lieu = req.biens?.commune
     ? [req.biens.quartier, req.biens.commune].filter(Boolean).join(' · ')
     : null
-  const ownerPhone = isFlash ? req.flash_owner_phone : null
-  // For web source, owner phone is on profiles (loaded separately if needed by actions)
+
+  // Propriétaire : flash → numéro scrapé ; web → profil du proprio inscrit
+  // (chargé ici pour que l'admin voie le numéro et le joigne en 1 tap).
+  let ownerName: string | null = null
+  let ownerPhone: string | null = null
+  if (isFlash) {
+    ownerPhone = req.flash_owner_phone
+  } else if (req.proprietaire_id) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: owner } = await (admin as any)
+      .from('profiles')
+      .select('full_name, phone')
+      .eq('id', req.proprietaire_id)
+      .single()
+    ownerName = owner?.full_name ?? null
+    ownerPhone = owner?.phone ?? null
+  }
 
   const visitorWa = waLink(req.visitor_phone)
   const ownerWa = waLink(ownerPhone)
+
+  // Ancienneté (respect du prospect : ne pas laisser traîner une demande)
+  const pending = req.admin_validation_status === 'pending'
+  const ageH = Math.floor((Date.now() - new Date(req.created_at).getTime()) / 3_600_000)
 
   return (
     <main className="min-h-screen bg-[var(--surface-hover)]">
@@ -149,7 +168,23 @@ export default async function ContactDetailPage({ params }: PageProps) {
                 </p>
               )}
             </div>
-            <StatusBadge status={req.admin_validation_status} />
+            <div className="flex flex-col items-start md:items-end gap-2">
+              <StatusBadge status={req.admin_validation_status} />
+              {pending && (
+                <span
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
+                    ageH >= 6
+                      ? 'bg-red-100 text-red-700 border-red-200'
+                      : ageH >= 2
+                        ? 'bg-amber-100 text-amber-700 border-amber-200'
+                        : 'bg-emerald-100 text-emerald-700 border-emerald-200'
+                  }`}
+                >
+                  <Clock className="w-3.5 h-3.5" />
+                  {ageH < 1 ? "Reçue à l'instant" : `En attente depuis ${ageH} h`}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -209,57 +244,67 @@ export default async function ContactDetailPage({ params }: PageProps) {
                 <Home className="w-3.5 h-3.5" />
                 Propriétaire {isFlash && <span className="text-orange-500">(scrapé WhatsApp)</span>}
               </h2>
-              {isFlash ? (
-                ownerPhone ? (
-                  <div className="space-y-3">
+              {ownerPhone ? (
+                <div className="space-y-3">
+                  {isFlash && (
                     <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 flex items-start gap-2">
                       <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                       <p className="text-xs text-amber-800 leading-relaxed">
-                        Ce propriétaire n&apos;est pas inscrit sur la plateforme. Contacte-le directement
+                        Ce propriétaire n&apos;est pas inscrit sur la plateforme. Contactez-le directement
                         pour confirmer la disponibilité et organiser une visite.
                       </p>
                     </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Phone className="w-4 h-4 text-orange-600" />
-                      <a href={`tel:${ownerPhone}`} className="text-[var(--text)] font-mono hover:underline">
-                        {ownerPhone}
-                      </a>
-                      {ownerWa && (
-                        <a
-                          href={ownerWa}
-                          target="_blank" rel="noopener noreferrer"
-                          className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold rounded-lg transition"
-                        >
-                          <MessageCircle className="w-3.5 h-3.5" />
-                          WhatsApp proprio
-                        </a>
-                      )}
-                    </div>
-                    {req.locaux_id != null && (
-                      <Link
-                        href={`/offre-flash/${req.locaux_id}`}
-                        className="inline-flex items-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text)]"
+                  )}
+                  {ownerName && <p className="text-lg font-bold text-[var(--text)]">{ownerName}</p>}
+                  <div className="flex items-center gap-2 text-sm">
+                    <Phone className={`w-4 h-4 ${isFlash ? 'text-orange-600' : 'text-emerald-600'}`} />
+                    <a href={`tel:${ownerPhone}`} className="text-[var(--text)] font-mono hover:underline">
+                      {ownerPhone}
+                    </a>
+                    {ownerWa && (
+                      <a
+                        href={ownerWa}
+                        target="_blank" rel="noopener noreferrer"
+                        className={`ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-bold rounded-lg transition ${
+                          isFlash ? 'bg-orange-600 hover:bg-orange-500' : 'bg-emerald-600 hover:bg-emerald-500'
+                        }`}
                       >
-                        <ExternalLink className="w-3 h-3" />
-                        Voir l&apos;offre flash
-                      </Link>
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        WhatsApp proprio
+                      </a>
                     )}
                   </div>
-                ) : (
-                  <p className="text-sm text-[var(--text-muted)] italic">
-                    Aucun numéro propriétaire enregistré pour cette offre.
-                  </p>
-                )
-              ) : req.biens?.id ? (
+                  {isFlash && req.locaux_id != null && (
+                    <Link
+                      href={`/offre-flash/${req.locaux_id}`}
+                      className="inline-flex items-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text)]"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      Voir l&apos;offre flash
+                    </Link>
+                  )}
+                  {!isFlash && req.biens?.id && (
+                    <Link
+                      href={`/biens/${req.biens.id}`}
+                      className="inline-flex items-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text)]"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      Voir le bien
+                    </Link>
+                  )}
+                </div>
+              ) : !isFlash && req.biens?.id ? (
                 <Link
                   href={`/biens/${req.biens.id}`}
                   className="inline-flex items-center gap-1.5 text-sm text-[var(--text)] hover:text-[var(--text)]"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
-                  Voir le bien
+                  Voir le bien (numéro proprio non renseigné)
                 </Link>
               ) : (
-                <p className="text-sm text-[var(--text-muted)] italic">Bien introuvable</p>
+                <p className="text-sm text-[var(--text-muted)] italic">
+                  Aucun numéro propriétaire enregistré.
+                </p>
               )}
             </section>
 

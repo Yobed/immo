@@ -68,6 +68,7 @@ export async function POST(req: NextRequest) {
     quartier: string | null
     telephone_bien: string | null
     telephone: string | null
+    publie_par: string | null
     status: string | null
     is_duplicate: boolean | null
   } | null = null
@@ -80,7 +81,7 @@ export async function POST(req: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data } = await (locauxAdmin as any)
       .from('locaux')
-      .select('id, ref_bien, type_de_bien, commune, quartier, telephone_bien, telephone, status, is_duplicate')
+      .select('id, ref_bien, type_de_bien, commune, quartier, telephone_bien, telephone, publie_par, status, is_duplicate')
       .eq('id', locauxId)
       .single()
     locauxRow = data
@@ -188,8 +189,9 @@ export async function POST(req: NextRequest) {
       visitorPhone,
       visitorEmail,
       reason: body.reason?.trim() || null,
-      ownerName: null,
+      ownerName: locauxRow.publie_par || null,
       ownerPhone: locauxRow.telephone_bien || locauxRow.telephone || null,
+      bienUrl: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bogbesgroup.com'}/offre-flash/${locauxId}`,
     }
     await notifyAdminContactRequest(admin, ctx)
   } catch (e) {

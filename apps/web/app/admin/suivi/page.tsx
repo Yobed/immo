@@ -75,6 +75,7 @@ interface ContactRow {
   visitor_notified_at: string | null
   source: string
   created_at: string
+  flash_titre: string | null
   biens: { titre: string; commune: string | null } | null
   proprietaire: { full_name: string; phone: string | null } | null
 }
@@ -102,6 +103,16 @@ function formatDate(iso: string) {
 
 function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+}
+
+/** Ancienneté colorée d'une demande en attente (vert < 2 h, ambre < 6 h, rouge au-delà). */
+function ageLabel(iso: string): { label: string; cls: string } {
+  const h = Math.floor((Date.now() - new Date(iso).getTime()) / 3_600_000)
+  if (h < 1) return { label: "à l'instant", cls: 'bg-emerald-100 text-emerald-700' }
+  if (h < 2) return { label: `${h} h`, cls: 'bg-emerald-100 text-emerald-700' }
+  if (h < 6) return { label: `${h} h`, cls: 'bg-amber-100 text-amber-700' }
+  const d = Math.floor(h / 24)
+  return { label: d >= 1 ? `${d} j` : `${h} h`, cls: 'bg-red-100 text-red-700' }
 }
 
 function applySearch<T extends { biens: { titre: string; commune: string | null } | null }>(
@@ -207,7 +218,7 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
     let query = (admin as any)
       .from('contact_requests')
       .select(`
-        id, visitor_name, visitor_phone, visitor_email, reason, source,
+        id, visitor_name, visitor_phone, visitor_email, reason, source, flash_titre,
         admin_validation_status, admin_validated_at, owner_notified_at, visitor_notified_at, created_at,
         biens ( titre, commune ),
         proprietaire:profiles!contact_requests_proprietaire_id_fkey ( full_name, phone )
@@ -450,6 +461,10 @@ function ListView({
 }
 
 function ContactCard({ c, compact = false }: { c: ContactRow; compact?: boolean }) {
+  const isFlash = c.source === 'flash'
+  const titre = c.biens?.titre || c.flash_titre || 'Bien'
+  const pending = c.admin_validation_status === 'pending'
+  const age = ageLabel(c.created_at)
   return (
     <Link
       href={`/admin/suivi/contacts/${c.id}`}
@@ -457,13 +472,19 @@ function ContactCard({ c, compact = false }: { c: ContactRow; compact?: boolean 
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <h3 className="font-bold text-[var(--text)] text-sm line-clamp-1">{c.biens?.titre || 'Bien'}</h3>
+          <h3 className="font-bold text-[var(--text)] text-sm line-clamp-1">{titre}</h3>
           <p className="text-[var(--text-muted)] text-xs flex items-center gap-1 mt-0.5">
             <MapPin className="w-3 h-3" />
             {c.biens?.commune || '—'}
+            {isFlash && <span className="ml-1 text-orange-500 font-bold">· ⚡ flash</span>}
           </p>
         </div>
-        {!compact && adminBadge(c.admin_validation_status)}
+        <div className="flex flex-col items-end gap-1 shrink-0">
+          {!compact && adminBadge(c.admin_validation_status)}
+          {pending && (
+            <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${age.cls}`}>{age.label}</span>
+          )}
+        </div>
       </div>
 
       <div className="space-y-0.5 text-xs text-[var(--text-muted)]">

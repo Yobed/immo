@@ -54,6 +54,8 @@ export interface ContactRequestContext {
   reason?: string | null
   ownerName?: string | null
   ownerPhone?: string | null
+  /** Lien public direct vers le bien / l'offre flash (pour identifier vite). */
+  bienUrl?: string | null
 }
 
 interface SendResult {
@@ -610,6 +612,14 @@ export async function notifyVisitorReservationRejected(
 
 // ---------------- Templates CONTACT REQUEST ----------------
 
+/** Lien wa.me pour un numéro propriétaire ivoirien (préfixe 225 si local). */
+function ownerWaLink(phone: string): string {
+  let d = phone.replace(/\D/g, '')
+  if (d.startsWith('00')) d = d.slice(2)
+  if (!d.startsWith('225') && d.length <= 10) d = '225' + d
+  return `https://wa.me/${d}`
+}
+
 function tplAdminContactRequest(ctx: ContactRequestContext): string {
   const baseUrl = getBaseUrl()
   return [
@@ -618,13 +628,21 @@ function tplAdminContactRequest(ctx: ContactRequestContext): string {
     `*Bien :* ${ctx.bienTitre}`,
     ctx.bienCommune ? `*Commune :* ${ctx.bienCommune}` : null,
     `*Réf :* #${ctx.id.slice(0, 8)}`,
+    ctx.bienUrl ? `🔗 Voir le bien : ${ctx.bienUrl}` : null,
     '',
     `*Visiteur :* ${ctx.visitorName}`,
-    `*Tél :* ${ctx.visitorPhone}`,
+    `*Tél visiteur :* ${ctx.visitorPhone}`,
     ctx.visitorEmail ? `*Email :* ${ctx.visitorEmail}` : null,
     ctx.reason ? `*Motif :* ${ctx.reason}` : null,
     '',
-    `📋 Voir et valider : ${baseUrl}/admin/suivi/contacts/${ctx.id}`,
+    // Numéro du propriétaire DIRECTEMENT dans la notif : l'admin appelle/écrit
+    // au proprio en un tap pour organiser la visite, sans ouvrir la fiche.
+    '👤 *PROPRIÉTAIRE À JOINDRE*',
+    ctx.ownerName ? `*Nom :* ${ctx.ownerName}` : null,
+    ctx.ownerPhone ? `*Tél proprio :* ${ctx.ownerPhone}` : '⚠️ Numéro propriétaire non enregistré',
+    ctx.ownerPhone ? `📲 Écrire au proprio : ${ownerWaLink(ctx.ownerPhone)}` : null,
+    '',
+    `📋 Fiche complète : ${baseUrl}/admin/suivi/contacts/${ctx.id}`,
   ]
     .filter(Boolean)
     .join('\n')

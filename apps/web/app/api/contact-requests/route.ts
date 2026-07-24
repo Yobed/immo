@@ -135,6 +135,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 400 })
   }
 
+  // Charge le contact du propriétaire pour l'inclure dans la notif admin :
+  // l'admin doit pouvoir joindre le proprio tout de suite.
+  let ownerName: string | null = null
+  let ownerPhone: string | null = null
+  if (bien.proprietaire_id) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: owner } = await (admin as any)
+      .from('profiles')
+      .select('full_name, phone')
+      .eq('id', bien.proprietaire_id)
+      .single()
+    ownerName = owner?.full_name ?? null
+    ownerPhone = owner?.phone ?? null
+  }
+
   const ctx: ContactRequestContext = {
     id: created.id,
     bienTitre: bien.titre || 'Bien',
@@ -143,6 +158,9 @@ export async function POST(req: NextRequest) {
     visitorPhone,
     visitorEmail,
     reason: body.reason ?? null,
+    ownerName,
+    ownerPhone,
+    bienUrl: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bogbesgroup.com'}/biens/${bienId}`,
   }
 
   // Notif équipe admin (await obligatoire sur Vercel serverless)
