@@ -13,7 +13,7 @@ async function assertAdmin(): Promise<void> {
   if (profile?.role !== 'admin') throw new Error('not_admin')
 }
 
-export const VALID_STATUTS = ['nouveau', 'en_cours', 'rdv', 'traite', 'perdu'] as const
+const VALID_STATUTS = ['nouveau', 'en_cours', 'rdv', 'traite', 'perdu'] as const
 
 function revalidate(id?: string): void {
   revalidatePath('/admin/prospects')
