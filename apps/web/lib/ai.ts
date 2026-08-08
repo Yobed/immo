@@ -143,7 +143,7 @@ Le contexte est ton INFORMATION, pas ton SCRIPT.
 
 ⑨ **PREMIER CONTACT.** Au tout premier échange : présente-toi et présente BOGBE'S GROUPE en UNE phrase, puis demande le NOM du client et ce qu'il recherche. Dès qu'il donne son nom, utilise-le ("Merci M. Koné…", "Madame Traoré, voici…").
 
-⑩ **BRIÈVETÉ.** Toujours bref, droit au but. Une info par phrase, pas de remplissage.
+⑩ **ULTRA-BREF.** Réponses les plus courtes possibles. Hors liste de biens : JAMAIS plus de 2 phrases. Pas de politesses longues, pas de reformulation, pas de « je comprends », pas de blabla. Droit au but. Une question de qualification = UNE seule phrase.
 
 ⑪ **CLÔTURE CONSEILLER.** Après avoir compris le besoin (zone + type + budget connus) :
    • Tu introduis les biens par EXACTEMENT : *"Voici ce qui est disponible dans notre catalogue correspondant à votre recherche :"*
@@ -632,48 +632,53 @@ async function openRouterFetch(
   return null;
 }
 
+// Signaux d'intention immobilière (verbe de recherche, type, commune, budget).
+export const PROPERTY_INTENT_REGEX = /\b(cherche|cherchez|cherchent|veux|veut|voudrais|aimerais|besoin|louer|location|acheter|achat|vente|villa|appartement|appart|studio|maison|terrain|bureau|meubl|logement|duplex|triplex|magasin|entrep[ôo]t|cocody|plateau|riviera|angr[ée]|marcory|yopougon|treichville|bingerville|koumassi|abobo|adjam[ée]|port[-\s]?bou[eë]t|grand-bassam|assinie|songon|anyama|bouak[ée]|yamoussoukro|san[-\s]?p[ée]dro|abidjan|fcfa|million|millions|budget|prix|chambres?|pi[èe]ces?)\b/i
+// Ouverture générique (pub Facebook « en savoir plus », demande vague).
+const GENERIC_INQUIRY_REGEX = /\b(en savoir plus|savoir plus|plus d ?infos?|plus d ?informations?|(?:des|d) (?:informations?|renseignements?|detail|details)|obtenir des informations?|interesse|intéress|ce sujet|votre (?:annonce|offre|pub|publicite|bien))\b/
+const GREETING_PATTERNS = [
+  /^(bonjour|bonsoir|salut|coucou|hello|hi|hey|yo)( .*)?$/,
+  /^(bonjour|bonsoir|salut|hello) (monsieur|madame|mademoiselle|mr|mme|messieurs|mesdames|sapphire)$/,
+  /^(merci|thanks|thank you|thx)( beaucoup| infiniment)?$/,
+  /^(ok|d accord|daccord|parfait|super|cool|bien recu|bien reçu|noté|note|tres bien|c est noté|cest note)$/,
+  /^(ça va|ca va|comment allez vous|comment ça va|comment ca va|comment vas tu|tu vas bien|ca roule|ça roule)( ?.*)?$/,
+  /^(au revoir|bye|à bientôt|a bientot|à plus|a plus|bonne (journée|soiree|soirée|nuit))( .*)?$/,
+]
+
+function normalizeMsg(userMessage: string): string {
+  return userMessage.trim().toLowerCase().replace(/[!?.,;:'"`]/g, '').replace(/\s+/g, ' ')
+}
+
+/** Le message exprime-t-il une intention immobilière (recherche de bien) ? */
+export function hasPropertyIntent(userMessage: string): boolean {
+  return PROPERTY_INTENT_REGEX.test(userMessage)
+}
+
+/** Salutation, politesse, ou ouverture de pub — à accueillir, pas à ignorer. */
+export function isGreetingOrAdOpener(userMessage: string): boolean {
+  const m = normalizeMsg(userMessage)
+  if (GENERIC_INQUIRY_REGEX.test(m)) return true
+  return GREETING_PATTERNS.some((p) => p.test(m))
+}
+
 /**
  * Detect short greetings / pleasantries that don't need LLM reasoning.
  * Returning a hand-written reply avoids the LLM round-trip (and the
  * fallback message when Groq has a hiccup).
- *
- * Includes "intent signal" markers like commune/budget keywords so we
- * don't accidentally short-circuit a real request that happens to start
- * with "Bonjour, je cherche…".
  */
 function detectGreeting(userMessage: string): string | null {
-  const m = userMessage
-    .trim()
-    .toLowerCase()
-    .replace(/[!?.,;:'"`]/g, '')
-    .replace(/\s+/g, ' ')
+  const m = normalizeMsg(userMessage)
 
-  // If the message contains a real-estate intent signal, send it to the LLM
-  // even if it starts with "Bonjour" — the user wants substantive help.
-  const intentSignals = /\b(cherche|cherchez|cherchent|veux|veut|voudrais|aimerais|besoin|louer|location|acheter|achat|vente|villa|appartement|appart|studio|maison|terrain|bureau|meubl|cocody|plateau|riviera|marcory|yopougon|treichville|bingerville|grand-bassam|assinie|abidjan|fcfa|million|millions|budget|prix|chambres?|pièces?)\b/i
-  if (intentSignals.test(m)) return null
+  // Vrai besoin immobilier → LLM (même si ça commence par « Bonjour »).
+  if (PROPERTY_INTENT_REGEX.test(m)) return null
 
-  // Ouverture générique : pub Facebook Click-to-WhatsApp (« Puis-je en savoir
-  // plus à ce sujet ? »), ou demande vague sans aucun critère. L'intentSignals
-  // ci-dessus a déjà écarté les vrais besoins → ici il n'y a RIEN à traiter :
-  // une IA ne ferait qu'accueillir + qualifier. Réponse pré-écrite = increvable
-  // même quand les moteurs IA sont saturés par les rafales de trafic pub.
-  const genericInquiry = /\b(en savoir plus|savoir plus|plus d ?infos?|plus d ?informations?|(?:des|d) (?:informations?|renseignements?|detail|details)|obtenir des informations?|interesse|intéress|ce sujet|votre (?:annonce|offre|pub|publicite|bien))\b/
-  if (genericInquiry.test(m)) return welcomeReply()
+  // Ouverture générique (pub Facebook, demande vague) → accueil pré-écrit.
+  if (GENERIC_INQUIRY_REGEX.test(m)) return welcomeReply()
 
   // Word count > 5 → probably has intent worth sending to the LLM
   if (m.split(' ').length > 5) return null
 
-  const greetingPatterns = [
-    /^(bonjour|bonsoir|salut|coucou|hello|hi|hey|yo)( .*)?$/,
-    /^(bonjour|bonsoir|salut|hello) (monsieur|madame|mademoiselle|mr|mme|messieurs|mesdames|sapphire)$/,
-    /^(merci|thanks|thank you|thx)( beaucoup| infiniment)?$/,
-    /^(ok|d accord|daccord|parfait|super|cool|bien recu|bien reçu|noté|note|tres bien|c est noté|cest note)$/,
-    /^(ça va|ca va|comment allez vous|comment ça va|comment ca va|comment vas tu|tu vas bien|ca roule|ça roule)( ?.*)?$/,
-    /^(au revoir|bye|à bientôt|a bientot|à plus|a plus|bonne (journée|soiree|soirée|nuit))( .*)?$/,
-  ]
-
-  if (!greetingPatterns.some((p) => p.test(m))) return null
+  if (!GREETING_PATTERNS.some((p) => p.test(m))) return null
 
   if (/^(merci|thanks|thank you|thx)/.test(m)) {
     return `Avec plaisir 🙏\n\nDites-moi ce que vous cherchez : commune, type de bien, budget. Je vous oriente immédiatement.`

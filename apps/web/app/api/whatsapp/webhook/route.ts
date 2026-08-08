@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { wasenderSendMessage, verifyWasenderSignature } from '@/lib/wasender';
 import { locauxClientForId } from '@/lib/supabase/locaux';
-import { chatImmobilier, isSapphireFallback, SAPPHIRE_ESCALATION, getLastSapphireRoute } from '@/lib/ai';
+import { chatImmobilier, isSapphireFallback, SAPPHIRE_ESCALATION, getLastSapphireRoute, hasPropertyIntent, isGreetingOrAdOpener } from '@/lib/ai';
 import { getAIBienContext } from '@/lib/ai/tools';
 import { captureProspect } from '@/lib/prospects/capture';
 import { extractBienFromWhatsApp } from '@/lib/extractors/whatsapp-bien-extractor';
@@ -459,6 +459,23 @@ export async function POST(req: NextRequest) {
       !NEW_NEED_REGEX.test(userMessage)
     ) {
       return NextResponse.json({ status: 'ok', branch: 'handoff_silence' });
+    }
+
+    // 2e. Hors-sujet : après le 1er échange, si le message n'a AUCUN rapport avec
+    // l'immobilier (pas d'intention, pas de salutation/pub, pas un nom demandé,
+    // pas une sélection ni un nouveau besoin) → Sapphire se tait. Le commercial
+    // gère la conversation. Le 1er contact (aucun message assistant) passe
+    // toujours (→ message de bienvenue).
+    const isNameAnswer =
+      !!lastAssistantMsg && /votre nom|puis-je avoir votre nom|comment vous appelez/i.test(lastAssistantMsg.content);
+    const onTopic =
+      hasPropertyIntent(userMessage) ||
+      isGreetingOrAdOpener(userMessage) ||
+      SELECTS_BIEN_REGEX.test(userMessage) ||
+      NEW_NEED_REGEX.test(userMessage) ||
+      isNameAnswer;
+    if (lastAssistantMsg && !onTopic) {
+      return NextResponse.json({ status: 'ok', branch: 'offtopic_silence' });
     }
 
     // 3. Contexte immobilier (biens + médias) — historique passé pour retrouver commune/type des échanges précédents
