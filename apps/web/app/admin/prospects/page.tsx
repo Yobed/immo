@@ -161,9 +161,14 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
         </form>
       </div>
 
-      {rows.length === 0 ? (
+      {total === 0 && (
+        <div className="bg-[var(--surface-card)] rounded-2xl p-6 border border-dashed border-[var(--border)] text-center mb-4">
+          <p className="text-[var(--text-muted)] text-sm">Aucun prospect pour l&apos;instant — le pipeline se remplit dès qu&apos;un prospect exprime un besoin à Sapphire.</p>
+        </div>
+      )}
+      {view === 'list' && rows.length === 0 ? (
         <div className="bg-[var(--surface-card)] rounded-2xl p-12 border border-[var(--border)] text-center">
-          <p className="text-[var(--text-muted)] text-sm">Aucun prospect pour l&apos;instant. La liste se remplit dès qu&apos;un prospect exprime un besoin à Sapphire.</p>
+          <p className="text-[var(--text-muted)] text-sm">Aucun prospect pour ce filtre.</p>
         </div>
       ) : view === 'kanban' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
