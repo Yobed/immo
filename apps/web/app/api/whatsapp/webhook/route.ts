@@ -4,6 +4,7 @@ import { wasenderSendMessage, verifyWasenderSignature } from '@/lib/wasender';
 import { locauxClientForId } from '@/lib/supabase/locaux';
 import { chatImmobilier, isSapphireFallback, SAPPHIRE_ESCALATION, getLastSapphireRoute } from '@/lib/ai';
 import { getAIBienContext } from '@/lib/ai/tools';
+import { captureProspect } from '@/lib/prospects/capture';
 import { extractBienFromWhatsApp } from '@/lib/extractors/whatsapp-bien-extractor';
 import { upsertProspect, recordOptOut } from '@/lib/outreach/agent-prospects';
 import { tryInviteProspect } from '@/lib/outreach/dispatch';
@@ -447,6 +448,16 @@ export async function POST(req: NextRequest) {
       !NEW_NEED_REGEX.test(userMessage)
     ) {
       return NextResponse.json({ status: 'ok', branch: 'handoff_silence' });
+    }
+
+    // 2d. Capture prospect (CRM) : enrichit la fiche du prospect avec ce qui est
+    // compris (numéro, nom, type, commune, quartier, budget, date souhaitée) au
+    // fil de la conversation. On n'arrive ici que pour de vrais prospects
+    // (annonces/démarcheurs et acquittements ont déjà été écartés). Best-effort.
+    try {
+      await captureProspect({ phone: senderPn, jid, nom: contactName, message: userMessage, history: formattedHistory });
+    } catch {
+      /* la capture prospect ne bloque jamais la réponse */
     }
 
     // 3. Contexte immobilier (biens + médias) — historique passé pour retrouver commune/type des échanges précédents
