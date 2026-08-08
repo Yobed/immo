@@ -20,13 +20,16 @@ export async function GET(request: Request) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (admin as any)
     .from('prospects')
-    .select('nom, phone, type_bien, commune, quartier, budget, date_souhaitee, statut, message_count, first_seen, last_seen')
+    .select('nom, phone, type_bien, commune, quartier, budget, date_souhaitee, statut, note, message_count, first_seen, last_seen')
     .order('last_seen', { ascending: false })
     .limit(5000)
 
+  const STATUT_FR: Record<string, string> = {
+    nouveau: 'À traiter', en_cours: 'En cours', traite: 'Traité', perdu: 'Perdu',
+  }
   const headers = [
     'Nom', 'Numéro', 'Type de bien', 'Commune', 'Quartier', 'Budget (FCFA)',
-    'Date souhaitée', 'Statut', 'Nb messages', 'Premier contact', 'Dernier contact',
+    'Date souhaitée', 'Statut', 'Note de suivi', 'Nb messages', 'Premier contact', 'Dernier contact',
   ]
   const lines = [headers.join(';')]
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -34,8 +37,8 @@ export async function GET(request: Request) {
     lines.push(
       [
         csv(r.nom), csv(r.phone), csv(r.type_bien), csv(r.commune), csv(r.quartier),
-        csv(r.budget), csv(r.date_souhaitee), csv(r.statut), csv(r.message_count),
-        csv(r.first_seen?.slice(0, 10)), csv(r.last_seen?.slice(0, 10)),
+        csv(r.budget), csv(r.date_souhaitee), csv(STATUT_FR[r.statut] ?? r.statut), csv(r.note),
+        csv(r.message_count), csv(r.first_seen?.slice(0, 10)), csv(r.last_seen?.slice(0, 10)),
       ].join(';'),
     )
   }
