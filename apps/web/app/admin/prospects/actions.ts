@@ -13,18 +13,23 @@ async function assertAdmin(): Promise<void> {
   if (profile?.role !== 'admin') throw new Error('not_admin')
 }
 
-const VALID_STATUTS = ['nouveau', 'en_cours', 'traite', 'perdu']
+export const VALID_STATUTS = ['nouveau', 'en_cours', 'rdv', 'traite', 'perdu'] as const
+
+function revalidate(id?: string): void {
+  revalidatePath('/admin/prospects')
+  if (id) revalidatePath(`/admin/prospects/${id}`)
+}
 
 /** Change le statut de suivi d'un prospect. */
 export async function setProspectStatutAction(formData: FormData): Promise<void> {
   await assertAdmin()
   const id = formData.get('id') as string
   const statut = formData.get('statut') as string
-  if (!id || !VALID_STATUTS.includes(statut)) return
+  if (!id || !(VALID_STATUTS as readonly string[]).includes(statut)) return
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (admin as any).from('prospects').update({ statut }).eq('id', id)
-  revalidatePath('/admin/prospects')
+  revalidate(id)
 }
 
 /** Enregistre une note de suivi (admin) sur un prospect. */
@@ -36,5 +41,29 @@ export async function setProspectNoteAction(formData: FormData): Promise<void> {
   const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (admin as any).from('prospects').update({ note: note || null }).eq('id', id)
-  revalidatePath('/admin/prospects')
+  revalidate(id)
+}
+
+/** Assigne (ou désassigne) un prospect à un commercial. */
+export async function setProspectAssignAction(formData: FormData): Promise<void> {
+  await assertAdmin()
+  const id = formData.get('id') as string
+  const assigned = (formData.get('assigned_to') as string) || ''
+  if (!id) return
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (admin as any).from('prospects').update({ assigned_to: assigned || null }).eq('id', id)
+  revalidate(id)
+}
+
+/** Fixe (ou efface) une date de relance. */
+export async function setProspectRelanceAction(formData: FormData): Promise<void> {
+  await assertAdmin()
+  const id = formData.get('id') as string
+  const relance = (formData.get('relance_le') as string) || ''
+  if (!id) return
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (admin as any).from('prospects').update({ relance_le: relance || null }).eq('id', id)
+  revalidate(id)
 }
