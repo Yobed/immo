@@ -438,7 +438,18 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 2c. Suivi post-clôture : le dernier message Sapphire annonçait la reprise
+    // 2c. Capture prospect (CRM) : enrichit la fiche avec ce qui est compris
+    // (numéro, nom, type, commune, quartier, budget, date). Placée AVANT la garde
+    // post-clôture pour capter aussi les réponses tardives (« pour dans 2 mois »
+    // arrive après le handoff). Annonces/démarcheurs déjà écartés plus haut.
+    // Best-effort : ne bloque jamais la réponse.
+    try {
+      await captureProspect({ phone: senderPn, jid, nom: contactName, message: userMessage, history: formattedHistory });
+    } catch {
+      /* la capture prospect ne bloque jamais la réponse */
+    }
+
+    // 2d. Suivi post-clôture : le dernier message Sapphire annonçait la reprise
     // par un conseiller → silence, SAUF sélection d'un bien ou nouveau besoin.
     const lastAssistantMsg = [...formattedHistory].reverse().find((m) => m.role === 'assistant');
     if (
@@ -448,16 +459,6 @@ export async function POST(req: NextRequest) {
       !NEW_NEED_REGEX.test(userMessage)
     ) {
       return NextResponse.json({ status: 'ok', branch: 'handoff_silence' });
-    }
-
-    // 2d. Capture prospect (CRM) : enrichit la fiche du prospect avec ce qui est
-    // compris (numéro, nom, type, commune, quartier, budget, date souhaitée) au
-    // fil de la conversation. On n'arrive ici que pour de vrais prospects
-    // (annonces/démarcheurs et acquittements ont déjà été écartés). Best-effort.
-    try {
-      await captureProspect({ phone: senderPn, jid, nom: contactName, message: userMessage, history: formattedHistory });
-    } catch {
-      /* la capture prospect ne bloque jamais la réponse */
     }
 
     // 3. Contexte immobilier (biens + médias) — historique passé pour retrouver commune/type des échanges précédents

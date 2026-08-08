@@ -17,6 +17,18 @@ function getClient(): SupabaseClient {
   return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } })
 }
 
+/**
+ * Numéro canonique : évite les doublons dus au format (0748…, 2250748…,
+ * +225 07 48…). On retire le 00 international et le 225 CI (uniquement si le
+ * reste est un numéro local plausible) — un numéro étranger (+44…) reste intact.
+ */
+export function canonicalPhone(raw: string): string {
+  let d = raw.replace(/\D/g, '')
+  if (d.startsWith('00')) d = d.slice(2)
+  if (d.startsWith('225') && d.length - 3 >= 8 && d.length - 3 <= 10) d = d.slice(3)
+  return d
+}
+
 // Quartiers fréquents (best-effort) — complète le `commune` du parseur.
 const QUARTIERS = [
   'angré', 'angre', 'riviera', 'bonoumin', 'palmeraie', 'deux plateaux', '2 plateaux',
@@ -59,56 +71,24 @@ interface CaptureArgs {
 export async function captureProspect(args: CaptureArgs): Promise<void> {
   const { phone, jid, nom, message } = args
   if (!phone) return
+  const canonical = canonicalPhone(phone)
+  if (canonical.length < 8) return // numéro inexploitable
 
   const p = parseSearchQuery(message)
-  const found = {
-    type_bien: p.type_bien || null,
-    commune: p.commune || null,
-    quartier: detectQuartier(message),
-    budget: p.prix_max ? parseInt(p.prix_max, 10) : null,
-    date_souhaitee: detectTimeframe(message),
-  }
-
   const sb = getClient()
+
+  // Upsert atomique côté DB (fonction upsert_prospect) : une seule ligne par
+  // numéro normalisé, fusion « dernière valeur non vide gagne », pas de course.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: existing } = await (sb as any)
-    .from('prospects')
-    .select('*')
-    .eq('phone', phone)
-    .maybeSingle()
-
-  const nowIso = new Date().toISOString()
-  const extrait = message.slice(0, 300)
-
-  if (!existing) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (sb as any).from('prospects').insert({
-      phone,
-      jid: jid ?? null,
-      nom: nom || null,
-      ...found,
-      dernier_message: extrait,
-      first_seen: nowIso,
-      last_seen: nowIso,
-    })
-    return
-  }
-
-  // Enrichissement : dernière valeur NON VIDE gagne ; on ne réécrit jamais une
-  // info connue par un vide (un message sans budget n'efface pas le budget).
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const upd: Record<string, any> = {
-    last_seen: nowIso,
-    message_count: (existing.message_count ?? 1) + 1,
-    dernier_message: extrait,
-  }
-  if (nom && !existing.nom) upd.nom = nom
-  if (found.type_bien) upd.type_bien = found.type_bien
-  if (found.commune) upd.commune = found.commune
-  if (found.quartier) upd.quartier = found.quartier
-  if (found.budget != null) upd.budget = found.budget
-  if (found.date_souhaitee) upd.date_souhaitee = found.date_souhaitee
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (sb as any).from('prospects').update(upd).eq('phone', phone)
+  await (sb as any).rpc('upsert_prospect', {
+    p_phone: canonical,
+    p_jid: jid ?? null,
+    p_nom: nom || null,
+    p_type: p.type_bien || null,
+    p_commune: p.commune || null,
+    p_quartier: detectQuartier(message),
+    p_budget: p.prix_max ? parseInt(p.prix_max, 10) : null,
+    p_date: detectTimeframe(message),
+    p_message: message.slice(0, 300),
+  })
 }
