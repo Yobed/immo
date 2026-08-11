@@ -4,6 +4,13 @@ import { wasenderSendMessage, verifyWasenderSignature } from '@/lib/wasender';
 import { locauxClientForId } from '@/lib/supabase/locaux';
 import { chatImmobilier, isSapphireFallback, SAPPHIRE_ESCALATION, getLastSapphireRoute, hasPropertyIntent, isGreetingOrAdOpener } from '@/lib/ai';
 import { getAIBienContext } from '@/lib/ai/tools';
+import {
+  qualify,
+  WELCOME_MESSAGE,
+  QUALIF_REMINDER_MESSAGE,
+  QUALIF_REMINDER_MARKER,
+  NO_RESULTS_MESSAGE,
+} from '@/lib/ai/qualification';
 import { captureProspect } from '@/lib/prospects/capture';
 import { extractBienFromWhatsApp } from '@/lib/extractors/whatsapp-bien-extractor';
 import { upsertProspect, recordOptOut } from '@/lib/outreach/agent-prospects';
@@ -478,8 +485,52 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: 'ok', branch: 'offtopic_silence' });
     }
 
+    // 2f. QUALIFICATION DÉTERMINISTE (Cahier des règles §5-7) — en code, pas via
+    // l'IA : TYPE + ZONE + BUDGET obligatoires AVANT toute proposition. Ne
+    // s'applique PAS à une visite / sélection d'un bien déjà proposé (→ flux LLM).
+    const isVisiteOrSelection =
+      detectVisiteIntent(userMessage) || SELECTS_BIEN_REGEX.test(userMessage);
+    if (!isVisiteOrSelection) {
+      const qual = qualify(userMessage, formattedHistory);
+      if (!qual.hasAll3) {
+        const sendFixed = async (text: string, type: string) => {
+          await humanReplyDelay(text, requestStartedAt);
+          await wasenderSendMessage(senderPn, text, 'text');
+          await supabase
+            .from('whatsapp_messages')
+            .insert({ jid, direction: 'outbound', body: text, metadata: { type } });
+        };
+        // 1er contact (aucun message assistant) → message de bienvenue (§3).
+        if (!lastAssistantMsg) {
+          await sendFixed(WELCOME_MESSAGE, 'qualif_welcome');
+          return NextResponse.json({ status: 'ok', branch: 'welcome' });
+        }
+        // Relance déjà envoyée ? → SILENCE : une seule relance autorisée (§7).
+        const reminderSent = formattedHistory.some(
+          (m) => m.role === 'assistant' && QUALIF_REMINDER_MARKER.test(m.content),
+        );
+        if (reminderSent) {
+          return NextResponse.json({ status: 'ok', branch: 'qualif_silence' });
+        }
+        await sendFixed(QUALIF_REMINDER_MESSAGE, 'qualif_reminder');
+        return NextResponse.json({ status: 'ok', branch: 'qualif_reminder' });
+      }
+    }
+
     // 3. Contexte immobilier (biens + médias) — historique passé pour retrouver commune/type des échanges précédents
     const context = await getAIBienContext(userMessage, formattedHistory);
+
+    // 2g. Client qualifié mais AUCUN bien en zone/budget → message conseiller
+    // EXACT (§13) directement en code : jamais via le LLM, donc zéro phrase
+    // interdite (« aucun bien disponible », « augmentez le budget »…, §14).
+    if (context && /^Aucun bien ne correspond/.test(context)) {
+      await humanReplyDelay(NO_RESULTS_MESSAGE, requestStartedAt);
+      await wasenderSendMessage(senderPn, NO_RESULTS_MESSAGE, 'text');
+      await supabase
+        .from('whatsapp_messages')
+        .insert({ jid, direction: 'outbound', body: NO_RESULTS_MESSAGE, metadata: { type: 'no_results' } });
+      return NextResponse.json({ status: 'ok', branch: 'no_results' });
+    }
 
     // 4. Enrichir le contexte avec instructions RDV si intent détecté
     const hasVisiteIntent = detectVisiteIntent(userMessage);

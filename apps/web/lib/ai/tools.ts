@@ -19,9 +19,9 @@ import {
  * voient exactement les mêmes biens.
  */
 
-/** Plafond budgétaire strict (règle Wilfried 23/07) : on ne propose JAMAIS un
- *  bien à plus de 2× le budget client. Moins cher = toujours proposable. */
-const BUDGET_CAP_FACTOR = 2
+/** Plafond budgétaire strict (Cahier des règles §10) : prix ≤ budget × 1.10
+ *  (tolérance 10 % max). JAMAIS 2× le budget. Moins cher = toujours proposable. */
+const BUDGET_CAP_FACTOR = 1.1
 
 /** Max biens retournés par source (BOGBE'S + offres flash) */
 const MAX_PER_SOURCE = 3
