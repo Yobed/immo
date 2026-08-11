@@ -20,6 +20,13 @@ function detectQuartierZone(text: string): string | null {
   return null
 }
 
+// Phrases d'une recherche FRAÎCHE et distincte (§16-17) — pas une simple mise à
+// jour d'un champ (« finalement mon budget est 300k » = update, on garde le
+// reste). Sur ces phrases, on repart des critères du message courant seul, sans
+// réutiliser ceux d'une recherche précédente (pas de mélange de critères).
+const FRESH_SEARCH_RE =
+  /\b(un(e)?\s+autre\s+(bien|villa|appartement|maison|studio|terrain|recherche)|autre\s+chose|nouvelle\s+recherche|je\s+recommence|reprendre\s+[àa]\s+z[ée]ro|je\s+cherche\s+autre|change[rz]?\s+de\s+recherche)\b/i
+
 function detectTransaction(text: string): 'location' | 'achat' | null {
   const t = text.toLowerCase()
   if (/\b(louer|location|à louer|en location|loyer|bail)\b/.test(t)) return 'location'
@@ -47,11 +54,16 @@ export function qualify(message: string, history?: { role: string; content: stri
   const pMsg = parseSearchQuery(message)
   const pAll = parseSearchQuery(combined)
 
-  const propertyType = pMsg.type_bien || pAll.type_bien || null
-  const zone = pMsg.commune || detectQuartierZone(message) || pAll.commune || detectQuartierZone(combined) || null
-  const budgetStr = pMsg.prix_max || pAll.prix_max
+  // Recherche fraîche → message courant seul ; sinon on complète avec l'historique
+  // (le message courant reste prioritaire pour chaque champ).
+  const fresh = FRESH_SEARCH_RE.test(message)
+  const propertyType = fresh ? (pMsg.type_bien ?? null) : (pMsg.type_bien || pAll.type_bien || null)
+  const zone = fresh
+    ? (pMsg.commune || detectQuartierZone(message) || null)
+    : (pMsg.commune || detectQuartierZone(message) || pAll.commune || detectQuartierZone(combined) || null)
+  const budgetStr = fresh ? pMsg.prix_max : (pMsg.prix_max || pAll.prix_max)
   const budget = budgetStr ? parseInt(budgetStr, 10) : null
-  const transaction = detectTransaction(combined)
+  const transaction = detectTransaction(fresh ? message : combined)
 
   const missing: string[] = []
   if (!propertyType) missing.push('type')
