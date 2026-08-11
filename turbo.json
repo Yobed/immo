@@ -18,7 +18,9 @@
     "N8N_WEBHOOK_BASE_URL",
     "FIREBASE_PROJECT_ID",
     "FIREBASE_CLIENT_EMAIL",
-    "FIREBASE_PRIVATE_KEY"
+    "FIREBASE_PRIVATE_KEY",
+    "GEMINI_API_KEY",
+    "OLD_LOCAUX_SERVICE_ROLE_KEY"
   ],
   "tasks": {
     "build": {
@@ -31,7 +33,9 @@
         "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME",
         "NEXT_PUBLIC_URL",
         "NEXT_PUBLIC_APP_URL",
-        "NEXT_PUBLIC_APP_NAME"
+        "NEXT_PUBLIC_APP_NAME",
+        "NEXT_PUBLIC_GA_ID",
+        "NEXT_PUBLIC_META_PIXEL_ID"
       ]
     },
     "dev": { "cache": false, "persistent": true },
