@@ -12,7 +12,10 @@ import { createClient } from '@supabase/supabase-js'
  * "ça vit" pas "real-time chat".
  */
 
-export const revalidate = 60
+// Pas de pré-rendu au build : cette route interroge Supabase au runtime.
+// `revalidate` forçait un prerender au build → échec ("supabaseUrl is required")
+// car les env vars ne sont pas disponibles à la compilation.
+export const dynamic = 'force-dynamic'
 
 interface FeedItem {
   /** Prénom court anonymisé (ex: "Mar.") */
