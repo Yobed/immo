@@ -827,7 +827,7 @@ Message client : "${userMessage.slice(0, 200)}"`;
 
     return NextResponse.json({ status: 'ok' });
   } catch (error: any) {
-    // Don't log error details — may contain user data
-    return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 });
+    // DIAGNOSTIC TEMP: expose error.message to locate the failure on Vercel.
+    return NextResponse.json({ error: 'Webhook processing failed', detail: String(error?.message ?? error) }, { status: 500 });
   }
 }
