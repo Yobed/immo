@@ -69,6 +69,9 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    // Toutes les pages SAUF : statics Next, images, et TOUTES les routes /api
+    // (les API — dont le webhook WhatsApp — doivent rester publiques et ne
+    // passent pas par la session Supabase du middleware).
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
