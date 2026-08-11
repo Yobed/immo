@@ -475,12 +475,21 @@ export async function POST(req: NextRequest) {
     // toujours (→ message de bienvenue).
     const isNameAnswer =
       !!lastAssistantMsg && /votre nom|puis-je avoir votre nom|comment vous appelez/i.test(lastAssistantMsg.content);
+    // Un message qui apporte AU MOINS un critère de qualification (type / zone /
+    // budget — y compris un complément purement numérique comme « 150k ») doit
+    // être traité comme « sur le sujet ». Sans ça, un client qui complète champ
+    // par champ se faisait étouffer par la garde offtopic_silence.
+    const bringsQualInfo = (() => {
+      const q = qualify(userMessage);
+      return !!(q.propertyType || q.zone || q.budget);
+    })();
     const onTopic =
       hasPropertyIntent(userMessage) ||
       isGreetingOrAdOpener(userMessage) ||
       SELECTS_BIEN_REGEX.test(userMessage) ||
       NEW_NEED_REGEX.test(userMessage) ||
-      isNameAnswer;
+      isNameAnswer ||
+      bringsQualInfo;
     if (lastAssistantMsg && !onTopic) {
       return NextResponse.json({ status: 'ok', branch: 'offtopic_silence' });
     }
@@ -505,14 +514,38 @@ export async function POST(req: NextRequest) {
           await sendFixed(WELCOME_MESSAGE, 'qualif_welcome');
           return NextResponse.json({ status: 'ok', branch: 'welcome' });
         }
-        // Relance déjà envoyée ? → SILENCE : une seule relance autorisée (§7).
+
+        // Le message courant apporte-t-il AU MOINS un critère de qualification ?
+        // (permet de tolérer les réponses « champ par champ » sur WhatsApp au
+        // lieu de se taire après la 1re relance — cause du bug « Sapphire ne
+        // répond plus » : un client qui envoie « appartement » → « Cocody » →
+        // « 300k » se faisait étouffer dès le 2e message partiel).
+        const currentMsgQual = qualify(userMessage);
+        const bringsInfo = !!(
+          currentMsgQual.propertyType ||
+          currentMsgQual.zone ||
+          currentMsgQual.budget
+        );
+
+        // Relance déjà envoyée ET le client n'apporte AUCUNE nouvelle info
+        // (répète la même chose / acquittement) → SILENCE (§7 : une seule
+        // relance autorisée). Sinon on continue de qualifier progressivement.
         const reminderSent = formattedHistory.some(
           (m) => m.role === 'assistant' && QUALIF_REMINDER_MARKER.test(m.content),
         );
-        if (reminderSent) {
+        if (reminderSent && !bringsInfo) {
           return NextResponse.json({ status: 'ok', branch: 'qualif_silence' });
         }
-        await sendFixed(QUALIF_REMINDER_MESSAGE, 'qualif_reminder');
+
+        // Relance personnalisée : on ne liste QUE les champs restants (et on
+        // conserve le marqueur §7 pour ne pas boucler). Le client peut compléter
+        // champ par champ sans que Sapphire se taise.
+        const missingLabels: string[] = [];
+        if (!qual.propertyType) missingLabels.push('🏠 Le type de bien');
+        if (!qual.zone) missingLabels.push('📍 La zone souhaitée');
+        if (qual.budget == null) missingLabels.push('💰 Votre budget maximum');
+        const personalized = `Merci 🙏\n\nPour vous proposer des biens qui correspondent vraiment, nous avons obligatoirement besoin de ces 3 informations :\n\n${missingLabels.join('\n')}\n\nMerci de me communiquer ce qui manque pour poursuivre votre recherche.`;
+        await sendFixed(personalized, 'qualif_reminder');
         return NextResponse.json({ status: 'ok', branch: 'qualif_reminder' });
       }
     }
