@@ -125,8 +125,8 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
     lower = lower.replace(m[0], '')
   }
 
-  // "25 mil" / "500mil" → ×1_000 (en ivoirien "mil" = mille = 1000)
-  const milMatches = [...lower.matchAll(/(\d+(?:[.,]\d+)?)\s*mil\b/gi)]
+  // "25 mil" / "500mil" / "250 mille" → ×1_000 (en ivoirien "mil" = mille = 1000)
+  const milMatches = [...lower.matchAll(/(\d+(?:[.,]\d+)?)\s*mil(?:le)?s?\b/gi)]
   for (const m of milMatches) {
     priceVals.push(Math.round(parseFloat(m[1].replace(',', '.')) * 1_000))
     lower = lower.replace(m[0], '')
@@ -137,6 +137,29 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
   for (const m of kMatches) {
     priceVals.push(Math.round(parseFloat(m[1].replace(',', '.')) * 1_000))
     lower = lower.replace(m[0], '')
+  }
+
+  // Séparateur de milliers par POINT : "50.000" → 50000, "1.250.000" → 1250000.
+  // (Le séparateur ESPACE est déjà géré par le matcher générique ci-dessous.)
+  lower = lower.replace(/\b\d{1,3}(?:\.\d{3})+\b/g, (m) => m.replace(/\./g, ''))
+
+  // Petits montants en « milliers » implicites (usage ivoirien) : un nombre
+  // collé à un mot-budget ("budget max 250", "loyer 50") ou suivi de f/fcfa
+  // ("250 f") = milliers → "250" = 250 000. Le garde n>=10 évite les faux
+  // positifs "3 pièces", "9e tranche", "4 chambres".
+  const smallBudget = [
+    ...lower.matchAll(/\b(?:budget|loyer|prix|max(?:imum)?|autour de|environ)\s*:?\s*(\d+)\b/gi),
+    ...lower.matchAll(/\b(\d+)\s*(?:f|fcfa|francs?)\b/gi),
+  ]
+  for (const m of smallBudget) {
+    const n = parseInt(m[1], 10)
+    if (n >= 10 && n < 1000) {
+      priceVals.push(n * 1000)
+      lower = lower.replace(m[0], '')
+    } else if (n >= 1000) {
+      priceVals.push(n)
+      lower = lower.replace(m[0], '')
+    }
   }
 
   // Standard large numbers: "500 000", "500000"

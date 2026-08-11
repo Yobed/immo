@@ -7,7 +7,6 @@ import { getAIBienContext } from '@/lib/ai/tools';
 import {
   qualify,
   WELCOME_MESSAGE,
-  QUALIF_REMINDER_MESSAGE,
   QUALIF_REMINDER_MARKER,
   NO_RESULTS_MESSAGE,
 } from '@/lib/ai/qualification';
