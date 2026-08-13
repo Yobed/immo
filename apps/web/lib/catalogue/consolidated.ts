@@ -10,6 +10,7 @@
 import { createClient } from '@/lib/supabase/server'
 import {
   createLocauxAdminClient,
+  createLocauxMidAdminClient,
   createLocauxLegacyClient,
   locauxReadClients,
   locauxClientForId,
@@ -618,12 +619,13 @@ export async function getLocauxPagedItems(
       return { rows: data as LocauxRow[], count: count ?? 0 }
     }
 
-    // Nouveau projet (admin) + ancien projet (anon lecture) fusionnés.
-    const [neu, legacy] = await Promise.all([
+    // FRESH (admin) + MID (admin) + OLD (anon lecture) fusionnés.
+    const [fresh, mid, legacy] = await Promise.all([
       runOn(createLocauxAdminClient()).catch(() => ({ rows: [] as LocauxRow[], count: 0 })),
+      runOn(createLocauxMidAdminClient()).catch(() => ({ rows: [] as LocauxRow[], count: 0 })),
       runOn(createLocauxLegacyClient()).catch(() => ({ rows: [] as LocauxRow[], count: 0 })),
     ])
-    const merged = [...neu.rows, ...legacy.rows].sort(byDatePubDesc).slice(from, to + 1)
+    const merged = [...fresh.rows, ...mid.rows, ...legacy.rows].sort(byDatePubDesc).slice(from, to + 1)
 
     const items: ConsolidatedBien[] = merged.map((row) => {
       const b = mapLocauxRow(row)
@@ -668,7 +670,7 @@ export async function getLocauxPagedItems(
       }
     })
 
-    return { items, total: neu.count + legacy.count }
+    return { items, total: fresh.count + mid.count + legacy.count }
   } catch {
     return { items: [], total: 0 }
   }
