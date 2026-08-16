@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { KycInlineActions } from './KycInlineActions'
 import {
   Users, Building2, KeyRound, Home, ShieldCheck, Search, Phone, Mail,
-  MessageCircle, Gift, IdCard, Camera, Fingerprint, Calendar, BadgeCheck,
+  MessageCircle, Gift, Fingerprint, Calendar, BadgeCheck,
 } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
@@ -282,13 +283,6 @@ export default async function AdminComptesPage({ searchParams }: PageProps) {
                     <Field icon={ShieldCheck} label="Statut KYC">
                       {p.kyc_statut ? (KYC_BADGE[p.kyc_statut]?.label ?? p.kyc_statut) : 'Non soumis'}
                     </Field>
-                    <Field icon={IdCard} label="Pièce d'identité (CNI)">
-                      {p.kyc_cni_url ? <a href={p.kyc_cni_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Voir la CNI</a> : '—'}
-                    </Field>
-                    <Field icon={Camera} label="Selfie KYC">
-                      {p.kyc_selfie_url ? <a href={p.kyc_selfie_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Voir le selfie</a> : '—'}
-                    </Field>
-
                     <Field icon={Building2} label="Agence">{agence || (p.agence_id ? p.agence_id : '—')}</Field>
                     <Field icon={BadgeCheck} label="Rôle dans l'agence">{p.agence_role}</Field>
                     <Field icon={Home} label="Biens publiés">{nBiens}</Field>
@@ -301,6 +295,16 @@ export default async function AdminComptesPage({ searchParams }: PageProps) {
                     <Field icon={Calendar} label="Mis à jour le">{fmtDate(p.updated_at)}</Field>
                     <Field icon={Fingerprint} label="ID compte"><span className="font-mono text-xs">{p.id}</span></Field>
                   </div>
+
+                  {/* Vérification KYC — valider/rejeter directement (pièces via liens signés) */}
+                  {(p.kyc_cni_url || p.kyc_selfie_url || p.kyc_statut === 'en_cours') && (
+                    <div className="mt-4 p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 inline-flex items-center gap-1 mb-2">
+                        <ShieldCheck className="w-3 h-3" /> Vérification KYC
+                      </p>
+                      <KycInlineActions userId={p.id} cniPath={p.kyc_cni_url} selfiePath={p.kyc_selfie_url} statut={p.kyc_statut} />
+                    </div>
+                  )}
                 </div>
               </details>
             )
