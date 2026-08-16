@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
-import { ShieldCheck, CheckSquare, Home, Building2, LogOut, ClipboardCheck, Flame, Users, Megaphone, UserSearch } from 'lucide-react'
+import { ShieldCheck, CheckSquare, Home, Building2, LogOut, ClipboardCheck, Flame, Users, Megaphone, UserSearch, Send } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface AdminShellProps {
@@ -21,6 +21,7 @@ const ADMIN_NAV = [
   { href: '/admin/flash', label: 'Offres flash', icon: Flame, badge: false },
   { href: '/admin/prospects', label: 'Prospects', icon: UserSearch, badge: false },
   { href: '/admin/demarcheurs', label: 'Démarcheurs', icon: Megaphone, badge: false },
+  { href: '/admin/outreach', label: 'Outreach', icon: Send, badge: false },
   { href: '/admin/errors', label: 'Erreurs', icon: ClipboardCheck, badge: false },
 ]
 
