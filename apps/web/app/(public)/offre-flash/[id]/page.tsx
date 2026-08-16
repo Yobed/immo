@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import {
   ArrowLeft, Flame, MapPin, BedDouble, Maximize,
-  Calendar, Tag, AlertTriangle,
+  Calendar, Tag, AlertTriangle, ShieldCheck, Phone, MessageCircle,
 } from 'lucide-react'
 import { locauxClientForId } from '@/lib/supabase/locaux'
 import { mapLocauxRow, type LocauxRow } from '@/lib/locaux/mapper'
@@ -129,6 +129,7 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
   const supabase = await createSupabaseServer()
   const { data: { user } } = await supabase.auth.getUser()
   let prefill: { name: string; phone: string; email: string } = { name: '', phone: '', email: '' }
+  let isAdminUser = false
   if (user) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: profile } = await (supabase as any)
@@ -142,8 +143,50 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
         phone: profile.phone || '',
         email: profile.email || user.email || '',
       }
+      isAdminUser = profile.role === 'admin'
     }
   }
+
+  // Admin : contact DIRECT de la source (colonnes normalement masquées pour le
+  // public). On ne fetch les colonnes sensibles QUE si l'utilisateur est admin.
+  let flashOwnerPhone: string | null = null
+  let flashOwnerName: string | null = null
+  if (isAdminUser) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: contactRow } = await (locaux as any)
+      .from('locaux')
+      .select('telephone_bien, telephone_expediteur, publie_par, expediteur')
+      .eq('id', numId)
+      .single()
+    if (contactRow) {
+      flashOwnerPhone = contactRow.telephone_bien || contactRow.telephone_expediteur || null
+      flashOwnerName = contactRow.publie_par || contactRow.expediteur || null
+    }
+  }
+  const flashAdminContact = flashOwnerPhone ? (
+    <div className="mb-3 p-3.5 rounded-xl bg-red-500/5 border border-red-500/25">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-red-700 inline-flex items-center gap-1 mb-1.5">
+        <ShieldCheck className="w-3 h-3" /> Contact source · admin
+      </p>
+      {flashOwnerName && <p className="text-sm font-bold text-[var(--text)]">{flashOwnerName}</p>}
+      <p className="text-sm font-mono text-[var(--text)] mt-0.5 select-all">{flashOwnerPhone}</p>
+      <div className="flex gap-2 mt-2.5">
+        <a
+          href={`https://wa.me/${flashOwnerPhone.replace(/[^0-9]/g, '')}`}
+          target="_blank" rel="noopener noreferrer"
+          className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition-colors"
+        >
+          <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
+        </a>
+        <a
+          href={`tel:${flashOwnerPhone}`}
+          className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors"
+        >
+          <Phone className="w-3.5 h-3.5" /> Appeler
+        </a>
+      </div>
+    </div>
+  ) : null
 
   return (
     <main className="bg-[var(--surface-hover)] min-h-screen pb-12">
@@ -305,6 +348,7 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
               <p className="text-[var(--text-subtle)] text-xs mb-4">{t.flash.broadcastedOn}</p>
 
               <div className="space-y-2">
+                {flashAdminContact}
                 <FlashContactModal
                   locauxId={bien.id}
                   bienTitre={bien.titre}

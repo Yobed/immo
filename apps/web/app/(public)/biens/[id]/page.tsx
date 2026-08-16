@@ -28,6 +28,8 @@ import {
   ArrowRight,
   Flame,
   ShieldCheck,
+  Phone,
+  MessageCircle,
 } from 'lucide-react'
 import * as motion from 'framer-motion/client'
 import { DiscoveryBar } from '@/components/bien/DiscoveryBar'
@@ -154,7 +156,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
   // Fetch owner profile separately to avoid RLS conflicts on the join
   const { data: proprio } = await (supabase as any)
     .from('profiles')
-    .select('full_name, avatar_url')
+    .select('full_name, avatar_url, phone')
     .eq('id', bien.proprietaire_id)
     .maybeSingle()
 
@@ -169,6 +171,36 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
   ])
   const initialIsFavori = !!favoriRow
   const isAdminUser = userProfile?.role === 'admin'
+
+  // Contact DIRECT du propriétaire — réservé aux ADMINS. Le numéro n'est jamais
+  // rendu dans le HTML des non-admins (proprioPhone reste null hors admin, et le
+  // bloc n'est instancié que si isAdminUser). Évite de passer par « Demander une visite ».
+  const proprioName = (proprio as any)?.full_name ?? null
+  const proprioPhone: string | null = isAdminUser ? ((proprio as any)?.phone ?? null) : null
+  const adminOwnerContact = proprioPhone ? (
+    <div className="p-3.5 rounded-xl bg-red-500/5 border border-red-500/25">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-red-700 inline-flex items-center gap-1 mb-1.5">
+        <ShieldCheck className="w-3 h-3" /> Contact propriétaire · admin
+      </p>
+      <p className="text-sm font-bold text-[var(--text)]">{proprioName || 'Propriétaire'}</p>
+      <p className="text-sm font-mono text-[var(--text)] mt-0.5 select-all">{proprioPhone}</p>
+      <div className="flex gap-2 mt-2.5">
+        <a
+          href={`https://wa.me/${proprioPhone.replace(/[^0-9]/g, '')}`}
+          target="_blank" rel="noopener noreferrer"
+          className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition-colors"
+        >
+          <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
+        </a>
+        <a
+          href={`tel:${proprioPhone}`}
+          className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors"
+        >
+          <Phone className="w-3.5 h-3.5" /> Appeler
+        </a>
+      </div>
+    </div>
+  ) : null
 
   const medias = ((bien.biens_medias as any[]) ?? []).sort((a: any, b: any) => a.ordre - b.ordre)
   let videoMedias = medias.filter((m: any) => m.type === 'video')
@@ -355,6 +387,8 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
 
           {/* Left column */}
           <div className="flex-1 min-w-0">
+            {/* Contact propriétaire (admin) — visible sur mobile ; la sidebar le montre sur desktop */}
+            {adminOwnerContact && <div className="lg:hidden mb-6">{adminOwnerContact}</div>}
 
             {/* ACTIONS rapides */}
             <div className="flex items-center gap-3 mb-8 flex-wrap">
@@ -539,6 +573,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
 
                   {!isOwner ? (
                     <div className="space-y-3">
+                      {adminOwnerContact}
                       {isNuitee ? (
                         <>
                           <Link
