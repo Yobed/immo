@@ -1,6 +1,7 @@
 export const revalidate = 3600 // ISR: revalide toutes les 1h
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Image from 'next/image'
@@ -172,33 +173,51 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
   const initialIsFavori = !!favoriRow
   const isAdminUser = userProfile?.role === 'admin'
 
-  // Contact DIRECT du propriétaire — réservé aux ADMINS. Le numéro n'est jamais
-  // rendu dans le HTML des non-admins (proprioPhone reste null hors admin, et le
-  // bloc n'est instancié que si isAdminUser). Évite de passer par « Demander une visite ».
-  const proprioName = (proprio as any)?.full_name ?? null
-  const proprioPhone: string | null = isAdminUser ? ((proprio as any)?.phone ?? null) : null
-  const adminOwnerContact = proprioPhone ? (
+  // Contact DIRECT du propriétaire — réservé aux ADMINS. Lecture via SERVICE ROLE
+  // (le RLS de profiles n'autorise pas la session admin à lire le tél d'autrui,
+  // surtout sur un bien NON publié → sans ça, rien ne s'affichait). Rien n'est
+  // lu ni rendu pour un non-admin.
+  let proprioName: string | null = (proprio as any)?.full_name ?? null
+  let proprioPhone: string | null = null
+  if (isAdminUser && bien.proprietaire_id) {
+    const adminDb = createAdminClient()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: ownerFull } = await (adminDb as any)
+      .from('profiles')
+      .select('full_name, phone')
+      .eq('id', bien.proprietaire_id)
+      .maybeSingle()
+    proprioPhone = ownerFull?.phone || null
+    if (ownerFull?.full_name) proprioName = ownerFull.full_name
+  }
+  const adminOwnerContact = isAdminUser ? (
     <div className="p-3.5 rounded-xl bg-red-500/5 border border-red-500/25">
       <p className="text-[10px] font-bold uppercase tracking-widest text-red-700 inline-flex items-center gap-1 mb-1.5">
         <ShieldCheck className="w-3 h-3" /> Contact propriétaire · admin
       </p>
       <p className="text-sm font-bold text-[var(--text)]">{proprioName || 'Propriétaire'}</p>
-      <p className="text-sm font-mono text-[var(--text)] mt-0.5 select-all">{proprioPhone}</p>
-      <div className="flex gap-2 mt-2.5">
-        <a
-          href={`https://wa.me/${proprioPhone.replace(/[^0-9]/g, '')}`}
-          target="_blank" rel="noopener noreferrer"
-          className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition-colors"
-        >
-          <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
-        </a>
-        <a
-          href={`tel:${proprioPhone}`}
-          className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors"
-        >
-          <Phone className="w-3.5 h-3.5" /> Appeler
-        </a>
-      </div>
+      {proprioPhone ? (
+        <>
+          <p className="text-sm font-mono text-[var(--text)] mt-0.5 select-all">{proprioPhone}</p>
+          <div className="flex gap-2 mt-2.5">
+            <a
+              href={`https://wa.me/${proprioPhone.replace(/[^0-9]/g, '')}`}
+              target="_blank" rel="noopener noreferrer"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition-colors"
+            >
+              <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
+            </a>
+            <a
+              href={`tel:${proprioPhone}`}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors"
+            >
+              <Phone className="w-3.5 h-3.5" /> Appeler
+            </a>
+          </div>
+        </>
+      ) : (
+        <p className="text-xs text-[var(--text-muted)] mt-1">Aucun numéro renseigné pour ce propriétaire.</p>
+      )}
     </div>
   ) : null
 
