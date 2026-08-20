@@ -57,16 +57,17 @@ export default async function ConfirmerPage({ params }: PageProps) {
 
   const wasDraft = bien.statut === 'brouillon'
   if (wasDraft) {
-    await admin.from('biens').update({ statut: 'publie' }).eq('id', bien.id)
+    // Contrôle avant publication : la confirmation soumet l'annonce à la
+    // validation d'un admin (elle n'est PAS publiée automatiquement).
+    await admin.from('biens').update({ statut: 'en_attente' }).eq('id', bien.id)
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/^﻿/, '') || 'https://www.bogbesgroup.com'
     const lieu = [bien.quartier, bien.commune].filter(Boolean).join(', ')
-    const text = `✅ *BOGBE'S GROUPE* — Votre annonce est publiée !
+    const text = `✅ *BOGBE'S GROUPE* — Votre annonce est bien reçue !
 
 🏠 *${bien.titre}*${lieu ? `\n📍 ${lieu}` : ''}
 
-Voir votre annonce en ligne :
-${baseUrl}/biens/${bien.id}
+Notre équipe la valide sous peu — vous serez notifié dès qu'elle sera en ligne.
 
 Gérer / modifier vos biens :
 ${baseUrl}/mes-biens

@@ -14,11 +14,12 @@
  * ⚠️ Doit rester cohérent avec la policy RLS SELECT publique sur `public.biens`
  * (voir supabase/migrations/022_biens_visibles_en_attente.sql).
  */
-export const STATUTS_PUBLICS = ['publie', 'en_attente'] as const
+export const STATUTS_PUBLICS = ['publie'] as const
 
 export type StatutPublic = (typeof STATUTS_PUBLICS)[number]
 
-/** True si le statut est visible publiquement (publie ou en_attente). */
+/** True si le statut est visible publiquement (uniquement `publie`, après
+ *  validation admin — un `en_attente` n'est PAS public). */
 export function estStatutPublic(statut: string | null | undefined): boolean {
-  return statut === 'publie' || statut === 'en_attente'
+  return statut === 'publie'
 }
