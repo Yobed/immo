@@ -746,12 +746,12 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
       </footer>
       </div>{/* /white-card */}
 
-      {!isOwner && prixValue && (
+      {!isOwner && (
         <StickyMobileCTA
           bienTitre={bien.titre}
           bienLieu={`${bien.commune}${bien.quartier ? `, ${bien.quartier}` : ''}`}
-          prix={formatFCFA(prixValue)}
-          prixSuffix={prixSuffix}
+          prix={prixValue ? formatFCFA(prixValue) : 'Sur demande'}
+          prixSuffix={prixValue ? prixSuffix : ''}
           bienId={bien.id}
           isNuitee={isNuitee}
           proprietaireId={bien.proprietaire_id as string}
