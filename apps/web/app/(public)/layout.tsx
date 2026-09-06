@@ -41,7 +41,7 @@ export default async function PublicLayout({ children }: { children: React.React
   let navLinks = [
     { href: '/', label: 'Accueil' },
     { href: '/catalogue', label: 'Annonces' },
-    { href: '/offre-flash', label: 'Offres flash' },
+    { href: '/offre-flash', label: 'Offres des agences' },
     { href: '/services', label: 'Services' },
   ]
 
@@ -51,7 +51,10 @@ export default async function PublicLayout({ children }: { children: React.React
   if (role === 'pro') {
     navLinks = [
       { href: '/', label: 'Accueil' },
-      { href: '/recherche', label: 'Rechercher' },
+      // Le catalogue (dont l'onglet « Annonces web ») était inatteignable depuis
+      // ce menu : /recherche n'était qu'une redirection vers /catalogue, sans
+      // que rien ne l'indique. La SearchBar du header couvre déjà la recherche.
+      { href: '/catalogue', label: 'Annonces' },
       { href: '/dashboard', label: 'Tableau de bord' },
       { href: '/mes-biens', label: 'Mes annonces' },
     ]
