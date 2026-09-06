@@ -322,7 +322,8 @@
     "verified": "Verified",
     "results": "result",
     "resultsPlural": "results",
-    "empty": "No property matches these criteria right now."
+    "empty": "No property matches these criteria right now.",
+    "webListings": "Web listings"
   },
   "testimonials": {
     "kicker": "They trusted us",

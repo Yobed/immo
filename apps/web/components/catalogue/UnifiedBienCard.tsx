@@ -49,7 +49,7 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
         // bogbes → /biens/<uuid>.
         // ViewTransitionLink anime l'image de la card → image hero de la fiche
         // via l'API View Transitions native (Chrome/Safari).
-        href={bien.source === 'flash' ? `/offre-flash/${bien.sourceId}` : `/biens/${bien.sourceId}`}
+        href={bien.url.replace(process.env.NEXT_PUBLIC_SITE_URL || '', '')}
         transitionName="bien-hero"
         className="flex flex-col h-full bg-[var(--surface-card)] border border-[var(--border)] rounded-xl overflow-hidden hover:border-accent-luxury/40 hover:shadow-xl hover:shadow-black/10 transition-all duration-300"
       >

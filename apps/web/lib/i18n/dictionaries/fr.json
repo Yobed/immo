@@ -322,7 +322,8 @@
     "verified": "Vérifiés",
     "results": "résultat",
     "resultsPlural": "résultats",
-    "empty": "Aucun bien ne correspond à ces critères pour le moment."
+    "empty": "Aucun bien ne correspond à ces critères pour le moment.",
+    "webListings": "Annonces web"
   },
   "testimonials": {
     "kicker": "Ils nous ont fait confiance",

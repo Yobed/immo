@@ -1,27 +1,20 @@
 import Link from 'next/link'
-import dynamicImport from 'next/dynamic'
-import { Grid, List as ListIcon, Compass, X, ShieldCheck, Flame, Layers, Map as MapIcon } from 'lucide-react'
+import { CatalogueMapView } from '@/components/catalogue/CatalogueMapLoader'
+import { Grid, List as ListIcon, Compass, X, ShieldCheck, Flame, Layers, Globe, Map as MapIcon } from 'lucide-react'
 import * as motion from 'framer-motion/client'
 import { SearchBar } from '@/components/search/SearchBar'
 import { QuickFilters } from '@/components/search/QuickFilters'
 import { UnifiedBienCard } from '@/components/catalogue/UnifiedBienCard'
 import { UnifiedBienListCard } from '@/components/catalogue/UnifiedBienListCard'
 import { Pagination } from '@/components/ui/Pagination'
-import { getConsolidatedCatalogue, getLocauxPagedItems, getLocauxCount, getCatalogueCommunes, type ConsolidatedFilters } from '@/lib/catalogue/consolidated'
+import { getConsolidatedCatalogue, getLocauxPagedItems, getLocauxCount, getAnnoncesPagedItems, getAnnoncesCount, getCatalogueCommunes, type ConsolidatedFilters } from '@/lib/catalogue/consolidated'
 import { getViewCounts7d } from '@/lib/analytics/view-counts'
 import { getDictionary } from '@/lib/i18n/server'
 import { formatCount } from '@/lib/format'
 
-// Map view chargée en dynamic — Mapbox = gros bundle, on ne le charge que
-// quand l'utilisateur switche sur la vue carte.
-const CatalogueMapView = dynamicImport(
-  () => import('@/components/catalogue/CatalogueMapView').then(m => m.CatalogueMapView),
-  { ssr: false, loading: () => (
-    <div className="w-full h-[60vh] flex items-center justify-center bg-[var(--surface-card)] rounded-2xl border border-[var(--border)]">
-      <p className="text-[var(--text-muted)] text-sm">Chargement de la carte...</p>
-    </div>
-  )},
-)
+// Map view (Mapbox, client-only) chargée via un module client dédié :
+// Next 15 interdit `ssr: false` avec next/dynamic dans un Server Component.
+// Voir components/catalogue/CatalogueMapLoader.tsx.
 
 export const dynamic = 'force-dynamic'
 export const metadata = {
@@ -71,7 +64,8 @@ export default async function CataloguePage({ searchParams }: PageProps) {
     .map(s => s.trim())
     .filter(Boolean)
 
-  const sourceFilter = sp.source === 'bogbes' || sp.source === 'flash' ? sp.source : null
+  const sourceFilter =
+    sp.source === 'bogbes' || sp.source === 'flash' || sp.source === 'web' ? sp.source : null
   const filters: ConsolidatedFilters = {
     source: sourceFilter,
     commune: sp.commune?.trim() || undefined,
@@ -87,7 +81,7 @@ export default async function CataloguePage({ searchParams }: PageProps) {
   // Vue "flash only" : pagination serveur directe (tous les biens, sans cap mémoire).
   // Vue "bogbes" ou "all" : consolidation en mémoire (peu de biens vérifiés, tolérable).
   let items: Awaited<ReturnType<typeof getConsolidatedCatalogue>>['items'] = []
-  let counts = { bogbes: 0, flash: 0, total: 0 }
+  let counts = { bogbes: 0, flash: 0, web: 0, total: 0 }
   let total = 0        // pour la pagination (items chargés)
   let displayTotal = 0 // pour le compteur affiché (vrai total DB)
   let paginated: typeof items = []
@@ -103,16 +97,34 @@ export default async function CataloguePage({ searchParams }: PageProps) {
     total = flashTotal
     displayTotal = flashTotal
     totalPages = Math.ceil(flashTotal / PAGE_SIZE)
-    counts = { bogbes: 0, flash: flashTotal, total: flashTotal }
+    counts = { bogbes: 0, flash: flashTotal, web: 0, total: flashTotal }
+    var communes = communes_
+  } else if (sourceFilter === 'web') {
+    const [{ items: webItems, total: webTotal }, communes_] = await Promise.all([
+      getAnnoncesPagedItems(filters, pageIdx, PAGE_SIZE),
+      getCatalogueCommunes('web'),
+    ])
+    items = webItems
+    paginated = webItems
+    total = webTotal
+    displayTotal = webTotal
+    totalPages = Math.ceil(webTotal / PAGE_SIZE)
+    counts = { bogbes: 0, flash: 0, web: webTotal, total: webTotal }
     var communes = communes_
   } else {
-    const [catalogue, communes_, flashTotal] = await Promise.all([
+    const [catalogue, communes_, flashTotal, webTotal] = await Promise.all([
       getConsolidatedCatalogue({ ...filters, limitPerSource: 500 }),
       getCatalogueCommunes(sourceFilter),
       getLocauxCount(filters),
+      getAnnoncesCount(filters),
     ])
     items = catalogue.items
-    counts = { bogbes: catalogue.counts.bogbes, flash: flashTotal, total: catalogue.counts.bogbes + flashTotal }
+    counts = {
+      bogbes: catalogue.counts.bogbes,
+      flash: flashTotal,
+      web: webTotal,
+      total: catalogue.counts.bogbes + flashTotal + webTotal,
+    }
     total = catalogue.items.length
     displayTotal = counts.total
     paginated = catalogue.items.slice(pageIdx * PAGE_SIZE, (pageIdx + 1) * PAGE_SIZE)
@@ -190,7 +202,7 @@ export default async function CataloguePage({ searchParams }: PageProps) {
           <QuickFilters communes={communes} />
         </div>
 
-        {/* Onglets source : Tout / Vérifiés / Flash */}
+        {/* Onglets source : Tout / Vérifiés / Flash / Annonces web */}
         <div className="flex gap-2 flex-wrap mb-8">
           <SourceTab
             href={buildHref(sp, { source: '' })}
@@ -215,6 +227,14 @@ export default async function CataloguePage({ searchParams }: PageProps) {
             icon={Flame}
             label={t.flash.title}
             count={counts.flash}
+          />
+          <SourceTab
+            href={buildHref(sp, { source: 'web' })}
+            active={currentSource === 'web'}
+            color="emerald"
+            icon={Globe}
+            label={t.catalogue.webListings}
+            count={counts.web}
           />
         </div>
 
@@ -294,7 +314,7 @@ function ViewToggle({ active, href, icon: Icon, label }: { active: boolean; href
 interface SourceTabProps {
   href: string
   active: boolean
-  color: 'luxury' | 'blue' | 'orange'
+  color: 'luxury' | 'blue' | 'orange' | 'emerald'
   icon: React.ComponentType<{ className?: string }>
   label: string
   count: number
@@ -305,6 +325,7 @@ function SourceTab({ href, active, color, icon: Icon, label, count }: SourceTabP
     luxury: 'bg-[var(--accent-luxury)] text-[var(--on-accent)] border-[var(--accent-luxury)] shadow-md',
     blue: 'bg-blue-500 text-white border-blue-500 shadow-md',
     orange: 'bg-orange-500 text-white border-orange-500 shadow-md',
+    emerald: 'bg-emerald-600 text-white border-emerald-600 shadow-md',
   }
   return (
     <Link

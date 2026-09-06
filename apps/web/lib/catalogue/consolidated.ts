@@ -17,6 +17,7 @@ import {
   byDatePubDesc,
 } from '@/lib/supabase/locaux'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { createAnnoncesClient } from '@/lib/supabase/annonces'
 import { mapLocauxRow, type LocauxRow } from '@/lib/locaux/mapper'
 import { formatFCFA } from '@/lib/format'
 import { STATUTS_PUBLICS } from './statuts'
@@ -27,7 +28,7 @@ export interface ConsolidatedBien {
   /** ID unique inter-sources, préfixé : "bogbes:UUID" ou "flash:1234" */
   id: string
   /** Source d'origine */
-  source: 'bogbes' | 'flash'
+  source: 'bogbes' | 'flash' | 'web'
   /** ID brut de la source (UUID pour bogbes, number pour flash) */
   sourceId: string
   titre: string
@@ -80,7 +81,7 @@ export interface ConsolidatedFilters {
   /** Équipements normalisés (filtre côté biens BOGBE'S uniquement — locaux n'a pas ce champ structuré) */
   equipements?: string[]
   /** Filtre par source ; null = toutes */
-  source?: 'bogbes' | 'flash' | null
+  source?: 'bogbes' | 'flash' | 'web' | null
   /** ASC/DESC sur prix, recent, etc. */
   sort?: 'recent' | 'price_asc' | 'price_desc' | 'verified_first'
   /** Limite max par source (à fusionner après) */
@@ -92,7 +93,7 @@ const DEFAULT_LIMIT = 30
 // ─── BOGBE'S ────────────────────────────────────────────────────────────────
 
 async function fetchBogbes(filters: ConsolidatedFilters): Promise<ConsolidatedBien[]> {
-  if (filters.source === 'flash') return []
+  if (filters.source && filters.source !== 'bogbes') return []
   const supabase = await createClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   // biens_medias capped at 6 rows/bien — we only need cover + a few extras for cards.
@@ -210,7 +211,7 @@ async function fetchBogbes(filters: ConsolidatedFilters): Promise<ConsolidatedBi
 // ─── Locaux (WhatsApp scraping) ─────────────────────────────────────────────
 
 async function fetchLocaux(filters: ConsolidatedFilters): Promise<ConsolidatedBien[]> {
-  if (filters.source === 'bogbes') return []
+  if (filters.source && filters.source !== 'flash') return []
   try {
     // Ancien + nouveau projet fusionnés : les offres historiques restent
     // visibles sans avoir été copiées dans le nouveau projet.
@@ -345,6 +346,184 @@ async function fetchLocaux(filters: ConsolidatedFilters): Promise<ConsolidatedBi
   }
 }
 
+// ─── Annonces web (sites immo scrapés, photos rapatriées) ───────────────────
+
+/** Codes type_bien de l'app → motif à chercher dans le libellé du site source. */
+const TYPE_MOTIF: Record<string, string> = {
+  residence_meublee: 'meubl',
+  appartement: 'appartement',
+  villa: 'villa',
+  terrain: 'terrain',
+  bureau: 'bureau',
+  commerce: 'commerce',
+  studio: 'studio',
+  immeuble: 'immeuble',
+}
+
+interface AnnonceRow {
+  id: number
+  titre: string | null
+  type_bien: string | null
+  transaction: string | null
+  commune: string | null
+  quartier: string | null
+  prix_fcfa: number | null
+  periodicite: string | null
+  prix_brut: string | null
+  surface_m2: number | null
+  nb_pieces: number | null
+  nb_chambres: number | null
+  description: string | null
+  photo_principale: string | null
+  photos: string[] | null
+  vu_le: string | null
+}
+
+const ANNONCE_COLS =
+  'id,titre,type_bien,transaction,commune,quartier,prix_fcfa,periodicite,prix_brut,' +
+  'surface_m2,nb_pieces,nb_chambres,description,photo_principale,photos,vu_le'
+
+/**
+ * Filtres serveur communs au catalogue consolidé, à la pagination et au comptage.
+ * `actif` + `nb_photos > 0` sont non négociables : une annonce sans photo n'a
+ * aucun intérêt ici, c'est précisément ce que cette source apporte.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function applyAnnonceFilters(q: any, filters: ConsolidatedFilters): any {
+  q = q.eq('actif', true).gt('nb_photos', 0)
+  if (filters.commune) q = q.ilike('commune', `%${filters.commune}%`)
+  if (filters.type_bien) {
+    const motif = TYPE_MOTIF[filters.type_bien] ?? filters.type_bien
+    q = q.ilike('type_bien', `%${motif}%`)
+  }
+  if (filters.type_offre) q = q.eq('transaction', filters.type_offre)
+  if (filters.q?.trim()) {
+    const term = filters.q.trim().replace(/[,()]/g, ' ')
+    q = q.or(`titre.ilike.%${term}%,description.ilike.%${term}%,quartier.ilike.%${term}%`)
+  }
+  // Prix inconnu conservé (comme pour les offres flash) : le conseiller/Sapphire
+  // annonce « Prix sur demande » plutôt que de masquer le bien.
+  if (filters.prix_min != null && filters.prix_max != null) {
+    q = q.or(`prix_fcfa.is.null,and(prix_fcfa.gte.${filters.prix_min},prix_fcfa.lte.${filters.prix_max})`)
+  } else if (filters.prix_min != null) {
+    q = q.or(`prix_fcfa.is.null,prix_fcfa.gte.${filters.prix_min}`)
+  } else if (filters.prix_max != null) {
+    q = q.or(`prix_fcfa.is.null,prix_fcfa.lte.${filters.prix_max}`)
+  }
+  // Les équipements ne sont pas structurés côté sites sources : filtre non
+  // appliqué (comme pour les locaux, où il passe par le texte libre).
+  return q
+}
+
+async function fetchAnnonces(filters: ConsolidatedFilters): Promise<ConsolidatedBien[]> {
+  if (filters.source && filters.source !== 'web') return []
+  try {
+    // v_annonces ne renvoie que les photos réellement présentes dans notre
+    // Storage (cf. scripts/sql/v_annonces-photos-storage.sql) → aucune vignette
+    // cassée possible côté catalogue.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const q = applyAnnonceFilters(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (createAnnoncesClient() as any).from('v_annonces').select(ANNONCE_COLS),
+      filters,
+    )
+      .order('vu_le', { ascending: false })
+      .limit(filters.limitPerSource ?? DEFAULT_LIMIT)
+    const { data, error } = await q
+    if (error || !data) return []
+    return (data as AnnonceRow[]).map(mapAnnonce)
+  } catch {
+    return []
+  }
+}
+
+/** Page d'annonces paginée côté serveur (onglet « Annonces web » seul). */
+export async function getAnnoncesPagedItems(
+  filters: ConsolidatedFilters,
+  page: number,
+  pageSize: number,
+): Promise<{ items: ConsolidatedBien[]; total: number }> {
+  try {
+    const from = page * pageSize
+    const q = applyAnnonceFilters(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (createAnnoncesClient() as any).from('v_annonces').select(ANNONCE_COLS, { count: 'exact' }),
+      filters,
+    )
+    const ordered =
+      filters.sort === 'price_asc'
+        ? q.order('prix_fcfa', { ascending: true, nullsFirst: false })
+        : filters.sort === 'price_desc'
+          ? q.order('prix_fcfa', { ascending: false, nullsFirst: false })
+          : q.order('vu_le', { ascending: false })
+    const { data, error, count } = await ordered.range(from, from + pageSize - 1)
+    if (error || !data) return { items: [], total: 0 }
+    return { items: (data as AnnonceRow[]).map(mapAnnonce), total: count ?? data.length }
+  } catch {
+    return { items: [], total: 0 }
+  }
+}
+
+/** Nombre total d'annonces web correspondant aux filtres (compteur d'onglet). */
+export async function getAnnoncesCount(filters: ConsolidatedFilters): Promise<number> {
+  try {
+    const { count } = await applyAnnonceFilters(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (createAnnoncesClient() as any).from('v_annonces').select('id', { count: 'exact', head: true }),
+      filters,
+    )
+    return count ?? 0
+  } catch {
+    return 0
+  }
+}
+
+/** v_annonces → ConsolidatedBien. Partagé par le catalogue et la fiche détail. */
+function mapAnnonce(a: AnnonceRow): ConsolidatedBien {
+  const nuitee = /nuit|jour/i.test(a.periodicite ?? '')
+  const period =
+    a.transaction === 'vente' ? ('vente' as const)
+    : a.transaction === 'location' ? (nuitee ? ('nuit' as const) : ('mois' as const))
+    : ('unknown' as const)
+  const suffixe = period === 'mois' ? ' / mois' : period === 'nuit' ? ' / nuit' : ''
+  const label = a.prix_fcfa
+    ? formatFCFA(a.prix_fcfa) + suffixe
+    : (a.prix_brut ?? 'Prix sur demande')
+
+  const dateIso = a.vu_le ?? new Date().toISOString()
+  const lieu = [a.quartier, a.commune].filter(Boolean).join(', ')
+  return {
+    id: `web:${a.id}`,
+    source: 'web',
+    sourceId: String(a.id),
+    titre: a.titre ?? `${a.type_bien ?? 'Bien'} à ${a.commune ?? 'Abidjan'}`,
+    commune: a.commune ?? '',
+    quartier: a.quartier ?? null,
+    type_bien: a.type_bien ?? '',
+    prix_label: label,
+    prix_value: a.prix_fcfa ?? null,
+    prix_period: period,
+    surface_m2: a.surface_m2 ?? null,
+    nb_pieces: a.nb_pieces ?? a.nb_chambres ?? null,
+    description: a.description ?? null,
+    photo_url: a.photo_principale ?? null,
+    // Annonce publique non contrôlée par nos soins : jamais marquée vérifiée.
+    is_verifie: false,
+    is_pending: false,
+    url: `${SITE_URL}/annonce/${a.id}`,
+    date_publication: dateIso,
+    date_scraping: a.vu_le ?? null,
+    is_recent: Date.now() - new Date(dateIso).getTime() < 24 * 60 * 60 * 1000,
+    photos: (a.photos ?? []).slice(0, 5),
+    videos: [],
+    equipements: [],
+    score_ia: null,
+    cta_url: `https://wa.me/2250544872051?text=${encodeURIComponent(
+      `Bonjour, je suis intéressé(e) par l'annonce #${a.id} (${a.titre ?? a.type_bien ?? 'bien'}${lieu ? ` à ${lieu}` : ''})`,
+    )}`,
+  }
+}
+
 // ─── Dédup ──────────────────────────────────────────────────────────────────
 
 /**
@@ -430,6 +609,16 @@ function dedupConsolidated(items: ConsolidatedBien[]): ConsolidatedBien[] {
 
 // ─── Merge + tri unifié ─────────────────────────────────────────────────────
 
+/** 0 = notre catalogue, 1 = source externe (flash / web). */
+function isNotre(b: ConsolidatedBien): number {
+  return b.source === 'bogbes' ? 0 : 1
+}
+
+/** 0 = a une photo. Un bien qu'on ne peut pas montrer ne convainc personne. */
+function hasPhoto(b: ConsolidatedBien): number {
+  return b.photo_url ? 0 : 1
+}
+
 function sortConsolidated(items: ConsolidatedBien[], sort: ConsolidatedFilters['sort']): ConsolidatedBien[] {
   const arr = items.slice()
   switch (sort) {
@@ -447,6 +636,14 @@ function sortConsolidated(items: ConsolidatedBien[], sort: ConsolidatedFilters['
       arr.sort((a, b) => {
         if (a.is_verifie && !b.is_verifie) return -1
         if (!a.is_verifie && b.is_verifie) return 1
+        // ⚠️ Ordre AVANT la date : les annonces web portent toutes la date de
+        // leur import (même journée) et écraseraient sinon toute la 1re page.
+        // 1) notre catalogue passe devant les sources externes ;
+        // 2) entre sources externes, celles qui ont une photo d'abord — c'est
+        //    précisément ce que le prospect réclame, et beaucoup d'offres flash
+        //    WhatsApp n'en ont aucune.
+        if (isNotre(a) !== isNotre(b)) return isNotre(a) - isNotre(b)
+        if (hasPhoto(a) !== hasPhoto(b)) return hasPhoto(a) - hasPhoto(b)
         return new Date(b.date_publication).getTime() - new Date(a.date_publication).getTime()
       })
   }
@@ -459,19 +656,28 @@ function sortConsolidated(items: ConsolidatedBien[], sort: ConsolidatedFilters['
  */
 export async function getConsolidatedCatalogue(
   filters: ConsolidatedFilters = {},
-): Promise<{ items: ConsolidatedBien[]; counts: { bogbes: number; flash: number; total: number } }> {
-  const [bogbes, flash] = await Promise.all([fetchBogbes(filters), fetchLocaux(filters)])
-  const deduped = dedupConsolidated([...bogbes, ...flash])
+): Promise<{
+  items: ConsolidatedBien[]
+  counts: { bogbes: number; flash: number; web: number; total: number }
+}> {
+  const [bogbes, flash, web] = await Promise.all([
+    fetchBogbes(filters),
+    fetchLocaux(filters),
+    fetchAnnonces(filters),
+  ])
+  const deduped = dedupConsolidated([...bogbes, ...flash, ...web])
   const merged = sortConsolidated(deduped, filters.sort ?? 'verified_first')
   // Compteurs APRÈS déduplication, par source → garantit total = bogbes + flash
   // (sinon "Tout" pouvait afficher moins que "Offres flash", ce qui n'a pas de sens).
   const bogbesCount = merged.filter((b) => b.source === 'bogbes').length
   const flashCount = merged.filter((b) => b.source === 'flash').length
+  const webCount = merged.filter((b) => b.source === 'web').length
   return {
     items: merged,
     counts: {
       bogbes: bogbesCount,
       flash: flashCount,
+      web: webCount,
       total: merged.length,
     },
   }
@@ -496,7 +702,7 @@ function titleCaseCommune(s: string): string {
  * @param limit   nombre max de communes renvoyées (par fréquence décroissante).
  */
 export async function getCatalogueCommunes(
-  source: 'bogbes' | 'flash' | null = null,
+  source: 'bogbes' | 'flash' | 'web' | null = null,
   limit = 16,
 ): Promise<string[]> {
   const counts = new Map<string, { label: string; n: number }>()
@@ -512,7 +718,7 @@ export async function getCatalogueCommunes(
 
   const tasks: Promise<void>[] = []
 
-  if (source !== 'flash') {
+  if (!source || source === 'bogbes') {
     tasks.push(
       (async () => {
         try {
@@ -532,7 +738,7 @@ export async function getCatalogueCommunes(
     )
   }
 
-  if (source !== 'bogbes') {
+  if (!source || source === 'flash') {
     for (const sb of locauxReadClients()) {
       tasks.push(
         (async () => {
@@ -552,6 +758,26 @@ export async function getCatalogueCommunes(
         })(),
       )
     }
+  }
+
+  if (!source || source === 'web') {
+    tasks.push(
+      (async () => {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data } = await (createAnnoncesClient() as any)
+            .from('v_annonces')
+            .select('commune')
+            .eq('actif', true)
+            .gt('nb_photos', 0)
+            .limit(5000)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          for (const r of (data ?? []) as any[]) add(r.commune)
+        } catch {
+          /* source indisponible — on ignore */
+        }
+      })(),
+    )
   }
 
   await Promise.all(tasks)
@@ -706,7 +932,9 @@ export async function getLocauxCount(filters: ConsolidatedFilters): Promise<numb
 // ─── Fetch by ID ────────────────────────────────────────────────────────────
 
 /** Détecte une URL de bien dans un message texte et retourne {source, id}. */
-export function extractBienIdFromText(text: string): { source: 'bogbes' | 'flash'; id: string } | null {
+export function extractBienIdFromText(
+  text: string,
+): { source: 'bogbes' | 'flash' | 'web'; id: string } | null {
   if (!text) return null
   // /biens/<UUID v4>
   const bogbesMatch = text.match(/\/biens\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i)
@@ -714,14 +942,36 @@ export function extractBienIdFromText(text: string): { source: 'bogbes' | 'flash
   // /offre-flash/<numeric>
   const flashMatch = text.match(/\/offre-flash\/(\d+)/i)
   if (flashMatch) return { source: 'flash', id: flashMatch[1] }
+  // /annonce/<numeric>
+  const webMatch = text.match(/\/annonce\/(\d+)/i)
+  if (webMatch) return { source: 'web', id: webMatch[1] }
   return null
 }
 
 /** Récupère UN bien précis par son ID + sa source. */
 export async function getConsolidatedBienById(
-  source: 'bogbes' | 'flash',
+  source: 'bogbes' | 'flash' | 'web',
   id: string,
 ): Promise<ConsolidatedBien | null> {
+  if (source === 'web') {
+    try {
+      const sb = createAnnoncesClient()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data } = await (sb as any)
+        .from('v_annonces')
+        .select(
+          'id,titre,type_bien,transaction,commune,quartier,prix_fcfa,periodicite,prix_brut,' +
+            'surface_m2,nb_pieces,nb_chambres,description,photo_principale,photos,vu_le',
+        )
+        .eq('id', Number(id))
+        .eq('actif', true)
+        .maybeSingle()
+      return data ? mapAnnonce(data as AnnonceRow) : null
+    } catch {
+      return null
+    }
+  }
+
   if (source === 'bogbes') {
     const supabase = await createClient()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

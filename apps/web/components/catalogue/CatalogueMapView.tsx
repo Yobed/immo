@@ -215,7 +215,7 @@ export function CatalogueMapView({ items }: CatalogueMapViewProps) {
                 </p>
               )}
               <Link
-                href={selected.source === 'flash' ? `/offre-flash/${selected.sourceId}` : `/biens/${selected.sourceId}`}
+                href={selected.url.replace(process.env.NEXT_PUBLIC_SITE_URL || '', '')}
                 className="block w-full text-center px-3 py-2 bg-slate-900 text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-slate-800 transition-colors"
               >
                 Voir le bien

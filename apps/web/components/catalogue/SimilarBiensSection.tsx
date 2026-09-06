@@ -6,7 +6,7 @@ interface Props {
   /** ID brut du bien courant à exclure (sourceId) */
   excludeId: string
   /** Source du bien courant (pour exclusion fiable, évite collisions UUID/numeric) */
-  excludeSource?: 'bogbes' | 'flash'
+  excludeSource?: 'bogbes' | 'flash' | 'web'
   /** Commune pour cibler les similaires */
   commune: string
   /** Type de bien pour cibler les similaires */

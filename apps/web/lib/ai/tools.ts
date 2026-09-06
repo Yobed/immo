@@ -64,14 +64,30 @@ const QUARTIER_COMMUNE: Record<string, string> = {
   abatta: 'Bingerville',
 }
 
-function formatBienBlock(b: ConsolidatedBien, i: number | null): string {
-  const sourceTag = b.source === 'bogbes' ? "[CATALOGUE BOGBE'S]" : '[OFFRE FLASH WhatsApp]'
+/** Étiquette de provenance montrée au LLM. Doit rester honnête : une annonce web
+ *  vient d'un site public — ses photos sont réelles (rapatriées chez nous) mais
+ *  l'offre elle-même n'a PAS été vérifiée par BOGBE'S. */
+function sourceTagOf(b: ConsolidatedBien): string {
+  if (b.source === 'bogbes') return "[CATALOGUE BOGBE'S]"
+  if (b.source === 'web') return '[ANNONCE WEB PUBLIQUE]'
+  return '[OFFRE FLASH WhatsApp]'
+}
+
+function badgesOf(b: ConsolidatedBien): string[] {
   const badges: string[] = []
   if (b.is_verifie) badges.push('✓ VÉRIFIÉ')
   if (b.is_pending) badges.push("⏳ En cours de validation (enregistré, pas encore vérifié par BOGBE'S)")
   if (typeof b.score_ia === 'number' && b.score_ia >= 80) badges.push('★ Top qualité')
   if (b.source === 'flash') badges.push('⚡ Offre flash (récente, à valider rapidement)')
+  if (b.source === 'web')
+    badges.push("🌐 Annonce d'un site immo public — photos réelles, offre NON vérifiée par BOGBE'S")
   if (b.is_recent) badges.push('🆕 Nouveau (< 24h)')
+  return badges
+}
+
+function formatBienBlock(b: ConsolidatedBien, i: number | null): string {
+  const sourceTag = sourceTagOf(b)
+  const badges = badgesOf(b)
 
   let out = i !== null ? `--- BIEN ${i + 1} ${sourceTag} ---\n` : `--- BIEN DEMANDÉ ${sourceTag} ---\n`
   out += `ID: ${b.sourceId}\n`
@@ -242,18 +258,13 @@ INSTRUCTION : remercie brièvement le client puis dis EXACTEMENT : "Un conseille
   if (p.equipements?.length) critereLines.push(`- Équipements : ${p.equipements.join(', ')}`)
 
   let context = `${top.length} bien(s) trouvé(s) (max ${SAPPHIRE_MAX_RESULTS}) via catalogue consolidé\n`
-  context += `Sources : BOGBE'S vérifiés (${counts.bogbes}) + Offres Flash WhatsApp (${counts.flash})\n`
+  context += `Sources : BOGBE'S vérifiés (${counts.bogbes}) + Offres Flash WhatsApp (${counts.flash}) + Annonces web (${counts.web})\n`
   if (critereLines.length) context += `\nCRITÈRES STRICTS APPLIQUÉS :\n${critereLines.join('\n')}\n`
   context += '\n'
 
   top.forEach((b: ConsolidatedBien, i: number) => {
-    const sourceTag = b.source === 'bogbes' ? '[CATALOGUE BOGBE\'S]' : '[OFFRE FLASH WhatsApp]'
-    const badges: string[] = []
-    if (b.is_verifie) badges.push('✓ VÉRIFIÉ')
-    if (b.is_pending) badges.push("⏳ En cours de validation (enregistré, pas encore vérifié par BOGBE'S)")
-    if (typeof b.score_ia === 'number' && b.score_ia >= 80) badges.push('★ Top qualité')
-    if (b.source === 'flash') badges.push('⚡ Offre flash (récente, à valider rapidement)')
-    if (b.is_recent) badges.push('🆕 Nouveau (< 24h)')
+    const sourceTag = sourceTagOf(b)
+    const badges = badgesOf(b)
 
     context += `--- BIEN ${i + 1} ${sourceTag} ---\n`
     context += `ID: ${b.sourceId}\n`
