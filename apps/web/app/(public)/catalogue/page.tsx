@@ -228,14 +228,19 @@ export default async function CataloguePage({ searchParams }: PageProps) {
             label={t.flash.title}
             count={counts.flash}
           />
-          <SourceTab
-            href={buildHref(sp, { source: 'web' })}
-            active={currentSource === 'web'}
-            color="emerald"
-            icon={Globe}
-            label={t.catalogue.webListings}
-            count={counts.web}
-          />
+          {/* Masqué si la source ne remonte rien (variable d'env absente, projet
+              scraping indisponible) : un onglet « Annonces web (0) » visible par
+              les visiteurs ne sert personne. */}
+          {(counts.web > 0 || currentSource === 'web') && (
+            <SourceTab
+              href={buildHref(sp, { source: 'web' })}
+              active={currentSource === 'web'}
+              color="emerald"
+              icon={Globe}
+              label={t.catalogue.webListings}
+              count={counts.web}
+            />
+          )}
         </div>
 
         {/* Grille / Liste / Carte — selon ?vue=
