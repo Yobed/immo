@@ -3,10 +3,11 @@ import { redirect }          from 'next/navigation'
 import { ReservationFlow }   from '@/components/reservation/ReservationFlow'
 
 interface Props {
-  searchParams: { bienId?: string }
+  searchParams: Promise<{ bienId?: string }>
 }
 
-export default async function NouvelleReservationPage({ searchParams }: Props) {
+export default async function NouvelleReservationPage({ searchParams: searchParamsPromise }: Props) {
+  const searchParams = await searchParamsPromise
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {

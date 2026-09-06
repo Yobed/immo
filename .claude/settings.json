@@ -1,23 +1,26 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git check-ignore *)",
-      "Bash(git rm *)",
-      "Bash(git add *)",
-      "Bash(git commit -m ' *)",
-      "Bash(git push *)",
-      "Bash(curl -sI \"https://bogbes-groupe.vercel.app/dashboard\")",
-      "Bash(git commit -m 'fix\\(catalogue\\): filtre type_offre flash tolerant aux variantes scraping *)",
-      "Bash(git commit -m 'fix\\(catalogue\\): ne plus dedupliquer 2 biens BOGBE'\\\\''S entre eux *)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(git add:*)",
+      "Bash(git rm:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(npx next:*)",
+      "Bash(node -e ' *)",
+      "Bash(node \"C:/Users/WILFRIED/AppData/Local/Temp/claude/c--Users-WILFRIED-OneDrive---Gravel-Ivoire-Bureau-immo/1e9b4945-b6fb-4475-b56d-6c08d9a50183/scratchpad/probe-offtopic.mjs\")",
+      "mcp__claude_ai_Supabase_Immo__apply_migration",
+      "Bash(curl -s -o /dev/null -w \"page prospects → %{http_code} \\(307 = redirection login, OK\\)\\\\n\" \"https://www.bogbesgroup.com/admin/prospects\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"https://www.bogbesgroup.com/admin/prospects\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"https://www.bogbesgroup.com/admin/prospects?view=list\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"https://www.bogbesgroup.com/admin/prospects/00000000-0000-0000-0000-000000000000\")",
+      "mcp__claude_ai_Supabase_Immo__execute_sql",
       "Bash(npx next *)",
-      "Bash(git commit -m 'feat\\(admin\\): page de validation KYC + page proprio reservations recues *)",
-      "Bash(git commit -m 'feat\\(notif\\): proprio notifie lors de chaque etape reservation sans PII locataire *)",
-      "Bash(cat \"C:\\\\\\\\Users\\\\\\\\WILFRIED\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\claude\\\\\\\\c--Users-WILFRIED-OneDrive---Gravel-Ivoire-Bureau-immo\\\\\\\\18f5e58a-9afe-4d23-a190-2a14672058bc\\\\\\\\tasks\\\\\\\\blh3y7hs5.output\")",
-      "Bash(git commit -m 'feat\\(notif\\): proprio notifie aussi pour visites \\(creation + validation admin\\) sans PII *)",
-      "Bash(git commit -m 'fix\\(pro\\): page reservations-recues respecte l'\\\\''intermediation totale *)",
-      "Bash(git commit -m 'feat\\(dashboard\\): KPI cards cliquables avec href + chevron *)",
-      "Bash(git commit -m 'fix\\(pro\\): reservations-recues query directe par proprietaire_id + schema correct *)",
-      "Bash(git commit -m 'fix\\(ui\\): titre bien tronque proprement sur cartes reservation *)"
+      "Bash(npx vercel:*)",
+      "Bash(vercel:*)"
     ]
   }
 }

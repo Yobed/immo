@@ -136,10 +136,15 @@ export default async function MesAnnoncesPage({
                     )
                   })()}
 
-                  <BienAvailabilityToggle 
-                    bienId={bien.id} 
-                    initialValue={bien.est_disponible} 
-                  />
+                  {/* Dispo/Occupé : réservé aux biens DÉJÀ validés (publié ou loué).
+                      Sur un bien en attente/brouillon/refusé, la visibilité n'a pas
+                      de sens et le verrou de publication (trigger DB) le bloquerait. */}
+                  {(bien.statut === 'publie' || bien.statut === 'loue') && (
+                    <BienAvailabilityToggle
+                      bienId={bien.id}
+                      initialValue={bien.est_disponible}
+                    />
+                  )}
                   <div className="flex gap-2">
                     <Link href={`/mes-biens/${bien.id}/modifier`} className="flex-1">
                       <Button variant="outline" size="sm" className="w-full">Modifier</Button>

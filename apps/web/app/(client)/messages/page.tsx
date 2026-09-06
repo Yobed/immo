@@ -7,11 +7,9 @@ import Link from 'next/link'
 export default async function MessagesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ conv?: string }> | { conv?: string }
+  searchParams: Promise<{ conv?: string }>
 }) {
-  const params = typeof (searchParams as any).then === 'function'
-    ? await (searchParams as Promise<{ conv?: string }>)
-    : (searchParams as { conv?: string })
+  const params = await searchParams
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

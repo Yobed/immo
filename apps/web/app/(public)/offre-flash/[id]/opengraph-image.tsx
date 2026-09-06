@@ -22,7 +22,8 @@ function formatFCFA(n: number): string {
  * quartier en arrière-plan + overlay type + prix + badge "À valider".
  * Compense l'absence quasi-systématique de photo sur les flash scrapées.
  */
-export default async function FlashOg({ params }: { params: { id: string } }) {
+export default async function FlashOg({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise
   const numId = parseInt(params.id, 10)
   if (isNaN(numId)) return fallbackOg()
 

@@ -10,7 +10,8 @@ const STATUT_LABELS: Record<string, { label: string; color: string }> = {
   terminee:   { label: 'Terminée',               color: 'text-muted'   },
 }
 
-export default async function ReservationDetailPage({ params }: { params: { id: string } }) {
+export default async function ReservationDetailPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')

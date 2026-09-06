@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
 /**
  * Les admins gardent l'onglet ouvert des jours sur mobile : le navigateur
@@ -11,7 +11,9 @@ import { useRouter } from 'next/navigation'
  */
 export function AutoRefreshOnFocus() {
   const router = useRouter()
+  const pathname = usePathname()
   const lastRefresh = useRef(0)
+  const mounted = useRef(false)
 
   useEffect(() => {
     const refresh = () => {
@@ -36,6 +38,20 @@ export function AutoRefreshOnFocus() {
       window.removeEventListener('pageshow', onPageShow)
     }
   }, [router])
+
+  // Navigation entre onglets admin : App Router NE re-rend PAS le layout (donc
+  // le badge « Validation », calculé côté layout), seul le segment de page se
+  // recharge. Sans ça le badge reste figé (« 1 ») pendant que la file affiche
+  // « 0 » → les admins croient la validation cassée. On resynchronise le layout
+  // à chaque changement d'onglet (on saute le montage initial, déjà frais).
+  useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true
+      return
+    }
+    lastRefresh.current = Date.now()
+    router.refresh()
+  }, [pathname, router])
 
   return null
 }

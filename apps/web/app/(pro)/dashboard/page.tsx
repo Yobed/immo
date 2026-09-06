@@ -2,7 +2,7 @@
 import { createClient }   from '@/lib/supabase/server'
 import { redirect }       from 'next/navigation'
 import Link               from 'next/link'
-import dynamic            from 'next/dynamic'
+import { RevenueBarChart, PaymentDonut, ConversionFunnel } from '@/components/dashboard/ChartLoaders'
 import { KPICard }        from '@/components/dashboard/KPICard'
 import { OccupancyGauge } from '@/components/dashboard/OccupancyGauge'
 import { AlertesSection } from '@/components/dashboard/AlertesSection'
@@ -12,19 +12,9 @@ import type { RevenueData }     from '@/components/dashboard/RevenueBarChart'
 import type { PaymentMethodData } from '@/components/dashboard/PaymentDonut'
 import type { FunnelData }      from '@/components/dashboard/ConversionFunnel'
 
-// Dynamic imports avec ssr:false — evite le Pitfall 5 recharts hydration mismatch
-const RevenueBarChart = dynamic(
-  () => import('@/components/dashboard/RevenueBarChart').then(m => m.RevenueBarChart),
-  { ssr: false }
-)
-const PaymentDonut = dynamic(
-  () => import('@/components/dashboard/PaymentDonut').then(m => m.PaymentDonut),
-  { ssr: false }
-)
-const ConversionFunnel = dynamic(
-  () => import('@/components/dashboard/ConversionFunnel').then(m => m.ConversionFunnel),
-  { ssr: false }
-)
+// Graphiques recharts (client-only) importés via un module client dédié :
+// Next 15 interdit `ssr: false` avec next/dynamic dans un Server Component.
+// Voir components/dashboard/ChartLoaders.tsx.
 
 export const metadata = { title: "Dashboard — BOGBE'S GROUPE" }
 

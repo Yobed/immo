@@ -1,10 +1,11 @@
 import Link from 'next/link'
 
 interface Props {
-  searchParams: { cpm_trans_id?: string; cpm_error_message?: string }
+  searchParams: Promise<{ cpm_trans_id?: string; cpm_error_message?: string }>
 }
 
-export default function PaiementRetourPage({ searchParams }: Props) {
+export default async function PaiementRetourPage({ searchParams: searchParamsPromise }: Props) {
+  const searchParams = await searchParamsPromise
   const isSuccess = !searchParams.cpm_error_message ||
                     searchParams.cpm_error_message === ''
   return (

@@ -63,3 +63,11 @@ build/
 
 # Outil tiers vendorise (repo git nested, hors projet)
 everything-claude-code/
+
+.vercel
+
+# Export brut des variables Vercel — CONTIENT DES SECRETS
+.env.vercel.import
+check_output_enhanced.txt
+.omc/
+*.bak

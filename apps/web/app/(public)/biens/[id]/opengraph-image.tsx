@@ -45,7 +45,8 @@ function formatFCFA(n: number): string {
  * photo plein cadre + overlay prix + commune + badge "BOGBE'S Vérifié"
  * si is_verifie. Maximise le click-rate des partages.
  */
-export default async function BienOg({ params }: { params: { id: string } }) {
+export default async function BienOg({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = await paramsPromise
   const supabase = await createClient()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
