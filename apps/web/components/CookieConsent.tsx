@@ -79,7 +79,7 @@ export function CookieConsent() {
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
               Nous utilisons Google Analytics et Meta Pixel pour améliorer votre expérience. 
               Ces outils nécessitent votre consentement.{' '}
-              <a href="/privacy" className="underline hover:text-slate-900 dark:hover:text-white">
+              <a href="/confidentialite" className="underline hover:text-slate-900 dark:hover:text-white">
                 En savoir plus
               </a>
             </p>
