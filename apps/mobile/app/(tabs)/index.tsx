@@ -8,55 +8,50 @@ import {
   Text,
   RefreshControl,
 } from 'react-native'
-import { supabase } from '../../lib/supabase'
-import { pickCover, type MediaRow } from '../../lib/media'
 import { BienCard, BienListItem } from '../../components/BienCard'
 import { colors, spacing } from '../../constants/theme'
 
-type BienListRow = {
-  id: string
-  titre: string
-  prix_mois_fcfa: number | null
-  prix_vente_fcfa: number | null
-  commune: string
-  type_bien: string
-  statut: string
-  biens_medias?: MediaRow[] | null
+type WebAnnonce = {
+  id: number
+  titre: string | null
+  type_bien: string | null
+  commune: string | null
+  prix_fcfa: number | null
+  surface_m2: number | null
+  nb_pieces: number | null
+  photo_principale: string | null
 }
+
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://www.bogbesgroup.com'
 
 export default function AccueilScreen() {
   const [biens, setBiens] = useState<BienListItem[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function fetchBiens(searchText = '') {
-    let query = supabase
-      .from('biens')
-      .select('id, titre, prix_mois_fcfa, prix_vente_fcfa, commune, type_bien, statut, biens_medias(url, est_couverture, ordre, type)')
-      .eq('statut', 'publie')
-      .order('created_at', { ascending: false })
-      .limit(20)
-
-    if (searchText) {
-      query = query.or(`commune.ilike.%${searchText}%,titre.ilike.%${searchText}%`)
-    }
-
-    const { data, error } = await query
-    if (!error && data) {
+    try {
+      const params = searchText ? `?q=${encodeURIComponent(searchText)}` : ''
+      const response = await fetch(`${API_URL}/api/mobile/annonces${params}`)
+      const payload = await response.json() as { items?: WebAnnonce[] }
+      if (response.ok && payload.items) {
+      setError(null)
       setBiens(
-        (data as unknown as BienListRow[]).map((b) => ({
-          id: b.id,
-          titre: b.titre,
-          prix_mois_fcfa: b.prix_mois_fcfa,
-          prix_vente_fcfa: b.prix_vente_fcfa,
-          commune: b.commune,
-          type_bien: b.type_bien,
-          statut: b.statut,
-          cover_url: pickCover(b.biens_medias),
+        payload.items.map((b) => ({
+          id: String(b.id),
+          titre: b.titre ?? `${b.type_bien ?? 'Bien'} à ${b.commune ?? 'Abidjan'}`,
+          prix_mois_fcfa: null,
+          prix_vente_fcfa: b.prix_fcfa,
+          commune: b.commune ?? '',
+          type_bien: b.type_bien ?? '',
+          statut: 'publie',
+          cover_url: b.photo_principale,
         }))
       )
-    }
+      } else setError('Impossible de charger les annonces. Réessayez.')
+    } catch { setError('Connexion impossible. Vérifiez votre réseau.') }
   }
 
   useEffect(() => {
@@ -97,7 +92,7 @@ export default function AccueilScreen() {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <BienCard bien={item} />}
         contentContainerStyle={styles.list}
-        ListEmptyComponent={<Text style={styles.empty}>Aucun bien trouvé</Text>}
+        ListEmptyComponent={<Text style={styles.empty}>{error ?? 'Aucun bien trouvé'}</Text>}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

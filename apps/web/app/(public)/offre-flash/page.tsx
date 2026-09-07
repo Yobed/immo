@@ -86,7 +86,7 @@ export default async function OffreFlashPage({ searchParams }: PageProps) {
                 {formatCount(total)}
               </p>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)] mt-1">
-                Offres flash
+                Offres des agences
               </p>
             </div>
             <div className="h-10 w-px bg-[var(--border)]" />
@@ -97,11 +97,23 @@ export default async function OffreFlashPage({ searchParams }: PageProps) {
           </div>
         </div>
 
+        {/* Onglets des sources — disponibles aussi depuis la page des offres flash */}
+        <div className="sticky top-16 z-30 -mx-4 px-4 py-2 mb-8 flex gap-2 flex-wrap bg-[var(--background)]/95 backdrop-blur-md border-b border-[var(--border)] sm:static sm:mx-0 sm:px-0 sm:py-0 sm:bg-transparent sm:backdrop-blur-none sm:border-0" aria-label="Sources des annonces">
+          <SourceTab href="/catalogue" label="Tout" />
+          <SourceTab href="/catalogue?source=bogbes" label="Vérifiés" />
+          <SourceTab href="/offre-flash" label="Offres des agences" active />
+          <SourceTab href="/catalogue?source=web" label="Annonces web" />
+        </div>
+
         {/* Filtres rapides — pleine largeur du conteneur (jusqu'à 1600px) pour
             que toutes les rangées de chips s'étalent sans être coupées sur PC */}
-        <div className="mb-8">
+        <section aria-label="Affiner la recherche" className="mb-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)]/45 p-3 sm:p-5">
+          <div className="mb-3 flex items-baseline justify-between gap-3">
+            <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--text)]">Affinez votre recherche</h2>
+            <span className="hidden sm:inline text-[11px] text-[var(--text-muted)]">Choisissez un ou plusieurs critères</span>
+          </div>
           <QuickFilters communes={communes} />
-        </div>
+        </section>
 
         {/* Bandeau avertissement intermédiation */}
         <div className="mb-8 rounded-2xl border border-orange-500/20 bg-orange-500/[0.03] p-4 flex items-start gap-3">
@@ -142,6 +154,22 @@ export default async function OffreFlashPage({ searchParams }: PageProps) {
         />
       </div>
     </main>
+  )
+}
+
+function SourceTab({ href, label, active = false }: { href: string; label: string; active?: boolean }) {
+  return (
+    <Link
+      href={href}
+      className={`inline-flex min-h-[44px] items-center rounded-full border px-4 py-2.5 text-xs font-bold uppercase tracking-wide transition-colors ${
+        active
+          ? 'border-[var(--accent-luxury)] bg-[var(--accent-luxury)] text-[var(--on-accent)]'
+          : 'border-[var(--border)] bg-[var(--surface-card)] text-[var(--text-muted)] hover:border-[var(--accent-luxury)] hover:text-[var(--text)]'
+      }`}
+      aria-current={active ? 'page' : undefined}
+    >
+      {label}
+    </Link>
   )
 }
 

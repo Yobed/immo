@@ -24,6 +24,11 @@ const TYPE_FILTERS = [
   { id: 'commerce',           label: 'Commerce',      icon: Store,     type: 'commerce' },
 ] as const
 
+const TYPE_GROUPS = [
+  { label: 'Résidences', ids: ['all', 'residence_meublee', 'appartement', 'villa', 'maison', 'studio'] },
+  { label: 'Terrain & activité', ids: ['terrain', 'bureau', 'commerce'] },
+] as const
+
 const OFFRE_FILTERS = [
   { id: 'all',      label: 'Vente + Location', icon: Tag,  offre: '' },
   { id: 'location', label: 'À louer',          icon: Key,  offre: 'location' },
@@ -98,19 +103,26 @@ export function QuickFilters({ communes }: QuickFiltersProps = {}) {
     <div className="flex flex-col gap-3">
       {/* Ligne 1 — Types de biens */}
       <FilterRow label="Type">
-        {TYPE_FILTERS.map((f) => {
-          const isActive = (f.id === 'all' && !currentType) || currentType === f.type
-          const Icon = f.icon
-          return (
-            <Chip
-              key={f.id}
-              active={isActive}
-              icon={<Icon className={cn('w-3.5 h-3.5', isActive ? 'text-[var(--on-accent)]' : 'text-[var(--accent-luxury)]')} />}
-              onClick={() => handleFilter({ type_bien: f.type })}
-              label={f.label}
-            />
-          )
-        })}
+        {TYPE_GROUPS.map((group, groupIndex) => (
+          <div key={group.label} className="flex items-center gap-1.5 shrink-0">
+            {groupIndex > 0 && <div className="w-px h-7 bg-[var(--border)] mx-1" aria-hidden="true" />}
+            <span className="hidden xl:inline text-[9px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mr-0.5">{group.label}</span>
+            {group.ids.map((id) => {
+              const f = TYPE_FILTERS.find((item) => item.id === id)!
+              const isActive = (f.id === 'all' && !currentType) || currentType === f.type
+              const Icon = f.icon
+              return (
+                <Chip
+                  key={f.id}
+                  active={isActive}
+                  icon={<Icon className={cn('w-3.5 h-3.5', isActive ? 'text-[var(--on-accent)]' : 'text-[var(--accent-luxury)]')} />}
+                  onClick={() => handleFilter({ type_bien: f.type })}
+                  label={f.label}
+                />
+              )
+            })}
+          </div>
+        ))}
       </FilterRow>
 
       {/* Ligne 2 — Type d'offre (Vente / Location) + Vérifié toggle */}
@@ -186,7 +198,7 @@ export function QuickFilters({ communes }: QuickFiltersProps = {}) {
 function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 lg:mx-0 lg:px-0">
-      <span className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)] shrink-0 hidden lg:inline-block w-16">
+      <span className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)] shrink-0 inline-block w-14 lg:w-16">
         {label}
       </span>
       {children}

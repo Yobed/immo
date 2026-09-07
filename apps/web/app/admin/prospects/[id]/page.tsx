@@ -10,21 +10,24 @@ import { formatFCFA } from '@/lib/format'
 import { getConsolidatedCatalogue } from '@/lib/catalogue/consolidated'
 import {
   setProspectStatutAction, setProspectNoteAction, setProspectAssignAction, setProspectRelanceAction,
+  setProspectOutcomeAction,
 } from '../actions'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-type Statut = 'nouveau' | 'en_cours' | 'rdv' | 'traite' | 'perdu'
+type Statut = 'nouveau' | 'contacte' | 'visite_planifiee' | 'visite_realisee' | 'relance' | 'gagne' | 'perdu'
 
 const STATUT_META: Record<Statut, { label: string; cls: string }> = {
-  nouveau: { label: 'À traiter', cls: 'bg-amber-100 text-amber-700 border-amber-200' },
-  en_cours: { label: 'En cours', cls: 'bg-blue-100 text-blue-700 border-blue-200' },
-  rdv: { label: 'RDV pris', cls: 'bg-purple-100 text-purple-700 border-purple-200' },
-  traite: { label: 'Traité', cls: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
-  perdu: { label: 'Perdu', cls: 'bg-slate-200 text-slate-600 border-slate-300' },
+  nouveau: { label: 'Nouveau', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-amber-300' },
+  contacte: { label: 'Contacté', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-blue-300' },
+  visite_planifiee: { label: 'Visite planifiée', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-purple-300' },
+  visite_realisee: { label: 'Visite réalisée', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-indigo-300' },
+  relance: { label: 'Relance', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-orange-300' },
+  gagne: { label: 'Gagné', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-emerald-300' },
+  perdu: { label: 'Perdu', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-slate-300' },
 }
-const FLOW: Statut[] = ['nouveau', 'en_cours', 'rdv', 'traite', 'perdu']
+const FLOW: Statut[] = ['nouveau', 'contacte', 'visite_planifiee', 'visite_realisee', 'relance', 'gagne', 'perdu']
 
 function waLink(phone: string): string {
   let d = phone.replace(/\D/g, '')
@@ -50,7 +53,15 @@ export default async function ProspectDetailPage({ params }: PageProps) {
   const { data: p } = await (admin as any).from('prospects').select('*').eq('id', id).maybeSingle()
   if (!p) notFound()
 
-  const st = (p.statut in STATUT_META ? p.statut : 'nouveau') as Statut
+  const [{ count: contactCount }, { count: visiteCount }, { count: reservationCount }, { data: crmEvents }] = await Promise.all([
+    (admin as any).from('contact_requests').select('id', { count: 'exact', head: true }).eq('prospect_id', id),
+    (admin as any).from('visites').select('id', { count: 'exact', head: true }).eq('prospect_id', id),
+    (admin as any).from('reservations').select('id', { count: 'exact', head: true }).eq('prospect_id', id),
+    (admin as any).from('crm_events').select('id, event_type, from_status, to_status, note, created_at').eq('prospect_id', id).order('created_at', { ascending: false }).limit(12),
+  ])
+
+  const legacyMap: Record<string, Statut> = { en_cours: 'contacte', rdv: 'visite_planifiee', traite: 'gagne' }
+  const st = (legacyMap[p.statut] ?? (p.statut in STATUT_META ? p.statut : 'nouveau')) as Statut
 
   // Commerciaux (admins) pour l'assignation
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -126,6 +137,20 @@ export default async function ProspectDetailPage({ params }: PageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr,340px] gap-5">
           {/* Colonne principale : conversation + biens */}
           <div className="space-y-5">
+            <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-5">
+              <h2 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-subtle)] mb-3">Parcours CRM</h2>
+              <div className="grid grid-cols-3 gap-2">
+                <JourneyStat label="Contacts" value={contactCount ?? 0} />
+                <JourneyStat label="Visites" value={visiteCount ?? 0} />
+                <JourneyStat label="Réservations" value={reservationCount ?? 0} />
+              </div>
+            </section>
+
+            <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-5">
+              <h2 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-subtle)] mb-3">Historique des actions</h2>
+              {(!crmEvents || crmEvents.length === 0) ? <p className="text-sm text-[var(--text-muted)] italic">Aucun événement enregistré.</p> : <ol className="space-y-3">{crmEvents.map((event: { id: string; event_type: string; from_status: string | null; to_status: string | null; note: string | null; created_at: string }) => <li key={event.id} className="flex gap-3 text-xs"><span className="mt-1 w-2 h-2 rounded-full bg-[var(--accent-luxury)] shrink-0" /><div><p className="text-[var(--text)] font-semibold">{event.to_status ? `Statut : ${event.to_status}` : event.event_type.replaceAll('_', ' ')}</p>{event.note && <p className="text-[var(--text-muted)] mt-0.5">{event.note}</p>}<p className="text-[var(--text-subtle)] mt-0.5">{new Date(event.created_at).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })}</p></div></li>)}</ol>}
+            </section>
+
             {/* Conversation */}
             <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-5">
               <h2 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-subtle)] mb-3 flex items-center gap-2">
@@ -255,9 +280,34 @@ export default async function ProspectDetailPage({ params }: PageProps) {
                 </button>
               </form>
             </section>
+
+            {/* Résultat et prochaine action */}
+            <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-5">
+              <h2 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-subtle)] mb-3">Résultat & prochaine action</h2>
+              <form action={setProspectOutcomeAction} className="space-y-2">
+                <input type="hidden" name="id" value={p.id} />
+                <select name="perte_motif" defaultValue={p.perte_motif ?? ''} className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)]">
+                  <option value="">Motif de perte (si applicable)</option>
+                  <option value="prix">Prix trop élevé</option>
+                  <option value="indisponible">Bien indisponible</option>
+                  <option value="proprietaire_injoignable">Propriétaire injoignable</option>
+                  <option value="prospect_absent">Prospect absent</option>
+                  <option value="documents">Documents incomplets</option>
+                  <option value="non_qualifie">Prospect non qualifié</option>
+                  <option value="autre">Autre</option>
+                </select>
+                <input name="prochaine_action" defaultValue={p.prochaine_action ?? ''} placeholder="Prochaine action à effectuer" className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)]" />
+                <input type="datetime-local" name="prochaine_action_at" defaultValue={p.prochaine_action_at ? new Date(p.prochaine_action_at).toISOString().slice(0, 16) : ''} className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)]" />
+                <button type="submit" className="w-full px-3 py-2 bg-[var(--text)] text-[var(--surface-card)] rounded-lg text-xs font-bold">Enregistrer le suivi</button>
+              </form>
+            </section>
           </aside>
         </div>
       </div>
     </main>
   )
+}
+
+function JourneyStat({ label, value }: { label: string; value: number }) {
+  return <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-hover)] p-3 text-center"><p className="text-xl font-black text-[var(--text)]">{value}</p><p className="text-[10px] text-[var(--text-muted)] uppercase tracking-wide mt-0.5">{label}</p></div>
 }

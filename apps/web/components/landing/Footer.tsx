@@ -24,7 +24,7 @@ export function Footer() {
         { label: t.footer.rentals, href: '/catalogue?type=location' },
         { label: t.footer.sales, href: '/catalogue?type=vente' },
         { label: t.footer.furnished, href: '/catalogue?type_bien=residence_meublee' },
-        { label: 'Offres flash', href: '/offre-flash' },
+        { label: 'Offres des agences', href: '/offre-flash' },
         { label: 'Comment ça marche', href: '/comment-ca-marche' },
         { label: t.footer.publishAd, href: '/register' },
       ],

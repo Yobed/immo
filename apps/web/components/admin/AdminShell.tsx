@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
-import { ShieldCheck, CheckSquare, Home, Building2, LogOut, ClipboardCheck, Flame, Users, Megaphone, UserSearch, Send } from 'lucide-react'
+import { ShieldCheck, CheckSquare, Home, Building2, LogOut, ClipboardCheck, Flame, Users, Megaphone, UserSearch, Send, BarChart3, ScanSearch, BookOpen } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface AdminShellProps {
@@ -12,17 +12,40 @@ interface AdminShellProps {
   children: React.ReactNode
 }
 
-const ADMIN_NAV = [
-  { href: '/admin/validation', label: 'Validation', icon: ClipboardCheck, badge: true },
-  { href: '/admin/comptes', label: 'Comptes', icon: Users, badge: false },
-  { href: '/admin/kyc', label: 'KYC', icon: ShieldCheck, badge: false },
-  { href: '/admin/suivi', label: 'Suivi', icon: CheckSquare, badge: false },
-  { href: '/admin/moderation', label: 'Modération', icon: ShieldCheck, badge: false },
-  { href: '/admin/flash', label: 'Offres flash', icon: Flame, badge: false },
-  { href: '/admin/prospects', label: 'Prospects', icon: UserSearch, badge: false },
-  { href: '/admin/demarcheurs', label: 'Démarcheurs', icon: Megaphone, badge: false },
-  { href: '/admin/outreach', label: 'Outreach', icon: Send, badge: false },
-  { href: '/admin/errors', label: 'Erreurs', icon: ClipboardCheck, badge: false },
+const ADMIN_NAV_GROUPS = [
+  {
+    label: 'À traiter',
+    items: [
+      { href: '/admin/suivi', label: 'Suivi', icon: CheckSquare, badge: false },
+      { href: '/admin/prospects', label: 'Prospects', icon: UserSearch, badge: false },
+      { href: '/admin/performance', label: 'Performance', icon: BarChart3, badge: false },
+      { href: '/admin/prospects/qualite', label: 'Qualité', icon: ScanSearch, badge: false },
+      { href: '/admin/guide', label: 'Guide', icon: BookOpen, badge: false },
+    ],
+  },
+  {
+    label: 'Annonces',
+    items: [
+      { href: '/admin/validation', label: 'Validation', icon: ClipboardCheck, badge: true },
+      { href: '/admin/moderation', label: 'Modération', icon: ShieldCheck, badge: false },
+      { href: '/admin/flash', label: 'Offres flash', icon: Flame, badge: false },
+    ],
+  },
+  {
+    label: 'Équipe',
+    items: [
+      { href: '/admin/comptes', label: 'Comptes', icon: Users, badge: false },
+      { href: '/admin/kyc', label: 'KYC', icon: ShieldCheck, badge: false },
+      { href: '/admin/demarcheurs', label: 'Démarcheurs', icon: Megaphone, badge: false },
+    ],
+  },
+  {
+    label: 'Système',
+    items: [
+      { href: '/admin/outreach', label: 'Outreach', icon: Send, badge: false },
+      { href: '/admin/errors', label: 'Erreurs', icon: ClipboardCheck, badge: false },
+    ],
+  },
 ]
 
 /**
@@ -44,7 +67,7 @@ export function AdminShell({ email, pendingCount = 0, children }: AdminShellProp
 
   return (
     <div className="min-h-screen bg-[var(--surface-hover)]">
-      <header className="relative z-30 bg-[#0a0e1a] text-white border-b border-white/10 shadow-md">
+      <header className="sticky top-0 z-40 bg-[#0a0e1a]/95 backdrop-blur-md text-white border-b border-white/10 shadow-md">
         {/* Ligne 1 : marque + liens croisés (jamais mélangés aux modules) */}
         <div className="max-w-[1400px] mx-auto px-4 lg:px-6 h-14 flex items-center gap-3">
           <Link href="/admin/suivi" className="flex items-center gap-2 shrink-0 group">
@@ -86,30 +109,38 @@ export function AdminShell({ email, pendingCount = 0, children }: AdminShellProp
           </div>
         </div>
 
-        {/* Ligne 2 : les 9 modules, pleine largeur, s'enroulent (jamais coupés) */}
+        {/* Navigation par missions : les modules sont regroupés pour réduire la charge cognitive. */}
         <div className="max-w-[1400px] mx-auto px-3 lg:px-5 pb-2">
-          <nav className="flex items-center flex-wrap gap-1">
-            {ADMIN_NAV.map((item) => {
-              const active = pathname.startsWith(item.href)
-              const Icon = item.icon
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold whitespace-nowrap transition-colors ${
-                    active ? 'bg-white/15 text-white' : 'text-white/60 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{item.label}</span>
-                  {item.badge && pendingCount > 0 && (
-                    <span className="ml-0.5 min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center rounded-full bg-amber-400 text-[#0a0e1a] text-[10px] font-bold">
-                      {pendingCount > 99 ? '99+' : pendingCount}
-                    </span>
-                  )}
-                </Link>
-              )
-            })}
+          <nav aria-label="Navigation administrateur" className="flex items-start gap-3 overflow-x-auto no-scrollbar">
+            {ADMIN_NAV_GROUPS.map((group) => (
+              <div key={group.label} className="shrink-0 border-l border-white/10 pl-2 first:border-l-0 first:pl-0">
+                <p className="px-2 mb-1 text-[9px] font-bold uppercase tracking-[0.18em] text-white/40">{group.label}</p>
+                <div className="flex items-center gap-1">
+                  {group.items.map((item) => {
+                    const active = pathname.startsWith(item.href)
+                    const Icon = item.icon
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        aria-current={active ? 'page' : undefined}
+                        className={`relative flex min-h-[40px] items-center gap-1.5 px-3 rounded-lg text-[13px] font-semibold whitespace-nowrap transition-colors ${
+                          active ? 'bg-white text-[#0a0e1a] shadow-sm' : 'text-white/65 hover:text-white hover:bg-white/10'
+                        }`}
+                      >
+                        <Icon className="w-3.5 h-3.5" />
+                        <span>{item.label}</span>
+                        {item.badge && pendingCount > 0 && (
+                          <span className={`ml-0.5 min-w-[20px] h-[20px] px-1 inline-flex items-center justify-center rounded-full text-[10px] font-bold ${active ? 'bg-amber-500 text-[#0a0e1a]' : 'bg-amber-400 text-[#0a0e1a]'}`}>
+                            {pendingCount > 99 ? '99+' : pendingCount}
+                          </span>
+                        )}
+                      </Link>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
           </nav>
         </div>
       </header>

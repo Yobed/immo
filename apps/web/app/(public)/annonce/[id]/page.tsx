@@ -7,6 +7,8 @@ import { getConsolidatedBienById } from '@/lib/catalogue/consolidated'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { SimilarBiensSection } from '@/components/catalogue/SimilarBiensSection'
 import { SITE_URL } from '@/lib/env'
+import { createClient } from '@/lib/supabase/server'
+import { createAnnoncesClient } from '@/lib/supabase/annonces'
 
 export const dynamic = 'force-dynamic'
 
@@ -46,13 +48,30 @@ export default async function AnnoncePage({ params }: PageProps) {
   const bien = await getConsolidatedBienById('web', id)
   if (!bien) notFound()
 
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  let isAdmin = false
+  if (user) {
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
+    isAdmin = profile?.role === 'admin'
+  }
+  let adminContact: string | null = null
+  let adminSourceUrl: string | null = null
+  if (isAdmin) {
+    // Contact is fetched only after the role check and never enters public catalogue data.
+    const { data: privateRow } = await (createAnnoncesClient() as any)
+      .from('annonces').select('contact, url').eq('id', Number(id)).maybeSingle()
+    adminContact = privateRow?.contact ?? null
+    adminSourceUrl = privateRow?.url ?? null
+  }
+
   const lieu = [bien.quartier, bien.commune].filter(Boolean).join(', ')
   const galerie = bien.photos.length ? bien.photos : ([bien.photo_url].filter(Boolean) as string[])
   const [couverture, ...secondaires] = galerie
 
   return (
     <main className="bg-[var(--background)] min-h-screen pt-6 sm:pt-10 pb-16">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-8">
         <Breadcrumb
           items={[
             { label: 'Catalogue', href: '/catalogue' },
@@ -81,6 +100,7 @@ export default async function AnnoncePage({ params }: PageProps) {
                 priority
                 sizes="(max-width: 768px) 100vw, 960px"
                 className="object-cover"
+                unoptimized
               />
             </div>
             {secondaires.map((url, i) => (
@@ -95,6 +115,7 @@ export default async function AnnoncePage({ params }: PageProps) {
                   loading="lazy"
                   sizes="(max-width: 768px) 33vw, 320px"
                   className="object-cover"
+                  unoptimized
                 />
               </div>
             ))}
@@ -115,6 +136,10 @@ export default async function AnnoncePage({ params }: PageProps) {
 
         <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text)] mb-2">{bien.titre}</h1>
 
+        <p className="text-xs font-semibold tracking-wide text-[var(--text-muted)] mb-3">
+          Référence : WEB-{bien.sourceId}
+        </p>
+
         {lieu && (
           <p className="flex items-center gap-1.5 text-[var(--text-muted)] mb-6">
             <MapPin className="w-4 h-4" />
@@ -122,7 +147,7 @@ export default async function AnnoncePage({ params }: PageProps) {
           </p>
         )}
 
-        <p className="text-3xl font-bold text-[var(--accent-luxury)] mb-6">{bien.prix_label}</p>
+        <p className="text-2xl sm:text-3xl font-bold text-[var(--accent-luxury)] mb-6 break-words">{bien.prix_label}</p>
 
         <div className="flex flex-wrap gap-4 mb-8 text-sm text-[var(--text-muted)]">
           {bien.surface_m2 && (
@@ -145,28 +170,33 @@ export default async function AnnoncePage({ params }: PageProps) {
           </p>
         )}
 
+        {isAdmin && (
+          <div className="flex flex-col gap-2 p-4 rounded-2xl bg-emerald-600/10 border border-emerald-600/30 mb-8">
+            <strong className="text-[var(--text)]">Informations administrateur</strong>
+            {adminContact && <p className="text-[var(--text)]">Contact : {adminContact}</p>}
+            {adminSourceUrl && <a className="text-emerald-700 underline break-all" href={adminSourceUrl} target="_blank" rel="noreferrer">Voir l’annonce source</a>}
+          </div>
+        )}
+
         {/* Transparence : ne jamais laisser croire que l'offre est validée par nos soins. */}
-        <div className="flex gap-3 p-4 rounded-2xl bg-[var(--surface-card)] border border-[var(--border)] mb-8">
+        {!isAdmin && <div className="flex gap-3 p-4 rounded-2xl bg-[var(--surface-card)] border border-[var(--border)] mb-8">
           <Info className="w-5 h-5 shrink-0 text-[var(--text-muted)] mt-0.5" />
           <p className="text-sm text-[var(--text-muted)] leading-relaxed">
-            Annonce repérée sur un site immobilier public. Les photos sont celles de
-            l&apos;annonce d&apos;origine.{' '}
-            <strong className="text-[var(--text)]">
-              L&apos;offre n&apos;a pas encore été vérifiée par BOGBE&apos;S
-            </strong>{' '}
-            : un conseiller la contrôle avant toute visite pour vous éviter les mauvaises surprises.
+            <strong className="block text-[var(--text)] mb-1">Une opportunité à saisir ?</strong>
+            Les disponibilités évoluent vite. Notre conseiller vérifie ce bien avec le propriétaire
+            et vous accompagne pour obtenir un créneau de visite, en toute confiance.
           </p>
-        </div>
+        </div>}
 
-        <a
+        {!isAdmin && <a
           href={bien.cta_url}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-4 rounded-2xl bg-[var(--accent-luxury)] text-[var(--on-accent)] font-bold hover:opacity-90 active:scale-95 transition-all"
         >
           <MessageCircle className="w-5 h-5" />
-          Faire vérifier ce bien par un conseiller
-        </a>
+          Obtenir mon créneau de visite
+        </a>}
 
         <div className="mt-16">
           <SimilarBiensSection

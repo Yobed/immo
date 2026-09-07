@@ -134,7 +134,7 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: profile } = await (supabase as any)
       .from('profiles')
-      .select('full_name, phone, email')
+      .select('full_name, phone, email, role')
       .eq('id', user.id)
       .single()
     if (profile) {

@@ -245,6 +245,14 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
   for (const c of contacts) contactsByStatus[c.admin_validation_status]?.push(c)
 
   const qParam = q ? `&q=${encodeURIComponent(q)}` : ''
+  const activeRows = tab === 'visites' ? visites : tab === 'reservations' ? reservations : contacts
+  const performance = {
+    pending: activeRows.filter((r) => r.admin_validation_status === 'pending').length,
+    approved: activeRows.filter((r) => r.admin_validation_status === 'approved').length,
+    rejected: activeRows.filter((r) => r.admin_validation_status === 'rejected').length,
+  }
+  const decided = performance.approved + performance.rejected
+  const approvalRate = decided > 0 ? Math.round((performance.approved / decided) * 100) : 0
 
   return (
     <main className="min-h-screen bg-[var(--surface-hover)]">
@@ -359,6 +367,12 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
 
       {/* Body */}
       <div className="max-w-[1600px] mx-auto px-6 py-6">
+        <section aria-label="Indicateurs de suivi" className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+          <MetricCard label="À traiter" value={performance.pending} tone="amber" hint="Demandes en attente" />
+          <MetricCard label="Validées" value={performance.approved} tone="emerald" hint="Sur la vue actuelle" />
+          <MetricCard label="Refusées" value={performance.rejected} tone="red" hint="Motif à documenter" />
+          <MetricCard label="Taux de validation" value={`${approvalRate}%`} tone="blue" hint={decided ? `${decided} décisions prises` : 'Aucune décision encore'} />
+        </section>
         {view === 'kanban' ? (
           <KanbanView
             tab={tab}
@@ -371,6 +385,22 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
         )}
       </div>
     </main>
+  )
+}
+
+function MetricCard({ label, value, hint, tone }: { label: string; value: number | string; hint: string; tone: 'amber' | 'emerald' | 'red' | 'blue' }) {
+  const tones = {
+    amber: 'border-amber-200 bg-amber-50 text-amber-800',
+    emerald: 'border-emerald-200 bg-emerald-50 text-emerald-800',
+    red: 'border-red-200 bg-red-50 text-red-800',
+    blue: 'border-blue-200 bg-blue-50 text-blue-800',
+  }
+  return (
+    <div className={`rounded-2xl border p-4 ${tones[tone]}`}>
+      <p className="text-[10px] font-bold uppercase tracking-wider opacity-75">{label}</p>
+      <p className="mt-1 text-2xl font-black tabular-nums">{value}</p>
+      <p className="mt-1 text-[11px] opacity-75">{hint}</p>
+    </div>
   )
 }
 

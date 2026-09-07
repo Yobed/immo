@@ -64,7 +64,9 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-              unoptimized={isFlash}
+              // Les URLs du Storage Supabase sont déjà publiques ; le proxy
+              // Next peut échouer sur leurs en-têtes, on les charge directement.
+              unoptimized
             />
           ) : isFlash ? (
             <FlashPlaceholder

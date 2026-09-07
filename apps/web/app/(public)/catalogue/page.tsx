@@ -196,14 +196,8 @@ export default async function CataloguePage({ searchParams }: PageProps) {
           </div>
         </div>
 
-        {/* Filtres rapides — pleine largeur du conteneur (jusqu'à 1600px) pour
-            que toutes les rangées de chips s'étalent sans être coupées sur PC */}
-        <div className="mb-10">
-          <QuickFilters communes={communes} />
-        </div>
-
-        {/* Onglets source : Tout / Vérifiés / Flash / biens scrapés avec photos */}
-        <div className="flex gap-2 flex-wrap mb-8">
+        {/* Onglets source : placés avant les filtres pour rester visibles immédiatement */}
+        <div className="sticky top-16 z-30 -mx-4 px-4 py-2 mb-8 flex gap-2 flex-wrap bg-[var(--background)]/95 backdrop-blur-md border-b border-[var(--border)] sm:static sm:mx-0 sm:px-0 sm:py-0 sm:bg-transparent sm:backdrop-blur-none sm:border-0">
           <SourceTab
             href={buildHref(sp, { source: '' })}
             active={currentSource === 'all'}
@@ -237,6 +231,15 @@ export default async function CataloguePage({ searchParams }: PageProps) {
             count={counts.web}
           />
         </div>
+
+        {/* Filtres rapides — regroupés dans un panneau pour clarifier les choix */}
+        <section aria-label="Affiner la recherche" className="mb-10 rounded-2xl border border-[var(--border)] bg-[var(--surface)]/45 p-3 sm:p-5">
+          <div className="mb-3 flex items-baseline justify-between gap-3">
+            <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--text)]">Affinez votre recherche</h2>
+            <span className="hidden sm:inline text-[11px] text-[var(--text-muted)]">Choisissez un ou plusieurs critères</span>
+          </div>
+          <QuickFilters communes={communes} />
+        </section>
 
         {/* Grille / Liste / Carte — selon ?vue=
             Carte = exploration géographique pure (les détails sont dans le popup).
@@ -330,7 +333,7 @@ function SourceTab({ href, active, color, icon: Icon, label, count }: SourceTabP
   return (
     <Link
       href={href}
-      className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all border ${
+      className={`inline-flex min-h-[44px] items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all border ${
         active
           ? activeColors[color]
           : 'bg-white/5 text-[var(--text-muted)] border-[var(--border)] hover:bg-white/10 hover:text-[var(--text)]'

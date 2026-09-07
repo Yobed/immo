@@ -110,7 +110,7 @@ export function FlashContactModal({
         className="w-full inline-flex items-center justify-center gap-2 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20 transition-all active:scale-[0.98]"
       >
         <MessageCircle className="w-4 h-4" />
-        Demander une visite
+        Discuter avec un conseiller
       </button>
 
       {open && (
@@ -189,7 +189,7 @@ export function FlashContactModal({
                 <Honeypot />
                 <div className="mb-5">
                   <h2 id="flash-contact-title" className="font-display text-xl font-bold text-[var(--text)] mb-1">
-                    Demander une visite
+                    Préparer ma visite
                   </h2>
                   <p className="text-xs text-[var(--text)] leading-relaxed">
                     Bien : <span className="font-semibold text-[var(--text)]">{bienTitre}</span>
@@ -199,7 +199,7 @@ export function FlashContactModal({
                 <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 mb-5 flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                   <p className="text-[11px] text-amber-800 leading-relaxed">
-                    Notre conseiller vérifie d&apos;abord la disponibilité avec le propriétaire avant d&apos;organiser une visite. Réponse sous 1h en journée.
+                    Les disponibilités évoluent vite. Notre conseiller vérifie d&apos;abord le bien avec le propriétaire, puis vous propose un créneau adapté. Réponse sous 1h en journée.
                   </p>
                 </div>
 
@@ -289,7 +289,7 @@ export function FlashContactModal({
                   ) : (
                     <>
                       <MessageCircle className="w-4 h-4" />
-                      Envoyer ma demande
+                      Envoyer ma demande au conseiller
                     </>
                   )}
                 </button>

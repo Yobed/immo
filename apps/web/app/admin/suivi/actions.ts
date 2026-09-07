@@ -45,6 +45,9 @@ export async function validateVisiteAction(formData: FormData): Promise<void> {
   if (!visiteId || !['approve', 'reject'].includes(action)) {
     throw new Error('Payload invalide')
   }
+  if (action === 'reject' && !note?.trim()) {
+    throw new Error('Un motif est obligatoire pour expliquer le refus')
+  }
 
   const admin = createAdminClient()
 
@@ -117,6 +120,23 @@ export async function validateVisiteAction(formData: FormData): Promise<void> {
   revalidatePath(`/admin/suivi/visites/${visiteId}`)
 }
 
+export async function setVisiteOutcomeAction(formData: FormData): Promise<void> {
+  const guard = await ensureAdmin()
+  const visiteId = String(formData.get('visiteId') || '')
+  const outcome = String(formData.get('outcome') || '')
+  const lossReason = String(formData.get('lossReason') || '').trim()
+  const note = String(formData.get('outcomeNote') || '').trim()
+  if (!visiteId || !['realisee', 'annulee', 'no_show', 'non_conclue'].includes(outcome)) throw new Error('Résultat de visite invalide')
+  const admin = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (admin as any).from('visites').update({ outcome, loss_reason: lossReason || null, outcome_note: note || null, outcome_at: new Date().toISOString() }).eq('id', visiteId)
+  if (error) throw new Error(error.message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (admin as any).from('crm_events').insert({ entity_type: 'visite', entity_id: visiteId, actor_id: guard.userId, event_type: outcome === 'realisee' ? 'visit_completed' : 'lost', reason_code: lossReason || null, note: note || null })
+  revalidatePath('/admin/suivi')
+  revalidatePath(`/admin/suivi/visites/${visiteId}`)
+}
+
 // ---------------- RESERVATIONS ----------------
 
 export async function validateReservationAction(formData: FormData): Promise<void> {
@@ -128,6 +148,9 @@ export async function validateReservationAction(formData: FormData): Promise<voi
 
   if (!reservationId || !['approve', 'reject'].includes(action)) {
     throw new Error('Payload invalide')
+  }
+  if (action === 'reject' && !note?.trim()) {
+    throw new Error('Un motif est obligatoire pour expliquer le refus')
   }
 
   const admin = createAdminClient()
@@ -210,6 +233,9 @@ export async function validateContactAction(formData: FormData): Promise<void> {
 
   if (!contactId || !['approve', 'reject'].includes(action)) {
     throw new Error('Payload invalide')
+  }
+  if (action === 'reject' && !note?.trim()) {
+    throw new Error('Un motif est obligatoire pour expliquer le refus')
   }
 
   const admin = createAdminClient()

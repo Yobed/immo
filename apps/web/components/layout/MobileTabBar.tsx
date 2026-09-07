@@ -62,7 +62,7 @@ export function MobileTabBar() {
                   )}
                 </div>
                 <span className={cn(
-                  "text-[9px] font-bold uppercase tracking-[0.08em] transition-all duration-300 leading-none truncate max-w-full",
+                  "text-[8px] min-[390px]:text-[9px] font-bold uppercase tracking-[0.06em] transition-all duration-300 leading-tight text-center max-w-[78px]",
                   isActive ? "opacity-100 text-[var(--accent-luxury)]" : "opacity-55 translate-y-0.5"
                 )}>
                   {tab.label}

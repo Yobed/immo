@@ -12,7 +12,6 @@ import {
 import { Image } from 'expo-image'
 import { Ionicons } from '@expo/vector-icons'
 import { useLocalSearchParams } from 'expo-router'
-import { supabase } from '../../lib/supabase'
 import { useSession } from '../../hooks/useAuth'
 import { pickCover, type MediaRow } from '../../lib/media'
 import { FavoriteButton } from '../../components/FavoriteButton'
@@ -31,22 +30,14 @@ export default function FicheBienScreen() {
   const [bien, setBien] = useState<BienRow | null>(null)
   const [cover, setCover] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
 
   useEffect(() => {
     if (!id) return
-    supabase
-      .from('biens')
-      .select('*, biens_medias(url, est_couverture, ordre, type)')
-      .eq('id', id)
-      .single()
-      .then(({ data }) => {
-        if (data) {
-          const { biens_medias, ...row } = data as BienRow & { biens_medias?: MediaRow[] | null }
-          setBien(row as BienRow)
-          setCover(pickCover(biens_medias))
-        }
-        setLoading(false)
-      })
+    fetch(`${process.env.EXPO_PUBLIC_API_URL || 'https://www.bogbesgroup.com'}/api/mobile/annonces/${id}`)
+      .then(async (res) => { if (!res.ok) throw new Error('load_failed'); return res.json() })
+      .then((data) => { setBien(data as BienRow); setCover(pickCover(data.biens_medias)) })
+      .catch(() => setError(true)).finally(() => setLoading(false))
   }, [id])
 
   function handleReserver() {
@@ -77,7 +68,7 @@ export default function FicheBienScreen() {
     )
   }
 
-  if (!bien) {
+  if (!bien || error) {
     return (
       <View style={styles.center}>
         <Text style={styles.errorText}>Bien introuvable</Text>

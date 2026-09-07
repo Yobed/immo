@@ -11,7 +11,7 @@ import { setProspectStatutAction } from './actions'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-type Statut = 'nouveau' | 'en_cours' | 'rdv' | 'traite' | 'perdu'
+type Statut = 'nouveau' | 'contacte' | 'visite_planifiee' | 'visite_realisee' | 'relance' | 'gagne' | 'perdu' | 'en_cours' | 'rdv' | 'traite'
 type View = 'kanban' | 'list'
 
 interface ProspectRow {
@@ -29,6 +29,9 @@ interface ProspectRow {
   note: string | null
   assigned_to: string | null
   relance_le: string | null
+  perte_motif?: string | null
+  prochaine_action?: string | null
+  prochaine_action_at?: string | null
   first_seen: string
   last_seen: string
 }
@@ -37,15 +40,20 @@ interface PageProps {
   searchParams: Promise<{ q?: string; statut?: string; view?: string }>
 }
 
-const STATUT_META: Record<Statut, { label: string; cls: string; dot: string; col: string }> = {
-  nouveau: { label: 'À traiter', cls: 'bg-amber-100 text-amber-700 border-amber-200', dot: 'bg-amber-400', col: 'border-t-amber-400' },
-  en_cours: { label: 'En cours', cls: 'bg-blue-100 text-blue-700 border-blue-200', dot: 'bg-blue-400', col: 'border-t-blue-400' },
-  rdv: { label: 'RDV pris', cls: 'bg-purple-100 text-purple-700 border-purple-200', dot: 'bg-purple-400', col: 'border-t-purple-400' },
-  traite: { label: 'Traité', cls: 'bg-emerald-100 text-emerald-700 border-emerald-200', dot: 'bg-emerald-400', col: 'border-t-emerald-400' },
-  perdu: { label: 'Perdu', cls: 'bg-slate-200 text-slate-600 border-slate-300', dot: 'bg-slate-400', col: 'border-t-slate-400' },
+const STATUT_META: Record<Statut, { label: string; hint: string; cls: string; dot: string; col: string }> = {
+  nouveau: { label: 'Nouveau', hint: 'À contacter', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-amber-300', dot: 'bg-amber-500', col: 'border-t-amber-400' },
+  contacte: { label: 'Contacté', hint: 'Échange en cours', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-blue-300', dot: 'bg-blue-500', col: 'border-t-blue-400' },
+  visite_planifiee: { label: 'Visite planifiée', hint: 'Préparer le rendez-vous', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-purple-300', dot: 'bg-purple-500', col: 'border-t-purple-400' },
+  visite_realisee: { label: 'Visite réalisée', hint: 'Recueillir le retour', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-indigo-300', dot: 'bg-indigo-500', col: 'border-t-indigo-400' },
+  relance: { label: 'Relance', hint: 'Prochaine action', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-orange-300', dot: 'bg-orange-500', col: 'border-t-orange-400' },
+  gagne: { label: 'Gagné', hint: 'Dossier conclu', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-emerald-300', dot: 'bg-emerald-500', col: 'border-t-emerald-400' },
+  perdu: { label: 'Perdu', hint: 'Motif à analyser', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-slate-300', dot: 'bg-slate-500', col: 'border-t-slate-400' },
+  en_cours: { label: 'Contacté', hint: 'Échange en cours', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-blue-300', dot: 'bg-blue-500', col: 'border-t-blue-400' },
+  rdv: { label: 'Visite planifiée', hint: 'Préparer le rendez-vous', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-purple-300', dot: 'bg-purple-500', col: 'border-t-purple-400' },
+  traite: { label: 'Gagné', hint: 'Dossier conclu', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-emerald-300', dot: 'bg-emerald-500', col: 'border-t-emerald-400' },
 }
-const KANBAN_COLS: Statut[] = ['nouveau', 'en_cours', 'rdv', 'traite']
-const NEXT: Partial<Record<Statut, Statut>> = { nouveau: 'en_cours', en_cours: 'rdv', rdv: 'traite' }
+const KANBAN_COLS: Statut[] = ['nouveau', 'contacte', 'visite_planifiee', 'visite_realisee', 'relance', 'gagne', 'perdu']
+const NEXT: Partial<Record<Statut, Statut>> = { nouveau: 'contacte', contacte: 'visite_planifiee', visite_planifiee: 'visite_realisee', visite_realisee: 'relance', relance: 'gagne' }
 
 function waLink(phone: string): string {
   let d = phone.replace(/\D/g, '')
@@ -60,12 +68,15 @@ function relative(iso: string): string {
   return `il y a ${Math.floor(h / 24)} j`
 }
 function stOf(s: string): Statut {
+  if (s === 'en_cours') return 'contacte'
+  if (s === 'rdv') return 'visite_planifiee'
+  if (s === 'traite') return 'gagne'
   return (s in STATUT_META ? s : 'nouveau') as Statut
 }
 
 export default async function AdminProspectsPage({ searchParams }: PageProps) {
   const { q, statut, view: viewParam } = await searchParams
-  const view: View = viewParam === 'list' ? 'list' : 'kanban'
+  const view: View = viewParam === 'kanban' ? 'kanban' : 'list'
   const admin = createAdminClient()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -102,7 +113,10 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
     return `/admin/prospects${s ? `?${s}` : ''}`
   }
 
-  const byStatut: Record<Statut, ProspectRow[]> = { nouveau: [], en_cours: [], rdv: [], traite: [], perdu: [] }
+  const byStatut: Record<Statut, ProspectRow[]> = {
+    nouveau: [], contacte: [], visite_planifiee: [], visite_realisee: [], relance: [], gagne: [], perdu: [],
+    en_cours: [], rdv: [], traite: [],
+  }
   for (const r of rows) byStatut[stOf(r.statut)].push(r)
 
   return (
@@ -113,8 +127,8 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
             <Users className="w-5 h-5 text-[var(--accent-luxury)]" />
             <h1 className="font-display text-2xl md:text-3xl font-bold text-[var(--text)]">Prospects</h1>
           </div>
-          <p className="text-sm text-[var(--text-muted)]">
-            Prospects qualifiés collectés par Sapphire. Suivez chacun jusqu&apos;au closing.
+            <p className="text-sm text-[var(--text-muted)]">
+            Une action à la fois : avancez chaque prospect jusqu&apos;à la conclusion.
           </p>
         </div>
         <a href="/api/admin/prospects/export"
@@ -144,7 +158,7 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
         </div>
         {view === 'list' && (
           <div className="flex items-center gap-1 bg-[var(--surface-hover)] p-1 rounded-xl flex-wrap">
-            {[{ k: '', l: 'Tous' }, { k: 'nouveau', l: 'À traiter' }, { k: 'en_cours', l: 'En cours' }, { k: 'rdv', l: 'RDV' }, { k: 'traite', l: 'Traités' }, { k: 'perdu', l: 'Perdus' }].map((t) => (
+            {[{ k: '', l: 'Tous' }, { k: 'nouveau', l: 'Nouveaux' }, { k: 'contacte', l: 'Contactés' }, { k: 'visite_planifiee', l: 'Visites planifiées' }, { k: 'visite_realisee', l: 'Visites réalisées' }, { k: 'relance', l: 'Relances' }, { k: 'gagne', l: 'Gagnés' }, { k: 'perdu', l: 'Perdus' }].map((t) => (
               <Link key={t.l} href={qs({ view: 'list', statut: t.k })}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold ${(statut ?? '') === t.k ? 'bg-[var(--surface-card)] text-[var(--text)] shadow-sm' : 'text-[var(--text-muted)]'}`}>
                 {t.l}
@@ -171,18 +185,19 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
           <p className="text-[var(--text-muted)] text-sm">Aucun prospect pour ce filtre.</p>
         </div>
       ) : view === 'kanban' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" aria-label="Pipeline des prospects">
           {KANBAN_COLS.map((col) => {
             const meta = STATUT_META[col]
             const items = byStatut[col]
             return (
               <div key={col} className={`bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] border-t-4 ${meta.col} flex flex-col`}>
                 <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between">
-                  <span className="font-bold text-[var(--text)] text-sm uppercase tracking-wide flex items-center gap-1.5">
+                  <span className="font-bold text-[var(--text)] text-sm flex items-center gap-1.5">
                     <span className={`w-2 h-2 rounded-full ${meta.dot}`} /> {meta.label}
                   </span>
                   <span className="text-xs font-bold text-[var(--text-subtle)]">{items.length}</span>
                 </div>
+                <p className="px-4 pt-2 text-[11px] text-[var(--text-muted)]">{meta.hint}</p>
                 <div className="p-2.5 flex flex-col gap-2.5 max-h-[calc(100vh-320px)] overflow-y-auto">
                   {items.length === 0 ? (
                     <p className="text-[var(--text-subtle)] text-xs italic text-center py-6">Vide</p>
@@ -194,6 +209,9 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
         </div>
       ) : (
         <div className="space-y-3">
+          <div className="hidden md:grid grid-cols-[1.5fr_1fr_1fr_auto] gap-4 px-4 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--text-muted)]" aria-hidden="true">
+            <span>Prospect</span><span>Besoin</span><span>Dernière activité</span><span>Action</span>
+          </div>
           {rows.map((r) => <ListRow key={r.id} r={r} assignedName={r.assigned_to ? nameById[r.assigned_to] : undefined} />)}
         </div>
       )}
@@ -226,7 +244,8 @@ function KanbanCard({ r, assignedName }: { r: ProspectRow; assignedName?: string
       <div className="flex items-center gap-2 text-[10px] text-[var(--text-subtle)] flex-wrap">
         <span className="inline-flex items-center gap-1"><Clock className="w-2.5 h-2.5" />{relative(r.last_seen)}</span>
         {assignedName && <span className="inline-flex items-center gap-1 text-emerald-700"><UserCheck className="w-2.5 h-2.5" />{assignedName}</span>}
-        {r.relance_le && <span className="inline-flex items-center gap-1 text-purple-600"><CalendarClock className="w-2.5 h-2.5" />{new Date(r.relance_le).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>}
+      {r.relance_le && <span className="inline-flex items-center gap-1 text-purple-600"><CalendarClock className="w-2.5 h-2.5" />{new Date(r.relance_le).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>}
+        {r.prochaine_action_at && <span className="inline-flex items-center gap-1 text-orange-600"><CalendarClock className="w-2.5 h-2.5" />action {new Date(r.prochaine_action_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>}
       </div>
       <div className="flex items-center gap-1.5 mt-1">
         <a href={waLink(r.phone)} target="_blank" rel="noopener noreferrer"
@@ -268,6 +287,7 @@ function ListRow({ r, assignedName }: { r: ProspectRow; assignedName?: string })
           </p>
         )}
         {r.note && <p className="text-[11px] text-[var(--text)] mt-1 bg-amber-50 border border-amber-200 rounded px-2 py-1 line-clamp-1">📝 {r.note}</p>}
+        {r.perte_motif && <p className="text-[11px] text-red-700 mt-1 bg-red-50 border border-red-200 rounded px-2 py-1 line-clamp-1">Motif de perte : {r.perte_motif}</p>}
       </div>
       <div className="flex flex-col items-end gap-1.5 shrink-0">
         <a href={waLink(r.phone)} target="_blank" rel="noopener noreferrer"

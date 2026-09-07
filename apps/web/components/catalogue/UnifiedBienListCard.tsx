@@ -37,7 +37,7 @@ export function UnifiedBienListCard({ bien, index = 0 }: Props) {
               fill
               sizes="160px"
               className="object-cover transition-transform duration-500 group-hover:scale-105"
-              unoptimized={isFlash}
+              unoptimized
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center opacity-20">
