@@ -13,7 +13,7 @@ select
   a.commune, a.quartier, a.adresse, a.prix_fcfa, a.periodicite, a.prix_brut,
   a.devise, a.surface_m2, a.nb_pieces, a.nb_chambres, a.contact, a.description,
   coalesce(array_length(p.photos, 1), 0)::smallint as nb_photos,
-  a.vu_le, a.maj_le, a.actif,
+  a.publie_le, a.vu_le, a.maj_le, a.actif,
   p.photos[1]                       as photo_principale,
   coalesce(p.photos, '{}'::text[])  as photos
 from public.annonces a

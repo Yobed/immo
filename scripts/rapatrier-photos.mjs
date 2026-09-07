@@ -73,18 +73,38 @@ async function rapatrier(p) {
 }
 
 const limite = Number(process.argv.find((a) => a.startsWith('--limit='))?.split('=')[1]) || Infinity
+
+// --depuis=YYYY-MM-DD : ne rapatrie que les annonces encore affichees par le
+// catalogue (publie_le recent, ou absent comme chez coinafrique). Evite de payer
+// du Storage pour des biens publies il y a des annees, donc vendus depuis.
+const depuis = process.argv.find((a) => a.startsWith('--depuis='))?.split('=')[1]
+let eligibles = null
+if (depuis) {
+  eligibles = new Set()
+  for (let de = 0; ; de += 1000) {
+    const { data, error } = await sb.from('annonces').select('id')
+      .or(`publie_le.is.null,publie_le.gte.${depuis}`).order('id').range(de, de + 999)
+    if (error) throw error
+    if (!data?.length) break
+    for (const r of data) eligibles.add(r.id)
+    if (data.length < 1000) break
+  }
+  console.log(`--depuis=${depuis} : ${eligibles.size} annonces eligibles`)
+}
 let curseur = 0, vues = 0, ok = 0, echecs = 0, octets = 0
 const erreurs = new Map()
 
 while (vues < limite) {
-  const { data: lot, error } = await sb.from('annonce_photos')
+  const { data: brut, error } = await sb.from('annonce_photos')
     .select('id, annonce_id, position, url_source')
     .is('chemin_storage', null).gt('id', curseur)
     .order('id').limit(Math.min(200, limite - vues))
   if (error) throw error
-  if (!lot?.length) break
-  curseur = lot[lot.length - 1].id
-  vues += lot.length
+  if (!brut?.length) break
+  curseur = brut[brut.length - 1].id
+  vues += brut.length
+  const lot = eligibles ? brut.filter((p) => eligibles.has(p.annonce_id)) : brut
+  if (!lot.length) continue
 
   for (let i = 0; i < lot.length; i += CONCURRENCE) {
     const paquet = lot.slice(i, i + CONCURRENCE)

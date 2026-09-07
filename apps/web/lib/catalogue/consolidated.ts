@@ -9,6 +9,8 @@
 // protection est implicite via les appels Supabase server-side dans createClient().
 import { createClient } from '@/lib/supabase/server'
 import {
+  createLocauxClient,
+  createLocauxMidClient,
   createLocauxAdminClient,
   createLocauxMidAdminClient,
   createLocauxLegacyClient,
@@ -385,12 +387,31 @@ const ANNONCE_COLS =
 
 /**
  * Filtres serveur communs au catalogue consolidé, à la pagination et au comptage.
- * `actif` + `nb_photos > 0` sont non négociables : une annonce sans photo n'a
+ * `nb_photos > 0` est non négociables : une annonce sans photo n'a
  * aucun intérêt ici, c'est précisément ce que cette source apporte.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+/** Anciennete maximale d'une annonce web affichee, en mois. */
+const FENETRE_FRAICHEUR_MOIS = 6
+
+/** Date plancher (YYYY-MM-DD) au-dela de laquelle une annonce datee est ecartee. */
+function seuilFraicheur(): string {
+  const d = new Date()
+  d.setMonth(d.getMonth() - FENETRE_FRAICHEUR_MOIS)
+  return d.toISOString().slice(0, 10)
+}
+
 function applyAnnonceFilters(q: any, filters: ConsolidatedFilters): any {
-  q = q.eq('actif', true).gt('nb_photos', 0)
+  // ponytail: la vue v_annonces n'expose pas `actif` -> PostgREST 42703 (HTTP 400),
+  // avale par le catch appelant, d'ou un onglet a 0. Les 2 690 lignes de la table
+  // sont toutes actif=true : le filtre etait sans effet. Le remettre le jour ou la
+  // vue exposera la colonne (scripts/sql/v_annonces-photos-storage.sql).
+  q = q.gt('nb_photos', 0)
+  // Fenetre de fraicheur : les sources datees (batirici, abidjan_net) exposent des
+  // annonces remontant a 2018, vendues depuis longtemps. Les annonces sans date
+  // (coinafrique) passent : leur age est inconnu mais elles etaient encore en ligne
+  // au moment du scrape. Depend de v_annonces.publie_le (cf. scripts/sql/).
+  q = q.or(`publie_le.is.null,publie_le.gte.${seuilFraicheur()}`)
   if (filters.commune) q = q.ilike('commune', `%${filters.commune}%`)
   if (filters.type_bien) {
     const motif = TYPE_MOTIF[filters.type_bien] ?? filters.type_bien
@@ -505,7 +526,7 @@ function mapAnnonce(a: AnnonceRow): ConsolidatedBien {
     prix_period: period,
     surface_m2: a.surface_m2 ?? null,
     nb_pieces: a.nb_pieces ?? a.nb_chambres ?? null,
-    description: a.description ?? null,
+    description: a.description ? a.description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() : null,
     photo_url: a.photo_principale ?? null,
     // Annonce publique non contrôlée par nos soins : jamais marquée vérifiée.
     is_verifie: false,
@@ -519,7 +540,7 @@ function mapAnnonce(a: AnnonceRow): ConsolidatedBien {
     equipements: [],
     score_ia: null,
     cta_url: `https://wa.me/2250544872051?text=${encodeURIComponent(
-      `Bonjour, je suis intéressé(e) par l'annonce #${a.id} (${a.titre ?? a.type_bien ?? 'bien'}${lieu ? ` à ${lieu}` : ''})`,
+      `Bonjour, je suis intéressé(e) par l'annonce WEB-${a.id} (${a.titre ?? a.type_bien ?? 'bien'}${lieu ? ` à ${lieu}` : ''}). Référence : WEB-${a.id}. Lien : ${SITE_URL}/annonce/${a.id}`,
     )}`,
   }
 }
@@ -768,7 +789,6 @@ export async function getCatalogueCommunes(
           const { data } = await (createAnnoncesClient() as any)
             .from('v_annonces')
             .select('commune')
-            .eq('actif', true)
             .gt('nb_photos', 0)
             .limit(5000)
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -845,10 +865,12 @@ export async function getLocauxPagedItems(
       return { rows: data as LocauxRow[], count: count ?? 0 }
     }
 
-    // FRESH (admin) + MID (admin) + OLD (anon lecture) fusionnés.
+    // Lecture publique : les trois projets sont lus avec leurs clients anon.
+    // Les clients service_role sont réservés aux écritures admin ; les utiliser
+    // ici rendait FRESH silencieusement vide dès que la variable serveur manquait.
     const [fresh, mid, legacy] = await Promise.all([
-      runOn(createLocauxAdminClient()).catch(() => ({ rows: [] as LocauxRow[], count: 0 })),
-      runOn(createLocauxMidAdminClient()).catch(() => ({ rows: [] as LocauxRow[], count: 0 })),
+      runOn(createLocauxClient()).catch(() => ({ rows: [] as LocauxRow[], count: 0 })),
+      runOn(createLocauxMidClient()).catch(() => ({ rows: [] as LocauxRow[], count: 0 })),
       runOn(createLocauxLegacyClient()).catch(() => ({ rows: [] as LocauxRow[], count: 0 })),
     ])
     const merged = [...fresh.rows, ...mid.rows, ...legacy.rows].sort(byDatePubDesc).slice(from, to + 1)
@@ -964,7 +986,6 @@ export async function getConsolidatedBienById(
             'surface_m2,nb_pieces,nb_chambres,description,photo_principale,photos,vu_le',
         )
         .eq('id', Number(id))
-        .eq('actif', true)
         .maybeSingle()
       return data ? mapAnnonce(data as AnnonceRow) : null
     } catch {

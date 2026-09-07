@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react'
 import Map, { Marker, Source, Layer } from 'react-map-gl/mapbox'
 import { Navigation, Loader2, Maximize2, X, RefreshCw } from 'lucide-react'
 import 'mapbox-gl/dist/mapbox-gl.css'
+import type { Feature } from 'geojson'
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
 const ABIDJAN_CENTER = { latitude: 5.3189, longitude: -4.0167 }
@@ -39,7 +40,7 @@ export function BienMap({ latitude, longitude, titre, commune, hauteur = 300 }: 
   const [viewState, setViewState] = useState(initialView)
   const [fsViewState, setFsViewState] = useState(initialView)
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null)
-  const [route, setRoute] = useState<GeoJSON.Feature | null>(null)
+  const [route, setRoute] = useState<Feature | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [fullscreen, setFullscreen] = useState(false)
@@ -60,7 +61,7 @@ export function BienMap({ latitude, longitude, titre, commune, hauteur = 300 }: 
       )
       const data = await res.json()
       if (data.routes?.[0]) {
-        const geo: GeoJSON.Feature = { type: 'Feature', properties: {}, geometry: data.routes[0].geometry }
+        const geo: Feature = { type: 'Feature', properties: {}, geometry: data.routes[0].geometry }
         setRoute(geo)
         const mid = { longitude: (uLng + propLng) / 2, latitude: (uLat + propLat) / 2, zoom: 11 }
         setViewState(mid)
