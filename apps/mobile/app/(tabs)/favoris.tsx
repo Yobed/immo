@@ -12,6 +12,7 @@ import { pickCover, type MediaRow } from '../../lib/media'
 import { useSession } from '../../hooks/useAuth'
 import { BienCard, BienListItem } from '../../components/BienCard'
 import { colors, spacing } from '../../constants/theme'
+import { formatFCFA } from '@immo-ci/shared'
 
 export default function FavorisScreen() {
   const { session } = useSession()
@@ -43,14 +44,17 @@ export default function FavorisScreen() {
             biens_medias?: MediaRow[] | null
           }
           return {
+            source: 'bogbes' as const,
             id: b.id,
+            reference: `BOGBES-${b.id.slice(0, 8).toUpperCase()}`,
+            url: `https://bogbesgroup.com/biens/${b.id}`,
             titre: b.titre,
-            prix_mois_fcfa: b.prix_mois_fcfa,
-            prix_vente_fcfa: b.prix_vente_fcfa,
+            prix_fcfa: b.prix_mois_fcfa ?? b.prix_vente_fcfa,
+            prix_period: b.prix_mois_fcfa ? 'mois' as const : b.prix_vente_fcfa ? 'vente' as const : 'unknown' as const,
+            prix_label: b.prix_mois_fcfa ? `${formatFCFA(b.prix_mois_fcfa)} / mois` : b.prix_vente_fcfa ? formatFCFA(b.prix_vente_fcfa) : 'Prix à confirmer',
             commune: b.commune,
             type_bien: b.type_bien,
-            statut: b.statut,
-            cover_url: pickCover(b.biens_medias),
+            photo_principale: pickCover(b.biens_medias),
           }
         })
       setFavoris(items)

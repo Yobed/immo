@@ -1,25 +1,11 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
-import { formatFCFA } from '@immo-ci/shared'
-import type { Database } from '@immo-ci/shared'
 import { FavoriteButton } from './FavoriteButton'
 import { colors, spacing, borderRadius, typography } from '../constants/theme'
+import type { PublicListing } from '../lib/catalogue-api'
 
-// Type Bien depuis la base de données réelle (pas de prix unique ni photo_principale_url)
-type BienRow = Database['public']['Tables']['biens']['Row']
-
-// Type étendu pour l'affichage dans les listes (avec cover_url optionnel depuis biens_medias)
-export interface BienListItem {
-  id: string
-  titre: string
-  prix_mois_fcfa: number | null
-  prix_vente_fcfa: number | null
-  commune: string
-  type_bien: string
-  statut: string
-  cover_url?: string | null
-}
+export type BienListItem = PublicListing
 
 interface BienCardProps {
   bien: BienListItem
@@ -28,34 +14,27 @@ interface BienCardProps {
 export function BienCard({ bien }: BienCardProps) {
   const router = useRouter()
 
-  // Afficher le prix mensuel en priorité, sinon le prix de vente
-  const prix = bien.prix_mois_fcfa ?? bien.prix_vente_fcfa ?? 0
-  const prixLabel = bien.prix_mois_fcfa
-    ? `${formatFCFA(prix)}/mois`
-    : bien.prix_vente_fcfa
-    ? formatFCFA(prix)
-    : 'Prix non renseigné'
-
   return (
     <TouchableOpacity
       style={styles.card}
-      onPress={() => router.push(`/bien/${bien.id}`)}
+      onPress={() => router.push({ pathname: '/bien/[id]', params: { id: bien.id, source: bien.source } })}
       activeOpacity={0.85}
     >
       <View>
         <Image
-          source={{ uri: bien.cover_url ?? 'https://via.placeholder.com/300x200?text=Immo+CI' }}
+          source={bien.photo_principale ? { uri: bien.photo_principale } : require('../assets/icon.png')}
           style={styles.image}
           contentFit="cover"
           transition={200}
           placeholder={{ blurhash: 'L6PZfSi_.AyE_3t7t7R**0o#DgR4' }}
         />
-        <FavoriteButton bienId={bien.id} onImage style={styles.fav} />
+        {bien.source === 'bogbes' && <FavoriteButton bienId={bien.id} onImage style={styles.fav} />}
       </View>
       <View style={styles.body}>
         <Text style={styles.titre} numberOfLines={2}>{bien.titre}</Text>
         <Text style={styles.commune}>{bien.commune} · {bien.type_bien}</Text>
-        <Text style={styles.prix}>{prixLabel}</Text>
+        <Text style={styles.prix}>{bien.prix_label}</Text>
+        <Text style={styles.reference}>{bien.reference}</Text>
       </View>
     </TouchableOpacity>
   )
@@ -80,4 +59,5 @@ const styles = StyleSheet.create({
   titre: { ...typography.h3, color: colors.text, marginBottom: spacing.xs },
   commune: { ...typography.caption, color: colors.textLight, marginBottom: spacing.sm },
   prix: { fontSize: 16, fontWeight: '700', color: colors.secondary },
+  reference: { fontSize: 12, color: colors.textLight, marginTop: spacing.xs },
 })

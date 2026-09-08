@@ -1,3 +1,4 @@
+import { validateCrmRequest, CrmMutationError } from '@/lib/crm/rpc'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, requireAdmin, safeErrorResponse } from '@/lib/auth/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -68,18 +69,7 @@ export async function POST(
 
     const newStatus = action === 'approve' ? 'approved' : 'rejected'
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: updErr } = await (admin as any)
-      .from('contact_requests')
-      .update({
-        admin_validation_status: newStatus,
-        admin_validated_at: new Date().toISOString(),
-        admin_validated_by: user.id,
-        admin_note: note,
-      })
-      .eq('id', id)
-
-    if (updErr) return NextResponse.json({ error: updErr.message }, { status: 400 })
+    await validateCrmRequest({ entity: 'contact', id, action, note })
 
     const results: Record<string, { success: boolean; error?: string }> = {}
 
@@ -98,6 +88,8 @@ export async function POST(
       notifications: results,
     })
   } catch (error) {
+    if (error instanceof CrmMutationError) return NextResponse.json({ error: error.message }, { status: error.status })
+    if (error instanceof SyntaxError) return NextResponse.json({ error: 'Formulaire invalide' }, { status: 400 })
     return safeErrorResponse(error)
   }
 }

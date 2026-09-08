@@ -101,11 +101,15 @@ Les indicateurs se lisent dans cet ordre :
 - demandes reçues ;
 - visites demandées ;
 - réservations ;
-- conversion contact → réservation ;
-- conversion contact → visite ;
-- conversion visite → réservation ;
+- conversion contact → réservation sur les mêmes prospects rattachés ;
+- conversion contact → visite validée ;
+- conversion visite → réservation validée ;
 - délais moyens entre les étapes ;
-- résultats par conseiller, commune, type de bien et source.
+- résultats par conseiller, commune, type de bien et source ;
+- cohortes hebdomadaires pour comparer des prospects entrés sur la même période ;
+- qualité des données : événements non rattachés, refus sans motif, assignations manquantes.
+
+Un événement non rattaché à un prospect est exclu des taux afin d’éviter une conversion artificiellement trop haute ou trop basse. Il apparaît dans **Qualité des données** et doit être rapproché avant d’interpréter la performance.
 
 La performance sert à décider où agir, pas à compter uniquement le volume de demandes.
 
@@ -163,4 +167,3 @@ Les contacts, visites et réservations sont rattachés à la fiche principale. L
 - examiner les motifs de perte ;
 - corriger les doublons et fiches incomplètes ;
 - décider d’une action commerciale pour la semaine suivante.
-

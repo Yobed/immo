@@ -1,26 +1,37 @@
 import { NextResponse } from 'next/server'
-import { createAnnoncesClient } from '@/lib/supabase/annonces'
+import { getConsolidatedBienById } from '@/lib/catalogue/consolidated'
+import { publicDescription } from '@/lib/catalogue/public-description'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  const requestedSource = new URL(request.url).searchParams.get('source') ?? 'web'
+  const source = requestedSource === 'bogbes' ? 'bogbes' : requestedSource.startsWith('flash') ? 'flash' : requestedSource === 'web' ? 'web' : null
+  if (!source || (source === 'bogbes' ? !/^[0-9a-f-]{36}$/i.test(id) : !/^\d+$/.test(id))) {
+    return NextResponse.json({ error: 'Référence invalide' }, { status: 400 })
+  }
   try {
-    const { data, error } = await (createAnnoncesClient() as any)
-      .from('v_annonces').select('id,titre,type_bien,transaction,commune,quartier,prix_fcfa,periodicite,surface_m2,nb_pieces,nb_chambres,description,photo_principale,photos')
-      .eq('id', Number(id)).eq('actif', true).maybeSingle()
-    if (error) throw error
-    if (!data) return NextResponse.json({ error: 'not_found' }, { status: 404 })
+    const item = await getConsolidatedBienById(source, id)
+    if (!item) return NextResponse.json({ error: 'Annonce introuvable ou indisponible' }, { status: 404 })
     return NextResponse.json({
-      id: String(data.id), titre: data.titre ?? `${data.type_bien ?? 'Bien'} à ${data.commune ?? 'Abidjan'}`,
-      prix_mois_fcfa: /mois/i.test(data.periodicite ?? '') ? data.prix_fcfa : null,
-      prix_vente_fcfa: /vente/i.test(data.transaction ?? '') ? data.prix_fcfa : null,
-      commune: data.commune ?? '', type_bien: data.type_bien ?? '', statut: 'publie',
-      description: data.description ?? null, surface_m2: data.surface_m2 ?? null,
-      nb_pieces: data.nb_pieces ?? null, nb_chambres: data.nb_chambres ?? null,
-      biens_medias: (data.photos ?? []).map((url: string, ordre: number) => ({ url, ordre, type: 'photo', est_couverture: ordre === 0 })),
-    })
+      source: requestedSource,
+      id: item.sourceId,
+      reference: source === 'web' ? `WEB-${item.sourceId}` : source === 'bogbes' ? `BOGBES-${item.sourceId.slice(0, 8).toUpperCase()}` : `FLASH-${item.sourceId}`,
+      url: item.url,
+      titre: item.titre,
+      commune: item.commune,
+      quartier: item.quartier,
+      type_bien: item.type_bien,
+      description: publicDescription(item.description),
+      prix_fcfa: item.prix_value,
+      prix_period: item.prix_period,
+      prix_label: item.prix_label,
+      surface_m2: item.surface_m2,
+      nb_pieces: item.nb_pieces,
+      photos: [item.photo_url, ...item.photos].filter((value, index, all): value is string => Boolean(value) && all.indexOf(value) === index),
+    }, { headers: { 'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60' } })
   } catch {
-    return NextResponse.json({ error: 'annonce indisponible' }, { status: 503 })
+    return NextResponse.json({ error: 'Annonce momentanément indisponible' }, { status: 503 })
   }
 }

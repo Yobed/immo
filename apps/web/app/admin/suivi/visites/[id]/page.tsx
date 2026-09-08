@@ -7,6 +7,7 @@ import {
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { validateVisiteAction, setVisiteOutcomeAction } from '../../actions'
+import { CrmActionForm } from '@/components/admin/CrmActionForm'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -88,7 +89,7 @@ export default async function VisiteDetailPage({ params }: PageProps) {
     .from('visites')
     .select(`
       id, date_souhaitee, heure_debut, heure_fin, notes, statut, source,
-      admin_validation_status, admin_validated_at, admin_note, outcome, loss_reason, outcome_note, outcome_at,
+      admin_validation_status, admin_validated_at, admin_note, outcome, loss_reason, outcome_note, outcome_at, version,
       admin_notified_at, owner_notified_at, visitor_notified_at,
       client_name, client_phone, created_at, bien_id,
       biens ( id, titre, commune, quartier ),
@@ -252,17 +253,18 @@ export default async function VisiteDetailPage({ params }: PageProps) {
 
           <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-6">
             <h2 className="text-xs font-bold uppercase tracking-wide text-[var(--text-subtle)] mb-3">Compte rendu de visite</h2>
-            <form action={setVisiteOutcomeAction} className="space-y-3">
-              <input type="hidden" name="visiteId" value={id} />
+            <CrmActionForm action={setVisiteOutcomeAction} className="space-y-3">
+                <input type="hidden" name="visiteId" value={id} />
+                <input type="hidden" name="version" value={visite.version} />
               <select name="outcome" defaultValue={visite.outcome ?? ''} required className="w-full px-3 py-2 border border-[var(--border)] rounded-lg text-sm bg-[var(--surface)] text-[var(--text)]">
                 <option value="">Résultat de la visite</option><option value="realisee">Visite réalisée</option><option value="annulee">Annulée</option><option value="no_show">Prospect absent</option><option value="non_conclue">Visite sans suite</option>
               </select>
               <select name="lossReason" defaultValue={visite.loss_reason ?? ''} className="w-full px-3 py-2 border border-[var(--border)] rounded-lg text-sm bg-[var(--surface)] text-[var(--text)]">
-                <option value="">Motif si la visite n&apos;a pas abouti</option><option value="prix">Prix</option><option value="indisponible">Bien indisponible</option><option value="proprietaire_injoignable">Propriétaire injoignable</option><option value="prospect_absent">Prospect absent</option><option value="documents">Documents incomplets</option><option value="autre">Autre</option>
+                  <option value="">Motif si la visite n&apos;a pas abouti</option><option value="prix">Prix</option><option value="bien_indisponible">Bien indisponible</option><option value="proprietaire_injoignable">Propriétaire injoignable</option><option value="prospect_absent">Prospect absent</option><option value="documents_incomplets">Documents incomplets</option><option value="autre">Autre</option>
               </select>
               <textarea name="outcomeNote" defaultValue={visite.outcome_note ?? ''} rows={3} placeholder="Ce qui s&apos;est passé, prochaine étape…" className="w-full px-3 py-2 border border-[var(--border)] rounded-lg text-sm bg-[var(--surface)] text-[var(--text)] resize-none" />
               <button type="submit" className="w-full px-4 py-2.5 rounded-xl bg-[var(--text)] text-[var(--surface-card)] text-sm font-bold">Enregistrer le compte rendu</button>
-            </form>
+            </CrmActionForm>
           </section>
         </div>
 

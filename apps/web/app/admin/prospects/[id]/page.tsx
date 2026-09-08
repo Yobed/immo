@@ -12,11 +12,12 @@ import {
   setProspectStatutAction, setProspectNoteAction, setProspectAssignAction, setProspectRelanceAction,
   setProspectOutcomeAction,
 } from '../actions'
+import { CrmActionForm } from '@/components/admin/CrmActionForm'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-type Statut = 'nouveau' | 'contacte' | 'visite_planifiee' | 'visite_realisee' | 'relance' | 'gagne' | 'perdu'
+type Statut = 'nouveau' | 'contacte' | 'visite_planifiee' | 'visite_realisee' | 'relance' | 'gagne' | 'perdu' | 'en_cours' | 'rdv' | 'traite'
 
 const STATUT_META: Record<Statut, { label: string; cls: string }> = {
   nouveau: { label: 'Nouveau', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-amber-300' },
@@ -26,6 +27,9 @@ const STATUT_META: Record<Statut, { label: string; cls: string }> = {
   relance: { label: 'Relance', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-orange-300' },
   gagne: { label: 'Gagné', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-emerald-300' },
   perdu: { label: 'Perdu', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-slate-300' },
+  en_cours: { label: 'En cours (historique)', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-blue-300' },
+  rdv: { label: 'Rendez-vous (historique)', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-purple-300' },
+  traite: { label: 'Traité — résultat à qualifier', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-slate-300' },
 }
 const FLOW: Statut[] = ['nouveau', 'contacte', 'visite_planifiee', 'visite_realisee', 'relance', 'gagne', 'perdu']
 
@@ -53,15 +57,15 @@ export default async function ProspectDetailPage({ params }: PageProps) {
   const { data: p } = await (admin as any).from('prospects').select('*').eq('id', id).maybeSingle()
   if (!p) notFound()
 
-  const [{ count: contactCount }, { count: visiteCount }, { count: reservationCount }, { data: crmEvents }] = await Promise.all([
+  const [{ count: contactCount }, { count: visiteCount }, { count: reservationCount }, timelineResult] = await Promise.all([
     (admin as any).from('contact_requests').select('id', { count: 'exact', head: true }).eq('prospect_id', id),
     (admin as any).from('visites').select('id', { count: 'exact', head: true }).eq('prospect_id', id),
     (admin as any).from('reservations').select('id', { count: 'exact', head: true }).eq('prospect_id', id),
-    (admin as any).from('crm_events').select('id, event_type, from_status, to_status, note, created_at').eq('prospect_id', id).order('created_at', { ascending: false }).limit(12),
+    (supabase as any).rpc('crm_prospect_timeline', { p_id: id, p_limit: 50 }),
   ])
+  const crmEvents = timelineResult.error ? null : timelineResult.data as Array<{ id: string; event_type: string; from_status: string | null; to_status: string | null; note: string | null; created_at: string; actor_name?: string | null; origin?: string }>
 
-  const legacyMap: Record<string, Statut> = { en_cours: 'contacte', rdv: 'visite_planifiee', traite: 'gagne' }
-  const st = (legacyMap[p.statut] ?? (p.statut in STATUT_META ? p.statut : 'nouveau')) as Statut
+  const st = (p.statut in STATUT_META ? p.statut : 'nouveau') as Statut
 
   // Commerciaux (admins) pour l'assignation
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -148,7 +152,7 @@ export default async function ProspectDetailPage({ params }: PageProps) {
 
             <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-5">
               <h2 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-subtle)] mb-3">Historique des actions</h2>
-              {(!crmEvents || crmEvents.length === 0) ? <p className="text-sm text-[var(--text-muted)] italic">Aucun événement enregistré.</p> : <ol className="space-y-3">{crmEvents.map((event: { id: string; event_type: string; from_status: string | null; to_status: string | null; note: string | null; created_at: string }) => <li key={event.id} className="flex gap-3 text-xs"><span className="mt-1 w-2 h-2 rounded-full bg-[var(--accent-luxury)] shrink-0" /><div><p className="text-[var(--text)] font-semibold">{event.to_status ? `Statut : ${event.to_status}` : event.event_type.replaceAll('_', ' ')}</p>{event.note && <p className="text-[var(--text-muted)] mt-0.5">{event.note}</p>}<p className="text-[var(--text-subtle)] mt-0.5">{new Date(event.created_at).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })}</p></div></li>)}</ol>}
+              {crmEvents === null ? <p role="alert" className="text-sm text-amber-700">Historique indisponible. Vérifiez que la migration CRM est appliquée.</p> : crmEvents.length === 0 ? <p className="text-sm text-[var(--text-muted)] italic">Aucun événement enregistré.</p> : <ol className="space-y-3">{crmEvents.map((event) => <li key={event.id} className="flex gap-3 text-xs"><span className="mt-1 w-2 h-2 rounded-full bg-[var(--accent-luxury)] shrink-0" /><div><p className="text-[var(--text)] font-semibold">{event.to_status ? `Statut : ${event.to_status}` : event.event_type.replaceAll('_', ' ')}</p>{event.note && <p className="text-[var(--text-muted)] mt-0.5">{event.note}</p>}<p className="text-[var(--text-subtle)] mt-0.5">{event.actor_name || (event.origin === 'legacy_unknown' ? 'Auteur historique non renseigné' : 'Système')} · {new Date(event.created_at).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })}</p></div></li>)}</ol>}
             </section>
 
             {/* Conversation */}
@@ -221,8 +225,9 @@ export default async function ProspectDetailPage({ params }: PageProps) {
               <h2 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-subtle)] mb-3">Statut de suivi</h2>
               <div className="grid grid-cols-2 gap-2">
                 {FLOW.map((s) => (
-                  <form key={s} action={setProspectStatutAction}>
+                  <CrmActionForm key={s} action={setProspectStatutAction}>
                     <input type="hidden" name="id" value={p.id} />
+                    <input type="hidden" name="version" value={p.version} />
                     <input type="hidden" name="statut" value={s} />
                     <button type="submit"
                       className={`w-full px-2 py-2 rounded-lg text-xs font-bold border transition-colors ${
@@ -230,7 +235,7 @@ export default async function ProspectDetailPage({ params }: PageProps) {
                       }`}>
                       {STATUT_META[s].label}
                     </button>
-                  </form>
+                  </CrmActionForm>
                 ))}
               </div>
             </section>
@@ -240,15 +245,16 @@ export default async function ProspectDetailPage({ params }: PageProps) {
               <h2 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-subtle)] mb-3 flex items-center gap-2">
                 <UserCheck className="w-3.5 h-3.5" /> Commercial assigné
               </h2>
-              <form action={setProspectAssignAction} className="flex items-center gap-2">
+              <CrmActionForm action={setProspectAssignAction} className="flex items-center gap-2">
                 <input type="hidden" name="id" value={p.id} />
+                <input type="hidden" name="version" value={p.version} />
                 <select name="assigned_to" defaultValue={p.assigned_to ?? ''}
                   className="flex-1 px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)]">
                   <option value="">— Non assigné —</option>
                   {admins.map((a) => <option key={a.id} value={a.id}>{a.full_name || a.id.slice(0, 8)}</option>)}
                 </select>
                 <button type="submit" className="px-3 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold">OK</button>
-              </form>
+              </CrmActionForm>
               {assignedName && <p className="text-[11px] text-emerald-700 mt-2">Suivi par <strong>{assignedName}</strong></p>}
             </section>
 
@@ -257,12 +263,13 @@ export default async function ProspectDetailPage({ params }: PageProps) {
               <h2 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-subtle)] mb-3 flex items-center gap-2">
                 <CalendarClock className="w-3.5 h-3.5" /> Date de relance
               </h2>
-              <form action={setProspectRelanceAction} className="flex items-center gap-2">
+              <CrmActionForm action={setProspectRelanceAction} className="flex items-center gap-2">
                 <input type="hidden" name="id" value={p.id} />
+                <input type="hidden" name="version" value={p.version} />
                 <input type="date" name="relance_le" defaultValue={p.relance_le ?? ''}
                   className="flex-1 px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)]" />
                 <button type="submit" className="px-3 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold">OK</button>
-              </form>
+              </CrmActionForm>
             </section>
 
             {/* Note */}
@@ -270,36 +277,39 @@ export default async function ProspectDetailPage({ params }: PageProps) {
               <h2 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-subtle)] mb-3 flex items-center gap-2">
                 <StickyNote className="w-3.5 h-3.5" /> Note de suivi
               </h2>
-              <form action={setProspectNoteAction} className="space-y-2">
+              <CrmActionForm action={setProspectNoteAction} className="space-y-2">
                 <input type="hidden" name="id" value={p.id} />
+                <input type="hidden" name="version" value={p.version} />
                 <textarea name="note" rows={4} defaultValue={p.note ?? ''} maxLength={500}
                   placeholder="Historique des échanges, prochaines étapes…"
                   className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] resize-none" />
                 <button type="submit" className="w-full px-3 py-2 bg-[var(--accent-luxury)] text-[var(--on-accent)] rounded-lg text-xs font-bold">
                   Enregistrer la note
                 </button>
-              </form>
+              </CrmActionForm>
             </section>
 
             {/* Résultat et prochaine action */}
             <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-5">
               <h2 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-subtle)] mb-3">Résultat & prochaine action</h2>
-              <form action={setProspectOutcomeAction} className="space-y-2">
+              <CrmActionForm action={setProspectOutcomeAction} className="space-y-2">
                 <input type="hidden" name="id" value={p.id} />
+                <input type="hidden" name="version" value={p.version} />
                 <select name="perte_motif" defaultValue={p.perte_motif ?? ''} className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)]">
                   <option value="">Motif de perte (si applicable)</option>
                   <option value="prix">Prix trop élevé</option>
-                  <option value="indisponible">Bien indisponible</option>
+                  <option value="bien_indisponible">Bien indisponible</option>
                   <option value="proprietaire_injoignable">Propriétaire injoignable</option>
                   <option value="prospect_absent">Prospect absent</option>
-                  <option value="documents">Documents incomplets</option>
-                  <option value="non_qualifie">Prospect non qualifié</option>
+                  <option value="documents_incomplets">Documents incomplets</option>
                   <option value="autre">Autre</option>
                 </select>
+                <textarea name="loss_note" defaultValue={p.loss_note ?? ''} rows={2} maxLength={2000} placeholder="Précision obligatoire si le motif est « Autre »" className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] resize-none" />
                 <input name="prochaine_action" defaultValue={p.prochaine_action ?? ''} placeholder="Prochaine action à effectuer" className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)]" />
+                <p className="text-[11px] text-[var(--text-muted)]">Heure d’Abidjan (UTC)</p>
                 <input type="datetime-local" name="prochaine_action_at" defaultValue={p.prochaine_action_at ? new Date(p.prochaine_action_at).toISOString().slice(0, 16) : ''} className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)]" />
                 <button type="submit" className="w-full px-3 py-2 bg-[var(--text)] text-[var(--surface-card)] rounded-lg text-xs font-bold">Enregistrer le suivi</button>
-              </form>
+              </CrmActionForm>
             </section>
           </aside>
         </div>

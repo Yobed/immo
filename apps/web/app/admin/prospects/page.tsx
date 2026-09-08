@@ -7,6 +7,7 @@ import {
 import { createAdminClient } from '@/lib/supabase/admin'
 import { formatFCFA } from '@/lib/format'
 import { setProspectStatutAction } from './actions'
+import { CrmActionForm } from '@/components/admin/CrmActionForm'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -34,6 +35,7 @@ interface ProspectRow {
   prochaine_action_at?: string | null
   first_seen: string
   last_seen: string
+  version: number
 }
 
 interface PageProps {
@@ -50,9 +52,9 @@ const STATUT_META: Record<Statut, { label: string; hint: string; cls: string; do
   perdu: { label: 'Perdu', hint: 'Motif à analyser', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-slate-300', dot: 'bg-slate-500', col: 'border-t-slate-400' },
   en_cours: { label: 'Contacté', hint: 'Échange en cours', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-blue-300', dot: 'bg-blue-500', col: 'border-t-blue-400' },
   rdv: { label: 'Visite planifiée', hint: 'Préparer le rendez-vous', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-purple-300', dot: 'bg-purple-500', col: 'border-t-purple-400' },
-  traite: { label: 'Gagné', hint: 'Dossier conclu', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-emerald-300', dot: 'bg-emerald-500', col: 'border-t-emerald-400' },
+  traite: { label: 'À qualifier', hint: 'Ancien statut à reclasser', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-slate-300', dot: 'bg-slate-400', col: 'border-t-slate-300' },
 }
-const KANBAN_COLS: Statut[] = ['nouveau', 'contacte', 'visite_planifiee', 'visite_realisee', 'relance', 'gagne', 'perdu']
+const KANBAN_COLS: Statut[] = ['nouveau', 'contacte', 'visite_planifiee', 'visite_realisee', 'relance', 'gagne', 'perdu', 'traite']
 const NEXT: Partial<Record<Statut, Statut>> = { nouveau: 'contacte', contacte: 'visite_planifiee', visite_planifiee: 'visite_realisee', visite_realisee: 'relance', relance: 'gagne' }
 
 function waLink(phone: string): string {
@@ -70,7 +72,6 @@ function relative(iso: string): string {
 function stOf(s: string): Statut {
   if (s === 'en_cours') return 'contacte'
   if (s === 'rdv') return 'visite_planifiee'
-  if (s === 'traite') return 'gagne'
   return (s in STATUT_META ? s : 'nouveau') as Statut
 }
 
@@ -141,7 +142,7 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
         <Stat label="Total" value={total} icon={Users} />
         <Stat label="À traiter" value={nNouveau} icon={Inbox} tone="amber" />
         <Stat label="En cours" value={nEnCours} icon={PhoneCall} tone="blue" />
-        <Stat label="Traités" value={nTraite} icon={CheckCircle2} tone="emerald" />
+        <Stat label="À reclasser" value={nTraite} icon={CheckCircle2} />
       </div>
 
       {/* Barre : bascule vue + recherche */}
@@ -158,7 +159,7 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
         </div>
         {view === 'list' && (
           <div className="flex items-center gap-1 bg-[var(--surface-hover)] p-1 rounded-xl flex-wrap">
-            {[{ k: '', l: 'Tous' }, { k: 'nouveau', l: 'Nouveaux' }, { k: 'contacte', l: 'Contactés' }, { k: 'visite_planifiee', l: 'Visites planifiées' }, { k: 'visite_realisee', l: 'Visites réalisées' }, { k: 'relance', l: 'Relances' }, { k: 'gagne', l: 'Gagnés' }, { k: 'perdu', l: 'Perdus' }].map((t) => (
+            {[{ k: '', l: 'Tous' }, { k: 'nouveau', l: 'Nouveaux' }, { k: 'contacte', l: 'Contactés' }, { k: 'visite_planifiee', l: 'Visites planifiées' }, { k: 'visite_realisee', l: 'Visites réalisées' }, { k: 'relance', l: 'Relances' }, { k: 'gagne', l: 'Gagnés' }, { k: 'perdu', l: 'Perdus' }, { k: 'traite', l: 'À reclasser' }].map((t) => (
               <Link key={t.l} href={qs({ view: 'list', statut: t.k })}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold ${(statut ?? '') === t.k ? 'bg-[var(--surface-card)] text-[var(--text)] shadow-sm' : 'text-[var(--text-muted)]'}`}>
                 {t.l}
@@ -253,14 +254,15 @@ function KanbanCard({ r, assignedName }: { r: ProspectRow; assignedName?: string
           <MessageCircle className="w-3 h-3" /> Contacter
         </a>
         {next && (
-          <form action={setProspectStatutAction}>
+          <CrmActionForm action={setProspectStatutAction}>
             <input type="hidden" name="id" value={r.id} />
+            <input type="hidden" name="version" value={r.version} />
             <input type="hidden" name="statut" value={next} />
             <button type="submit" title={`Vers « ${STATUT_META[next].label} »`}
               className="inline-flex items-center justify-center px-2 py-1.5 bg-[var(--surface-hover)] hover:bg-[var(--border)] text-[var(--text)] rounded-lg">
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
-          </form>
+          </CrmActionForm>
         )}
       </div>
     </div>

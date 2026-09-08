@@ -20,6 +20,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { createAnnoncesClient } from '@/lib/supabase/annonces'
 import { mapLocauxRow, type LocauxRow } from '@/lib/locaux/mapper'
 import { formatFCFA } from '@/lib/format'
+import { publicDescription } from './public-description'
 import { STATUTS_PUBLICS } from './statuts'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bogbesgroup.com'
@@ -417,8 +418,12 @@ function applyAnnonceFilters(q: any, filters: ConsolidatedFilters): any {
   }
   if (filters.type_offre) q = q.eq('transaction', filters.type_offre)
   if (filters.q?.trim()) {
-    const term = filters.q.trim().replace(/[,()]/g, ' ')
-    q = q.or(`titre.ilike.%${term}%,description.ilike.%${term}%,quartier.ilike.%${term}%`)
+    const term = filters.q
+      .trim()
+      .slice(0, 100)
+      .replace(/[^\p{L}\p{N}\s'-]/gu, ' ')
+      .replace(/\s+/g, ' ')
+    if (term) q = q.or(`titre.ilike.%${term}%,description.ilike.%${term}%,quartier.ilike.%${term}%`)
   }
   // Prix inconnu conservé (comme pour les offres flash) : le conseiller/Sapphire
   // annonce « Prix sur demande » plutôt que de masquer le bien.
@@ -457,30 +462,48 @@ async function fetchAnnonces(filters: ConsolidatedFilters): Promise<Consolidated
 }
 
 /** Page d'annonces paginée côté serveur (onglet « Annonces web » seul). */
+async function queryAnnoncesPagedItems(
+  filters: ConsolidatedFilters,
+  page: number,
+  pageSize: number,
+): Promise<{ items: ConsolidatedBien[]; total: number }> {
+  const from = Math.max(0, page) * pageSize
+  const q = applyAnnonceFilters(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (createAnnoncesClient() as any).from('v_annonces').select(ANNONCE_COLS, { count: 'exact' }),
+    filters,
+  )
+  const ordered =
+    filters.sort === 'price_asc'
+      ? q.order('prix_fcfa', { ascending: true, nullsFirst: false }).order('id', { ascending: false })
+      : filters.sort === 'price_desc'
+        ? q.order('prix_fcfa', { ascending: false, nullsFirst: false }).order('id', { ascending: false })
+        : q.order('vu_le', { ascending: false }).order('id', { ascending: false })
+  const { data, error, count } = await ordered.range(from, from + pageSize - 1)
+  if (error) throw new Error(`Catalogue web indisponible: ${error.message}`)
+  if (!data) throw new Error('Catalogue web indisponible: réponse vide')
+  return { items: (data as AnnonceRow[]).map(mapAnnonce), total: count ?? data.length }
+}
+
 export async function getAnnoncesPagedItems(
   filters: ConsolidatedFilters,
   page: number,
   pageSize: number,
 ): Promise<{ items: ConsolidatedBien[]; total: number }> {
   try {
-    const from = page * pageSize
-    const q = applyAnnonceFilters(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (createAnnoncesClient() as any).from('v_annonces').select(ANNONCE_COLS, { count: 'exact' }),
-      filters,
-    )
-    const ordered =
-      filters.sort === 'price_asc'
-        ? q.order('prix_fcfa', { ascending: true, nullsFirst: false })
-        : filters.sort === 'price_desc'
-          ? q.order('prix_fcfa', { ascending: false, nullsFirst: false })
-          : q.order('vu_le', { ascending: false })
-    const { data, error, count } = await ordered.range(from, from + pageSize - 1)
-    if (error || !data) return { items: [], total: 0 }
-    return { items: (data as AnnonceRow[]).map(mapAnnonce), total: count ?? data.length }
+    return await queryAnnoncesPagedItems(filters, page, pageSize)
   } catch {
     return { items: [], total: 0 }
   }
+}
+
+/** Variante API : une panne fournisseur doit être visible, jamais simulée par un catalogue vide. */
+export async function getAnnoncesPagedItemsStrict(
+  filters: ConsolidatedFilters,
+  page: number,
+  pageSize: number,
+): Promise<{ items: ConsolidatedBien[]; total: number }> {
+  return queryAnnoncesPagedItems(filters, page, pageSize)
 }
 
 /** Nombre total d'annonces web correspondant aux filtres (compteur d'onglet). */
@@ -524,7 +547,7 @@ function mapAnnonce(a: AnnonceRow): ConsolidatedBien {
     prix_period: period,
     surface_m2: a.surface_m2 ?? null,
     nb_pieces: a.nb_pieces ?? a.nb_chambres ?? null,
-    description: a.description ? a.description.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() : null,
+    description: publicDescription(a.description),
     photo_url: a.photo_principale ?? null,
     // Annonce publique non contrôlée par nos soins : jamais marquée vérifiée.
     is_verifie: false,

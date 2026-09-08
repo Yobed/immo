@@ -1,6 +1,7 @@
+import { validateCrmRequest, CrmMutationError } from '@/lib/crm/rpc'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, requireAdmin, safeErrorResponse } from '@/lib/auth/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import {
   notifyOwnerReservationApproved,
   notifyVisitorReservationApproved,
@@ -29,7 +30,7 @@ export async function POST(
       return NextResponse.json({ error: 'Action invalide' }, { status: 400 })
     }
 
-    const supabase = await createClient()
+    const supabase = createAdminClient()
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: reservation, error: fetchErr } = await (supabase as any)
@@ -77,20 +78,7 @@ export async function POST(
 
     const newStatus = action === 'approve' ? 'approved' : 'rejected'
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: updateErr } = await (supabase as any)
-      .from('reservations')
-      .update({
-        admin_validation_status: newStatus,
-        admin_validated_at: new Date().toISOString(),
-        admin_validated_by: user.id,
-        admin_note: note,
-      })
-      .eq('id', id)
-
-    if (updateErr) {
-      return NextResponse.json({ error: updateErr.message }, { status: 400 })
-    }
+    await validateCrmRequest({ entity: 'reservation', id, action, note })
 
     const results: Record<string, { success: boolean; error?: string }> = {}
 
@@ -155,6 +143,8 @@ export async function POST(
       notifications: results,
     })
   } catch (error) {
+    if (error instanceof CrmMutationError) return NextResponse.json({ error: error.message }, { status: error.status })
+    if (error instanceof SyntaxError) return NextResponse.json({ error: 'Formulaire invalide' }, { status: 400 })
     return safeErrorResponse(error)
   }
 }

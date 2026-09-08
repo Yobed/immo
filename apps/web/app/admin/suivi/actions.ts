@@ -1,5 +1,8 @@
 'use server'
 
+import { validateCrmRequest, callCrmRpc } from '@/lib/crm/rpc'
+import { formUuid, formVersion, type CrmActionResult } from '@/lib/crm/input'
+
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -96,18 +99,7 @@ export async function validateVisiteAction(formData: FormData): Promise<void> {
 
   const newStatus = action === 'approve' ? 'approved' : 'rejected'
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error: updateErr } = await (admin as any)
-    .from('visites')
-    .update({
-      admin_validation_status: newStatus,
-      admin_validated_at: new Date().toISOString(),
-      admin_validated_by: guard.userId,
-      admin_note: note,
-    })
-    .eq('id', visiteId)
-
-  if (updateErr) throw new Error(updateErr.message)
+  await validateCrmRequest({ entity: 'visite', id: visiteId, action, note })
 
   if (action === 'approve') {
     if (ctx.ownerPhone) await notifyOwnerVisitApproved(admin, ctx)
@@ -120,21 +112,20 @@ export async function validateVisiteAction(formData: FormData): Promise<void> {
   revalidatePath(`/admin/suivi/visites/${visiteId}`)
 }
 
-export async function setVisiteOutcomeAction(formData: FormData): Promise<void> {
-  const guard = await ensureAdmin()
-  const visiteId = String(formData.get('visiteId') || '')
-  const outcome = String(formData.get('outcome') || '')
-  const lossReason = String(formData.get('lossReason') || '').trim()
-  const note = String(formData.get('outcomeNote') || '').trim()
-  if (!visiteId || !['realisee', 'annulee', 'no_show', 'non_conclue'].includes(outcome)) throw new Error('Résultat de visite invalide')
-  const admin = createAdminClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (admin as any).from('visites').update({ outcome, loss_reason: lossReason || null, outcome_note: note || null, outcome_at: new Date().toISOString() }).eq('id', visiteId)
-  if (error) throw new Error(error.message)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (admin as any).from('crm_events').insert({ entity_type: 'visite', entity_id: visiteId, actor_id: guard.userId, event_type: outcome === 'realisee' ? 'visit_completed' : 'lost', reason_code: lossReason || null, note: note || null })
-  revalidatePath('/admin/suivi')
-  revalidatePath(`/admin/suivi/visites/${visiteId}`)
+export async function setVisiteOutcomeAction(formData: FormData): Promise<CrmActionResult> {
+  try {
+    const visiteId = formUuid(formData, 'visiteId')
+    await callCrmRpc('crm_set_visit_outcome', {
+      p_id: visiteId, p_outcome: String(formData.get('outcome') || ''),
+      p_reason: String(formData.get('lossReason') || '').trim() || null,
+      p_note: String(formData.get('outcomeNote') || '').trim(), p_version: formVersion(formData),
+    })
+    revalidatePath('/admin/suivi')
+    revalidatePath('/admin/suivi/visites/' + visiteId)
+    revalidatePath('/admin/prospects', 'layout')
+    revalidatePath('/admin/performance')
+    return { message: 'Compte rendu enregistré.' }
+  } catch (error) { return { error: error instanceof Error ? error.message : 'Compte rendu non enregistré.' } }
 }
 
 // ---------------- RESERVATIONS ----------------
@@ -196,18 +187,7 @@ export async function validateReservationAction(formData: FormData): Promise<voi
 
   const newStatus = action === 'approve' ? 'approved' : 'rejected'
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error: updateErr } = await (admin as any)
-    .from('reservations')
-    .update({
-      admin_validation_status: newStatus,
-      admin_validated_at: new Date().toISOString(),
-      admin_validated_by: guard.userId,
-      admin_note: note,
-    })
-    .eq('id', reservationId)
-
-  if (updateErr) throw new Error(updateErr.message)
+  await validateCrmRequest({ entity: 'reservation', id: reservationId, action, note })
 
   if (action === 'approve') {
     if (ctx.ownerPhone) await notifyOwnerReservationApproved(admin, ctx)
@@ -289,18 +269,7 @@ export async function validateContactAction(formData: FormData): Promise<void> {
 
   const newStatus = action === 'approve' ? 'approved' : 'rejected'
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error: updateErr } = await (admin as any)
-    .from('contact_requests')
-    .update({
-      admin_validation_status: newStatus,
-      admin_validated_at: new Date().toISOString(),
-      admin_validated_by: guard.userId,
-      admin_note: note,
-    })
-    .eq('id', contactId)
-
-  if (updateErr) throw new Error(updateErr.message)
+  await validateCrmRequest({ entity: 'contact', id: contactId, action, note })
 
   if (action === 'approve') {
     if (ctx.visitorPhone) await notifyVisitorContactApproved(admin, ctx)
