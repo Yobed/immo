@@ -26,7 +26,9 @@
 
 ## Contrôles après déploiement
 
-Déploiement Vercel production : `dpl_rcVRbzxLW34KGzXgifTReRPQh6K4` (`READY`), alias `https://www.bogbesgroup.com`.
+Déploiement Vercel production : `dpl_79YSxwEcDnsmxwD5UkUCRn4RwdVx` (`READY`), alias `https://www.bogbesgroup.com`.
+
+Le build Vercel ne signale plus de variables de catalogue absentes de `turbo.json`.
 
 - `TEST_BASE_URL=https://www.bogbesgroup.com node scripts/test-production-surfaces.mjs` — OK (`health=ok`, catalogue `1319`) ;
 - `TEST_BASE_URL=https://www.bogbesgroup.com node scripts/test-catalogue-contract.mjs` — OK (`2` annonces, total `1319`).
