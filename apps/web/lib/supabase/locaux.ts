@@ -5,6 +5,10 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js'
 // on ne copie JAMAIS l'historique (décision Wilfried).
 //  - FRESH (jdjzcxvtvxfqflvwkfgv) : reçoit les NOUVELLES offres (write + read).
 //  - OLD   (udyfhzyvalansmhkynnc) : saturé → lecture seule (historique).
+// ⚠️ Les noms trompent sur le POIDS. Mesuré le 08/09/2026, hors doublons :
+// OLD porte 11 601 offres dont 3 444 de moins de 3 mois ; FRESH n'en porte que
+// 141. « Historique » est donc le gros du catalogue, pas un fond d'archive, et
+// « récent » n'en est qu'une frange. Ne dimensionne rien d'après les libellés.
 // Un TROISIÈME projet, MID (mignebexvzrpfxgbhjuf), a été SUPPRIMÉ : son domaine
 // ne résout plus (ENOTFOUND, vérifié sur 3 résolveurs). Il était interrogé à
 // chaque chargement du catalogue et l'échec était avalé par un .catch() — une
