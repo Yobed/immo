@@ -26,4 +26,7 @@
 
 ## Contrôles après déploiement
 
-Les scripts `scripts/test-production-surfaces.mjs` et `scripts/test-catalogue-contract.mjs` vérifient les routes publiques, les headers de sécurité et le contrat catalogue/mobile avec `TEST_BASE_URL=https://www.bogbesgroup.com`.
+Déploiement Vercel production : `dpl_rcVRbzxLW34KGzXgifTReRPQh6K4` (`READY`), alias `https://www.bogbesgroup.com`.
+
+- `TEST_BASE_URL=https://www.bogbesgroup.com node scripts/test-production-surfaces.mjs` — OK (`health=ok`, catalogue `1319`) ;
+- `TEST_BASE_URL=https://www.bogbesgroup.com node scripts/test-catalogue-contract.mjs` — OK (`2` annonces, total `1319`).
