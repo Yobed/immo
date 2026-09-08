@@ -1,7 +1,8 @@
 import { redirect, notFound } from 'next/navigation'
-import { Activity, BarChart3, Clock3, MessageCircle, CalendarDays, CreditCard, DatabaseZap } from 'lucide-react'
+import { Activity, BarChart3, MessageCircle, CalendarDays, CreditCard, DatabaseZap } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { ActionQueue } from '@/components/admin/ActionQueue'
 
 export const dynamic = 'force-dynamic'
 
@@ -213,7 +214,16 @@ export default async function AdminPerformancePage({ searchParams }: { searchPar
           </div>
         </section>
 
-        <section className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5"><div className="flex items-start gap-3"><Clock3 className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" /><div><h2 className="font-bold text-amber-900 text-sm">File d’action immédiate</h2><p className="text-xs text-amber-800 mt-1">Ces anomalies doivent être traitées pour garder un CRM fiable.</p></div></div><div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2 mt-4"><AlertLink label="Sans réponse depuis 24 h" value={unanswered} href="/admin/suivi" /><AlertLink label="Relances en retard" value={overdueFollowups} href="/admin/prospects" /><AlertLink label="Prospects non assignés" value={unassigned} href="/admin/prospects" /><AlertLink label="Visites sans compte rendu" value={pastVisitsWithoutReport} href="/admin/suivi?tab=visites" /><AlertLink label="Réservations sans visite" value={reservationsWithoutVisit} href="/admin/suivi?tab=reservations" /><AlertLink label="Refus sans motif" value={rejectedWithoutReason} href="/admin/suivi" /><AlertLink label="Doublons potentiels" value={duplicateRows} href="/admin/prospects/doublons" /><AlertLink label="Événements non rattachés" value={unlinked} href="/admin/suivi" /></div></section>
+        <ActionQueue items={[
+          { label: 'Sans réponse depuis 24 h', value: unanswered, href: '/admin/suivi' },
+          { label: 'Relances en retard', value: overdueFollowups, href: '/admin/prospects' },
+          { label: 'Prospects non assignés', value: unassigned, href: '/admin/prospects' },
+          { label: 'Visites sans compte rendu', value: pastVisitsWithoutReport, href: '/admin/suivi?tab=visites' },
+          { label: 'Réservations sans visite', value: reservationsWithoutVisit, href: '/admin/suivi?tab=reservations' },
+          { label: 'Refus sans motif', value: rejectedWithoutReason, href: '/admin/suivi' },
+          { label: 'Doublons potentiels', value: duplicateRows, href: '/admin/prospects/doublons' },
+          { label: 'Événements non rattachés', value: unlinked, href: '/admin/suivi' },
+        ]} />
       </div>
     </main>
   )
@@ -231,5 +241,3 @@ function SourceRow({ label, value, total }: { label: string; value: number; tota
 function Breakdown({ title, rows }: { title: string; rows: ConversionRow[] }) { return <div><h3 className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-3">{title}</h3><div className="space-y-3">{rows.length ? rows.map((row) => <div key={row.label}><div className="flex justify-between gap-2 text-xs mb-1"><span className="truncate text-[var(--text)]">{row.label}</span><span className="font-bold text-[var(--text)]">{row.rate}% <span className="font-normal text-[var(--text-muted)]">· {row.reservations}/{row.total}</span></span></div><div className="h-1.5 rounded-full bg-[var(--surface-hover)] overflow-hidden"><div className="h-full rounded-full bg-[var(--accent-luxury)]" style={{ width: `${row.rate}%` }} /></div></div>) : <p className="text-xs text-[var(--text-muted)]">Aucune donnée</p>}</div></div> }
 
 function QualityRow({ label, value }: { label: string; value: number }) { return <div className="flex items-center justify-between gap-3 rounded-xl bg-[var(--surface-hover)] px-3 py-2"><span className="text-xs text-[var(--text-muted)]">{label}</span><span className={`text-sm font-black tabular-nums ${value ? 'text-amber-700' : 'text-emerald-700'}`}>{value}</span></div> }
-
-function AlertLink({ label, value, href }: { label: string; value: number; href: string }) { return <a href={href} className="flex items-center justify-between gap-3 rounded-xl border border-amber-200/80 bg-white/50 px-3 py-2 hover:bg-white transition-colors"><span className="text-xs text-amber-900">{label}</span><span className={`text-sm font-black ${value ? 'text-amber-800' : 'text-emerald-700'}`}>{value}</span></a> }

@@ -15,7 +15,9 @@ CREATE TABLE public.prospects (
 );
 CREATE TABLE public.contact_requests (
   id uuid PRIMARY KEY, admin_validation_status text DEFAULT 'pending',
-  admin_validated_at timestamptz, admin_validated_by uuid, admin_note text
+  admin_validated_at timestamptz, admin_validated_by uuid, admin_note text,
+  created_at timestamptz NOT NULL DEFAULT now(), date_souhaitee date,
+  outcome text, prospect_id uuid, source text
 );
 CREATE TABLE public.visites (LIKE public.contact_requests INCLUDING ALL);
 CREATE TABLE public.reservations (LIKE public.contact_requests INCLUDING ALL);

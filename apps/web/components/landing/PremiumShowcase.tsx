@@ -193,7 +193,7 @@ export const PremiumShowcase = ({ properties }: { properties?: Property[] }) => 
           </p>
 
           <button 
-            onClick={() => router.push('/contact')}
+            onClick={() => router.push('/support')}
             className="group relative flex items-center gap-10 text-[var(--text)] border-b border-[var(--border)] pb-6 transition-all hover:border-[var(--accent-luxury)] hover:px-6 duration-500"
           >
             <span className="font-sans text-[10px] font-bold tracking-[0.4em] uppercase">Rejoindre le Cercle Privé</span>

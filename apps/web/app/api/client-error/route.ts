@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { logError } from '@/lib/error-logger'
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
 
 /**
  * Reçoit les erreurs client (boundary error.tsx) et les enregistre dans error_logs
  * via logError. Non-bloquant : répond toujours 200, ne casse jamais le client.
  */
 export async function POST(req: NextRequest) {
+  const rl = checkRateLimit(req, { scope: 'client-error', max: 20, windowMs: 10 * 60_000 })
+  if (!rl.ok) return rateLimitResponse(rl)
   try {
     const body = (await req.json().catch(() => ({}))) as Record<string, unknown>
     const err = new Error(typeof body.message === 'string' ? body.message : 'client error')

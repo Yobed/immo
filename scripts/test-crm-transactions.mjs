@@ -47,6 +47,7 @@ try {
   if (!process.argv.includes('--baseline-only')) {
     try { await access(join(root, migration)); await file(migration); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   }
+  if (!process.argv.includes('--baseline-only')) await file('supabase/migrations/032_crm_catalogue_indexes.sql');
   assert.equal(await sql("SELECT to_regprocedure('public.crm_validate_request(text,uuid,text,text)') IS NOT NULL"), 't', 'Atomic validation RPC must exist');
   await file('supabase/tests/crm_atomic_operations.sql');
   const validation = `${actor} SELECT public.crm_validate_request('reservation', 'cccccccc-0000-4000-8000-000000000003', 'approve', null);`;
