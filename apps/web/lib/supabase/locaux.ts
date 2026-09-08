@@ -1,15 +1,17 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-// TROIS projets Supabase pour les offres flash (scraping), free tier saturé
-// l'un après l'autre → on n'écrit que dans le plus récent, on lit les trois,
+// DEUX projets Supabase pour les offres flash (scraping), free tier saturé
+// l'un après l'autre → on n'écrit que dans le plus récent, on lit les deux,
 // on ne copie JAMAIS l'historique (décision Wilfried).
 //  - FRESH (jdjzcxvtvxfqflvwkfgv) : reçoit les NOUVELLES offres (write + read).
-//  - MID   (mignebexvzrpfxgbhjuf) : saturé → lecture seule (historique).
 //  - OLD   (udyfhzyvalansmhkynnc) : saturé → lecture seule (historique).
+// Un TROISIÈME projet, MID (mignebexvzrpfxgbhjuf), a été SUPPRIMÉ : son domaine
+// ne résout plus (ENOTFOUND, vérifié sur 3 résolveurs). Il était interrogé à
+// chaque chargement du catalogue et l'échec était avalé par un .catch() — une
+// requête morte par page pendant des semaines, invisible. Ses ids (100 000 à
+// 999 999) sont définitivement orphelins.
 const FRESH_URL = 'https://jdjzcxvtvxfqflvwkfgv.supabase.co'
 const FRESH_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkanpjeHZ0dnhmcWZsdndrZmd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY2MTM3MzUsImV4cCI6MjEwMjE4OTczNX0.KO6DptdkqSxBeF138yF-Rljmb8ScfaUr9p-HhmAtJJ4'
-const MID_URL = 'https://mignebexvzrpfxgbhjuf.supabase.co'
-const MID_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pZ25lYmV4dnpycGZ4Z2JoanVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1NjA5NzksImV4cCI6MjEwMDEzNjk3OX0.jiERuKejm7D96ILlnBfWQKcRnCLjVkKaxR-2Rz_hBek'
 const OLD_URL = 'https://udyfhzyvalansmhkynnc.supabase.co'
 const OLD_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkeWZoenl2YWxhbnNtaGt5bm5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTYzNTcsImV4cCI6MjA4Njc3MjM1N30.blMJPyp5n_j22AJn6cwKwrTeuxFbMutsnCfDd2AR_pI'
 
@@ -20,10 +22,8 @@ export const LOCAUX_LEGACY_MAX_ID = 99999 // borne haute OLD (rétro-compat)
 export const LOCAUX_FRESH_MIN_ID = 1_000_000 // borne basse FRESH
 
 let _fresh: SupabaseClient | null = null
-let _mid: SupabaseClient | null = null
 let _old: SupabaseClient | null = null
 let _freshAdmin: SupabaseClient | null = null
-let _midAdmin: SupabaseClient | null = null
 let _oldAdmin: SupabaseClient | null = null
 
 const OPTS = {
@@ -48,13 +48,6 @@ export function createLocauxClient(): SupabaseClient {
   return _fresh
 }
 
-/** Client lecture seule vers le projet intermédiaire MID (historique). */
-export function createLocauxMidClient(): SupabaseClient {
-  if (_mid) return _mid
-  _mid = createClient(MID_URL, MID_ANON, OPTS)
-  return _mid
-}
-
 /** Client lecture seule vers le plus ancien projet OLD (historique). */
 export function createLocauxLegacyClient(): SupabaseClient {
   if (_old) return _old
@@ -62,15 +55,17 @@ export function createLocauxLegacyClient(): SupabaseClient {
   return _old
 }
 
-/** Les trois sources de lecture, plus récent d'abord (listes fusionnées). */
+/** Les deux sources de lecture restantes, plus récent d'abord (listes fusionnées). */
 export function locauxReadClients(): SupabaseClient[] {
-  return [createLocauxClient(), createLocauxMidClient(), createLocauxLegacyClient()]
+  return [createLocauxClient(), createLocauxLegacyClient()]
 }
 
 /** Route une lecture par id vers le bon projet (plages disjointes). */
 export function locauxClientForId(id: number): SupabaseClient {
   if (id >= LOCAUX_FRESH_MIN_ID) return createLocauxClient()
-  if (id > LOCAUX_LEGACY_MAX_ID) return createLocauxMidClient()
+  // ponytail: la plage MID (100 000-999 999) est orpheline depuis la
+  // suppression du projet mignebexvzrpfxgbhjuf. Ces ids retombent sur
+  // legacy, qui ne les contient pas : lecture vide, jamais de crash.
   return createLocauxLegacyClient()
 }
 
@@ -83,13 +78,6 @@ export function createLocauxAdminClient(): SupabaseClient {
   return _freshAdmin
 }
 
-/** Admin du projet MID (retrait/restauration d'offres historiques). → LOCAUX_SUPABASE_SERVICE_ROLE_KEY */
-export function createLocauxMidAdminClient(): SupabaseClient {
-  if (_midAdmin) return _midAdmin
-  _midAdmin = createClient(MID_URL, svcKey('LOCAUX_SUPABASE_SERVICE_ROLE_KEY'), ADMIN_OPTS)
-  return _midAdmin
-}
-
 /** Admin du projet OLD (retrait/restauration d'offres historiques). → OLD_LOCAUX_SERVICE_ROLE_KEY */
 export function createLocauxLegacyAdminClient(): SupabaseClient {
   if (_oldAdmin) return _oldAdmin
@@ -100,7 +88,9 @@ export function createLocauxLegacyAdminClient(): SupabaseClient {
 /** Route une écriture admin par id vers le bon projet (plages disjointes). */
 export function locauxAdminForId(id: number): SupabaseClient {
   if (id >= LOCAUX_FRESH_MIN_ID) return createLocauxAdminClient()
-  if (id > LOCAUX_LEGACY_MAX_ID) return createLocauxMidAdminClient()
+  // ponytail: la plage MID (100 000-999 999) est orpheline depuis la
+  // suppression du projet mignebexvzrpfxgbhjuf. Ces ids retombent sur
+  // legacy, qui ne les contient pas : lecture vide, jamais de crash.
   return createLocauxLegacyAdminClient()
 }
 

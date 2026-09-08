@@ -10,9 +10,7 @@
 import { createClient } from '@/lib/supabase/server'
 import {
   createLocauxClient,
-  createLocauxMidClient,
   createLocauxAdminClient,
-  createLocauxMidAdminClient,
   createLocauxLegacyClient,
   locauxReadClients,
   locauxClientForId,
@@ -865,15 +863,14 @@ export async function getLocauxPagedItems(
       return { rows: data as LocauxRow[], count: count ?? 0 }
     }
 
-    // Lecture publique : les trois projets sont lus avec leurs clients anon.
+    // Lecture publique : les deux projets restants sont lus avec leurs clients anon.
     // Les clients service_role sont réservés aux écritures admin ; les utiliser
     // ici rendait FRESH silencieusement vide dès que la variable serveur manquait.
-    const [fresh, mid, legacy] = await Promise.all([
+    const [fresh, legacy] = await Promise.all([
       runOn(createLocauxClient()).catch(() => ({ rows: [] as LocauxRow[], count: 0 })),
-      runOn(createLocauxMidClient()).catch(() => ({ rows: [] as LocauxRow[], count: 0 })),
       runOn(createLocauxLegacyClient()).catch(() => ({ rows: [] as LocauxRow[], count: 0 })),
     ])
-    const merged = [...fresh.rows, ...mid.rows, ...legacy.rows].sort(byDatePubDesc).slice(from, to + 1)
+    const merged = [...fresh.rows, ...legacy.rows].sort(byDatePubDesc).slice(from, to + 1)
 
     const items: ConsolidatedBien[] = merged.map((row) => {
       const b = mapLocauxRow(row)
@@ -918,7 +915,7 @@ export async function getLocauxPagedItems(
       }
     })
 
-    return { items, total: fresh.count + mid.count + legacy.count }
+    return { items, total: fresh.count + legacy.count }
   } catch {
     return { items: [], total: 0 }
   }
