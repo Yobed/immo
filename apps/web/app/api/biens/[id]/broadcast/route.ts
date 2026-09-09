@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { wasenderSendMessage } from '@/lib/wasender'
+import { requireAuth, requireAdmin, safeErrorResponse } from '@/lib/auth/server'
 
 const getSupabase = () => createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,8 +13,12 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id: bienId } = await params
-  const supabase = getSupabase()
+  try {
+    const { user } = await requireAuth(req)
+    await requireAdmin(user.id)
+
+    const { id: bienId } = await params
+    const supabase = getSupabase()
 
   // Fetch the bien details
   const { data: bien } = await supabase
@@ -78,7 +83,7 @@ Intéressé(e) ? Répondez ici pour plus d'infos ou pour planifier une visite. �
     const phone = r.jid.split('@')[0]
     try {
       const result = await wasenderSendMessage(phone, message, 'text')
-      if ((result as any).status !== false) sent++
+      if (result.success === true) sent++
     } catch (err: any) {
       errors.push(`${phone}: ${err.message}`)
     }
@@ -94,5 +99,8 @@ Intéressé(e) ? Répondez ici pour plus d'infos ou pour planifier une visite. �
     sent_count: sent,
   })
 
-  return NextResponse.json({ sent, total: recipients.length, errors })
+    return NextResponse.json({ sent, total: recipients.length, errors })
+  } catch (error) {
+    return safeErrorResponse(error)
+  }
 }

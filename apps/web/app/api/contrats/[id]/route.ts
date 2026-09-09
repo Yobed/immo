@@ -11,14 +11,14 @@ export async function GET(
 
   const { data: contrat } = await supabase
     .from('contrats' as never)
-    .select('id, pdf_url, bailleur_id, preneur_id')
+    .select('id, pdf_url, proprietaire_id, locataire_id')
     .eq('id', id)
     .single()
 
   if (!contrat) return NextResponse.json({ error: 'Contrat introuvable' }, { status: 404 })
 
-  const c = contrat as { id: string; pdf_url: string; bailleur_id: string; preneur_id: string }
-  if (c.bailleur_id !== user.id && c.preneur_id !== user.id)
+  const c = contrat as { id: string; pdf_url: string; proprietaire_id: string; locataire_id: string }
+  if (c.proprietaire_id !== user.id && c.locataire_id !== user.id)
     return NextResponse.json({ error: 'Accès non autorisé' }, { status: 403 })
 
   return NextResponse.json({ pdfUrl: c.pdf_url })

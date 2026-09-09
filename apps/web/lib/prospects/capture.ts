@@ -85,11 +85,11 @@ function detectDeclaredName(message: string, history?: { role: string; content: 
   return cleaned.charAt(0).toUpperCase() + cleaned.slice(1)
 }
 
-export async function captureProspect(args: CaptureArgs): Promise<void> {
+export async function captureProspect(args: CaptureArgs): Promise<string | null> {
   const { phone, jid, nom, message, history } = args
-  if (!phone) return
+  if (!phone) return null
   const canonical = canonicalPhone(phone)
-  if (canonical.length < 8) return // numéro inexploitable
+  if (canonical.length < 8) return null // numéro inexploitable
 
   const p = parseSearchQuery(message)
   const found = {
@@ -106,14 +106,14 @@ export async function captureProspect(args: CaptureArgs): Promise<void> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: existing } = await (sb as any)
     .from('prospects')
-    .select('phone')
+    .select('id, phone')
     .eq('phone', canonical)
     .maybeSingle()
 
   // Pas de fiche pour un simple « Bonjour » ou un clic de pub : on ne crée la
   // fiche que quand le prospect exprime un VRAI besoin (type/commune/budget).
   // Une fiche déjà existante s'enrichit sur tous les messages (ex. date seule).
-  if (!existing && !hasSignal) return
+  if (!existing && !hasSignal) return null
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (sb as any).rpc('upsert_prospect', {
@@ -133,4 +133,14 @@ export async function captureProspect(args: CaptureArgs): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (sb as any).from('prospects').update({ nom: declaredName }).eq('phone', canonical)
   }
+
+  const { data: linked } = await (sb as any)
+    .from('prospects')
+    .select('id')
+    .eq('phone', canonical)
+    .is('merged_into', null)
+    .order('last_seen', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  return linked?.id ?? existing?.id ?? null
 }

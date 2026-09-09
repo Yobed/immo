@@ -8,6 +8,7 @@ import {
 } from '@/lib/notifications/whatsapp-notifier'
 import { isHoneypotFilledInBody } from '@/lib/honeypot'
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
+import { ensureProspectForIntake, samePhone } from '@/lib/crm/intake'
 
 export const runtime = 'nodejs'
 
@@ -122,28 +123,31 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  // 3) Anti-spam : 1 demande / 24h sur la même offre flash pour ce visiteur
+  // 3) Anti-spam : 1 demande / 24h sur la même offre flash pour ce visiteur.
+  // The service client is required here because anonymous users cannot SELECT
+  // their own rows under RLS. Phone variants are compared canonically.
+  const admin = createAdminClient()
   const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: existing } = await (supabase as any)
+  const { data: existing } = await (admin as any)
     .from('contact_requests')
-    .select('id, admin_validation_status, created_at')
+    .select('id, admin_validation_status, created_at, visitor_id, visitor_phone')
     .eq('locaux_id', locauxId)
-    .or(
-      user
-        ? `visitor_id.eq.${user.id},visitor_phone.eq.${visitorPhone}`
-        : `visitor_phone.eq.${visitorPhone}`,
-    )
     .gte('created_at', since)
     .order('created_at', { ascending: false })
-    .limit(1)
+    .limit(50)
 
-  if (existing && existing.length > 0) {
+  const duplicate = (existing ?? []).find((row: { id: string; admin_validation_status: string; visitor_id?: string | null; visitor_phone?: string | null }) =>
+    row.admin_validation_status !== 'rejected' &&
+    ((user && row.visitor_id === user.id) || samePhone(row.visitor_phone, visitorPhone))
+  )
+
+  if (duplicate) {
     return NextResponse.json(
       {
         error: 'Demande déjà enregistrée — notre conseiller vous recontacte sous peu',
-        existingId: existing[0].id,
-        status: existing[0].admin_validation_status,
+        existingId: duplicate.id,
+        status: duplicate.admin_validation_status,
       },
       { status: 409 },
     )
@@ -155,7 +159,6 @@ export async function POST(req: NextRequest) {
     .join(' · ') || 'Offre flash'
 
   // 5) Insertion via service_role (bypass RLS pour visiteur anonyme)
-  const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: created, error } = await (admin as any)
     .from('contact_requests')
@@ -176,10 +179,36 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error) {
+    if (error.code === '23505') {
+      const { data: raced } = await (admin as any)
+        .from('contact_requests')
+        .select('id, admin_validation_status')
+        .eq('locaux_id', locauxId)
+        .gte('created_at', since)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (raced) return NextResponse.json({
+        error: 'Demande déjà enregistrée — notre conseiller vous recontacte sous peu',
+        existingId: raced.id,
+        status: raced.admin_validation_status,
+      }, { status: 409 })
+    }
     return NextResponse.json({ error: error.message }, { status: 400 })
   }
 
+  const prospectId = await ensureProspectForIntake({
+    phone: visitorPhone,
+    name: visitorName,
+    message: body.reason as string | null | undefined,
+    source: 'flash',
+    entity: 'contact',
+    entityId: created.id,
+    supabase: admin,
+  })
+
   // 6) Notifier les admins par WhatsApp (best-effort, n'échoue pas la requête)
+  let notification = { sent: 0, failed: 0, total: 0 }
   try {
     const ctx: ContactRequestContext = {
       id: created.id,
@@ -193,15 +222,23 @@ export async function POST(req: NextRequest) {
       ownerPhone: locauxRow.telephone_bien || locauxRow.telephone || null,
       bienUrl: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bogbesgroup.com'}/offre-flash/${locauxId}`,
     }
-    await notifyAdminContactRequest(admin, ctx)
+    notification = await notifyAdminContactRequest(admin, ctx)
+    if (notification.failed > 0) {
+      // Keep the request successful, but expose an operationally actionable
+      // failure to the caller/admin UI instead of silently swallowing it.
+      console.error('[flash-contact] admin notification failure', notification)
+    }
   } catch (e) {
-    // Notification failure is non-critical
+    notification = { sent: 0, failed: 1, total: 1 }
+    console.error('[flash-contact] admin notification failure', e)
   }
 
   return NextResponse.json(
     {
       success: true,
       id: created.id,
+      prospect_id: prospectId,
+      notified: notification,
       message:
         'Demande enregistrée. Notre conseiller te recontacte rapidement pour organiser la visite.',
     },

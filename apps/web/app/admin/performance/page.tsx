@@ -71,7 +71,11 @@ export default async function AdminPerformancePage({ searchParams }: { searchPar
   const contactToVisit = cohortIds.length ? Math.round((visitedIds.size / cohortIds.length) * 100) : 0
   const visitToReservation = visitedIds.size ? Math.round((reservedIds.size / visitedIds.size) * 100) : 0
   const overall = cohortIds.length ? Math.round((reservedIds.size / cohortIds.length) * 100) : 0
-  const sourceCount = (source: string) => contacts.filter((r) => source === 'flash' ? r.source?.startsWith('flash') : (r.source ?? 'web') === source).length
+  // L'origine peut être portée par une demande de contact ou une visite
+  // WhatsApp. Compter uniquement les contacts sous-évalue les parcours qui
+  // commencent dans WhatsApp puis arrivent directement sur une visite.
+  const sourceRows = [...contacts, ...visites]
+  const sourceCount = (source: string) => sourceRows.filter((r) => source === 'flash' ? r.source?.startsWith('flash') : (r.source ?? 'web') === source).length
   const overdueFollowups = prospects.filter((r) => r.prochaine_action_at && new Date(r.prochaine_action_at).getTime() < Date.now() && !['gagne', 'perdu', 'traite'].includes(r.statut)).length
   const unassigned = prospects.filter((r) => !r.assigned_to && !['gagne', 'perdu', 'traite'].includes(r.statut)).length
   const phoneCounts = prospects.reduce<Record<string, number>>((acc, row) => {
@@ -184,9 +188,9 @@ export default async function AdminPerformancePage({ searchParams }: { searchPar
 
           <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface-card)] p-5 sm:p-6">
             <h2 className="font-bold text-[var(--text)]">Origine des demandes</h2><p className="text-xs text-[var(--text-muted)] mt-1 mb-6">Ce qui génère réellement des prospects</p>
-            <SourceRow label="Annonces web" value={sourceCount('web')} total={contacts.length} />
-            <SourceRow label="Offres flash" value={sourceCount('flash')} total={contacts.length} />
-            <SourceRow label="WhatsApp" value={sourceCount('whatsapp')} total={contacts.length} />
+            <SourceRow label="Annonces web" value={sourceCount('web')} total={sourceRows.length} />
+            <SourceRow label="Offres flash" value={sourceCount('flash')} total={sourceRows.length} />
+            <SourceRow label="WhatsApp" value={sourceCount('whatsapp')} total={sourceRows.length} />
             <div className="mt-6 rounded-xl bg-[var(--surface-hover)] p-4"><p className="text-xs font-bold text-[var(--text)]">Lecture recommandée</p><p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">Priorisez les demandes en attente, puis comparez la conversion de chaque source avant d’augmenter la diffusion.</p></div>
           </section>
         </div>

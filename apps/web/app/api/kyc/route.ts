@@ -1,6 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { getServerUser } from '@/lib/server-auth'
+import { requireAuth, requireAdmin } from '@/lib/auth/server'
+import crypto from 'node:crypto'
+
+function sameSecret(actual: string | null, expected: string | undefined): boolean {
+  if (!actual || !expected) return false
+  const a = Buffer.from(actual.trim())
+  const b = Buffer.from(expected.trim())
+  return a.length === b.length && crypto.timingSafeEqual(a, b)
+}
+
+async function authorizeKycPatch(req: NextRequest): Promise<boolean> {
+  const serviceKey = req.headers.get('x-service-key')
+  const bearer = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? null
+  if (sameSecret(serviceKey, process.env.SUPABASE_SERVICE_ROLE_KEY)) return true
+  if (sameSecret(bearer, process.env.CRON_SECRET)) return true
+
+  try {
+    const { user } = await requireAuth(req)
+    await requireAdmin(user.id)
+    return true
+  } catch {
+    return false
+  }
+}
 
 // POST /api/kyc — utilisateur soumet ses documents KYC
 export async function POST(req: NextRequest) {
@@ -33,7 +57,11 @@ export async function POST(req: NextRequest) {
 
 // PATCH /api/kyc — admin webhook pour valider/rejeter le KYC
 export async function PATCH(req: NextRequest) {
-  // Utilise service role — pas de vérif auth (webhook admin uniquement)
+  if (!(await authorizeKycPatch(req))) {
+    return NextResponse.json({ error: 'Authentification admin ou clé interne requise' }, { status: 401 })
+  }
+
+  // Le client service-role est utilisé uniquement après l'autorisation ci-dessus.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createServerClient<any>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -51,10 +79,16 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'statut invalide' }, { status: 400 })
   }
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from('profiles')
     .update({ kyc_statut: body.statut })
     .eq('id', body.userId)
+    .select('id')
+    .maybeSingle()
+
+  if (!updated && !error) {
+    return NextResponse.json({ error: 'Profil introuvable' }, { status: 404 })
+  }
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })

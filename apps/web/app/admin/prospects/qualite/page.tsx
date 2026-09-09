@@ -6,6 +6,34 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
+type ProspectRow = {
+  id: string
+  nom: string | null
+  phone: string | null
+  email: string | null
+  commune: string | null
+  type_bien: string | null
+  statut: string
+  assigned_to: string | null
+}
+
+async function fetchAllProspects(admin: ReturnType<typeof createAdminClient>): Promise<ProspectRow[]> {
+  const pageSize = 1000
+  const rows: ProspectRow[] = []
+  for (let from = 0; ; from += pageSize) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (admin as any)
+      .from('prospects')
+      .select('id, nom, phone, email, commune, type_bien, statut, assigned_to')
+      .order('last_seen', { ascending: false })
+      .range(from, from + pageSize - 1)
+    if (error) throw new Error(`Impossible de charger la qualité CRM : ${error.message}`)
+    const batch = (data ?? []) as ProspectRow[]
+    rows.push(...batch)
+    if (batch.length < pageSize) return rows
+  }
+}
+
 export default async function ProspectQualityPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -13,9 +41,7 @@ export default async function ProspectQualityPage() {
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
   if (profile?.role !== 'admin') notFound()
   const admin = createAdminClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (admin as any).from('prospects').select('id, nom, phone, email, commune, type_bien, statut, assigned_to').order('last_seen', { ascending: false }).limit(1000)
-  const rows = (data ?? []) as { id: string; nom: string | null; phone: string | null; email: string | null; commune: string | null; type_bien: string | null; statut: string; assigned_to: string | null }[]
+  const rows = await fetchAllProspects(admin)
   const checks = [
     { key: 'phone', label: 'Téléphone manquant', test: (r: typeof rows[number]) => !r.phone },
     { key: 'nom', label: 'Nom manquant', test: (r: typeof rows[number]) => !r.nom },

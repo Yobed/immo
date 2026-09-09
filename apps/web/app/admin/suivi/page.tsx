@@ -21,6 +21,7 @@ interface SearchParams {
   view?: View
   status?: AdminStatus | 'all'
   q?: string
+  page?: string
 }
 
 interface PageProps {
@@ -145,6 +146,10 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
   const view: View = sp.view || 'kanban'
   const listStatus = sp.status || 'pending'
   const q = sp.q?.trim() || ''
+  const page = Math.max(1, Number.parseInt(sp.page || '1', 10) || 1)
+  const pageSize = view === 'kanban' ? 200 : 100
+  const rangeStart = (page - 1) * pageSize
+  let hasMore = false
 
   const admin = createAdminClient()
 
@@ -180,13 +185,14 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
         proprietaire:profiles!visites_proprietaire_id_fkey ( full_name, phone )
       `)
       .order('created_at', { ascending: false })
-      .limit(view === 'kanban' ? 200 : 100)
+      .range(rangeStart, rangeStart + pageSize)
 
     if (view === 'list' && listStatus !== 'all') {
       query = query.eq('admin_validation_status', listStatus)
     }
     const { data } = await query
-    visites = applySearch((data ?? []) as VisiteRow[], q, (v) => [
+    hasMore = (data ?? []).length > pageSize
+    visites = applySearch((data ?? []).slice(0, pageSize) as VisiteRow[], q, (v) => [
       v.locataire?.full_name, v.locataire?.phone,
       v.client_name, v.client_phone,
       v.proprietaire?.full_name, v.proprietaire?.phone,
@@ -203,13 +209,14 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
         proprietaire:profiles!reservations_proprietaire_id_fkey ( full_name, phone )
       `)
       .order('created_at', { ascending: false })
-      .limit(view === 'kanban' ? 200 : 100)
+      .range(rangeStart, rangeStart + pageSize)
 
     if (view === 'list' && listStatus !== 'all') {
       query = query.eq('admin_validation_status', listStatus)
     }
     const { data } = await query
-    reservations = applySearch((data ?? []) as ReservationRow[], q, (r) => [
+    hasMore = (data ?? []).length > pageSize
+    reservations = applySearch((data ?? []).slice(0, pageSize) as ReservationRow[], q, (r) => [
       r.locataire?.full_name, r.locataire?.phone,
       r.proprietaire?.full_name, r.proprietaire?.phone,
     ])
@@ -224,13 +231,14 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
         proprietaire:profiles!contact_requests_proprietaire_id_fkey ( full_name, phone )
       `)
       .order('created_at', { ascending: false })
-      .limit(view === 'kanban' ? 200 : 100)
+      .range(rangeStart, rangeStart + pageSize)
 
     if (view === 'list' && listStatus !== 'all') {
       query = query.eq('admin_validation_status', listStatus)
     }
     const { data } = await query
-    contacts = applySearch((data ?? []) as ContactRow[], q, (c) => [
+    hasMore = (data ?? []).length > pageSize
+    contacts = applySearch((data ?? []).slice(0, pageSize) as ContactRow[], q, (c) => [
       c.visitor_name, c.visitor_phone, c.visitor_email,
       c.proprietaire?.full_name, c.proprietaire?.phone,
     ])
@@ -274,7 +282,7 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
         <div className="max-w-[1600px] mx-auto px-3 sm:px-6 overflow-x-auto no-scrollbar border-b border-[var(--border)]">
           <div className="flex items-center justify-center min-w-max gap-1">
           <Link
-            href={`/admin/suivi?tab=visites&view=${view}${qParam}`}
+            href={`/admin/suivi?tab=visites&view=${view}${qParam}&page=1`}
             className={`min-h-[48px] min-w-[112px] justify-center px-3 sm:px-4 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${
               tab === 'visites' ? 'border-[var(--accent-luxury)] text-[var(--accent-luxury)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text)]'
             }`}
@@ -285,7 +293,7 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
             )}
           </Link>
           <Link
-            href={`/admin/suivi?tab=reservations&view=${view}${qParam}`}
+            href={`/admin/suivi?tab=reservations&view=${view}${qParam}&page=1`}
             className={`min-h-[48px] min-w-[136px] justify-center px-3 sm:px-4 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${
               tab === 'reservations' ? 'border-[var(--accent-luxury)] text-[var(--accent-luxury)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text)]'
             }`}
@@ -296,7 +304,7 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
             )}
           </Link>
           <Link
-            href={`/admin/suivi?tab=contacts&view=${view}${qParam}`}
+            href={`/admin/suivi?tab=contacts&view=${view}${qParam}&page=1`}
             className={`min-h-[48px] min-w-[112px] justify-center px-3 sm:px-4 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${
               tab === 'contacts' ? 'border-[var(--accent-luxury)] text-[var(--accent-luxury)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text)]'
             }`}
@@ -313,11 +321,12 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
         <form className="max-w-[1600px] mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center gap-3">
           <input type="hidden" name="tab" value={tab} />
           <input type="hidden" name="view" value={view} />
+          <input type="hidden" name="page" value="1" />
 
           {/* Toggle kanban / liste */}
           <div className="flex items-center gap-1 bg-[var(--surface-hover)] p-1 rounded-xl">
             <Link
-              href={`/admin/suivi?tab=${tab}&view=kanban${qParam}`}
+              href={`/admin/suivi?tab=${tab}&view=kanban${qParam}&page=1`}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
                 view === 'kanban' ? 'bg-[var(--surface-card)] text-[var(--text)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text)]'
               }`}
@@ -325,7 +334,7 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
               <LayoutGrid className="w-3.5 h-3.5" /> Kanban
             </Link>
             <Link
-              href={`/admin/suivi?tab=${tab}&view=list&status=pending${qParam}`}
+              href={`/admin/suivi?tab=${tab}&view=list&status=pending${qParam}&page=1`}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
                 view === 'list' ? 'bg-[var(--surface-card)] text-[var(--text)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text)]'
               }`}
@@ -340,7 +349,7 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
               {(['pending', 'approved', 'rejected', 'all'] as const).map((s) => (
                 <Link
                   key={s}
-                  href={`/admin/suivi?tab=${tab}&view=list&status=${s}${qParam}`}
+                  href={`/admin/suivi?tab=${tab}&view=list&status=${s}${qParam}&page=1`}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
                     listStatus === s ? 'bg-[var(--surface-card)] text-[var(--text)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text)]'
                   }`}
@@ -361,7 +370,7 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
             placeholder="Bien, commune, nom, téléphone..."
             className="flex-1 min-w-[260px] px-4 py-2 bg-[var(--surface-hover)] border border-[var(--border)] rounded-xl text-sm focus:outline-none focus:border-slate-400"
           />
-          <button type="submit" className="px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800">
+          <button type="submit" className="min-h-[44px] px-4 py-2 bg-[var(--text)] text-[var(--surface-card)] rounded-xl text-sm font-bold hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-luxury)]">
             Filtrer
           </button>
         </form>
@@ -385,6 +394,23 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
         ) : (
           <ListView tab={tab} visites={visites} reservations={reservations} contacts={contacts} />
         )}
+        <nav aria-label="Pagination du suivi" className="mt-6 flex items-center justify-between gap-3">
+          <span className="text-xs text-[var(--text-muted)]">Page {page}{hasMore ? '' : ' · dernière page'}</span>
+          <div className="flex items-center gap-2">
+            {page > 1 && (
+              <Link
+                href={`/admin/suivi?tab=${tab}&view=${view}${view === 'list' ? `&status=${listStatus}` : ''}${qParam}&page=${page - 1}`}
+                className="min-h-[44px] inline-flex items-center rounded-xl border border-[var(--border)] px-4 text-sm font-bold text-[var(--text)] hover:bg-[var(--surface-card)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-luxury)]"
+              >Précédente</Link>
+            )}
+            {hasMore && (
+              <Link
+                href={`/admin/suivi?tab=${tab}&view=${view}${view === 'list' ? `&status=${listStatus}` : ''}${qParam}&page=${page + 1}`}
+                className="min-h-[44px] inline-flex items-center rounded-xl bg-[var(--text)] px-4 text-sm font-bold text-[var(--surface-card)] hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-luxury)]"
+              >Suivante</Link>
+            )}
+          </div>
+        </nav>
       </div>
     </main>
   )

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/server-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
+import { ensureProspectForIntake, samePhone } from '@/lib/crm/intake'
 import {
   notifyAdminContactRequest,
   type ContactRequestContext,
@@ -86,35 +87,37 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  // Use the service client for dedupe: anonymous visitors have no SELECT policy.
+  // Compare canonical forms so 05…, +22505… and 00225 05… are one person.
+  const admin = createAdminClient()
   // Anti-spam basique : 1 demande / 24h pour le même visiteur sur le même bien
   const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: existing } = await (supabase as any)
+  const { data: existing } = await (admin as any)
     .from('contact_requests')
-    .select('id, admin_validation_status, created_at')
+    .select('id, admin_validation_status, created_at, visitor_id, visitor_phone')
     .eq('bien_id', bienId)
-    .or(
-      user
-        ? `visitor_id.eq.${user.id},visitor_phone.eq.${visitorPhone}`
-        : `visitor_phone.eq.${visitorPhone}`
-    )
     .gte('created_at', since)
     .order('created_at', { ascending: false })
-    .limit(1)
+    .limit(50)
 
-  if (existing && existing.length > 0) {
+  const duplicate = (existing ?? []).find((row: { id: string; admin_validation_status: string; visitor_id?: string | null; visitor_phone?: string | null }) =>
+    row.admin_validation_status !== 'rejected' &&
+    ((user && row.visitor_id === user.id) || samePhone(row.visitor_phone, visitorPhone))
+  )
+
+  if (duplicate) {
     return NextResponse.json(
       {
         error: 'Vous avez déjà fait une demande pour ce bien dans les dernières 24h',
-        existingId: existing[0].id,
-        status: existing[0].admin_validation_status,
+        existingId: duplicate.id,
+        status: duplicate.admin_validation_status,
       },
       { status: 409 }
     )
   }
 
   // Création (en service_role pour bypasser RLS si visitor_id null + utilisateur non auth)
-  const admin = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: created, error } = await (admin as any)
     .from('contact_requests')
@@ -132,8 +135,34 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error) {
+    // The SQL fingerprint closes the concurrent check-then-insert race.
+    if (error.code === '23505') {
+      const { data: raced } = await (admin as any)
+        .from('contact_requests')
+        .select('id, admin_validation_status')
+        .eq('bien_id', bienId)
+        .gte('created_at', since)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (raced) return NextResponse.json({
+        error: 'Vous avez déjà fait une demande pour ce bien dans les dernières 24h',
+        existingId: raced.id,
+        status: raced.admin_validation_status,
+      }, { status: 409 })
+    }
     return NextResponse.json({ error: error.message }, { status: 400 })
   }
+
+  const prospectId = await ensureProspectForIntake({
+    phone: visitorPhone,
+    name: visitorName,
+    message: body.reason,
+    source: 'web',
+    entity: 'contact',
+    entityId: created.id,
+    supabase: admin,
+  })
 
   // Charge le contact du propriétaire pour l'inclure dans la notif admin :
   // l'admin doit pouvoir joindre le proprio tout de suite.
@@ -164,15 +193,18 @@ export async function POST(req: NextRequest) {
   }
 
   // Notif équipe admin (await obligatoire sur Vercel serverless)
-  let notif: { sent: number; total: number } = { sent: 0, total: 0 }
+  let notif: { sent: number; failed: number; total: number } = { sent: 0, failed: 0, total: 0 }
   try {
     notif = await notifyAdminContactRequest(admin, ctx)
   } catch (err) {
-    // Notification failure is non-critical — request still succeeds
+    // Notification failure is non-critical — request still succeeds, but the
+    // response keeps an explicit failed count for the admin UI/monitoring.
+    notif = { sent: 0, failed: 1, total: 1 }
+    console.error('[contact-request] admin notification failure', err)
   }
 
   return NextResponse.json(
-    { id: created.id, admin_validation_status: 'pending', notified: notif },
+    { id: created.id, prospect_id: prospectId, admin_validation_status: 'pending', notified: notif },
     { status: 201 }
   )
 }

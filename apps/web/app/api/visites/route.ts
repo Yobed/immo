@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server'
 import { getServerUser } from '@/lib/server-auth'
-import { notifyAdminVisitRequest, notifyOwnerVisitApproved, type VisitContext } from '@/lib/notifications/whatsapp-notifier'
+import { notifyAdminVisitRequest, notifyOwnerVisitPending, type VisitContext } from '@/lib/notifications/whatsapp-notifier'
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import { logError } from '@/lib/error-logger'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { ensureProspectForIntake } from '@/lib/crm/intake'
 
-// POST — créer une demande de visite (workflow admin-first)
-// Le propriétaire EST notifié à ce stade pour vérifier sa disponibilité.
+// POST — créer une demande de visite (workflow admin-first).
+// Le propriétaire reçoit une demande EN ATTENTE, jamais une confirmation.
 export async function POST(request: Request) {
   // Rate limit : max 5 demandes de visite par IP / 5 minutes (anti-spam)
   const rl = checkRateLimit(request, { scope: 'visite-create', max: 5, windowMs: 5 * 60_000 })
@@ -46,6 +48,33 @@ export async function POST(request: Request) {
   const heure_debut = parts[0] ?? null
   const heure_fin = parts[1] ?? null
 
+  // Load the visitor once, before the insert, so the same phone can be linked
+  // to the CRM and the WhatsApp notice contains the right reference.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: visitor } = await (supabase as any)
+    .from('profiles')
+    .select('full_name, phone')
+    .eq('id', user.id)
+    .single()
+
+  const { data: duplicate } = await (supabase as any)
+    .from('visites')
+    .select('id, admin_validation_status')
+    .eq('bien_id', bien_id)
+    .eq('locataire_id', user.id)
+    .eq('date_souhaitee', date_souhaitee)
+    .eq('heure_debut', heure_debut)
+    .not('admin_validation_status', 'eq', 'rejected')
+    .limit(1)
+    .maybeSingle()
+  if (duplicate) {
+    return NextResponse.json({
+      error: 'Une demande identique est déjà en cours pour ce bien et ce créneau',
+      existingId: duplicate.id,
+      status: duplicate.admin_validation_status,
+    }, { status: 409 })
+  }
+
   const { data, error } = await (supabase as any)
     .from('visites')
     .insert({
@@ -55,6 +84,7 @@ export async function POST(request: Request) {
       date_souhaitee,
       heure_debut,
       heure_fin,
+      client_phone: visitor?.phone ?? null,
       notes: message ?? null,
       statut: 'en_attente',
       admin_validation_status: 'pending',
@@ -64,6 +94,9 @@ export async function POST(request: Request) {
     .single()
 
   if (error) {
+    if (error.code === '23505') {
+      return NextResponse.json({ error: 'Une demande identique est déjà en cours pour ce bien et ce créneau' }, { status: 409 })
+    }
     await logError(error, {
       source: 'api',
       route: '/api/visites',
@@ -73,13 +106,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 400 })
   }
 
-  // Récupérer les infos visiteur pour la notif admin
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: visitor } = await (supabase as any)
-    .from('profiles')
-    .select('full_name, phone')
-    .eq('id', user.id)
-    .single()
+  const admin = createAdminClient()
+  const prospectId = await ensureProspectForIntake({
+    phone: visitor?.phone,
+    name: visitor?.full_name,
+    message,
+    source: 'web',
+    entity: 'visite',
+    entityId: data.id,
+    supabase: admin,
+  })
 
   const ctx: VisitContext = {
     id: data.id,
@@ -96,16 +132,17 @@ export async function POST(request: Request) {
   // Notif équipe admin et propriétaire
   // ⚠ Vercel serverless : les fonctions sont gelées dès la réponse HTTP.
   // On AWAIT pour garantir l'envoi avant fin de la requête.
-  let notifAdmin: { sent: number; total: number } = { sent: 0, total: 0 }
+  let notifAdmin: { sent: number; failed: number; total: number } = { sent: 0, failed: 0, total: 0 }
   try {
-    notifAdmin = await notifyAdminVisitRequest(supabase, ctx)
+    notifAdmin = await notifyAdminVisitRequest(admin, ctx)
   } catch (err) {
-    // Notification failure is non-critical
+    notifAdmin = { sent: 0, failed: 1, total: 1 }
+    console.error('[visite] admin notification failure', err)
   }
 
   // Notif propriétaire
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: owner } = await (supabase as any)
+  const { data: owner } = await (admin as any)
     .from('profiles')
     .select('full_name, phone')
     .eq('id', bien.proprietaire_id)
@@ -115,7 +152,7 @@ export async function POST(request: Request) {
     ctx.ownerName = owner.full_name
     ctx.ownerPhone = owner.phone
     try {
-      await notifyOwnerVisitApproved(supabase, ctx)
+      await notifyOwnerVisitPending(admin, ctx)
     } catch {
       // Notification failure is non-critical
     }
@@ -142,7 +179,7 @@ export async function POST(request: Request) {
       `Notre équipe vérifie la demande et vous tient informé.`,
     ].join('\n')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase.from('notifications') as any).insert({
+    await (admin.from('notifications') as any).insert({
       user_id:   bien.proprietaire_id,
       type:      'visite_demandee',
       titre:     'Nouvelle demande de visite',
@@ -155,7 +192,7 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json(
-    { id: data.id, admin_validation_status: 'pending', notified: notifAdmin },
+    { id: data.id, prospect_id: prospectId, admin_validation_status: 'pending', notified: notifAdmin },
     { status: 201 }
   )
 }

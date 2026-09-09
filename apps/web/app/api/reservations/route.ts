@@ -6,6 +6,8 @@ import {
 } from '@/lib/notifications/whatsapp-notifier'
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import { logError } from '@/lib/error-logger'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { ensureProspectForIntake } from '@/lib/crm/intake'
 
 export async function POST(req: NextRequest) {
   // Rate limit : max 5 réservations par IP / 5 minutes
@@ -27,6 +29,29 @@ export async function POST(req: NextRequest) {
   }
   if (new Date(body.dateFin) <= new Date(body.dateDebut)) {
     return NextResponse.json({ error: 'dateFin doit etre apres dateDebut' }, { status: 400 })
+  }
+
+  const admin = createAdminClient()
+
+  // Exact repeats are rejected before the broader overlap check. The SQL
+  // trigger below repeats this guard under an advisory lock for concurrent
+  // requests that arrive at the same time.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: duplicate } = await (supabase.from('reservations') as any)
+    .select('id, admin_validation_status')
+    .eq('bien_id', body.bienId)
+    .eq('locataire_id', user.id)
+    .eq('date_debut', body.dateDebut)
+    .eq('date_fin', body.dateFin)
+    .not('admin_validation_status', 'eq', 'rejected')
+    .limit(1)
+    .maybeSingle()
+  if (duplicate) {
+    return NextResponse.json({
+      error: 'Cette demande de réservation est déjà enregistrée',
+      existingId: duplicate.id,
+      status: duplicate.admin_validation_status,
+    }, { status: 409 })
   }
 
   // RESA-01 : Verifier les conflits de dates avant creation (overlap SQL)
@@ -55,6 +80,12 @@ export async function POST(req: NextRequest) {
   if (!bien) {
     return NextResponse.json({ error: 'Bien introuvable' }, { status: 404 })
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: visitor } = await (supabase.from('profiles') as any)
+    .select('full_name, phone')
+    .eq('id', user.id)
+    .single()
 
   const isNuitee = bien.type_bien === 'residence_meublee' && bien.prix_nuit_fcfa
   const nbNuits  = Math.ceil(
@@ -90,6 +121,9 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error) {
+    if (error.code === '23505' || error.code === '23P01') {
+      return NextResponse.json({ error: 'Ces dates sont déjà demandées ou réservées pour ce bien' }, { status: 409 })
+    }
     await logError(error, {
       source: 'api',
       route: '/api/reservations',
@@ -99,12 +133,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 400 })
   }
 
-  // Récupérer le visiteur pour la notif admin
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: visitor } = await (supabase.from('profiles') as any)
-    .select('full_name, phone')
-    .eq('id', user.id)
-    .single()
+  const prospectId = await ensureProspectForIntake({
+    phone: visitor?.phone,
+    name: visitor?.full_name,
+    message: body.notes,
+    source: 'web',
+    entity: 'reservation',
+    entityId: reservation.id,
+    supabase: admin,
+  })
 
   const ctx: ReservationContext = {
     id: reservation.id,
@@ -119,11 +156,12 @@ export async function POST(req: NextRequest) {
 
   // Notif équipe admin uniquement (proprio attend la validation).
   // ⚠ Vercel serverless : await obligatoire avant fin de la requête.
-  let notif: { sent: number; total: number } = { sent: 0, total: 0 }
+  let notif: { sent: number; failed: number; total: number } = { sent: 0, failed: 0, total: 0 }
   try {
-    notif = await notifyAdminReservationRequest(supabase, ctx)
-  } catch {
-    // Notification failure is non-critical
+    notif = await notifyAdminReservationRequest(admin, ctx)
+  } catch (err) {
+    notif = { sent: 0, failed: 1, total: 1 }
+    console.error('[reservation] admin notification failure', err)
   }
 
   // ─── Notification in-app pour le PROPRIO ────────────────────────────────
@@ -148,7 +186,7 @@ export async function POST(req: NextRequest) {
     ].join('\n')
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase.from('notifications') as any).insert({
+    await (admin.from('notifications') as any).insert({
       user_id:   bien.proprietaire_id,
       type:      'reservation_nouvelle',
       titre,
@@ -161,7 +199,7 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json(
-    { ...reservation, admin_validation_status: 'pending', notified: notif },
+    { ...reservation, prospect_id: prospectId, admin_validation_status: 'pending', notified: notif },
     { status: 201 }
   )
 }

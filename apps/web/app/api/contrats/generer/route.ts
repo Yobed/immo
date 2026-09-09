@@ -4,11 +4,35 @@ import { renderToBuffer }            from '@react-pdf/renderer'
 import { createElement }             from 'react'
 import { ContratDocument }           from '@/lib/contrat-pdf'
 import type { ContratProps }         from '@/lib/contrat-pdf'
+import crypto from 'node:crypto'
 
 // Ce handler utilise renderToBuffer — necessite serverExternalPackages dans next.config.ts
 
+function sameSecret(actual: string | null, expected: string | undefined): boolean {
+  if (!actual || !expected) return false
+  const a = Buffer.from(actual.trim())
+  const b = Buffer.from(expected.trim())
+  return a.length === b.length && crypto.timingSafeEqual(a, b)
+}
+
+function hasInternalAuth(req: NextRequest): boolean {
+  const serviceKey = req.headers.get('x-service-key')
+  const bearer = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? null
+  return (
+    sameSecret(serviceKey, process.env.SUPABASE_SERVICE_ROLE_KEY) ||
+    sameSecret(bearer, process.env.CRON_SECRET)
+  )
+}
+
 export async function POST(req: NextRequest) {
-  // Utiliser service role key : appelable depuis webhook (non authentifie) apres paiement confirme
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY || (!process.env.CRON_SECRET && !req.headers.get('x-service-key'))) {
+    return NextResponse.json({ error: 'Génération non configurée' }, { status: 500 })
+  }
+  if (!hasInternalAuth(req)) {
+    return NextResponse.json({ error: 'Authentification interne requise' }, { status: 401 })
+  }
+
+  // Utiliser service role key uniquement après authentification interne.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createServerClient<any>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -26,14 +50,17 @@ export async function POST(req: NextRequest) {
     .from('reservations')
     .select(`
       id, date_debut, date_fin, montant_loyer_fcfa, locataire_id,
+      statut, admin_validation_status,
       biens (
         id, titre, adresse_complete, commune, surface_m2, nb_pieces,
         charges_mois_fcfa, depot_garantie_fcfa,
         proprietaire_id
       ),
-      profiles!locataire_id ( nom_complet, telephone )
+      profiles!locataire_id ( full_name, phone )
     `)
     .eq('id', body.reservationId)
+    .eq('admin_validation_status', 'approved')
+    .eq('statut', 'confirmee')
     .single()
 
   if (resaError || !resa) {
@@ -43,7 +70,7 @@ export async function POST(req: NextRequest) {
   // Recuperer le profil bailleur
   const { data: bailleur } = await supabase
     .from('profiles')
-    .select('nom_complet, telephone')
+    .select('full_name, phone')
     .eq('id', (resa.biens as unknown as { proprietaire_id: string }).proprietaire_id)
     .single()
 
@@ -52,7 +79,7 @@ export async function POST(req: NextRequest) {
     surface_m2: number; nb_pieces: number; charges_mois_fcfa: number;
     depot_garantie_fcfa: number; proprietaire_id: string
   }
-  const locataire = resa.profiles as unknown as { nom_complet: string; telephone: string } | null
+  const locataire = resa.profiles as unknown as { full_name: string; phone: string } | null
   const today     = new Date().toLocaleDateString('fr-FR')
 
   const contratProps: ContratProps = {
@@ -60,12 +87,12 @@ export async function POST(req: NextRequest) {
     reservationId:      resa.id,
     dateDebut:          resa.date_debut,
     dateFin:            resa.date_fin,
-    bailleurNom:        (bailleur as { nom_complet: string } | null)?.nom_complet ?? 'Non renseigne',
+    bailleurNom:        (bailleur as { full_name: string } | null)?.full_name ?? 'Non renseigne',
     bailleurCni:        '—',
-    bailleurTel:        (bailleur as { telephone: string } | null)?.telephone ?? '—',
-    preneurNom:         locataire?.nom_complet ?? 'Non renseigne',
+    bailleurTel:        (bailleur as { phone: string } | null)?.phone ?? '—',
+    preneurNom:         locataire?.full_name ?? 'Non renseigne',
     preneurCni:         '—',
-    preneurTel:         locataire?.telephone   ?? '—',
+    preneurTel:         locataire?.phone   ?? '—',
     bienAdresse:        bien.adresse_complete  ?? bien.titre,
     bienCommune:        bien.commune,
     surfaceM2:          bien.surface_m2        ?? 0,
@@ -108,14 +135,14 @@ export async function POST(req: NextRequest) {
     .insert({
       reservation_id:      resa.id,
       bien_id:             bien.id,
-      bailleur_id:         bien.proprietaire_id,
-      preneur_id:          resa.locataire_id,
+      proprietaire_id:     bien.proprietaire_id,
+      locataire_id:        resa.locataire_id,
       date_debut:          resa.date_debut,
       date_fin:            resa.date_fin,
       loyer_mois_fcfa:     contratProps.loyerMoisFcfa,
       charges_mois_fcfa:   contratProps.chargesMoisFcfa,
       depot_garantie_fcfa: contratProps.depotGarantieFcfa,
-      statut:              'brouillon',
+      statut:              'en_attente',
       pdf_url:             pdfUrl,
     })
     .select('id')

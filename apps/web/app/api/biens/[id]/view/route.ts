@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
 
 function getServiceClient() {
   return createClient(
@@ -22,9 +23,11 @@ async function countViews(bienId: string): Promise<number> {
 
 /** POST: enregistre une vue + retourne le compteur 7 derniers jours. */
 export async function POST(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const rl = checkRateLimit(req, { scope: 'bien-view', max: 30, windowMs: 60_000 })
+  if (!rl.ok) return rateLimitResponse(rl)
   const { id } = await params
   const supabase = getServiceClient()
 
@@ -39,9 +42,11 @@ export async function POST(
 
 /** GET: retourne uniquement le compteur (lecture seule, pas d'insert). */
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const rl = checkRateLimit(req, { scope: 'bien-view-read', max: 60, windowMs: 60_000 })
+  if (!rl.ok) return rateLimitResponse(rl)
   const { id } = await params
   return NextResponse.json({ count: await countViews(id) })
 }

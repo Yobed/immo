@@ -11,6 +11,7 @@ import {
   NO_RESULTS_MESSAGE,
 } from '@/lib/ai/qualification';
 import { captureProspect } from '@/lib/prospects/capture';
+import { linkIntakeToProspect } from '@/lib/crm/intake';
 import { extractBienFromWhatsApp } from '@/lib/extractors/whatsapp-bien-extractor';
 import { upsertProspect, recordOptOut } from '@/lib/outreach/agent-prospects';
 import { tryInviteProspect } from '@/lib/outreach/dispatch';
@@ -221,11 +222,12 @@ export async function POST(req: NextRequest) {
     const rawBody = await req.text();
     const signature = req.headers.get('x-webhook-signature');
 
-    // Verify signature if present.
+    // La signature est obligatoire : sans secret configuré ou sans en-tête,
+    // le webhook ne doit jamais traiter un message externe.
     // Log entry pour diagnostiquer les 401 silencieux : on saura toujours
     // qu'un payload est arrivé même quand la signature ne matche pas.
     console.log(`[Webhook] POST received bodyLen=${rawBody.length} hasSig=${!!signature} sigPrefix=${signature?.slice(0, 8) ?? 'none'}`);
-    if (signature && !verifyWasenderSignature(rawBody, signature)) {
+    if (!signature || !verifyWasenderSignature(rawBody, signature)) {
       console.warn('[Webhook] Signature invalid — rejecting with 401');
       return NextResponse.json({error: 'Invalid signature'}, {status: 401})
     }
@@ -449,10 +451,13 @@ export async function POST(req: NextRequest) {
     // post-clôture pour capter aussi les réponses tardives (« pour dans 2 mois »
     // arrive après le handoff). Annonces/démarcheurs déjà écartés plus haut.
     // Best-effort : ne bloque jamais la réponse.
+    let capturedProspectId: string | null = null;
     try {
-      await captureProspect({ phone: senderPn, jid, nom: contactName, message: userMessage, history: formattedHistory });
-    } catch {
-      /* la capture prospect ne bloque jamais la réponse */
+      capturedProspectId = await captureProspect({ phone: senderPn, jid, nom: contactName, message: userMessage, history: formattedHistory });
+    } catch (error) {
+      // The conversation must continue, but a missing CRM capture is an
+      // operational failure and must remain visible in Vercel logs.
+      console.error('[whatsapp] CRM prospect capture failed', error);
     }
 
     // 2d. Suivi post-clôture : le dernier message Sapphire annonçait la reprise
@@ -663,11 +668,19 @@ export async function POST(req: NextRequest) {
             client_jid: jid,
             client_name: contactName,
             client_phone: senderPn,
+            prospect_id: capturedProspectId,
             date_souhaitee: dateSouhaitee,
             statut: 'en_attente',
             source: 'whatsapp',
             notes: `Demande via WhatsApp. Message : "${userMessage.slice(0, 200)}"`,
           }).select('id').single();
+
+          if (visiteRow?.id) {
+            // Capture can intentionally skip a bare first message. The SQL
+            // linker still reconciles this RDV against an existing prospect
+            // using all accepted phone formats.
+            await linkIntakeToProspect('visite', visiteRow.id, senderPn, supabase);
+          }
 
           // Notification proprio immédiate (sans détails client — date + horaire uniquement)
           const ownerProfile = Array.isArray(bienRow?.profiles) ? bienRow.profiles[0] : bienRow?.profiles;

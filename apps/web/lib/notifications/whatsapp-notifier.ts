@@ -18,6 +18,12 @@ import { whatsappLink } from '@/lib/whatsapp'
 export type NotificationRelatedType = 'visite' | 'reservation' | 'contact_request'
 export type RecipientRole = 'admin' | 'owner' | 'visitor'
 
+export interface NotificationSummary {
+  sent: number
+  failed: number
+  total: number
+}
+
 export interface VisitContext {
   id: string
   bienTitre: string
@@ -81,9 +87,10 @@ function getAdminNumbers(): string[] {
 
 function getBaseUrl(): string {
   const raw =
+    process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.NEXT_PUBLIC_APP_URL ||
     process.env.APP_BASE_URL ||
-    'http://localhost:3000'
+    'https://www.bogbesgroup.com'
   // Strip whitespace AND literal \r\n / \n / \r suffixes injected by Vercel CLI
   return raw
     .replace(/(\\r\\n|\\n|\\r)+/g, '')
@@ -368,10 +375,11 @@ function tplVisitorReservationRejected(
 export async function notifyAdminVisitRequest(
   supabase: SupabaseClient,
   ctx: VisitContext
-): Promise<{ sent: number; total: number }> {
+): Promise<NotificationSummary> {
   const admins = getAdminNumbers()
   const message = tplAdminVisitRequest(ctx)
   let sent = 0
+  let failed = 0
 
   // eslint-disable-next-line no-console
   console.log(`[whatsapp-notifier] Sending to ${admins.length} admins: ${admins.join(', ')}`)
@@ -379,6 +387,7 @@ export async function notifyAdminVisitRequest(
   for (const phone of admins) {
     const result = await send(phone, message)
     if (result.success) sent++
+    else failed++
     await logNotification(supabase, {
       toPhone: phone,
       role: 'admin',
@@ -397,7 +406,7 @@ export async function notifyAdminVisitRequest(
       .eq('id', ctx.id)
   }
 
-  return { sent, total: admins.length }
+  return { sent, failed, total: admins.length }
 }
 
 /**
@@ -509,14 +518,16 @@ export async function notifyVisitorVisitRejected(
 export async function notifyAdminReservationRequest(
   supabase: SupabaseClient,
   ctx: ReservationContext
-): Promise<{ sent: number; total: number }> {
+): Promise<NotificationSummary> {
   const admins = getAdminNumbers()
   const message = tplAdminReservationRequest(ctx)
   let sent = 0
+  let failed = 0
 
   for (const phone of admins) {
     const result = await send(phone, message)
     if (result.success) sent++
+    else failed++
     await logNotification(supabase, {
       toPhone: phone,
       role: 'admin',
@@ -535,7 +546,7 @@ export async function notifyAdminReservationRequest(
       .eq('id', ctx.id)
   }
 
-  return { sent, total: admins.length }
+  return { sent, failed, total: admins.length }
 }
 
 export async function notifyOwnerReservationApproved(
@@ -712,14 +723,16 @@ function tplVisitorContactRejected(ctx: ContactRequestContext, reason?: string):
 export async function notifyAdminContactRequest(
   supabase: SupabaseClient,
   ctx: ContactRequestContext
-): Promise<{ sent: number; total: number }> {
+): Promise<NotificationSummary> {
   const admins = getAdminNumbers()
   const message = tplAdminContactRequest(ctx)
   let sent = 0
+  let failed = 0
 
   for (const phone of admins) {
     const result = await send(phone, message)
     if (result.success) sent++
+    else failed++
     await logNotification(supabase, {
       toPhone: phone,
       role: 'admin',
@@ -738,7 +751,7 @@ export async function notifyAdminContactRequest(
       .eq('id', ctx.id)
   }
 
-  return { sent, total: admins.length }
+  return { sent, failed, total: admins.length }
 }
 
 export async function notifyVisitorContactApproved(

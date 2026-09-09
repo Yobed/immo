@@ -39,15 +39,13 @@ export interface WasenderSendResponse {
 /**
  * Vérifie la signature du webhook Wasender.
  *
- * Wasender peut envoyer la signature dans plusieurs formats selon la version :
- *   1. HMAC-SHA256 hex (standard)
- *   2. HMAC-SHA256 avec préfixe `sha256=...`
- *   3. Le secret partagé tel quel (variante simple)
- *
- * On accepte les trois pour rester compatible.
+ * Wasender peut envoyer la signature HMAC-SHA256 hex avec ou sans le préfixe
+ * `sha256=` selon la version de l'intégration.
  */
 export function verifyWasenderSignature(payload: string, signature: string): boolean {
-  if (!WASSENDER_WEBHOOK_SECRET) return true; // Skip if no secret configured
+  // L'absence de secret est une erreur de configuration, jamais une raison
+  // d'accepter un webhook anonyme.
+  if (!WASSENDER_WEBHOOK_SECRET || !signature) return false
 
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const crypto = require('crypto') as typeof import('crypto');
@@ -59,13 +57,13 @@ export function verifyWasenderSignature(payload: string, signature: string): boo
   // Strip optional 'sha256=' prefix and trim
   const cleanSig = signature.replace(/^sha256=/i, '').trim();
 
-  // Try : HMAC hex match, OR shared-secret match (constant-time-ish).
-  if (cleanSig === sigHmacHex) return true;
-  if (cleanSig === WASSENDER_WEBHOOK_SECRET) return true;
+  const expected = Buffer.from(sigHmacHex, 'utf8')
+  const received = Buffer.from(cleanSig, 'utf8')
+  if (expected.length === received.length && crypto.timingSafeEqual(expected, received)) return true
 
   // Log helpful diagnostic (truncated) for debugging mismatches
   console.warn(
-    `[Wasender] signature mismatch — received=${cleanSig.slice(0, 8)}... expected_hmac=${sigHmacHex.slice(0, 8)}... or shared_secret=${WASSENDER_WEBHOOK_SECRET.slice(0, 8)}...`
+    `[Wasender] signature mismatch — received=${cleanSig.slice(0, 8)}... expected_hmac=${sigHmacHex.slice(0, 8)}...`
   );
   return false;
 }
@@ -172,4 +170,3 @@ export async function wasenderCheckNumber(phone: string) {
 export async function wasenderGetStatus() {
   return wasenderFetch('/status');
 }
-

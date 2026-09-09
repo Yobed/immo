@@ -1,6 +1,6 @@
 // apps/web/app/api/quittances/generer/route.ts
 // POST webhook — reçoit {contratId, mois?} de n8n (via Edge Function ou appel direct)
-// Service role key utilisée: appelable depuis webhook non authentifié
+// Service role key utilisée après authentification interne (x-service-key ou CRON_SECRET)
 // Idempotent: UNIQUE INDEX sur (contrat_id, mois) évite les doublons
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -9,12 +9,33 @@ import { renderToBuffer }            from '@react-pdf/renderer'
 import { createElement }             from 'react'
 import { QuittanceDocument }         from '@/lib/quittance-pdf'
 import type { QuittanceProps }       from '@/lib/quittance-pdf'
+import crypto from 'node:crypto'
 
 // Ce handler utilise renderToBuffer — necessite serverExternalPackages dans next.config.ts
 
+function sameSecret(actual: string | null, expected: string | undefined): boolean {
+  if (!actual || !expected) return false
+  const a = Buffer.from(actual.trim())
+  const b = Buffer.from(expected.trim())
+  return a.length === b.length && crypto.timingSafeEqual(a, b)
+}
+
+function hasInternalAuth(req: NextRequest): boolean {
+  const serviceKey = req.headers.get('x-service-key')
+  const bearer = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? null
+  return (
+    sameSecret(serviceKey, process.env.SUPABASE_SERVICE_ROLE_KEY) ||
+    sameSecret(bearer, process.env.CRON_SECRET)
+  )
+}
+
 export async function POST(req: NextRequest) {
-  // Auth: x-service-key optionnel (Edge Function) — service role suffit pour DB
-  // En production: valider x-service-key === process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY || (!process.env.CRON_SECRET && !req.headers.get('x-service-key'))) {
+    return NextResponse.json({ error: 'Génération non configurée' }, { status: 500 })
+  }
+  if (!hasInternalAuth(req)) {
+    return NextResponse.json({ error: 'Authentification interne requise' }, { status: 401 })
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = createServerClient<any>(
@@ -46,8 +67,8 @@ export async function POST(req: NextRequest) {
       id, locataire_id, proprietaire_id, bien_id,
       loyer_mois_fcfa, charges_mois_fcfa,
       biens ( id, adresse_complete, commune ),
-      profiles!locataire_id ( nom_complet, telephone ),
-      profiles!proprietaire_id ( nom_complet, telephone )
+      profiles!locataire_id ( full_name, phone ),
+      profiles!proprietaire_id ( full_name, phone )
     `)
     .eq('id', body.contratId)
     .eq('statut', 'signe')
@@ -59,9 +80,9 @@ export async function POST(req: NextRequest) {
 
   const bien = contrat.biens as unknown as { id: string; adresse_complete: string; commune: string } | null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const locataire = (contrat as any)['profiles!locataire_id'] as { nom_complet: string; telephone: string } | null
+  const locataire = (contrat as any)['profiles!locataire_id'] as { full_name: string; phone: string } | null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const proprietaire = (contrat as any)['profiles!proprietaire_id'] as { nom_complet: string; telephone: string } | null
+  const proprietaire = (contrat as any)['profiles!proprietaire_id'] as { full_name: string; phone: string } | null
 
   const loyerMoisFcfa   = Number(contrat.loyer_mois_fcfa)
   const chargesMoisFcfa = Number(contrat.charges_mois_fcfa ?? 0)
@@ -113,10 +134,10 @@ export async function POST(req: NextRequest) {
     quittanceId,
     contratId:       body.contratId,
     mois:            moisIso,
-    bailleurNom:     proprietaire?.nom_complet ?? 'Non renseigne',
-    bailleurTel:     proprietaire?.telephone   ?? '—',
-    preneurNom:      locataire?.nom_complet    ?? 'Non renseigne',
-    preneurTel:      locataire?.telephone      ?? '—',
+    bailleurNom:     proprietaire?.full_name ?? 'Non renseigne',
+    bailleurTel:     proprietaire?.phone   ?? '—',
+    preneurNom:      locataire?.full_name    ?? 'Non renseigne',
+    preneurTel:      locataire?.phone      ?? '—',
     bienAdresse:     bien?.adresse_complete    ?? '—',
     bienCommune:     bien?.commune             ?? '—',
     loyerMoisFcfa,
@@ -165,5 +186,5 @@ export async function POST(req: NextRequest) {
     lien_id:   quittanceId,
   })
 
-  return NextResponse.json({ quittanceId, pdfUrl, locataireTel: locataire?.telephone })
+  return NextResponse.json({ quittanceId, pdfUrl, locataireTel: locataire?.phone })
 }
