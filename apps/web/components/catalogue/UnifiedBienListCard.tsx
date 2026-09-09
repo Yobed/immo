@@ -26,7 +26,7 @@ export function UnifiedBienListCard({ bien, index = 0 }: Props) {
     >
       <Link
         href={internalPath}
-        className="group flex gap-4 p-3 md:p-4 bg-[var(--surface-card)] border border-[var(--border)] rounded-2xl hover:border-accent-luxury/30 hover:shadow-[0_12px_30px_-15px_rgba(0,0,0,0.2)] transition-all duration-300"
+        className="group flex gap-4 p-3 md:p-4 bg-[var(--surface-card)] border border-[var(--border)] rounded-[var(--radius-lg)] hover:border-[var(--accent-luxury)]/45 hover:shadow-[var(--shadow-card-hover)] transition-all duration-300"
       >
         {/* Image carrée à gauche */}
         <div className="relative w-28 h-28 md:w-40 md:h-40 shrink-0 rounded-xl overflow-hidden bg-[var(--midnight-muted)]">
@@ -48,17 +48,17 @@ export function UnifiedBienListCard({ bien, index = 0 }: Props) {
           {/* Badge source (top-left) : vérifié → bouclier ; offre flash → flamme ;
               bien enregistré non encore validé → horloge « En validation ». */}
           {bien.is_verifie ? (
-            <span className="absolute top-1.5 left-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-blue-500/95 text-white text-[8px] font-black uppercase tracking-wider shadow">
+            <span className="absolute top-1.5 left-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-[var(--success)] text-white text-[8px] font-bold uppercase tracking-wider shadow">
               <ShieldCheck className="w-2.5 h-2.5" />
               {t.card.verified}
             </span>
           ) : isFlash ? (
-            <span className="absolute top-1.5 left-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-amber-500/95 text-white text-[8px] font-black uppercase tracking-wider shadow">
+            <span className="absolute top-1.5 left-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-[var(--secondary)] text-white text-[8px] font-bold uppercase tracking-wider shadow">
               <Flame className="w-2.5 h-2.5" />
               Flash
             </span>
           ) : bien.is_pending ? (
-            <span className="absolute top-1.5 left-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-slate-500/95 text-white text-[8px] font-black uppercase tracking-wider shadow">
+            <span className="absolute top-1.5 left-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-[var(--surface-hover)] text-[var(--text)] text-[8px] font-bold uppercase tracking-wider shadow">
               <Clock className="w-2.5 h-2.5" />
               En validation
             </span>
@@ -68,7 +68,7 @@ export function UnifiedBienListCard({ bien, index = 0 }: Props) {
         {/* Contenu à droite */}
         <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
           <div>
-            <span className="inline-block px-2 py-0.5 rounded-full bg-[var(--surface)] text-[9px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
+            <span className="inline-block px-2 py-0.5 rounded-md bg-[var(--surface)] border border-[var(--border)] text-[9px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
               {bien.type_bien.replace(/_/g, ' ')}
             </span>
             <h3 className="font-display font-bold text-[14px] md:text-[16px] text-[var(--text)] leading-snug line-clamp-2 mb-1">
@@ -109,7 +109,7 @@ export function UnifiedBienListCard({ bien, index = 0 }: Props) {
                 </div>
               )}
             </div>
-            <div className="w-8 h-8 rounded-full bg-accent-luxury/10 flex items-center justify-center shrink-0 group-hover:bg-[var(--accent-luxury)] group-hover:text-white transition-all text-[var(--accent-luxury)]">
+            <div className="w-9 h-9 rounded-md bg-[var(--accent-luxury-muted)] flex items-center justify-center shrink-0 group-hover:bg-[var(--accent-luxury)] group-hover:text-[var(--on-accent)] transition-all text-[var(--accent-luxury)]">
               <ArrowUpRight className="w-4 h-4" strokeWidth={2.5} />
             </div>
           </div>

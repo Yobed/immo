@@ -52,10 +52,10 @@ export default async function SupportPage() {
 
           <a
             href="tel:+2250778311541"
-            className="flex items-center gap-4 p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] hover:border-orange-500/40 transition-all group"
+            className="flex items-center gap-4 p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] hover:border-[var(--accent-luxury)]/45 transition-all group"
           >
-            <div className="w-11 h-11 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
-              <Phone className="w-5 h-5 text-orange-500" />
+            <div className="w-11 h-11 rounded-xl bg-[var(--accent-luxury-muted)] flex items-center justify-center shrink-0">
+              <Phone className="w-5 h-5 text-[var(--accent-luxury)]" />
             </div>
             <div className="text-left">
               <p className="font-bold text-[var(--text)] text-sm">{t.support.phone}</p>
@@ -65,10 +65,10 @@ export default async function SupportPage() {
 
           <a
             href="mailto:commercial@bogbesgroup.com"
-            className="flex items-center gap-4 p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] hover:border-blue-500/40 transition-all group"
+            className="flex items-center gap-4 p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] hover:border-[var(--accent-luxury)]/45 transition-all group"
           >
-            <div className="w-11 h-11 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
-              <Mail className="w-5 h-5 text-blue-400" />
+            <div className="w-11 h-11 rounded-xl bg-[var(--accent-luxury-muted)] flex items-center justify-center shrink-0">
+              <Mail className="w-5 h-5 text-[var(--accent-luxury)]" />
             </div>
             <div className="text-left">
               <p className="font-bold text-[var(--text)] text-sm">{t.support.emailCommercial}</p>
@@ -78,10 +78,10 @@ export default async function SupportPage() {
 
           <a
             href="mailto:info@bogbesgroup.com"
-            className="flex items-center gap-4 p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] hover:border-blue-500/40 transition-all group"
+            className="flex items-center gap-4 p-5 rounded-2xl border border-[var(--border)] bg-[var(--surface)] hover:border-[var(--accent-luxury)]/45 transition-all group"
           >
-            <div className="w-11 h-11 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
-              <Mail className="w-5 h-5 text-blue-400" />
+            <div className="w-11 h-11 rounded-xl bg-[var(--accent-luxury-muted)] flex items-center justify-center shrink-0">
+              <Mail className="w-5 h-5 text-[var(--accent-luxury)]" />
             </div>
             <div className="text-left">
               <p className="font-bold text-[var(--text)] text-sm">{t.support.emailInfo}</p>

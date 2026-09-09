@@ -73,14 +73,14 @@ function ActionButton({
 }) {
   const content = (
     <div className="flex items-center justify-center gap-2 px-5 h-full">
-      <Icon className="w-4 h-4 text-white shrink-0 group-hover:scale-110 transition-transform" strokeWidth={2.5} />
-      <span className="text-white font-display font-bold text-[10px] uppercase tracking-[0.18em] leading-none whitespace-nowrap">
+      <Icon className="w-4 h-4 text-[var(--on-accent)] shrink-0 group-hover:scale-110 transition-transform" strokeWidth={2.5} />
+      <span className="text-[var(--on-accent)] font-display font-bold text-[10px] uppercase tracking-[0.14em] leading-none whitespace-nowrap">
         {label}
       </span>
     </div>
   )
 
-  const baseClass = "pointer-events-auto group h-[52px] rounded-xl bg-gradient-to-r from-[var(--accent-luxury)] via-[#f59e0b] to-[#d97706] shadow-[0_8px_24px_rgba(249,115,22,0.35)] active:scale-95 transition-all duration-300 animate-cta border border-white/20 flex-1 flex items-center justify-center relative overflow-hidden"
+  const baseClass = "pointer-events-auto group h-[52px] rounded-xl bg-[var(--accent-luxury)] shadow-[0_8px_24px_var(--accent-glow)] active:scale-95 transition-all duration-300 animate-cta border border-[var(--accent-luxury)]/50 flex-1 flex items-center justify-center relative overflow-hidden"
 
   const shimmer = (
     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />

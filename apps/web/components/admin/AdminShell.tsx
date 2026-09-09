@@ -67,21 +67,21 @@ export function AdminShell({ email, pendingCount = 0, children }: AdminShellProp
 
   return (
     <div className="min-h-screen bg-[var(--surface-hover)]">
-      <header className="sticky top-0 z-40 bg-[#0a0e1a]/95 backdrop-blur-md text-white border-b border-white/10 shadow-md">
+      <header className="sticky top-0 z-40 bg-[var(--background)]/95 backdrop-blur-md text-[var(--text)] border-b border-[var(--border)] shadow-md">
         {/* Ligne 1 : marque + liens croisés (jamais mélangés aux modules) */}
         <div className="max-w-[1400px] mx-auto px-4 lg:px-6 h-14 flex items-center gap-3">
           <Link href="/admin/suivi" className="flex items-center gap-2 shrink-0 group">
             <Image src="/bogbes-logo.png" alt="BOGBE'S GROUPE" width={28} height={28} className="w-7 h-7 object-contain" />
             <span className="inline-flex items-center gap-1.5">
               <span className="font-display text-sm font-bold tracking-tight">BOGBE&apos;S</span>
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-red-500/90 text-white px-2 py-0.5 rounded-full">Admin</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-[var(--accent-luxury-muted)] text-[var(--accent-luxury)] border border-[var(--accent-luxury)]/30 px-2 py-0.5 rounded-md">Admin</span>
             </span>
           </Link>
 
           <div className="ml-auto flex items-center gap-1">
             <Link
               href="/dashboard"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-colors whitespace-nowrap"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-hover)] transition-colors whitespace-nowrap"
               title="Gérer mes propres annonces"
             >
               <Building2 className="w-3.5 h-3.5" />
@@ -89,18 +89,18 @@ export function AdminShell({ email, pendingCount = 0, children }: AdminShellProp
             </Link>
             <Link
               href="/"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-white/70 hover:text-white hover:bg-white/10 transition-colors whitespace-nowrap"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-hover)] transition-colors whitespace-nowrap"
             >
               <Home className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Accueil</span>
             </Link>
-            <span className="hidden lg:block max-w-[160px] truncate text-[11px] text-white/40 px-2" title={email}>
+            <span className="hidden lg:block max-w-[160px] truncate text-[11px] text-[var(--text-muted)] px-2" title={email}>
               {email}
             </span>
             <button
               type="button"
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-white/70 hover:text-white hover:bg-red-500/30 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-[var(--text-muted)] hover:text-red-300 hover:bg-red-500/15 transition-colors"
               aria-label="Se déconnecter"
             >
               <LogOut className="w-3.5 h-3.5" />
@@ -113,8 +113,8 @@ export function AdminShell({ email, pendingCount = 0, children }: AdminShellProp
         <div className="max-w-[1400px] mx-auto px-3 lg:px-5 pb-2">
           <nav aria-label="Navigation administrateur" className="flex items-start gap-3 overflow-x-auto no-scrollbar">
             {ADMIN_NAV_GROUPS.map((group) => (
-              <div key={group.label} className="shrink-0 border-l border-white/10 pl-2 first:border-l-0 first:pl-0">
-                <p className="px-2 mb-1 text-[9px] font-bold uppercase tracking-[0.18em] text-white/40">{group.label}</p>
+              <div key={group.label} className="shrink-0 border-l border-[var(--border)] pl-2 first:border-l-0 first:pl-0">
+                <p className="px-2 mb-1 text-[9px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">{group.label}</p>
                 <div className="flex items-center gap-1">
                   {group.items.map((item) => {
                     const active = pathname.startsWith(item.href)
@@ -125,13 +125,15 @@ export function AdminShell({ email, pendingCount = 0, children }: AdminShellProp
                         href={item.href}
                         aria-current={active ? 'page' : undefined}
                         className={`relative flex min-h-[40px] items-center gap-1.5 px-3 rounded-lg text-[13px] font-semibold whitespace-nowrap transition-colors ${
-                          active ? 'bg-white text-[#0a0e1a] shadow-sm' : 'text-white/65 hover:text-white hover:bg-white/10'
+                          active
+                            ? 'bg-[var(--accent-luxury-muted)] text-[var(--accent-luxury)] border-l-2 border-[var(--accent-luxury)] shadow-none'
+                            : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-hover)]'
                         }`}
                       >
                         <Icon className="w-3.5 h-3.5" />
                         <span>{item.label}</span>
                         {item.badge && pendingCount > 0 && (
-                          <span className={`ml-0.5 min-w-[20px] h-[20px] px-1 inline-flex items-center justify-center rounded-full text-[10px] font-bold ${active ? 'bg-amber-500 text-[#0a0e1a]' : 'bg-amber-400 text-[#0a0e1a]'}`}>
+                          <span className={`ml-0.5 min-w-[20px] h-[20px] px-1 inline-flex items-center justify-center rounded-full text-[10px] font-bold ${active ? 'bg-[var(--accent-luxury)] text-[var(--on-accent)]' : 'bg-[var(--accent-luxury-muted)] text-[var(--accent-luxury)]'}`}>
                             {pendingCount > 99 ? '99+' : pendingCount}
                           </span>
                         )}

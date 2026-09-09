@@ -132,7 +132,7 @@ export function BienMediaGallery({
                 {typeLabel}
               </span>
               {bien.is_verifie && (
-                <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/70 backdrop-blur text-white text-[8px] font-bold uppercase tracking-widest">
+                <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--success)] backdrop-blur text-white text-[8px] font-bold uppercase tracking-widest">
                   <ShieldCheck className="w-2.5 h-2.5" /> Certifié
                 </span>
               )}

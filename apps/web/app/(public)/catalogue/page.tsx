@@ -181,14 +181,14 @@ export default async function CataloguePage({ searchParams }: PageProps) {
             </div>
             <div className="h-10 w-px bg-[var(--border)]" />
             {/* Desktop : 3 toggles (Grille / Liste / Carte) */}
-            <div className="hidden lg:flex gap-1 p-1 bg-surface-raised/50 backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-inner">
+            <div className="hidden lg:flex gap-1 p-1 bg-[var(--surface)] rounded-[var(--radius-md)] border border-[var(--border)]">
               <ViewToggle active={vue === 'grille'} href={buildHref(sp, { vue: '' })} icon={Grid} label="Grille" />
               <ViewToggle active={vue === 'liste'} href={buildHref(sp, { vue: 'liste' })} icon={ListIcon} label="Liste" />
               <ViewToggle active={vue === 'carte'} href={buildHref(sp, { vue: 'carte' })} icon={MapIcon} label="Carte" />
             </div>
             {/* Mobile : 2 toggles (Liste / Carte) — Grille est masquée car son rendu mobile
                 est identique à Liste (1 colonne horizontale). On affiche Liste comme défaut. */}
-            <div className="flex lg:hidden gap-1 p-1 bg-surface-raised/50 backdrop-blur-xl rounded-2xl border border-[var(--border)] shadow-inner">
+            <div className="flex lg:hidden gap-1 p-1 bg-[var(--surface)] rounded-[var(--radius-md)] border border-[var(--border)]">
               <ViewToggle
                 active={vue !== 'carte'}
                 href={buildHref(sp, { vue: '' })}
@@ -314,8 +314,8 @@ function ViewToggle({ active, href, icon: Icon, label }: { active: boolean; href
       href={href}
       className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all duration-200 ${
         active
-          ? 'bg-[var(--accent-luxury)] text-[var(--on-accent)] shadow-md'
-          : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-white/5'
+          ? 'bg-[var(--accent-luxury)] text-[var(--on-accent)] shadow-sm'
+          : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-hover)]'
       }`}
     >
       <Icon className="w-3.5 h-3.5" />
@@ -334,19 +334,21 @@ interface SourceTabProps {
 }
 
 function SourceTab({ href, active, color, icon: Icon, label, count }: SourceTabProps) {
+  // One active color keeps the tabs scannable. The icon and label carry the
+  // meaning of each source; color is reserved for the selected state.
   const activeColors = {
-    luxury: 'bg-[var(--accent-luxury)] text-[var(--on-accent)] border-[var(--accent-luxury)] shadow-md',
-    blue: 'bg-blue-500 text-white border-blue-500 shadow-md',
-    orange: 'bg-orange-500 text-white border-orange-500 shadow-md',
-    emerald: 'bg-emerald-600 text-white border-emerald-600 shadow-md',
+    luxury: 'bg-[var(--accent-luxury)] text-[var(--on-accent)] border-[var(--accent-luxury)] shadow-sm',
+    blue: 'bg-[var(--accent-luxury)] text-[var(--on-accent)] border-[var(--accent-luxury)] shadow-sm',
+    orange: 'bg-[var(--accent-luxury)] text-[var(--on-accent)] border-[var(--accent-luxury)] shadow-sm',
+    emerald: 'bg-[var(--accent-luxury)] text-[var(--on-accent)] border-[var(--accent-luxury)] shadow-sm',
   }
   return (
     <Link
       href={href}
-      className={`inline-flex min-h-[44px] items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all border ${
+      className={`inline-flex min-h-[44px] items-center gap-1.5 px-4 py-2.5 rounded-[var(--radius-md)] text-xs font-bold tracking-wide transition-all border ${
         active
           ? activeColors[color]
-          : 'bg-white/5 text-[var(--text-muted)] border-[var(--border)] hover:bg-white/10 hover:text-[var(--text)]'
+          : 'bg-[var(--surface)] text-[var(--text-muted)] border-[var(--border)] hover:bg-[var(--surface-hover)] hover:text-[var(--text)]'
       }`}
     >
       <Icon className="w-3 h-3" />

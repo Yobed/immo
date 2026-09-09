@@ -51,7 +51,7 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
         // via l'API View Transitions native (Chrome/Safari).
         href={bien.url.replace(process.env.NEXT_PUBLIC_SITE_URL || '', '')}
         transitionName="bien-hero"
-        className="flex flex-col h-full bg-[var(--surface-card)] border border-[var(--border)] rounded-xl overflow-hidden hover:border-accent-luxury/40 hover:shadow-xl hover:shadow-black/10 transition-all duration-300"
+        className="flex flex-col h-full bg-[var(--surface-card)] border border-[var(--border)] rounded-[var(--radius-lg)] overflow-hidden hover:border-[var(--accent-luxury)]/45 hover:shadow-[var(--shadow-card-hover)] transition-all duration-300"
       >
         {/* Image — ratio 4:3 (au lieu de 4:5) → 25% plus court.
             Flash sans photo : on affiche un PLACEHOLDER honnête (carte d'identité)
@@ -97,7 +97,7 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
               avec une offre flash). */}
           {bien.is_verifie ? (
             <span
-              className="absolute top-1.5 right-1.5 flex items-center gap-0.5 @[260px]/card:gap-1 px-1.5 @[260px]/card:px-2 py-0.5 rounded-full bg-blue-600 text-white text-[8px] @[260px]/card:text-[10px] font-black uppercase tracking-wider shadow-md"
+              className="absolute top-1.5 right-1.5 flex items-center gap-0.5 @[260px]/card:gap-1 px-1.5 @[260px]/card:px-2 py-0.5 rounded-md bg-[var(--success)] text-white text-[8px] @[260px]/card:text-[10px] font-bold uppercase tracking-wider shadow-md"
               title="Propriétaire et documents contrôlés par notre équipe"
             >
               <ShieldCheck className="w-2.5 h-2.5 @[260px]/card:w-3 @[260px]/card:h-3" strokeWidth={2.5} />
@@ -105,7 +105,7 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
             </span>
           ) : isFlash ? (
             <span
-              className="absolute top-1.5 right-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[8px] font-black uppercase tracking-wider shadow-md"
+              className="absolute top-1.5 right-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-[var(--secondary)] text-white text-[8px] font-bold uppercase tracking-wider shadow-md"
               title={t.flash.tag}
             >
               <Flame className="w-2.5 h-2.5" strokeWidth={2.5} />
@@ -113,7 +113,7 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
             </span>
           ) : bien.is_pending ? (
             <span
-              className="absolute top-1.5 right-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-slate-500/90 text-white text-[8px] font-black uppercase tracking-wider shadow-md"
+              className="absolute top-1.5 right-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-[var(--surface-hover)] text-[var(--text)] text-[8px] font-bold uppercase tracking-wider shadow-md"
               title="En cours de validation par notre équipe"
             >
               <Clock className="w-2.5 h-2.5" strokeWidth={2.5} />
@@ -130,7 +130,7 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
               </span>
             )}
             {bien.is_recent && (
-              <span className="ml-auto flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-500/90 text-white text-[8px] font-bold uppercase">
+              <span className="ml-auto flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-[var(--success)] text-white text-[8px] font-bold uppercase">
                 <span className="w-1 h-1 bg-[var(--surface-card)] rounded-full animate-pulse" />
                 {t.common.new}
               </span>

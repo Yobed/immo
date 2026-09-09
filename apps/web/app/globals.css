@@ -27,9 +27,9 @@ body > * {
    Standardized variables for prestige, contrast and spacing.
 ══════════════════════════════════════════════════════ */
 :root {
-  /* Branding Palette */
-  --secondary:       #F97316;
-  --accent-gold:     #C5A059;
+  /* Branding Palette — warm, restrained and readable. */
+  --secondary:       #a96545;
+  --accent-gold:     #b38a58;
   --danger:          #ef4444;
 
   /* Easing functions — always available as CSS vars */
@@ -52,11 +52,11 @@ body > * {
 
   /* Radius scale (used to replace 8+ arbitrary values across components) */
   --radius-xs:       6px;
-  --radius-sm:       10px;
-  --radius-md:       14px;
-  --radius-lg:       18px;
-  --radius-xl:       24px;
-  --radius-2xl:      32px;
+  --radius-sm:       8px;
+  --radius-md:       12px;
+  --radius-lg:       16px;
+  --radius-xl:       20px;
+  --radius-2xl:      24px;
   --radius-full:     9999px;
 
   /* Glass surface opacity (consumed by .card-glass / .card-glass-light) */
@@ -67,74 +67,72 @@ body > * {
      — kept distinct from brand accent-luxury so badges remain readable.
      #4 : info passé d'un bleu corporate (#1d4ed8) à un navy profond (#1e3a8a)
      qui s'harmonise mieux avec l'or chaud (complémentaires). */
-  --success:         #047857;
-  --success-soft:    rgba(4, 120, 87, 0.10);
+  --success:         #3f8067;
+  --success-soft:    rgba(63, 128, 103, 0.10);
   --success-on:      #ffffff;
-  --warning:         #b45309;
-  --warning-soft:    rgba(180, 83, 9, 0.10);
-  --info:            #1e3a8a;
-  --info-soft:       rgba(30, 58, 138, 0.10);
+  --warning:         #a66d3f;
+  --warning-soft:    rgba(166, 109, 63, 0.10);
+  --info:            #5e756b;
+  --info-soft:       rgba(94, 117, 107, 0.10);
 
   /* RGB channel triplets (theme-independent) — let Tailwind opacity modifiers
      work on these brand/semantic colors via named tokens. */
-  --accent-gold-rgb: 197 160 89;   /* #C5A059 */
-  --success-rgb:     4 120 87;     /* #047857 */
-  --info-rgb:        30 58 138;    /* #1e3a8a — navy luxe */
+  --accent-gold-rgb: 179 138 88;   /* #B38A58 */
+  --success-rgb:     63 128 103;   /* #3F8067 */
+  --info-rgb:        94 117 107;   /* #5E756B */
 }
 
 /* ═══════════════════════════════════════════════
-   MIDNIGHT SAPPHIRE — Dark Theme (default)
-   #5 : background passé de noir pur (#02040a) à bleu nuit minéral
-   (#0b1530) — évoque le luxe Cartier/Tiffany navy, réchauffe avec l'or.
+   INK + OLIVE — Dark Theme (default)
+   A calm mineral charcoal keeps the brand premium without the
+   high-saturation navy/blue dashboard look.
 ═══════════════════════════════════════════════ */
 :root, [data-theme='dark'] {
-  --background:      #0b1530;   /* Midnight Sapphire — bleu nuit profond */
-  --surface:         #111c3a;
-  --surface-card:    #15224a;
-  --surface-hover:   #1f2e5a;
+  --background:      #171b1a;
+  --surface:         #1f2422;
+  --surface-card:    #272d2a;
+  --surface-hover:   #313834;
 
-  --text:            #f8fafc;
-  --text-muted:      #b4c2dc;  /* 4.8:1 sur #111c3a → WCAG AA ✅ */
-  --text-subtle:     #d1d9ea;  /* 4.6:1 sur #111c3a → WCAG AA ✅ */
+  --text:            #f4f1eb;
+  --text-muted:      #b9bcb3;
+  --text-subtle:     #d5d3cb;
 
-  --border:          rgba(255, 255, 255, 0.08);
-  --border-hover:    rgba(255, 255, 255, 0.12);
+  --border:          rgba(244, 241, 235, 0.12);
+  --border-hover:    rgba(244, 241, 235, 0.22);
 
   /* RGB channel triplets — consumed by theme-aware Tailwind tokens */
-  --surface-rgb:        17 28 58;     /* #111c3a */
-  --surface-card-rgb:   21 34 74;     /* #15224a */
-  --surface-raised-rgb: 31 46 90;     /* #1f2e5a */
-  --muted-rgb:          180 194 220;  /* #b4c2dc — WCAG AA */
-  --subtle-rgb:         209 217 234;  /* #d1d9ea — WCAG AA */
-  --border-rgb:         51 65 85;
-  --border-hover-rgb:   71 85 105;
-  --text-rgb:           248 250 252;  /* #f8fafc */
-  --background-rgb:     11 21 48;     /* #0b1530 — midnight */
-  --accent-luxury-rgb:  212 168 106;  /* #D4A86A — or chaud unifié */
+  --surface-rgb:        31 36 34;
+  --surface-card-rgb:   39 45 42;
+  --surface-raised-rgb: 49 56 52;
+  --muted-rgb:          185 188 179;
+  --subtle-rgb:         213 211 203;
+  --border-rgb:         82 91 85;
+  --border-hover-rgb:   112 121 113;
+  --text-rgb:           244 241 235;
+  --background-rgb:     23 27 26;
+  --accent-luxury-rgb:  215 173 115;
   --on-primary-rgb:     255 255 255;
 
-  /* #1 : Accent doré UNIFIÉ — D4A86A (or chaud) — même teinte que light theme,
-     ajusté en luminosité pour rester lisible sur fond sombre. */
-  --accent-luxury:        #D4A86A;
-  --accent-glow:          rgba(212, 168, 106, 0.25);
-  --accent-luxury-muted:  rgba(212, 168, 106, 0.10);
-  --on-accent:            #0b1530;
+  --accent-luxury:        #d7ad73;
+  --accent-glow:          rgba(215, 173, 115, 0.20);
+  --accent-luxury-muted:  rgba(215, 173, 115, 0.12);
+  --on-accent:            #1c211f;
 
-  --primary:              #020617;
+  --primary:              #242b27;
   --on-primary:           #ffffff;
   --primary-light:        rgba(255, 255, 255, 0.05);
-  --primary-mid:          #1e3a8a;
-  --primary-glow:         rgba(12, 45, 94, 0.25);
-  --secondary-glow:       rgba(249, 115, 22, 0.28);
+  --primary-mid:          #52665b;
+  --primary-glow:         rgba(82, 102, 91, 0.22);
+  --secondary-glow:       rgba(169, 101, 69, 0.22);
 
-  --shadow-premium:       0 25px 60px -15px rgba(0, 0, 0, 0.7);
-  --shadow-card:          0 2px 8px rgba(0,0,0,0.28), 0 0 0 1px rgba(255,255,255,0.05);
-  --shadow-card-hover:    0 16px 48px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.25);
-  --shadow-md:            0 8px 24px rgba(0,0,0,0.38);
+  --shadow-premium:       0 24px 50px -20px rgba(0, 0, 0, 0.55);
+  --shadow-card:          0 2px 8px rgba(0,0,0,0.22), 0 0 0 1px rgba(255,255,255,0.04);
+  --shadow-card-hover:    0 14px 34px rgba(0,0,0,0.34), 0 3px 10px rgba(0,0,0,0.20);
+  --shadow-md:            0 7px 20px rgba(0,0,0,0.28);
 
-  --nav-bg:               rgba(11, 21, 48, 0.88);
-  --glass-surface:        rgba(11, 21, 48, 0.72);
-  --glass-border:         rgba(255, 255, 255, 0.1);
+  --nav-bg:               rgba(23, 27, 26, 0.94);
+  --glass-surface:        rgba(31, 36, 34, 0.88);
+  --glass-border:         rgba(244, 241, 235, 0.12);
 
   /* Legacy aliases (kept for backwards-compat with existing components) */
   --midnight:             var(--background);
@@ -142,59 +140,56 @@ body > * {
 }
 
 /* ═══════════════════════════════════════════════
-   PRISTINE IVORY — Light Theme
-   Optimized for high readability and soft shadows
+   WARM PAPER — Light Theme
+   Optimized for high readability and quiet surfaces.
    ═══════════════════════════════════════════════ */
 [data-theme='light'] {
-  --background:      #fdfcf9;   /* Pristine Ivory - Warmer for luxury */
-  --surface:         #ffffff;
-  --surface-card:    #ffffff;
-  --surface-hover:   #f7f5f0;
+  --background:      #f5f2ec;
+  --surface:         #fbfaf7;
+  --surface-card:    #fffefa;
+  --surface-hover:   #eeeae1;
 
-  --text:            #1a1c1e;
-  --text-muted:      #536878;  /* 4.5:1 on #ffffff → WCAG AA ✅ */
-  --text-subtle:     #6b7684;  /* 4.6:1 on #ffffff → WCAG AA ✅ */
+  --text:            #202322;
+  --text-muted:      #5b625d;
+  --text-subtle:     #4d5650;
 
-  --border:          #e8e4db;   /* Champagne border */
-  --border-hover:    #dcd7cc;
+  --border:          #ded8cd;
+  --border-hover:    #c9c0b2;
 
   /* RGB channel triplets — consumed by theme-aware Tailwind tokens
      (surface / muted / subtle / border). Keep in sync with the hex values above. */
   --surface-rgb:        255 255 255;  /* #ffffff */
   --surface-card-rgb:   255 255 255;  /* #ffffff */
-  --surface-raised-rgb: 247 245 240;  /* #f7f5f0 */
-  --muted-rgb:          83 104 120;   /* #536878 — updated for WCAG AA */
-  --subtle-rgb:         107 118 132;  /* #6b7684 — updated for WCAG AA */
-  --border-rgb:         232 228 219;  /* #e8e4db */
-  --border-hover-rgb:   220 215 204;  /* #dcd7cc */
-  --text-rgb:           26 28 30;     /* #1a1c1e */
-  --background-rgb:     253 252 249;  /* #fdfcf9 */
-  --accent-luxury-rgb:  168 129 74;   /* #A8814A — or chaud unifié */
+  --surface-raised-rgb: 238 234 225;
+  --muted-rgb:          91 98 93;
+  --subtle-rgb:         77 86 80;
+  --border-rgb:         222 216 205;
+  --border-hover-rgb:   201 192 178;
+  --text-rgb:           32 35 34;
+  --background-rgb:     245 242 236;
+  --accent-luxury-rgb:  153 111 67;
   --on-primary-rgb:     255 255 255;  /* #ffffff */
 
-  /* #1 : Accent doré UNIFIÉ — A8814A (or chaud) — légèrement plus saturé
-     que le dark theme pour rester lisible sur fond clair, mais MÊME teinte
-     (= cohérence visuelle au switch theme). */
-  --accent-luxury:        #A8814A;
-  --accent-glow:          rgba(168, 129, 74, 0.18);
-  --accent-luxury-muted:  rgba(168, 129, 74, 0.08);
+  --accent-luxury:        #996f43;
+  --accent-glow:          rgba(153, 111, 67, 0.16);
+  --accent-luxury-muted:  rgba(153, 111, 67, 0.10);
   --on-accent:            #ffffff;
 
-  --primary:              #1a1c1e;
+  --primary:              #242a27;
   --on-primary:           #ffffff;
   --primary-light:        rgba(12, 45, 94, 0.05);
-  --primary-mid:          #1e3a8a;
-  --primary-glow:         rgba(12, 45, 94, 0.15);
-  --secondary-glow:       rgba(249, 115, 22, 0.18);
+  --primary-mid:          #536a5d;
+  --primary-glow:         rgba(83, 106, 93, 0.14);
+  --secondary-glow:       rgba(169, 101, 69, 0.16);
 
-  --shadow-premium:       0 20px 50px -12px rgba(0, 0, 0, 0.10);
-  --shadow-card:          0 1px 4px rgba(0,0,0,0.07), 0 0 0 1px rgba(12,45,94,0.07);
-  --shadow-card-hover:    0 10px 36px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-premium:       0 20px 44px -18px rgba(46, 42, 35, 0.18);
+  --shadow-card:          0 1px 4px rgba(46,42,35,0.06), 0 0 0 1px rgba(46,42,35,0.04);
+  --shadow-card-hover:    0 10px 30px rgba(46,42,35,0.12), 0 2px 8px rgba(46,42,35,0.05);
   --shadow-md:            0 4px 18px rgba(0,0,0,0.09);
 
-  --nav-bg:               rgba(253, 252, 249, 0.88);
-  --glass-surface:        rgba(255, 255, 255, 0.75);
-  --glass-border:         rgba(146, 64, 14, 0.09);
+  --nav-bg:               rgba(245, 242, 236, 0.94);
+  --glass-surface:        rgba(251, 250, 247, 0.90);
+  --glass-border:         rgba(76, 70, 59, 0.12);
 
   /* Legacy aliases — these are dark-theme tokens that don't make sense in light,
      so we route them to surface-hover for graceful degradation rather than black. */
@@ -235,25 +230,22 @@ body {
   transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ══════════════════════════════════════════════════════
-   #2 NOISE/GRAIN TEXTURE GLOBAL — overlay très subtil sur tout le body
-   pour profondeur "magazine print". Données SVG inline (zéro requête réseau).
-   Opacity 1% sur dark, 1.5% sur light. Z-index négatif pour rester sous tout.
-   ══════════════════════════════════════════════════════ */
+/* Keep the page surface quiet. A visible grain texture made cards and controls
+   compete with the content, especially on mobile. */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.015;
+  opacity: 0.004;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.9'/></svg>");
   background-size: 240px 240px;
   mix-blend-mode: overlay;
 }
 
 [data-theme='light'] body::before {
-  opacity: 0.025;
+  opacity: 0.006;
   mix-blend-mode: multiply;
 }
 
@@ -264,13 +256,13 @@ body > * { position: relative; z-index: 1; }
    #2 SECTIONAL BACKGROUNDS — utilities pour varier les fonds
    ══════════════════════════════════════════════════════ */
 .bg-section-deep {
-  background: linear-gradient(180deg, var(--background) 0%, rgb(var(--surface-rgb) / 0.7) 100%);
+  background: var(--background);
 }
 .bg-section-raised {
   background: rgb(var(--surface-rgb) / 0.6);
 }
 .bg-section-tint {
-  background: linear-gradient(135deg, rgb(var(--accent-luxury-rgb) / 0.03) 0%, transparent 60%);
+  background: rgb(var(--accent-luxury-rgb) / 0.035);
 }
 .bg-section-radial-gold {
   position: relative;
@@ -279,7 +271,7 @@ body > * { position: relative; z-index: 1; }
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgb(var(--accent-luxury-rgb) / 0.06), transparent 70%);
+  background: rgb(var(--accent-luxury-rgb) / 0.035);
   pointer-events: none;
   z-index: 0;
 }
@@ -575,9 +567,7 @@ a:active {
 
 /* Gradient animated background */
 .bg-gradient-animated {
-  background: linear-gradient(-45deg, #0C2D5E, #1A4D8F, #0C3D78, #152B54);
-  background-size: 400% 400%;
-  animation: gradientPan 10s ease infinite;
+  background: var(--surface);
 }
 
 .bg-midnight {
@@ -590,15 +580,15 @@ a:active {
 
 /* Dot grid pattern */
 .bg-dots {
-  background-image: radial-gradient(circle, rgba(12, 45, 94, 0.07) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgb(var(--accent-luxury-rgb) / 0.10) 1px, transparent 1px);
   background-size: 28px 28px;
 }
 
 /* Line grid pattern */
 .bg-grid {
   background-image:
-    linear-gradient(rgba(12, 45, 94, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(12, 45, 94, 0.04) 1px, transparent 1px);
+    linear-gradient(rgb(var(--border-rgb) / 0.30) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--border-rgb) / 0.30) 1px, transparent 1px);
   background-size: 40px 40px;
 }
 
@@ -624,7 +614,7 @@ a:active {
   display: block;
   height: 3px;
   width: 48px;
-  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  background: var(--accent-luxury);
   border-radius: 2px;
   margin-top: 10px;
 }
@@ -643,7 +633,7 @@ a:active {
   position: absolute;
   bottom: -3px; left: 0;
   height: 2px; width: 0;
-  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  background: var(--accent-luxury);
   border-radius: 1px;
   transition: width 250ms var(--ease-out);
 }
@@ -656,7 +646,7 @@ a:active {
   transition: all 200ms var(--ease-out);
 }
 .btn-primary-glow:hover {
-  box-shadow: 0 4px 20px var(--primary-glow), 0 2px 8px rgba(12, 45, 94, 0.15);
+  box-shadow: 0 4px 18px var(--primary-glow);
   transform: translateY(-1px);
 }
 .btn-primary-glow:active {
@@ -668,7 +658,7 @@ a:active {
   transition: all 200ms var(--ease-out);
 }
 .btn-secondary-glow:hover {
-  box-shadow: 0 4px 20px var(--secondary-glow), 0 2px 8px rgba(249, 115, 22, 0.20);
+  box-shadow: 0 4px 18px var(--secondary-glow);
   transform: translateY(-1px);
 }
 

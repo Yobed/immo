@@ -213,7 +213,7 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
             <ArrowLeft className="w-4 h-4" />
             <span className="hidden sm:inline">{t.flash.backToList}</span>
           </Link>
-          <span className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-full text-[10px] font-bold uppercase tracking-wider">
+          <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--accent-luxury-muted)] text-[var(--accent-luxury)] border border-[var(--accent-luxury)]/30 rounded-md text-[10px] font-bold uppercase tracking-wider">
             <Flame className="w-3 h-3" /> {t.flash.tag}
           </span>
         </div>
@@ -264,14 +264,14 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
             {/* Titre + meta */}
             <div className="bg-[var(--surface-card)] rounded-2xl p-5 md:p-6 border border-[var(--border)]">
               <div className="flex items-center gap-2 mb-3 flex-wrap">
-                <span className="px-2 py-0.5 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-wide rounded-full">
+                <span className="px-2 py-0.5 bg-[var(--primary)] text-white text-[10px] font-bold uppercase tracking-wide rounded-md">
                   {bien.type_offre === 'location' ? 'À louer' : bien.type_offre === 'vente' ? 'À vendre' : 'Offre'}
                 </span>
                 <span className="px-2 py-0.5 bg-[var(--surface-hover)] text-[var(--text)] text-[10px] font-bold uppercase tracking-wide rounded-full capitalize">
                   {bien.type_bien}
                 </span>
                 {bien.meuble && (
-                  <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold uppercase tracking-wide rounded-full">
+                  <span className="px-2 py-0.5 bg-[var(--success-soft)] text-[var(--success)] border border-[var(--success)]/30 text-[10px] font-bold uppercase tracking-wide rounded-md">
                     Meublé
                   </span>
                 )}
@@ -283,11 +283,11 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
               </h1>
 
               <div className="flex items-center gap-1.5 text-[var(--text-muted)] text-sm mb-4">
-                <MapPin className="w-4 h-4 text-orange-600" />
+                <MapPin className="w-4 h-4 text-[var(--accent-luxury)]" />
                 <span>{[bien.quartier, bien.commune, bien.zone].filter(Boolean).join(', ')}</span>
               </div>
 
-              <div className="text-3xl md:text-4xl font-display font-bold text-orange-600 mb-2">
+              <div className="text-3xl md:text-4xl font-display font-bold text-[var(--accent-luxury)] mb-2">
                 {priceDisplay(bien.prix_value, bien.prix_unit, bien.prix_label)}
               </div>
               {bien.prix_label && bien.prix_value != null && bien.prix_label !== priceDisplay(bien.prix_value, bien.prix_unit, null) && (
@@ -298,7 +298,7 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
               <div className="flex flex-wrap gap-4 mt-5 pt-5 border-t border-[var(--border)]">
                 {bien.nb_chambres != null && bien.nb_chambres > 0 && (
                   <div className="flex items-center gap-2">
-                    <BedDouble className="w-5 h-5 text-orange-600" />
+                    <BedDouble className="w-5 h-5 text-[var(--accent-luxury)]" />
                     <div>
                       <div className="font-bold text-[var(--text)] text-base leading-none">{bien.nb_chambres}</div>
                       <div className="text-[10px] text-[var(--text-subtle)] uppercase tracking-wide mt-0.5">{bien.nb_chambres > 1 ? t.flash.bedrooms : t.flash.bedroom}</div>
@@ -307,7 +307,7 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
                 )}
                 {bien.surface_m2 && (
                   <div className="flex items-center gap-2">
-                    <Maximize className="w-5 h-5 text-orange-600" />
+                    <Maximize className="w-5 h-5 text-[var(--accent-luxury)]" />
                     <div>
                       <div className="font-bold text-[var(--text)] text-base leading-none">{bien.surface_m2.toLocaleString('fr-FR')} m²</div>
                       <div className="text-[10px] text-[var(--text-subtle)] uppercase tracking-wide mt-0.5">{t.flash.surface}</div>
@@ -315,7 +315,7 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
                   </div>
                 )}
                 <div className="flex items-center gap-2">
-                  <Tag className="w-5 h-5 text-orange-600" />
+                  <Tag className="w-5 h-5 text-[var(--accent-luxury)]" />
                   <div>
                     <div className="font-mono font-bold text-[var(--text)] text-xs leading-none">{bien.ref}</div>
                     <div className="text-[10px] text-[var(--text-subtle)] uppercase tracking-wide mt-0.5">{t.flash.reference}</div>
