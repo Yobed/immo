@@ -34,3 +34,8 @@ Le build Vercel ne signale plus de variables de catalogue absentes de `turbo.jso
 - `TEST_BASE_URL=https://www.bogbesgroup.com node scripts/test-catalogue-contract.mjs` — OK (`2` annonces, total `1319`).
 - `TEST_BASE_URL=https://www.bogbesgroup.com node scripts/test-admin-contract.mjs` — OK (export, mutations et pages admin refusés sans session) ;
 - `node --experimental-strip-types scripts/test-rate-limit.mjs` — OK (fenêtre glissante et cinq routes sensibles couvertes).
+
+## Points suivis séparément
+
+- Les index propres à `v_annonces` doivent être exécutés sur le projet Supabase de scraping, séparé de la base CRM liée au dépôt ; le contrat catalogue et la disponibilité de cette source sont toutefois contrôlés en production.
+- `npm audit --workspace=@immo-ci/web --omit=dev` remonte encore 7 avis (2 modérés, 5 élevés), dont certains nécessitent une montée majeure de Next.js. Aucun `--force` n'a été lancé automatiquement pour éviter une régression de production.
