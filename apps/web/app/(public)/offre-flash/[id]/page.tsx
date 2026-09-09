@@ -17,6 +17,7 @@ import { FlashPlaceholder } from '@/components/offre-flash/FlashPlaceholder'
 import { ViewCount } from '@/components/bien/ViewCount'
 import { createClient as createSupabaseServer } from '@/lib/supabase/server'
 import { SITE_URL } from '@/lib/env'
+import { whatsappLink } from '@/lib/whatsapp'
 
 export const revalidate = 60
 export const dynamic = 'force-dynamic'
@@ -176,7 +177,7 @@ export default async function OffreFlashDetailPage({ params }: PageProps) {
       <p className="text-sm font-mono text-[var(--text)] select-all">{phone}</p>
       <div className="flex gap-2 mt-1.5">
         <a
-          href={`https://wa.me/${phone.replace(/[^0-9]/g, '')}`}
+          href={whatsappLink(phone) ?? '#'}
           target="_blank" rel="noopener noreferrer"
           className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition-colors"
         >

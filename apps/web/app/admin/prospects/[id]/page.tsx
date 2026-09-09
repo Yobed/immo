@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { formatFCFA } from '@/lib/format'
 import { getConsolidatedCatalogue } from '@/lib/catalogue/consolidated'
+import { whatsappLink } from '@/lib/whatsapp'
 import {
   setProspectStatutAction, setProspectNoteAction, setProspectAssignAction, setProspectRelanceAction,
   setProspectOutcomeAction,
@@ -32,13 +33,6 @@ const STATUT_META: Record<Statut, { label: string; cls: string }> = {
   traite: { label: 'Traité — résultat à qualifier', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-slate-300' },
 }
 const FLOW: Statut[] = ['nouveau', 'contacte', 'visite_planifiee', 'visite_realisee', 'relance', 'gagne', 'perdu']
-
-function waLink(phone: string): string {
-  let d = phone.replace(/\D/g, '')
-  if (d.startsWith('00')) d = d.slice(2)
-  if (!d.startsWith('225') && d.length <= 10) d = '225' + d
-  return `https://wa.me/${d}`
-}
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -132,7 +126,7 @@ export default async function ProspectDetailPage({ params }: PageProps) {
               <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" />{p.message_count} msg</span>
             </p>
           </div>
-          <a href={waLink(p.phone)} target="_blank" rel="noopener noreferrer"
+          <a href={whatsappLink(p.phone) ?? '#'} target="_blank" rel="noopener noreferrer"
             className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-bold">
             <MessageCircle className="w-4 h-4" /> Contacter
           </a>

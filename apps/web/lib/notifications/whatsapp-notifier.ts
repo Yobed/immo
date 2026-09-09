@@ -11,6 +11,7 @@
 
 import { wasenderSendMessage } from '@/lib/wasender'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { whatsappLink } from '@/lib/whatsapp'
 
 // ---------------- Types ----------------
 
@@ -614,10 +615,7 @@ export async function notifyVisitorReservationRejected(
 
 /** Lien wa.me pour un numéro propriétaire ivoirien (préfixe 225 si local). */
 function ownerWaLink(phone: string): string {
-  let d = phone.replace(/\D/g, '')
-  if (d.startsWith('00')) d = d.slice(2)
-  if (!d.startsWith('225') && d.length <= 10) d = '225' + d
-  return `https://wa.me/${d}`
+  return whatsappLink(phone) ?? 'https://wa.me/2250544872051'
 }
 
 function tplAdminContactRequest(ctx: ContactRequestContext): string {

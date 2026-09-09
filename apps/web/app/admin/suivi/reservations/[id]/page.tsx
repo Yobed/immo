@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { formatFCFA } from '@/lib/format'
 import { validateReservationAction } from '../../actions'
+import { whatsappLink } from '@/lib/whatsapp'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -55,12 +56,6 @@ function adminBadge(status: string) {
       {labels[status] ?? status}
     </span>
   )
-}
-
-function whatsappLink(phone: string | null | undefined) {
-  if (!phone) return null
-  const digits = phone.replace(/\D/g, '')
-  return `https://wa.me/${digits}`
 }
 
 function diffDays(d1: string, d2: string): number {
@@ -121,7 +116,7 @@ export default async function ReservationDetailPage({ params }: PageProps) {
   return (
     <main className="min-h-screen bg-[var(--surface-hover)]">
       <div className="bg-[var(--surface-card)] border-b border-[var(--border)]">
-        <div className="max-w-[1200px] mx-auto px-6 py-4 flex items-center justify-between gap-4">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <Link href="/admin/suivi?tab=reservations" className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text)] text-sm font-medium">
             <ArrowLeft className="w-4 h-4" /> Retour suivi
           </Link>
@@ -133,7 +128,7 @@ export default async function ReservationDetailPage({ params }: PageProps) {
         </div>
       </div>
 
-      <div className="max-w-[1200px] mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 sm:py-8 grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="lg:col-span-2 space-y-6">
           {/* Bien */}
           <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-6">
@@ -165,8 +160,8 @@ export default async function ReservationDetailPage({ params }: PageProps) {
                 {visitorPhone || '—'}
               </span>
               {visitorPhone && (
-                <a href={whatsappLink(visitorPhone)!} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold">
-                  <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
+                <a href={whatsappLink(visitorPhone)!} target="_blank" rel="noopener noreferrer" className="min-h-[44px] inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-sm font-bold">
+                  <MessageCircle className="w-4 h-4" /> WhatsApp
                 </a>
               )}
             </div>
@@ -184,8 +179,8 @@ export default async function ReservationDetailPage({ params }: PageProps) {
                 {ownerPhone || '—'}
               </span>
               {ownerPhone && (
-                <a href={whatsappLink(ownerPhone)!} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold">
-                  <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
+                <a href={whatsappLink(ownerPhone)!} target="_blank" rel="noopener noreferrer" className="min-h-[44px] inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-sm font-bold">
+                  <MessageCircle className="w-4 h-4" /> WhatsApp
                 </a>
               )}
             </div>

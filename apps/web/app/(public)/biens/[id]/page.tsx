@@ -18,6 +18,7 @@ import { FavorisWithNote } from '@/components/bien/FavorisWithNote'
 import { VisiteRequestForm } from '@/components/bien/VisiteRequestForm'
 import { VIPConciergeButton } from '@/components/bien/VIPConciergeButton'
 import { DemanderContactWhatsAppButton } from '@/components/bien/DemanderContactWhatsAppButton'
+import { whatsappLink } from '@/lib/whatsapp'
 import { PremiumBienCard } from '@/components/bien/PremiumBienCard'
 import { VirtualTourViewer } from '@/components/bien/VirtualTourViewer'
 import { BienMap } from '@/components/bien/BienMap'
@@ -201,7 +202,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
           <p className="text-sm font-mono text-[var(--text)] mt-0.5 select-all">{proprioPhone}</p>
           <div className="flex gap-2 mt-2.5">
             <a
-              href={`https://wa.me/${proprioPhone.replace(/[^0-9]/g, '')}`}
+              href={whatsappLink(proprioPhone) ?? '#'}
               target="_blank" rel="noopener noreferrer"
               className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition-colors"
             >

@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { formatFCFA } from '@/lib/format'
+import { whatsappLink } from '@/lib/whatsapp'
 import { setProspectStatutAction } from './actions'
 import { bulkSetProspectStatutAction } from './actions'
 import { CrmActionForm } from '@/components/admin/CrmActionForm'
@@ -59,12 +60,6 @@ const STATUT_META: Record<Statut, { label: string; hint: string; cls: string; do
 const KANBAN_COLS: Statut[] = ['nouveau', 'contacte', 'visite_planifiee', 'visite_realisee', 'relance', 'gagne', 'perdu', 'traite']
 const NEXT: Partial<Record<Statut, Statut>> = { nouveau: 'contacte', contacte: 'visite_planifiee', visite_planifiee: 'visite_realisee', visite_realisee: 'relance', relance: 'gagne' }
 
-function waLink(phone: string): string {
-  let d = phone.replace(/\D/g, '')
-  if (d.startsWith('00')) d = d.slice(2)
-  if (!d.startsWith('225') && d.length <= 10) d = '225' + d
-  return `https://wa.me/${d}`
-}
 function relative(iso: string): string {
   const h = Math.floor((Date.now() - new Date(iso).getTime()) / 3_600_000)
   if (h < 1) return "à l'instant"
@@ -269,7 +264,7 @@ function KanbanCard({ r, assignedName }: { r: ProspectRow; assignedName?: string
         {r.prochaine_action_at && <span className="inline-flex items-center gap-1 text-orange-600"><CalendarClock className="w-2.5 h-2.5" />action {new Date(r.prochaine_action_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>}
       </div>
       <div className="flex items-center gap-1.5 mt-1">
-        <a href={waLink(r.phone)} target="_blank" rel="noopener noreferrer"
+        <a href={whatsappLink(r.phone) ?? '#'} target="_blank" rel="noopener noreferrer"
           className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-[11px] font-bold">
           <MessageCircle className="w-3 h-3" /> Contacter
         </a>
@@ -312,7 +307,7 @@ function ListRow({ r, assignedName }: { r: ProspectRow; assignedName?: string })
         {r.perte_motif && <p className="text-[11px] text-red-700 mt-1 bg-red-50 border border-red-200 rounded px-2 py-1 line-clamp-1">Motif de perte : {r.perte_motif}</p>}
       </div>
       <div className="flex flex-col items-end gap-1.5 shrink-0">
-        <a href={waLink(r.phone)} target="_blank" rel="noopener noreferrer"
+        <a href={whatsappLink(r.phone) ?? '#'} target="_blank" rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-bold">
           <MessageCircle className="w-3.5 h-3.5" /> Contacter
         </a>

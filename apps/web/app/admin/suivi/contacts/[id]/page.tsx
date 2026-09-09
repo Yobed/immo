@@ -7,6 +7,7 @@ import {
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { validateContactAction } from '@/app/admin/suivi/actions'
+import { whatsappLink } from '@/lib/whatsapp'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -64,13 +65,6 @@ function StatusBadge({ status }: { status: ContactRow['admin_validation_status']
       {s.label}
     </span>
   )
-}
-
-function waLink(phone: string | null): string | null {
-  if (!phone) return null
-  const digits = phone.replace(/\D/g, '')
-  if (!digits) return null
-  return `https://wa.me/${digits}`
 }
 
 function formatDateTime(iso: string): string {
@@ -134,8 +128,8 @@ export default async function ContactDetailPage({ params }: PageProps) {
     ownerPhone = owner?.phone ?? null
   }
 
-  const visitorWa = waLink(req.visitor_phone)
-  const ownerWa = waLink(ownerPhone)
+  const visitorWa = whatsappLink(req.visitor_phone)
+  const ownerWa = whatsappLink(ownerPhone)
 
   // Ancienneté (respect du prospect : ne pas laisser traîner une demande)
   const pending = req.admin_validation_status === 'pending'
@@ -200,7 +194,7 @@ export default async function ContactDetailPage({ params }: PageProps) {
               <div className="space-y-2">
                 <p className="text-lg font-bold text-[var(--text)]">{req.visitor_name || '—'}</p>
                 {req.visitor_phone && (
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex flex-wrap items-center gap-2 text-sm">
                     <Phone className="w-4 h-4 text-emerald-600" />
                     <a href={`tel:${req.visitor_phone}`} className="text-[var(--text)] font-mono hover:underline">
                       {req.visitor_phone}
@@ -209,7 +203,7 @@ export default async function ContactDetailPage({ params }: PageProps) {
                       <a
                         href={visitorWa}
                         target="_blank" rel="noopener noreferrer"
-                        className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition"
+                        className="ml-0 sm:ml-auto min-h-[44px] inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold rounded-lg transition"
                       >
                         <MessageCircle className="w-3.5 h-3.5" />
                         WhatsApp
@@ -218,7 +212,7 @@ export default async function ContactDetailPage({ params }: PageProps) {
                   </div>
                 )}
                 {req.visitor_email && (
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex flex-wrap items-center gap-2 text-sm">
                     <Mail className="w-4 h-4 text-[var(--text-subtle)]" />
                     <a href={`mailto:${req.visitor_email}`} className="text-[var(--text)] hover:underline">
                       {req.visitor_email}
@@ -265,7 +259,7 @@ export default async function ContactDetailPage({ params }: PageProps) {
                       <a
                         href={ownerWa}
                         target="_blank" rel="noopener noreferrer"
-                        className={`ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-bold rounded-lg transition ${
+                        className={`ml-0 sm:ml-auto min-h-[44px] inline-flex items-center gap-2 px-4 py-2.5 text-white text-sm font-bold rounded-lg transition ${
                           isFlash ? 'bg-orange-600 hover:bg-orange-500' : 'bg-emerald-600 hover:bg-emerald-500'
                         }`}
                       >

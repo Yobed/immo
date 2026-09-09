@@ -226,7 +226,7 @@ export function StickyMobileCTA({
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 100, opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed left-4 right-4 z-[105] lg:hidden pointer-events-none flex flex-col items-center gap-2"
+            className="fixed left-3 right-3 z-[105] lg:hidden pointer-events-none flex flex-col items-center gap-2"
             style={{ bottom: `calc(${barBottom} + 20px)` }}
           >
             {/* Reassurance microtext */}
@@ -235,11 +235,11 @@ export function StickyMobileCTA({
             </div>
 
             {/* Action Bar Unifiée */}
-            <div className="w-full h-[58px] glass-pill rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.25)] border border-white/10 flex items-center p-2 pointer-events-auto">
+            <div className="w-full min-h-[68px] glass-pill rounded-2xl shadow-[0_12px_32px_rgba(0,0,0,0.25)] border border-white/10 flex items-center p-2 pointer-events-auto">
 
               {/* Infos Prix - Très compact à gauche */}
-              <div className="flex flex-col pl-3 pr-3 border-r border-white/10 justify-center h-full min-w-[90px]">
-                <span className="text-[15px] font-display font-bold text-[var(--accent-luxury)] leading-none mb-0.5">
+              <div className="flex min-w-0 w-[28%] max-w-[120px] flex-col pl-2 pr-2 sm:pl-3 sm:pr-3 border-r border-white/10 justify-center self-stretch">
+                <span className="truncate text-[clamp(11px,3.5vw,15px)] font-display font-bold text-[var(--accent-luxury)] leading-none mb-0.5">
                   {prix}
                 </span>
                 <span className="text-[8px] font-bold text-[var(--text-muted)] uppercase tracking-widest opacity-60">
@@ -248,7 +248,7 @@ export function StickyMobileCTA({
               </div>
 
               {/* Le Bouton d'Action - Prend le reste de la place */}
-              <div className="flex-1 pl-2">
+              <div className="flex-1 min-w-0 pl-1.5 sm:pl-2">
                 {isNuitee ? (
                   <ActionButton
                     href={`/reservations/nouvelle?bienId=${bienId}`}
@@ -269,7 +269,8 @@ export function StickyMobileCTA({
                 href={`https://wa.me/2250544872051?text=${waText}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-[56px] h-[56px] flex items-center justify-center rounded-2xl bg-white/5 hover:bg-white/10 transition-colors ml-2"
+                aria-label="Contacter le conseiller sur WhatsApp"
+                className="w-[52px] h-[52px] flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 transition-colors ml-1.5 shrink-0"
               >
                 <Image src="/whatsapp-icon.svg" alt="WhatsApp" width={24} height={24} className="opacity-80 group-hover:opacity-100" />
               </a>
@@ -310,7 +311,7 @@ export function StickyMobileCTA({
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 32, stiffness: 320 }}
               className="fixed bottom-0 left-0 right-0 z-[121] bg-[var(--surface-card)] rounded-t-3xl lg:hidden shadow-2xl"
-              style={{ maxHeight: '88vh' }}
+              style={{ maxHeight: '92vh', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
             >
               {/* Handle — plus large et premium */}
               <div className="flex justify-center pt-4 pb-2">
@@ -357,7 +358,7 @@ export function StickyMobileCTA({
               <div className="flex gap-1.5 mx-4 my-3 p-1 bg-[var(--surface-hover)] rounded-xl">
                 <button
                   onClick={() => setActiveTab('visite')}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all duration-200 ${
+                  className={`flex-1 min-h-[48px] flex items-center justify-center gap-2 px-2 py-2.5 rounded-lg text-xs font-bold transition-all duration-200 ${
                     activeTab === 'visite'
                       ? 'bg-[var(--surface-card)] text-[var(--text)] shadow-sm'
                       : 'text-[var(--text)] hover:text-[var(--text)]'
@@ -368,7 +369,7 @@ export function StickyMobileCTA({
                 </button>
                 <button
                   onClick={() => setActiveTab('contact')}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all duration-200 ${
+                  className={`flex-1 min-h-[48px] flex items-center justify-center gap-2 px-2 py-2.5 rounded-lg text-xs font-bold transition-all duration-200 ${
                     activeTab === 'contact'
                       ? 'bg-[var(--surface-card)] text-[var(--text)] shadow-sm'
                       : 'text-[var(--text)] hover:text-[var(--text)]'
@@ -382,7 +383,7 @@ export function StickyMobileCTA({
               {/* Contenu scrollable */}
               <div
                 className="overflow-y-auto px-4 pb-8"
-                style={{ maxHeight: 'calc(88vh - 170px)' }}
+                style={{ maxHeight: 'calc(92vh - 190px)' }}
               >
                 {activeTab === 'visite' && bienId && proprietaireId ? (
                   <VisiteRequestForm

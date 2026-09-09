@@ -271,11 +271,12 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
         </div>
 
         {/* Tabs */}
-        <div className="max-w-[1600px] mx-auto px-6 flex items-center gap-1 border-b border-[var(--border)]">
+        <div className="max-w-[1600px] mx-auto px-3 sm:px-6 overflow-x-auto no-scrollbar border-b border-[var(--border)]">
+          <div className="flex items-center justify-center min-w-max gap-1">
           <Link
             href={`/admin/suivi?tab=visites&view=${view}${qParam}`}
-            className={`px-4 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${
-              tab === 'visites' ? 'border-slate-900 text-[var(--text)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text)]'
+            className={`min-h-[48px] min-w-[112px] justify-center px-3 sm:px-4 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${
+              tab === 'visites' ? 'border-[var(--accent-luxury)] text-[var(--accent-luxury)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text)]'
             }`}
           >
             <Home className="w-4 h-4" /> Visites
@@ -285,8 +286,8 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
           </Link>
           <Link
             href={`/admin/suivi?tab=reservations&view=${view}${qParam}`}
-            className={`px-4 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${
-              tab === 'reservations' ? 'border-slate-900 text-[var(--text)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text)]'
+            className={`min-h-[48px] min-w-[136px] justify-center px-3 sm:px-4 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${
+              tab === 'reservations' ? 'border-[var(--accent-luxury)] text-[var(--accent-luxury)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text)]'
             }`}
           >
             <BedDouble className="w-4 h-4" /> Réservations
@@ -296,8 +297,8 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
           </Link>
           <Link
             href={`/admin/suivi?tab=contacts&view=${view}${qParam}`}
-            className={`px-4 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${
-              tab === 'contacts' ? 'border-slate-900 text-[var(--text)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text)]'
+            className={`min-h-[48px] min-w-[112px] justify-center px-3 sm:px-4 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${
+              tab === 'contacts' ? 'border-[var(--accent-luxury)] text-[var(--accent-luxury)]' : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text)]'
             }`}
           >
             <MessageCircle className="w-4 h-4" /> Contacts
@@ -305,10 +306,11 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
               <span className="px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px]">{contactsPending}</span>
             )}
           </Link>
+          </div>
         </div>
 
         {/* Toolbar */}
-        <form className="max-w-[1600px] mx-auto px-6 py-4 flex flex-wrap items-center gap-3">
+        <form className="max-w-[1600px] mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center gap-3">
           <input type="hidden" name="tab" value={tab} />
           <input type="hidden" name="view" value={view} />
 
