@@ -489,11 +489,11 @@ export async function getAnnoncesPagedItems(
   filters: ConsolidatedFilters,
   page: number,
   pageSize: number,
-): Promise<{ items: ConsolidatedBien[]; total: number }> {
+): Promise<{ items: ConsolidatedBien[]; total: number; unavailable: boolean }> {
   try {
-    return await queryAnnoncesPagedItems(filters, page, pageSize)
+    return { ...(await queryAnnoncesPagedItems(filters, page, pageSize)), unavailable: false }
   } catch {
-    return { items: [], total: 0 }
+    return { items: [], total: 0, unavailable: true }
   }
 }
 
@@ -508,15 +508,19 @@ export async function getAnnoncesPagedItemsStrict(
 
 /** Nombre total d'annonces web correspondant aux filtres (compteur d'onglet). */
 export async function getAnnoncesCount(filters: ConsolidatedFilters): Promise<number> {
+  return (await getAnnoncesCountStatus(filters)).count
+}
+
+export async function getAnnoncesCountStatus(filters: ConsolidatedFilters): Promise<{ count: number; unavailable: boolean }> {
   try {
     const { count } = await applyAnnonceFilters(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (createAnnoncesClient() as any).from('v_annonces').select('id', { count: 'exact', head: true }),
       filters,
     )
-    return count ?? 0
+    return { count: count ?? 0, unavailable: false }
   } catch {
-    return 0
+    return { count: 0, unavailable: true }
   }
 }
 
@@ -548,7 +552,7 @@ function mapAnnonce(a: AnnonceRow): ConsolidatedBien {
     surface_m2: a.surface_m2 ?? null,
     nb_pieces: a.nb_pieces ?? a.nb_chambres ?? null,
     description: publicDescription(a.description),
-    photo_url: a.photo_principale ?? null,
+    photo_url: a.photo_principale ?? a.photos?.[0] ?? null,
     // Annonce publique non contrôlée par nos soins : jamais marquée vérifiée.
     is_verifie: false,
     is_pending: false,

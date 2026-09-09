@@ -7,7 +7,9 @@ import {
 import { createAdminClient } from '@/lib/supabase/admin'
 import { formatFCFA } from '@/lib/format'
 import { setProspectStatutAction } from './actions'
+import { bulkSetProspectStatutAction } from './actions'
 import { CrmActionForm } from '@/components/admin/CrmActionForm'
+import { BulkProspectActions } from '@/components/admin/BulkProspectActions'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -39,7 +41,7 @@ interface ProspectRow {
 }
 
 interface PageProps {
-  searchParams: Promise<{ q?: string; statut?: string; view?: string }>
+  searchParams: Promise<{ q?: string; statut?: string; view?: string; assigned?: string }>
 }
 
 const STATUT_META: Record<Statut, { label: string; hint: string; cls: string; dot: string; col: string }> = {
@@ -76,16 +78,26 @@ function stOf(s: string): Statut {
 }
 
 export default async function AdminProspectsPage({ searchParams }: PageProps) {
-  const { q, statut, view: viewParam } = await searchParams
+  const { q, statut, view: viewParam, assigned } = await searchParams
   const view: View = viewParam === 'kanban' ? 'kanban' : 'list'
   const admin = createAdminClient()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query = (admin as any).from('prospects').select('*').order('last_seen', { ascending: false }).limit(500)
   if (view === 'list' && statut && statut in STATUT_META) query = query.eq('statut', statut)
+  if (assigned === 'unassigned') query = query.is('assigned_to', null)
+  else if (assigned && /^[0-9a-f-]{36}$/i.test(assigned)) query = query.eq('assigned_to', assigned)
   if (q) query = query.or(`nom.ilike.%${q}%,phone.ilike.%${q}%,commune.ilike.%${q}%,quartier.ilike.%${q}%`)
   const { data } = await query
   const rows = (data ?? []) as ProspectRow[]
+
+  const { data: assigneeRows } = await (admin as any)
+    .from('profiles')
+    .select('id, full_name')
+    .not('full_name', 'is', null)
+    .order('full_name', { ascending: true })
+    .limit(100)
+  const assignees = (assigneeRows ?? []) as { id: string; full_name: string | null }[]
 
   // Noms des commerciaux assignés
   const assignedIds = Array.from(new Set(rows.map((r) => r.assigned_to).filter(Boolean))) as string[]
@@ -109,6 +121,7 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
   const qs = (extra: Record<string, string>) => {
     const sp = new URLSearchParams()
     if (q) sp.set('q', q)
+    if (assigned) sp.set('assigned', assigned)
     for (const [k, v] of Object.entries(extra)) if (v) sp.set(k, v)
     const s = sp.toString()
     return `/admin/prospects${s ? `?${s}` : ''}`
@@ -172,6 +185,12 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
           {statut && <input type="hidden" name="statut" value={statut} />}
           <input type="text" name="q" defaultValue={q ?? ''} placeholder="Nom, numéro, commune…"
             className="flex-1 px-4 py-2 bg-[var(--surface-card)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)] focus:outline-none focus:border-[var(--accent-luxury)]" />
+          <select name="assigned" defaultValue={assigned ?? ''} aria-label="Filtrer par conseiller"
+            className="max-w-[12rem] rounded-xl border border-[var(--border)] bg-[var(--surface-card)] px-3 py-2 text-xs font-semibold text-[var(--text)]">
+            <option value="">Tous les conseillers</option>
+            <option value="unassigned">Non assignés</option>
+            {assignees.map((person) => <option key={person.id} value={person.id}>{person.full_name}</option>)}
+          </select>
           <button type="submit" className="px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800">OK</button>
         </form>
       </div>
@@ -210,6 +229,7 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
         </div>
       ) : (
         <div className="space-y-3">
+          {rows.length > 0 && <BulkProspectActions rows={rows.map((r) => ({ id: r.id, version: r.version, label: r.nom || 'Prospect' }))} action={bulkSetProspectStatutAction} />}
           <div className="hidden md:grid grid-cols-[1.5fr_1fr_1fr_auto] gap-4 px-4 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--text-muted)]" aria-hidden="true">
             <span>Prospect</span><span>Besoin</span><span>Dernière activité</span><span>Action</span>
           </div>

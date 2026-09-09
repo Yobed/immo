@@ -7,7 +7,7 @@ import { QuickFilters } from '@/components/search/QuickFilters'
 import { UnifiedBienCard } from '@/components/catalogue/UnifiedBienCard'
 import { UnifiedBienListCard } from '@/components/catalogue/UnifiedBienListCard'
 import { Pagination } from '@/components/ui/Pagination'
-import { getConsolidatedCatalogue, getLocauxPagedItems, getLocauxCount, getAnnoncesPagedItems, getAnnoncesCount, getCatalogueCommunes, type ConsolidatedFilters } from '@/lib/catalogue/consolidated'
+import { getConsolidatedCatalogue, getLocauxPagedItems, getLocauxCount, getAnnoncesPagedItems, getAnnoncesCountStatus, getCatalogueCommunes, type ConsolidatedFilters } from '@/lib/catalogue/consolidated'
 import { getViewCounts7d } from '@/lib/analytics/view-counts'
 import { getDictionary } from '@/lib/i18n/server'
 import { formatCount } from '@/lib/format'
@@ -84,6 +84,7 @@ export default async function CataloguePage({ searchParams }: PageProps) {
   let counts = { bogbes: 0, flash: 0, web: 0, total: 0 }
   let total = 0        // pour la pagination (items chargés)
   let displayTotal = 0 // pour le compteur affiché (vrai total DB)
+  let sourceUnavailable = false
   let paginated: typeof items = []
   let totalPages = 0
 
@@ -100,7 +101,7 @@ export default async function CataloguePage({ searchParams }: PageProps) {
     counts = { bogbes: 0, flash: flashTotal, web: 0, total: flashTotal }
     var communes = communes_
   } else if (sourceFilter === 'web') {
-    const [{ items: webItems, total: webTotal }, communes_] = await Promise.all([
+    const [{ items: webItems, total: webTotal, unavailable }, communes_] = await Promise.all([
       getAnnoncesPagedItems(filters, pageIdx, PAGE_SIZE),
       getCatalogueCommunes('web'),
     ])
@@ -110,14 +111,17 @@ export default async function CataloguePage({ searchParams }: PageProps) {
     displayTotal = webTotal
     totalPages = Math.ceil(webTotal / PAGE_SIZE)
     counts = { bogbes: 0, flash: 0, web: webTotal, total: webTotal }
+    sourceUnavailable = unavailable
     var communes = communes_
   } else {
-    const [catalogue, communes_, flashTotal, webTotal] = await Promise.all([
+    const [catalogue, communes_, flashTotal, webStatus] = await Promise.all([
       getConsolidatedCatalogue({ ...filters, limitPerSource: 500 }),
       getCatalogueCommunes(sourceFilter),
       getLocauxCount(filters),
-      getAnnoncesCount(filters),
+      getAnnoncesCountStatus(filters),
     ])
+    const webTotal = webStatus.count
+    sourceUnavailable = webStatus.unavailable
     items = catalogue.items
     counts = {
       bogbes: catalogue.counts.bogbes,
@@ -240,6 +244,12 @@ export default async function CataloguePage({ searchParams }: PageProps) {
           </div>
           <QuickFilters communes={communes} />
         </section>
+
+        {sourceUnavailable && (
+          <div role="status" className="mb-6 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-800">
+            Les annonces web sont momentanément indisponibles. Les autres sources restent consultables ; réessayez dans quelques instants.
+          </div>
+        )}
 
         {/* Grille / Liste / Carte — selon ?vue=
             Carte = exploration géographique pure (les détails sont dans le popup).

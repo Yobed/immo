@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
-import { AlertOctagon, AlertTriangle, Info, Clock, User as UserIcon, Code } from 'lucide-react'
+import { AlertOctagon, AlertTriangle, Info, Clock, User as UserIcon, Code, Database, Globe2 } from 'lucide-react'
 import Link from 'next/link'
+import { getHealthSnapshot } from '@/lib/observability/health'
 
 export const dynamic = 'force-dynamic'
 
@@ -58,6 +59,7 @@ export default async function AdminErrorsPage({ searchParams }: PageProps) {
     supabase.from('error_logs').select('id', { count: 'exact', head: true }).eq('status', 'ignored'),
   ])
   const [open, investigating, resolved, ignored] = counts.map((c: { count: number | null }) => c.count ?? 0)
+  const health = await getHealthSnapshot()
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-6 lg:py-10">
@@ -72,6 +74,27 @@ export default async function AdminErrorsPage({ searchParams }: PageProps) {
           Toutes les erreurs survenues dans les API / server actions / pages, dédupliquées par fingerprint.
         </p>
       </header>
+
+      <section
+        aria-label="État des dépendances"
+        className={`mb-6 rounded-2xl border p-4 ${health.status === 'ok' ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-amber-500/40 bg-amber-500/10'}`}
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--text-muted)]">Disponibilité</p>
+            <p className={`mt-1 text-sm font-semibold ${health.status === 'ok' ? 'text-emerald-700' : 'text-amber-700'}`}>
+              {health.status === 'ok' ? 'Toutes les dépendances répondent.' : 'Une dépendance nécessite une vérification.'}
+            </p>
+          </div>
+          <span className={`rounded-full px-3 py-1 text-xs font-bold ${health.status === 'ok' ? 'bg-emerald-600 text-white' : 'bg-amber-600 text-white'}`}>
+            {health.status === 'ok' ? 'Opérationnel' : 'Dégradé'}
+          </span>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2 text-xs">
+          <HealthCheck icon={Database} label="Base CRM" ok={health.checks.supabase} />
+          <HealthCheck icon={Globe2} label="Catalogue web" ok={health.checks.catalogue} />
+        </div>
+      </section>
 
       {/* Filtres status */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -105,6 +128,14 @@ export default async function AdminErrorsPage({ searchParams }: PageProps) {
         </p>
       )}
     </main>
+  )
+}
+
+function HealthCheck({ icon: Icon, label, ok }: { icon: typeof Database; label: string; ok: boolean }) {
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-semibold ${ok ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-700' : 'border-red-500/30 bg-red-500/10 text-red-700'}`}>
+      <Icon className="h-3.5 w-3.5" /> {label} · {ok ? 'OK' : 'À vérifier'}
+    </span>
   )
 }
 

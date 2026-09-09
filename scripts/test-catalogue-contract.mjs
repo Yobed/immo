@@ -12,6 +12,14 @@ for (const item of payload.items) {
   assert.ok(item.photo_principale)
 }
 
+const specialSearch = await fetch(`${base}/api/mobile/annonces?q=${encodeURIComponent("Côte d'Ivoire")}&limit=1`)
+assert.equal(specialSearch.status, 200)
+const invalid = await fetch(`${base}/api/mobile/annonces?limit=0`)
+assert.equal(invalid.status, 400)
+
+const invalidDetail = await fetch(`${base}/api/mobile/annonces/not-an-id?source=web`)
+assert.equal(invalidDetail.status, 400)
+
 if (payload.items[0]) {
   const detail = await fetch(`${base}/api/mobile/annonces/${encodeURIComponent(payload.items[0].id)}?source=web`)
   assert.equal(detail.status, 200)
