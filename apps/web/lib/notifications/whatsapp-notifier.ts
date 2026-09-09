@@ -125,6 +125,7 @@ async function logNotification(
     template: string
     relatedType: NotificationRelatedType
     relatedId: string
+    message: string
     payload: Record<string, unknown>
     result: SendResult
   }
@@ -137,8 +138,12 @@ async function logNotification(
       template: params.template,
       related_type: params.relatedType,
       related_id: params.relatedId,
+      message_body: params.message,
       payload: params.payload,
       status: params.result.success ? 'sent' : 'failed',
+      attempt_count: 1,
+      last_attempt_at: new Date().toISOString(),
+      next_retry_at: params.result.success ? null : new Date(Date.now() + 5 * 60_000).toISOString(),
       external_id: params.result.externalId ?? null,
       error_message: params.result.error ?? null,
       sent_at: params.result.success ? new Date().toISOString() : null,
@@ -394,6 +399,7 @@ export async function notifyAdminVisitRequest(
       template: 'visit_request_admin',
       relatedType: 'visite',
       relatedId: ctx.id,
+      message,
       payload: { bienTitre: ctx.bienTitre, visitorName: ctx.visitorName },
       result,
     })
@@ -421,13 +427,15 @@ export async function notifyOwnerVisitPending(
   if (!ctx.ownerPhone) {
     return { success: false, error: 'owner phone missing' }
   }
-  const result = await send(ctx.ownerPhone, tplOwnerVisitPending(ctx))
+  const message = tplOwnerVisitPending(ctx)
+  const result = await send(ctx.ownerPhone, message)
   await logNotification(supabase, {
     toPhone: ctx.ownerPhone,
     role: 'owner',
     template: 'visit_pending_owner',
     relatedType: 'visite',
     relatedId: ctx.id,
+    message,
     payload: { bienTitre: ctx.bienTitre, dateSouhaitee: ctx.dateSouhaitee },
     result,
   })
@@ -444,13 +452,15 @@ export async function notifyOwnerVisitApproved(
   if (!ctx.ownerPhone) {
     return { success: false, error: 'owner phone missing' }
   }
-  const result = await send(ctx.ownerPhone, tplOwnerVisitAnnounce(ctx))
+  const message = tplOwnerVisitAnnounce(ctx)
+  const result = await send(ctx.ownerPhone, message)
   await logNotification(supabase, {
     toPhone: ctx.ownerPhone,
     role: 'owner',
     template: 'visit_announce_owner',
     relatedType: 'visite',
     relatedId: ctx.id,
+    message,
     payload: { bienTitre: ctx.bienTitre },
     result,
   })
@@ -470,13 +480,15 @@ export async function notifyVisitorVisitApproved(
   supabase: SupabaseClient,
   ctx: VisitContext
 ): Promise<SendResult> {
-  const result = await send(ctx.visitorPhone, tplVisitorVisitConfirmed(ctx))
+  const message = tplVisitorVisitConfirmed(ctx)
+  const result = await send(ctx.visitorPhone, message)
   await logNotification(supabase, {
     toPhone: ctx.visitorPhone,
     role: 'visitor',
     template: 'visit_confirmed_visitor',
     relatedType: 'visite',
     relatedId: ctx.id,
+    message,
     payload: { bienTitre: ctx.bienTitre },
     result,
   })
@@ -497,9 +509,10 @@ export async function notifyVisitorVisitRejected(
   ctx: VisitContext,
   reason?: string
 ): Promise<SendResult> {
+  const message = tplVisitorVisitRejected(ctx, reason)
   const result = await send(
     ctx.visitorPhone,
-    tplVisitorVisitRejected(ctx, reason)
+    message
   )
   await logNotification(supabase, {
     toPhone: ctx.visitorPhone,
@@ -507,6 +520,7 @@ export async function notifyVisitorVisitRejected(
     template: 'visit_rejected_visitor',
     relatedType: 'visite',
     relatedId: ctx.id,
+    message,
     payload: { reason: reason ?? null },
     result,
   })
@@ -534,6 +548,7 @@ export async function notifyAdminReservationRequest(
       template: 'reservation_request_admin',
       relatedType: 'reservation',
       relatedId: ctx.id,
+      message,
       payload: { bienTitre: ctx.bienTitre, visitorName: ctx.visitorName },
       result,
     })
@@ -556,13 +571,15 @@ export async function notifyOwnerReservationApproved(
   if (!ctx.ownerPhone) {
     return { success: false, error: 'owner phone missing' }
   }
-  const result = await send(ctx.ownerPhone, tplOwnerReservationAnnounce(ctx))
+  const message = tplOwnerReservationAnnounce(ctx)
+  const result = await send(ctx.ownerPhone, message)
   await logNotification(supabase, {
     toPhone: ctx.ownerPhone,
     role: 'owner',
     template: 'reservation_announce_owner',
     relatedType: 'reservation',
     relatedId: ctx.id,
+    message,
     payload: { bienTitre: ctx.bienTitre },
     result,
   })
@@ -579,9 +596,10 @@ export async function notifyVisitorReservationApproved(
   supabase: SupabaseClient,
   ctx: ReservationContext
 ): Promise<SendResult> {
+  const message = tplVisitorReservationConfirmed(ctx)
   const result = await send(
     ctx.visitorPhone,
-    tplVisitorReservationConfirmed(ctx)
+    message
   )
   await logNotification(supabase, {
     toPhone: ctx.visitorPhone,
@@ -589,6 +607,7 @@ export async function notifyVisitorReservationApproved(
     template: 'reservation_confirmed_visitor',
     relatedType: 'reservation',
     relatedId: ctx.id,
+    message,
     payload: { bienTitre: ctx.bienTitre },
     result,
   })
@@ -606,9 +625,10 @@ export async function notifyVisitorReservationRejected(
   ctx: ReservationContext,
   reason?: string
 ): Promise<SendResult> {
+  const message = tplVisitorReservationRejected(ctx, reason)
   const result = await send(
     ctx.visitorPhone,
-    tplVisitorReservationRejected(ctx, reason)
+    message
   )
   await logNotification(supabase, {
     toPhone: ctx.visitorPhone,
@@ -616,6 +636,7 @@ export async function notifyVisitorReservationRejected(
     template: 'reservation_rejected_visitor',
     relatedType: 'reservation',
     relatedId: ctx.id,
+    message,
     payload: { reason: reason ?? null },
     result,
   })
@@ -739,6 +760,7 @@ export async function notifyAdminContactRequest(
       template: 'contact_request_admin',
       relatedType: 'contact_request',
       relatedId: ctx.id,
+      message,
       payload: { bienTitre: ctx.bienTitre, visitorName: ctx.visitorName },
       result,
     })
@@ -761,13 +783,15 @@ export async function notifyVisitorContactApproved(
   if (!ctx.visitorPhone) {
     return { success: false, error: 'visitor phone missing' }
   }
-  const result = await send(ctx.visitorPhone, tplVisitorContactApproved(ctx))
+  const message = tplVisitorContactApproved(ctx)
+  const result = await send(ctx.visitorPhone, message)
   await logNotification(supabase, {
     toPhone: ctx.visitorPhone,
     role: 'visitor',
     template: 'contact_approved_visitor',
     relatedType: 'contact_request',
     relatedId: ctx.id,
+    message,
     payload: { bienTitre: ctx.bienTitre },
     result,
   })
@@ -787,13 +811,15 @@ export async function notifyOwnerContactShared(
   if (!ctx.ownerPhone) {
     return { success: false, error: 'owner phone missing' }
   }
-  const result = await send(ctx.ownerPhone, tplOwnerContactShared(ctx))
+  const message = tplOwnerContactShared(ctx)
+  const result = await send(ctx.ownerPhone, message)
   await logNotification(supabase, {
     toPhone: ctx.ownerPhone,
     role: 'owner',
     template: 'contact_shared_owner',
     relatedType: 'contact_request',
     relatedId: ctx.id,
+    message,
     payload: { bienTitre: ctx.bienTitre, visitorName: ctx.visitorName },
     result,
   })
@@ -814,9 +840,10 @@ export async function notifyVisitorContactRejected(
   if (!ctx.visitorPhone) {
     return { success: false, error: 'visitor phone missing' }
   }
+  const message = tplVisitorContactRejected(ctx, reason)
   const result = await send(
     ctx.visitorPhone,
-    tplVisitorContactRejected(ctx, reason)
+    message
   )
   await logNotification(supabase, {
     toPhone: ctx.visitorPhone,
@@ -824,6 +851,7 @@ export async function notifyVisitorContactRejected(
     template: 'contact_rejected_visitor',
     relatedType: 'contact_request',
     relatedId: ctx.id,
+    message,
     payload: { reason: reason ?? null },
     result,
   })
