@@ -197,11 +197,13 @@ export function QuickFilters({ communes }: QuickFiltersProps = {}) {
 /** Ligne de filtres scrollable horizontalement avec label (caché sur mobile pour gagner de la verticale) */
 function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 lg:mx-0 lg:px-0">
-      <span className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)] shrink-0 inline-block w-14 lg:w-16">
+    <div className="flex items-start gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 lg:mx-0 lg:overflow-visible lg:px-0">
+      <span className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)] shrink-0 inline-block w-14 lg:w-16 lg:pt-2">
         {label}
       </span>
-      {children}
+      <div className="flex min-w-max items-center gap-2 lg:min-w-0 lg:flex-1 lg:flex-wrap lg:items-start lg:gap-x-2 lg:gap-y-2">
+        {children}
+      </div>
     </div>
   )
 }
