@@ -134,7 +134,7 @@ export function QuickFilters({ communes }: QuickFiltersProps = {}) {
             <Chip
               key={f.id}
               active={isActive}
-              icon={<Icon className={cn('w-3.5 h-3.5', isActive ? 'text-[var(--on-accent)]' : 'text-blue-500')} />}
+              icon={<Icon className={cn('w-3.5 h-3.5', isActive ? 'text-[var(--on-accent)]' : 'text-[var(--accent-luxury)]')} />}
               onClick={() => handleFilter({ type_offre: f.offre })}
               label={f.label}
             />
@@ -144,7 +144,7 @@ export function QuickFilters({ communes }: QuickFiltersProps = {}) {
         <div className="w-px h-6 bg-[var(--border)] self-center shrink-0" />
         <Chip
           active={verifiedActive}
-          icon={<ShieldCheck className={cn('w-3.5 h-3.5', verifiedActive ? 'text-white' : 'text-blue-600')} />}
+          icon={<ShieldCheck className={cn('w-3.5 h-3.5', verifiedActive ? 'text-[var(--on-accent)]' : 'text-[var(--accent-luxury)]')} />}
           onClick={() => handleFilter({ source: verifiedActive ? '' : 'bogbes' })}
           label="Vérifié uniquement"
           variant="verified"
@@ -155,7 +155,7 @@ export function QuickFilters({ communes }: QuickFiltersProps = {}) {
       <FilterRow label="Budget">
         <Chip
           active={!currentPrixMax}
-          icon={<Wallet className={cn('w-3.5 h-3.5', !currentPrixMax ? 'text-[var(--on-accent)]' : 'text-emerald-500')} />}
+          icon={<Wallet className={cn('w-3.5 h-3.5', !currentPrixMax ? 'text-[var(--on-accent)]' : 'text-[var(--accent-luxury)]')} />}
           onClick={() => handleFilter({ prix_max: '' })}
           label="Tout budget"
         />
@@ -217,14 +217,14 @@ interface ChipProps {
 function Chip({ active, onClick, label, icon, variant = 'default' }: ChipProps) {
   const activeBase = 'bg-[var(--accent-luxury)] border-[var(--accent-luxury)] text-[var(--on-accent)] shadow-sm'
   const inactiveByVariant = {
-    default: 'bg-surface-raised/50 border-[var(--border)] text-[var(--text-muted)] hover:border-white/20 hover:text-[var(--text)]',
-    muted: 'bg-white/5 border-white/10 text-[var(--text-muted)] hover:text-[var(--text)]',
-    verified: 'bg-blue-500/10 border-blue-500/30 text-blue-700 hover:bg-blue-500/20',
+    default: 'bg-[var(--surface)] border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--border-hover)] hover:text-[var(--text)]',
+    muted: 'bg-[var(--surface)] border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)]',
+    verified: 'bg-[var(--surface)] border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--accent-luxury)]/45 hover:text-[var(--text)]',
   }
   const activeByVariant = {
     default: activeBase,
-    muted: 'bg-accent-luxury/20 border-accent-luxury/50 text-[var(--accent-luxury)]',
-    verified: 'bg-blue-600 border-blue-600 text-white shadow-sm',
+    muted: 'bg-[var(--accent-luxury-muted)] border-[var(--accent-luxury)]/55 text-[var(--accent-luxury)]',
+    verified: activeBase,
   }
 
   return (
@@ -232,7 +232,7 @@ function Chip({ active, onClick, label, icon, variant = 'default' }: ChipProps) 
       type="button"
       onClick={onClick}
       className={cn(
-        'flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider whitespace-nowrap transition-all border shrink-0 active:scale-95',
+        'flex items-center gap-1.5 px-3.5 py-2 rounded-[var(--radius-md)] text-[11px] font-bold tracking-wide whitespace-nowrap transition-all border shrink-0 active:scale-95',
         active ? activeByVariant[variant] : inactiveByVariant[variant],
       )}
     >
