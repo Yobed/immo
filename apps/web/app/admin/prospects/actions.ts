@@ -50,6 +50,7 @@ export async function bulkSetProspectStatutAction(form: FormData): Promise<CrmAc
   if (!parsedStatus.success) return { error: 'Choisissez un statut valide.' }
   const selections = form.getAll('selection').filter((value): value is string => typeof value === 'string')
   if (selections.length === 0) return { error: 'Sélectionnez au moins un prospect.' }
+  if (selections.length > 50) return { error: 'Sélectionnez au maximum 50 prospects par opération.' }
 
   let updated = 0
   let failed = 0

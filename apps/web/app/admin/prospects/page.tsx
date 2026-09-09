@@ -229,7 +229,7 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
         </div>
       ) : (
         <div className="space-y-3">
-          {rows.length > 0 && <BulkProspectActions rows={rows.map((r) => ({ id: r.id, version: r.version, label: r.nom || 'Prospect' }))} action={bulkSetProspectStatutAction} />}
+          {rows.length > 0 && <BulkProspectActions rows={rows.slice(0, 50).map((r) => ({ id: r.id, version: r.version, label: r.nom || 'Prospect' }))} action={bulkSetProspectStatutAction} />}
           <div className="hidden md:grid grid-cols-[1.5fr_1fr_1fr_auto] gap-4 px-4 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--text-muted)]" aria-hidden="true">
             <span>Prospect</span><span>Besoin</span><span>Dernière activité</span><span>Action</span>
           </div>

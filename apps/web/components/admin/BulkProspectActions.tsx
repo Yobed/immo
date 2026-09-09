@@ -78,7 +78,7 @@ export function BulkProspectActions({ rows, action }: {
         {result.error && <p role="alert" className="basis-full text-xs font-semibold text-red-700">{result.error}</p>}
         {result.message && <p role="status" className="basis-full text-xs font-semibold text-emerald-700">{result.message}</p>}
       </form>
-      <p className="mt-2 text-[11px] text-[var(--text-muted)]">Les changements respectent la version de chaque dossier et demandent une confirmation.</p>
+      <p className="mt-2 text-[11px] text-[var(--text-muted)]">Maximum 50 dossiers par opération. Les changements respectent la version de chaque dossier et demandent une confirmation.</p>
     </section>
   )
 }
