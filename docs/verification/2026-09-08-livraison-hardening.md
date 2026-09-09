@@ -32,3 +32,5 @@ Le build Vercel ne signale plus de variables de catalogue absentes de `turbo.jso
 
 - `TEST_BASE_URL=https://www.bogbesgroup.com node scripts/test-production-surfaces.mjs` — OK (`health=ok`, catalogue `1319`) ;
 - `TEST_BASE_URL=https://www.bogbesgroup.com node scripts/test-catalogue-contract.mjs` — OK (`2` annonces, total `1319`).
+- `TEST_BASE_URL=https://www.bogbesgroup.com node scripts/test-admin-contract.mjs` — OK (export, mutations et pages admin refusés sans session) ;
+- `node --experimental-strip-types scripts/test-rate-limit.mjs` — OK (fenêtre glissante et cinq routes sensibles couvertes).
