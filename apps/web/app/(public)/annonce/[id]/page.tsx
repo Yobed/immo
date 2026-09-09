@@ -2,8 +2,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { ArrowLeft, Globe, MapPin, BedDouble, Maximize, Info, MessageCircle } from 'lucide-react'
+import { ArrowLeft, Globe, MapPin, BedDouble, Maximize, Info, MessageCircle, BookOpen, CheckCircle2, ExternalLink, ShieldCheck } from 'lucide-react'
 import { getConsolidatedBienById } from '@/lib/catalogue/consolidated'
+import { publicDescription } from '@/lib/catalogue/public-description'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { SimilarBiensSection } from '@/components/catalogue/SimilarBiensSection'
 import { SITE_URL } from '@/lib/env'
@@ -14,6 +15,43 @@ export const dynamic = 'force-dynamic'
 
 interface PageProps {
   params: Promise<{ id: string }>
+}
+
+type DescriptionPresentation = {
+  intro: string | null
+  highlights: string[]
+  note: string | null
+}
+
+/**
+ * Convert scraped prose into a readable introduction and a list of key points.
+ * The source remains untouched; this only changes how it is presented on the detail page.
+ */
+function presentDescription(value: string | null): DescriptionPresentation {
+  const clean = publicDescription(value)
+  if (!clean) return { intro: null, highlights: [], note: null }
+
+  const section = clean.match(/(?:composition|caractéristiques|equipements|équipements|détails?)\s*:/i)
+  const sectionStart = section?.index ?? 0
+  const introRaw = (section ? clean.slice(0, sectionStart) : clean).replace(/[|–—]+\s*$/, '').trim()
+  const narrative = introRaw.match(/(?:nous vous|découvrez|situé(?:e)?|ce bien|cette annonce)\b/i)
+  const intro = (narrative ? introRaw.slice(narrative.index ?? 0) : introRaw).trim() || null
+  const details = section ? clean.slice((section.index ?? 0) + section[0].length) : ''
+  const rawHighlights = details
+    .replace(/^\s*[:\-–—]+\s*/, '')
+    .split(/\s*(?:•|·|▪|◦)\s*|\s*;\s*/)
+    .map((item) => item.replace(/^\s*[-–—:]\s*/, '').trim())
+    .filter((item) => item.length > 1)
+  let note: string | null = null
+  const highlights = rawHighlights.flatMap((item) => {
+    const marker = item.match(/(?:💰\s*)?(?:loyer|prix|montant)\s*:/i)
+    if (!marker || marker.index === undefined) return [item]
+    const before = item.slice(0, marker.index).trim()
+    note = item.slice(marker.index).trim()
+    return before ? [before] : []
+  })
+
+  return { intro, highlights, note }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -68,6 +106,7 @@ export default async function AnnoncePage({ params }: PageProps) {
   const lieu = [bien.quartier, bien.commune].filter(Boolean).join(', ')
   const galerie = bien.photos.length ? bien.photos : ([bien.photo_url].filter(Boolean) as string[])
   const [couverture, ...secondaires] = galerie
+  const description = presentDescription(bien.description)
 
   return (
     <main className="bg-[var(--background)] min-h-screen pt-6 sm:pt-10 pb-16">
@@ -164,18 +203,69 @@ export default async function AnnoncePage({ params }: PageProps) {
           )}
         </div>
 
-        {bien.description && (
-          <p className="text-[var(--text)] leading-relaxed whitespace-pre-line mb-8">
-            {bien.description}
-          </p>
+        {(description.intro || description.highlights.length > 0) && (
+          <section className="mb-8 rounded-3xl border border-[var(--border)] bg-[var(--surface-card)] p-5 sm:p-6">
+            <div className="flex items-center gap-2">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--surface-hover)] text-[var(--accent-luxury)]">
+                <BookOpen className="h-4 w-4" />
+              </span>
+              <h2 className="text-lg font-bold text-[var(--text)]">À propos de ce bien</h2>
+            </div>
+            {description.intro && (
+              <p className="mt-4 max-w-4xl text-[15px] leading-7 text-[var(--text)]">
+                {description.intro}
+              </p>
+            )}
+            {description.highlights.length > 0 && (
+              <div className="mt-5 border-t border-[var(--border)] pt-4">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--text-muted)]">Points clés</p>
+                <ul className="mt-3 grid gap-x-8 gap-y-2 sm:grid-cols-2">
+                  {description.highlights.map((item, index) => (
+                    <li key={`${item}-${index}`} className="flex items-start gap-2 text-sm leading-6 text-[var(--text)]">
+                      <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-emerald-600" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {description.note && (
+              <div className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1 rounded-2xl bg-[var(--surface-hover)] px-4 py-3 text-sm">
+                <span className="font-bold text-[var(--text)]">À noter</span>
+                <span className="text-[var(--text-muted)]">{description.note}</span>
+              </div>
+            )}
+          </section>
         )}
 
         {isAdmin && (
-          <div className="flex flex-col gap-2 p-4 rounded-2xl bg-emerald-600/10 border border-emerald-600/30 mb-8">
-            <strong className="text-[var(--text)]">Informations administrateur</strong>
-            {adminContact && <p className="text-[var(--text)]">Contact : {adminContact}</p>}
-            {adminSourceUrl && <a className="text-emerald-700 underline break-all" href={adminSourceUrl} target="_blank" rel="noreferrer">Voir l’annonce source</a>}
-          </div>
+          <section className="mb-8 rounded-3xl border border-emerald-600/30 bg-emerald-600/10 p-5 sm:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">Accès réservé</p>
+                <h2 className="mt-1 text-lg font-bold text-[var(--text)]">Informations administrateur</h2>
+              </div>
+              <ShieldCheck className="mt-1 h-5 w-5 shrink-0 text-emerald-700 dark:text-emerald-300" />
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-emerald-600/20 bg-[var(--surface-card)] p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Contact source</p>
+                <p className="mt-2 break-words text-sm font-semibold text-[var(--text)]">{adminContact || 'Non renseigné'}</p>
+              </div>
+              {adminSourceUrl ? (
+                <a className="group rounded-2xl border border-[var(--accent-luxury)]/60 bg-[var(--surface-card)] p-4 transition hover:border-[var(--accent-luxury)]" href={adminSourceUrl} target="_blank" rel="noreferrer">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Source d’origine</p>
+                  <span className="mt-2 inline-flex items-center gap-2 text-sm font-bold text-[var(--accent-luxury)]">Ouvrir l’annonce source <ExternalLink className="h-4 w-4 transition group-hover:translate-x-0.5" /></span>
+                </a>
+              ) : (
+                <div className="rounded-2xl border border-emerald-600/20 bg-[var(--surface-card)] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Source d’origine</p>
+                  <p className="mt-2 text-sm text-[var(--text-muted)]">Lien non renseigné</p>
+                </div>
+              )}
+            </div>
+            <p className="mt-3 text-xs leading-relaxed text-[var(--text-muted)]">Ces informations servent au traitement interne. Le prospect passe toujours par un conseiller.</p>
+          </section>
         )}
 
         {/* Transparence : ne jamais laisser croire que l'offre est validée par nos soins. */}
