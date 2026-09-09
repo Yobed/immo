@@ -10,7 +10,7 @@ import {
   QUALIF_REMINDER_MARKER,
   NO_RESULTS_MESSAGE,
 } from '@/lib/ai/qualification';
-import { captureProspect } from '@/lib/prospects/capture';
+import { captureProspect, canonicalPhone } from '@/lib/prospects/capture';
 import { linkIntakeToProspect } from '@/lib/crm/intake';
 import { extractBienFromWhatsApp } from '@/lib/extractors/whatsapp-bien-extractor';
 import { upsertProspect, recordOptOut } from '@/lib/outreach/agent-prospects';
@@ -216,6 +216,15 @@ function normalizeCIPhone(phone: string): string {
   return digits;
 }
 
+/** Keep the property context a commercial included in a WhatsApp reply. */
+function humanTraceContext(text: string): { property_ref: string | null; property_url: string | null } {
+  const propertyRef = text.match(/\b((?:WEB|FLASH)-\d+)\b/i)?.[1]?.toUpperCase() ?? null;
+  const propertyUrl = text.match(
+    /https?:\/\/(?:www\.)?bogbesgroup\.com\/(?:biens|offre-flash|annonce)\/[^\s)]+/i,
+  )?.[0] ?? null;
+  return { property_ref: propertyRef, property_url: propertyUrl };
+}
+
 export async function POST(req: NextRequest) {
   const requestStartedAt = Date.now();
   try {
@@ -268,20 +277,55 @@ export async function POST(req: NextRequest) {
         const sb = getSupabase();
         const { data: recentOut } = await sb
           .from('whatsapp_messages')
-          .select('body')
+          .select('body, metadata')
           .eq('jid', jid)
           .eq('direction', 'outbound')
           .gte('created_at', new Date(Date.now() - 5 * 60_000).toISOString())
           .limit(10);
         const isOurBot = (((recentOut as unknown) as { body: string }[]) ?? []).some(
-          (r) => r.body === userMessage,
+          (r) => r.body === userMessage && (r as unknown as { metadata?: { actor_type?: string } }).metadata?.actor_type !== 'commercial',
         );
         if (!isOurBot) {
+          const rawHumanPhone = jid.split('@')[0] ?? '';
+          const trace = humanTraceContext(userMessage);
+          const { data: prospect } = await sb
+            .from('prospects')
+            .select('id')
+            .is('merged_into', null)
+            .eq('phone', canonicalPhone(rawHumanPhone))
+            .order('last_seen', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          const traceMetadata = {
+            actor_type: 'commercial',
+            trace_source: 'human_takeover',
+            takeover: true,
+            prospect_id: prospect?.id ?? null,
+            message_id: msg.key?.id ?? null,
+            ...trace,
+          };
+
+          // Store the exact human text before muting Sapphire. This is the
+          // canonical conversation record shown to administrators.
+          await sb.from('whatsapp_messages').insert({
+            jid,
+            direction: 'outbound',
+            body: userMessage,
+            metadata: traceMetadata,
+          });
+          const { error: crmError } = await sb.rpc('crm_record_human_whatsapp_reply', {
+            p_phone: rawHumanPhone,
+            p_jid: jid,
+            p_message: userMessage,
+            p_metadata: traceMetadata,
+          });
+          if (crmError) console.error('[whatsapp] CRM human reply trace failed', crmError);
+
           await sb.from('whatsapp_messages').insert({
             jid,
             direction: 'system',
             body: 'HUMAN_TAKEOVER',
-            metadata: { preview: String(userMessage).slice(0, 80) },
+            metadata: { ...traceMetadata, preview: String(userMessage).slice(0, 80) },
           });
         }
       }

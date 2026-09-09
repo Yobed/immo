@@ -19,6 +19,12 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 type Statut = 'nouveau' | 'contacte' | 'visite_planifiee' | 'visite_realisee' | 'relance' | 'gagne' | 'perdu' | 'en_cours' | 'rdv' | 'traite'
+type WhatsAppMetadata = {
+  actor_type?: string
+  trace_source?: string
+  property_ref?: string | null
+  property_url?: string | null
+}
 
 const STATUT_META: Record<Statut, { label: string; cls: string }> = {
   nouveau: { label: 'Nouveau', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-amber-300' },
@@ -72,14 +78,14 @@ export default async function ProspectDetailPage({ params }: PageProps) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let msgQuery = (admin as any)
     .from('whatsapp_messages')
-    .select('direction, body, created_at')
+    .select('direction, body, created_at, metadata')
     .order('created_at', { ascending: true })
     .limit(60)
   if (p.jid) msgQuery = msgQuery.eq('jid', p.jid)
   else msgQuery = msgQuery.ilike('jid', `%${p.phone}%`)
   const { data: msgsRaw } = await msgQuery
   const msgs = (msgsRaw ?? []).filter((m: { direction: string }) => m.direction === 'inbound' || m.direction === 'outbound') as
-    { direction: string; body: string; created_at: string }[]
+    { direction: string; body: string; created_at: string; metadata?: WhatsAppMetadata | null }[]
 
   // Biens du catalogue correspondant aux critères
   let matches: Awaited<ReturnType<typeof getConsolidatedCatalogue>>['items'] = []
@@ -146,7 +152,15 @@ export default async function ProspectDetailPage({ params }: PageProps) {
 
             <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-5">
               <h2 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-subtle)] mb-3">Historique des actions</h2>
-              {crmEvents === null ? <p role="alert" className="text-sm text-amber-700">Historique indisponible. Vérifiez que la migration CRM est appliquée.</p> : crmEvents.length === 0 ? <p className="text-sm text-[var(--text-muted)] italic">Aucun événement enregistré.</p> : <ol className="space-y-3">{crmEvents.map((event) => <li key={event.id} className="flex gap-3 text-xs"><span className="mt-1 w-2 h-2 rounded-full bg-[var(--accent-luxury)] shrink-0" /><div><p className="text-[var(--text)] font-semibold">{event.to_status ? `Statut : ${event.to_status}` : event.event_type.replaceAll('_', ' ')}</p>{event.note && <p className="text-[var(--text-muted)] mt-0.5">{event.note}</p>}<p className="text-[var(--text-subtle)] mt-0.5">{event.actor_name || (event.origin === 'legacy_unknown' ? 'Auteur historique non renseigné' : 'Système')} · {new Date(event.created_at).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })}</p></div></li>)}</ol>}
+              {crmEvents === null ? <p role="alert" className="text-sm text-amber-700">Historique indisponible. Vérifiez que la migration CRM est appliquée.</p> : crmEvents.length === 0 ? <p className="text-sm text-[var(--text-muted)] italic">Aucun événement enregistré.</p> : <ol className="space-y-3">{crmEvents.map((event) => {
+                const eventLabel = event.event_type === 'human_reply'
+                  ? 'Réponse commerciale'
+                  : event.to_status ? `Statut : ${event.to_status}` : event.event_type.replaceAll('_', ' ')
+                const eventAuthor = event.event_type === 'human_reply'
+                  ? 'Commercial · WhatsApp'
+                  : event.actor_name || (event.origin === 'legacy_unknown' ? 'Auteur historique non renseigné' : 'Système')
+                return <li key={event.id} className="flex gap-3 text-xs"><span className={`mt-1 w-2 h-2 rounded-full shrink-0 ${event.event_type === 'human_reply' ? 'bg-amber-500' : 'bg-[var(--accent-luxury)]'}`} /><div><p className="text-[var(--text)] font-semibold">{eventLabel}</p>{event.note && <p className="text-[var(--text-muted)] mt-0.5 whitespace-pre-wrap break-words">{event.note}</p>}<p className="text-[var(--text-subtle)] mt-0.5">{eventAuthor} · {new Date(event.created_at).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })}</p></div></li>
+              })}</ol>}
             </section>
 
             {/* Conversation */}
@@ -160,14 +174,16 @@ export default async function ProspectDetailPage({ params }: PageProps) {
                 <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
                   {msgs.map((m, i) => {
                     const inbound = m.direction === 'inbound'
+                    const commercial = !inbound && (m.metadata?.actor_type === 'commercial' || m.metadata?.trace_source === 'human_takeover')
+                    const senderLabel = inbound ? 'Client' : commercial ? 'Commercial' : 'Sapphire'
                     return (
                       <div key={i} className={`flex ${inbound ? 'justify-start' : 'justify-end'}`}>
                         <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
-                          inbound ? 'bg-[var(--surface-hover)] text-[var(--text)]' : 'bg-emerald-600 text-white'
+                          inbound ? 'bg-[var(--surface-hover)] text-[var(--text)]' : commercial ? 'bg-amber-500 text-slate-950' : 'bg-emerald-600 text-white'
                         }`}>
                           <p className="whitespace-pre-wrap break-words leading-snug">{m.body}</p>
-                          <p className={`text-[10px] mt-1 ${inbound ? 'text-[var(--text-subtle)]' : 'text-white/70'}`}>
-                            {inbound ? 'Client' : 'Sapphire'} · {new Date(m.created_at).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                          <p className={`text-[10px] mt-1 ${inbound ? 'text-[var(--text-subtle)]' : commercial ? 'text-slate-800/75' : 'text-white/70'}`}>
+                            {senderLabel} · {new Date(m.created_at).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                           </p>
                         </div>
                       </div>
