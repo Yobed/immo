@@ -22,7 +22,7 @@
     },
     {
       "path": "/api/cron/retry-whatsapp",
-      "schedule": "*/10 * * * *"
+      "schedule": "7 4 * * *"
     }
   ]
 }
