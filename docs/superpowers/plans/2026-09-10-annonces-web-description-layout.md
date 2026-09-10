@@ -19,10 +19,14 @@
 **Files:**
 - Create: `apps/web/lib/catalogue/description-presentation.ts`
 - Modify: `apps/web/app/(public)/annonce/[id]/page.tsx:20-55`
+- Modify: `apps/web/tsconfig.json:compilerOptions`
 
 - [ ] **Step 1: Écrire le module pur avec les types et la fonction `presentDescription`**
   - Déplacer `DescriptionPresentation` et `presentDescription` hors de la page.
-  - Importer `publicDescription` via un chemin relatif.
+  - Importer `publicDescription` via `./public-description.ts` avec l'extension
+    explicite requise par Node ESM strip-types.
+  - Activer `allowImportingTsExtensions: true` dans `apps/web/tsconfig.json`
+    afin que le type-check Next accepte cette extension.
   - Séparer les marqueurs de section (`composition`, `caractéristiques`, `équipements`, `détails`).
   - Découper aussi les séparateurs et retours à la ligne quand aucun marqueur n'est présent.
   - Déplacer les segments contenant `loyer`, `prix` ou `montant` vers `note`.
@@ -103,12 +107,17 @@
   - Run: `npm.cmd run lint --workspace @immo-ci/web`
   - Expected: aucune nouvelle erreur sur les fichiers modifiés.
 
-- [ ] **Step 3: Vérifier les routes et les largeurs**
+- [ ] **Step 3: Vérifier le build Next et la route**
+  - Run: `npm.cmd run build --workspace @immo-ci/web`
+  - Expected: build Next terminé sans erreur.
+  - Après le build, lancer l'application avec `npm.cmd run start --workspace @immo-ci/web`
+    et vérifier qu'une route `/annonce/[id]` réelle répond en HTTP 200.
+
+- [ ] **Step 4: Vérifier les routes et les largeurs**
   - Ouvrir une annonce web réelle à 390 px, 768 px et 1440 px.
   - Contrôler le contraste, la hiérarchie h2/ul, les icônes `aria-hidden`, la navigation clavier et l'absence de scroll horizontal.
   - Vérifier que les coordonnées, URLs, placeholders techniques et hashtags ne sont jamais visibles publiquement.
 
-- [ ] **Step 4: Committer uniquement le périmètre**
-  - `git add apps/web/lib/catalogue/description-presentation.ts apps/web/lib/catalogue/public-description.ts apps/web/app/(public)/annonce/[id]/page.tsx apps/web/scripts/test-description-presentation.mjs apps/web/package.json`
+- [ ] **Step 5: Committer uniquement le périmètre**
+  - PowerShell : `git add -- 'apps/web/lib/catalogue/description-presentation.ts' 'apps/web/lib/catalogue/public-description.ts' 'apps/web/app/(public)/annonce/[id]/page.tsx' 'apps/web/scripts/test-description-presentation.mjs' 'apps/web/package.json' 'apps/web/tsconfig.json'`
   - `git commit -m "feat: improve web listing description readability"`
-
