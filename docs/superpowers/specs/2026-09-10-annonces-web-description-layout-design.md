@@ -15,7 +15,7 @@ La section adopte une structure éditoriale en trois niveaux :
 2. **Points clés** : une liste lisible, un élément par ligne, avec une icône de
    validation et une grille à deux colonnes seulement sur écran large.
 3. **À noter** : une information complémentaire séparée visuellement lorsque le
-   texte contient un loyer, un prix ou une précision particulière.
+   texte contient un marqueur explicite `loyer`, `prix` ou `montant`.
 
 Le bloc conserve le bleu de la marque, ses bordures actuelles et ses rayons,
 mais utilise davantage d'espace entre les niveaux. Les informations principales
@@ -33,7 +33,9 @@ La fonction de présentation nettoie uniquement l'affichage public :
   même lorsqu'aucun marqueur « composition » n'est présent ;
 - reconnaissance des marqueurs « composition », « caractéristiques »,
   « équipements » et « détails » ;
-- détection des marqueurs prix/loyer pour les déplacer vers « À noter » ;
+- détection des marqueurs `loyer`, `prix` et `montant` pour les déplacer vers
+  « À noter » ; aucune autre phrase n'est classée automatiquement dans cette
+  zone ;
 - conservation du texte source en base pour les administrateurs.
 
 Les liens, e-mails et numéros de téléphone sont retirés du contenu affiché
@@ -65,8 +67,13 @@ vide, la section n'est pas rendue.
 
 - `apps/web/app/(public)/annonce/[id]/page.tsx` : présentation et rendu de la
   section ;
-- tests unitaires de la fonction de découpage si le projet dispose déjà d'un
-  emplacement de tests adapté ;
+- `apps/web/lib/catalogue/public-description.ts` : nettoyage du texte public,
+  suppression des coordonnées/hashtags et conservation des retours utiles ;
+- un test déterministe obligatoire de la fonction de présentation et du helper
+  de nettoyage. Le projet n'ayant pas de runner unitaire configuré, le test sera
+  un script Node minimal dans `scripts/` (sans nouvelle dépendance) couvrant
+  hashtags, séparateurs sans marqueur, retours à la ligne, formats de téléphone,
+  absence de placeholders et conservation de la valeur source ;
 - aucune modification de la base, des données source, du CRM ou des fichiers
   marketing.
 
