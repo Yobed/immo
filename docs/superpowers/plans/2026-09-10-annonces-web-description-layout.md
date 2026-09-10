@@ -55,7 +55,7 @@
 
 - [ ] **Step 1: Écrire le script Node de test**
   - Importer `description-presentation.ts` et `public-description.ts` avec les imports relatifs définis dans la spécification.
-  - Tester hashtags, séparateurs sans marqueur, retours à la ligne, prix/loyer dans `note`, formats `+225`/`00225`/`07`/`05`/`01`, absence de placeholders et conservation de l'entrée originale.
+  - Tester hashtags, séparateurs sans marqueur, retours à la ligne, marqueurs `prix`/`loyer`/`montant` déplacés une seule fois dans `note`, formats `+225`/`00225`/`07`/`05`/`01`, absence de placeholders et conservation de l'entrée originale.
   - Utiliser uniquement `node:assert/strict`.
 
 - [ ] **Step 2: Ajouter la commande et la version Node minimale**

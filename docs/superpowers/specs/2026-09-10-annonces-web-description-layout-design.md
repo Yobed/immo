@@ -69,6 +69,8 @@ vide, la section n'est pas rendue.
   pure `presentDescription`, types associés et règles de découpage ;
 - `apps/web/app/(public)/annonce/[id]/page.tsx` : import du module de présentation
   et rendu de la section ;
+- `apps/web/tsconfig.json` : autoriser les extensions `.ts` explicites nécessaires
+  au test Node ESM strip-types, sans modifier le comportement de compilation ;
 - `apps/web/lib/catalogue/public-description.ts` : nettoyage du texte public,
   suppression des coordonnées/hashtags et conservation des retours utiles ;
 - `apps/web/scripts/test-description-presentation.mjs` : test déterministe
@@ -80,8 +82,9 @@ vide, la section n'est pas rendue.
   nouvelle dépendance ;
 - le test importera directement `../lib/catalogue/description-presentation.ts`
   et `../lib/catalogue/public-description.ts`, et couvrira hashtags,
-  séparateurs sans marqueur, retours à la ligne, formats de téléphone, absence
-  de placeholders et conservation de la valeur source ;
+  séparateurs sans marqueur, retours à la ligne, marqueurs prix/loyer/montant
+  déplacés une seule fois dans « À noter », formats de téléphone, absence de
+  placeholders et conservation de la valeur source ;
 - aucune modification de la base, des données source, du CRM ou des fichiers
   marketing.
 
