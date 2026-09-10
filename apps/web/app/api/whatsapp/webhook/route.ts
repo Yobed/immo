@@ -243,6 +243,7 @@ export async function POST(req: NextRequest) {
 
     const body = JSON.parse(rawBody);
     const { event, data } = body;
+    const normalizedEvent = typeof event === 'string' ? event.trim() : '';
 
     // Wasender peut livrer le même message par plusieurs événements selon la
     // configuration du webhook : message entrant privé, upsert général et
@@ -253,9 +254,10 @@ export async function POST(req: NextRequest) {
       'messages.received',
       'messages-group.received',
     ]);
-    if (!inboundMessageEvents.has(event)) {
-      return NextResponse.json({ status: 'ignored', reason: `event=${event} not processed (message event required)` });
+    if (!inboundMessageEvents.has(normalizedEvent)) {
+      return NextResponse.json({ status: 'ignored', reason: `event=${normalizedEvent} not processed (message event required)` });
     }
+    console.log(`[Webhook] accepted inbound event=${normalizedEvent}`);
 
     const messages = data?.messages;
     if (!messages) return NextResponse.json({ status: 'ignored' });

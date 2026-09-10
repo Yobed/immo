@@ -10,7 +10,7 @@ for (const event of ['messages.upsert', 'messages.received', 'messages-group.rec
   }
 }
 
-if (!source.includes('inboundMessageEvents.has(event)')) {
+if (!source.includes('inboundMessageEvents.has(normalizedEvent)')) {
   throw new Error('Webhook route must gate events through the inbound message allowlist');
 }
 
