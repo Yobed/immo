@@ -244,11 +244,17 @@ export async function POST(req: NextRequest) {
     const body = JSON.parse(rawBody);
     const { event, data } = body;
 
-    // Wasender envoie 2 events pour chaque message entrant (messages.received
-    // ET messages.upsert). On NE traite QUE messages.upsert pour éviter de
-    // répondre 2 fois au même message. Les autres events sont ignorés silencieusement.
-    if (event !== 'messages.upsert') {
-      return NextResponse.json({ status: 'ignored', reason: `event=${event} not processed (only messages.upsert)` });
+    // Wasender peut livrer le même message par plusieurs événements selon la
+    // configuration du webhook : message entrant privé, upsert général et
+    // événement dédié aux groupes. Ils passent tous par le même pipeline ; la
+    // clé d'idempotence ci-dessous évite les doubles réponses et doubles imports.
+    const inboundMessageEvents = new Set([
+      'messages.upsert',
+      'messages.received',
+      'messages-group.received',
+    ]);
+    if (!inboundMessageEvents.has(event)) {
+      return NextResponse.json({ status: 'ignored', reason: `event=${event} not processed (message event required)` });
     }
 
     const messages = data?.messages;
