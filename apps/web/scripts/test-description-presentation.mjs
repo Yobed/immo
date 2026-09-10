@@ -12,17 +12,28 @@ assert.equal(clean.includes('+225'), false, 'les numéros doivent être retirés
 assert.equal(clean.includes('[contact retiré]'), false, 'les placeholders techniques sont interdits')
 
 const presented = presentDescription(source)
-assert.equal(presented.note, 'Loyer: 1.600.000 FCFA')
-assert.deepEqual(presented.highlights, ['salon lumineux', '04 chambres'])
-assert.equal(presented.intro, 'Située dans un environnement calme')
+assert.equal(
+  presented.text,
+  'Située dans un environnement calme: salon lumineux; 04 chambres; Loyer: 1.600.000 FCFA;',
+  'la description complète doit rester intacte après nettoyage public',
+)
+assert.deepEqual(presented.blocks, [
+  'Située dans un environnement calme: salon lumineux;',
+  '04 chambres;',
+  'Loyer: 1.600.000 FCFA;',
+])
 
 const amount = presentDescription('Villa disponible. Composition: séjour; jardin; Montant: 45.000.000 FCFA')
-assert.equal(amount.note, 'Montant: 45.000.000 FCFA')
-assert.equal((amount.note.match(/Montant/gi) ?? []).length, 1)
+assert.equal(amount.text, 'Villa disponible. Composition: séjour; jardin; Montant: 45.000.000 FCFA')
+assert.deepEqual(amount.blocks, [
+  'Villa disponible. Composition: séjour;',
+  'jardin;',
+  'Montant: 45.000.000 FCFA',
+])
 
 const unmarked = presentDescription('Appartement agréable\nCuisine équipée\nTerrasse')
-assert.equal(unmarked.intro, 'Appartement agréable')
-assert.deepEqual(unmarked.highlights, ['Cuisine équipée', 'Terrasse'])
+assert.equal(unmarked.text, 'Appartement agréable\nCuisine équipée\nTerrasse')
+assert.deepEqual(unmarked.blocks, ['Appartement agréable', 'Cuisine équipée', 'Terrasse'])
 
 const original = 'Texte source #Cocody +225 0700000000'
 publicDescription(original)

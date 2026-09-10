@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED: Use superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Présenter les descriptions des annonces web sous forme de résumé et de points clés lisibles, sans exposer hashtags, liens ou coordonnées.
+**Goal:** Présenter la description complète des annonces web de façon lisible, sans la résumer ni exposer hashtags, liens ou coordonnées.
 
-**Architecture:** Extraire la logique de présentation dans un module TypeScript pur réutilisable et testable. La page d’annonce composera ensuite une section éditoriale responsive avec résumé, points clés et encart « À noter », tandis que le nettoyeur public supprimera réellement les données de contact.
+**Architecture:** Extraire la logique de présentation dans un module TypeScript pur réutilisable et testable. La page d’annonce affichera la description intégrale, avec des espacements visuels ajoutés entre les séparateurs, tandis que le nettoyeur public supprimera réellement les données de contact.
 
 **Tech Stack:** Next.js 15, React 19, TypeScript, Tailwind CSS 3, scripts Node natifs.
 
@@ -27,9 +27,9 @@
     explicite requise par Node ESM strip-types.
   - Activer `allowImportingTsExtensions: true` dans `apps/web/tsconfig.json`
     afin que le type-check Next accepte cette extension.
-  - Séparer les marqueurs de section (`composition`, `caractéristiques`, `équipements`, `détails`).
-  - Découper aussi les séparateurs et retours à la ligne quand aucun marqueur n'est présent.
-  - Déplacer les segments contenant `loyer`, `prix` ou `montant` vers `note`.
+  - Conserver le texte complet et sa ponctuation après nettoyage public.
+  - Ajouter uniquement des retours visuels après les séparateurs et retours à la ligne.
+  - Ne générer ni résumé, ni liste éditoriale, ni encart « À noter ».
   - Ne jamais muter la valeur source.
 
 - [ ] **Step 2: Remplacer la fonction locale de la page par l'import du module**
@@ -55,7 +55,7 @@
 
 - [ ] **Step 1: Écrire le script Node de test**
   - Importer `description-presentation.ts` et `public-description.ts` avec les imports relatifs définis dans la spécification.
-  - Tester hashtags, séparateurs sans marqueur, retours à la ligne, marqueurs `prix`/`loyer`/`montant` déplacés une seule fois dans `note`, formats `+225`/`00225`/`07`/`05`/`01`, absence de placeholders et conservation de l'entrée originale.
+  - Tester hashtags, séparateurs sans marqueur, retours à la ligne, conservation des marqueurs `prix`/`loyer`/`montant`, formats `+225`/`00225`/`07`/`05`/`01`, absence de placeholders et conservation de l'entrée originale.
   - Utiliser uniquement `node:assert/strict`.
 
 - [ ] **Step 2: Ajouter la commande et la version Node minimale**
@@ -75,11 +75,9 @@
 
 - [ ] **Step 1: Créer la hiérarchie visuelle**
   - Garder le titre `h2` et l'icône décorative avec `aria-hidden`.
-  - Présenter le résumé avec `max-w-[65ch]`, 15–16 px et une interligne confortable.
-  - Présenter les points clés dans une liste `ul` sémantique.
-  - Utiliser une seule colonne jusqu'à `lg`, puis deux colonnes à partir de `lg:grid-cols-2`.
-  - Afficher « À noter » seulement quand `note` existe.
-  - Ne pas répéter le prix, la surface ou le nombre de pièces déjà visibles au-dessus.
+  - Présenter la description complète avec `max-w-[75ch]`, 15–16 px et une interligne confortable.
+  - Rendre chaque bloc visuel sous forme de paragraphe, sans retirer ni résumer de contenu.
+  - Conserver une seule colonne afin de respecter l'ordre exact de la description.
 
 - [ ] **Step 2: Garantir la lisibilité mobile**
   - Éviter toute largeur fixe et tout débordement horizontal.
@@ -89,7 +87,7 @@
 - [ ] **Step 3: Vérifier les états**
   - Description vide : ne pas rendre la section.
   - Description non découpable : rendre un paragraphe unique limité en largeur.
-  - Description avec prix/loyer : afficher l'information une seule fois dans « À noter ».
+  - Description avec prix/loyer : conserver l'information à son emplacement exact, sans duplication ni encart « À noter ».
 
 ## Chunk 3: Vérification et livraison
 
@@ -115,7 +113,7 @@
 
 - [ ] **Step 4: Vérifier les routes et les largeurs**
   - Ouvrir une annonce web réelle à 390 px, 768 px et 1440 px.
-  - Contrôler le contraste, la hiérarchie h2/ul, les icônes `aria-hidden`, la navigation clavier et l'absence de scroll horizontal.
+  - Contrôler le contraste, la hiérarchie du titre et des paragraphes, les icônes `aria-hidden`, la navigation clavier et l'absence de scroll horizontal.
   - Vérifier que les coordonnées, URLs, placeholders techniques et hashtags ne sont jamais visibles publiquement.
 
 - [ ] **Step 5: Committer uniquement le périmètre**

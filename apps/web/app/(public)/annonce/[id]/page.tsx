@@ -2,7 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { ArrowLeft, Globe, MapPin, BedDouble, Maximize, Info, MessageCircle, BookOpen, CheckCircle2, ExternalLink, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, Globe, MapPin, BedDouble, Maximize, Info, MessageCircle, BookOpen, ExternalLink, ShieldCheck } from 'lucide-react'
 import { getConsolidatedBienById } from '@/lib/catalogue/consolidated'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { SimilarBiensSection } from '@/components/catalogue/SimilarBiensSection'
@@ -166,44 +166,22 @@ export default async function AnnoncePage({ params }: PageProps) {
           )}
         </div>
 
-        {(description.intro || description.highlights.length > 0 || description.note) && (
+        {description.text && (
           <section className="mb-8 rounded-3xl border border-[var(--border)] bg-[var(--surface-card)] p-5 sm:p-7 lg:p-8">
             <div className="flex items-center gap-3">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--surface-hover)] text-[var(--accent-luxury)]">
                 <BookOpen aria-hidden="true" className="h-5 w-5" />
               </span>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--text-muted)]">Présentation</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--text-muted)]">Description complète</p>
                 <h2 className="mt-0.5 text-lg font-bold text-[var(--text)]">À propos de ce bien</h2>
               </div>
             </div>
-
-            {description.intro && (
-              <p className="mt-5 max-w-[65ch] text-[15px] leading-7 text-[var(--text)] sm:text-base">
-                {description.intro}
-              </p>
-            )}
-
-            {description.highlights.length > 0 && (
-              <div className="mt-6 border-t border-[var(--border)] pt-5">
-                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)]">Points clés</p>
-                <ul className="mt-4 grid gap-x-10 gap-y-3 lg:grid-cols-2">
-                  {description.highlights.map((item, index) => (
-                    <li key={`${item}-${index}`} className="flex items-start gap-2.5 text-[15px] leading-6 text-[var(--text)]">
-                      <CheckCircle2 aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-emerald-600" />
-                      <span className="min-w-0 break-words">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {description.note && (
-              <div className="mt-6 flex flex-wrap items-baseline gap-x-2 gap-y-1 rounded-2xl border border-[var(--border)] bg-[var(--surface-hover)] px-4 py-3.5 text-[15px] leading-6">
-                <span className="font-bold text-[var(--text)]">À noter</span>
-                <span className="text-[var(--text-muted)]">{description.note}</span>
-              </div>
-            )}
+            <div className="mt-5 max-w-[75ch] space-y-3 text-[15px] leading-7 text-[var(--text)] sm:text-base">
+              {description.blocks.map((block, index) => (
+                <p key={`${block}-${index}`} className="break-words">{block}</p>
+              ))}
+            </div>
           </section>
         )}
 

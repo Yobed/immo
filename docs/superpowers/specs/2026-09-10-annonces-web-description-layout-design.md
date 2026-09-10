@@ -9,13 +9,9 @@ puis de consulter les détails utiles.
 
 ## Décision de design
 
-La section adopte une structure éditoriale en trois niveaux :
-
-1. **Résumé** : un paragraphe court, limité à une largeur de lecture confortable.
-2. **Points clés** : une liste lisible, un élément par ligne, avec une icône de
-   validation et une grille à deux colonnes seulement sur écran large.
-3. **À noter** : une information complémentaire séparée visuellement lorsque le
-   texte contient un marqueur explicite `loyer`, `prix` ou `montant`.
+La section affiche la **description complète** du bien. Aucun résumé, classement
+ou réécriture éditoriale n'est généré. Le texte est seulement nettoyé pour le
+rendu public, puis espacé visuellement en paragraphes et lignes lisibles.
 
 Le bloc conserve le bleu de la marque, ses bordures actuelles et ses rayons,
 mais utilise davantage d'espace entre les niveaux. Les informations principales
@@ -29,13 +25,10 @@ La fonction de présentation nettoie uniquement l'affichage public :
 - suppression du HTML, des liens, des adresses e-mail et des numéros de contact ;
 - suppression des hashtags en fin de texte (aucun hashtag ne doit rester dans le
   rendu public) ;
-- reconnaissance des séparateurs `•`, `·`, `▪`, `◦`, `;` et des retours à la ligne,
-  même lorsqu'aucun marqueur « composition » n'est présent ;
-- reconnaissance des marqueurs « composition », « caractéristiques »,
-  « équipements » et « détails » ;
-- détection des marqueurs `loyer`, `prix` et `montant` pour les déplacer vers
-  « À noter » ; aucune autre phrase n'est classée automatiquement dans cette
-  zone ;
+- conservation des séparateurs `•`, `·`, `▪`, `◦`, `;` et des retours à la ligne,
+  avec seulement des retours visuels supplémentaires pour aérer l'affichage ;
+- conservation de tous les mots, chiffres, marqueurs de prix et de loyer de la
+  description après nettoyage ;
 - conservation du texte source en base pour les administrateurs.
 
 Les liens, e-mails et numéros de téléphone sont retirés du contenu affiché
@@ -54,10 +47,10 @@ vide, la section n'est pas rendue.
 
 - téléphone (≤ 639 px) : une seule colonne, texte 15–16 px, éléments espacés et sans
   débordement horizontal ;
-- tablette (640–1023 px) : une seule colonne pour les points clés afin de garder
-  une largeur de lecture stable ;
-- écran large (≥ 1024 px) : résumé et points clés respirent dans une grille
-  contrôlée à deux colonnes ;
+- tablette (640–1023 px) : une seule colonne pour respecter l'ordre intégral du
+  texte et garder une largeur de lecture stable ;
+- écran large (≥ 1024 px) : la description reste dans une colonne contrôlée,
+  limitée à environ 75 caractères par ligne ;
 - les icônes restent décoratives (`aria-hidden`) et les titres gardent une
   hiérarchie `h2`/`p`/`ul` correcte ;
 - contraste maintenu avec les variables de thème existantes ;
@@ -66,7 +59,8 @@ vide, la section n'est pas rendue.
 ## Périmètre technique
 
 - `apps/web/lib/catalogue/description-presentation.ts` : fonction TypeScript
-  pure `presentDescription`, types associés et règles de découpage ;
+  pure `presentDescription`, qui conserve le texte complet et ne modifie que
+  les espaces/separateurs utilisés pour l'affichage ;
 - `apps/web/app/(public)/annonce/[id]/page.tsx` : import du module de présentation
   et rendu de la section ;
 - `apps/web/tsconfig.json` : autoriser les extensions `.ts` explicites nécessaires
@@ -82,9 +76,9 @@ vide, la section n'est pas rendue.
   nouvelle dépendance ;
 - le test importera directement `../lib/catalogue/description-presentation.ts`
   et `../lib/catalogue/public-description.ts`, et couvrira hashtags,
-  séparateurs sans marqueur, retours à la ligne, marqueurs prix/loyer/montant
-  déplacés une seule fois dans « À noter », formats de téléphone, absence de
-  placeholders et conservation de la valeur source ;
+  séparateurs sans marqueur, retours à la ligne, conservation exacte des
+  marqueurs prix/loyer/montant, formats de téléphone, absence de placeholders et
+  conservation de la valeur source ;
 - aucune modification de la base, des données source, du CRM ou des fichiers
   marketing.
 
@@ -92,10 +86,10 @@ vide, la section n'est pas rendue.
 
 - une annonce contenant des hashtags et une longue phrase est lisible sans
   bloc compact ;
-- une annonce structurée par `;` ou `•` produit des points clés ;
+- une annonce structurée par `;` ou `•` reste complète et est seulement espacée ;
 - une annonce non structurée par un titre mais contenant `;`, `•` ou des retours
-  à la ligne produit tout de même des points clés ;
-- un prix ou un loyer n'est pas dupliqué dans les points clés ;
+  à la ligne reste complète et lisible ;
+- aucun prix, loyer ou autre détail descriptif n'est supprimé ou résumé ;
 - aucun hashtag, numéro, e-mail ou URL réel ne reste dans le rendu public ;
 - la page compile et les routes `/annonce/[id]` existantes répondent toujours.
 
