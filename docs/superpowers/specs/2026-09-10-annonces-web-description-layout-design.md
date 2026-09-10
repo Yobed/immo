@@ -65,15 +65,18 @@ vide, la section n'est pas rendue.
 
 ## Périmètre technique
 
-- `apps/web/app/(public)/annonce/[id]/page.tsx` : présentation et rendu de la
-  section ;
+- `apps/web/lib/catalogue/description-presentation.ts` : fonction TypeScript
+  pure `presentDescription`, types associés et règles de découpage ;
+- `apps/web/app/(public)/annonce/[id]/page.tsx` : import du module de présentation
+  et rendu de la section ;
 - `apps/web/lib/catalogue/public-description.ts` : nettoyage du texte public,
   suppression des coordonnées/hashtags et conservation des retours utiles ;
-- un test déterministe obligatoire de la fonction de présentation et du helper
-  de nettoyage. Le projet n'ayant pas de runner unitaire configuré, le test sera
-  un script Node minimal dans `scripts/` (sans nouvelle dépendance) couvrant
-  hashtags, séparateurs sans marqueur, retours à la ligne, formats de téléphone,
-  absence de placeholders et conservation de la valeur source ;
+- `apps/web/scripts/test-description-presentation.mjs` : test déterministe
+  obligatoire de la fonction de présentation et du helper de nettoyage. Il sera
+  exécuté par `npm run test:description --workspace @immo-ci/web` (aucune
+  nouvelle dépendance) et couvrira hashtags, séparateurs sans marqueur, retours
+  à la ligne, formats de téléphone, absence de placeholders et conservation de
+  la valeur source ;
 - aucune modification de la base, des données source, du CRM ou des fichiers
   marketing.
 
