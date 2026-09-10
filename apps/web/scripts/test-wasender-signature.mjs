@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import { createHmac } from 'node:crypto'
 
-process.env.WASSENDER_WEBHOOK_SECRET = 'test-webhook-secret'
+// Simulate the value copied from an env export with surrounding quotes.
+process.env.WASSENDER_WEBHOOK_SECRET = '"test-webhook-secret"'
 
 const { verifyWasenderSignature } = await import('../lib/wasender.ts')
 const payload = JSON.stringify({ event: 'messages.upsert', data: { id: 'message-1' } })
