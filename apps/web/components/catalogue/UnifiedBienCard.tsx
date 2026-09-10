@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { MapPin, BedDouble, Maximize2, Flame, ShieldCheck, Radio, Clock, Eye } from 'lucide-react'
 import { useT } from '@/lib/i18n/client'
@@ -8,31 +9,32 @@ import type { ConsolidatedBien } from '@/lib/catalogue/consolidated'
 import { FlashPlaceholder } from '@/components/offre-flash/FlashPlaceholder'
 import { TiltCard } from '@/components/ui/TiltCard'
 import { ViewTransitionLink } from '@/components/ui/ViewTransitionLink'
+import { formatRelativeTime, isRecentTimestamp } from '@/lib/catalogue/relative-time'
 
 interface Props {
   bien: ConsolidatedBien
   index?: number
 }
 
-function relativeTime(iso: string | null): string {
-  if (!iso) return ''
-  const d = new Date(iso).getTime()
-  if (isNaN(d)) return ''
-  const diff = Date.now() - d
-  const mins = Math.floor(diff / 60000)
-  if (mins < 1) return "à l'instant"
-  if (mins < 60) return `${mins} min`
-  const hours = Math.floor(mins / 60)
-  if (hours < 24) return `${hours} h`
-  const days = Math.floor(hours / 24)
-  if (days < 7) return `${days} j`
-  return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })
+function useLiveRelativeTime(iso: string | null): { label: string; now: number } {
+  const [now, setNow] = useState(() => Date.now())
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 60_000)
+    return () => window.clearInterval(timer)
+  }, [])
+
+  return { label: formatRelativeTime(iso, now), now }
 }
 
 export function UnifiedBienCard({ bien, index = 0 }: Props) {
   const t = useT()
   const prefersReduced = useReducedMotion()
   const isFlash = bien.source === 'flash'
+  const { label: liveRelativeTime, now } = useLiveRelativeTime(bien.date_scraping)
+  const isRecentLive = bien.date_scraping
+    ? isRecentTimestamp(bien.date_scraping, now)
+    : bien.is_recent
 
   return (
     <motion.div
@@ -129,7 +131,7 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
                 {bien.commune}
               </span>
             )}
-            {bien.is_recent && (
+            {isRecentLive && (
               <span className="ml-auto flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-[var(--success)] text-white text-[8px] font-bold uppercase">
                 <span className="w-1 h-1 bg-[var(--surface-card)] rounded-full animate-pulse" />
                 {t.common.new}
@@ -173,10 +175,13 @@ export function UnifiedBienCard({ bien, index = 0 }: Props) {
               {bien.date_scraping && isFlash && (
                 <div
                   className="flex items-center gap-0.5 ml-auto text-emerald-600"
-                  title="Mise à jour récente"
+                  title={new Date(bien.date_scraping).toLocaleString('fr-FR', {
+                    dateStyle: 'medium',
+                    timeStyle: 'short',
+                  })}
                 >
                   <Radio className="w-2.5 h-2.5" />
-                  <span className="font-medium">{relativeTime(bien.date_scraping)}</span>
+                  <span className="font-medium" suppressHydrationWarning>{liveRelativeTime}</span>
                 </div>
               )}
             </div>

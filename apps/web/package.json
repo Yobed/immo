@@ -9,6 +9,7 @@
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "test:description": "node --experimental-strip-types scripts/test-description-presentation.mjs",
+    "test:catalogue-relative-time": "node --experimental-strip-types scripts/test-catalogue-relative-time.mjs",
     "test:openrouter-model-chain": "node --experimental-strip-types scripts/test-openrouter-model-chain.mjs",
     "test:wasender-signature": "node --experimental-strip-types scripts/test-wasender-signature.mjs",
     "test:wasender-events": "node --experimental-strip-types scripts/test-wasender-events.mjs",
