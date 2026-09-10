@@ -73,10 +73,15 @@ vide, la section n'est pas rendue.
   suppression des coordonnées/hashtags et conservation des retours utiles ;
 - `apps/web/scripts/test-description-presentation.mjs` : test déterministe
   obligatoire de la fonction de présentation et du helper de nettoyage. Il sera
-  exécuté par `npm run test:description --workspace @immo-ci/web` (aucune
-  nouvelle dépendance) et couvrira hashtags, séparateurs sans marqueur, retours
-  à la ligne, formats de téléphone, absence de placeholders et conservation de
-  la valeur source ;
+- exécuté par `npm run test:description --workspace @immo-ci/web` ; le plan doit
+  ajouter explicitement dans `apps/web/package.json` le script
+  `"test:description": "node --experimental-strip-types scripts/test-description-presentation.mjs"`
+  ainsi que `"engines": { "node": ">=22.6.0" }`, requis pour importer les modules `.ts` purs sans
+  nouvelle dépendance ;
+- le test importera directement `../lib/catalogue/description-presentation.ts`
+  et `../lib/catalogue/public-description.ts`, et couvrira hashtags,
+  séparateurs sans marqueur, retours à la ligne, formats de téléphone, absence
+  de placeholders et conservation de la valeur source ;
 - aucune modification de la base, des données source, du CRM ou des fichiers
   marketing.
 
