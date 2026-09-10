@@ -1,5 +1,5 @@
-const OPENROUTER_API_KEY = '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';
-const MODEL = 'meta-llama/llama-3-8b-instruct:free';
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+const MODEL = process.env.OPENROUTER_MODEL || 'qwen/qwen3.7-flash';
 
 const SYSTEM_PROMPT = `Tu es "Élite Immo CI", un conseiller immobilier de prestige et concierge dédié en ligne.
 Ton ton est extrêmement professionnel, raffiné, courtois et expert.
@@ -29,6 +29,7 @@ Image 2 : https://example.com/piscine.jpg`;
 const systemMessage = `${SYSTEM_PROMPT}\n\n[CONTEXTE DU BIEN ACTUEL] :\n${context}\nSert-toi de ces infos pour répondre aux questions sur ce bien.`;
 
 async function test() {
+  if (!OPENROUTER_API_KEY) throw new Error('OPENROUTER_API_KEY is required');
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {

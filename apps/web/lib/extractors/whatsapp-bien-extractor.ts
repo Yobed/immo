@@ -65,13 +65,47 @@ Schema JSON exact (toutes les clés obligatoires, mets null pour les champs non 
   "confidence": number
 }`
 
-const FREE_MODELS = [
+/**
+ * Ordered by cost/latency first, then by a free fallback. The paid Chinese
+ * models are intentionally first: OpenRouter's free pool can return 404/429
+ * when a provider is unavailable, which used to make WhatsApp imports stop
+ * even though the API key was valid.
+ */
+export const DEFAULT_OPENROUTER_MODELS = [
+  'qwen/qwen3.7-flash',
+  'deepseek/deepseek-v4-flash-0731',
+  'qwen/qwen3-30b-a3b-instruct-2507',
   'openai/gpt-oss-120b:free',
   'qwen/qwen3-next-80b-a3b-instruct:free',
   'nvidia/nemotron-3-super-120b-a12b:free',
   'google/gemma-3-27b-it:free',
   'meta-llama/llama-3.3-70b-instruct:free',
 ] as const
+
+export const DEFAULT_OPENROUTER_TIMEOUT_MS = 12_000
+
+/**
+ * Allows a deployment to tune the chain without rebuilding the application.
+ * Empty values and duplicates are removed; an empty override falls back to
+ * the safe defaults above.
+ */
+export function getOpenRouterModels(): readonly string[] {
+  const configured = (process.env.OPENROUTER_EXTRACTOR_MODELS ?? '')
+    .split(',')
+    .map((model) => model.trim())
+    .filter(Boolean)
+
+  return configured.length > 0
+    ? [...new Set(configured)]
+    : DEFAULT_OPENROUTER_MODELS
+}
+
+export function getOpenRouterTimeoutMs(): number {
+  const configured = Number(process.env.OPENROUTER_EXTRACTOR_TIMEOUT_MS)
+  return Number.isFinite(configured) && configured >= 1_000 && configured <= 30_000
+    ? Math.floor(configured)
+    : DEFAULT_OPENROUTER_TIMEOUT_MS
+}
 
 interface OpenRouterMessage {
   role: 'system' | 'user' | 'assistant'
@@ -88,22 +122,30 @@ async function callOpenRouter(
   model: string,
   messages: OpenRouterMessage[]
 ): Promise<string | null> {
-  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://www.bogbesgroup.com',
-      'X-Title': "BOGBE'S GROUPE Tally Webhook",
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      temperature: 0.1,
-      max_tokens: 2048,
-      response_format: { type: 'json_object' },
-    }),
-  })
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), getOpenRouterTimeoutMs())
+  let res: Response
+  try {
+    res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://www.bogbesgroup.com',
+        'X-Title': "BOGBE'S GROUPE Tally Webhook",
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        temperature: 0.1,
+        max_tokens: 2048,
+        response_format: { type: 'json_object' },
+      }),
+    })
+  } finally {
+    clearTimeout(timeout)
+  }
 
   if (!res.ok) {
     const errBody = await res.text().catch(() => '')
@@ -133,7 +175,7 @@ export async function extractBienFromWhatsApp(rawMessage: string): Promise<Extra
     { role: 'user', content: `Annonce brute :\n\n${rawMessage}` },
   ]
 
-  for (const model of FREE_MODELS) {
+  for (const model of getOpenRouterModels()) {
     let text: string | null = null
     try {
       text = await callOpenRouter(apiKey, model, messages)

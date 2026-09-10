@@ -40,17 +40,14 @@ const GEMINI_API_KEY = sanitizeKey(process.env.GEMINI_API_KEY);
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-flash-latest';
 
 const OPENROUTER_API_KEY = sanitizeKey(process.env.OPENROUTER_API_KEY);
-// Modèle PAYANT très bon marché (~$0.001/msg) = filet fiable quand Groq/Gemini
-// sont quota-out. llama-3.3-70b-instruct = même modèle que le Groq primaire,
-// donc réponses cohérentes. Surchargeable via env OPENROUTER_MODEL.
-const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct';
-// Modèles GRATUITS de dernier secours, essayés après le payant (providers
-// diversifiés → si un est saturé, un autre passe). Surchargeable via env.
-// hermes-405b retiré : trop lourd/lent (risque de timeout quand il répond).
-// Les 2 restants échouent vite (429 < 1s) quand le tier free est saturé.
+// Modèle chinois PAYANT très bon marché = filet fiable quand Groq/Gemini
+// sont quota-out. Surchargeable via env OPENROUTER_MODEL.
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'qwen/qwen3.7-flash';
+// Replis peu coûteux et diversifiés : un fournisseur indisponible ne doit pas
+// transformer une demande WhatsApp valide en message d'erreur.
 const OPENROUTER_FREE_MODELS = (
   process.env.OPENROUTER_FREE_MODELS ||
-  'meta-llama/llama-3.3-70b-instruct:free,qwen/qwen3-next-80b-a3b-instruct:free'
+  'deepseek/deepseek-v4-flash-0731,qwen/qwen3-30b-a3b-instruct-2507,openai/gpt-oss-120b:free,qwen/qwen3-next-80b-a3b-instruct:free'
 ).split(',').map((s) => s.trim()).filter(Boolean);
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 

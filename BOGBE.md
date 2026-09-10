@@ -340,7 +340,9 @@ SUPABASE_LOCAUX_ANON_KEY=
 GROQ_API_KEY=                  # primary
 OPENROUTER_API_KEY=            # backup
 GROQ_MODEL=llama-3.3-70b-versatile
-OPENROUTER_MODEL=openai/gpt-oss-120b:free
+OPENROUTER_MODEL=qwen/qwen3.7-flash
+# Chaîne extraction WhatsApp (ordre de tentative, séparée par des virgules)
+OPENROUTER_EXTRACTOR_MODELS=qwen/qwen3.7-flash,deepseek/deepseek-v4-flash-0731,qwen/qwen3-30b-a3b-instruct-2507
 
 # WhatsApp
 WASSENDER_API_KEY=
