@@ -1,4 +1,6 @@
 // apps/web/lib/wasender.ts
+import { createHmac, timingSafeEqual } from 'node:crypto'
+
 /**
  * Wasender API Client — BOGBE'S GROUPE Platform
  * Intégration pour la gestion intelligente des messages WhatsApp
@@ -7,8 +9,8 @@
 /**
  * Nettoie une valeur d'env des caractères invisibles (BOM, sauts de ligne,
  * espaces, zero-width chars) qui peuvent s'incruster lors d'un copier-coller
- * depuis le dashboard Vercel ou Wasender et casser silencieusement le HMAC
- * de signature. Garde uniquement les caractères ASCII imprimables.
+ * depuis le dashboard Vercel ou Wasender. Garde uniquement les caractères
+ * ASCII imprimables.
  */
 function sanitizeEnv(raw: string | undefined): string {
   if (!raw) return '';
@@ -39,31 +41,38 @@ export interface WasenderSendResponse {
 /**
  * Vérifie la signature du webhook Wasender.
  *
- * Wasender peut envoyer la signature HMAC-SHA256 hex avec ou sans le préfixe
- * `sha256=` selon la version de l'intégration.
+ * Wasender documente `X-Webhook-Signature` comme le secret webhook configuré
+ * dans le tableau de bord. Certaines anciennes intégrations ont envoyé un
+ * HMAC-SHA256 hexadécimal (avec ou sans `sha256=`), donc ce format reste
+ * accepté pour assurer une migration sans coupure.
  */
 export function verifyWasenderSignature(payload: string, signature: string): boolean {
   // L'absence de secret est une erreur de configuration, jamais une raison
   // d'accepter un webhook anonyme.
   if (!WASSENDER_WEBHOOK_SECRET || !signature) return false
 
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const crypto = require('crypto') as typeof import('crypto');
-  const sigHmacHex = crypto
-    .createHmac('sha256', WASSENDER_WEBHOOK_SECRET)
+  const cleanSig = signature.trim();
+  const directSig = cleanSig.replace(/^secret=/i, '').trim();
+  const hmacSig = cleanSig.replace(/^sha256=/i, '').trim();
+
+  const constantTimeEqual = (expectedValue: string, receivedValue: string) => {
+    const expected = Buffer.from(expectedValue, 'utf8')
+    const received = Buffer.from(receivedValue, 'utf8')
+    return expected.length === received.length && timingSafeEqual(expected, received)
+  }
+
+  // Current Wasender webhooks use the configured secret verbatim.
+  if (constantTimeEqual(WASSENDER_WEBHOOK_SECRET, directSig)) return true
+
+  // Keep accepting the HMAC form used by older webhook integrations.
+  const expectedHmac = createHmac('sha256', WASSENDER_WEBHOOK_SECRET)
     .update(payload)
     .digest('hex');
-
-  // Strip optional 'sha256=' prefix and trim
-  const cleanSig = signature.replace(/^sha256=/i, '').trim();
-
-  const expected = Buffer.from(sigHmacHex, 'utf8')
-  const received = Buffer.from(cleanSig, 'utf8')
-  if (expected.length === received.length && crypto.timingSafeEqual(expected, received)) return true
+  if (constantTimeEqual(expectedHmac, hmacSig)) return true
 
   // Log helpful diagnostic (truncated) for debugging mismatches
   console.warn(
-    `[Wasender] signature mismatch — received=${cleanSig.slice(0, 8)}... expected_hmac=${sigHmacHex.slice(0, 8)}...`
+    `[Wasender] signature mismatch — received=${cleanSig.slice(0, 8)}... expected_secret_length=${WASSENDER_WEBHOOK_SECRET.length}`
   );
   return false;
 }
