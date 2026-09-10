@@ -301,7 +301,7 @@ Sapphire comprend et répond correctement à :
 - FlashPlaceholder pour offres sans photo
 - Logique meublé strict (/nuit ou "Sur demande")
 - Format Sapphire ultra minimaliste
-- Dédoublonnage webhook WhatsApp (skip `messages.received`)
+- Dédoublonnage webhook WhatsApp par identifiant de message (les événements `messages.upsert`, `messages.received` et `messages-group.received` passent par le même pipeline)
 - Signature flex (HMAC hex / sha256= / shared secret)
 
 ### Session "Visual Identity"
@@ -393,7 +393,7 @@ Coller le contenu du fichier `.sql`, cliquer **Run**.
 Dans le dashboard https://www.wasenderapi.com :
 - Session "BOGBE'S GROUPE"
 - Manage Webhook → URL : `https://bogbes-groupe.vercel.app/api/whatsapp/webhook`
-- Events : `messages.upsert` (uniquement, sinon double traitement)
+- Events : `messages.upsert`, `messages.received` et `messages-group.received` ; l'idempotence empêche les doubles traitements
 - Secret : matche `WASSENDER_WEBHOOK_SECRET` dans Vercel
 
 ---
