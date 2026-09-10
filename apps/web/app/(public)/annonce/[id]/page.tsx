@@ -4,9 +4,9 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { ArrowLeft, Globe, MapPin, BedDouble, Maximize, Info, MessageCircle, BookOpen, CheckCircle2, ExternalLink, ShieldCheck } from 'lucide-react'
 import { getConsolidatedBienById } from '@/lib/catalogue/consolidated'
-import { publicDescription } from '@/lib/catalogue/public-description'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { SimilarBiensSection } from '@/components/catalogue/SimilarBiensSection'
+import { presentDescription } from '@/lib/catalogue/description-presentation'
 import { SITE_URL } from '@/lib/env'
 import { createClient } from '@/lib/supabase/server'
 import { createAnnoncesClient } from '@/lib/supabase/annonces'
@@ -15,43 +15,6 @@ export const dynamic = 'force-dynamic'
 
 interface PageProps {
   params: Promise<{ id: string }>
-}
-
-type DescriptionPresentation = {
-  intro: string | null
-  highlights: string[]
-  note: string | null
-}
-
-/**
- * Convert scraped prose into a readable introduction and a list of key points.
- * The source remains untouched; this only changes how it is presented on the detail page.
- */
-function presentDescription(value: string | null): DescriptionPresentation {
-  const clean = publicDescription(value)
-  if (!clean) return { intro: null, highlights: [], note: null }
-
-  const section = clean.match(/(?:composition|caractéristiques|equipements|équipements|détails?)\s*:/i)
-  const sectionStart = section?.index ?? 0
-  const introRaw = (section ? clean.slice(0, sectionStart) : clean).replace(/[|–—]+\s*$/, '').trim()
-  const narrative = introRaw.match(/(?:nous vous|découvrez|situé(?:e)?|ce bien|cette annonce)\b/i)
-  const intro = (narrative ? introRaw.slice(narrative.index ?? 0) : introRaw).trim() || null
-  const details = section ? clean.slice((section.index ?? 0) + section[0].length) : ''
-  const rawHighlights = details
-    .replace(/^\s*[:\-–—]+\s*/, '')
-    .split(/\s*(?:•|·|▪|◦)\s*|\s*;\s*/)
-    .map((item) => item.replace(/^\s*[-–—:]\s*/, '').trim())
-    .filter((item) => item.length > 1)
-  let note: string | null = null
-  const highlights = rawHighlights.flatMap((item) => {
-    const marker = item.match(/(?:💰\s*)?(?:loyer|prix|montant)\s*:/i)
-    if (!marker || marker.index === undefined) return [item]
-    const before = item.slice(0, marker.index).trim()
-    note = item.slice(marker.index).trim()
-    return before ? [before] : []
-  })
-
-  return { intro, highlights, note }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -203,34 +166,40 @@ export default async function AnnoncePage({ params }: PageProps) {
           )}
         </div>
 
-        {(description.intro || description.highlights.length > 0) && (
-          <section className="mb-8 rounded-3xl border border-[var(--border)] bg-[var(--surface-card)] p-5 sm:p-6">
-            <div className="flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--surface-hover)] text-[var(--accent-luxury)]">
-                <BookOpen className="h-4 w-4" />
+        {(description.intro || description.highlights.length > 0 || description.note) && (
+          <section className="mb-8 rounded-3xl border border-[var(--border)] bg-[var(--surface-card)] p-5 sm:p-7 lg:p-8">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--surface-hover)] text-[var(--accent-luxury)]">
+                <BookOpen aria-hidden="true" className="h-5 w-5" />
               </span>
-              <h2 className="text-lg font-bold text-[var(--text)]">À propos de ce bien</h2>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--text-muted)]">Présentation</p>
+                <h2 className="mt-0.5 text-lg font-bold text-[var(--text)]">À propos de ce bien</h2>
+              </div>
             </div>
+
             {description.intro && (
-              <p className="mt-4 max-w-4xl text-[15px] leading-7 text-[var(--text)]">
+              <p className="mt-5 max-w-[65ch] text-[15px] leading-7 text-[var(--text)] sm:text-base">
                 {description.intro}
               </p>
             )}
+
             {description.highlights.length > 0 && (
-              <div className="mt-5 border-t border-[var(--border)] pt-4">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--text-muted)]">Points clés</p>
-                <ul className="mt-3 grid gap-x-8 gap-y-2 sm:grid-cols-2">
+              <div className="mt-6 border-t border-[var(--border)] pt-5">
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)]">Points clés</p>
+                <ul className="mt-4 grid gap-x-10 gap-y-3 lg:grid-cols-2">
                   {description.highlights.map((item, index) => (
-                    <li key={`${item}-${index}`} className="flex items-start gap-2 text-sm leading-6 text-[var(--text)]">
-                      <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-emerald-600" />
-                      <span>{item}</span>
+                    <li key={`${item}-${index}`} className="flex items-start gap-2.5 text-[15px] leading-6 text-[var(--text)]">
+                      <CheckCircle2 aria-hidden="true" className="mt-1 h-4 w-4 shrink-0 text-emerald-600" />
+                      <span className="min-w-0 break-words">{item}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             )}
+
             {description.note && (
-              <div className="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1 rounded-2xl bg-[var(--surface-hover)] px-4 py-3 text-sm">
+              <div className="mt-6 flex flex-wrap items-baseline gap-x-2 gap-y-1 rounded-2xl border border-[var(--border)] bg-[var(--surface-hover)] px-4 py-3.5 text-[15px] leading-6">
                 <span className="font-bold text-[var(--text)]">À noter</span>
                 <span className="text-[var(--text-muted)]">{description.note}</span>
               </div>
