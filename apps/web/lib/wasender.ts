@@ -15,7 +15,9 @@ import { createHmac, timingSafeEqual } from 'node:crypto'
 function sanitizeEnv(raw: string | undefined): string {
   if (!raw) return '';
   // eslint-disable-next-line no-control-regex
-  return raw.replace(/[^!-~]/g, '');
+  const trimmed = raw.trim();
+  const unquoted = trimmed.replace(/^("|')(.*)\1$/, '$2');
+  return unquoted.replace(/[^!-~]/g, '');
 }
 
 const WASSENDER_API_KEY = sanitizeEnv(process.env.WASSENDER_API_KEY);
