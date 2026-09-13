@@ -17,6 +17,7 @@ import { upsertProspect, recordOptOut } from '@/lib/outreach/agent-prospects';
 import { tryInviteProspect } from '@/lib/outreach/dispatch';
 import { notifyOwnerVisitPending } from '@/lib/notifications/whatsapp-notifier';
 import { markSeen } from '@/lib/idempotency';
+import { shouldProcessWasenderMessageEvent } from '@/lib/wasender-event-policy';
 
 // Le délai anti-ban (humanReplyDelay) + l'appel LLM peuvent dépasser les 10-15 s
 // par défaut d'une fonction Vercel → on s'octroie 60 s.
@@ -245,24 +246,23 @@ export async function POST(req: NextRequest) {
     const { event, data } = body;
     const normalizedEvent = typeof event === 'string' ? event.trim() : '';
 
-    // Wasender peut livrer le même message par plusieurs événements selon la
-    // configuration du webhook : message entrant privé, upsert général et
-    // événement dédié aux groupes. Ils passent tous par le même pipeline ; la
-    // clé d'idempotence ci-dessous évite les doubles réponses et doubles imports.
-    const inboundMessageEvents = new Set([
+    const messageEvents = new Set([
       'messages.upsert',
       'messages.received',
       'messages-group.received',
     ]);
-    if (!inboundMessageEvents.has(normalizedEvent)) {
+    if (!messageEvents.has(normalizedEvent)) {
       return NextResponse.json({ status: 'ignored', reason: `event=${normalizedEvent} not processed (message event required)` });
     }
-    console.log(`[Webhook] accepted inbound event=${normalizedEvent}`);
 
     const messages = data?.messages;
     if (!messages) return NextResponse.json({ status: 'ignored' });
 
     const msg = Array.isArray(messages) ? messages[0] : messages;
+    if (!shouldProcessWasenderMessageEvent(normalizedEvent, msg.key?.fromMe)) {
+      return NextResponse.json({ status: 'ignored', reason: `event=${normalizedEvent} delegated to its canonical delivery` });
+    }
+    console.log(`[Webhook] accepted event=${normalizedEvent} fromMe=${msg.key?.fromMe === true}`);
 
     const jid = msg.key?.remoteJid;
     const userMessage =

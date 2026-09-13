@@ -61,6 +61,18 @@ const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const PROVIDER_TIMEOUT_MS = 5000;
 
 /**
+ * OpenRouter is Sapphire's last provider fallback. Keep this branch bounded:
+ * a webhook must still have enough time to persist the conversation and send
+ * the answer before Vercel's hard timeout. Two diverse attempts are enough
+ * here because Groq and Gemini have already been tried.
+ */
+export function buildOpenRouterAttemptPlan(models: readonly string[]) {
+  return [...new Set(models.map((model) => model.trim()).filter(Boolean))]
+    .slice(0, 2)
+    .map((model) => ({ model, timeout: 7_000 }))
+}
+
+/**
  * Wraps fetch with an AbortController + timeout. Throws on timeout so callers
  * can treat it as a transient failure (and retry / fall back).
  */
@@ -607,8 +619,8 @@ async function openRouterFetchModel(
  * Cascade OpenRouter : modèle payant bon marché d'abord (fiable), puis modèles
  * gratuits de secours. On s'arrête au premier qui répond. But : ne quasiment
  * JAMAIS atteindre le message d'indisponibilité qui énerve les prospects.
- * Payant = 18s (peut être un peu lent), gratuits = 12s chacun (sinon on épuise
- * le budget des 60s webhook).
+ * Deux tentatives de 7 s au maximum : les étages Groq et Gemini ont déjà été
+ * sollicités, il faut préserver le temps de journaliser et d'envoyer la réponse.
  */
 async function openRouterFetch(
   messages: ChatMessage[],
@@ -618,10 +630,10 @@ async function openRouterFetch(
     console.warn('[OpenRouter] OPENROUTER_API_KEY not configured — skipping fallback');
     return null;
   }
-  const chain = [
-    { model: OPENROUTER_MODEL, timeout: 18000 },
-    ...OPENROUTER_FREE_MODELS.map((model) => ({ model, timeout: 12000 })),
-  ];
+  const chain = buildOpenRouterAttemptPlan([
+    OPENROUTER_MODEL,
+    ...OPENROUTER_FREE_MODELS,
+  ])
   for (const { model, timeout } of chain) {
     const out = await openRouterFetchModel(messages, system, model, timeout);
     if (out) return out;
