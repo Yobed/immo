@@ -11,9 +11,13 @@ const {
 
 assert.equal(DEFAULT_OPENROUTER_MODELS[0], 'qwen/qwen3.7-flash')
 assert.ok(DEFAULT_OPENROUTER_MODELS.includes('deepseek/deepseek-v4-flash-0731'))
+assert.ok(
+  DEFAULT_OPENROUTER_MODELS.every((model) => !model.endsWith(':free')),
+  'Scraping must not depend on OpenRouter free-tier capacity',
+)
 
 const original = process.env.OPENROUTER_EXTRACTOR_MODELS
-process.env.OPENROUTER_EXTRACTOR_MODELS = ' qwen/qwen3.7-flash, deepseek/deepseek-v4-flash-0731, qwen/qwen3.7-flash '
+process.env.OPENROUTER_EXTRACTOR_MODELS = ' qwen/qwen3.7-flash, openai/gpt-oss-120b:free, deepseek/deepseek-v4-flash-0731, qwen/qwen3.7-flash '
 assert.deepEqual(getOpenRouterModels(), [
   'qwen/qwen3.7-flash',
   'deepseek/deepseek-v4-flash-0731',

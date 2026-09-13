@@ -13,11 +13,15 @@ import {
 import { captureProspect, canonicalPhone } from '@/lib/prospects/capture';
 import { linkIntakeToProspect } from '@/lib/crm/intake';
 import { extractBienFromWhatsApp } from '@/lib/extractors/whatsapp-bien-extractor';
-import { upsertProspect, recordOptOut } from '@/lib/outreach/agent-prospects';
-import { tryInviteProspect } from '@/lib/outreach/dispatch';
+import { recordOptOut } from '@/lib/outreach/agent-prospects';
 import { notifyOwnerVisitPending } from '@/lib/notifications/whatsapp-notifier';
 import { markSeen } from '@/lib/idempotency';
 import { shouldProcessWasenderMessageEvent } from '@/lib/wasender-event-policy';
+import {
+  forwardGroupMessageToScraper,
+  getN8nScraperWebhookUrl,
+  shouldForwardGroupMessageToScraper,
+} from '@/lib/wasender-scraper-forward';
 
 // Le délai anti-ban (humanReplyDelay) + l'appel LLM peuvent dépasser les 10-15 s
 // par défaut d'une fonction Vercel → on s'octroie 60 s.
@@ -351,6 +355,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: 'ignored' });
     }
 
+    // The n8n workflow is the sole importer for announcements posted in
+    // WhatsApp groups. Forward the original Wasender payload once, then stop:
+    // the website must never let a group offer silently disappear nor DM the
+    // sender as if they were a prospect.
+    if (shouldForwardGroupMessageToScraper(normalizedEvent, jid, msg.key?.fromMe)) {
+      const scraperUrl = getN8nScraperWebhookUrl(process.env.N8N_SCRAPER_WEBHOOK_URL)
+      if (!scraperUrl) {
+        console.error('[group-scraper] N8N_SCRAPER_WEBHOOK_URL is missing or invalid')
+        return NextResponse.json({ status: 'error', branch: 'group_scraper_not_configured' }, { status: 503 })
+      }
+      const forwarded = await forwardGroupMessageToScraper(scraperUrl, body)
+      if (!forwarded.ok) {
+        console.error(`[group-scraper] n8n delivery failed status=${forwarded.status ?? 'network'}`)
+        return NextResponse.json({ status: 'error', branch: 'group_scraper_delivery_failed' }, { status: 502 })
+      }
+      console.log('[group-scraper] group message forwarded to n8n')
+      return NextResponse.json({ status: 'ok', branch: 'group_forwarded' })
+    }
+
     // Idempotency: short-circuit if Wasender retried the same message within 30 s.
     // Prevents duplicate DB writes, double LLM calls, and double Sapphire replies.
     const dedupKey = buildDedupKey(msg.key?.id, jid, userMessage)
@@ -360,36 +383,6 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = getSupabase();
-
-    // ─── Branche OUTREACH : message provenant d'un groupe public ───
-    const isGroupMessage = typeof jid === 'string' && jid.endsWith('@g.us');
-    if (isGroupMessage) {
-      // 1. Extraction de l'annonce (silencieux : on ne répond JAMAIS dans le groupe)
-      const { data: extracted } = await extractBienFromWhatsApp(userMessage);
-      const isAd = !!extracted && extracted.confidence >= MIN_EXTRACTION_CONFIDENCE;
-      if (!isAd) {
-        return NextResponse.json({ status: 'ok', branch: 'group_no_ad' });
-      }
-
-      // 2. Upsert prospect (par numéro)
-      const prospect = await upsertProspect({
-        phone: senderPn,
-        jid: msg.key?.participant || jid,
-        displayName: contactName,
-        sourceGroupJid: jid,
-        sourceGroupName: msg.subject || null,
-        extraction: extracted,
-      });
-
-      // 3. Tentative d'envoi DM privé (cooldown + quota gérés en interne)
-      const result = await tryInviteProspect(prospect);
-      return NextResponse.json({
-        status: 'ok',
-        branch: 'group_outreach',
-        invited: result.sent,
-        reason: result.sent ? undefined : result.reason,
-      });
-    }
 
     // ─── Opt-out : STOP / STOPPER / etc. ───
     if (OPT_OUT_REGEX.test(userMessage)) {

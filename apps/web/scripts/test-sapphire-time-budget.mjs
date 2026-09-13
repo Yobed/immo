@@ -4,6 +4,7 @@ import { buildOpenRouterAttemptPlan } from '../lib/ai.ts'
 
 const plan = buildOpenRouterAttemptPlan([
   'qwen/qwen3.7-flash',
+  'openai/gpt-oss-120b:free',
   'deepseek/deepseek-v4-flash-0731',
   'qwen/qwen3-30b-a3b-instruct-2507',
 ])

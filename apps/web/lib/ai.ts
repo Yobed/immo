@@ -2,7 +2,7 @@
 //
 // Stratégie fail-over :
 //   1. Groq (primary)         — Llama 3.3 70B, ultra rapide, gratuit
-//   2. OpenRouter (backup)    — Gemini 2.0 Flash :free quand Groq KO
+//   2. OpenRouter (backup)    — Qwen payant à coût maîtrisé quand Groq KO
 //   3. Hand-written fallback  — message d'attente amical en dernier recours
 //
 // Le greeting fast-path (détection "Bonjour", "Merci"…) court-circuite tout
@@ -43,12 +43,12 @@ const OPENROUTER_API_KEY = sanitizeKey(process.env.OPENROUTER_API_KEY);
 // Modèle chinois PAYANT très bon marché = filet fiable quand Groq/Gemini
 // sont quota-out. Surchargeable via env OPENROUTER_MODEL.
 const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'qwen/qwen3.7-flash';
-// Replis peu coûteux et diversifiés : un fournisseur indisponible ne doit pas
-// transformer une demande WhatsApp valide en message d'erreur.
-const OPENROUTER_FREE_MODELS = (
-  process.env.OPENROUTER_FREE_MODELS ||
-  'deepseek/deepseek-v4-flash-0731,qwen/qwen3-30b-a3b-instruct-2507,openai/gpt-oss-120b:free,qwen/qwen3-next-80b-a3b-instruct:free'
-).split(',').map((s) => s.trim()).filter(Boolean);
+// Replis payants peu coûteux : aucun flux métier ne dépend du quota ou du
+// routage aléatoire du catalogue OpenRouter :free.
+const OPENROUTER_PAID_MODELS = (
+  process.env.OPENROUTER_PAID_MODELS ||
+  'qwen/qwen3.5-9b,deepseek/deepseek-v4-flash-0731'
+).split(',').map((s) => s.trim()).filter((model) => model.length > 0 && !model.endsWith(':free'));
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
 // Vercel functions cap at 10 s. Budgeting for the worst case:
@@ -67,7 +67,7 @@ const PROVIDER_TIMEOUT_MS = 5000;
  * here because Groq and Gemini have already been tried.
  */
 export function buildOpenRouterAttemptPlan(models: readonly string[]) {
-  return [...new Set(models.map((model) => model.trim()).filter(Boolean))]
+  return [...new Set(models.map((model) => model.trim()).filter((model) => model.length > 0 && !model.endsWith(':free')))]
     .slice(0, 2)
     .map((model) => ({ model, timeout: 7_000 }))
 }
@@ -568,7 +568,7 @@ async function geminiFetch(
 }
 
 /**
- * Fallback completion via OpenRouter (Gemini 2.0 Flash :free).
+ * Fallback completion via a paid Qwen model on OpenRouter.
  * Used when Groq is rate-limited or down.
  * Same OpenAI-compatible request shape — only base URL + model change.
  */
@@ -632,7 +632,7 @@ async function openRouterFetch(
   }
   const chain = buildOpenRouterAttemptPlan([
     OPENROUTER_MODEL,
-    ...OPENROUTER_FREE_MODELS,
+    ...OPENROUTER_PAID_MODELS,
   ])
   for (const { model, timeout } of chain) {
     const out = await openRouterFetchModel(messages, system, model, timeout);
@@ -953,7 +953,7 @@ export async function chatImmobilierStream(messages: ChatMessage[], context?: st
     }
   }
 
-  // Stage 2 — OpenRouter stream fallback (Gemini Flash :free)
+  // Stage 2 — OpenRouter stream fallback (paid Qwen model)
   if (OPENROUTER_API_KEY) {
     try {
       const orResp = await fetch(OPENROUTER_BASE_URL, {

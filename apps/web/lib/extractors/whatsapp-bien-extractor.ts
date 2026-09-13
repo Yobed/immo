@@ -66,20 +66,14 @@ Schema JSON exact (toutes les clés obligatoires, mets null pour les champs non 
 }`
 
 /**
- * Ordered by cost/latency first, then by a free fallback. The paid Chinese
- * models are intentionally first: OpenRouter's free pool can return 404/429
- * when a provider is unavailable, which used to make WhatsApp imports stop
- * even though the API key was valid.
+ * Paid models only, ordered by cost and latency. The free pool can return
+ * 404/429 when a provider is unavailable, which used to make WhatsApp imports
+ * stop even though the API key was valid.
  */
 export const DEFAULT_OPENROUTER_MODELS = [
   'qwen/qwen3.7-flash',
+  'qwen/qwen3.5-9b',
   'deepseek/deepseek-v4-flash-0731',
-  'qwen/qwen3-30b-a3b-instruct-2507',
-  'openai/gpt-oss-120b:free',
-  'qwen/qwen3-next-80b-a3b-instruct:free',
-  'nvidia/nemotron-3-super-120b-a12b:free',
-  'google/gemma-3-27b-it:free',
-  'meta-llama/llama-3.3-70b-instruct:free',
 ] as const
 
 export const DEFAULT_OPENROUTER_TIMEOUT_MS = 12_000
@@ -93,7 +87,7 @@ export function getOpenRouterModels(): readonly string[] {
   const configured = (process.env.OPENROUTER_EXTRACTOR_MODELS ?? '')
     .split(',')
     .map((model) => model.trim())
-    .filter(Boolean)
+    .filter((model) => model.length > 0 && !model.endsWith(':free'))
 
   return configured.length > 0
     ? [...new Set(configured)]
