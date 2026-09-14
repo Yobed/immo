@@ -1,33 +1,33 @@
-import { parseSearchQuery } from '@/lib/searchParser'
+import { parseSearchQuery } from '../searchParser.ts'
 
 /**
  * Moteur de qualification déterministe (Cahier des règles Sapphire).
  * Détermine si les 3 infos obligatoires (TYPE + ZONE + BUDGET) sont réunies —
- * en code, pas via l'IA (règle 24 : une règle métier prime sur l'IA).
+ * en code strict, pas via l'IA (règle métier prime sur l'IA).
  */
 
 // Quartiers reconnus comme « zone » (le parseur ne connaît que les communes).
-const QUARTIERS_ZONE = [
+export const QUARTIERS_ZONE = [
   'angré', 'angre', 'riviera', 'bonoumin', 'palmeraie', 'deux plateaux', '2 plateaux',
-  'vallon', 'cocovico', 'synacass', 'akouédo', 'danga', 'zone 4', 'biétry', 'bietry',
+  'vallon', 'cocovico', 'synacass', 'akouédo', 'akouedo', 'danga', 'zone 4', 'biétry', 'bietry',
   'anoumabo', 'niangon', 'selmer', 'toits rouges', 'vridi', 'gonzagueville', 'abatta',
-  'bonoua', 'faya', 'bracodi', 'sicogi', 'attoban', 'château', 'chateau',
+  'bonoua', 'faya', 'bracodi', 'sicogi', 'attoban', 'château', 'chateau', 'djorobite', 'djorobité',
+  'bassam', 'grand-bassam', 'songon', 'anyama', 'bingerville',
 ]
 
-function detectQuartierZone(text: string): string | null {
+export function detectQuartierZone(text: string): string | null {
   const t = text.toLowerCase()
-  for (const q of QUARTIERS_ZONE) if (t.includes(q)) return q.charAt(0).toUpperCase() + q.slice(1)
+  for (const q of QUARTIERS_ZONE) {
+    if (t.includes(q)) return q.charAt(0).toUpperCase() + q.slice(1)
+  }
   return null
 }
 
-// Phrases d'une recherche FRAÎCHE et distincte (§16-17) — pas une simple mise à
-// jour d'un champ (« finalement mon budget est 300k » = update, on garde le
-// reste). Sur ces phrases, on repart des critères du message courant seul, sans
-// réutiliser ceux d'une recherche précédente (pas de mélange de critères).
-const FRESH_SEARCH_RE =
+// Phrases d'une recherche FRAÎCHE et distincte (§16-17 / Règle 7)
+export const FRESH_SEARCH_RE =
   /\b(un(e)?\s+autre\s+(bien|villa|appartement|maison|studio|terrain|recherche)|autre\s+chose|nouvelle\s+recherche|je\s+recommence|reprendre\s+[àa]\s+z[ée]ro|je\s+cherche\s+autre|change[rz]?\s+de\s+recherche)\b/i
 
-function detectTransaction(text: string): 'location' | 'achat' | null {
+export function detectTransaction(text: string): 'location' | 'achat' | null {
   const t = text.toLowerCase()
   if (/\b(louer|location|à louer|en location|loyer|bail)\b/.test(t)) return 'location'
   if (/\b(acheter|achat|à vendre|vente|acqu[ée]rir|acquisition)\b/.test(t)) return 'achat'
@@ -40,32 +40,36 @@ export interface Qualification {
   zone: string | null
   budget: number | null
   hasAll3: boolean
-  missing: string[]
+  missing: ('type' | 'zone' | 'budget')[]
 }
 
 /**
  * Accumule les critères sur le message courant + l'historique récent du client.
- * (Le message courant est prioritaire pour chaque champ.)
+ * Si isNewSession ou recherche fraîche -> historique ignoré (pas de mélange de critères).
  */
-export function qualify(message: string, history?: { role: string; content: string }[]): Qualification {
-  const recentUser = (history ?? []).filter((m) => m.role === 'user').slice(-8).map((m) => m.content)
+export function qualify(
+  message: string,
+  history?: { role: string; content: string }[],
+  options?: { isNewSession?: boolean },
+): Qualification {
+  const isFresh = options?.isNewSession || FRESH_SEARCH_RE.test(message)
+  const recentUser = isFresh
+    ? []
+    : (history ?? []).filter((m) => m.role === 'user').slice(-8).map((m) => m.content)
   const combined = [message, ...recentUser].join('  ')
 
   const pMsg = parseSearchQuery(message)
   const pAll = parseSearchQuery(combined)
 
-  // Recherche fraîche → message courant seul ; sinon on complète avec l'historique
-  // (le message courant reste prioritaire pour chaque champ).
-  const fresh = FRESH_SEARCH_RE.test(message)
-  const propertyType = fresh ? (pMsg.type_bien ?? null) : (pMsg.type_bien || pAll.type_bien || null)
-  const zone = fresh
+  const propertyType = isFresh ? (pMsg.type_bien ?? null) : (pMsg.type_bien || pAll.type_bien || null)
+  const zone = isFresh
     ? (pMsg.commune || detectQuartierZone(message) || null)
     : (pMsg.commune || detectQuartierZone(message) || pAll.commune || detectQuartierZone(combined) || null)
-  const budgetStr = fresh ? pMsg.prix_max : (pMsg.prix_max || pAll.prix_max)
+  const budgetStr = isFresh ? pMsg.prix_max : (pMsg.prix_max || pAll.prix_max)
   const budget = budgetStr ? parseInt(budgetStr, 10) : null
-  const transaction = detectTransaction(fresh ? message : combined)
+  const transaction = detectTransaction(isFresh ? message : combined)
 
-  const missing: string[] = []
+  const missing: ('type' | 'zone' | 'budget')[] = []
   if (!propertyType) missing.push('type')
   if (!zone) missing.push('zone')
   if (budget == null) missing.push('budget')
@@ -73,36 +77,42 @@ export function qualify(message: string, history?: { role: string; content: stri
   return { transaction, propertyType, zone, budget, hasAll3: missing.length === 0, missing }
 }
 
-// ─── Messages fixes (Cahier des règles) ──────────────────────────────────────
+// ─── Messages fixes stricts (Cahier des 7 règles) ──────────────────────────
 
-/** Marqueur unique de la relance qualification (pour détecter « déjà envoyée »). */
-export const QUALIF_REMINDER_MARKER = /obligatoirement besoin de ces 3 informations/i
+/** Règle 1 : Message de bienvenue envoyé automatiquement au nouveau prospect */
+export const WELCOME_MESSAGE = `🏡 Bienvenue chez Bogbe’s Groupe Immobilier !
 
-export const WELCOME_MESSAGE = `Bienvenue chez BOGBE'S GROUPE Immobilier ! 🏠
+Pour mieux vous accompagner, merci de nous préciser :
 
-Pour mieux vous accompagner, précisez-moi :
-• Location ou achat ?
-• Le type de bien (appartement, villa, studio, terrain…)
-• La zone (commune ou quartier)
-• Votre budget maximum
-• La date souhaitée
+🔹 Recherchez-vous un bien à louer ou à acheter ?
+🔹 Quel type de bien souhaitez-vous ?
+🔹 Dans quelle zone recherchez-vous ?
+🔹 Quel est votre budget maximum ?
+🔹 À quelle date souhaitez-vous disposer du bien ?
 
-Vous pouvez aussi consulter nos annonces : https://www.bogbesgroup.com`
+🌐 Vous pouvez également consulter directement nos annonces ici :
+https://bogbesgroup.com
 
-export const QUALIF_REMINDER_MESSAGE = `Merci 🙏
+Votre futur bien est peut-être déjà disponible ! 🔑`
 
-Pour vous proposer des biens qui correspondent vraiment, nous avons obligatoirement besoin de ces 3 informations :
+/** Marqueur unique de la relance qualification (pour détecter « déjà envoyée ») */
+export const QUALIF_REMINDER_MARKER = /proposer les biens les plus adapt[ée]s/i
 
-🏠 Le type de bien
-📍 La zone souhaitée
-💰 Votre budget maximum
+/** Règle 2 : Relance unique ciblée sur les éléments manquants */
+export function buildQualifReminder(missing: ('type' | 'zone' | 'budget')[]): string {
+  const items: string[] = []
+  if (missing.includes('type')) items.push('🔹 Quel type de bien souhaitez-vous ? (appartement, villa, studio, terrain...)')
+  if (missing.includes('zone')) items.push('🔹 Dans quelle zone recherchez-vous ? (commune ou quartier)')
+  if (missing.includes('budget')) items.push('🔹 Quel est votre budget maximum ?')
+  return `Pour que je puisse vous proposer les biens les plus adaptés, merci de m'indiquer également :\n\n${items.join('\n')}`
+}
 
-Merci de me communiquer ce qui manque pour poursuivre votre recherche.`
+/** Message de relance par défaut (si les 3 critères manquent) */
+export const QUALIF_REMINDER_MESSAGE = buildQualifReminder(['type', 'zone', 'budget'])
 
+/** Règle 4 : Message strict envoyé lorsqu'aucun bien ne correspond aux critères */
 export const NO_RESULTS_MESSAGE = `Merci pour ces informations 🙏
 
-Votre recherche est bien enregistrée. Un conseiller va vous contacter pour la prendre en charge et poursuivre les recherches avec vous.
+Nous avons bien enregistré votre recherche. Un conseiller client va vous contacter d’ici peu pour vous faire des propositions adaptées.
 
-Vous pouvez aussi consulter nos annonces : https://www.bogbesgroup.com
-
-_Votre futur bien est peut-être déjà disponible !_`
+À très bientôt ! 🤝`

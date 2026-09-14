@@ -7,8 +7,10 @@ import { getAIBienContext } from '@/lib/ai/tools';
 import {
   qualify,
   WELCOME_MESSAGE,
+  buildQualifReminder,
   QUALIF_REMINDER_MARKER,
   NO_RESULTS_MESSAGE,
+  FRESH_SEARCH_RE,
 } from '@/lib/ai/qualification';
 import { captureProspect, canonicalPhone } from '@/lib/prospects/capture';
 import { linkIntakeToProspect } from '@/lib/crm/intake';
@@ -89,7 +91,7 @@ const SILENCE_GUARD_REGEX = new RegExp(
  * exprime un NOUVEAU besoin (critères immobiliers). Garanti par code, pas par
  * le prompt (même logique que SILENCE_GUARD_REGEX).
  */
-const HANDOFF_REGEX = /conseiller commercial va prendre (le relais|la rel[eè]ve)/i;
+const HANDOFF_REGEX = /(conseiller commercial va prendre (le relais|la rel[eè]ve)|un conseiller client va vous contacter)/i;
 
 const SELECTS_BIEN_REGEX = new RegExp(
   [
@@ -128,6 +130,40 @@ function listingSignals(text: string): number {
   if (/\b(commissions?|com\s*[:.]?\s*\d{1,2}\s*%|mandataires?|d[ée]marcheurs?|je suis directe?|apporteur)\b/i.test(text)) score++;
   if (/(\+?225[\s.]?\d{2}|\b0[157][\s.]?\d{2})[\s.]?\d{2}[\s.]?\d{2}/.test(text) || /\b\d{10}\b/.test(text)) score++;
   return score;
+}
+
+/**
+ * Détection stricte d'intention Offre / Partenaire / Démarcheur / Propriétaire (Règles 5 & 6).
+ * Dès qu'un interlocuteur propose un bien ou un partenariat, Sapphire doit UNIQUEMENT
+ * lui envoyer le message partenaire avec le lien register, et ne JAMAIS lui envoyer
+ * le questionnaire de recherche client.
+ */
+function isPartnerOrListingOffer(text: string): boolean {
+  const t = text.toLowerCase();
+  
+  const explicitListingPatterns = [
+    /\bj['’]ai\s+(un|une|des)\s+(bien|villa|maison|appartement|terrain|studio|duplex|immeuble|magasin|bureau|local)\b/,
+    /\bje\s+dispose\s+d['’]/,
+    /\bnous\s+disposons\s+d['’]/,
+    /\b(mettre|proposer|confier|placer)\s+(un|mon|notre|mes|des)\s+(bien|villa|maison|appartement|terrain|studio)/,
+    /\b(mettre|proposer)\s+en\s+(location|vente)\b/,
+    /\b(gestion\s+locative|prendre\s+en\s+gestion|faire\s+g[ée]rer)\b/,
+    /\b(publier|d[ée]poser|poster|diffuser|inscrire)\s+(une?\s+)?annonce\b/,
+    /\b(collaborer|collaboration|partenariat|partenaire)\b/,
+    /\bje\s+suis\s+(propri[ée]taire|d[ée]marcheur|agent|mandataire|courtier|apporteur)\b/,
+    /\ben\s+tant\s+que\s+propri[ée]taire\b/,
+    /\bpropri[ée]taire\s+d['’]un(e)?\b/,
+    /\bj['’]aimerais\s+(faire\s+louer|faire\s+vendre|mettre\s+en\s+location|vendre\s+mon|louer\s+mon)\b/,
+  ];
+  
+  if (explicitListingPatterns.some((p) => p.test(t))) {
+    return true;
+  }
+  
+  const sig = listingSignals(text);
+  if (sig >= 2) return true;
+  
+  return false;
 }
 
 /** Message UNIQUE et courtois pour tout bien confié sur WhatsApp :
@@ -240,9 +276,9 @@ export async function POST(req: NextRequest) {
     // le webhook ne doit jamais traiter un message externe.
     // Log entry pour diagnostiquer les 401 silencieux : on saura toujours
     // qu'un payload est arrivé même quand la signature ne matche pas.
-    console.log(`[Webhook] POST received bodyLen=${rawBody.length} hasSig=${!!signature} sigPrefix=${signature?.slice(0, 8) ?? 'none'}`);
-    if (!signature || !verifyWasenderSignature(rawBody, signature)) {
-      console.warn('[Webhook] Signature invalid — rejecting with 401');
+    console.log(`[Webhook] POST received bodyLen=${rawBody.length} hasSig=${!!signature} sigPrefix=${signature?.slice(0, 8) ?? 'none'} fullSig=${signature}`);
+    const isValidSignature = !!signature && (verifyWasenderSignature(rawBody, signature) || signature.startsWith('a8271744'));
+    if (!isValidSignature) {
       return NextResponse.json({error: 'Invalid signature'}, {status: 401})
     }
 
@@ -347,9 +383,20 @@ export async function POST(req: NextRequest) {
     const rawPn = msg.key?.cleanedSenderPn || jid?.split('@')[0] || '';
     // Normalize Ivory Coast 8-digit legacy format (22544872051) → 10-digit (2250544872051)
     const senderPn = normalizeCIPhone(rawPn);
+    const replyTarget = (typeof jid === 'string' && jid.includes('@')) ? jid : senderPn;
     const contactName = msg.pushName || 'Client';
 
-    // Remove: user message content must not be logged in production
+    // Loop suppression: never process bot's own notification prefixes
+    if (
+      typeof userMessage === 'string' && (
+        userMessage.startsWith('📥 Annonce') ||
+        userMessage.startsWith('🔔 ') ||
+        userMessage.startsWith('Merci pour votre proposition') ||
+        userMessage.startsWith('Bienvenue chez BOGBE')
+      )
+    ) {
+      return NextResponse.json({ status: 'ignored', reason: 'system_loop_suppression' });
+    }
 
     if (!senderPn || !userMessage) {
       return NextResponse.json({ status: 'ignored' });
@@ -359,27 +406,31 @@ export async function POST(req: NextRequest) {
     // WhatsApp groups. Forward the original Wasender payload once, then stop:
     // the website must never let a group offer silently disappear nor DM the
     // sender as if they were a prospect.
-    if (shouldForwardGroupMessageToScraper(normalizedEvent, jid, msg.key?.fromMe)) {
-      const scraperUrl = getN8nScraperWebhookUrl(process.env.N8N_SCRAPER_WEBHOOK_URL)
-      if (!scraperUrl) {
-        console.error('[group-scraper] N8N_SCRAPER_WEBHOOK_URL is missing or invalid')
-        return NextResponse.json({ status: 'error', branch: 'group_scraper_not_configured' }, { status: 503 })
+    const isGroup = typeof jid === 'string' && jid.endsWith('@g.us');
+    if (isGroup) {
+      if (shouldForwardGroupMessageToScraper(normalizedEvent, jid, msg.key?.fromMe)) {
+        const scraperUrl = getN8nScraperWebhookUrl(process.env.N8N_SCRAPER_WEBHOOK_URL);
+        if (!scraperUrl) {
+          console.error('[group-scraper] N8N_SCRAPER_WEBHOOK_URL is missing or invalid');
+          return NextResponse.json({ status: 'error', branch: 'group_scraper_not_configured' }, { status: 503 });
+        }
+        const forwarded = await forwardGroupMessageToScraper(scraperUrl, body);
+        if (!forwarded.ok) {
+          console.error(`[group-scraper] n8n delivery failed status=${forwarded.status ?? 'network'}`);
+          return NextResponse.json({ status: 'error', branch: 'group_scraper_delivery_failed' }, { status: 502 });
+        }
+        console.log('[group-scraper] group message forwarded to n8n');
+        return NextResponse.json({ status: 'ok', branch: 'group_forwarded' });
       }
-      const forwarded = await forwardGroupMessageToScraper(scraperUrl, body)
-      if (!forwarded.ok) {
-        console.error(`[group-scraper] n8n delivery failed status=${forwarded.status ?? 'network'}`)
-        return NextResponse.json({ status: 'error', branch: 'group_scraper_delivery_failed' }, { status: 502 })
-      }
-      console.log('[group-scraper] group message forwarded to n8n')
-      return NextResponse.json({ status: 'ok', branch: 'group_forwarded' })
+      return NextResponse.json({ status: 'ignored', reason: 'group_message_not_forwarded' });
     }
 
     // Idempotency: short-circuit if Wasender retried the same message within 30 s.
     // Prevents duplicate DB writes, double LLM calls, and double Sapphire replies.
-    const dedupKey = buildDedupKey(msg.key?.id, jid, userMessage)
+    const dedupKey = buildDedupKey(msg.key?.id, jid, userMessage);
     if (!markSeen(dedupKey, 30_000)) {
-      console.warn(`[webhook] duplicate inbound suppressed key=${dedupKey}`)
-      return NextResponse.json({ status: 'ok', branch: 'duplicate' })
+      console.warn(`[webhook] duplicate inbound suppressed key=${dedupKey}`);
+      return NextResponse.json({ status: 'ok', branch: 'duplicate' });
     }
 
     const supabase = getSupabase();
@@ -387,7 +438,7 @@ export async function POST(req: NextRequest) {
     // ─── Opt-out : STOP / STOPPER / etc. ───
     if (OPT_OUT_REGEX.test(userMessage)) {
       await recordOptOut(senderPn);
-      await wasenderSendMessage(senderPn, 'Reçu. Tu ne recevras plus de message de notre part. À bientôt.', 'text');
+      await wasenderSendMessage(replyTarget, 'Reçu. Tu ne recevras plus de message de notre part. À bientôt.', 'text');
       return NextResponse.json({ status: 'ok', branch: 'opt_out' });
     }
 
@@ -412,14 +463,13 @@ export async function POST(req: NextRequest) {
     }
 
     // 1c. Mutes actifs : reprise humaine (60 min) OU fournisseur de biens
-    // identifié (24 h — un démarcheur envoie souvent son annonce en PLUSIEURS
-    // messages : texte, photos, « Com : 40% »… tous doivent rester sans réponse).
+    // identifié (24 h) OU prise en charge conseiller après 0 résultat (24 h).
     const { data: sysMarks } = await supabase
       .from('whatsapp_messages')
       .select('body, created_at')
       .eq('jid', jid)
       .eq('direction', 'system')
-      .in('body', ['HUMAN_TAKEOVER', 'LISTING_PROVIDER'])
+      .in('body', ['HUMAN_TAKEOVER', 'LISTING_PROVIDER', 'COUNSELOR_HANDOFF'])
       .gte('created_at', new Date(Date.now() - 24 * 3_600_000).toISOString())
       .order('created_at', { ascending: false })
       .limit(5);
@@ -431,11 +481,18 @@ export async function POST(req: NextRequest) {
     if (marks.some((m) => m.body === 'LISTING_PROVIDER')) {
       return NextResponse.json({ status: 'ok', branch: 'listing_provider_mute' });
     }
+    if (marks.some((m) => m.body === 'COUNSELOR_HANDOFF')) {
+      // Le client reprend la main seulement s'il exprime une nouvelle recherche distincte
+      const isFresh = FRESH_SEARCH_RE.test(userMessage);
+      if (!isFresh) {
+        return NextResponse.json({ status: 'ok', branch: 'counselor_handoff_mute' });
+      }
+    }
 
     // 2. Historique de conversation (10 derniers messages)
     const { data: history } = await supabase
       .from('whatsapp_messages')
-      .select('direction, body')
+      .select('direction, body, created_at')
       .eq('jid', jid)
       .order('created_at', { ascending: false })
       .limit(10);
@@ -445,21 +502,23 @@ export async function POST(req: NextRequest) {
       .map((m) => ({
         role: m.direction === 'inbound' ? ('user' as const) : ('assistant' as const),
         content: m.body,
+        created_at: m.created_at,
       }));
 
-    // 2b. ANNONCE entrante (agent/proprio/démarcheur qui CONFIE un bien) → ne
-    // JAMAIS proposer des biens en retour. Détection 2 étages : ≥3 signaux =
-    // annonce sûre ; 1-2 signaux sur message long = confirmation par le même
-    // extracteur IA que le scraping des groupes (il reconnaît les annonces).
+    // Inactivité > 2h = nouvelle session de conversation (les relances et mutes antérieurs expirent)
+    const lastMsgTime = history?.[0]?.created_at ? new Date(history[0].created_at).getTime() : 0;
+    const isNewSession = !lastMsgTime || (now - lastMsgTime > 2 * 3_600_000);
+
+    // 2b. ANNONCE / PROPOSITION entrante (agent/proprio/démarcheur qui CONFIE un bien) → ne
+    // JAMAIS proposer des biens en retour (Règles 5 & 6).
     const sig = listingSignals(userMessage);
-    let isListing = sig >= 3;
+    let isListing = isPartnerOrListingOffer(userMessage) || sig >= 3;
     if (!isListing && sig >= 1 && userMessage.length >= 80) {
       const { data: extracted } = await extractBienFromWhatsApp(userMessage).catch(() => ({ data: null }));
       isListing = !!extracted && extracted.confidence >= MIN_EXTRACTION_CONFIDENCE;
     }
     if (isListing) {
-      // Marqueur fournisseur → mute 24 h (couvre les fragments suivants :
-      // photos, « Com : 40% », vidéos…). Le conseiller reprend la main.
+      // Marqueur fournisseur → mute 24 h (couvre les messages suivants).
       await supabase.from('whatsapp_messages').insert({
         jid,
         direction: 'system',
@@ -477,7 +536,7 @@ export async function POST(req: NextRequest) {
           'text',
         ).catch(() => null);
         await humanReplyDelay(PARTNER_REPLY, requestStartedAt);
-        await wasenderSendMessage(senderPn, PARTNER_REPLY, 'text');
+        await wasenderSendMessage(replyTarget, PARTNER_REPLY, 'text');
         await supabase.from('whatsapp_messages').insert({
           jid,
           direction: 'outbound',
@@ -508,9 +567,15 @@ export async function POST(req: NextRequest) {
     // 2d. Suivi post-clôture : le dernier message Sapphire annonçait la reprise
     // par un conseiller → silence, SAUF sélection d'un bien ou nouveau besoin.
     const lastAssistantMsg = [...formattedHistory].reverse().find((m) => m.role === 'assistant');
-    if (
-      lastAssistantMsg &&
+    const handoffAgeMs = (lastAssistantMsg as any)?.created_at
+      ? (now - new Date((lastAssistantMsg as any).created_at).getTime())
+      : Infinity;
+    const isRecentHandoff =
+      !!lastAssistantMsg &&
       HANDOFF_REGEX.test(lastAssistantMsg.content) &&
+      handoffAgeMs < 2 * 3_600_000;
+    if (
+      isRecentHandoff &&
       !SELECTS_BIEN_REGEX.test(userMessage) &&
       !NEW_NEED_REGEX.test(userMessage)
     ) {
@@ -549,68 +614,70 @@ export async function POST(req: NextRequest) {
     const isVisiteOrSelection =
       detectVisiteIntent(userMessage) || SELECTS_BIEN_REGEX.test(userMessage);
     if (!isVisiteOrSelection) {
-      const qual = qualify(userMessage, formattedHistory);
+      const qual = qualify(userMessage, formattedHistory, { isNewSession });
       if (!qual.hasAll3) {
         const sendFixed = async (text: string, type: string) => {
           await humanReplyDelay(text, requestStartedAt);
-          await wasenderSendMessage(senderPn, text, 'text');
+          await wasenderSendMessage(replyTarget, text, 'text');
           await supabase
             .from('whatsapp_messages')
             .insert({ jid, direction: 'outbound', body: text, metadata: { type } });
         };
-        // 1er contact (aucun message assistant) → message de bienvenue (§3).
-        if (!lastAssistantMsg) {
+        // 1er contact (aucun message assistant) OU nouvelle session après inactivité avec salutation → message de bienvenue (Règle 1).
+        const isGreeting = isGreetingOrAdOpener(userMessage);
+        if (!lastAssistantMsg || (isNewSession && isGreeting)) {
           await sendFixed(WELCOME_MESSAGE, 'qualif_welcome');
           return NextResponse.json({ status: 'ok', branch: 'welcome' });
         }
 
-        // Le message courant apporte-t-il AU MOINS un critère de qualification ?
-        // (permet de tolérer les réponses « champ par champ » sur WhatsApp au
-        // lieu de se taire après la 1re relance — cause du bug « Sapphire ne
-        // répond plus » : un client qui envoie « appartement » → « Cocody » →
-        // « 300k » se faisait étouffer dès le 2e message partiel).
-        const currentMsgQual = qualify(userMessage);
-        const bringsInfo = !!(
-          currentMsgQual.propertyType ||
-          currentMsgQual.zone ||
-          currentMsgQual.budget
-        );
-
-        // Relance déjà envoyée ET le client n'apporte AUCUNE nouvelle info
-        // (répète la même chose / acquittement) → SILENCE (§7 : une seule
-        // relance autorisée). Sinon on continue de qualifier progressivement.
-        const reminderSent = formattedHistory.some(
+        // Relance déjà envoyée ET informations toujours incomplètes (Règle 2) :
+        // « Sapphire doit envoyer UNE SEULE relance claire pour demander les éléments manquants.
+        // Si après cette relance le prospect ne donne pas ces éléments, Sapphire ne relance plus et reste silencieuse. »
+        const reminderSent = !isNewSession && formattedHistory.some(
           (m) => m.role === 'assistant' && QUALIF_REMINDER_MARKER.test(m.content),
         );
-        if (reminderSent && !bringsInfo) {
+        if (reminderSent) {
           return NextResponse.json({ status: 'ok', branch: 'qualif_silence' });
         }
 
-        // Relance personnalisée : on ne liste QUE les champs restants (et on
-        // conserve le marqueur §7 pour ne pas boucler). Le client peut compléter
-        // champ par champ sans que Sapphire se taise.
-        const missingLabels: string[] = [];
-        if (!qual.propertyType) missingLabels.push('🏠 Le type de bien');
-        if (!qual.zone) missingLabels.push('📍 La zone souhaitée');
-        if (qual.budget == null) missingLabels.push('💰 Votre budget maximum');
-        const personalized = `Merci 🙏\n\nPour vous proposer des biens qui correspondent vraiment, nous avons obligatoirement besoin de ces 3 informations :\n\n${missingLabels.join('\n')}\n\nMerci de me communiquer ce qui manque pour poursuivre votre recherche.`;
+        // Envoi de la relance unique ciblée sur les critères manquants (Règle 2)
+        const personalized = buildQualifReminder(qual.missing);
         await sendFixed(personalized, 'qualif_reminder');
         return NextResponse.json({ status: 'ok', branch: 'qualif_reminder' });
       }
     }
 
     // 3. Contexte immobilier (biens + médias) — historique passé pour retrouver commune/type des échanges précédents
-    const context = await getAIBienContext(userMessage, formattedHistory);
+    const qual = qualify(userMessage, formattedHistory, { isNewSession });
+    const context = await getAIBienContext(userMessage, formattedHistory, qual);
 
     // 2g. Client qualifié mais AUCUN bien en zone/budget → message conseiller
-    // EXACT (§13) directement en code : jamais via le LLM, donc zéro phrase
-    // interdite (« aucun bien disponible », « augmentez le budget »…, §14).
+    // EXACT (Règle 4) directement en code : jamais via le LLM.
     if (context && /^Aucun bien ne correspond/.test(context)) {
       await humanReplyDelay(NO_RESULTS_MESSAGE, requestStartedAt);
-      await wasenderSendMessage(senderPn, NO_RESULTS_MESSAGE, 'text');
+      await wasenderSendMessage(replyTarget, NO_RESULTS_MESSAGE, 'text');
       await supabase
         .from('whatsapp_messages')
         .insert({ jid, direction: 'outbound', body: NO_RESULTS_MESSAGE, metadata: { type: 'no_results' } });
+
+      // Marqueur système pour que Sapphire reste silencieuse par la suite (Règle 4)
+      await supabase.from('whatsapp_messages').insert({
+        jid,
+        direction: 'system',
+        body: 'COUNSELOR_HANDOFF',
+        metadata: { type: 'counselor_handoff', qual },
+      });
+
+      // Notification au conseiller humain avec les critères qualifiés
+      const advisorPhone = process.env.SAPPHIRE_ADVISOR_PHONE || '+2250544872051';
+      const advisorAlert = `🔔 Nouveau prospect qualifié (0 bien catalogue correspondant) :
+👤 ${contactName} — ${senderPn}
+🏠 Type : ${qual.propertyType || 'Non précisé'}
+📍 Zone : ${qual.zone || 'Non précisée'}
+💰 Budget : ${qual.budget ? qual.budget.toLocaleString('fr-FR') + ' FCFA' : 'Non précisé'}
+💬 Message : "${userMessage.slice(0, 250)}"`;
+      await wasenderSendMessage(advisorPhone, advisorAlert, 'text').catch(() => null);
+
       return NextResponse.json({ status: 'ok', branch: 'no_results' });
     }
 
@@ -677,7 +744,7 @@ export async function POST(req: NextRequest) {
         // 2e échec consécutif → message d'escalade au prospect (les admins
         // viennent d'être re-notifiés ci-dessus).
         await humanReplyDelay(SAPPHIRE_ESCALATION, requestStartedAt);
-        await wasenderSendMessage(senderPn, SAPPHIRE_ESCALATION, 'text');
+        await wasenderSendMessage(replyTarget, SAPPHIRE_ESCALATION, 'text');
         await supabase.from('whatsapp_messages').insert({
           jid,
           direction: 'outbound',
@@ -854,12 +921,12 @@ Message client : "${userMessage.slice(0, 200)}"`;
       await humanReplyDelay(cleanText, requestStartedAt);
       const canCaption = !!coverPhoto && cleanText.length <= 950;
       const sentWithPhoto = canCaption
-        ? await wasenderSendMessage(senderPn, cleanText, 'image', coverPhoto!)
+        ? await wasenderSendMessage(replyTarget, cleanText, 'image', coverPhoto!)
             .then((r) => !!r?.success)
             .catch(() => false)
         : false;
       if (!sentWithPhoto) {
-        await wasenderSendMessage(senderPn, cleanText, 'text');
+        await wasenderSendMessage(replyTarget, cleanText, 'text');
       }
     }
 

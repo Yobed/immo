@@ -6,6 +6,7 @@ import {
   extractBienIdFromText,
   type ConsolidatedBien,
 } from '@/lib/catalogue/consolidated'
+import type { Qualification } from './qualification'
 
 /**
  * Outil de recherche Sapphire.
@@ -19,9 +20,9 @@ import {
  * voient exactement les mêmes biens.
  */
 
-/** Plafond budgétaire strict (Cahier des règles §10) : prix ≤ budget × 1.10
- *  (tolérance 10 % max). JAMAIS 2× le budget. Moins cher = toujours proposable. */
-const BUDGET_CAP_FACTOR = 1.1
+/** Plafond budgétaire strict (Règle 3) : prix ≤ budget (tolérance 0 %).
+ *  JAMAIS de dépassement. Moins cher = toujours proposable. */
+const BUDGET_CAP_FACTOR = 1.0
 
 /** Max biens retournés par source (BOGBE'S + offres flash) */
 const MAX_PER_SOURCE = 3
@@ -31,17 +32,14 @@ const SAPPHIRE_MAX_RESULTS = 5
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bogbesgroup.com'
 
 /** Normalisation zone : minuscules sans accents pour comparer commune/quartier. */
-const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 
 /**
- * Quartiers fréquemment cités → commune de rattachement. Le parseur ne connaît
- * que les COMMUNES : « Angré 8ème tranche » n'activait AUCUN filtre de zone et
- * Sapphire proposait des biens d'autres communes (observé : Divo/Koumassi pour
- * une demande Angré). ponytail: liste courte des quartiers réels du flux —
- * enrichir quand un quartier manquant se présente.
+ * Quartiers fréquemment cités → commune de rattachement.
  */
 const QUARTIER_COMMUNE: Record<string, string> = {
   angre: 'Cocody',
+  'angré': 'Cocody',
   riviera: 'Cocody',
   bonoumin: 'Cocody',
   palmeraie: 'Cocody',
@@ -51,17 +49,26 @@ const QUARTIER_COMMUNE: Record<string, string> = {
   cocovico: 'Cocody',
   synacass: 'Cocody',
   djorobite: 'Cocody',
+  'djorobité': 'Cocody',
   akouedo: 'Cocody',
+  'akouédo': 'Cocody',
   danga: 'Cocody',
+  faya: 'Cocody',
+  attoban: 'Cocody',
+  abatta: 'Bingerville',
   'zone 4': 'Marcory',
   bietry: 'Marcory',
+  'biétry': 'Marcory',
   anoumabo: 'Marcory',
   niangon: 'Yopougon',
   selmer: 'Yopougon',
   'toits rouges': 'Yopougon',
+  sicogi: 'Yopougon',
   vridi: 'Port-Bouët',
   gonzagueville: 'Port-Bouët',
-  abatta: 'Bingerville',
+  chateau: 'Yopougon',
+  'château': 'Yopougon',
+  bracodi: 'Adjamé',
 }
 
 /** Étiquette de provenance montrée au LLM. Doit rester honnête : une annonce web
@@ -115,6 +122,7 @@ function formatBienBlock(b: ConsolidatedBien, i: number | null): string {
 export async function getAIBienContext(
   userMessage: string,
   history?: { role: string; content: string }[],
+  qualification?: Qualification,
 ) {
   // ─── PRIORITÉ 1 : URL d'un bien dans le message ────────────────────────────
   // Si le client envoie un lien comme www.bogbesgroup.com/biens/<UUID> ou
@@ -166,6 +174,13 @@ export async function getAIBienContext(
 
   const p = parseSearchQuery(userMessage)
 
+  // Alignement direct avec l'objet de qualification déterministe
+  if (qualification) {
+    if (qualification.propertyType) p.type_bien = qualification.propertyType
+    if (qualification.zone) p.commune = qualification.zone
+    if (qualification.budget) p.prix_max = String(qualification.budget)
+  }
+
   // Détecter si le client demande des images/photos/vidéos
   const demandeMedia = /photo|image|voir|envoie|montre|aper[cç]u|visu|vid[eé]o/i.test(userMessage)
 
@@ -185,11 +200,13 @@ export async function getAIBienContext(
 
   // ZONE STRICTE — étape 1 : si le client cite un quartier connu sans commune,
   // on retient les termes de zone (quartier + sa commune) pour le filtre final.
-  // On ne force PAS le filtre commune en DB : les offres scrapées ont parfois
-  // le quartier dans le champ commune (« Angré ») — le post-filtre gère.
   const zoneTerms: string[] = []
   if (p.commune) {
-    zoneTerms.push(norm(p.commune))
+    const normCommune = norm(p.commune)
+    zoneTerms.push(normCommune)
+    if (QUARTIER_COMMUNE[normCommune]) {
+      zoneTerms.push(norm(QUARTIER_COMMUNE[normCommune]))
+    }
   } else {
     const msgNorm = norm(
       userMessage + ' ' + (history?.slice(-8).map((m) => m.content).join(' ') ?? ''),
@@ -207,19 +224,16 @@ export async function getAIBienContext(
     return null
   }
 
-  // Plafond budgétaire : ≤ 2× le budget client, aucun plancher
-  const budget = p.prix_max ? parseInt(p.prix_max) : null
+  // Plafond budgétaire strict (Règle 3) : budgetMax = budget
+  const budget = p.prix_max ? parseInt(p.prix_max, 10) : null
   const budgetMin = undefined
   const budgetMax = budget ? budget * BUDGET_CAP_FACTOR : undefined
 
   // ─── Unique appel au catalogue consolidé ────────────────────────────────────
-  // ⚠️ ON NE PASSE PAS `p.q` au catalogue : c'est une recherche full-text trop stricte
-  // (ilike %louer riviera 3 03 pièces% ne matche jamais une description réelle).
-  // La combinaison commune + type + budget ±15% suffit pour trouver les biens pertinents,
-  // et le LLM peut ensuite mentionner le quartier (Riviera 3) à partir des biens retournés.
   const { items, counts } = await getConsolidatedCatalogue({
     commune: p.commune,
     type_bien: p.type_bien,
+    type_offre: qualification?.transaction === 'achat' ? 'vente' : (qualification?.transaction ?? undefined),
     equipements: p.equipements,
     prix_min: budgetMin,
     prix_max: budgetMax,
@@ -227,23 +241,38 @@ export async function getAIBienContext(
     limitPerSource: MAX_PER_SOURCE,
   })
 
-  // ZONE STRICTE — étape 2 (règle Wilfried 23/07) : JAMAIS un bien d'une autre
-  // zone, même présenté comme « autre option ». Filtre code, pas prompt : un
-  // bien passe seulement si sa commune/quartier/titre contient un terme de la
-  // zone demandée. Le quartier exact est classé en premier.
-  let zoned = items
+  // Post-filtrage strict sur le budget (Règle 3) :
+  // Si budget spécifié, JAMAIS de bien dont le prix est supérieur au budget,
+  // et exclusion des biens avec prix inconnu / sur demande pour éviter les dépassements.
+  let validItems = items
+  if (budget != null) {
+    validItems = items.filter((b) => b.prix_value != null && b.prix_value <= budget)
+  }
+
+  // ZONE STRICTE — étape 2 (Règle 3) : JAMAIS un bien d'une autre zone ou commune.
+  let zoned = validItems
   if (zoneTerms.length > 0) {
-    const bienZone = (b: ConsolidatedBien) => norm(`${b.commune ?? ''} ${b.quartier ?? ''} ${b.titre}`)
-    zoned = items.filter((b) => zoneTerms.some((t) => bienZone(b).includes(t)))
-    const quartierExact = zoneTerms[0]
-    zoned.sort((a, b) => Number(bienZone(b).includes(quartierExact)) - Number(bienZone(a).includes(quartierExact)))
+    const bienZone = (b: ConsolidatedBien) => norm(`${b.commune ?? ''} ${b.quartier ?? ''} ${b.titre} ${b.description ?? ''}`)
+    // Détecter si l'un des termes demandés est un quartier précis (ex: 'angre')
+    const quartierDemande = zoneTerms.find((t) => QUARTIER_COMMUNE[t] != null)
+    if (quartierDemande) {
+      const inQuartier = validItems.filter((b) => bienZone(b).includes(quartierDemande))
+      if (inQuartier.length > 0) {
+        zoned = inQuartier
+      } else {
+        // Si aucun bien dans ce quartier précis, interdiction stricte de proposer une autre commune
+        zoned = []
+      }
+    } else {
+      zoned = validItems.filter((b) => zoneTerms.some((t) => bienZone(b).includes(t)))
+    }
   }
 
   const top = zoned.slice(0, SAPPHIRE_MAX_RESULTS)
 
   if (top.length === 0) {
     return `Aucun bien ne correspond exactement à ces critères (zone comprise), ni dans le catalogue BOGBE'S, ni dans les offres flash WhatsApp.
-INSTRUCTION : remercie brièvement le client puis dis EXACTEMENT : "Un conseiller commercial va prendre le relais et vous recontacter." Rien d'autre. Ne propose JAMAIS un bien d'une autre zone.`
+INSTRUCTION : remercie brièvement le client puis dis EXACTEMENT : "Un conseiller client va prendre le relais et vous recontacter." Rien d'autre. Ne propose JAMAIS un bien d'une autre zone.`
   }
 
   // En-tête avec récap des critères
@@ -252,7 +281,7 @@ INSTRUCTION : remercie brièvement le client puis dis EXACTEMENT : "Un conseille
   if (p.type_bien) critereLines.push(`- Type : ${p.type_bien}`)
   if (budget && budgetMax != null) {
     critereLines.push(
-      `- Budget client : ${formatFCFA(budget)} (plafond strict appliqué : aucun bien au-delà de ${formatFCFA(budgetMax)} = 2× le budget)`,
+      `- Budget client : ${formatFCFA(budget)} (plafond strict appliqué : aucun bien au-delà de ${formatFCFA(budgetMax)})`,
     )
   }
   if (p.equipements?.length) critereLines.push(`- Équipements : ${p.equipements.join(', ')}`)
