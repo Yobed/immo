@@ -29,10 +29,37 @@ export const FRESH_SEARCH_RE =
 
 export function detectTransaction(text: string): 'location' | 'achat' | null {
   const t = text.toLowerCase()
-  if (/\b(louer|location|à louer|en location|loyer|bail)\b/.test(t)) return 'location'
-  if (/\b(acheter|achat|à vendre|vente|acqu[ée]rir|acquisition)\b/.test(t)) return 'achat'
+  if (/\b(louer|location|[àa]\s+lou[ée]r?|en\s+location|loyer|bail|lou[ée])\b/.test(t)) return 'location'
+  if (/\b(acheter|achat|[àa]\s+vendre|vente|acqu[ée]rir|acquisition)\b/.test(t)) return 'achat'
   return null
 }
+
+/**
+ * Règle 6 : Détection de l'intention de recherche client (vs proposition de bien).
+ * Un client qui recherche un bien ne doit JAMAIS recevoir le message partenaire.
+ */
+export function isClientSearchIntent(text: string): boolean {
+  const t = text.toLowerCase()
+
+  // Si c'est un propriétaire/bailleur cherchant des clients ou locataires
+  if (/\b(cherche|trouver)\s+(un|des)?\s*(locataire|locataires|client|clients|acheteur|acheteurs|preneur|preneurs)\b/i.test(t)) {
+    return false
+  }
+
+  const searchPhrases = [
+    /\b(je\s+cherche|cherche|je\s+recherche|recherche|on\s+cherche|nous\s+cherchons)\b/i,
+    /\b(je\s+suis\s+[àa]\s+la\s+recherche|en\s+qu[êe]te\s+d['’])\b/i,
+    /\b(je\s+veux|je\s+voudrais|j['’]aimerais|je\s+souhaite|souhaiterais)\s+(louer|acheter|visiter|trouver|avoir|prendre|emm[ée]nager|un|une|des|ce|le|la|habiter)\b/i,
+    /\b(besoin\s+d['’](un|une|des)?\s*(bien|appartement|villa|maison|studio|duplex|terrain|logement|bureau|local|chambre|toit))\b/i,
+    /\b(trouver\s+(un|une|des)\s+(bien|appartement|villa|maison|studio|duplex|terrain|logement))\b/i,
+    /\b(avez[-\s]vous|est[-\s]ce\s+que\s+vous\s+avez|auriez[-\s]vous)\b/i,
+    /\b(mon\s+budget|notre\s+budget|budget\s*[:=]?\s*\d+)\b/i,
+    /\b(pour\s+(y\s+)?habiter|pour\s+emm[ée]nager|pour\s+mon\s+s[ée]jour)\b/i,
+  ]
+
+  return searchPhrases.some((p) => p.test(t))
+}
+
 
 export interface Qualification {
   transaction: 'location' | 'achat' | null

@@ -1,5 +1,6 @@
 import { parseSearchQuery } from '../searchParser'
 import { formatFCFA } from '../format'
+import { COMMUNES_CI } from '@immo-ci/shared/constants/communes'
 import {
   getConsolidatedCatalogue,
   getConsolidatedBienById,
@@ -107,8 +108,8 @@ function formatBienBlock(b: ConsolidatedBien, i: number | null): string {
   if (b.nb_pieces) out += `Pièces/chambres: ${b.nb_pieces}\n`
   if (b.surface_m2) out += `Surface: ${b.surface_m2} m²\n`
   if (b.equipements.length) out += `Équipements: ${b.equipements.join(', ')}\n`
-  if (b.description) out += `Description: ${b.description.slice(0, 280)}\n`
-  if (b.photos.length > 0) out += `Photos disponibles (${b.photos.length}): ${b.photos.slice(0, 3).join(' | ')}\n`
+  if (b.description) out += `Description: ${b.description.slice(0, 150)}\n`
+  if (b.photos.length > 0) out += `Photos disponibles (${b.photos.length}): ${b.photos.slice(0, 1).join(' | ')}\n`
   else out += `Pas de photos dans le catalogue pour ce bien.\n`
   if (b.videos.length > 0) out += `Vidéos disponibles (${b.videos.length}): ${b.videos.slice(0, 2).join(' | ')}\n`
   out += `Lien fiche: ${b.url}\n`
@@ -198,29 +199,42 @@ export async function getAIBienContext(
     if (pFromHistory.equipements?.length) p.equipements = pFromHistory.equipements
   }
 
-  // ZONE STRICTE — étape 1 : si le client cite un quartier connu sans commune,
-  // on retient les termes de zone (quartier + sa commune) pour le filtre final.
+  // ZONE STRICTE — étape 1 : détection de TOUTES les zones (communes et quartiers)
+  // mentionnées dans le message et l'historique récent (gestion multi-zones ex: "Cocody, Faya, Bingerville").
   const zoneTerms: string[] = []
-  if (p.commune) {
+  const msgNorm = norm(
+    userMessage + ' ' + (history?.slice(-8).map((m) => m.content).join(' ') ?? ''),
+  )
+
+  // 1. Communes citées
+  for (const c of COMMUNES_CI) {
+    const clean = norm(c === 'Bassam (Grand-Bassam)' ? 'bassam' : c)
+    if (msgNorm.includes(clean) && !zoneTerms.includes(clean)) {
+      zoneTerms.push(clean)
+    }
+  }
+
+  // 2. Quartiers cités
+  for (const [quartier, commune] of Object.entries(QUARTIER_COMMUNE)) {
+    const normQ = norm(quartier)
+    if (msgNorm.includes(normQ)) {
+      if (!zoneTerms.includes(normQ)) zoneTerms.push(normQ)
+      const normC = norm(commune)
+      if (!zoneTerms.includes(normC)) zoneTerms.push(normC)
+    }
+  }
+
+  // 3. Fallback sur p.commune si le scan direct n'a rien donné
+  if (p.commune && zoneTerms.length === 0) {
     const normCommune = norm(p.commune)
     zoneTerms.push(normCommune)
     if (QUARTIER_COMMUNE[normCommune]) {
       zoneTerms.push(norm(QUARTIER_COMMUNE[normCommune]))
     }
-  } else {
-    const msgNorm = norm(
-      userMessage + ' ' + (history?.slice(-8).map((m) => m.content).join(' ') ?? ''),
-    )
-    for (const [quartier, commune] of Object.entries(QUARTIER_COMMUNE)) {
-      if (msgNorm.includes(quartier)) {
-        zoneTerms.push(quartier, norm(commune))
-        break
-      }
-    }
   }
 
   // Si toujours aucun critère et pas de demande de média, pas de recherche
-  if (!p.commune && !p.type_bien && !p.prix_max && !p.q && !demandeMedia) {
+  if (zoneTerms.length === 0 && !p.commune && !p.type_bien && !p.prix_max && !p.q && !demandeMedia) {
     return null
   }
 
@@ -229,16 +243,22 @@ export async function getAIBienContext(
   const budgetMin = undefined
   const budgetMax = budget ? budget * BUDGET_CAP_FACTOR : undefined
 
+  // Si plusieurs communes sont demandées (ex: Cocody + Bingerville), on ne filtre pas par
+  // une commune unique au niveau SQL : on interroge le catalogue et on filtre en mémoire.
+  const allKnownCommunesNorm = COMMUNES_CI.map((c) => norm(c === 'Bassam (Grand-Bassam)' ? 'bassam' : c))
+  const distinctCommunesInTerms = allKnownCommunesNorm.filter((c) => zoneTerms.includes(c))
+  const singleCommuneFilter = distinctCommunesInTerms.length === 1 ? (p.commune || distinctCommunesInTerms[0]) : undefined
+
   // ─── Unique appel au catalogue consolidé ────────────────────────────────────
   const { items, counts } = await getConsolidatedCatalogue({
-    commune: p.commune,
+    commune: singleCommuneFilter,
     type_bien: p.type_bien,
     type_offre: qualification?.transaction === 'achat' ? 'vente' : (qualification?.transaction ?? undefined),
     equipements: p.equipements,
     prix_min: budgetMin,
     prix_max: budgetMax,
     sort: 'verified_first',
-    limitPerSource: MAX_PER_SOURCE,
+    limitPerSource: distinctCommunesInTerms.length > 1 ? MAX_PER_SOURCE * 2 : MAX_PER_SOURCE,
   })
 
   // Post-filtrage strict sur le budget (Règle 3) :
@@ -253,9 +273,10 @@ export async function getAIBienContext(
   let zoned = validItems
   if (zoneTerms.length > 0) {
     const bienZone = (b: ConsolidatedBien) => norm(`${b.commune ?? ''} ${b.quartier ?? ''} ${b.titre} ${b.description ?? ''}`)
-    // Détecter si l'un des termes demandés est un quartier précis (ex: 'angre')
+    // Détecter si l'utilisateur a cité uniquement un quartier précis (ex: juste 'angre') sans commune
     const quartierDemande = zoneTerms.find((t) => QUARTIER_COMMUNE[t] != null)
-    if (quartierDemande) {
+    const hasOnlyQuartier = !!quartierDemande && distinctCommunesInTerms.length === 0
+    if (hasOnlyQuartier) {
       const inQuartier = validItems.filter((b) => bienZone(b).includes(quartierDemande))
       if (inQuartier.length > 0) {
         zoned = inQuartier

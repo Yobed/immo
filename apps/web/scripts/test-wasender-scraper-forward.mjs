@@ -10,6 +10,14 @@ assert.equal(
   true,
 )
 assert.equal(
+  shouldForwardGroupMessageToScraper('messages.received', '120363287041460977@g.us', false),
+  true,
+)
+assert.equal(
+  shouldForwardGroupMessageToScraper('messages.received', '2250102030405@s.whatsapp.net', false),
+  false,
+)
+assert.equal(
   shouldForwardGroupMessageToScraper('messages.upsert', '120363287041460977@g.us', false),
   false,
 )

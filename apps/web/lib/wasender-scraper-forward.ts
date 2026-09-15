@@ -6,7 +6,7 @@ export function shouldForwardGroupMessageToScraper(
   remoteJid: string | undefined,
   fromMe: boolean | undefined,
 ): boolean {
-  return event === 'messages-group.received'
+  return (event === 'messages-group.received' || event === 'messages.received')
     && remoteJid?.endsWith('@g.us') === true
     && fromMe !== true
 }

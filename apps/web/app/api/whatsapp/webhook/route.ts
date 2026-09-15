@@ -11,6 +11,7 @@ import {
   QUALIF_REMINDER_MARKER,
   NO_RESULTS_MESSAGE,
   FRESH_SEARCH_RE,
+  isClientSearchIntent,
 } from '@/lib/ai/qualification';
 import { captureProspect, canonicalPhone } from '@/lib/prospects/capture';
 import { linkIntakeToProspect } from '@/lib/crm/intake';
@@ -138,9 +139,21 @@ function listingSignals(text: string): number {
  * lui envoyer le message partenaire avec le lien register, et ne JAMAIS lui envoyer
  * le questionnaire de recherche client.
  */
-function isPartnerOrListingOffer(text: string): boolean {
+function isPartnerOrListingOffer(text: string, isReplyingToQualif = false): boolean {
+  // 1. Si le prospect répond à une question de qualification du bot, il ne propose pas un bien
+  // sauf s'il indique expressément être propriétaire/démarcheur confiant un bien.
+  if (isReplyingToQualif) {
+    return /\b(je\s+suis\s+(propri[ée]taire|d[ée]marcheur|agent|mandataire|apporteur)|mettre\s+en\s+(location|vente)|confier\s+mon\s+bien|publier\s+une\s+annonce|partenariat|collaborer)\b/i.test(text);
+  }
+
+  // 2. Si le message exprime clairement une intention de recherche client, ce n'est JAMAIS une offre de bien
+  if (isClientSearchIntent(text)) {
+    return false;
+  }
+
   const t = text.toLowerCase();
   
+  // 3. Formulations explicites d'un propriétaire / bailleur / démarcheur proposant un bien
   const explicitListingPatterns = [
     /\bj['’]ai\s+(un|une|des)\s+(bien|villa|maison|appartement|terrain|studio|duplex|immeuble|magasin|bureau|local)\b/,
     /\bje\s+dispose\s+d['’]/,
@@ -154,14 +167,26 @@ function isPartnerOrListingOffer(text: string): boolean {
     /\ben\s+tant\s+que\s+propri[ée]taire\b/,
     /\bpropri[ée]taire\s+d['’]un(e)?\b/,
     /\bj['’]aimerais\s+(faire\s+louer|faire\s+vendre|mettre\s+en\s+location|vendre\s+mon|louer\s+mon)\b/,
+    /\b(cherche|trouver)\s+(un|des)?\s*(locataire|locataires|client|clients|acheteur|acheteurs|preneur|preneurs)\b/,
+    /\bdisponible\s+imm[ée]diatement\s*:\s*(villa|appartement|studio|duplex)/,
   ];
   
   if (explicitListingPatterns.some((p) => p.test(t))) {
     return true;
   }
   
-  const sig = listingSignals(text);
-  if (sig >= 2) return true;
+  // 4. Signaux forts d'annonce / diffusion démarcheur (conditions de bail, honoraires, visite payante, prix du loyer)
+  const hasConditions = /\b(conditions?(\s*:|\.{2,})|\d+\s*mois\s+de\s+(caution|avance)|caution\s*:\s*\d+|avance\s*:\s*\d+|honoraires?|com\s*:\s*\d+|frais\s+d['’]agence)\b/i.test(t);
+  const hasBrokerInfo = /\b(visites?\s+sur\s+rdvs?|frais\s+de\s+visites?|infoline|direct\s+propri[ée]taire|mandat\s+exclusif|contact\s*:\s*(\+?225|\b0[157])|prix\s+du\s+loyer)\b/i.test(t);
+
+  if (hasConditions || hasBrokerInfo) {
+    return true;
+  }
+
+  // 5. Annonce immobilière brute avec ≥ 3 signaux d'annonce (sans être une recherche client)
+  if (listingSignals(text) >= 3) {
+    return true;
+  }
   
   return false;
 }
@@ -479,7 +504,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: 'ok', branch: 'human_takeover_mute' });
     }
     if (marks.some((m) => m.body === 'LISTING_PROVIDER')) {
-      return NextResponse.json({ status: 'ok', branch: 'listing_provider_mute' });
+      const isClientSearch = isClientSearchIntent(userMessage) || FRESH_SEARCH_RE.test(userMessage);
+      if (isClientSearch) {
+        // Lever le mute fournisseur si le contact formule une recherche client
+        await supabase
+          .from('whatsapp_messages')
+          .delete()
+          .eq('jid', jid)
+          .eq('direction', 'system')
+          .eq('body', 'LISTING_PROVIDER');
+      } else {
+        return NextResponse.json({ status: 'ok', branch: 'listing_provider_mute' });
+      }
     }
     if (marks.some((m) => m.body === 'COUNSELOR_HANDOFF')) {
       // Le client reprend la main seulement s'il exprime une nouvelle recherche distincte
@@ -511,9 +547,16 @@ export async function POST(req: NextRequest) {
 
     // 2b. ANNONCE / PROPOSITION entrante (agent/proprio/démarcheur qui CONFIE un bien) → ne
     // JAMAIS proposer des biens en retour (Règles 5 & 6).
+    const isReplyingToQualif = formattedHistory.slice(-2).some((m) =>
+      m.role === 'assistant' && (
+        m.content.includes('Bienvenue chez Bogbe') ||
+        QUALIF_REMINDER_MARKER.test(m.content)
+      )
+    );
+    const clientSearching = isClientSearchIntent(userMessage);
     const sig = listingSignals(userMessage);
-    let isListing = isPartnerOrListingOffer(userMessage) || sig >= 3;
-    if (!isListing && sig >= 1 && userMessage.length >= 80) {
+    let isListing = !clientSearching && isPartnerOrListingOffer(userMessage, isReplyingToQualif);
+    if (!isListing && !clientSearching && !isReplyingToQualif && sig >= 3 && userMessage.length >= 80) {
       const { data: extracted } = await extractBienFromWhatsApp(userMessage).catch(() => ({ data: null }));
       isListing = !!extracted && extracted.confidence >= MIN_EXTRACTION_CONFIDENCE;
     }
