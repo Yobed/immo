@@ -4,6 +4,7 @@ import { AlertTriangle, ArrowLeft, CheckCircle2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
+export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 type ProspectRow = {
@@ -41,9 +42,9 @@ export default async function ProspectQualityPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login?next=/admin/prospects/qualite')
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') notFound()
   const admin = createAdminClient()
+  const { data: profile } = await (admin as any).from('profiles').select('role').eq('id', user.id).maybeSingle()
+  if (profile?.role !== 'admin') notFound()
   const { rows, error: fetchError } = await fetchAllProspects(admin)
 
   const checks = [
