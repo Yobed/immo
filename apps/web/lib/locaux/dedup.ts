@@ -25,7 +25,37 @@ interface MinimalRow {
 const dateOf = (r: MinimalRow): number =>
   new Date(r.date_publication || r.created_at || 0).getTime()
 
+export async function cleanZombieN8nExecutions(): Promise<{ unblocked: number }> {
+  try {
+    const admin = createLocauxAdminClient()
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60_000).toISOString()
+    const now = new Date().toISOString()
+    const { data, error } = await admin
+      .from('execution_entity')
+      .update({ status: 'error', finished: true, stoppedAt: now })
+      .eq('status', 'running')
+      .lt('startedAt', tenMinutesAgo)
+      .select('id')
+
+    if (error) {
+      console.warn('[n8n-watchdog] Could not cleanup zombie executions:', error.message)
+      return { unblocked: 0 }
+    }
+    const count = data?.length ?? 0
+    if (count > 0) {
+      console.log(`[n8n-watchdog] Cleaned ${count} zombie n8n executions`)
+    }
+    return { unblocked: count }
+  } catch (err) {
+    console.warn('[n8n-watchdog] Error in watchdog:', err)
+    return { unblocked: 0 }
+  }
+}
+
 export async function runLocauxDedup(): Promise<DedupResult> {
+  // Purge préventive des exécutions n8n zombies (> 10 min) pour ne jamais bloquer le scraping
+  await cleanZombieN8nExecutions()
+
   const c = createLocauxClient()
   const admin = createLocauxAdminClient()
 

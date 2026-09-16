@@ -1,4 +1,4 @@
-const FORWARD_TIMEOUT_MS = 8_000
+const FORWARD_TIMEOUT_MS = 15_000
 
 /** Only the canonical group event may enter the n8n property importer. */
 export function shouldForwardGroupMessageToScraper(
