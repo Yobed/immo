@@ -117,7 +117,15 @@ export function AdminShell({ email, pendingCount = 0, children }: AdminShellProp
                 <p className="px-2 mb-1 text-[9px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">{group.label}</p>
                 <div className="flex items-center gap-1">
                   {group.items.map((item) => {
-                    const active = pathname.startsWith(item.href)
+                    const active =
+                      pathname === item.href ||
+                      (pathname.startsWith(item.href + '/') &&
+                        !ADMIN_NAV_GROUPS.flatMap((g) => g.items).some(
+                          (other) =>
+                            other.href !== item.href &&
+                            other.href.startsWith(item.href + '/') &&
+                            (pathname === other.href || pathname.startsWith(other.href + '/'))
+                        ))
                     const Icon = item.icon
                     return (
                       <Link

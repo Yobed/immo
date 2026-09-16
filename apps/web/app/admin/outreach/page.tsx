@@ -2,6 +2,7 @@ import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { Users, Send, MousePointerClick, CheckCircle2, Ban, Clock } from 'lucide-react'
+import { InviteSingleButton, BatchInviteButton } from '@/components/admin/OutreachInviteButton'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -126,9 +127,12 @@ export default async function AdminOutreachPage() {
 
         {/* Table */}
         <div className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] overflow-hidden">
-          <div className="px-5 py-4 border-b border-[var(--border)] flex items-center justify-between">
-            <h2 className="text-sm font-bold text-[var(--text)]">Prospects récents (100 derniers)</h2>
-            <span className="text-[10px] text-[var(--text-subtle)] uppercase tracking-widest">Trié par dernière activité</span>
+          <div className="px-5 py-4 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-bold text-[var(--text)]">Prospects récents (100 derniers)</h2>
+              <span className="text-[10px] text-[var(--text-subtle)] uppercase tracking-widest">Trié par dernière activité</span>
+            </div>
+            <BatchInviteButton pendingCount={stats.pending} />
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -141,6 +145,7 @@ export default async function AdminOutreachPage() {
                   <th className="text-center px-4 py-2.5 font-semibold">Invites</th>
                   <th className="text-left px-4 py-2.5 font-semibold">Statut</th>
                   <th className="text-left px-4 py-2.5 font-semibold">Vu</th>
+                  <th className="text-right px-4 py-2.5 font-semibold">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--border)]">
@@ -161,11 +166,18 @@ export default async function AdminOutreachPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-[11px] text-[var(--text-muted)]">{formatDate(p.last_seen_at)}</td>
+                    <td className="px-4 py-3 text-right">
+                      <InviteSingleButton
+                        prospectId={p.id}
+                        disabled={p.opt_out || p.status === 'converted' || p.status === 'opted_out' || p.status === 'blocked'}
+                        label={p.invite_count > 0 ? 'Relancer' : 'Inviter'}
+                      />
+                    </td>
                   </tr>
                 ))}
                 {prospects.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center text-[var(--text-subtle)] text-sm">
+                    <td colSpan={8} className="px-4 py-12 text-center text-[var(--text-subtle)] text-sm">
                       Aucun prospect détecté pour le moment.
                     </td>
                   </tr>

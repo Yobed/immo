@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { recordOutreachConversionForCurrentUser } from '@/app/actions/outreach'
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
@@ -53,6 +54,9 @@ export async function GET(request: NextRequest) {
       const { data: { user } } = await supabase.auth.getUser()
 
       if (user) {
+        // Enregistre la conversion si l'utilisateur provient d'une invitation outreach
+        await recordOutreachConversionForCurrentUser().catch(() => null)
+
         const provider = user.app_metadata?.provider ?? ''
 
         // Vérifier si c'est un nouvel utilisateur Google (profil incomplet)

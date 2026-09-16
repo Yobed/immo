@@ -15,8 +15,8 @@ import {
 } from '@/lib/ai/qualification';
 import { captureProspect, canonicalPhone } from '@/lib/prospects/capture';
 import { linkIntakeToProspect } from '@/lib/crm/intake';
-import { extractBienFromWhatsApp } from '@/lib/extractors/whatsapp-bien-extractor';
-import { recordOptOut } from '@/lib/outreach/agent-prospects';
+import { extractBienFromWhatsApp, type ExtractedBien } from '@/lib/extractors/whatsapp-bien-extractor';
+import { recordOptOut, upsertProspect } from '@/lib/outreach/agent-prospects';
 import { notifyOwnerVisitPending } from '@/lib/notifications/whatsapp-notifier';
 import { markSeen } from '@/lib/idempotency';
 import { shouldProcessWasenderMessageEvent } from '@/lib/wasender-event-policy';
@@ -439,12 +439,53 @@ export async function POST(req: NextRequest) {
           console.error('[group-scraper] N8N_SCRAPER_WEBHOOK_URL is missing or invalid');
           return NextResponse.json({ status: 'error', branch: 'group_scraper_not_configured' }, { status: 503 });
         }
-        const forwarded = await forwardGroupMessageToScraper(scraperUrl, body);
-        if (!forwarded.ok) {
-          console.error(`[group-scraper] n8n delivery failed status=${forwarded.status ?? 'network'}`);
+
+        // Tâche 1 : Envoi n8n (offres flash)
+        const forwardPromise = forwardGroupMessageToScraper(scraperUrl, body);
+
+        // Tâche 2 : Capture du démarcheur pour l'Outreach
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const participantJid = msg.key?.participant || (msg as any).participant;
+        const authorRaw = msg.key?.cleanedSenderPn || (typeof participantJid === 'string' ? participantJid.split('@')[0] : '') || '';
+        const authorPhone = normalizeCIPhone(authorRaw);
+
+        const outreachPromise = (async () => {
+          if (!authorPhone || authorPhone.length < 8 || !userMessage || msg.key?.fromMe) return;
+          const sigs = listingSignals(userMessage);
+          if (sigs < 1 && userMessage.length < 30) return;
+
+          try {
+            let extraction: ExtractedBien | null = null;
+            try {
+              const res = await extractBienFromWhatsApp(userMessage);
+              if (res.data && res.data.confidence >= 0.5) {
+                extraction = res.data;
+              }
+            } catch (extErr) {
+              console.warn('[outreach] extraction LLM skipped:', extErr);
+            }
+
+            await upsertProspect({
+              phone: authorPhone,
+              jid: typeof participantJid === 'string' ? participantJid : `${authorPhone}@s.whatsapp.net`,
+              displayName: msg.pushName || null,
+              sourceGroupJid: jid,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              sourceGroupName: (msg as any).groupName || null,
+              extraction,
+            });
+            console.log(`[outreach] agent prospect captured: ${authorPhone} (${msg.pushName || 'inconnu'})`);
+          } catch (err) {
+            console.error('[outreach] upsertProspect failed', err);
+          }
+        })();
+
+        const [forwardResult] = await Promise.all([forwardPromise, outreachPromise]);
+        if (!forwardResult.ok) {
+          console.error(`[group-scraper] n8n delivery failed status=${forwardResult.status ?? 'network'}`);
           return NextResponse.json({ status: 'error', branch: 'group_scraper_delivery_failed' }, { status: 502 });
         }
-        console.log('[group-scraper] group message forwarded to n8n');
+        console.log('[group-scraper] group message forwarded to n8n and prospect evaluated');
         return NextResponse.json({ status: 'ok', branch: 'group_forwarded' });
       }
       return NextResponse.json({ status: 'ignored', reason: 'group_message_not_forwarded' });
