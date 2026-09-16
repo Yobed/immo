@@ -38,8 +38,10 @@ const OPTS = {
 const ADMIN_OPTS = { auth: { persistSession: false, autoRefreshToken: false } } as const
 
 function svcKey(name: string): string {
-  const key = process.env[name]?.trim().replace(/^﻿/, '')
-  if (!key) throw new Error(`${name} missing`)
+  const raw = process.env[name]
+  if (!raw) throw new Error(`${name} missing`)
+  const key = raw.trim().replace(/^["']|["']$/g, '').replace(/[\r\n\ufeff]/g, '').trim()
+  if (!key) throw new Error(`${name} empty after sanitization`)
   return key
 }
 

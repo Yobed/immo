@@ -14,9 +14,9 @@ type DuplicateGroup = { phone_normalized: string; duplicate_count: number; prosp
 export default async function ProspectDuplicatesPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login?next=/admin/prospects/doublons')
+  if (!user) redirect('/login?redirect=/admin/prospects/doublons')
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') notFound()
+  if (profile?.role !== 'admin') redirect('/login?redirect=/admin/prospects/doublons')
 
   const admin = createAdminClient()
   const { data, error } = await (admin as any).from('v_prospect_duplicates')

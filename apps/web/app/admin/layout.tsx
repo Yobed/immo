@@ -1,4 +1,6 @@
-import { redirect, notFound } from 'next/navigation'
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { ShieldAlert } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { AdminShell } from '@/components/admin/AdminShell'
@@ -22,7 +24,38 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .eq('id', user.id)
     .single()
 
-  if (profile?.role !== 'admin') notFound()
+  if (profile?.role !== 'admin') {
+    return (
+      <main className="min-h-screen bg-[var(--surface-hover)] flex items-center justify-center p-4">
+        <div className="max-w-md w-full rounded-2xl border border-amber-300 bg-amber-50 p-6 text-center shadow-lg">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-700 mb-4">
+            <ShieldAlert className="h-6 w-6" />
+          </div>
+          <h1 className="text-xl font-bold text-amber-950 mb-2">Accès Administrateur Requis</h1>
+          <p className="text-sm text-amber-900 mb-4">
+            Vous êtes connecté avec le compte <strong className="font-mono">{user.email}</strong>, qui possède actuellement le rôle <strong className="font-mono">"{profile?.role || 'aucun'}"</strong>.
+          </p>
+          <p className="text-xs text-amber-800 mb-6">
+            Pour accéder à la console d'administration, veuillez vous connecter avec un compte administrateur autorisé.
+          </p>
+          <div className="flex flex-col gap-2">
+            <Link
+              href="/login?redirect=/admin/suivi"
+              className="inline-flex justify-center items-center rounded-xl bg-amber-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-amber-950 transition-colors"
+            >
+              Changer de compte
+            </Link>
+            <Link
+              href="/"
+              className="inline-flex justify-center items-center rounded-xl border border-amber-300 bg-white px-4 py-2.5 text-sm font-medium text-amber-900 hover:bg-amber-100/50 transition-colors"
+            >
+              Retour à l&apos;accueil
+            </Link>
+          </div>
+        </div>
+      </main>
+    )
+  }
 
   // Compteur d'annonces en attente pour le badge "Validation".
   let pendingCount = 0

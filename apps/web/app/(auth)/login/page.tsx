@@ -33,8 +33,8 @@ function LoginContent() {
 
   const supabase = createClient()
 
-  // Get redirect URL from search params (null si non fourni → on choisira selon le rôle)
-  const explicitRedirect = searchParams.get('redirect')
+  // Get redirect URL from search params (supporter ?redirect= et ?next= indifféremment)
+  const explicitRedirect = searchParams.get('redirect') || searchParams.get('next')
   const redirectUrl = explicitRedirect || '/dashboard'
 
   const {

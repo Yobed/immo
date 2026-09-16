@@ -28,9 +28,9 @@ async function fetchAllRows<T>(client: any, table: string, selection: string, op
 export default async function AdminPerformancePage({ searchParams }: { searchParams: Promise<{ period?: string }> }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login?next=/admin/performance')
+  if (!user) redirect('/login?redirect=/admin/performance')
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') notFound()
+  if (profile?.role !== 'admin') redirect('/login?redirect=/admin/performance')
 
   const params = await searchParams
   const period: Period = params.period === '7' || params.period === '90' ? Number(params.period) as Period : 30

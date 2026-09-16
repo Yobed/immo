@@ -23,6 +23,10 @@
     {
       "path": "/api/cron/retry-whatsapp",
       "schedule": "7 4 * * *"
+    },
+    {
+      "path": "/api/cron/watchdog-n8n",
+      "schedule": "15 */2 * * *"
     }
   ]
 }

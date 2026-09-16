@@ -1,24 +1,35 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createAnnoncesClient } from '@/lib/supabase/annonces'
+import { createLocauxClient } from '@/lib/supabase/locaux'
 
 export interface HealthSnapshot {
   status: 'ok' | 'degraded'
-  checks: { supabase: boolean; catalogue: boolean }
+  checks: {
+    supabase: boolean
+    catalogue: boolean
+    freshLocaux: boolean
+    n8n: boolean
+  }
   checkedAt: string
 }
 
 /**
- * Vérifie uniquement la disponibilité des dépendances. Aucun compteur,
- * message SQL ou identifiant métier ne sort de cette fonction.
+ * Vérifie la disponibilité de TOUTES les dépendances critiques :
+ * 1. Base CRM principale (profiles, prospects, biens)
+ * 2. Base catalogue web (v_annonces)
+ * 3. Base d'ingestion FRESH WhatsApp (locaux)
+ * 4. Moteur de scraping n8n (/healthz)
  */
 export async function getHealthSnapshot(): Promise<HealthSnapshot> {
   const checks = await Promise.allSettled([
+    // 1. Supabase Principal
     (async () => {
       const { error } = await (createAdminClient() as any)
         .from('profiles')
         .select('id', { head: true, count: 'exact' })
       if (error) throw error
     })(),
+    // 2. Annonces Scrappées Web
     (async () => {
       const { error } = await (createAnnoncesClient() as any)
         .from('v_annonces')
@@ -26,12 +37,39 @@ export async function getHealthSnapshot(): Promise<HealthSnapshot> {
         .gt('nb_photos', 0)
       if (error) throw error
     })(),
+    // 3. Supabase FRESH (Offres flash WhatsApp)
+    (async () => {
+      const { error } = await (createLocauxClient() as any)
+        .from('locaux')
+        .select('id', { head: true, count: 'exact' })
+      if (error) throw error
+    })(),
+    // 4. Moteur n8n (Hugging Face)
+    (async () => {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 4000)
+      try {
+        const res = await fetch('https://kassio1-n8n-free.hf.space/healthz', {
+          signal: controller.signal,
+          headers: { 'Cache-Control': 'no-cache' },
+        })
+        if (!res.ok) throw new Error(`n8n health status ${res.status}`)
+      } finally {
+        clearTimeout(timeoutId)
+      }
+    })(),
   ])
+
   const supabase = checks[0]?.status === 'fulfilled'
   const catalogue = checks[1]?.status === 'fulfilled'
+  const freshLocaux = checks[2]?.status === 'fulfilled'
+  const n8n = checks[3]?.status === 'fulfilled'
+
+  const allOk = supabase && catalogue && freshLocaux && n8n
+
   return {
-    status: supabase && catalogue ? 'ok' : 'degraded',
-    checks: { supabase, catalogue },
+    status: allOk ? 'ok' : 'degraded',
+    checks: { supabase, catalogue, freshLocaux, n8n },
     checkedAt: new Date().toISOString(),
   }
 }

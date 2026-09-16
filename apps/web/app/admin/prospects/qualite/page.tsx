@@ -41,10 +41,10 @@ async function fetchAllProspects(admin: ReturnType<typeof createAdminClient>): P
 export default async function ProspectQualityPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login?next=/admin/prospects/qualite')
+  if (!user) redirect('/login?redirect=/admin/prospects/qualite')
   const admin = createAdminClient()
   const { data: profile } = await (admin as any).from('profiles').select('role').eq('id', user.id).maybeSingle()
-  if (profile?.role !== 'admin') notFound()
+  if (profile?.role !== 'admin') redirect('/login?redirect=/admin/prospects/qualite')
   const { rows, error: fetchError } = await fetchAllProspects(admin)
 
   const checks = [
