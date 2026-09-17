@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { notifyAdminNewUser } from '@/lib/notifications/whatsapp-notifier'
 
 /**
  * Inscription email/mot de passe côté serveur.
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
   const { full_name, email, password, role, referral_code } = parsed.data
 
   const admin = createAdminClient()
-  const { error } = await admin.auth.admin.createUser({
+  const { data, error } = await admin.auth.admin.createUser({
     email,
     password,
     email_confirm: true, // aucun mail envoyé → contourne le rate limit Supabase
@@ -47,5 +48,20 @@ export async function POST(req: NextRequest) {
       { status: already ? 409 : 500 },
     )
   }
+
+  if (data?.user) {
+    notifyAdminNewUser(admin, {
+      id: data.user.id,
+      fullName: full_name,
+      email,
+      role,
+      referralCode: referral_code ?? null,
+    }).catch((err) => {
+      // eslint-disable-next-line no-console
+      console.error('[auth/register] Failed to notify admins of new user', err)
+    })
+  }
+
   return NextResponse.json({ ok: true })
 }
+

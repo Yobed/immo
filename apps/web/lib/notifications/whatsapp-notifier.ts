@@ -123,7 +123,7 @@ async function logNotification(
     toPhone: string
     role: RecipientRole
     template: string
-    relatedType: NotificationRelatedType
+    relatedType?: NotificationRelatedType | null
     relatedId: string
     message: string
     payload: Record<string, unknown>
@@ -131,12 +131,17 @@ async function logNotification(
   }
 ): Promise<void> {
   try {
+    const validRelatedTypes = ['visite', 'reservation', 'contact_request']
+    const safeRelatedType = params.relatedType && validRelatedTypes.includes(params.relatedType)
+      ? params.relatedType
+      : null
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (supabase.from('whatsapp_notifications') as any).insert({
       to_phone: params.toPhone,
       recipient_role: params.role,
       template: params.template,
-      related_type: params.relatedType,
+      related_type: safeRelatedType,
       related_id: params.relatedId,
       message_body: params.message,
       payload: params.payload,
@@ -857,3 +862,127 @@ export async function notifyVisitorContactRejected(
   })
   return result
 }
+
+// ---------------- Notifications ADMIN (Inscriptions & Soumissions) ----------------
+
+export interface NewUserContext {
+  id: string
+  fullName: string
+  email: string
+  role: string
+  phone?: string | null
+  referralCode?: string | null
+}
+
+export async function notifyAdminNewUser(
+  supabase: SupabaseClient,
+  ctx: NewUserContext
+): Promise<NotificationSummary> {
+  const admins = getAdminNumbers()
+  if (admins.length === 0) return { sent: 0, failed: 0, total: 0 }
+
+  const baseUrl = getBaseUrl()
+  const roleLabel =
+    ({
+      proprietaire: 'Propriétaire',
+      agence: 'Agence',
+      locataire: 'Locataire',
+      admin: 'Admin',
+    } as Record<string, string>)[ctx.role] || ctx.role
+
+  const message = [
+    '👤 *NOUVELLE INSCRIPTION SUR LA PLATEFORME*',
+    '',
+    `*Nom :* ${ctx.fullName}`,
+    `*Email :* ${ctx.email}`,
+    `*Rôle :* ${roleLabel}`,
+    ctx.phone ? `*Téléphone :* ${ctx.phone}` : null,
+    ctx.referralCode ? `*Code parrain :* ${ctx.referralCode}` : null,
+    '',
+    `📋 Voir le compte : ${baseUrl}/admin/comptes?q=${encodeURIComponent(ctx.email)}`,
+  ]
+    .filter(Boolean)
+    .join('\n')
+
+  let sent = 0
+  let failed = 0
+  for (const phone of admins) {
+    const result = await send(phone, message)
+    if (result.success) sent++
+    else failed++
+    await logNotification(supabase, {
+      toPhone: phone,
+      role: 'admin',
+      template: 'new_user_admin',
+      relatedType: null,
+      relatedId: ctx.id,
+      message,
+      payload: { ...ctx },
+      result,
+    })
+  }
+
+  return { sent, failed, total: admins.length }
+}
+
+export interface BienSubmittedContext {
+  id: string
+  titre: string
+  typeBien?: string | null
+  commune?: string | null
+  quartier?: string | null
+  prix?: number | null
+  proprietaireName?: string | null
+  proprietairePhone?: string | null
+  proprietaireEmail?: string | null
+}
+
+export async function notifyAdminBienSubmitted(
+  supabase: SupabaseClient,
+  ctx: BienSubmittedContext
+): Promise<NotificationSummary> {
+  const admins = getAdminNumbers()
+  if (admins.length === 0) return { sent: 0, failed: 0, total: 0 }
+
+  const baseUrl = getBaseUrl()
+  const loc = [ctx.commune, ctx.quartier].filter(Boolean).join(' - ')
+  const prixStr = ctx.prix ? formatMoneyFCFA(ctx.prix) : null
+
+  const message = [
+    '🏡 *NOUVEAU BIEN SOUMIS POUR VALIDATION*',
+    '',
+    `*Titre :* ${ctx.titre}`,
+    ctx.typeBien ? `*Type :* ${ctx.typeBien}` : null,
+    loc ? `*Localisation :* ${loc}` : null,
+    prixStr ? `*Prix / Loyer :* ${prixStr}` : null,
+    '',
+    `*Propriétaire :* ${ctx.proprietaireName || 'Non renseigné'}`,
+    ctx.proprietairePhone ? `*Tél propriétaire :* ${ctx.proprietairePhone}` : null,
+    ctx.proprietaireEmail ? `*Email propriétaire :* ${ctx.proprietaireEmail}` : null,
+    '',
+    `📋 Valider l'annonce : ${baseUrl}/admin/validation`,
+  ]
+    .filter(Boolean)
+    .join('\n')
+
+  let sent = 0
+  let failed = 0
+  for (const phone of admins) {
+    const result = await send(phone, message)
+    if (result.success) sent++
+    else failed++
+    await logNotification(supabase, {
+      toPhone: phone,
+      role: 'admin',
+      template: 'bien_submitted_admin',
+      relatedType: null,
+      relatedId: ctx.id,
+      message,
+      payload: { ...ctx },
+      result,
+    })
+  }
+
+  return { sent, failed, total: admins.length }
+}
+

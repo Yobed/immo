@@ -103,12 +103,33 @@ export default async function AdminComptesPage({ searchParams }: PageProps) {
   const { data: rows } = await sel
   const profiles = (rows ?? []) as Profile[]
 
-  // Nombre de biens par compte
+  // Détail des biens par compte
+  interface UserBienSummary {
+    id: string
+    proprietaire_id: string | null
+    titre: string
+    type_bien: string | null
+    statut: string
+    commune: string | null
+    quartier: string | null
+    prix_mois_fcfa: number | null
+    prix_vente_fcfa: number | null
+    created_at: string
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: biensRaw } = await (supabase as any).from('biens').select('proprietaire_id')
-  const biensCount = new Map<string, number>()
-  for (const b of (biensRaw ?? []) as { proprietaire_id: string | null }[]) {
-    if (b.proprietaire_id) biensCount.set(b.proprietaire_id, (biensCount.get(b.proprietaire_id) ?? 0) + 1)
+  const { data: biensRaw } = await (supabase as any)
+    .from('biens')
+    .select('id, proprietaire_id, titre, type_bien, statut, commune, quartier, prix_mois_fcfa, prix_vente_fcfa, created_at')
+    .order('created_at', { ascending: false })
+
+  const biensByUser = new Map<string, UserBienSummary[]>()
+  for (const b of (biensRaw ?? []) as UserBienSummary[]) {
+    if (b.proprietaire_id) {
+      const list = biensByUser.get(b.proprietaire_id) || []
+      list.push(b)
+      biensByUser.set(b.proprietaire_id, list)
+    }
   }
 
   // Noms des agences rattachées
@@ -229,7 +250,13 @@ export default async function AdminComptesPage({ searchParams }: PageProps) {
         <div className="space-y-2">
           {profiles.map((p) => {
             const kyc = p.kyc_statut ? KYC_BADGE[p.kyc_statut] : null
-            const nBiens = biensCount.get(p.id) ?? 0
+            const userBiens = biensByUser.get(p.id) ?? []
+            const nBiens = userBiens.length
+            const nPublies = userBiens.filter((b) => b.statut === 'publie').length
+            const nEnAttente = userBiens.filter((b) => b.statut === 'en_attente').length
+            const nBrouillons = userBiens.filter((b) => b.statut === 'brouillon').length
+            const nRefuses = userBiens.filter((b) => b.statut === 'refuse').length
+
             const agence = p.agence_id ? agenceName.get(p.agence_id) : null
             const parrain = p.parrain_id ? parrainName.get(p.parrain_id) : null
             return (
@@ -258,8 +285,33 @@ export default async function AdminComptesPage({ searchParams }: PageProps) {
                     <p className="text-xs text-[var(--text-muted)] truncate mt-0.5">{[p.email, p.phone].filter(Boolean).join(' · ') || '—'}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-xs font-semibold text-[var(--text)]">{nBiens > 0 ? `${nBiens} bien${nBiens > 1 ? 's' : ''}` : 'Aucun bien'}</p>
-                    <p className="text-[11px] text-[var(--text-subtle)]">Inscrit le {fmtDate(p.created_at)}</p>
+                    {nBiens === 0 ? (
+                      <p className="text-xs font-semibold text-[var(--text-subtle)]">0 bien</p>
+                    ) : (
+                      <div className="flex flex-wrap items-center justify-end gap-1.5">
+                        {nPublies > 0 && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
+                            {nPublies} publié{nPublies > 1 ? 's' : ''}
+                          </span>
+                        )}
+                        {nEnAttente > 0 && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-700 border border-amber-500/20">
+                            {nEnAttente} à valider
+                          </span>
+                        )}
+                        {nBrouillons > 0 && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-500/10 text-slate-600 border border-slate-500/20">
+                            {nBrouillons} brouillon{nBrouillons > 1 ? 's' : ''}
+                          </span>
+                        )}
+                        {nRefuses > 0 && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-700 border border-red-500/20">
+                            {nRefuses} refusé{nRefuses > 1 ? 's' : ''}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    <p className="text-[11px] text-[var(--text-subtle)] mt-0.5">Inscrit le {fmtDate(p.created_at)}</p>
                   </div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-subtle)] group-open:hidden">Détails ▾</span>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-subtle)] hidden group-open:inline">Réduire ▴</span>
@@ -285,7 +337,18 @@ export default async function AdminComptesPage({ searchParams }: PageProps) {
                     </Field>
                     <Field icon={Building2} label="Agence">{agence || (p.agence_id ? p.agence_id : '—')}</Field>
                     <Field icon={BadgeCheck} label="Rôle dans l'agence">{p.agence_role}</Field>
-                    <Field icon={Home} label="Biens publiés">{nBiens}</Field>
+                    <Field icon={Home} label="Biens enregistrés">
+                      {nBiens > 0 ? (
+                        <span>
+                          <strong className="font-semibold">{nBiens}</strong> au total
+                          {nPublies > 0 ? ` · ${nPublies} pub.` : ''}
+                          {nEnAttente > 0 ? ` · ${nEnAttente} à valider` : ''}
+                          {nBrouillons > 0 ? ` · ${nBrouillons} brouillon` : ''}
+                        </span>
+                      ) : (
+                        '0 bien'
+                      )}
+                    </Field>
 
                     <Field icon={Gift} label="Code parrainage">{p.code_parrainage}</Field>
                     <Field icon={Gift} label="Parrainé par">{parrain || (p.parrain_id ? p.parrain_id : '—')}</Field>
@@ -295,6 +358,113 @@ export default async function AdminComptesPage({ searchParams }: PageProps) {
                     <Field icon={Calendar} label="Mis à jour le">{fmtDate(p.updated_at)}</Field>
                     <Field icon={Fingerprint} label="ID compte"><span className="font-mono text-xs">{p.id}</span></Field>
                   </div>
+
+                  {/* Section Biens du compte avec statut et raccourcis */}
+                  {userBiens.length > 0 && (
+                    <div className="mt-4 p-3.5 rounded-xl bg-[var(--surface-hover)] border border-[var(--border)]">
+                      <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+                        <p className="text-xs font-bold uppercase tracking-wider text-[var(--text)] inline-flex items-center gap-1.5">
+                          <Home className="w-3.5 h-3.5 text-[var(--accent-luxury)]" /> Biens de ce compte ({userBiens.length})
+                        </p>
+                        {nEnAttente > 0 && (
+                          <Link
+                            href="/admin/validation"
+                            className="text-xs font-bold text-amber-700 bg-amber-500/10 hover:bg-amber-500/20 px-2.5 py-1 rounded-md transition-colors inline-flex items-center gap-1"
+                          >
+                            ⚡ {nEnAttente} en attente → Aller valider
+                          </Link>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        {userBiens.map((b) => {
+                          const prix = b.prix_mois_fcfa
+                            ? `${b.prix_mois_fcfa.toLocaleString('fr-FR')} FCFA/mois`
+                            : b.prix_vente_fcfa
+                              ? `${b.prix_vente_fcfa.toLocaleString('fr-FR')} FCFA (vente)`
+                              : 'Prix non renseigné'
+                          const loc = [b.commune, b.quartier].filter(Boolean).join(' · ') || 'Localisation non précisée'
+
+                          const statutConfig: Record<string, { label: string; badge: string; hint?: string }> = {
+                            publie: {
+                              label: 'Publié en ligne',
+                              badge: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20',
+                            },
+                            en_attente: {
+                              label: 'En attente de validation',
+                              badge: 'bg-amber-500/10 text-amber-700 border-amber-500/20',
+                              hint: 'Le propriétaire a soumis l\'annonce. Elle attend votre validation pour être visible sur le catalogue.',
+                            },
+                            brouillon: {
+                              label: 'Brouillon non soumis',
+                              badge: 'bg-slate-500/10 text-slate-600 border-slate-500/20',
+                              hint: 'L\'utilisateur a démarré la création mais n\'a pas encore cliqué sur « Publier l\'annonce » (Step 5 Médias). L\'annonce reste privée tant qu\'elle n\'est pas soumise.',
+                            },
+                            refuse: {
+                              label: 'Refusé',
+                              badge: 'bg-red-500/10 text-red-700 border-red-500/20',
+                            },
+                            archive: {
+                              label: 'Archivé',
+                              badge: 'bg-gray-500/10 text-gray-600 border-gray-500/20',
+                            },
+                          }
+                          const cfg = statutConfig[b.statut] || { label: b.statut, badge: 'bg-slate-500/10 text-slate-600 border-slate-500/20' }
+
+                          return (
+                            <div
+                              key={b.id}
+                              className="p-3 bg-[var(--surface-card)] rounded-lg border border-[var(--border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                            >
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-bold text-[var(--text)] text-sm">{b.titre || 'Sans titre'}</span>
+                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${cfg.badge}`}>
+                                    {cfg.label}
+                                  </span>
+                                  {b.type_bien && (
+                                    <span className="text-[10px] text-[var(--text-subtle)] uppercase">({b.type_bien})</span>
+                                  )}
+                                </div>
+                                <p className="text-[var(--text-muted)] mt-1">
+                                  📍 {loc} • 💰 <span className="font-semibold text-[var(--text)]">{prix}</span>
+                                </p>
+                                {cfg.hint && (
+                                  <p className="text-[11px] text-amber-700/90 italic mt-1.5 bg-amber-500/5 px-2 py-1 rounded border border-amber-500/10">
+                                    ℹ️ {cfg.hint}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                                {b.statut === 'publie' ? (
+                                  <Link
+                                    href={`/biens/${b.id}`}
+                                    target="_blank"
+                                    className="px-2.5 py-1.5 rounded-md bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors"
+                                  >
+                                    Voir l&apos;annonce ↗
+                                  </Link>
+                                ) : b.statut === 'en_attente' ? (
+                                  <Link
+                                    href="/admin/validation"
+                                    className="px-2.5 py-1.5 rounded-md bg-amber-600 text-white font-medium hover:bg-amber-700 transition-colors"
+                                  >
+                                    Valider le bien
+                                  </Link>
+                                ) : (
+                                  <Link
+                                    href="/admin/moderation"
+                                    className="px-2.5 py-1.5 rounded-md border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-hover)] transition-colors"
+                                  >
+                                    Modération
+                                  </Link>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Vérification KYC — valider/rejeter directement (pièces via liens signés) */}
                   {(p.kyc_cni_url || p.kyc_selfie_url || p.kyc_statut === 'en_cours') && (

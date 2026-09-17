@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { extractBienFromWhatsApp } from '@/lib/extractors/whatsapp-bien-extractor'
 import { signMagicLinkToken } from '@/lib/auth/magic-link-token'
 import { wasenderSendMessage } from '@/lib/wasender'
+import { notifyAdminBienSubmitted } from '@/lib/notifications/whatsapp-notifier'
 import { v2 as cloudinary } from 'cloudinary'
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
 
@@ -380,6 +381,19 @@ async function processTallySubmission(args: {
   }
 
   await sendConfirmationWhatsApp(phone, bien.id, userId, bien.titre).catch(() => null)
+
+  notifyAdminBienSubmitted(admin, {
+    id: bien.id,
+    titre: bien.titre,
+    typeBien: extracted?.type_bien,
+    commune: extracted?.commune,
+    quartier: extracted?.quartier,
+    prix: extracted?.prix_mois_fcfa || extracted?.prix_nuit_fcfa || extracted?.prix_vente_fcfa,
+    proprietairePhone: phone,
+  }).catch((err) => {
+    // eslint-disable-next-line no-console
+    console.error('[tally-webhook] Failed to notify admin', err)
+  })
 
   console.log(
     `[tally-webhook] bien ${bien.id} créé — confiance ${extracted?.confidence ?? 0}, photos ${uploadedCount}/${imageUrls.length}`,
