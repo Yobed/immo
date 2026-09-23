@@ -28,28 +28,24 @@ const dateOf = (r: MinimalRow): number =>
 export async function cleanZombieN8nExecutions(): Promise<{ unblockedRunning: number; unblockedNew: number; purged: number }> {
   try {
     const admin = createLocauxAdminClient()
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60_000).toISOString()
     const tenMinutesAgo = new Date(Date.now() - 10 * 60_000).toISOString()
-    const fifteenMinutesAgo = new Date(Date.now() - 15 * 60_000).toISOString()
     const threeDaysAgo = new Date(Date.now() - 3 * 86_400_000).toISOString()
     const now = new Date().toISOString()
 
-    // 1. Débloquer les exécutions en 'running' mortes (> 10 min)
-    const { data: runningData } = await admin
+    // 1. Débloquer les exécutions en 'running' mortes (> 5 min)
+    const { count: unblockedRunning } = await admin
       .from('execution_entity')
-      .update({ status: 'error', finished: true, stoppedAt: now })
+      .update({ status: 'error', finished: true, stoppedAt: now }, { count: 'exact' })
       .eq('status', 'running')
-      .lt('startedAt', tenMinutesAgo)
-      .select('id')
-    const unblockedRunning = runningData?.length ?? 0
+      .lt('startedAt', fiveMinutesAgo)
 
-    // 2. Débloquer les exécutions empilées en 'new' orphelines (> 15 min)
-    const { data: newData } = await admin
+    // 2. Débloquer les exécutions empilées en 'new' ou unfinished orphelines (> 5 min)
+    const { count: unblockedNew } = await admin
       .from('execution_entity')
-      .update({ status: 'error', finished: true, stoppedAt: now })
-      .eq('status', 'new')
-      .lt('createdAt', fifteenMinutesAgo)
-      .select('id')
-    const unblockedNew = newData?.length ?? 0
+      .update({ status: 'error', finished: true, stoppedAt: now }, { count: 'exact' })
+      .eq('finished', false)
+      .lt('createdAt', fiveMinutesAgo)
 
     // 3. Purger les vieilles exécutions (> 3 jours) pour éviter la saturation du quota Postgres 500 Mo
     let purged = 0
@@ -64,10 +60,13 @@ export async function cleanZombieN8nExecutions(): Promise<{ unblockedRunning: nu
       /* purge best-effort */
     }
 
-    if (unblockedRunning > 0 || unblockedNew > 0 || purged > 0) {
-      console.log(`[n8n-watchdog] Unblocked: ${unblockedRunning} running, ${unblockedNew} new. Purged: ${purged} old records.`)
+    const rCount = unblockedRunning ?? 0
+    const nCount = unblockedNew ?? 0
+
+    if (rCount > 0 || nCount > 0 || purged > 0) {
+      console.log(`[n8n-watchdog] Unblocked: ${rCount} running, ${nCount} new. Purged: ${purged} old records.`)
     }
-    return { unblockedRunning, unblockedNew, purged }
+    return { unblockedRunning: rCount, unblockedNew: nCount, purged }
   } catch (err) {
     console.warn('[n8n-watchdog] Error in watchdog:', err)
     return { unblockedRunning: 0, unblockedNew: 0, purged: 0 }

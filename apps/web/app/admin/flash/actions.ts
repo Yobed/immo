@@ -74,3 +74,14 @@ export async function marquerDisponibleAction(formData: FormData): Promise<void>
   await (sb.from('locaux') as any).update({ disponible: 'oui' }).eq('id', Number(id))
   revalidatePath('/admin/flash')
 }
+
+/**
+ * Débloque la file n8n : purge les exécutions zombies ('running' > 5m et 'new' > 10m).
+ */
+export async function debloquerN8nAction(): Promise<void> {
+  await assertAdmin()
+  const { cleanZombieN8nExecutions } = await import('@/lib/locaux/dedup')
+  await cleanZombieN8nExecutions()
+  revalidatePath('/admin/flash')
+}
+

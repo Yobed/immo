@@ -5,6 +5,7 @@ import { locauxReadClients, byDatePubDesc } from '@/lib/supabase/locaux'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { retirerFlashAction, restaurerFlashAction, marquerOccupeAction, marquerDisponibleAction } from './actions'
 import { FlashPhotoButton } from './FlashPhotoButton'
+import { DebloquerN8nButton } from './DebloquerN8nButton'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -96,9 +97,12 @@ export default async function AdminFlashPage({ searchParams }: PageProps) {
     <main className="min-h-screen bg-[var(--surface-hover)]">
       <div className="bg-[var(--surface-card)] border-b border-[var(--border)]">
         <div className="max-w-[1400px] mx-auto px-6 py-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Flame className="w-5 h-5 text-orange-500" />
-            <h1 className="font-bold text-[var(--text)] text-lg leading-none">Offres flash</h1>
+          <div className="flex items-center justify-between gap-4 mb-3">
+            <div className="flex items-center gap-2">
+              <Flame className="w-5 h-5 text-orange-500" />
+              <h1 className="font-bold text-[var(--text)] text-lg leading-none">Offres flash</h1>
+            </div>
+            <DebloquerN8nButton />
           </div>
           <p className="text-[var(--text-muted)] text-xs mb-3">
             {showInactive ? 'Offres masquées (restaurables)' : 'Offres actives (non-doublons)'} — {total.toLocaleString('fr-FR')} au total, page {page + 1}/{totalPages || 1}.
