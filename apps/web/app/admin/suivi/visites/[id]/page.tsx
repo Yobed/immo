@@ -121,10 +121,20 @@ export default async function VisiteDetailPage({ params }: PageProps) {
           <Link href="/admin/suivi?tab=visites" className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text)] text-sm font-medium">
             <ArrowLeft className="w-4 h-4" /> Retour suivi
           </Link>
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-[var(--text)]" />
-            <span className="font-bold text-[var(--text)] text-sm">Visite #{id.slice(0, 8)}</span>
-            {adminBadge(visite.admin_validation_status)}
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <a
+              href={`/api/admin/visites/${id}/fiche`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-[var(--text)] text-[var(--surface-card)] hover:opacity-90 shadow-sm transition-opacity"
+            >
+              <FileText className="w-3.5 h-3.5" /> Fiche de visite (PDF)
+            </a>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-[var(--text)]" />
+              <span className="font-bold text-[var(--text)] text-sm">Visite #{id.slice(0, 8)}</span>
+              {adminBadge(visite.admin_validation_status)}
+            </div>
           </div>
         </div>
       </div>
@@ -245,6 +255,32 @@ export default async function VisiteDetailPage({ params }: PageProps) {
               )}
             </section>
           )}
+
+          {/* Bon de visite officiel (PDF) */}
+          <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-6">
+            <h2 className="text-xs font-bold uppercase tracking-wide text-[var(--text-subtle)] mb-2 flex items-center gap-2">
+              <FileText className="w-4 h-4" /> Bon de visite officiel (PDF)
+            </h2>
+            <p className="text-xs text-[var(--text-muted)] mb-4">
+              Document à faire émarger par le prospect lors de la visite sur le terrain (inclut la clause de non-contournement de 12 mois).
+            </p>
+            <div className="flex flex-wrap gap-2.5">
+              <a
+                href={`/api/admin/visites/${id}/fiche`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--text)] text-[var(--surface-card)] text-xs font-bold hover:opacity-90 transition-opacity"
+              >
+                <FileText className="w-4 h-4" /> Ouvrir &amp; Imprimer le PDF
+              </a>
+              <a
+                href={`/api/admin/visites/${id}/fiche?download=1`}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] text-xs font-bold text-[var(--text)] hover:bg-[var(--surface-hover)] transition-colors"
+              >
+                Télécharger le fichier PDF
+              </a>
+            </div>
+          </section>
 
           <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-6">
             <h2 className="text-xs font-bold uppercase tracking-wide text-[var(--text-subtle)] mb-3">Compte rendu de visite</h2>

@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
 import {
   ArrowLeft, Phone, MessageCircle, Home, Wallet, Calendar, Clock, MapPin,
-  CalendarClock, UserCheck, StickyNote, ExternalLink, Flame, ShieldCheck,
+  CalendarClock, UserCheck, StickyNote, ExternalLink, Flame, ShieldCheck, FileText,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -135,10 +135,24 @@ export default async function ProspectDetailPage({ params }: PageProps) {
               <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" />{p.message_count} msg</span>
             </p>
           </div>
-          <a href={whatsappLink(p.phone) ?? '#'} target="_blank" rel="noopener noreferrer"
-            className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-bold">
-            <MessageCircle className="w-4 h-4" /> Contacter
-          </a>
+          <div className="flex items-center gap-2 shrink-0 flex-wrap">
+            <a
+              href={`/api/admin/prospects/${p.id}/fiche-visite`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[var(--text)] hover:opacity-90 text-[var(--surface-card)] rounded-xl text-sm font-bold shadow-sm transition-opacity"
+            >
+              <FileText className="w-4 h-4" /> Fiche de visite (PDF)
+            </a>
+            <a
+              href={whatsappLink(p.phone) ?? '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-bold"
+            >
+              <MessageCircle className="w-4 h-4" /> Contacter
+            </a>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr,340px] gap-5">
