@@ -91,10 +91,13 @@ export default async function ProspectDetailPage({ params }: PageProps) {
   let matches: Awaited<ReturnType<typeof getConsolidatedCatalogue>>['items'] = []
   if (p.commune || p.type_bien) {
     try {
+      const inferredOffre =
+        p.budget && p.budget <= 5_000_000 && p.type_bien !== 'terrain' ? 'location' : undefined
       const { items } = await getConsolidatedCatalogue({
         commune: p.commune ?? undefined,
         type_bien: p.type_bien ?? undefined,
-        prix_max: p.budget ? p.budget * 2 : undefined,
+        type_offre: inferredOffre,
+        prix_max: p.budget ? Math.round(p.budget * 1.15) : undefined,
         sort: 'verified_first',
         limitPerSource: 4,
       })

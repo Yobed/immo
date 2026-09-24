@@ -91,6 +91,15 @@ export interface ConsolidatedFilters {
 
 const DEFAULT_LIMIT = 30
 
+function isPeripherieCommune(commune?: string | null): boolean {
+  if (!commune) return false
+  const c = commune.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  return c.includes('peripherie') || c.includes('alentour')
+}
+
+const PERIPHERIE_OR_CLAUSE =
+  'commune.ilike.%bingerville%,commune.ilike.%bassam%,commune.ilike.%songon%,commune.ilike.%anyama%'
+
 // ─── BOGBE'S ────────────────────────────────────────────────────────────────
 
 async function fetchBogbes(filters: ConsolidatedFilters): Promise<ConsolidatedBien[]> {
@@ -112,7 +121,11 @@ async function fetchBogbes(filters: ConsolidatedFilters): Promise<ConsolidatedBi
     .limit(6, { foreignTable: 'biens_medias' })
     .limit(filters.limitPerSource ?? DEFAULT_LIMIT)
 
-  if (filters.commune) q = q.ilike('commune', `%${filters.commune}%`)
+  if (filters.commune) {
+    q = isPeripherieCommune(filters.commune)
+      ? q.or(PERIPHERIE_OR_CLAUSE)
+      : q.ilike('commune', `%${filters.commune}%`)
+  }
   if (filters.type_bien) q = q.eq('type_bien', filters.type_bien)
   if (filters.type_offre === 'vente') {
     // Exige un prix_vente_fcfa renseigné
@@ -234,7 +247,11 @@ async function fetchLocaux(filters: ConsolidatedFilters): Promise<ConsolidatedBi
       // Marge 10x pour compenser les filtres JS post-mapping (prix, disponible)
       .limit(Math.max(500, (filters.limitPerSource ?? DEFAULT_LIMIT) * 10))
 
-    if (filters.commune) q = q.ilike('commune', `%${filters.commune}%`)
+    if (filters.commune) {
+      q = isPeripherieCommune(filters.commune)
+        ? q.or(PERIPHERIE_OR_CLAUSE)
+        : q.ilike('commune', `%${filters.commune}%`)
+    }
     if (filters.type_bien) q = q.ilike('type_de_bien', `%${filters.type_bien}%`)
     // ⚠️ `type_offre` est stocké en variantes par le scraper WhatsApp :
     // 'vente', 'Vente', 'à vendre', 'achat', 'location', 'à louer', etc.
@@ -411,7 +428,11 @@ function applyAnnonceFilters(q: any, filters: ConsolidatedFilters): any {
   // (coinafrique) passent : leur age est inconnu mais elles etaient encore en ligne
   // au moment du scrape. Depend de v_annonces.publie_le (cf. scripts/sql/).
   q = q.or(`publie_le.is.null,publie_le.gte.${seuilFraicheur()}`)
-  if (filters.commune) q = q.ilike('commune', `%${filters.commune}%`)
+  if (filters.commune) {
+    q = isPeripherieCommune(filters.commune)
+      ? q.or(PERIPHERIE_OR_CLAUSE)
+      : q.ilike('commune', `%${filters.commune}%`)
+  }
   if (filters.type_bien) {
     const motif = TYPE_MOTIF[filters.type_bien] ?? filters.type_bien
     q = q.ilike('type_bien', `%${motif}%`)

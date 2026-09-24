@@ -224,6 +224,16 @@ export async function getAIBienContext(
     }
   }
 
+  // 2b. Périphérie / alentours d'Abidjan
+  if (
+    /(aux?\s+)?alentours?\s+(d['’]|de\s+)?abidjan|autour\s+d['’]abidjan|peripherie/i.test(msgNorm) ||
+    (p.commune && norm(p.commune).includes('peripherie'))
+  ) {
+    for (const periph of ['bingerville', 'bassam', 'grand-bassam', 'songon', 'anyama']) {
+      if (!zoneTerms.includes(periph)) zoneTerms.push(periph)
+    }
+  }
+
   // 3. Fallback sur p.commune si le scan direct n'a rien donné
   if (p.commune && zoneTerms.length === 0) {
     const normCommune = norm(p.commune)
@@ -247,7 +257,12 @@ export async function getAIBienContext(
   // une commune unique au niveau SQL : on interroge le catalogue et on filtre en mémoire.
   const allKnownCommunesNorm = COMMUNES_CI.map((c) => norm(c === 'Bassam (Grand-Bassam)' ? 'bassam' : c))
   const distinctCommunesInTerms = allKnownCommunesNorm.filter((c) => zoneTerms.includes(c))
-  const singleCommuneFilter = distinctCommunesInTerms.length === 1 ? (p.commune || distinctCommunesInTerms[0]) : undefined
+  const isPeripherieOnly = !!(p.commune && norm(p.commune).includes('peripherie'))
+  const singleCommuneFilter = isPeripherieOnly
+    ? p.commune
+    : distinctCommunesInTerms.length === 1
+      ? (p.commune || distinctCommunesInTerms[0])
+      : undefined
 
   // ─── Unique appel au catalogue consolidé ────────────────────────────────────
   const { items, counts } = await getConsolidatedCatalogue({

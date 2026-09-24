@@ -725,7 +725,11 @@ export async function POST(req: NextRequest) {
         }
 
         // Envoi de la relance unique ciblée sur les critères manquants (Règle 2)
-        const personalized = buildQualifReminder(qual.missing);
+        const personalized = buildQualifReminder(qual.missing, {
+          propertyType: qual.propertyType,
+          zone: qual.zone,
+          budget: qual.budget,
+        });
         await sendFixed(personalized, 'qualif_reminder');
         return NextResponse.json({ status: 'ok', branch: 'qualif_reminder' });
       }

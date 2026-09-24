@@ -17,6 +17,9 @@ export const QUARTIERS_ZONE = [
 
 export function detectQuartierZone(text: string): string | null {
   const t = text.toLowerCase()
+  if (/(aux?\s+)?alentours?\s+(d['’]|de\s+)?abidjan|autour\s+d['’]abidjan|p[ée]riph[ée]rie(\s+d['’]abidjan)?/i.test(t)) {
+    return "Périphérie d'Abidjan"
+  }
   for (const q of QUARTIERS_ZONE) {
     if (t.includes(q)) return q.charAt(0).toUpperCase() + q.slice(1)
   }
@@ -27,10 +30,19 @@ export function detectQuartierZone(text: string): string | null {
 export const FRESH_SEARCH_RE =
   /\b(un(e)?\s+autre\s+(bien|villa|appartement|maison|studio|terrain|recherche)|autre\s+chose|nouvelle\s+recherche|je\s+recommence|reprendre\s+[àa]\s+z[ée]ro|je\s+cherche\s+autre|change[rz]?\s+de\s+recherche)\b/i
 
-export function detectTransaction(text: string): 'location' | 'achat' | null {
+export function detectTransaction(
+  text: string,
+  budget?: number | null,
+  propertyType?: string | null,
+): 'location' | 'achat' | null {
   const t = text.toLowerCase()
-  if (/\b(louer|location|[àa]\s+lou[ée]r?|en\s+location|loyer|bail|lou[ée])\b/.test(t)) return 'location'
-  if (/\b(acheter|achat|[àa]\s+vendre|vente|acqu[ée]rir|acquisition)\b/.test(t)) return 'achat'
+  if (/\b(louer|location|en\s+location|loyer|bail|lou[ée])\b|[àa]\s+lou[ée]r?/.test(t)) return 'location'
+  if (/\b(acheter|achat|vente|acqu[ée]rir|acquisition)\b|[àa]\s+vendre/.test(t)) return 'achat'
+  // En Côte d'Ivoire, un budget <= 5 000 000 FCFA pour une maison/villa/appartement sans mention d'achat
+  // correspond à un loyer mensuel et non à une acquisition immobilière (qui démarre à 15-20M+).
+  if (budget != null && budget > 0 && budget <= 5_000_000 && propertyType !== 'terrain') {
+    return 'location'
+  }
   return null
 }
 
@@ -94,7 +106,7 @@ export function qualify(
     : (pMsg.commune || detectQuartierZone(message) || pAll.commune || detectQuartierZone(combined) || null)
   const budgetStr = isFresh ? pMsg.prix_max : (pMsg.prix_max || pAll.prix_max)
   const budget = budgetStr ? parseInt(budgetStr, 10) : null
-  const transaction = detectTransaction(isFresh ? message : combined)
+  const transaction = detectTransaction(isFresh ? message : combined, budget, propertyType)
 
   const missing: ('type' | 'zone' | 'budget')[] = []
   if (!propertyType) missing.push('type')
@@ -126,12 +138,25 @@ Votre futur bien est peut-être déjà disponible ! 🔑`
 export const QUALIF_REMINDER_MARKER = /proposer les biens les plus adapt[ée]s/i
 
 /** Règle 2 : Relance unique ciblée sur les éléments manquants */
-export function buildQualifReminder(missing: ('type' | 'zone' | 'budget')[]): string {
+export function buildQualifReminder(
+  missing: ('type' | 'zone' | 'budget')[],
+  known?: { propertyType?: string | null; zone?: string | null; budget?: number | null },
+): string {
+  const acknowledgments: string[] = []
+  if (known?.propertyType) acknowledgments.push(`votre recherche de **${known.propertyType}**`)
+  if (known?.zone) acknowledgments.push(`dans le secteur de **${known.zone}**`)
+  if (known?.budget) acknowledgments.push(`avec un budget d'environ **${known.budget.toLocaleString('fr-FR')} FCFA**`)
+
+  let intro = ''
+  if (acknowledgments.length > 0) {
+    intro = `C'est bien noté pour ${acknowledgments.join(', ')} ! 🙏\n\n`
+  }
+
   const items: string[] = []
   if (missing.includes('type')) items.push('🔹 Quel type de bien souhaitez-vous ? (appartement, villa, studio, terrain...)')
   if (missing.includes('zone')) items.push('🔹 Dans quelle zone recherchez-vous ? (commune ou quartier)')
   if (missing.includes('budget')) items.push('🔹 Quel est votre budget maximum ?')
-  return `Pour que je puisse vous proposer les biens les plus adaptés, merci de m'indiquer également :\n\n${items.join('\n')}`
+  return `${intro}Pour que je puisse vous proposer les biens les plus adaptés, merci de m'indiquer également :\n\n${items.join('\n')}`
 }
 
 /** Message de relance par défaut (si les 3 critères manquent) */

@@ -39,6 +39,15 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
     'triplex': 'villa',
     'penthouse': 'appartement',
     'loft': 'appartement',
+    'grande cour': 'villa',
+    'avec cour': 'villa',
+    'cour avant': 'villa',
+    'cour arrière': 'villa',
+    'cour arriere': 'villa',
+    'villa basse': 'villa',
+    'entrée couchée': 'studio',
+    'entree couchee': 'studio',
+    'chambre salon': 'appartement',
   }
   for (const [alias, mapped] of Object.entries(TYPE_ALIASES)) {
     if (lower.includes(alias) && !result.type_bien) {
@@ -69,6 +78,13 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
   }
 
   // 2. Communes
+  // Détection des zones périphériques d'Abidjan (Bingerville, Bassam, Songon, Anyama)
+  const peripherieMatch = lower.match(/\b(aux?\s+alentours?\s+(?:d['’]|de\s+)?abidjan|autour\s+d['’]abidjan|p[ée]riph[ée]rie(?:\s+d['’]abidjan)?|hors\s+abidjan|banlieue(?:\s+d['’]abidjan)?)\b/i)
+  if (peripherieMatch) {
+    result.commune = "Périphérie d'Abidjan"
+    lower = lower.replace(peripherieMatch[0], '')
+  }
+
   // We match the last found to handle corrections like "marcory... non cocody" in voice, 
   // or just first found if we want. Let's just find all and pick the first or last.
   const communes = [...COMMUNES_CI]
@@ -146,13 +162,26 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
   // (Le séparateur ESPACE est déjà géré par le matcher générique ci-dessous.)
   lower = lower.replace(/\b\d{1,3}(?:\.\d{3})+\b/g, (m) => m.replace(/\./g, ''))
 
+  // 4a. Montant isolé (ex: "250", "250 max", "250k", "250 mille")
+  // En Côte d'Ivoire dans une recherche immo, un nombre isolé entre 20 et 999
+  // représente toujours des milliers de FCFA (250 = 250 000).
+  const standaloneMatch = lower.trim().match(/^(\d{2,3})(?:\s*(?:k|mil(?:le)?s?|f|fcfa|frs?|francs?|max(?:imum)?))?$/i)
+  if (standaloneMatch) {
+    const n = parseInt(standaloneMatch[1], 10)
+    if (n >= 15 && n < 1000) {
+      priceVals.push(n * 1000)
+      lower = ''
+    }
+  }
+
   // Petits montants en « milliers » implicites (usage ivoirien) : un nombre
-  // collé à un mot-budget ("budget max 250", "loyer 50") ou suivi de f/fcfa
+  // collé à un mot-budget ("budget max 250", "loyer 50", "dans les 250", "250 max") ou suivi de f/fcfa
   // ("250 f") = milliers → "250" = 250 000. Le garde n>=10 évite les faux
   // positifs "3 pièces", "9e tranche", "4 chambres".
   const smallBudget = [
-    ...lower.matchAll(/\b(?:budget|loyer|prix|max(?:imum)?|autour de|environ)\s*:?\s*(\d+)\b/gi),
-    ...lower.matchAll(/\b(\d+)\s*(?:f|fcfa|francs?)\b/gi),
+    ...lower.matchAll(/\b(?:budget|loyer|prix|max(?:imum)?|autour de|environ|vers|dans les|c['’]est)\s*:?\s*(\d{2,3})\b(?!\s*(?:pi[eè]ces?|chambres?|m2|m²|lots?|hectares?|mois|tranches?))/gi),
+    ...lower.matchAll(/\b(\d{2,3})\s*(?:f|fcfa|francs?|frs?)\b/gi),
+    ...lower.matchAll(/\b(\d{2,3})\s*(?:max|maximum)\b/gi),
   ]
   for (const m of smallBudget) {
     const n = parseInt(m[1], 10)
