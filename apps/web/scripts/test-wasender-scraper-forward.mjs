@@ -39,4 +39,22 @@ assert.equal(
   null,
 )
 
+// Chatter vs Real Estate Listing tests:
+assert.equal(
+  shouldForwardGroupMessageToScraper('messages-group.received', '120363287041460977@g.us', false, 'Bonjour la famille, qui a des nouvelles ?'),
+  false,
+)
+assert.equal(
+  shouldForwardGroupMessageToScraper('messages-group.received', '120363287041460977@g.us', false, 'Amen merci 🙏'),
+  false,
+)
+assert.equal(
+  shouldForwardGroupMessageToScraper('messages-group.received', '120363287041460977@g.us', false, 'Villa duplex 4 pièces à louer à Angré 350.000 FCFA caution 2 mois'),
+  true,
+)
+assert.equal(
+  shouldForwardGroupMessageToScraper('messages-group.received', '120363287041460977@g.us', false, 'Terrain 500m2 avec ACD à Bingerville à vendre'),
+  true,
+)
+
 console.log('Wasender group scraper forwarding policy: OK')

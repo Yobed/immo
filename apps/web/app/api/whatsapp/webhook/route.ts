@@ -433,7 +433,7 @@ export async function POST(req: NextRequest) {
     // sender as if they were a prospect.
     const isGroup = typeof jid === 'string' && jid.endsWith('@g.us');
     if (isGroup) {
-      if (shouldForwardGroupMessageToScraper(normalizedEvent, jid, msg.key?.fromMe)) {
+      if (shouldForwardGroupMessageToScraper(normalizedEvent, jid, msg.key?.fromMe, userMessage)) {
         const scraperUrl = getN8nScraperWebhookUrl(process.env.N8N_SCRAPER_WEBHOOK_URL);
         if (!scraperUrl) {
           console.error('[group-scraper] N8N_SCRAPER_WEBHOOK_URL is missing or invalid');
