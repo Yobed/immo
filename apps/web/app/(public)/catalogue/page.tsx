@@ -7,7 +7,7 @@ import { QuickFilters } from '@/components/search/QuickFilters'
 import { UnifiedBienCard } from '@/components/catalogue/UnifiedBienCard'
 import { UnifiedBienListCard } from '@/components/catalogue/UnifiedBienListCard'
 import { Pagination } from '@/components/ui/Pagination'
-import { getConsolidatedCatalogue, getLocauxPagedItems, getLocauxCount, getAnnoncesPagedItems, getAnnoncesCountStatus, getCatalogueCommunes, type ConsolidatedFilters } from '@/lib/catalogue/consolidated'
+import { getConsolidatedCatalogue, getBogbesCount, getLocauxPagedItems, getLocauxCount, getAnnoncesPagedItems, getAnnoncesCountStatus, getCatalogueCommunes, type ConsolidatedFilters } from '@/lib/catalogue/consolidated'
 import { getViewCounts7d } from '@/lib/analytics/view-counts'
 import { getDictionary } from '@/lib/i18n/server'
 import { formatCount } from '@/lib/format'
@@ -89,28 +89,43 @@ export default async function CataloguePage({ searchParams }: PageProps) {
   let totalPages = 0
 
   if (sourceFilter === 'flash') {
-    const [{ items: flashItems, total: flashTotal }, communes_] = await Promise.all([
+    const [{ items: flashItems, total: flashTotal }, communes_, bogbesCount, webStatus] = await Promise.all([
       getLocauxPagedItems(filters, pageIdx, PAGE_SIZE),
       getCatalogueCommunes('flash'),
+      getBogbesCount(filters),
+      getAnnoncesCountStatus(filters),
     ])
+    const webTotal = webStatus.count
     items = flashItems
     paginated = flashItems
     total = flashTotal
     displayTotal = flashTotal
     totalPages = Math.ceil(flashTotal / PAGE_SIZE)
-    counts = { bogbes: 0, flash: flashTotal, web: 0, total: flashTotal }
+    counts = {
+      bogbes: bogbesCount,
+      flash: flashTotal,
+      web: webTotal,
+      total: bogbesCount + flashTotal + webTotal,
+    }
     var communes = communes_
   } else if (sourceFilter === 'web') {
-    const [{ items: webItems, total: webTotal, unavailable }, communes_] = await Promise.all([
+    const [{ items: webItems, total: webTotal, unavailable }, communes_, bogbesCount, flashTotal] = await Promise.all([
       getAnnoncesPagedItems(filters, pageIdx, PAGE_SIZE),
       getCatalogueCommunes('web'),
+      getBogbesCount(filters),
+      getLocauxCount(filters),
     ])
     items = webItems
     paginated = webItems
     total = webTotal
     displayTotal = webTotal
     totalPages = Math.ceil(webTotal / PAGE_SIZE)
-    counts = { bogbes: 0, flash: 0, web: webTotal, total: webTotal }
+    counts = {
+      bogbes: bogbesCount,
+      flash: flashTotal,
+      web: webTotal,
+      total: bogbesCount + flashTotal + webTotal,
+    }
     sourceUnavailable = unavailable
     var communes = communes_
   } else {
@@ -130,7 +145,7 @@ export default async function CataloguePage({ searchParams }: PageProps) {
       total: catalogue.counts.bogbes + flashTotal + webTotal,
     }
     total = catalogue.items.length
-    displayTotal = counts.total
+    displayTotal = sourceFilter === 'bogbes' ? catalogue.counts.bogbes : counts.total
     paginated = catalogue.items.slice(pageIdx * PAGE_SIZE, (pageIdx + 1) * PAGE_SIZE)
     totalPages = Math.ceil(total / PAGE_SIZE)
     var communes = communes_

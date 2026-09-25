@@ -98,7 +98,7 @@ function isPeripherieCommune(commune?: string | null): boolean {
 }
 
 const PERIPHERIE_OR_CLAUSE =
-  'commune.ilike.%bingerville%,commune.ilike.%bassam%,commune.ilike.%songon%,commune.ilike.%anyama%'
+  'commune.ilike.%bingerville%,commune.ilike.%bassam%,commune.ilike.%bonoua%,commune.ilike.%assinie%,commune.ilike.%songon%,commune.ilike.%anyama%,commune.ilike.%dabou%,commune.ilike.%jacqueville%,commune.ilike.%azaguie%,commune.ilike.%alepe%'
 
 // ─── BOGBE'S ────────────────────────────────────────────────────────────────
 
@@ -243,9 +243,9 @@ async function fetchLocaux(filters: ConsolidatedFilters): Promise<ConsolidatedBi
       // Le tri/filtrage fin est fait en JS via isStillActive (voir mapper.ts).
       .not('status', 'eq', 'inactive')
       .not('is_duplicate', 'is', true)
+      .or('disponible.is.null,disponible.neq.non')
       .order('date_publication', { ascending: false })
-      // Marge 10x pour compenser les filtres JS post-mapping (prix, disponible)
-      .limit(Math.max(500, (filters.limitPerSource ?? DEFAULT_LIMIT) * 10))
+      .limit(Math.min(500, Math.max(120, (filters.limitPerSource ?? DEFAULT_LIMIT) * 2)))
 
     if (filters.commune) {
       q = isPeripherieCommune(filters.commune)
@@ -795,7 +795,7 @@ export async function getCatalogueCommunes(
             .from('biens')
             .select('commune')
             .in('statut', [...STATUTS_PUBLICS])
-            .limit(5000)
+            .limit(1000)
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           for (const r of (data ?? []) as any[]) add(r.commune)
         } catch {
@@ -816,7 +816,7 @@ export async function getCatalogueCommunes(
               .select('commune')
               .not('status', 'eq', 'inactive')
               .not('is_duplicate', 'is', true)
-              .limit(5000)
+              .limit(1000)
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             for (const r of (data ?? []) as any[]) add(r.commune)
           } catch {
@@ -836,7 +836,7 @@ export async function getCatalogueCommunes(
             .from('v_annonces')
             .select('commune')
             .gt('nb_photos', 0)
-            .limit(5000)
+            .limit(1000)
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           for (const r of (data ?? []) as any[]) add(r.commune)
         } catch {
@@ -870,9 +870,6 @@ export async function getLocauxPagedItems(
     const from = pageIdx * pageSize
     const to = from + pageSize - 1
 
-    // ponytail: over-fetch 0..to sur chaque projet puis merge-tri-slice —
-    // simple et correct ; à optimiser (curseurs) si la pagination profonde
-    // devient un vrai usage.
     const runOn = async (sb: SupabaseClient): Promise<{ rows: LocauxRow[]; count: number }> => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let q = (sb as any)
@@ -911,14 +908,12 @@ export async function getLocauxPagedItems(
       return { rows: data as LocauxRow[], count: count ?? 0 }
     }
 
-    // Lecture publique : les deux projets restants sont lus avec leurs clients anon.
-    // Les clients service_role sont réservés aux écritures admin ; les utiliser
-    // ici rendait FRESH silencieusement vide dès que la variable serveur manquait.
-    const [fresh, legacy] = await Promise.all([
-      runOn(createLocauxClient()).catch(() => ({ rows: [] as LocauxRow[], count: 0 })),
-      runOn(createLocauxLegacyClient()).catch(() => ({ rows: [] as LocauxRow[], count: 0 })),
-    ])
-    const merged = [...fresh.rows, ...legacy.rows].sort(byDatePubDesc).slice(from, to + 1)
+    // Lecture publique sur tous les projets locaux actifs (FRESH, MID, OLD)
+    const parts = await Promise.all(
+      locauxReadClients().map((sb) => runOn(sb).catch(() => ({ rows: [] as LocauxRow[], count: 0 }))),
+    )
+    const merged = parts.flatMap((p) => p.rows).sort(byDatePubDesc).slice(from, to + 1)
+    const totalCount = parts.reduce((acc, p) => acc + p.count, 0)
 
     const items: ConsolidatedBien[] = merged.map((row) => {
       const b = mapLocauxRow(row)
@@ -963,9 +958,59 @@ export async function getLocauxPagedItems(
       }
     })
 
-    return { items, total: fresh.count + legacy.count }
+    return { items, total: totalCount }
   } catch {
     return { items: [], total: 0 }
+  }
+}
+
+/** Retourne uniquement le nombre total de biens BOGBE'S actifs correspondant aux filtres. */
+export async function getBogbesCount(filters: ConsolidatedFilters): Promise<number> {
+  try {
+    const supabase = await createClient()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let q = (supabase as any)
+      .from('biens')
+      .select('id', { count: 'exact', head: true })
+      .in('statut', [...STATUTS_PUBLICS])
+
+    if (filters.commune) {
+      q = isPeripherieCommune(filters.commune)
+        ? q.or(PERIPHERIE_OR_CLAUSE)
+        : q.ilike('commune', `%${filters.commune}%`)
+    }
+    if (filters.type_bien) q = q.eq('type_bien', filters.type_bien)
+    if (filters.type_offre === 'vente') {
+      q = q.not('prix_vente_fcfa', 'is', null)
+    } else if (filters.type_offre === 'location') {
+      q = q.or('prix_mois_fcfa.not.is.null,prix_nuit_fcfa.not.is.null')
+    }
+    if (filters.q?.trim()) {
+      q = q.textSearch('fts', filters.q.trim(), { type: 'plain', config: 'french' })
+    }
+    if (filters.equipements && filters.equipements.length > 0) {
+      q = q.contains('equipements', filters.equipements)
+    }
+    if (filters.prix_min != null && filters.prix_max != null) {
+      q = q.or(
+        `and(prix_mois_fcfa.gte.${filters.prix_min},prix_mois_fcfa.lte.${filters.prix_max}),` +
+          `and(prix_nuit_fcfa.gte.${filters.prix_min},prix_nuit_fcfa.lte.${filters.prix_max}),` +
+          `and(prix_vente_fcfa.gte.${filters.prix_min},prix_vente_fcfa.lte.${filters.prix_max})`,
+      )
+    } else if (filters.prix_min != null) {
+      q = q.or(
+        `prix_mois_fcfa.gte.${filters.prix_min},prix_nuit_fcfa.gte.${filters.prix_min},prix_vente_fcfa.gte.${filters.prix_min}`,
+      )
+    } else if (filters.prix_max != null) {
+      q = q.or(
+        `prix_mois_fcfa.lte.${filters.prix_max},prix_nuit_fcfa.lte.${filters.prix_max},prix_vente_fcfa.lte.${filters.prix_max}`,
+      )
+    }
+
+    const { count, error } = await q
+    return error ? 0 : (count ?? 0)
+  } catch {
+    return 0
   }
 }
 

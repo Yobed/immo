@@ -1,6 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createAnnoncesClient } from '@/lib/supabase/annonces'
-import { createLocauxClient } from '@/lib/supabase/locaux'
+import { locauxReadClients } from '@/lib/supabase/locaux'
 
 export interface HealthSnapshot {
   status: 'ok' | 'degraded'
@@ -17,7 +17,7 @@ export interface HealthSnapshot {
  * Vérifie la disponibilité de TOUTES les dépendances critiques :
  * 1. Base CRM principale (profiles, prospects, biens)
  * 2. Base catalogue web (v_annonces)
- * 3. Base d'ingestion FRESH WhatsApp (locaux)
+ * 3. Bases d'ingestion WhatsApp (locaux)
  * 4. Moteur de scraping n8n (/healthz)
  */
 export async function getHealthSnapshot(): Promise<HealthSnapshot> {
@@ -37,12 +37,19 @@ export async function getHealthSnapshot(): Promise<HealthSnapshot> {
         .gt('nb_photos', 0)
       if (error) throw error
     })(),
-    // 3. Supabase FRESH (Offres flash WhatsApp)
+    // 3. Supabase Locaux (Offres flash WhatsApp : au moins 1 base active)
     (async () => {
-      const { error } = await (createLocauxClient() as any)
-        .from('locaux')
-        .select('id', { head: true, count: 'exact' })
-      if (error) throw error
+      const results = await Promise.allSettled(
+        locauxReadClients().map(async (sb) => {
+          const { error } = await (sb as any)
+            .from('locaux')
+            .select('id', { head: true, count: 'exact' })
+          if (error) throw error
+        }),
+      )
+      if (!results.some((r) => r.status === 'fulfilled')) {
+        throw new Error('All locaux databases unreachable')
+      }
     })(),
     // 4. Moteur n8n (Hugging Face)
     (async () => {
