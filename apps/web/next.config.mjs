@@ -6,6 +6,12 @@ const nextConfig = {
   // crashe a la premiere requete.
   // Next 15 : `serverComponentsExternalPackages` (experimental) → `serverExternalPackages` (stable).
   serverExternalPackages: ['@react-pdf/renderer'],
+  outputFileTracingIncludes: {
+    '/api/**': [
+      './node_modules/pdfkit/js/standard-fonts/**/*',
+      '../../node_modules/pdfkit/js/standard-fonts/**/*',
+    ],
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'res.cloudinary.com' },
