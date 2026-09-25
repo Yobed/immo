@@ -157,7 +157,7 @@ async function fetchBogbes(filters: ConsolidatedFilters): Promise<ConsolidatedBi
     )
   }
 
-  q = q.order('is_verifie', { ascending: false }).order('score_ia', { ascending: false, nullsFirst: false }).order('created_at', { ascending: false })
+  q = q.order('created_at', { ascending: false })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await q
@@ -686,11 +686,31 @@ function hasPhoto(b: ConsolidatedBien): number {
   return b.photo_url ? 0 : 1
 }
 
+const ONE_MONTH_MS = 30 * 24 * 60 * 60 * 1000
+
+/**
+ * 0 = bien publié il y a moins d'un mois (30 jours).
+ * Permet d'afficher en priorité absolue les biens récents, quel que soit le canal.
+ */
+export function isUnderOneMonth(dateIso?: string | null): boolean {
+  if (!dateIso) return false
+  const t = new Date(dateIso).getTime()
+  if (isNaN(t)) return false
+  return Date.now() - t <= ONE_MONTH_MS
+}
+
 function sortConsolidated(items: ConsolidatedBien[], sort: ConsolidatedFilters['sort']): ConsolidatedBien[] {
   const arr = items.slice()
   switch (sort) {
     case 'recent':
-      arr.sort((a, b) => new Date(b.date_publication).getTime() - new Date(a.date_publication).getTime())
+      arr.sort((a, b) => {
+        // 1) Moins d'un mois en priorité absolue (< 30 jours)
+        const aMonth = isUnderOneMonth(a.date_publication) ? 0 : 1
+        const bMonth = isUnderOneMonth(b.date_publication) ? 0 : 1
+        if (aMonth !== bMonth) return aMonth - bMonth
+        // 2) Plus récent en premier
+        return new Date(b.date_publication).getTime() - new Date(a.date_publication).getTime()
+      })
       break
     case 'price_asc':
       arr.sort((a, b) => (a.prix_value ?? Number.POSITIVE_INFINITY) - (b.prix_value ?? Number.POSITIVE_INFINITY))
@@ -701,16 +721,23 @@ function sortConsolidated(items: ConsolidatedBien[], sort: ConsolidatedFilters['
     case 'verified_first':
     default:
       arr.sort((a, b) => {
+        // 1) Règle d'or : biens récents de moins d'un mois (< 30 jours) EN PRIORITÉ
+        const aMonth = isUnderOneMonth(a.date_publication) ? 0 : 1
+        const bMonth = isUnderOneMonth(b.date_publication) ? 0 : 1
+        if (aMonth !== bMonth) return aMonth - bMonth
+
+        // 2) Au sein de la même fenêtre (tous deux < 1 mois ou tous deux > 1 mois) :
+        // Biens vérifiés BOGBE'S en avant
         if (a.is_verifie && !b.is_verifie) return -1
         if (!a.is_verifie && b.is_verifie) return 1
-        // ⚠️ Ordre AVANT la date : les annonces web portent toutes la date de
-        // leur import (même journée) et écraseraient sinon toute la 1re page.
-        // 1) notre catalogue passe devant les sources externes ;
-        // 2) entre sources externes, celles qui ont une photo d'abord — c'est
-        //    précisément ce que le prospect réclame, et beaucoup d'offres flash
-        //    WhatsApp n'en ont aucune.
-        if (isNotre(a) !== isNotre(b)) return isNotre(a) - isNotre(b)
+
+        // 3) Biens avec photo d'abord
         if (hasPhoto(a) !== hasPhoto(b)) return hasPhoto(a) - hasPhoto(b)
+
+        // 4) Biens BOGBE'S en avant
+        if (isNotre(a) !== isNotre(b)) return isNotre(a) - isNotre(b)
+
+        // 5) Date la plus récente d'abord (du plus récent au plus ancien)
         return new Date(b.date_publication).getTime() - new Date(a.date_publication).getTime()
       })
   }
