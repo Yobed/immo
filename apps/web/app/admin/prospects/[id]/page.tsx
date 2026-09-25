@@ -91,10 +91,23 @@ export default async function ProspectDetailPage({ params }: PageProps) {
   let matches: Awaited<ReturnType<typeof getConsolidatedCatalogue>>['items'] = []
   if (p.commune || p.type_bien) {
     try {
-      const inferredOffre =
-        p.budget && p.budget <= 5_000_000 && p.type_bien !== 'terrain' ? 'location' : undefined
+      const inboundText = msgs
+        .filter((m) => m.direction === 'inbound')
+        .map((m) => m.body || '')
+        .join(' ')
+      const isLocation = /louer|location|loyer/i.test(inboundText)
+      const inferredOffre = isLocation
+        ? 'location'
+        : p.budget && p.budget <= 5_000_000 && p.type_bien !== 'terrain'
+          ? 'location'
+          : undefined
+      const targetCommune =
+        p.commune ||
+        inboundText.match(
+          /\b(taabo|abidjan|angr[ée]|cocody|yopougon|bassam|bingerville|marcory|plateau|songon|anyama)\b/i,
+        )?.[1]
       const { items } = await getConsolidatedCatalogue({
-        commune: p.commune ?? undefined,
+        commune: targetCommune ?? undefined,
         type_bien: p.type_bien ?? undefined,
         type_offre: inferredOffre,
         prix_max: p.budget ? Math.round(p.budget * 1.15) : undefined,
@@ -235,9 +248,20 @@ export default async function ProspectDetailPage({ params }: PageProps) {
                         <MapPin className="w-3 h-3" />{b.commune}{b.quartier ? ` · ${b.quartier}` : ''}
                       </p>
                       <p className="text-sm font-bold text-[var(--accent-luxury)] mt-1">{b.prix_label}</p>
-                      <span className="inline-flex items-center gap-1 text-[10px] text-[var(--text-subtle)] mt-1">
-                        <ExternalLink className="w-2.5 h-2.5" /> Voir
-                      </span>
+                      <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-[var(--border)]">
+                        <span className="inline-flex items-center gap-1 text-[10px] text-[var(--text-subtle)]">
+                          <ExternalLink className="w-2.5 h-2.5" /> Voir l'annonce
+                        </span>
+                        <a
+                          href={`/api/admin/prospects/${p.id}/fiche-visite?${b.source === 'flash' ? `localId=${b.sourceId}` : `bienId=${b.sourceId}`}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="inline-flex items-center gap-1 px-2 py-1 bg-[var(--surface-hover)] hover:bg-[var(--border)] text-[var(--text)] rounded text-[10px] font-bold transition-colors"
+                        >
+                          <FileText className="w-2.5 h-2.5" /> Fiche PDF
+                        </a>
+                      </div>
                     </Link>
                   ))}
                 </div>

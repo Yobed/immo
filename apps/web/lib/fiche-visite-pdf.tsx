@@ -390,11 +390,21 @@ export function FicheVisiteDocument(props: FicheVisiteProps) {
               <Text style={[S.colObs, S.thText]}>Appréciation client</Text>
             </View>
             {rows.map((item, idx) => (
-              <View key={idx} style={S.tableRow}>
+              <View
+                key={idx}
+                style={[
+                  S.tableRow,
+                  !item ? { minHeight: 28, backgroundColor: idx % 2 === 1 ? '#FAFAFA' : '#FFFFFF' } : {},
+                ]}
+              >
                 <Text style={S.colNum}>{idx + 1}</Text>
                 <Text style={S.colRef}>{item?.ref ?? ''}</Text>
                 <Text style={S.colType}>
-                  {item ? `${item.typeBien ? item.typeBien.toUpperCase() + ' — ' : ''}${item.titre}` : ''}
+                  {item
+                    ? item.titre.toLowerCase().startsWith(item.typeBien.toLowerCase())
+                      ? item.titre
+                      : `${item.typeBien ? item.typeBien.toUpperCase() + ' — ' : ''}${item.titre}`
+                    : ''}
                 </Text>
                 <Text style={S.colLoc}>{item?.localisation ?? ''}</Text>
                 <Text style={S.colPrix}>{item?.prixLabel ?? ''}</Text>
