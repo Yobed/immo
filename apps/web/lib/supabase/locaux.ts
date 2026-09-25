@@ -1,36 +1,34 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-// DEUX projets Supabase pour les offres flash (scraping), free tier saturé
-// l'un après l'autre → on n'écrit que dans le plus récent, on lit les deux,
+// QUATRE projets Supabase pour les offres flash (scraping), free tier saturé
+// l'un après l'autre → on n'écrit que dans le plus récent, on lit tous les actifs,
 // on ne copie JAMAIS l'historique (décision Wilfried).
-//  - FRESH (jdjzcxvtvxfqflvwkfgv) : reçoit les NOUVELLES offres (write + read).
-//  - OLD   (udyfhzyvalansmhkynnc) : saturé → lecture seule (historique).
-// ⚠️ Les noms trompent sur le POIDS. Mesuré le 08/09/2026, hors doublons :
-// OLD porte 11 601 offres dont 3 444 de moins de 3 mois ; FRESH n'en porte que
-// 141. « Historique » est donc le gros du catalogue, pas un fond d'archive, et
-// « récent » n'en est qu'une frange. Ne dimensionne rien d'après les libellés.
-// Un TROISIÈME projet, MID (mignebexvzrpfxgbhjuf), a été SUPPRIMÉ : son domaine
-// ne résout plus (ENOTFOUND, vérifié sur 3 résolveurs). Il était interrogé à
-// chaque chargement du catalogue et l'échec était avalé par un .catch() — une
-// requête morte par page pendant des semaines, invisible. Ses ids (100 000 à
-// 999 999) sont définitivement orphelins.
-const FRESH_URL = 'https://jdjzcxvtvxfqflvwkfgv.supabase.co'
-const FRESH_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkanpjeHZ0dnhmcWZsdndrZmd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY2MTM3MzUsImV4cCI6MjEwMjE4OTczNX0.KO6DptdkqSxBeF138yF-Rljmb8ScfaUr9p-HhmAtJJ4'
+//  - FRESH      (fzccugmyoglemjwidqrl) : reçoit les NOUVELLES offres (write + read, id >= 2 000 000).
+//  - PREV_FRESH (jdjzcxvtvxfqflvwkfgv) : lecture seule (id 1 000 000 .. 1 999 999).
+//  - MID        (mignebexvzrpfxgbhjuf) : lecture seule (historique août, id 100 000 .. 999 999).
+//  - OLD        (udyfhzyvalansmhkynnc) : lecture seule (historique initial, id <= 99 999).
+const FRESH_URL = 'https://fzccugmyoglemjwidqrl.supabase.co'
+const FRESH_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ6Y2N1Z215b2dsZW1qd2lkcXJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzNDI0MjYsImV4cCI6MjEwNTkxODQyNn0.90URR1TCwwdnokdUDrQ1aRHYVfvHa__v0tejFYHADT0'
+const PREV_FRESH_URL = 'https://jdjzcxvtvxfqflvwkfgv.supabase.co'
+const PREV_FRESH_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkanpjeHZ0dnhmcWZsdndrZmd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY2MTM3MzUsImV4cCI6MjEwMjE4OTczNX0.KO6DptdkqSxBeF138yF-Rljmb8ScfaUr9p-HhmAtJJ4'
 const MID_URL = 'https://mignebexvzrpfxgbhjuf.supabase.co'
 const MID_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pZ25lYmV4dnpycGZ4Z2JoanVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1NjA5NzksImV4cCI6MjEwMDEzNjk3OX0.jiERuKejm7D96ILlnBfWQKcRnCLjVkKaxR-2Rz_hBek'
 const OLD_URL = 'https://udyfhzyvalansmhkynnc.supabase.co'
 const OLD_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkeWZoenl2YWxhbnNtaGt5bm5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExOTYzNTcsImV4cCI6MjA4Njc3MjM1N30.blMJPyp5n_j22AJn6cwKwrTeuxFbMutsnCfDd2AR_pI'
 
 // Plages d'id DISJOINTES → un id suffit à savoir dans quel projet vit la ligne,
-// sans requête. Les séquences démarrent : OLD à 1, MID à 100 000, FRESH à
-// 1 000 000 (ALTER SEQUENCE locaux_id_seq RESTART WITH 1000000 côté FRESH).
+// sans requête. Les séquences démarrent : OLD à 1, MID à 100 000, PREV_FRESH à
+// 1 000 000, FRESH à 2 000 000 (START WITH 2000000 côté FRESH).
 export const LOCAUX_LEGACY_MAX_ID = 99999 // borne haute OLD (rétro-compat)
-export const LOCAUX_FRESH_MIN_ID = 1_000_000 // borne basse FRESH
+export const LOCAUX_PREV_FRESH_MIN_ID = 1_000_000 // borne basse PREV_FRESH
+export const LOCAUX_FRESH_MIN_ID = 2_000_000 // borne basse FRESH actuel
 
 let _fresh: SupabaseClient | null = null
+let _prevFresh: SupabaseClient | null = null
 let _mid: SupabaseClient | null = null
 let _old: SupabaseClient | null = null
 let _freshAdmin: SupabaseClient | null = null
+let _prevFreshAdmin: SupabaseClient | null = null
 let _midAdmin: SupabaseClient | null = null
 let _oldAdmin: SupabaseClient | null = null
 
@@ -51,11 +49,18 @@ function svcKey(name: string): string {
 
 // ─── Clients lecture (anon) ──────────────────────────────────────────────────
 
-/** Client lecture seule vers le projet d'ÉCRITURE actuel (FRESH). */
+/** Client lecture seule vers le projet d'ÉCRITURE actuel (FRESH : fzccugmyoglemjwidqrl). */
 export function createLocauxClient(): SupabaseClient {
   if (_fresh) return _fresh
   _fresh = createClient(FRESH_URL, FRESH_ANON, OPTS)
   return _fresh
+}
+
+/** Client lecture seule vers le précédent projet FRESH (jdjzcxvtvxfqflvwkfgv). */
+export function createLocauxPrevFreshClient(): SupabaseClient {
+  if (_prevFresh) return _prevFresh
+  _prevFresh = createClient(PREV_FRESH_URL, PREV_FRESH_ANON, OPTS)
+  return _prevFresh
 }
 
 /** Client lecture seule vers le projet intermédiaire MID (mignebexvzrpfxgbhjuf). */
@@ -72,14 +77,20 @@ export function createLocauxLegacyClient(): SupabaseClient {
   return _old
 }
 
-/** Les trois sources de lecture, plus récent d'abord (listes fusionnées). */
+/** Les sources de lecture, plus récent d'abord (listes fusionnées). */
 export function locauxReadClients(): SupabaseClient[] {
-  return [createLocauxClient(), createLocauxMidClient(), createLocauxLegacyClient()]
+  return [
+    createLocauxClient(),
+    createLocauxPrevFreshClient(),
+    createLocauxMidClient(),
+    createLocauxLegacyClient(),
+  ]
 }
 
 /** Route une lecture par id vers le bon projet (plages disjointes). */
 export function locauxClientForId(id: number): SupabaseClient {
   if (id >= LOCAUX_FRESH_MIN_ID) return createLocauxClient()
+  if (id >= LOCAUX_PREV_FRESH_MIN_ID) return createLocauxPrevFreshClient()
   if (id > LOCAUX_LEGACY_MAX_ID) return createLocauxMidClient()
   return createLocauxLegacyClient()
 }
@@ -91,6 +102,16 @@ export function createLocauxAdminClient(): SupabaseClient {
   if (_freshAdmin) return _freshAdmin
   _freshAdmin = createClient(FRESH_URL, svcKey('FRESH_LOCAUX_SERVICE_ROLE_KEY'), ADMIN_OPTS)
   return _freshAdmin
+}
+
+/** Admin du projet PREV_FRESH (jdjzcxvtvxfqflvwkfgv). */
+export function createLocauxPrevFreshAdminClient(): SupabaseClient {
+  if (_prevFreshAdmin) return _prevFreshAdmin
+  const key = process.env.PREV_FRESH_LOCAUX_SERVICE_ROLE_KEY
+    ? svcKey('PREV_FRESH_LOCAUX_SERVICE_ROLE_KEY')
+    : PREV_FRESH_ANON
+  _prevFreshAdmin = createClient(PREV_FRESH_URL, key, ADMIN_OPTS)
+  return _prevFreshAdmin
 }
 
 /** Admin du projet MID (retrait/restauration d'offres historiques). → LOCAUX_SUPABASE_SERVICE_ROLE_KEY */
@@ -110,14 +131,18 @@ export function createLocauxLegacyAdminClient(): SupabaseClient {
 /** Route une écriture admin par id vers le bon projet (plages disjointes). */
 export function locauxAdminForId(id: number): SupabaseClient {
   if (id >= LOCAUX_FRESH_MIN_ID) return createLocauxAdminClient()
+  if (id >= LOCAUX_PREV_FRESH_MIN_ID) return createLocauxPrevFreshAdminClient()
   if (id > LOCAUX_LEGACY_MAX_ID) return createLocauxMidAdminClient()
   return createLocauxLegacyAdminClient()
 }
 
-/** Tri fusionné des sources : date_publication décroissante (ISO texte). */
+/** Tri fusionné des sources : date_publication (ou created_at) décroissante (ISO texte). */
 export function byDatePubDesc(
-  a: { date_publication?: string | null },
-  b: { date_publication?: string | null },
+  a: { date_publication?: string | null; created_at?: string | null },
+  b: { date_publication?: string | null; created_at?: string | null },
 ): number {
-  return (b.date_publication ?? '').localeCompare(a.date_publication ?? '')
+  const da = a.date_publication || a.created_at || ''
+  const db = b.date_publication || b.created_at || ''
+  return db.localeCompare(da)
 }
+
