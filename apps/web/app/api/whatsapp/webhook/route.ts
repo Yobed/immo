@@ -509,11 +509,45 @@ export async function POST(req: NextRequest) {
     const clientSearching = isClientSearchIntent(userMessage);
     const sig = listingSignals(userMessage);
     let isListing = !clientSearching && isPartnerOrListingOffer(userMessage, isReplyingToQualif);
+    let extractedListing: ExtractedBien | null = null;
     if (!isListing && !clientSearching && !isReplyingToQualif && sig >= 3 && userMessage.length >= 80) {
       const { data: extracted } = await extractBienFromWhatsApp(userMessage).catch(() => ({ data: null }));
-      isListing = !!extracted && extracted.confidence >= MIN_EXTRACTION_CONFIDENCE;
+      if (extracted && extracted.confidence >= MIN_EXTRACTION_CONFIDENCE) {
+        isListing = true;
+        extractedListing = extracted;
+      }
     }
     if (isListing) {
+      // Enregistrer l'offreur/démarcheur dans agent_prospects (/admin/outreach) pour ne jamais le perdre
+      try {
+        if (!extractedListing) {
+          const parsedOffer = qualify(userMessage);
+          if (parsedOffer.propertyType || parsedOffer.zone || parsedOffer.budget) {
+            extractedListing = {
+              type_bien: (parsedOffer.propertyType as ExtractedBien['type_bien']) ?? 'appartement',
+              type_offre: parsedOffer.transaction === 'achat' ? 'vente' : 'location',
+              commune: parsedOffer.zone ?? 'Abidjan',
+              quartier: null,
+              prix: parsedOffer.budget ?? null,
+              superficie: null,
+              chambres: null,
+              description_courte: userMessage.slice(0, 140),
+              confidence: 0.8,
+            };
+          }
+        }
+        await upsertProspect({
+          phone: canonicalPhone(senderPn),
+          jid,
+          displayName: contactName !== 'Client' ? contactName : null,
+          sourceGroupJid: jid,
+          sourceGroupName: 'Message direct (DM)',
+          extraction: extractedListing,
+        });
+      } catch (err) {
+        console.error('[outreach] DM listing provider upsert failed', err);
+      }
+
       // Marqueur fournisseur → mute 24 h (couvre les messages suivants).
       await supabase.from('whatsapp_messages').insert({
         jid,
