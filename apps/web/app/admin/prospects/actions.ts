@@ -79,3 +79,21 @@ export async function bulkSetProspectStatutAction(form: FormData): Promise<CrmAc
   if (failed > 0) return { error: `${updated} prospect(s) mis à jour, ${failed} non modifié(s). Actualisez puis réessayez.` }
   return { message: `${updated} prospect(s) mis à jour.` }
 }
+
+export async function setProspectTypeAction(form: FormData): Promise<CrmActionResult> {
+  try {
+    const id = formUuid(form, 'id')
+    const typeContact = String(form.get('type_contact') || 'prospect')
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const admin = createAdminClient()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (admin as any).from('prospects').update({ source_detail: typeContact }).eq('id', id)
+    if (error) throw error
+    for (const path of ['/admin/prospects', '/admin/prospects/' + id, '/admin/suivi']) revalidatePath(path)
+    return {
+      message: `Statut enregistré : ${typeContact === 'agent' ? 'Agent immobilier / Démarcheur' : 'Prospect (Client direct)'}.`,
+    }
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : 'Impossible d’enregistrer le type de contact.' }
+  }
+}

@@ -25,7 +25,10 @@ export interface FicheVisiteProps {
   prospectCni?: string
   prospectCritere?: string
   prospectBudget?: string
-  // Visite & Agent
+  typeContact?: 'prospect' | 'agent' | 'autre'
+  agenceOuStructure?: string
+  nomClientRepresente?: string
+  // Visite & Commercial
   dateVisite: string
   creneauHoraire: string
   commercialNom: string
@@ -282,6 +285,9 @@ export function FicheVisiteDocument(props: FicheVisiteProps) {
     prospectCni,
     prospectCritere,
     prospectBudget,
+    typeContact = 'prospect',
+    agenceOuStructure,
+    nomClientRepresente,
     dateVisite,
     creneauHoraire,
     commercialNom,
@@ -290,11 +296,15 @@ export function FicheVisiteDocument(props: FicheVisiteProps) {
     notesVisite,
   } = props
 
-  // Toujours afficher au moins 3 lignes dans le tableau des biens pour permettre d'ajouter des biens visités sur le terrain
+  // La fiche garde uniquement les biens réellement confirmés pour la visite.
+  // Si aucun bien n'est pré-enregistré ou pour compléter jusqu'à 3 lignes,
+  // nous affichons des lignes vierges à remplir manuellement sur le terrain.
   const rows: (BienVisiteItem | null)[] = [...biens]
   while (rows.length < 3) {
     rows.push(null)
   }
+
+  const isAgent = typeContact === 'agent'
 
   return (
     <Document>
@@ -307,16 +317,44 @@ export function FicheVisiteDocument(props: FicheVisiteProps) {
             <Text style={S.brandSub}>Abidjan, Côte d&apos;Ivoire — Web : www.bogbesgroup.com</Text>
           </View>
           <View style={S.docBadge}>
-            <Text style={S.docBadgeTitle}>FICHE DE VISITE PROSPECT</Text>
+            <Text style={S.docBadgeTitle}>BON DE VISITE IMMOBILIER</Text>
             <Text style={S.docBadgeRef}>Réf : {ficheNum} | Éditée le {dateEdition}</Text>
           </View>
         </View>
 
-        {/* Informations Prospect & Détails RDV */}
+        {/* Informations Visiteur & Détails RDV */}
         <View style={S.twoCol}>
-          {/* Prospect */}
+          {/* Visiteur (Prospect ou Agent Immobilier) */}
           <View style={S.card}>
-            <Text style={S.cardTitle}>1. Identité du Prospect (Visiteur)</Text>
+            <Text style={S.cardTitle}>1. Identité du Visiteur</Text>
+
+            {/* Distinction claire : Prospect (Client direct) vs Agent Immobilier / Démarcheur */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5, paddingBottom: 4, borderBottomWidth: 0.5, borderBottomColor: '#CBD5E1' }}>
+              <Text style={{ fontSize: 8, fontFamily: 'Helvetica-Bold', color: '#475569', marginRight: 6 }}>
+                Qualité :
+              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 8 }}>
+                <View style={[S.checkboxSquare, !isAgent ? { backgroundColor: '#0F172A' } : {}]}>
+                  {!isAgent && (
+                    <Text style={{ color: '#FFFFFF', fontSize: 7, textAlign: 'center', fontFamily: 'Helvetica-Bold' }}>✓</Text>
+                  )}
+                </View>
+                <Text style={{ fontSize: 7.8, fontFamily: !isAgent ? 'Helvetica-Bold' : 'Helvetica', color: '#0F172A' }}>
+                  Prospect (Client direct)
+                </Text>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={[S.checkboxSquare, isAgent ? { backgroundColor: '#0F172A' } : {}]}>
+                  {isAgent && (
+                    <Text style={{ color: '#FFFFFF', fontSize: 7, textAlign: 'center', fontFamily: 'Helvetica-Bold' }}>✓</Text>
+                  )}
+                </View>
+                <Text style={{ fontSize: 7.8, fontFamily: isAgent ? 'Helvetica-Bold' : 'Helvetica', color: '#0F172A' }}>
+                  Agent / Démarcheur
+                </Text>
+              </View>
+            </View>
+
             <View style={S.fieldRow}>
               <Text style={S.fieldLabel}>Nom &amp; Prénoms :</Text>
               <Text style={S.fieldValue}>{prospectNom || '____________________________'}</Text>
@@ -325,6 +363,28 @@ export function FicheVisiteDocument(props: FicheVisiteProps) {
               <Text style={S.fieldLabel}>Téléphone :</Text>
               <Text style={S.fieldValue}>{prospectTel || '____________________________'}</Text>
             </View>
+
+            {isAgent ? (
+              <>
+                <View style={S.fieldRow}>
+                  <Text style={S.fieldLabel}>Cabinet / Agence :</Text>
+                  {agenceOuStructure ? (
+                    <Text style={S.fieldValue}>{agenceOuStructure}</Text>
+                  ) : (
+                    <View style={S.dottedLine} />
+                  )}
+                </View>
+                <View style={S.fieldRow}>
+                  <Text style={S.fieldLabel}>Client représenté :</Text>
+                  {nomClientRepresente ? (
+                    <Text style={S.fieldValue}>{nomClientRepresente}</Text>
+                  ) : (
+                    <View style={S.dottedLine} />
+                  )}
+                </View>
+              </>
+            ) : null}
+
             <View style={S.fieldRow}>
               <Text style={S.fieldLabel}>N° CNI / Pièce :</Text>
               {prospectCni ? (
@@ -343,7 +403,7 @@ export function FicheVisiteDocument(props: FicheVisiteProps) {
             </View>
             {(prospectCritere || prospectBudget) && (
               <View style={S.fieldRow}>
-                <Text style={S.fieldLabel}>Recherche :</Text>
+                <Text style={S.fieldLabel}>Projet / Recherche :</Text>
                 <Text style={S.fieldValue}>
                   {[prospectCritere, prospectBudget ? `Budget: ${prospectBudget}` : ''].filter(Boolean).join(' — ')}
                 </Text>
@@ -379,7 +439,9 @@ export function FicheVisiteDocument(props: FicheVisiteProps) {
 
         {/* Tableau des biens présentés et visités */}
         <View style={S.section}>
-          <Text style={S.sectionHeader}>3. DÉSIGNATION DU OU DES BIENS VISITÉS</Text>
+          <Text style={S.sectionHeader}>
+            3. DÉSIGNATION DU OU DES BIENS CONFIRMÉS POUR LA VISITE
+          </Text>
           <View style={S.table}>
             <View style={S.tableHeader}>
               <Text style={[S.colNum, S.thText]}>N°</Text>
@@ -387,7 +449,7 @@ export function FicheVisiteDocument(props: FicheVisiteProps) {
               <Text style={[S.colType, S.thText]}>Désignation / Type</Text>
               <Text style={[S.colLoc, S.thText]}>Commune / Quartier</Text>
               <Text style={[S.colPrix, S.thText]}>Loyer / Prix</Text>
-              <Text style={[S.colObs, S.thText]}>Appréciation client</Text>
+              <Text style={[S.colObs, S.thText]}>Appréciation visiteur</Text>
             </View>
             {rows.map((item, idx) => (
               <View
@@ -449,10 +511,10 @@ export function FicheVisiteDocument(props: FicheVisiteProps) {
         <View style={S.legalBox}>
           <Text style={S.legalTitle}>5. Reconnaissance de Visite &amp; Engagement de Non-Contournement</Text>
           <Text style={S.legalText}>
-            1. Le(s) visiteur(s) soussigné(s) reconnaît(reconnaissent) expressément avoir pris connaissance et visité ce jour le(s) bien(s) immobilier(s) désigné(s) ci-dessus grâce aux soins et par l&apos;entremise exclusive de BOGBE&apos;S GROUPE IMMOBILIER.
+            1. Le(s) visiteur(s) soussigné(s) (agissant en qualité de prospect/acquéreur/locataire direct ou en qualité d&apos;agent immobilier, démarcheur, mandataire ou apporteur d&apos;affaires pour le compte de clients) reconnaît(reconnaissent) expressément avoir pris connaissance et visité ce jour le(s) bien(s) immobilier(s) désigné(s) ci-dessus grâce aux soins et par l&apos;entremise exclusive de BOGBE&apos;S GROUPE IMMOBILIER.
           </Text>
           <Text style={S.legalText}>
-            2. CLAUSE DE NON-CONTOURNEMENT : Le visiteur s&apos;interdit formellement de traiter directement ou indirectement (par conjoint, parent, société, prête-nom ou tout autre intermédiaire) la location ou l&apos;achat d&apos;un ou plusieurs des biens présentés avec le propriétaire/bailleur sans le concours de BOGBE&apos;S GROUPE IMMOBILIER, et ce pendant une durée de DOUZE (12) MOIS à compter de la date de signature du présent bon de visite.
+            2. CLAUSE DE NON-CONTOURNEMENT : Le visiteur (ainsi que les mandants, clients ou sociétés qu&apos;il représente ou avec lesquels il collabore) s&apos;interdit formellement de traiter directement ou indirectement (par conjoint, parent, société, prête-nom ou tout autre intermédiaire) la location ou l&apos;achat d&apos;un ou plusieurs des biens présentés avec le propriétaire/bailleur sans le concours de BOGBE&apos;S GROUPE IMMOBILIER, et ce pendant une durée de DOUZE (12) MOIS à compter de la date de signature du présent bon de visite.
           </Text>
           <Text style={S.legalText}>
             3. À défaut de respect de cette clause, le visiteur s&apos;engage à verser immédiatement à BOGBE&apos;S GROUPE IMMOBILIER, à titre de clause pénale irréductible, une indemnité compensatrice égale au montant intégral des honoraires d&apos;agence prévus, sans préjudice de tous dommages et intérêts et frais de recouvrement judiciaire.
@@ -462,11 +524,18 @@ export function FicheVisiteDocument(props: FicheVisiteProps) {
         {/* Signatures */}
         <View style={S.signaturesRow}>
           <View style={S.sigBox}>
-            <Text style={S.sigTitle}>LE VISITEUR / PROSPECT</Text>
+            <Text style={S.sigTitle}>
+              {isAgent
+                ? 'LE VISITEUR (AGENT / DÉMARCHEUR)'
+                : 'LE VISITEUR (PROSPECT / CLIENT)'}
+            </Text>
             <Text style={S.sigSub}>
               Mention manuscrite « Lu et approuvé, bon pour reconnaissance de visite » + Signature :
             </Text>
             <Text style={{ fontSize: 8, color: '#475569' }}>Nom : {prospectNom || '_________________________'}</Text>
+            <Text style={{ fontSize: 7.5, color: '#64748B', marginTop: 2 }}>
+              Qualité : {isAgent ? 'Agent immobilier / Démarcheur' : 'Prospect (Client direct)'}
+            </Text>
           </View>
 
           <View style={S.sigBox}>

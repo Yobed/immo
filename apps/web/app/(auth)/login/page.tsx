@@ -66,8 +66,12 @@ function LoginContent() {
       setLoading(false)
     } else {
       const path = await resolvePostLoginPath(explicitRedirect)
-      router.push(path)
-      router.refresh()
+      if (path.startsWith('/api/')) {
+        window.location.href = path
+      } else {
+        router.push(path)
+        router.refresh()
+      }
     }
   }
 

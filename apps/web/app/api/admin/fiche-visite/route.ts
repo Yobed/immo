@@ -17,14 +17,9 @@ export async function GET(req: NextRequest) {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    const isBrowser =
-      req.headers.get('accept')?.includes('text/html') || !req.headers.get('accept')
-    if (isBrowser) {
-      const loginUrl = new URL('/login', req.nextUrl.origin)
-      loginUrl.searchParams.set('redirect', req.nextUrl.pathname + req.nextUrl.search)
-      return NextResponse.redirect(loginUrl)
-    }
-    return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+    const loginUrl = new URL('/login', req.nextUrl.origin)
+    loginUrl.searchParams.set('redirect', req.nextUrl.pathname + req.nextUrl.search)
+    return NextResponse.redirect(loginUrl)
   }
 
   const { data: profile } = await supabase
@@ -38,6 +33,9 @@ export async function GET(req: NextRequest) {
   }
 
   const sp = req.nextUrl.searchParams
+  const qType = sp.get('typeContact')
+  const typeContact: 'prospect' | 'agent' = qType === 'agent' ? 'agent' : 'prospect'
+
   const props: FicheVisiteProps = {
     ficheNum: `BV-${new Date().getFullYear()}-${String(Math.floor(1000 + Math.random() * 9000))}`,
     dateEdition: new Date().toLocaleDateString('fr-FR'),
@@ -46,6 +44,9 @@ export async function GET(req: NextRequest) {
     prospectEmail: sp.get('email') || '',
     prospectCritere: sp.get('critere') || '',
     prospectBudget: sp.get('budget') || '',
+    typeContact,
+    agenceOuStructure: sp.get('agence') || undefined,
+    nomClientRepresente: sp.get('client') || undefined,
     dateVisite: sp.get('date') || '____ / ____ / 2026',
     creneauHoraire: sp.get('heure') || '____h____ à ____h____',
     commercialNom: profile.full_name || 'Conseiller BOGBE\'S',

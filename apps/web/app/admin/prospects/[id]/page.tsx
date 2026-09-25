@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation'
 import {
   ArrowLeft, Phone, MessageCircle, Home, Wallet, Calendar, Clock, MapPin,
   CalendarClock, UserCheck, StickyNote, ExternalLink, Flame, ShieldCheck, FileText,
+  Briefcase, User,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -11,7 +12,7 @@ import { getConsolidatedCatalogue } from '@/lib/catalogue/consolidated'
 import { whatsappLink } from '@/lib/whatsapp'
 import {
   setProspectStatutAction, setProspectNoteAction, setProspectAssignAction, setProspectRelanceAction,
-  setProspectOutcomeAction,
+  setProspectOutcomeAction, setProspectTypeAction,
 } from '../actions'
 import { CrmActionForm } from '@/components/admin/CrmActionForm'
 
@@ -57,13 +58,31 @@ export default async function ProspectDetailPage({ params }: PageProps) {
   const { data: p } = await (admin as any).from('prospects').select('*').eq('id', id).maybeSingle()
   if (!p) notFound()
 
-  const [{ count: contactCount }, { count: visiteCount }, { count: reservationCount }, timelineResult] = await Promise.all([
+  const [
+    { count: contactCount },
+    { count: visiteCount },
+    { count: reservationCount },
+    timelineResult,
+    visitesResult,
+  ] = await Promise.all([
     (admin as any).from('contact_requests').select('id', { count: 'exact', head: true }).eq('prospect_id', id),
     (admin as any).from('visites').select('id', { count: 'exact', head: true }).eq('prospect_id', id),
     (admin as any).from('reservations').select('id', { count: 'exact', head: true }).eq('prospect_id', id),
     (supabase as any).rpc('crm_prospect_timeline', { p_id: id, p_limit: 50 }),
+    (admin as any)
+      .from('visites')
+      .select(`
+        id, date_souhaitee, heure_debut, heure_fin, statut, notes,
+        biens ( id, titre, type_bien, commune, quartier, prix_mois_fcfa, prix_vente_fcfa )
+      `)
+      .eq('prospect_id', id)
+      .order('date_souhaitee', { ascending: false }),
   ])
   const crmEvents = timelineResult.error ? null : timelineResult.data as Array<{ id: string; event_type: string; from_status: string | null; to_status: string | null; note: string | null; created_at: string; actor_name?: string | null; origin?: string }>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const confirmedVisites = ((visitesResult.data ?? []) as any[]).filter(
+    (v) => v.statut !== 'annulee' && v.statut !== 'refusee',
+  )
 
   const st = (p.statut in STATUT_META ? p.statut : 'nouveau') as Statut
 
@@ -86,6 +105,28 @@ export default async function ProspectDetailPage({ params }: PageProps) {
   const { data: msgsRaw } = await msgQuery
   const msgs = (msgsRaw ?? []).filter((m: { direction: string }) => m.direction === 'inbound' || m.direction === 'outbound') as
     { direction: string; body: string; created_at: string; metadata?: WhatsAppMetadata | null }[]
+
+  // Détection de la qualité du visiteur : Prospect (Client direct) vs Agent immobilier / Démarcheur
+  const fullConversation = [
+    p.dernier_message,
+    ...msgs.map((m) => m.body),
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  const isDetectedAgent =
+    /mon client|mes clients|notre client|mandant|confr[èe]re|cabinet|d[ée]marcheur|demarcheur|interm[ée]diaire|apporteur|pour un client|pour mon client|cherche pour client/i.test(
+      fullConversation,
+    )
+
+  const currentType: 'agent' | 'prospect' =
+    p.source_detail === 'agent'
+      ? 'agent'
+      : p.source_detail === 'prospect'
+        ? 'prospect'
+        : isDetectedAgent
+          ? 'agent'
+          : 'prospect'
 
   // Biens du catalogue correspondant aux critères
   let matches: Awaited<ReturnType<typeof getConsolidatedCatalogue>>['items'] = []
@@ -129,7 +170,7 @@ export default async function ProspectDetailPage({ params }: PageProps) {
           <ArrowLeft className="w-4 h-4" /> Retour aux prospects
         </Link>
 
-        {/* En-tête */}
+        {/* En-tête avec distinction Prospect direct vs Agent Immobilier */}
         <div className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-5 mb-5 flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
@@ -137,7 +178,33 @@ export default async function ProspectDetailPage({ params }: PageProps) {
               <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide border ${STATUT_META[st].cls}`}>
                 {STATUT_META[st].label}
               </span>
+
+              {/* Badge Distinction : Client Direct vs Agent Immobilier */}
+              <span
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
+                  currentType === 'agent'
+                    ? 'bg-purple-100 text-purple-900 border-purple-300 dark:bg-purple-950 dark:text-purple-200 dark:border-purple-800'
+                    : 'bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-800'
+                }`}
+              >
+                {currentType === 'agent' ? <Briefcase className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
+                {currentType === 'agent' ? 'Agent immobilier / Démarcheur' : 'Prospect (Client direct)'}
+              </span>
+
+              {/* Action rapide pour basculer le statut */}
+              <CrmActionForm action={setProspectTypeAction} className="inline-block">
+                <input type="hidden" name="id" value={p.id} />
+                <input type="hidden" name="type_contact" value={currentType === 'agent' ? 'prospect' : 'agent'} />
+                <button
+                  type="submit"
+                  title="Modifier la qualification du contact"
+                  className="text-[11px] text-[var(--accent-luxury)] hover:underline ml-1 font-semibold"
+                >
+                  (Basculer en {currentType === 'agent' ? 'Client direct' : 'Agent démarcheur'})
+                </button>
+              </CrmActionForm>
             </div>
+
             <p className="text-sm text-[var(--text-muted)] font-mono mt-1 flex items-center gap-1.5">
               <Phone className="w-3.5 h-3.5" /> +225 {String(p.phone).replace(/^225/, '')}
             </p>
@@ -148,14 +215,15 @@ export default async function ProspectDetailPage({ params }: PageProps) {
               <span className="inline-flex items-center gap-1"><Clock className="w-3 h-3" />{p.message_count} msg</span>
             </p>
           </div>
+
           <div className="flex items-center gap-2 shrink-0 flex-wrap">
             <a
-              href={`/api/admin/prospects/${p.id}/fiche-visite`}
+              href={`/api/admin/prospects/${p.id}/fiche-visite?typeContact=${currentType}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[var(--text)] hover:opacity-90 text-[var(--surface-card)] rounded-xl text-sm font-bold shadow-sm transition-opacity"
             >
-              <FileText className="w-4 h-4" /> Fiche de visite (PDF)
+              <FileText className="w-4 h-4" /> Bon de visite PDF {confirmedVisites.length > 0 ? `(${confirmedVisites.length} confirmé${confirmedVisites.length > 1 ? 's' : ''})` : ''}
             </a>
             <a
               href={whatsappLink(p.phone) ?? '#'}
@@ -169,15 +237,70 @@ export default async function ProspectDetailPage({ params }: PageProps) {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr,340px] gap-5">
-          {/* Colonne principale : conversation + biens */}
+          {/* Colonne principale : parcours + visites confirmées + conversation + catalogue */}
           <div className="space-y-5">
             <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-5">
               <h2 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-subtle)] mb-3">Parcours CRM</h2>
               <div className="grid grid-cols-3 gap-2">
                 <JourneyStat label="Contacts" value={contactCount ?? 0} />
-                <JourneyStat label="Visites" value={visiteCount ?? 0} />
+                <JourneyStat label="Visites confirmées" value={confirmedVisites.length} />
                 <JourneyStat label="Réservations" value={reservationCount ?? 0} />
               </div>
+            </section>
+
+            {/* Section Visites confirmées pour ce visiteur */}
+            <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-5">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-subtle)] flex items-center gap-2">
+                  <Calendar className="w-3.5 h-3.5 text-blue-500" /> Visites confirmées ({confirmedVisites.length})
+                </h2>
+                {confirmedVisites.length > 0 && (
+                  <span className="text-[11px] font-semibold text-emerald-600">
+                    Inscrites sur le Bon de Visite
+                  </span>
+                )}
+              </div>
+
+              {confirmedVisites.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-[var(--border)] p-4 text-center">
+                  <p className="text-xs text-[var(--text-muted)] font-medium">
+                    Aucune visite n&apos;est actuellement enregistrée pour ce contact.
+                  </p>
+                  <p className="text-[11px] text-[var(--text-subtle)] mt-1">
+                    Pour éditer un bon de visite avec un bien précis, cliquez sur « Bon de visite » à côté d&apos;un des biens correspondants ci-dessous, ou éditez un bon vierge avec le bouton supérieur.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2.5">
+                  {confirmedVisites.map((v) => (
+                    <div
+                      key={v.id}
+                      className="rounded-xl border border-[var(--border)] p-3.5 bg-[var(--surface-hover)] flex flex-wrap items-center justify-between gap-3"
+                    >
+                      <div>
+                        <p className="font-bold text-sm text-[var(--text)]">
+                          {v.biens?.titre || 'Bien sans titre'}
+                        </p>
+                        <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                          {v.biens?.commune} {v.biens?.quartier ? `· ${v.biens?.quartier}` : ''}
+                          {v.biens?.prix_mois_fcfa ? ` — ${Number(v.biens.prix_mois_fcfa).toLocaleString('fr-FR')} FCFA/mois` : v.biens?.prix_vente_fcfa ? ` — ${Number(v.biens.prix_vente_fcfa).toLocaleString('fr-FR')} FCFA` : ''}
+                        </p>
+                        <p className="text-[11px] text-[var(--accent-luxury)] font-semibold mt-1">
+                          📅 {v.date_souhaitee} {v.heure_debut ? `à ${v.heure_debut}` : ''} {v.heure_fin ? `(fin ${v.heure_fin})` : ''}
+                        </p>
+                      </div>
+                      <a
+                        href={`/api/admin/prospects/${p.id}/fiche-visite?bienId=${v.biens?.id}&date=${encodeURIComponent(v.date_souhaitee || '')}&heure=${encodeURIComponent(v.heure_debut || '')}&typeContact=${currentType}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--text)] hover:opacity-90 text-[var(--surface-card)] rounded-lg text-xs font-bold transition-opacity shadow-sm"
+                      >
+                        <FileText className="w-3.5 h-3.5" /> Bon de visite pour ce bien
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
 
             <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-5">
@@ -205,7 +328,7 @@ export default async function ProspectDetailPage({ params }: PageProps) {
                   {msgs.map((m, i) => {
                     const inbound = m.direction === 'inbound'
                     const commercial = !inbound && (m.metadata?.actor_type === 'commercial' || m.metadata?.trace_source === 'human_takeover')
-                    const senderLabel = inbound ? 'Client' : commercial ? 'Commercial' : 'Sapphire'
+                    const senderLabel = inbound ? (currentType === 'agent' ? 'Agent / Démarcheur' : 'Client') : commercial ? 'Commercial' : 'Sapphire'
                     return (
                       <div key={i} className={`flex ${inbound ? 'justify-start' : 'justify-end'}`}>
                         <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
@@ -233,7 +356,7 @@ export default async function ProspectDetailPage({ params }: PageProps) {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {matches.map((b) => (
-                    <Link key={b.id} href={b.url} target="_blank"
+                    <div key={b.id}
                       className="block rounded-xl border border-[var(--border)] p-3 hover:border-[var(--accent-luxury)] transition-colors">
                       <div className="flex items-center gap-1.5 mb-1">
                         {b.source === 'flash'
@@ -249,20 +372,23 @@ export default async function ProspectDetailPage({ params }: PageProps) {
                       </p>
                       <p className="text-sm font-bold text-[var(--accent-luxury)] mt-1">{b.prix_label}</p>
                       <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-[var(--border)]">
-                        <span className="inline-flex items-center gap-1 text-[10px] text-[var(--text-subtle)]">
-                          <ExternalLink className="w-2.5 h-2.5" /> Voir l'annonce
-                        </span>
+                        <Link
+                          href={b.url}
+                          target="_blank"
+                          className="inline-flex items-center gap-1 text-[10px] text-[var(--text-subtle)] hover:text-[var(--text)]"
+                        >
+                          <ExternalLink className="w-2.5 h-2.5" /> Voir l&apos;annonce
+                        </Link>
                         <a
-                          href={`/api/admin/prospects/${p.id}/fiche-visite?${b.source === 'flash' ? `localId=${b.sourceId}` : `bienId=${b.sourceId}`}`}
+                          href={`/api/admin/prospects/${p.id}/fiche-visite?${b.source === 'flash' ? `localId=${b.sourceId}` : `bienId=${b.sourceId}`}&typeContact=${currentType}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1 px-2 py-1 bg-[var(--surface-hover)] hover:bg-[var(--border)] text-[var(--text)] rounded text-[10px] font-bold transition-colors"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--text)] hover:opacity-90 text-[var(--surface-card)] rounded text-[10px] font-bold transition-opacity"
                         >
-                          <FileText className="w-2.5 h-2.5" /> Fiche PDF
+                          <FileText className="w-2.5 h-2.5" /> Bon de visite
                         </a>
                       </div>
-                    </Link>
+                    </div>
                   ))}
                 </div>
               )}

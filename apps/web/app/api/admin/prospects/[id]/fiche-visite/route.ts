@@ -185,14 +185,9 @@ export async function GET(
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) {
-    const isBrowser =
-      req.headers.get('accept')?.includes('text/html') || !req.headers.get('accept')
-    if (isBrowser) {
-      const loginUrl = new URL('/login', req.nextUrl.origin)
-      loginUrl.searchParams.set('redirect', req.nextUrl.pathname + req.nextUrl.search)
-      return NextResponse.redirect(loginUrl)
-    }
-    return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+    const loginUrl = new URL('/login', req.nextUrl.origin)
+    loginUrl.searchParams.set('redirect', req.nextUrl.pathname + req.nextUrl.search)
+    return NextResponse.redirect(loginUrl)
   }
 
   const { data: profile } = await supabase
@@ -246,17 +241,48 @@ export async function GET(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const msgs = (msgsRaw ?? []) as any[]
 
-  // Paramètres URL éventuels pour surcharger ou cibler un bien
+  // Paramètres URL
   const searchParams = req.nextUrl.searchParams
   const qBienId = searchParams.get('bienId')
   const qLocalId = searchParams.get('localId')
   const qDate = searchParams.get('date')
   const qHeure = searchParams.get('heure')
+  const qTypeContact = searchParams.get('typeContact')
 
-  // 3. Biens à faire visiter
+  // Détection de la qualité du visiteur : Prospect (Client direct) vs Agent immobilier / Démarcheur
+  const fullConversation = [
+    prospect.dernier_message,
+    ...msgs.map((m: any) => m.body),
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  const isDetectedAgent =
+    /mon client|mes clients|notre client|mandant|confr[èe]re|cabinet|d[ée]marcheur|demarcheur|interm[ée]diaire|apporteur|pour un client|pour mon client|cherche pour client/i.test(
+      fullConversation,
+    )
+
+  const typeContact: 'agent' | 'prospect' =
+    qTypeContact === 'agent'
+      ? 'agent'
+      : qTypeContact === 'prospect'
+        ? 'prospect'
+        : prospect.source_detail === 'agent'
+          ? 'agent'
+          : prospect.source_detail === 'prospect'
+            ? 'prospect'
+            : isDetectedAgent
+              ? 'agent'
+              : 'prospect'
+
+  // 3. Biens RÉELLEMENT CONFIRMÉS pour la visite
+  // RÈGLE : La fiche de visite ne doit garder STRICTEMENT que le ou les biens confirmés.
+  // Cas A : Bien confirmé et sélectionné explicitement via l'interface (paramètre bienId ou localId)
+  // Cas B : Visite(s) confirmée(s) ou programmée(s) dans la table `visites` pour ce prospect
+  // Si aucune visite n'est encore confirmée, la liste reste VIDE (lignes vierges d'écriture manuscrite sur le terrain).
   const biensList: BienVisiteItem[] = []
 
-  // Cas A : Bien spécifique passé en paramètre d'URL (ex: sélectionné depuis la fiche prospect)
+  // Cas A : Bien spécifique confirmé passé en paramètre d'URL
   if (qBienId) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: b } = await (admin as any)
@@ -275,7 +301,7 @@ export async function GET(
           : b.prix_vente_fcfa
             ? `${Number(b.prix_vente_fcfa).toLocaleString('fr-FR')} FCFA`
             : 'Prix sur demande',
-        observations: '',
+        observations: 'Visite confirmée',
       })
     }
   } else if (qLocalId) {
@@ -292,12 +318,12 @@ export async function GET(
         typeBien: loc.type_de_bien || 'Immobilier',
         localisation: [loc.commune, loc.quartier].filter(Boolean).join(' · ') || 'Abidjan',
         prixLabel: loc.prix_normalise ? `${Number(loc.prix_normalise).toLocaleString('fr-FR')} FCFA` : 'Prix sur demande',
-        observations: '',
+        observations: 'Visite confirmée',
       })
     }
   }
 
-  // Cas B : Visites programmées dans la table `visites`
+  // Cas B : Visites programmées / confirmées dans la table `visites` pour ce prospect
   let dateVisite = qDate || '____ / ____ / 2026'
   let creneauHoraire = qHeure || '____h____ à ____h____'
 
@@ -305,7 +331,7 @@ export async function GET(
   const { data: scheduledVisites } = await (admin as any)
     .from('visites')
     .select(`
-      id, date_souhaitee, heure_debut, heure_fin, notes,
+      id, date_souhaitee, heure_debut, heure_fin, notes, statut,
       biens ( id, titre, type_bien, commune, quartier, adresse_complete, prix_mois_fcfa, prix_vente_fcfa )
     `)
     .eq('prospect_id', id)
@@ -313,94 +339,53 @@ export async function GET(
     .limit(4)
 
   if (scheduledVisites && scheduledVisites.length > 0) {
-    const firstVisite = scheduledVisites[0]
-    if (firstVisite.date_souhaitee && !qDate) {
-      try {
-        dateVisite = new Date(firstVisite.date_souhaitee).toLocaleDateString('fr-FR', {
-          weekday: 'long',
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric',
-        })
-      } catch {
-        dateVisite = firstVisite.date_souhaitee
+    const validVisites = scheduledVisites.filter((v: any) => v.statut !== 'annulee' && v.statut !== 'refusee')
+    if (validVisites.length > 0) {
+      const firstVisite = validVisites[0]
+      if (firstVisite.date_souhaitee && !qDate) {
+        try {
+          dateVisite = new Date(firstVisite.date_souhaitee).toLocaleDateString('fr-FR', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+          })
+        } catch {
+          dateVisite = firstVisite.date_souhaitee
+        }
       }
-    }
-    if (!qHeure) {
-      if (firstVisite.heure_debut && firstVisite.heure_fin) {
-        creneauHoraire = `${firstVisite.heure_debut} - ${firstVisite.heure_fin}`
-      } else if (firstVisite.heure_debut) {
-        creneauHoraire = firstVisite.heure_debut
+      if (!qHeure) {
+        if (firstVisite.heure_debut && firstVisite.heure_fin) {
+          creneauHoraire = `${firstVisite.heure_debut} - ${firstVisite.heure_fin}`
+        } else if (firstVisite.heure_debut) {
+          creneauHoraire = firstVisite.heure_debut
+        }
       }
-    }
 
-    for (const v of scheduledVisites) {
-      const b = v.biens
-      if (b && !biensList.some((item) => item.ref === String(b.id).slice(0, 8).toUpperCase())) {
-        biensList.push({
-          ref: String(b.id).slice(0, 8).toUpperCase(),
-          titre: b.titre || 'Bien sans titre',
-          typeBien: b.type_bien || 'Immobilier',
-          localisation: [b.commune, b.quartier].filter(Boolean).join(' · ') || 'Abidjan',
-          prixLabel: b.prix_mois_fcfa
-            ? `${Number(b.prix_mois_fcfa).toLocaleString('fr-FR')} FCFA/mois`
-            : b.prix_vente_fcfa
-              ? `${Number(b.prix_vente_fcfa).toLocaleString('fr-FR')} FCFA`
-              : 'Prix sur demande',
-          observations: v.notes || '',
-        })
-      }
-    }
-  }
-
-  // Cas C : Biens réellement proposés dans les messages WhatsApp
-  if (biensList.length === 0 && msgs.length > 0) {
-    const proposedItems = extractProposedBiensFromMessages(msgs)
-    for (const pItem of proposedItems) {
-      if (!biensList.some((item) => item.titre === pItem.titre)) {
-        biensList.push(pItem)
+      // Si aucun bien spécifique n'a été forcé en URL, on inclut les biens confirmés de la table visites
+      if (biensList.length === 0) {
+        for (const v of validVisites) {
+          const b = v.biens
+          if (b && !biensList.some((item) => item.ref === String(b.id).slice(0, 8).toUpperCase())) {
+            biensList.push({
+              ref: String(b.id).slice(0, 8).toUpperCase(),
+              titre: b.titre || 'Bien sans titre',
+              typeBien: b.type_bien || 'Immobilier',
+              localisation: [b.commune, b.quartier].filter(Boolean).join(' · ') || 'Abidjan',
+              prixLabel: b.prix_mois_fcfa
+                ? `${Number(b.prix_mois_fcfa).toLocaleString('fr-FR')} FCFA/mois`
+                : b.prix_vente_fcfa
+                  ? `${Number(b.prix_vente_fcfa).toLocaleString('fr-FR')} FCFA`
+                  : 'Prix sur demande',
+              observations: v.notes || 'Visite confirmée',
+            })
+          }
+        }
       }
     }
   }
 
-  // Cas D : Correspondance stricte catalogue (uniquement si commune définie et pertinente)
-  if (biensList.length === 0 && prospect.commune) {
-    try {
-      const inboundText = msgs
-        .filter((m) => m.direction === 'inbound')
-        .map((m) => m.body || '')
-        .join(' ')
-      const isLocation = /louer|location|loyer/i.test(inboundText)
-      const inferredOffre = isLocation
-        ? 'location'
-        : prospect.budget && prospect.budget <= 5_000_000 && prospect.type_bien !== 'terrain'
-          ? 'location'
-          : 'vente'
-
-      const { items } = await getConsolidatedCatalogue({
-        commune: prospect.commune,
-        type_bien: prospect.type_bien ?? undefined,
-        type_offre: inferredOffre,
-        prix_max: prospect.budget ? Math.round(prospect.budget * 1.15) : undefined,
-        sort: 'verified_first',
-        limitPerSource: 3,
-      })
-      for (const item of items.slice(0, 3)) {
-        biensList.push({
-          ref: item.sourceId.slice(0, 8).toUpperCase(),
-          titre: item.titre,
-          typeBien: item.type_bien,
-          localisation: [item.commune, item.quartier].filter(Boolean).join(' · '),
-          prixLabel: item.prix_label,
-          observations: '',
-        })
-      }
-    } catch {
-      /* catalogue indisponible */
-    }
-  }
-
-  // Synthèse de recherche précise et humaine
+  // Synthèse de recherche du visiteur
   const rechercheCritere = buildSearchCriteriaSummary(prospect, msgs)
 
   const props: FicheVisiteProps = {
@@ -413,6 +398,9 @@ export async function GET(
     prospectBudget: prospect.budget
       ? `${Number(prospect.budget).toLocaleString('fr-FR')} FCFA`
       : undefined,
+    typeContact,
+    agenceOuStructure: searchParams.get('agence') || undefined,
+    nomClientRepresente: searchParams.get('client') || undefined,
     dateVisite,
     creneauHoraire,
     commercialNom,
