@@ -185,6 +185,13 @@ export async function GET(
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) {
+    const isBrowser =
+      req.headers.get('accept')?.includes('text/html') || !req.headers.get('accept')
+    if (isBrowser) {
+      const loginUrl = new URL('/login', req.nextUrl.origin)
+      loginUrl.searchParams.set('redirect', req.nextUrl.pathname + req.nextUrl.search)
+      return NextResponse.redirect(loginUrl)
+    }
     return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
   }
 
