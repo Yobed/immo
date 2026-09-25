@@ -47,6 +47,56 @@ export function detectTransaction(
 }
 
 /**
+ * Signaux d'ANNONCE immobilière entrante : un agent/propriétaire/démarcheur
+ * qui CONFIE ou PUBLIE un bien, à ne jamais traiter comme un prospect en recherche.
+ */
+export function listingSignals(text: string): number {
+  let score = 0
+  if (/\b[àa]\s+(louer|vendre)\b|\b(en\s+vente|mise\s+en\s+vente|en\s+location|disponibles?|dispo)\b/i.test(text)) score++
+  if (
+    /\d[\d\s.,]*\s*(fcfa|f\s?cfa|francs?|millions?|milles?|f\b)/i.test(text) ||
+    /\b\d{1,3}(?:[.,]\d{3}){2,}\b/.test(text) ||
+    /\d\s*\/\s*(m²|m2|lot|mois)\b/i.test(text) ||
+    /\b\d[\d\s.,]*\s*[x×*]\s*[4567]\b/i.test(text)
+  ) score++
+  if (/\b(villas?|studios?|appartements?|duplex|triplex|terrains?|magasins?|bureaux?|entrep[ôo]ts?|r\+\d|pi[èe]ces?|chambres?|lots?|hectares?)\b/i.test(text)) score++
+  if (/\b(caution|avances?|loyers?|mois de loyer|superficie|m2|m²|titre foncier|tf\b|acd|loti[es]?|morcelable|documents?|pv de famille|attestation villageoise)\b/i.test(text)) score++
+  if (/\b(commissions?|com\s*[:.]?\s*\d{1,2}\s*%|mandataires?|d[ée]marcheurs?|demachaires?|je suis directe?|apporteur|direct avec g[ée]rant)\b/i.test(text)) score++
+  if (/(\+?225[\s.]?\d{2}|\b0[157][\s.]?\d{2})[\s.]?\d{2}[\s.]?\d{2}/.test(text) || /\b\d{10}\b/.test(text)) score++
+  return score
+}
+
+/**
+ * Formulations caractéristiques d'une OFFRE / PUBLICATION de bien par un démarcheur ou propriétaire.
+ * Même si l'annonce contient un slogan marketing (« Vous recherchez un site... nous mettons en vente »),
+ * ces marqueurs prouvent qu'il s'agit d'un offreur et NON d'un prospect cherchant un bien.
+ */
+const EXPLICIT_SUPPLY_RE = new RegExp(
+  [
+    /\b(nous\s+mettons\s+en\s+(vente|location)|mise\s+en\s+(vente|location)|mettre\s+en\s+(vente|location))\b/.source,
+    /\b(nous\s+disposons\s+d['’\s]|je\s+dispose\s+d['’\s]|on\s+dispose\s+d['’\s]|nous\s+avons\s+un(e)?\s+(chambre|studio|villa|appartement|terrain|parcelle))\b/.source,
+    /\b(j['’]\s*ai\s+(un|une|des|\d+)\s*(bien|villa|maison|appartement|terrain|studio|duplex|immeuble|magasin|bureau|local|portes?))\b/.source,
+    /\b(voici\s+une\s+(autre\s+)?offre\s+que\s+j['’]envoie|offre\s+que\s+j['’]envoie)\b/.source,
+    /\b(conditions?\s*[:.]?\s*\d|cdt\s*[:.]?\s*\d+\s*mois|\d[\d\s.,]*\s*(?:f|fcfa|fr|frs|mil(?:le)?s?|k)?\s*[x×*]\s*[4567]\b)/.source,
+    /\b(visites?\s*:?\s*\d+\s*(?:f|fcfa|fr|mille)|frais\s+de\s+visites?|part\s+de\s+porte|dont\s+\d[\d\s.,]*\s*(?:f|fcfa)?\s*de\s+commission|obligatoire\s+pour\s+les\s+d[ée]ma(?:r)?ch(?:e|ai)urs?)\b/.source,
+    /^\s*\*?(?:[àa]\s+louer|[àa]\s+vendre|location\s*:|vente\s*:|en\s+vente\b|chambre\s+froide\s+en\s+vente|entrep[ôo]t\s+en\s+vente|terrain\s+[àa]\s+vendre|[ée]cole\s+[àa]\s+vendre|studio\s+[àa]\s+louer|villa\s+[àa]\s+louer)/i.source,
+  ].join('|'),
+  'i',
+)
+
+/**
+ * Détecte une diffusion circulaire d'un confrère/démarcheur qui cherche un bien pour son client
+ * (ex: « Bonsoir la grande famille mon client direct a besoin de 10 hectares... »).
+ * Ce contact est un Demandeur B2B (Agent immobilier en recherche), pas un client B2C à qualifier par le message de bienvenue.
+ */
+export function isBrokerBroadcastSearch(text: string): boolean {
+  const t = text.toLowerCase()
+  return /\b(bon(jour|soir)\s+(la\s+)?(grande\s+)?famille|bonjour\s+les\s+coll[èe]gues|mon\s+client\s+direct|un\s+client\s+est\s+[àa]\s+la\s+recherche|besoin\s+pour\s+achat|budget\s+du\s+client|pour\s+mon\s+client)\b/i.test(
+    t,
+  )
+}
+
+/**
  * Règle 6 : Détection de l'intention de recherche client (vs proposition de bien).
  * Un client qui recherche un bien ne doit JAMAIS recevoir le message partenaire.
  */
@@ -58,18 +108,77 @@ export function isClientSearchIntent(text: string): boolean {
     return false
   }
 
+  // Si le message contient des marqueurs explicites d'offre/publication de bien (ex: "Mise en vente", "Nous disposons", "250.000f x5")
+  if (EXPLICIT_SUPPLY_RE.test(t)) {
+    return false
+  }
+
   const searchPhrases = [
-    /\b(je\s+cherche|cherche|je\s+recherche|recherche|on\s+cherche|nous\s+cherchons)\b/i,
+    /\b(je\s+cherche|je\s+recherche|on\s+cherche|nous\s+cherchons|client\s+(?:direct\s+)?(?:qui\s+)?(?:cherche|recherche|a\s+besoin)|est\s+[àa]\s+la\s+recherche\s+d)\b/i,
+    /\b^\s*(?:bonjour|bonsoir|salut|bjr|bsr|svp|urgent[\s!]*)*\s*cherche\s+(un|une|des|\d+)/i,
     /\b(je\s+suis\s+[àa]\s+la\s+recherche|en\s+qu[êe]te\s+d['’])\b/i,
     /\b(je\s+veux|je\s+voudrais|j['’]aimerais|je\s+souhaite|souhaiterais)\s+(louer|acheter|visiter|trouver|avoir|prendre|emm[ée]nager|un|une|des|ce|le|la|habiter)\b/i,
-    /\b(besoin\s+d['’](un|une|des)?\s*(bien|appartement|villa|maison|studio|duplex|terrain|logement|bureau|local|chambre|toit))\b/i,
+    /\b((?:j['’]ai\s+|a\s+)?besoin\s+(?:pour\s+achat\s+)?d['’e]\s*(un|une|des|\d+)?\s*(bien|appartement|villa|maison|studio|duplex|terrain|parcelle|entrep[ôo]t|logement|bureau|local|chambre|toit|hectares?|ha\b))\b/i,
     /\b(trouver\s+(un|une|des)\s+(bien|appartement|villa|maison|studio|duplex|terrain|logement))\b/i,
     /\b(avez[-\s]vous|est[-\s]ce\s+que\s+vous\s+avez|auriez[-\s]vous)\b/i,
-    /\b(mon\s+budget|notre\s+budget|budget\s*[:=]?\s*\d+)\b/i,
+    /\b(mon\s+budget|notre\s+budget|budget\s+du\s+client|budget\s+(?:max(?:imum)?\s*)?(?:compris\s+entre\s+|est\s+de\s+)?[:=]?\s*\d+)\b/i,
     /\b(pour\s+(y\s+)?habiter|pour\s+emm[ée]nager|pour\s+mon\s+s[ée]jour)\b/i,
   ]
 
   return searchPhrases.some((p) => p.test(t))
+}
+
+/**
+ * Détection stricte d'intention Offre / Partenaire / Démarcheur / Propriétaire (Règles 5 & 6).
+ * Un agent ou propriétaire qui publie/propose un bien ne doit PAS apparaître dans les prospects.
+ */
+export function isListingOrPartnerOffer(text: string, isReplyingToQualif = false): boolean {
+  if (isReplyingToQualif) {
+    return /\b(je\s+suis\s+(propri[ée]taire|d[ée]marcheur|agent|mandataire|apporteur)|mettre\s+en\s+(location|vente)|confier\s+mon\s+bien|publier\s+une\s+annonce|partenariat|collaborer)\b/i.test(text)
+  }
+
+  // Marqueur explicite d'offre de bien (même si le texte contient un mot comme "recherche")
+  if (EXPLICIT_SUPPLY_RE.test(text)) {
+    return true
+  }
+
+  // Si le message exprime clairement une intention de recherche client (et pas une offre), ce n'est pas une annonce
+  if (isClientSearchIntent(text)) {
+    return false
+  }
+
+  const t = text.toLowerCase()
+
+  const explicitListingPatterns = [
+    /\b(mettre|proposer|confier|placer)\s+(un|mon|notre|mes|des)\s+(bien|villa|maison|appartement|terrain|studio)/,
+    /\b(mettre|proposer)\s+en\s+(location|vente)\b/,
+    /\b(gestion\s+locative|prendre\s+en\s+gestion|faire\s+g[ée]rer)\b/,
+    /\b(publier|d[ée]poser|poster|diffuser|inscrire)\s+(une?\s+)?annonce\b/,
+    /\b(collaborer|collaboration|partenariat|partenaire)\b/,
+    /\bje\s+suis\s+(propri[ée]taire|d[ée]marcheur|agent|mandataire|courtier|apporteur)\b/,
+    /\ben\s+tant\s+que\s+propri[ée]taire\b/,
+    /\bpropri[ée]taire\s+d['’]un(e)?\b/,
+    /\bj['’]aimerais\s+(faire\s+louer|faire\s+vendre|mettre\s+en\s+location|vendre\s+mon|louer\s+mon)\b/,
+    /\b(cherche|trouver)\s+(un|des)?\s*(locataire|locataires|client|clients|acheteur|acheteurs|preneur|preneurs)\b/,
+    /\bdisponible\s+imm[ée]diatement\s*:\s*(villa|appartement|studio|duplex)/,
+  ]
+
+  if (explicitListingPatterns.some((p) => p.test(t))) {
+    return true
+  }
+
+  const hasConditions = /\b(conditions?(\s*:|\.{2,}|\s+\d)|(?:\d+)\s*mois\s+de\s+(caution|avance)|caution\s*:\s*\d+|avance\s*:\s*\d+|honoraires?|com(?:mission)?\s*[:=]?\s*\d+|frais\s+d['’]agence)\b/i.test(t)
+  const hasBrokerInfo = /\b(visites?\s+sur\s+rdvs?|frais\s+de\s+visites?|infoline|direct\s+propri[ée]taire|direct\s+avec\s+g[ée]rant|mandat\s+exclusif|contact\s*:\s*(\+?225|\b0[157])|prix\s+du\s+loyer)\b/i.test(t)
+
+  if (hasConditions || hasBrokerInfo) {
+    return true
+  }
+
+  if (listingSignals(text) >= 3) {
+    return true
+  }
+
+  return false
 }
 
 

@@ -87,7 +87,7 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
   const admin = createAdminClient()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let query = (admin as any).from('prospects').select('*').order('last_seen', { ascending: false }).limit(500)
+  let query = (admin as any).from('prospects').select('*').is('merged_into', null).order('last_seen', { ascending: false }).limit(500)
   if (view === 'list' && statut && statut in STATUT_META) query = query.eq('statut', statut)
   if (assigned === 'unassigned') query = query.is('assigned_to', null)
   else if (assigned && /^[0-9a-f-]{36}$/i.test(assigned)) query = query.eq('assigned_to', assigned)
@@ -114,7 +114,7 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
 
   const countOf = async (s?: Statut) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let c = (admin as any).from('prospects').select('id', { count: 'exact', head: true })
+    let c = (admin as any).from('prospects').select('id', { count: 'exact', head: true }).is('merged_into', null)
     if (s) c = c.eq('statut', s)
     return (await c).count ?? 0
   }

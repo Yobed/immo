@@ -48,6 +48,12 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
     'entrée couchée': 'studio',
     'entree couchee': 'studio',
     'chambre salon': 'appartement',
+    'hectare': 'terrain',
+    'parcelle': 'terrain',
+    'lotissement': 'terrain',
+    'entrepôt': 'commerce',
+    'entrepot': 'commerce',
+    'magasin': 'commerce',
   }
   for (const [alias, mapped] of Object.entries(TYPE_ALIASES)) {
     if (lower.includes(alias) && !result.type_bien) {
@@ -158,9 +164,9 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
     lower = lower.replace(m[0], '')
   }
 
-  // Séparateur de milliers par POINT : "50.000" → 50000, "1.250.000" → 1250000.
+  // Séparateur de milliers par POINT : "50.000" → 50000, "1.250.000" → 1250000, "50.000.000f" → 50000000f, "5000.000f" → 5000000f.
   // (Le séparateur ESPACE est déjà géré par le matcher générique ci-dessous.)
-  lower = lower.replace(/\b\d{1,3}(?:\.\d{3})+\b/g, (m) => m.replace(/\./g, ''))
+  lower = lower.replace(/\b\d{1,4}(?:\.\d{3})+(?=\D|$)/g, (m) => m.replace(/\./g, ''))
 
   // 4a. Montant isolé (ex: "250", "250 max", "250k", "250 mille")
   // En Côte d'Ivoire dans une recherche immo, un nombre isolé entre 20 et 999

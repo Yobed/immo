@@ -12,6 +12,9 @@ import {
   NO_RESULTS_MESSAGE,
   FRESH_SEARCH_RE,
   isClientSearchIntent,
+  listingSignals,
+  isListingOrPartnerOffer as isPartnerOrListingOffer,
+  isBrokerBroadcastSearch,
 } from '@/lib/ai/qualification';
 import { captureProspect, canonicalPhone } from '@/lib/prospects/capture';
 import { linkIntakeToProspect } from '@/lib/crm/intake';
@@ -109,87 +112,6 @@ const SELECTS_BIEN_REGEX = new RegExp(
 );
 
 const NEW_NEED_REGEX = /\b(cherche|voudrais|aimerais|besoin|louer|acheter|autre\s+(bien|chose|option)|plut[ôo]t|finalement|villas?|appartements?|apparts?|studios?|maisons?|terrains?|bureaux?|duplex|triplex|magasins?|chambres?|cocody|plateau|riviera|marcory|yopougon|treichville|bingerville|koumassi|abobo|adjam[ée]|port[-\s]?bou[eë]t|attecoub[ée]|songon|anyama|bassam|assinie|bouak[ée]|yamoussoukro|san[-\s]?p[ée]dro|korhogo|daloa|budget|fcfa|millions?|milles?)\b/i;
-
-/**
- * Signaux d'ANNONCE immobilière entrante : un agent/propriétaire/démarcheur
- * qui CONFIE un bien, à ne surtout pas traiter comme un client qui cherche.
- * Vocabulaire réel des annonces WhatsApp CI (cf. captures terrain) :
- * « 8.000.000/ lot », « 700milles * 5mois », « Com : 40% », « mandataire
- * exclusif », « morcelable », « TF », prix au m², hectares…
- * ≥3 signaux = annonce sûre ; 1-2 signaux sur message long = confirmation IA.
- */
-function listingSignals(text: string): number {
-  let score = 0;
-  if (/\b[àa]\s+(louer|vendre)\b|\bdisponibles?\b|\bdispo\b/i.test(text)) score++;
-  if (
-    /\d[\d\s.,]*\s*(fcfa|f\s?cfa|francs?|millions?|milles?)\b/i.test(text) ||
-    /\b\d{1,3}(?:[.,]\d{3}){2,}\b/.test(text) || // 8.000.000 sans devise
-    /\d\s*\/\s*(m²|m2|lot|mois)\b/i.test(text) // prix au m² / au lot
-  ) score++;
-  if (/\b(villas?|studios?|appartements?|duplex|triplex|terrains?|magasins?|bureaux?|entrep[ôo]ts?|r\+\d|pi[èe]ces?|chambres?|lots?|hectares?)\b/i.test(text)) score++;
-  if (/\b(caution|avances?|loyers?|mois de loyer|superficie|m2|m²|titre foncier|tf\b|acd|loti[es]?|morcelable|documents?)\b/i.test(text)) score++;
-  if (/\b(commissions?|com\s*[:.]?\s*\d{1,2}\s*%|mandataires?|d[ée]marcheurs?|je suis directe?|apporteur)\b/i.test(text)) score++;
-  if (/(\+?225[\s.]?\d{2}|\b0[157][\s.]?\d{2})[\s.]?\d{2}[\s.]?\d{2}/.test(text) || /\b\d{10}\b/.test(text)) score++;
-  return score;
-}
-
-/**
- * Détection stricte d'intention Offre / Partenaire / Démarcheur / Propriétaire (Règles 5 & 6).
- * Dès qu'un interlocuteur propose un bien ou un partenariat, Sapphire doit UNIQUEMENT
- * lui envoyer le message partenaire avec le lien register, et ne JAMAIS lui envoyer
- * le questionnaire de recherche client.
- */
-function isPartnerOrListingOffer(text: string, isReplyingToQualif = false): boolean {
-  // 1. Si le prospect répond à une question de qualification du bot, il ne propose pas un bien
-  // sauf s'il indique expressément être propriétaire/démarcheur confiant un bien.
-  if (isReplyingToQualif) {
-    return /\b(je\s+suis\s+(propri[ée]taire|d[ée]marcheur|agent|mandataire|apporteur)|mettre\s+en\s+(location|vente)|confier\s+mon\s+bien|publier\s+une\s+annonce|partenariat|collaborer)\b/i.test(text);
-  }
-
-  // 2. Si le message exprime clairement une intention de recherche client, ce n'est JAMAIS une offre de bien
-  if (isClientSearchIntent(text)) {
-    return false;
-  }
-
-  const t = text.toLowerCase();
-  
-  // 3. Formulations explicites d'un propriétaire / bailleur / démarcheur proposant un bien
-  const explicitListingPatterns = [
-    /\bj['’]ai\s+(un|une|des)\s+(bien|villa|maison|appartement|terrain|studio|duplex|immeuble|magasin|bureau|local)\b/,
-    /\bje\s+dispose\s+d['’]/,
-    /\bnous\s+disposons\s+d['’]/,
-    /\b(mettre|proposer|confier|placer)\s+(un|mon|notre|mes|des)\s+(bien|villa|maison|appartement|terrain|studio)/,
-    /\b(mettre|proposer)\s+en\s+(location|vente)\b/,
-    /\b(gestion\s+locative|prendre\s+en\s+gestion|faire\s+g[ée]rer)\b/,
-    /\b(publier|d[ée]poser|poster|diffuser|inscrire)\s+(une?\s+)?annonce\b/,
-    /\b(collaborer|collaboration|partenariat|partenaire)\b/,
-    /\bje\s+suis\s+(propri[ée]taire|d[ée]marcheur|agent|mandataire|courtier|apporteur)\b/,
-    /\ben\s+tant\s+que\s+propri[ée]taire\b/,
-    /\bpropri[ée]taire\s+d['’]un(e)?\b/,
-    /\bj['’]aimerais\s+(faire\s+louer|faire\s+vendre|mettre\s+en\s+location|vendre\s+mon|louer\s+mon)\b/,
-    /\b(cherche|trouver)\s+(un|des)?\s*(locataire|locataires|client|clients|acheteur|acheteurs|preneur|preneurs)\b/,
-    /\bdisponible\s+imm[ée]diatement\s*:\s*(villa|appartement|studio|duplex)/,
-  ];
-  
-  if (explicitListingPatterns.some((p) => p.test(t))) {
-    return true;
-  }
-  
-  // 4. Signaux forts d'annonce / diffusion démarcheur (conditions de bail, honoraires, visite payante, prix du loyer)
-  const hasConditions = /\b(conditions?(\s*:|\.{2,})|\d+\s*mois\s+de\s+(caution|avance)|caution\s*:\s*\d+|avance\s*:\s*\d+|honoraires?|com\s*:\s*\d+|frais\s+d['’]agence)\b/i.test(t);
-  const hasBrokerInfo = /\b(visites?\s+sur\s+rdvs?|frais\s+de\s+visites?|infoline|direct\s+propri[ée]taire|mandat\s+exclusif|contact\s*:\s*(\+?225|\b0[157])|prix\s+du\s+loyer)\b/i.test(t);
-
-  if (hasConditions || hasBrokerInfo) {
-    return true;
-  }
-
-  // 5. Annonce immobilière brute avec ≥ 3 signaux d'annonce (sans être une recherche client)
-  if (listingSignals(text) >= 3) {
-    return true;
-  }
-  
-  return false;
-}
 
 /** Message UNIQUE et courtois pour tout bien confié sur WhatsApp :
  *  orientation plateforme (créer un compte + publier) — rien de plus. */
@@ -528,7 +450,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: 'ok', branch: 'guard_silence' });
     }
 
-    // 1c. Mutes actifs : reprise humaine (60 min) OU fournisseur de biens
+    // 1c. Mutes actifs : reprise humaine (24 h) OU fournisseur de biens
     // identifié (24 h) OU prise en charge conseiller après 0 résultat (24 h).
     const { data: sysMarks } = await supabase
       .from('whatsapp_messages')
@@ -541,36 +463,13 @@ export async function POST(req: NextRequest) {
       .limit(5);
     const now = Date.now();
     const marks = ((sysMarks as unknown) as { body: string; created_at: string }[]) ?? [];
-    if (marks.some((m) => m.body === 'HUMAN_TAKEOVER' && now - new Date(m.created_at).getTime() < 3_600_000)) {
-      return NextResponse.json({ status: 'ok', branch: 'human_takeover_mute' });
-    }
-    if (marks.some((m) => m.body === 'LISTING_PROVIDER')) {
-      const isClientSearch = isClientSearchIntent(userMessage) || FRESH_SEARCH_RE.test(userMessage);
-      if (isClientSearch) {
-        // Lever le mute fournisseur si le contact formule une recherche client
-        await supabase
-          .from('whatsapp_messages')
-          .delete()
-          .eq('jid', jid)
-          .eq('direction', 'system')
-          .eq('body', 'LISTING_PROVIDER');
-      } else {
-        return NextResponse.json({ status: 'ok', branch: 'listing_provider_mute' });
-      }
-    }
-    if (marks.some((m) => m.body === 'COUNSELOR_HANDOFF')) {
-      // Le client reprend la main seulement s'il exprime une nouvelle recherche distincte
-      const isFresh = FRESH_SEARCH_RE.test(userMessage);
-      if (!isFresh) {
-        return NextResponse.json({ status: 'ok', branch: 'counselor_handoff_mute' });
-      }
-    }
 
-    // 2. Historique de conversation (10 derniers messages)
+    // 2. Historique de conversation (10 derniers messages réels, hors marqueurs system)
     const { data: history } = await supabase
       .from('whatsapp_messages')
-      .select('direction, body, created_at')
+      .select('direction, body, created_at, metadata')
       .eq('jid', jid)
+      .in('direction', ['inbound', 'outbound'])
       .order('created_at', { ascending: false })
       .limit(10);
 
@@ -580,15 +479,28 @@ export async function POST(req: NextRequest) {
         role: m.direction === 'inbound' ? ('user' as const) : ('assistant' as const),
         content: m.body,
         created_at: m.created_at,
+        metadata: m.metadata,
       }));
 
-    // Inactivité > 2h = nouvelle session de conversation (les relances et mutes antérieurs expirent)
-    const lastMsgTime = history?.[0]?.created_at ? new Date(history[0].created_at).getTime() : 0;
-    const isNewSession = !lastMsgTime || (now - lastMsgTime > 2 * 3_600_000);
+    // Note : history[0] est le message entrant qui vient d'être inséré à l'étape 1.
+    // Le dernier message précédent est donc history[1].
+    const prevMsgTime = history?.[1]?.created_at ? new Date(history[1].created_at).getTime() : 0;
+    const isNewSession = !prevMsgTime || (now - prevMsgTime > 2 * 3_600_000);
 
-    // 2b. ANNONCE / PROPOSITION entrante (agent/proprio/démarcheur qui CONFIE un bien) → ne
-    // JAMAIS proposer des biens en retour (Règles 5 & 6).
-    const isReplyingToQualif = formattedHistory.slice(-2).some((m) =>
+    // Détection d'une conversation déjà gérée par un commercial humain (< 24 h)
+    const hasHumanTakeover =
+      marks.some((m) => m.body === 'HUMAN_TAKEOVER' && now - new Date(m.created_at).getTime() < 24 * 3_600_000) ||
+      formattedHistory.some(
+        (m) =>
+          m.role === 'assistant' &&
+          (m.metadata?.actor_type === 'commercial' || m.metadata?.trace_source === 'human_takeover') &&
+          m.created_at &&
+          now - new Date(m.created_at).getTime() < 24 * 3_600_000,
+      );
+
+    // 2b. ANNONCE / PROPOSITION entrante (agent/proprio/démarcheur qui CONFIE ou PUBLIE un bien) → ne
+    // JAMAIS l'enregistrer comme prospect ni lui proposer des biens en retour (Règles 5 & 6).
+    const isReplyingToQualif = formattedHistory.slice(-3, -1).some((m) =>
       m.role === 'assistant' && (
         m.content.includes('Bienvenue chez Bogbe') ||
         QUALIF_REMINDER_MARKER.test(m.content)
@@ -612,7 +524,7 @@ export async function POST(req: NextRequest) {
       const alreadyReplied = formattedHistory.some(
         (m) => m.role === 'assistant' && m.content.startsWith('Merci pour votre proposition'),
       );
-      if (!alreadyReplied) {
+      if (!alreadyReplied && !hasHumanTakeover) {
         const advisorPhone = process.env.SAPPHIRE_ADVISOR_PHONE || '+2250544872051';
         await wasenderSendMessage(
           advisorPhone,
@@ -630,22 +542,45 @@ export async function POST(req: NextRequest) {
       }
       return NextResponse.json({
         status: 'ok',
-        branch: alreadyReplied ? 'listing_muted' : 'listing_partner',
+        branch: alreadyReplied || hasHumanTakeover ? 'listing_muted' : 'listing_partner',
       });
     }
 
-    // 2c. Capture prospect (CRM) : enrichit la fiche avec ce qui est compris
-    // (numéro, nom, type, commune, quartier, budget, date). Placée AVANT la garde
-    // post-clôture pour capter aussi les réponses tardives (« pour dans 2 mois »
-    // arrive après le handoff). Annonces/démarcheurs déjà écartés plus haut.
-    // Best-effort : ne bloque jamais la réponse.
+    // Si le contact est un démarcheur identifié (LISTING_PROVIDER) et n'exprime PAS de recherche client,
+    // on coupe immédiatement AVANT toute capture prospect.
+    if (marks.some((m) => m.body === 'LISTING_PROVIDER') && !clientSearching && !FRESH_SEARCH_RE.test(userMessage)) {
+      return NextResponse.json({ status: 'ok', branch: 'listing_provider_mute' });
+    }
+
+    // 2c. Capture prospect (CRM) : uniquement pour les vrais demandeurs (clients directs ou agents
+    // cherchant un bien pour leur client). Les offreurs/publicateurs sont déjà écartés ci-dessus et dans captureProspect.
     let capturedProspectId: string | null = null;
     try {
       capturedProspectId = await captureProspect({ phone: senderPn, jid, nom: contactName, message: userMessage, history: formattedHistory });
     } catch (error) {
-      // The conversation must continue, but a missing CRM capture is an
-      // operational failure and must remain visible in Vercel logs.
       console.error('[whatsapp] CRM prospect capture failed', error);
+    }
+
+    // Si un commercial humain a déjà pris la main sur cette conversation (< 24 h),
+    // Sapphire ne répond JAMAIS à sa place (évite d'envoyer « Bienvenue chez Bogbe's » au milieu d'un échange humain).
+    if (hasHumanTakeover) {
+      return NextResponse.json({ status: 'ok', branch: 'human_takeover_mute' });
+    }
+
+    // Si c'est une diffusion circulaire de confrère/démarcheur (« Bonsoir la grande famille mon client direct a besoin... »)
+    // ou un démarcheur (LISTING_PROVIDER) qui exprime un besoin pour son client :
+    // la demande est bien capturée dans le CRM (avec le badge Agent démarcheur), mais Sapphire ne lui envoie pas
+    // le questionnaire B2C « Bienvenue chez Bogbe's » — le commercial humain gère la relation confrère.
+    if (isBrokerBroadcastSearch(userMessage) || marks.some((m) => m.body === 'LISTING_PROVIDER')) {
+      return NextResponse.json({ status: 'ok', branch: 'broker_search_captured_silent' });
+    }
+
+    if (marks.some((m) => m.body === 'COUNSELOR_HANDOFF')) {
+      // Le client reprend la main seulement s'il exprime une nouvelle recherche distincte
+      const isFresh = FRESH_SEARCH_RE.test(userMessage);
+      if (!isFresh) {
+        return NextResponse.json({ status: 'ok', branch: 'counselor_handoff_mute' });
+      }
     }
 
     // 2d. Suivi post-clôture : le dernier message Sapphire annonçait la reprise
@@ -708,8 +643,12 @@ export async function POST(req: NextRequest) {
             .insert({ jid, direction: 'outbound', body: text, metadata: { type } });
         };
         // 1er contact (aucun message assistant) OU nouvelle session après inactivité avec salutation → message de bienvenue (Règle 1).
+        // Garde anti-spam : on ne renvoie JAMAIS le WELCOME_MESSAGE s'il a déjà été envoyé dans l'historique récent.
+        const alreadyWelcomed = formattedHistory.some(
+          (m) => m.role === 'assistant' && m.content.includes('Bienvenue chez Bogbe'),
+        );
         const isGreeting = isGreetingOrAdOpener(userMessage);
-        if (!lastAssistantMsg || (isNewSession && isGreeting)) {
+        if (!alreadyWelcomed && (!lastAssistantMsg || (isNewSession && isGreeting))) {
           await sendFixed(WELCOME_MESSAGE, 'qualif_welcome');
           return NextResponse.json({ status: 'ok', branch: 'welcome' });
         }

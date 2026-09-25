@@ -1,5 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { parseSearchQuery } from '@/lib/searchParser'
+import { isListingOrPartnerOffer, isBrokerBroadcastSearch, QUALIF_REMINDER_MARKER } from '@/lib/ai/qualification'
 
 /**
  * Capture prospect : à chaque message entrant d'un client (WhatsApp), on
@@ -88,8 +89,21 @@ function detectDeclaredName(message: string, history?: { role: string; content: 
 export async function captureProspect(args: CaptureArgs): Promise<string | null> {
   const { phone, jid, nom, message, history } = args
   if (!phone) return null
+  if (jid && jid.endsWith('@g.us')) return null // ne jamais enregistrer un groupe WhatsApp comme prospect
   const canonical = canonicalPhone(phone)
-  if (canonical.length < 8) return null // numéro inexploitable
+  if (canonical.length < 8 || canonical.length > 15 || canonical.startsWith('120363')) return null // numéro inexploitable ou ID de groupe
+
+  const isReplyingToQualif = (history ?? []).slice(-2).some(
+    (m) =>
+      m.role === 'assistant' &&
+      (m.content.includes('Bienvenue chez Bogbe') || QUALIF_REMINDER_MARKER.test(m.content)),
+  )
+
+  // Règle stricte : un agent immobilier / propriétaire qui publie ou propose un bien
+  // ne doit JAMAIS apparaître dans la liste des prospects s'il ne cherche pas de bien.
+  if (isListingOrPartnerOffer(message, isReplyingToQualif)) {
+    return null
+  }
 
   const p = parseSearchQuery(message)
   const found = {
@@ -106,8 +120,9 @@ export async function captureProspect(args: CaptureArgs): Promise<string | null>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: existing } = await (sb as any)
     .from('prospects')
-    .select('id, phone')
+    .select('id, phone, source_detail')
     .eq('phone', canonical)
+    .is('merged_into', null)
     .maybeSingle()
 
   // Pas de fiche pour un simple « Bonjour » ou un clic de pub : on ne crée la
@@ -132,6 +147,17 @@ export async function captureProspect(args: CaptureArgs): Promise<string | null>
   if (declaredName) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (sb as any).from('prospects').update({ nom: declaredName }).eq('phone', canonical)
+  }
+
+  // Détection automatique d'un agent immobilier en recherche pour son client (Demandeur B2B)
+  const isAgentSearchingForClient =
+    isBrokerBroadcastSearch(message) ||
+    /\b(mon client|mes clients|notre client|mandant|confr[èe]re|cabinet|d[ée]marcheur|demarcheur|interm[ée]diaire|apporteur|pour un client|pour mon client|cherche pour client)\b/i.test(
+      message,
+    )
+  if (isAgentSearchingForClient && existing?.source_detail !== 'prospect') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (sb as any).from('prospects').update({ source_detail: 'agent' }).eq('phone', canonical)
   }
 
   const { data: linked } = await (sb as any)
