@@ -10,11 +10,12 @@ import { parseSearchQuery } from '../searchParser.ts'
 export const QUARTIERS_ZONE = [
   'angrée', 'angré', 'angre', 'belle ville', 'belleville', 'aboboté', 'abobote',
   'riviera golf', 'riviera 2', 'riviera 3', 'riviera 4', 'riviera palmeraie', 'riviera bonoumin',
-  'riviera faya', 'riviera', 'bonoumin', 'palmeraie', 'deux plateaux', '2 plateaux',
-  'vallon', 'cocovico', 'synacass', 'akouédo', 'akouedo', 'danga', 'zone 4', 'biétry', 'bietry',
-  'anoumabo', 'niangon', 'selmer', 'toits rouges', 'toit rouge', 'maroc', 'anador', 'sopim',
-  'ananeraie', 'sideci', 'banco', 'gesco', 'azito', 'wassakara', 'andokoi', 'kouté', 'koute',
-  'millionnaire', 'koweit', 'koweït', 'pk18', 'pk 18', 'avocatier', 'ndotre', 'n\'dotré', 'ndotré',
+  'riviera faya', 'riviera', 'bonoumin', 'palmeraie', 'deux plateaux', 'deux plateau', '2 plateaux', '2 plateau',
+  'vallon', 'cocovico', 'synacass', 'akouédo', 'akouedo', 'danga', 'aghien', 'anono', 'golf', 'golfe',
+  'zone 4', 'biétry', 'bietry', 'anoumabo', 'niangon', 'selmer', 'toits rouges', 'toit rouge',
+  'maroc', 'anador', 'sopim', 'ananeraie', 'sideci', 'banco', 'gesco', 'azito', 'wassakara',
+  'andokoi', 'kouté', 'koute', 'millionnaire', 'koweit', 'koweït', 'nouveau bureau',
+  'pk18', 'pk 18', 'avocatier', 'ndotre', 'n\'dotré', 'ndotré', 'akeikoi', 'akéikoi',
   'jules verne', 'cite ado', 'cité ado', 'remblais', 'sogephia', 'williamsville', 'paillet',
   'vridi', 'gonzagueville', 'abatta', 'bonoua', 'faya', 'bracodi', 'sicogi', 'attoban',
   'château', 'chateau', 'djorobite', 'djorobité', 'dokui', 'gestoci', 'mahou',
@@ -36,6 +37,8 @@ export function detectQuartierZone(text: string): string | null {
       if (q === 'abobote') return 'Aboboté'
       if (q === 'toit rouge') return 'Toits rouges'
       if (q === 'koweit') return 'Koweït'
+      if (q === '2 plateau') return '2 plateaux'
+      if (q === 'deux plateau') return 'Deux plateaux'
       return q.charAt(0).toUpperCase() + q.slice(1)
     }
   }
@@ -149,11 +152,7 @@ export function isClientSearchIntent(text: string): boolean {
  * Un agent ou propriétaire qui publie/propose un bien ne doit PAS apparaître dans les prospects.
  */
 export function isListingOrPartnerOffer(text: string, isReplyingToQualif = false): boolean {
-  if (isReplyingToQualif) {
-    return /\b(je\s+suis\s+(propri[ée]taire|d[ée]marcheur|agent|mandataire|apporteur)|mettre\s+en\s+(location|vente)|confier\s+mon\s+bien|publier\s+une\s+annonce|partenariat|collaborer)\b/i.test(text)
-  }
-
-  // Marqueur explicite d'offre de bien (même si le texte contient un mot comme "recherche")
+  // Marqueur explicite d'offre de bien (même si le texte contient un mot comme "recherche" ou répond au message de bienvenue)
   if (EXPLICIT_SUPPLY_RE.test(text)) {
     return true
   }
@@ -168,6 +167,8 @@ export function isListingOrPartnerOffer(text: string, isReplyingToQualif = false
   const explicitListingPatterns = [
     /\b(mettre|proposer|confier|placer)\s+(un|mon|notre|mes|des)\s+(bien|villa|maison|appartement|terrain|studio)/,
     /\b(mettre|proposer)\s+en\s+(location|vente)\b/,
+    /\bque\s+je\s+veux\s+(vendre|louer|mettre\s+en\s+(location|vente)|faire\s+louer)\b/,
+    /\b(besoin\s+d['’]un\s+(op[ée]rateur|financier)|projet\s+d['’]am[ée]nagement\s+foncier|dotation\s*:)\b/,
     /\b(gestion\s+locative|prendre\s+en\s+gestion|faire\s+g[ée]rer)\b/,
     /\b(publier|d[ée]poser|poster|diffuser|inscrire)\s+(une?\s+)?annonce\b/,
     /\b(collaborer|collaboration|partenariat|partenaire)\b/,
@@ -190,7 +191,7 @@ export function isListingOrPartnerOffer(text: string, isReplyingToQualif = false
     return true
   }
 
-  if (listingSignals(text) >= 3) {
+  if (!isReplyingToQualif && listingSignals(text) >= 3) {
     return true
   }
 

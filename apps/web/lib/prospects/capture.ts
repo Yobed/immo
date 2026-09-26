@@ -33,42 +33,66 @@ export function canonicalPhone(raw: string): string {
 // Quartiers fréquents (best-effort) — complète le `commune` du parseur.
 const QUARTIERS = [
   'angrée', 'angré', 'angre', 'belle ville', 'belleville', 'aboboté', 'abobote',
-  'riviera', 'bonoumin', 'palmeraie', 'deux plateaux', '2 plateaux',
+  'riviera golf', 'riviera 2', 'riviera 3', 'riviera 4', 'riviera palmeraie', 'riviera bonoumin',
+  'riviera faya', 'riviera', 'bonoumin', 'palmeraie', 'deux plateaux', 'deux plateau', '2 plateaux', '2 plateau',
   'vallon', 'cocovico', 'synacass', 'djorobité', 'djorobite', 'akouédo', 'akouedo',
-  'danga', 'zone 4', 'biétry', 'bietry', 'anoumabo', 'niangon', 'selmer',
-  'toits rouges', 'vridi', 'gonzagueville', 'abatta', 'bonoua', 'faya',
-  'bracodi', 'sicogi', 'ficgayo', 'lokoua', 'attoban', 'château', 'chateau',
+  'danga', 'aghien', 'anono', 'golf', 'golfe', 'm\'badon', 'mbadon', 'mpouto', 'm\'pouto',
+  'zone 4', 'biétry', 'bietry', 'anoumabo', 'remblais', 'sogephia',
+  'niangon', 'selmer', 'toits rouges', 'toit rouge', 'maroc', 'anador', 'sopim',
+  'ananeraie', 'sideci', 'banco', 'gesco', 'azito', 'wassakara', 'andokoi',
+  'kouté', 'koute', 'millionnaire', 'koweit', 'koweït', 'nouveau bureau', 'cite ado', 'cité ado',
+  'vridi', 'gonzagueville', 'abatta', 'jules verne', 'bonoua', 'faya',
+  'bracodi', 'williamsville', 'paillet', 'sicogi', 'ficgayo', 'lokoua', 'attoban', 'château', 'chateau',
   'dokui', 'gestoci', 'mahou', '7e tranche', '8e tranche', '9e tranche',
+  'pk18', 'pk 18', 'avocatier', 'ndotre', 'n\'dotré', 'ndotré', 'akeikoi', 'akéikoi',
 ]
 
 const QUARTIER_TO_COMMUNE: Record<string, string> = {
   angrée: 'Cocody', angré: 'Cocody', angre: 'Cocody',
   'belle ville': 'Cocody', belleville: 'Cocody',
   aboboté: 'Cocody', abobote: 'Cocody',
+  'riviera golf': 'Cocody', 'riviera 2': 'Cocody', 'riviera 3': 'Cocody', 'riviera 4': 'Cocody',
+  'riviera palmeraie': 'Cocody', 'riviera bonoumin': 'Cocody', 'riviera faya': 'Cocody',
   riviera: 'Cocody', bonoumin: 'Cocody', palmeraie: 'Cocody',
-  'deux plateaux': 'Cocody', '2 plateaux': 'Cocody',
+  'deux plateaux': 'Cocody', 'deux plateau': 'Cocody', '2 plateaux': 'Cocody', '2 plateau': 'Cocody',
   vallon: 'Cocody', cocovico: 'Cocody', synacass: 'Cocody',
   djorobité: 'Cocody', djorobite: 'Cocody', akouédo: 'Cocody', akouedo: 'Cocody',
-  danga: 'Cocody', faya: 'Cocody', attoban: 'Cocody',
+  danga: 'Cocody', aghien: 'Cocody', anono: 'Cocody', golf: 'Cocody', golfe: 'Cocody',
+  'm\'badon': 'Cocody', mbadon: 'Cocody', mpouto: 'Cocody', 'm\'pouto': 'Cocody',
+  faya: 'Cocody', attoban: 'Cocody',
   château: 'Cocody', chateau: 'Cocody',
   dokui: 'Cocody', gestoci: 'Cocody', mahou: 'Cocody',
   '7e tranche': 'Cocody', '8e tranche': 'Cocody', '9e tranche': 'Cocody',
   'zone 4': 'Marcory', biétry: 'Marcory', bietry: 'Marcory', anoumabo: 'Marcory',
-  niangon: 'Yopougon', selmer: 'Yopougon', 'toits rouges': 'Yopougon',
+  remblais: 'Koumassi', sogephia: 'Koumassi',
+  niangon: 'Yopougon', selmer: 'Yopougon', 'toits rouges': 'Yopougon', 'toit rouge': 'Yopougon',
+  maroc: 'Yopougon', anador: 'Yopougon', sopim: 'Yopougon', ananeraie: 'Yopougon',
+  sideci: 'Yopougon', banco: 'Yopougon', gesco: 'Yopougon', azito: 'Yopougon',
+  wassakara: 'Yopougon', andokoi: 'Yopougon', kouté: 'Yopougon', koute: 'Yopougon',
+  millionnaire: 'Yopougon', koweit: 'Yopougon', koweït: 'Yopougon', 'nouveau bureau': 'Yopougon',
+  'cite ado': 'Yopougon', 'cité ado': 'Yopougon',
   sicogi: 'Yopougon', ficgayo: 'Yopougon', lokoua: 'Yopougon',
   vridi: 'Port-Bouët', gonzagueville: 'Port-Bouët',
-  abatta: 'Bingerville',
-  bracodi: 'Adjamé',
+  abatta: 'Bingerville', 'jules verne': 'Bingerville',
+  bracodi: 'Adjamé', williamsville: 'Adjamé', paillet: 'Adjamé',
+  pk18: 'Abobo', 'pk 18': 'Abobo', avocatier: 'Abobo',
+  ndotre: 'Abobo', 'n\'dotré': 'Abobo', ndotré: 'Abobo', akeikoi: 'Abobo', akéikoi: 'Abobo',
 }
 
 function detectQuartier(text: string): { quartier: string | null; commune: string | null } {
   const t = text.toLowerCase()
   for (const q of QUARTIERS) {
-    if (t.includes(q)) {
+    const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const re = new RegExp(`(?:^|[^a-z0-9éèêëàâîïôùûç])(${escaped})(?:$|[^a-z0-9éèêëàâîïôùûç])`, 'i')
+    if (re.test(t)) {
       const normalizedLabel =
         q === 'angrée' || q === 'angre' ? 'Angré'
         : q === 'belleville' ? 'Belle ville'
         : q === 'abobote' ? 'Aboboté'
+        : q === 'toit rouge' ? 'Toits rouges'
+        : q === 'koweit' ? 'Koweït'
+        : q === '2 plateau' ? '2 plateaux'
+        : q === 'deux plateau' ? 'Deux plateaux'
         : q.charAt(0).toUpperCase() + q.slice(1)
       return { quartier: normalizedLabel, commune: QUARTIER_TO_COMMUNE[q] ?? null }
     }

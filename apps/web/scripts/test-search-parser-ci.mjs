@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { parseSearchQuery } from '../lib/searchParser.ts';
-import { qualify, buildQualifReminder, detectTransaction } from '../lib/ai/qualification.ts';
+import { qualify, buildQualifReminder, detectTransaction, isListingOrPartnerOffer } from '../lib/ai/qualification.ts';
 
 console.log('--- TEST 1 : Parser Shorthands & Aliases ---');
 const p1 = parseSearchQuery('de 4 pièces avec une grande cour');
@@ -159,6 +159,51 @@ assert.ok(
   'Français fluide sans "pour dans le secteur de"',
 );
 console.log('✓ Test 7 validé');
+
+console.log('--- TEST 8 : Cas réels audit 60 conversations prospects ---');
+// 1. Chamberlain Akereni : "2 plateaux" / "2 plateau" ne doit JAMAIS matcher la commune "Plateau"
+const qChamberlain = qualify("Pourriez vous m'orienter sur une maison au 2 plateaux 2 pièces");
+assert.notEqual(qChamberlain.zone, 'Plateau', '"2 plateaux" ne doit jamais matcher Plateau');
+assert.equal(qChamberlain.zone, '2 plateaux', '"2 plateaux" reconnu comme quartier de Cocody');
+
+const p2PlateauSingulier = parseSearchQuery('studio au 2 plateau');
+assert.notEqual(p2PlateauSingulier.commune, 'Plateau', '"2 plateau" au singulier ne doit jamais matcher Plateau');
+
+// 2. tontonkouamy : "dans la commune de Cocody : deux plateaux, aghien" -> Cocody (jamais Plateau)
+const pTonton = parseSearchQuery('dans la commune de Cocody : deux plateaux, aghien');
+assert.equal(pTonton.commune, 'Cocody', 'Cocody prime et deux plateaux ne matche pas Plateau');
+
+// 3. Interconfimo Commercial : numéro de téléphone "0574176868" ne doit JAMAIS écraser le budget "500 000 FCFA"
+const pInterconfimo = parseSearchQuery('💰 Budget : 450 000 à 500 000 FCFA / mois. Contactez nous au :0574176868');
+assert.equal(pInterconfimo.prix_max, '500000', 'Le numéro 0574176868 est ignoré, budget = 500000');
+
+// 4. Tyga : "J'ai un terrain de 1000m² à Assini que je veux vendre" après WELCOME_MESSAGE
+const msgTyga = "J'ai un terrain de 1000m² à Assini que je veux vendre";
+assert.equal(isListingOrPartnerOffer(msgTyga, true), true, 'Détecté comme offre vendeur même après WELCOME_MESSAGE');
+const pTyga = parseSearchQuery(msgTyga);
+assert.equal(pTyga.prix_max, undefined, '"1000m²" ne doit pas être lu comme un budget de 1000 FCFA');
+
+// 5. rollins 01flan : annonce démarcheur avec commission après relance qualification
+const msgRollins = 'Riviera palmeraie rosier programme2 une villa duplex de 5pieces 700milles 5mois Commission 40% bureau comme habitation';
+assert.equal(isListingOrPartnerOffer(msgRollins, true), true, 'Annonce avec Commission 40% détectée même après relance');
+
+// 6. al : URL avec UUID "17b41636-..." ne doit pas écraser le prix "(30 000 FCFA/mois)"
+const pAl = parseSearchQuery("Bonjour, je souhaite plus d'infos sur Studio meublé Marcory (30 000 FCFA/mois) https://www.bogbesgroup.com/biens/17b41636-3b3b-4580-a0a7-7fc98c84a97c");
+assert.equal(pAl.prix_max, '30000', 'Les chiffres dans l UUID de l URL sont ignorés');
+
+// 7. Keita Mahoua : "70.000 x 4 = 300.000" -> garde le loyer mensuel 70 000 FCFA, pas la caution multipliée 300 000
+const pKeitaCaution = parseSearchQuery('70.000 x 4 = 300.000');
+assert.equal(pKeitaCaution.prix_max, '70000', 'Multiplication de caution x 4 ignorée au profit du loyer mensuel');
+
+// 8. kouamealexander120 : "Yopougon Nouveau bureau" est un quartier de Yopougon, pas un type_bien "bureau"
+const pNouveauBureau = parseSearchQuery('Yopougon Nouveau bureau');
+assert.equal(pNouveauBureau.type_bien, undefined, '"Nouveau bureau" ne force pas type_bien = bureau');
+assert.equal(pNouveauBureau.commune, 'Yopougon', '"Yopougon Nouveau bureau" -> commune Yopougon');
+
+// 9. Tima : "WILLIAMSVILLE" reconnu comme zone
+const qTima = qualify('WILLIAMSVILLE');
+assert.equal(qTima.zone, 'Williamsville', '"WILLIAMSVILLE" reconnu comme quartier');
+console.log('✓ Test 8 validé');
 
 console.log('\n========================================================');
 console.log('TOUS LES TESTS DU MOTEUR DE QUALIFICATION SONT VALIDÉS !');

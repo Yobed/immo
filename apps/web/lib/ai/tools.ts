@@ -67,7 +67,9 @@ const QUARTIER_COMMUNE: Record<string, string> = {
   bonoumin: 'Cocody',
   palmeraie: 'Cocody',
   'deux plateaux': 'Cocody',
+  'deux plateau': 'Cocody',
   '2 plateaux': 'Cocody',
+  '2 plateau': 'Cocody',
   vallon: 'Cocody',
   cocovico: 'Cocody',
   synacass: 'Cocody',
@@ -76,6 +78,10 @@ const QUARTIER_COMMUNE: Record<string, string> = {
   akouedo: 'Cocody',
   'akouédo': 'Cocody',
   danga: 'Cocody',
+  aghien: 'Cocody',
+  anono: 'Cocody',
+  golf: 'Cocody',
+  golfe: 'Cocody',
   faya: 'Cocody',
   attoban: 'Cocody',
   chateau: 'Cocody',
@@ -112,6 +118,7 @@ const QUARTIER_COMMUNE: Record<string, string> = {
   millionnaire: 'Yopougon',
   koweit: 'Yopougon',
   'koweït': 'Yopougon',
+  'nouveau bureau': 'Yopougon',
   'cite ado': 'Yopougon',
   'cité ado': 'Yopougon',
   pk18: 'Abobo',
@@ -119,6 +126,8 @@ const QUARTIER_COMMUNE: Record<string, string> = {
   avocatier: 'Abobo',
   ndotre: 'Abobo',
   'ndotré': 'Abobo',
+  akeikoi: 'Abobo',
+  'akéikoi': 'Abobo',
   vridi: 'Port-Bouët',
   gonzagueville: 'Port-Bouët',
   bracodi: 'Adjamé',
@@ -261,13 +270,15 @@ export async function getAIBienContext(
   const msgNorm = norm(
     userMessage + ' ' + (history?.slice(-8).map((m) => m.content).join(' ') ?? ''),
   )
+  // Empêcher "2 plateau" / "deux plateau" de matcher la commune "Plateau"
+  const msgNormForCommunes = msgNorm.replace(/\b(?:deux|2|ii)\s*plateaux?\b/gi, 'deux_plateaux')
 
-  // 1. Communes citées (avec frontières de mots pour éviter que "Aboboté" matche "Abobo")
+  // 1. Communes citées (avec frontières de mots pour éviter que "Aboboté" matche "Abobo" ou "2 plateau" matche "Plateau")
   for (const c of COMMUNES_CI) {
     const clean = norm(c === 'Bassam (Grand-Bassam)' ? 'bassam' : c)
     const escaped = clean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    const communeRe = new RegExp(`(?<![a-z0-9])${escaped}(?![a-z0-9])`, 'i')
-    if (communeRe.test(msgNorm) && !zoneTerms.includes(clean)) {
+    const communeRe = new RegExp(`(?<![a-z0-9_])${escaped}(?![a-z0-9_])`, 'i')
+    if (communeRe.test(msgNormForCommunes) && !zoneTerms.includes(clean)) {
       zoneTerms.push(clean)
     }
   }
@@ -343,6 +354,8 @@ export async function getAIBienContext(
   if (budget != null) {
     validItems = items.filter((b) => b.prix_value != null && b.prix_value <= budget)
   }
+  // Exclusion des prix aberrants issus d'erreurs d'extraction (< 15 000 FCFA, ex: "2 735 FCFA / mois")
+  validItems = validItems.filter((b) => b.prix_value == null || b.prix_value >= 15_000)
 
   // Post-filtrage strict sur la transaction (location vs vente) :
   // Ne jamais proposer un bien en vente (25M, 90M) à quelqu'un qui cherche une location

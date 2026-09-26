@@ -80,6 +80,14 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
     }
   }
 
+  // Protection des noms de quartiers contenant un mot-clé de type de bien
+  // ex: "Yopougon Nouveau bureau" est un quartier de Yopougon, pas une recherche de bureau !
+  const hasNouveauBureau = /\bnouveau\s+bureau\b/i.test(lower)
+  if (hasNouveauBureau) {
+    result.commune = 'Yopougon'
+    lower = lower.replace(/\bnouveau\s+bureau\b/gi, ' ')
+  }
+
   // We sort by length DESC to match 'residence_meublee' before 'residence' etc.
   // En Côte d'Ivoire, "maison" est souvent employé génériquement ("une maison une chambre salon") :
   // il ne doit pas écraser un type précis déjà détecté via TYPE_ALIASES (ex: "villa basse").
@@ -125,10 +133,16 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
     lower = lower.replace(peripherieMatch[0], '')
   }
 
-  // Quartiers d'Abidjan dont le nom contient le préfixe d'une autre commune (ex: "Aboboté" est à Cocody/Angré, pas à Abobo)
+  // Quartiers d'Abidjan dont le nom contient le préfixe ou le nom d'une autre commune :
+  // - "Aboboté" est à Cocody/Angré, pas à Abobo
+  // - "2 plateaux" / "deux plateaux" / "2 plateau" est à Cocody, JAMAIS au Plateau !
   if (/abobot[ée]/i.test(lower)) {
     result.commune = 'Cocody'
     lower = lower.replace(/abobot[ée]/gi, '')
+  }
+  const hasDeuxPlateaux = /\b(?:deux|2|ii)\s*plateaux?\b/i.test(lower)
+  if (hasDeuxPlateaux) {
+    lower = lower.replace(/\b(?:deux|2|ii)\s*plateaux?\b/gi, 'deux_plateaux')
   }
 
   // Abréviation courante "Yop" → Yopougon
@@ -190,6 +204,21 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
 
   // 4. prix_max — handles CI shorthand: "25 mil"=25 000, "90 mill"=90 000, "2 millions"=2 000 000, "500k", "25 000"
   const priceVals: number[] = []
+
+  // Nettoyage préalable des séquences numériques qui ne sont JAMAIS un budget :
+  // - URLs et UUIDs (ex: https://www.bogbesgroup.com/biens/17b41636-... où "41636" était lu comme budget)
+  // - Numéros de téléphone ivoiriens (10 chiffres 01/05/07 ou précédés de +225 / "contactez-nous au")
+  // - Surfaces et contenances ("1000m²", "500 m2", "2 hectares", "3 lots")
+  // - Dates ("15/08/2026")
+  // - Multiplications de caution ("70.000 x 4 = 300.000" → on conserve uniquement le loyer mensuel "70.000")
+  lower = lower
+    .replace(/https?:\/\/\S+/gi, ' ')
+    .replace(/\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi, ' ')
+    .replace(/\b(?:contact(?:ez)?(?:\s*[-nous]+)?(?:\s+au)?|t[ée]l(?:[ée]phone)?|whatsapp|appeler|num[ée]ro|infoline)\s*[:.]?\s*\+?\d[\d\s.-]{7,14}\b/gi, ' ')
+    .replace(/(?:\+?225[\s.-]?)?\b0[157](?:[\s.-]?\d{2}){4}\b/g, ' ')
+    .replace(/\b\d+(?:[.,]\d+)?\s*(?:m2|m²|ha\b|hectares?|lots?)\b/gi, ' ')
+    .replace(/\b\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})\b/g, ' ')
+    .replace(/(\d[\d\s.,]*)\s*(?:f|fcfa|frs?)?\s*[x×*]\s*[2-9]\s*(?:mois)?(?:\s*=\s*\d[\d\s.,]*(?:\s*(?:f|fcfa|frs?))?)?/gi, '$1 ')
 
   // "2 millions" / "1.5million" → ×1_000_000 (must be before "mil" to avoid conflict)
   const millionMatches = [...lower.matchAll(/(\d+(?:[.,]\d+)?)\s*millions?/gi)]
@@ -267,7 +296,7 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
   if (priceMatches) {
     priceMatches.forEach(pm => {
       const v = parseInt(pm.replace(/\s/g, ''))
-      if (v >= 1000) {
+      if (v >= 10000 && v <= 50_000_000_000 && !(v >= 10_000_000 && v % 500 !== 0)) {
         priceVals.push(v)
         lower = lower.replace(pm, '')
       }

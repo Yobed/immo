@@ -441,10 +441,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: 'ignored', reason: 'group_message_not_forwarded' });
     }
 
-    // Idempotency: short-circuit if Wasender retried the same message within 30 s.
-    // Prevents duplicate DB writes, double LLM calls, and double Sapphire replies.
+    // Idempotency: short-circuit if Wasender retried the same message within 30 s,
+    // or if the user double-tapped the same message (e.g. pre-filled Meta ad) within 60 s.
     const dedupKey = buildDedupKey(msg.key?.id, jid, userMessage);
-    if (!markSeen(dedupKey, 30_000)) {
+    const bodyDedupKey = buildDedupKey(undefined, jid, userMessage.trim().toLowerCase());
+    if (!markSeen(dedupKey, 30_000) || !markSeen(bodyDedupKey, 60_000)) {
       console.warn(`[webhook] duplicate inbound suppressed key=${dedupKey}`);
       return NextResponse.json({ status: 'ok', branch: 'duplicate' });
     }
@@ -751,6 +752,9 @@ export async function POST(req: NextRequest) {
         (detectVisiteIntent(userMessage) || SELECTS_BIEN_REGEX.test(userMessage)));
     if (!isVisiteOrSelection) {
       const qual = qualify(userMessage, formattedHistory, { isNewSession, fallbackProfile });
+      const isGreeting = isGreetingOrAdOpener(userMessage);
+      const hasAnyCriterion = !!(qual.propertyType || qual.zone || qual.budget != null);
+
       if (!qual.hasAll3) {
         const sendFixed = async (text: string, type: string) => {
           await humanReplyDelay(text, requestStartedAt);
@@ -759,15 +763,22 @@ export async function POST(req: NextRequest) {
             .from('whatsapp_messages')
             .insert({ jid, direction: 'outbound', body: text, metadata: { type } });
         };
-        // 1er contact (aucun message assistant) OU nouvelle session après inactivité (> 7j) avec salutation → message de bienvenue (Règle 1).
-        // Garde anti-spam : on ne renvoie JAMAIS le WELCOME_MESSAGE s'il a déjà été envoyé dans l'historique.
+        // 1er contact sans critère (simple salutation ou clic pub) OU nouvelle session avec salutation → message de bienvenue (Règle 1).
+        // Si le 1er message contient DÉJÀ au moins un critère (ex: "Bonjour je cherche un 3 pièces à Yopougon"),
+        // on passe directement à la relance ciblée (buildQualifReminder) qui accuse réception et ne demande QUE ce qui manque !
         const alreadyWelcomed = formattedHistory.some(
           (m) => m.role === 'assistant' && m.content.includes('Bienvenue chez Bogbe'),
         );
-        const isGreeting = isGreetingOrAdOpener(userMessage);
-        if (!alreadyWelcomed && (!lastAssistantMsg || (isNewSession && isGreeting))) {
+        if (!alreadyWelcomed && !hasAnyCriterion && (!lastAssistantMsg || (isNewSession && isGreeting))) {
           await sendFixed(WELCOME_MESSAGE, 'qualif_welcome');
           return NextResponse.json({ status: 'ok', branch: 'welcome' });
+        }
+
+        // Si le prospect a déjà reçu le message de bienvenue et reclique simplement sur la pub
+        // (« Bonjour ! Puis-je en savoir plus à ce sujet ? ») sans donner le moindre critère,
+        // on ne gaspille pas l'unique relance de qualification : on attend sa vraie réponse.
+        if (alreadyWelcomed && !hasAnyCriterion && isGreeting) {
+          return NextResponse.json({ status: 'ok', branch: 'duplicate_greeting_silent' });
         }
 
         // Relance déjà envoyée ET informations toujours incomplètes (Règle 2) :
@@ -788,6 +799,13 @@ export async function POST(req: NextRequest) {
         });
         await sendFixed(personalized, 'qualif_reminder');
         return NextResponse.json({ status: 'ok', branch: 'qualif_reminder' });
+      }
+
+      // Si le prospect a DÉJÀ reçu des propositions de biens dans la session courante
+      // et reclique par erreur sur une pub (« Bonjour ! Puis-je en savoir plus à ce sujet ? ») sans nouveau critère,
+      // on ne lui renvoie pas une 2e fois la même liste de biens.
+      if (!isNewSession && isGreeting && !bringsQualInfo && !hasExplicitBienLinkOrRef && hasProposedBiensInSession) {
+        return NextResponse.json({ status: 'ok', branch: 'ad_reopen_silent' });
       }
     }
 
