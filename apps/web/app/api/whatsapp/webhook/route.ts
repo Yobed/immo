@@ -19,6 +19,7 @@ import {
 import { captureProspect, canonicalPhone } from '@/lib/prospects/capture';
 import { linkIntakeToProspect } from '@/lib/crm/intake';
 import { extractBienFromWhatsApp, type ExtractedBien } from '@/lib/extractors/whatsapp-bien-extractor';
+import { ingestWhatsAppListingToLocaux } from '@/lib/locaux/ingest';
 import { recordOptOut, upsertProspect } from '@/lib/outreach/agent-prospects';
 import { notifyOwnerVisitPending } from '@/lib/notifications/whatsapp-notifier';
 import { markSeen } from '@/lib/idempotency';
@@ -372,7 +373,7 @@ export async function POST(req: NextRequest) {
         const authorPhone = normalizeCIPhone(authorRaw);
 
         const outreachPromise = (async () => {
-          if (!authorPhone || authorPhone.length < 8 || !userMessage || msg.key?.fromMe) return;
+          if (!userMessage || msg.key?.fromMe) return;
           const sigs = listingSignals(userMessage);
           if (sigs < 1 && userMessage.length < 30) return;
 
@@ -387,16 +388,32 @@ export async function POST(req: NextRequest) {
               console.warn('[outreach] extraction LLM skipped:', extErr);
             }
 
-            await upsertProspect({
-              phone: authorPhone,
-              jid: typeof participantJid === 'string' ? participantJid : `${authorPhone}@s.whatsapp.net`,
-              displayName: msg.pushName || null,
-              sourceGroupJid: jid,
+            // Enregistrement direct dans la nouvelle base FRESH (fzccugmyoglemjwidqrl)
+            await ingestWhatsAppListingToLocaux({
+              rawMessage: userMessage,
+              messageId: msg.key?.id ?? null,
+              senderPhone: authorPhone || null,
+              senderName: msg.pushName || null,
+              groupJid: jid,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              sourceGroupName: (msg as any).groupName || null,
-              extraction,
+              groupName: (msg as any).groupName || 'Groupe WhatsApp',
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              imageMessage: (msg.message?.imageMessage as any) ?? null,
+              preExtracted: extraction,
             });
-            console.log(`[outreach] agent prospect captured: ${authorPhone} (${msg.pushName || 'inconnu'})`);
+
+            if (authorPhone && authorPhone.length >= 8) {
+              await upsertProspect({
+                phone: authorPhone,
+                jid: typeof participantJid === 'string' ? participantJid : `${authorPhone}@s.whatsapp.net`,
+                displayName: msg.pushName || null,
+                sourceGroupJid: jid,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                sourceGroupName: (msg as any).groupName || null,
+                extraction,
+              });
+              console.log(`[outreach] agent prospect captured: ${authorPhone} (${msg.pushName || 'inconnu'})`);
+            }
           } catch (err) {
             console.error('[outreach] upsertProspect failed', err);
           }
@@ -404,10 +421,9 @@ export async function POST(req: NextRequest) {
 
         const [forwardResult] = await Promise.all([forwardPromise, outreachPromise]);
         if (!forwardResult.ok) {
-          console.error(`[group-scraper] n8n delivery failed status=${forwardResult.status ?? 'network'}`);
-          return NextResponse.json({ status: 'error', branch: 'group_scraper_delivery_failed' }, { status: 502 });
+          console.warn(`[group-scraper] n8n delivery status=${forwardResult.status ?? 'network'} (direct FRESH ingest active)`);
         }
-        console.log('[group-scraper] group message forwarded to n8n and prospect evaluated');
+        console.log('[group-scraper] group message ingested to FRESH and forwarded to n8n');
         return NextResponse.json({ status: 'ok', branch: 'group_forwarded' });
       }
       return NextResponse.json({ status: 'ignored', reason: 'group_message_not_forwarded' });
@@ -543,6 +559,18 @@ export async function POST(req: NextRequest) {
           sourceGroupJid: jid,
           sourceGroupName: 'Message direct (DM)',
           extraction: extractedListing,
+        });
+
+        await ingestWhatsAppListingToLocaux({
+          rawMessage: userMessage,
+          messageId: msg.key?.id ?? null,
+          senderPhone: canonicalPhone(senderPn),
+          senderName: contactName !== 'Client' ? contactName : null,
+          groupJid: jid,
+          groupName: 'WhatsApp Partenaire',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          imageMessage: (msg.message?.imageMessage as any) ?? null,
+          preExtracted: extractedListing && 'prix_mois_fcfa' in extractedListing ? extractedListing : null,
         });
       } catch (err) {
         console.error('[outreach] DM listing provider upsert failed', err);
