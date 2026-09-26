@@ -215,7 +215,7 @@ export interface Qualification {
  */
 export function filterCurrentSessionHistory<T extends { role: string; content: string; created_at?: string }>(
   history?: T[],
-  maxGapMs = 2 * 3_600_000,
+  maxGapMs = 48 * 3_600_000,
 ): T[] {
   if (!history || history.length === 0) return []
   const result: T[] = []
@@ -270,7 +270,7 @@ export function qualify(
   for (const m of newestFirst) {
     const pm = parseSearchQuery(m)
     if (!latestType && pm.type_bien) latestType = pm.type_bien
-    if (!latestZone) latestZone = detectQuartierZone(m) || pm.commune || null
+    if (!latestZone) latestZone = pm.commune || detectQuartierZone(m) || null
     if (!latestBudgetStr && pm.prix_max) latestBudgetStr = pm.prix_max
     if (!latestNbPieces && pm.nb_pieces) latestNbPieces = pm.nb_pieces
   }
@@ -279,10 +279,10 @@ export function qualify(
   const propertyType = isFresh
     ? (pMsg.type_bien ?? null)
     : (pMsg.type_bien || latestType || pAll.type_bien || fb?.propertyType || null)
-  const msgZone = detectQuartierZone(message) || pMsg.commune || null
+  const msgZone = pMsg.commune || detectQuartierZone(message) || null
   const zone = isFresh
     ? msgZone
-    : (msgZone || latestZone || detectQuartierZone(combined) || pAll.commune || fb?.zone || null)
+    : (msgZone || latestZone || pAll.commune || detectQuartierZone(combined) || fb?.zone || null)
   const budgetStr = isFresh ? pMsg.prix_max : (pMsg.prix_max || latestBudgetStr || pAll.prix_max)
   const budget = budgetStr ? parseInt(budgetStr, 10) : (fb?.budget ?? null)
   const nbPieces = isFresh ? (pMsg.nb_pieces ?? null) : (pMsg.nb_pieces || latestNbPieces || pAll.nb_pieces || null)

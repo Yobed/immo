@@ -53,6 +53,16 @@ const QUARTIER_COMMUNE: Record<string, string> = {
   '7e tranche': 'Cocody',
   '8e tranche': 'Cocody',
   '9e tranche': 'Cocody',
+  '7eme tranche': 'Cocody',
+  '8eme tranche': 'Cocody',
+  '9eme tranche': 'Cocody',
+  'riviera golf': 'Cocody',
+  'riviera 2': 'Cocody',
+  'riviera 3': 'Cocody',
+  'riviera 4': 'Cocody',
+  'riviera palmeraie': 'Cocody',
+  'riviera bonoumin': 'Cocody',
+  'riviera faya': 'Cocody',
   riviera: 'Cocody',
   bonoumin: 'Cocody',
   palmeraie: 'Cocody',
@@ -70,18 +80,50 @@ const QUARTIER_COMMUNE: Record<string, string> = {
   attoban: 'Cocody',
   chateau: 'Cocody',
   'château': 'Cocody',
+  mbadon: 'Cocody',
+  'm\'badon': 'Cocody',
+  mpouto: 'Cocody',
+  'm\'pouto': 'Cocody',
   abatta: 'Bingerville',
+  'jules verne': 'Bingerville',
   'zone 4': 'Marcory',
   bietry: 'Marcory',
   'biétry': 'Marcory',
   anoumabo: 'Marcory',
+  remblais: 'Koumassi',
+  sogephia: 'Koumassi',
   niangon: 'Yopougon',
   selmer: 'Yopougon',
   'toits rouges': 'Yopougon',
+  'toit rouge': 'Yopougon',
   sicogi: 'Yopougon',
+  maroc: 'Yopougon',
+  anador: 'Yopougon',
+  sopim: 'Yopougon',
+  ananeraie: 'Yopougon',
+  sideci: 'Yopougon',
+  banco: 'Yopougon',
+  gesco: 'Yopougon',
+  azito: 'Yopougon',
+  wassakara: 'Yopougon',
+  andokoi: 'Yopougon',
+  koute: 'Yopougon',
+  'kouté': 'Yopougon',
+  millionnaire: 'Yopougon',
+  koweit: 'Yopougon',
+  'koweït': 'Yopougon',
+  'cite ado': 'Yopougon',
+  'cité ado': 'Yopougon',
+  pk18: 'Abobo',
+  'pk 18': 'Abobo',
+  avocatier: 'Abobo',
+  ndotre: 'Abobo',
+  'ndotré': 'Abobo',
   vridi: 'Port-Bouët',
   gonzagueville: 'Port-Bouët',
   bracodi: 'Adjamé',
+  williamsville: 'Adjamé',
+  paillet: 'Adjamé',
 }
 
 /** Étiquette de provenance montrée au LLM. Doit rester honnête : une annonce web
@@ -192,6 +234,7 @@ export async function getAIBienContext(
     if (qualification.propertyType) p.type_bien = qualification.propertyType
     if (qualification.zone) p.commune = qualification.zone
     if (qualification.budget) p.prix_max = String(qualification.budget)
+    if (qualification.nbPieces) p.nb_pieces = qualification.nbPieces
   }
 
   // Détecter si le client demande des images/photos/vidéos
@@ -209,6 +252,7 @@ export async function getAIBienContext(
     if (pFromHistory.prix_max) p.prix_max = pFromHistory.prix_max
     if (pFromHistory.q) p.q = pFromHistory.q
     if (pFromHistory.equipements?.length) p.equipements = pFromHistory.equipements
+    if (pFromHistory.nb_pieces) p.nb_pieces = pFromHistory.nb_pieces
   }
 
   // ZONE STRICTE — étape 1 : détection de TOUTES les zones (communes et quartiers)
@@ -231,7 +275,9 @@ export async function getAIBienContext(
   // 2. Quartiers cités
   for (const [quartier, commune] of Object.entries(QUARTIER_COMMUNE)) {
     const normQ = norm(quartier)
-    if (msgNorm.includes(normQ)) {
+    const escapedQ = normQ.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const qRe = new RegExp(`(?<![a-z0-9])${escapedQ}(?![a-z0-9])`, 'i')
+    if (qRe.test(msgNorm)) {
       if (!zoneTerms.includes(normQ)) zoneTerms.push(normQ)
       const normC = norm(commune)
       if (!zoneTerms.includes(normC)) zoneTerms.push(normC)
@@ -275,7 +321,7 @@ export async function getAIBienContext(
   const singleCommuneFilter = isPeripherieOnly
     ? p.commune
     : distinctCommunesInTerms.length === 1
-      ? (p.commune || distinctCommunesInTerms[0])
+      ? distinctCommunesInTerms[0]
       : undefined
 
   // ─── Unique appel au catalogue consolidé ────────────────────────────────────
@@ -298,19 +344,73 @@ export async function getAIBienContext(
     validItems = items.filter((b) => b.prix_value != null && b.prix_value <= budget)
   }
 
+  // Post-filtrage strict sur la transaction (location vs vente) :
+  // Ne jamais proposer un bien en vente (25M, 90M) à quelqu'un qui cherche une location
+  const requestedTransaction = qualification?.transaction
+  if (requestedTransaction === 'location') {
+    validItems = validItems.filter(
+      (b) => b.prix_period !== 'vente' && !/\b(vente|[àa]\s+vendre)\b/i.test(`${b.titre} ${b.prix_label}`),
+    )
+  } else if (requestedTransaction === 'achat') {
+    validItems = validItems.filter(
+      (b) => b.prix_period === 'vente' || /\b(vente|[àa]\s+vendre)\b/i.test(`${b.titre} ${b.prix_label}`),
+    )
+  }
+
+  // Post-filtrage strict sur le type de bien :
+  // Ne JAMAIS proposer un terrain, un hôtel, un commerce ou un bureau quand le client demande un logement résidentiel
+  if (p.type_bien) {
+    const reqType = norm(p.type_bien)
+    validItems = validItems.filter((b) => {
+      const bType = norm(`${b.type_bien ?? ''} ${b.titre ?? ''}`)
+      if (['appartement', 'villa', 'maison', 'studio', 'residence_meublee'].includes(reqType)) {
+        if (/\b(terrain|lotissement|parcelle|hotel|hôtel|magasin|entrepot|entrepôt|fonds de commerce|bureau)\b/i.test(bType)) {
+          return false
+        }
+      }
+      if (reqType === 'villa' || reqType === 'maison') {
+        return /\b(villa|maison|duplex|triplex)\b/i.test(bType)
+      }
+      if (reqType === 'appartement') {
+        return /\b(appartement|appart|f[2-6]|[2-6]\s*pi[eè]ces?)\b/i.test(bType)
+      }
+      if (reqType === 'studio') {
+        return /\b(studio|chambre|1\s*pi[eè]ce|f1)\b/i.test(bType)
+      }
+      if (reqType === 'terrain') {
+        return /\b(terrain|lot|parcelle|acd|tf)\b/i.test(bType)
+      }
+      return bType.includes(reqType)
+    })
+  }
+
+  // Post-filtrage sur le nombre de pièces (ex: 2 pièces demandé -> exclure 4+ pièces)
+  const reqPieces = p.nb_pieces || qualification?.nbPieces
+  if (reqPieces) {
+    validItems = validItems.filter((b) => {
+      if (b.nb_pieces != null) {
+        return Math.abs(b.nb_pieces - reqPieces) <= 1
+      }
+      return true
+    })
+  }
+
   // ZONE STRICTE — étape 2 (Règle 3) : JAMAIS un bien d'une autre zone ou commune.
   let zoned = validItems
   if (zoneTerms.length > 0) {
     const bienZone = (b: ConsolidatedBien) => norm(`${b.commune ?? ''} ${b.quartier ?? ''} ${b.titre} ${b.description ?? ''}`)
-    // Détecter si l'utilisateur a cité uniquement un quartier précis (ex: juste 'angre') sans commune
-    const quartierDemande = zoneTerms.find((t) => QUARTIER_COMMUNE[t] != null)
-    const hasOnlyQuartier = !!quartierDemande && distinctCommunesInTerms.length === 0
-    if (hasOnlyQuartier) {
-      const inQuartier = validItems.filter((b) => bienZone(b).includes(quartierDemande))
+    // Détecter tous les quartiers précis cités par le client (ex: 'maroc', 'faya', 'riviera 2', 'angre')
+    const quartiersDemandes = zoneTerms.filter((t) => QUARTIER_COMMUNE[t] != null)
+    const quartierDemande = quartiersDemandes[0]
+    const hasOnlyQuartier = quartiersDemandes.length > 0
+    if (hasOnlyQuartier && quartierDemande) {
+      const inQuartier = validItems.filter((b) =>
+        quartiersDemandes.some((q) => bienZone(b).includes(q)),
+      )
       if (inQuartier.length > 0) {
         zoned = inQuartier
       } else {
-        // Si aucun bien dans ce quartier précis, interdiction stricte de proposer une autre commune
+        // Si aucun bien dans ce(s) quartier(s) précis, interdiction stricte de proposer un autre quartier ou une autre commune
         zoned = []
       }
     } else {

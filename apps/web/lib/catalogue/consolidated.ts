@@ -140,7 +140,13 @@ async function fetchBogbes(filters: ConsolidatedFilters): Promise<ConsolidatedBi
       ? q.or(PERIPHERIE_OR_CLAUSE)
       : q.ilike('commune', `%${filters.commune}%`)
   }
-  if (filters.type_bien) q = q.eq('type_bien', filters.type_bien)
+  if (filters.type_bien) {
+    if (filters.type_bien === 'villa' || filters.type_bien === 'maison') {
+      q = q.in('type_bien', ['villa', 'maison'])
+    } else {
+      q = q.eq('type_bien', filters.type_bien)
+    }
+  }
   if (filters.type_offre === 'vente') {
     // Exige un prix_vente_fcfa renseigné
     q = q.not('prix_vente_fcfa', 'is', null)
@@ -266,7 +272,13 @@ async function fetchLocaux(filters: ConsolidatedFilters): Promise<ConsolidatedBi
         ? q.or(PERIPHERIE_OR_CLAUSE)
         : q.ilike('commune', `%${filters.commune}%`)
     }
-    if (filters.type_bien) q = q.ilike('type_de_bien', `%${filters.type_bien}%`)
+    if (filters.type_bien) {
+      if (filters.type_bien === 'villa' || filters.type_bien === 'maison') {
+        q = q.or('type_de_bien.ilike.%villa%,type_de_bien.ilike.%maison%,type_de_bien.ilike.%duplex%')
+      } else {
+        q = q.ilike('type_de_bien', `%${filters.type_bien}%`)
+      }
+    }
     // ⚠️ `type_offre` est stocké en variantes par le scraper WhatsApp :
     // 'vente', 'Vente', 'à vendre', 'achat', 'location', 'à louer', etc.
     // → tolérance large via ilike + multiples patterns OR pour matcher
@@ -448,8 +460,12 @@ function applyAnnonceFilters(q: any, filters: ConsolidatedFilters): any {
       : q.ilike('commune', `%${filters.commune}%`)
   }
   if (filters.type_bien) {
-    const motif = TYPE_MOTIF[filters.type_bien] ?? filters.type_bien
-    q = q.ilike('type_bien', `%${motif}%`)
+    if (filters.type_bien === 'villa' || filters.type_bien === 'maison') {
+      q = q.or('type_bien.ilike.%villa%,type_bien.ilike.%maison%,type_bien.ilike.%duplex%')
+    } else {
+      const motif = TYPE_MOTIF[filters.type_bien] ?? filters.type_bien
+      q = q.ilike('type_bien', `%${motif}%`)
+    }
   }
   if (filters.type_offre) q = q.eq('transaction', filters.type_offre)
   if (filters.q?.trim()) {

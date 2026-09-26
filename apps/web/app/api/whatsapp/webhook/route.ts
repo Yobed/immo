@@ -6,6 +6,7 @@ import { chatImmobilier, isSapphireFallback, SAPPHIRE_ESCALATION, getLastSapphir
 import { getAIBienContext } from '@/lib/ai/tools';
 import {
   qualify,
+  filterCurrentSessionHistory,
   WELCOME_MESSAGE,
   buildQualifReminder,
   QUALIF_REMINDER_MARKER,
@@ -105,9 +106,10 @@ const SELECTS_BIEN_REGEX = new RegExp(
     /\bcelui\s+(de|du|d'|à|a)\b/.source,
     /offre-flash\/\d+/.source,
     /\/biens\/[a-f0-9-]{8}/.source,
+    /\/annonce\/\d+/.source,
     /\b[A-Z]{3}-[A-Z]{2,4}-[VL]-[A-Z0-9]{4,}\b/.source, // réf type TRX-COC-V-XXXX
     /\b(visite|visiter|rendez[-\s]?vous|rdv)\b/.source,
-    /\b(je\s+(prends|choisis|veux|pr[ée]f[eè]re)|[cç]a\s+m[’']int[ée]resse|int[ée]ress[ée]e?\s+par)\b/.source,
+    /\b(je\s+(prends|choisis|pr[ée]f[eè]re)\s+(le|la|ce|cette|celui|l['’]offre|l['’]option)|[cç]a\s+m[’']int[ée]resse|int[ée]ress[ée]e?\s+par\s+(le|la|ce|cette|celui|l['’]offre))\b/.source,
   ].join('|'),
   'i',
 );
@@ -274,13 +276,23 @@ export async function POST(req: NextRequest) {
         const { data: recentOut } = await sb
           .from('whatsapp_messages')
           .select('body, metadata')
-          .eq('jid', jid)
           .eq('direction', 'outbound')
           .gte('created_at', new Date(Date.now() - 5 * 60_000).toISOString())
-          .limit(10);
-        const isOurBot = (((recentOut as unknown) as { body: string }[]) ?? []).some(
-          (r) => r.body === userMessage && (r as unknown as { metadata?: { actor_type?: string } }).metadata?.actor_type !== 'commercial',
-        );
+          .order('created_at', { ascending: false })
+          .limit(30);
+        const isKnownBotTemplate =
+          userMessage.includes('Bienvenue chez Bogbe') ||
+          QUALIF_REMINDER_MARKER.test(userMessage) ||
+          userMessage.includes('disponible dans notre catalogue correspondant à votre recherche') ||
+          userMessage.startsWith('Merci pour ces informations 🙏') ||
+          userMessage.startsWith('Merci pour votre proposition 🙏');
+        const isOurBot =
+          isKnownBotTemplate ||
+          (((recentOut as unknown) as { body: string }[]) ?? []).some(
+            (r) =>
+              r.body.trim() === userMessage.trim() &&
+              (r as unknown as { metadata?: { actor_type?: string } }).metadata?.actor_type !== 'commercial',
+          );
         if (!isOurBot) {
           const rawHumanPhone = jid.split('@')[0] ?? '';
           const trace = humanTraceContext(userMessage);
@@ -489,7 +501,16 @@ export async function POST(req: NextRequest) {
       .order('created_at', { ascending: false })
       .limit(30);
 
-    const formattedHistory = ((history as any[]) || [])
+    const rawHistory = (history as any[]) || [];
+
+    // Note : rawHistory[0] est le message entrant qui vient d'être inséré à l'étape 1.
+    // Le dernier message précédent est donc rawHistory[1].
+    // ⚠️ Ne JAMAIS faire rawHistory.reverse() avant de lire rawHistory[1], car .reverse()
+    // mute le tableau en place et ferait pointer history[1] sur le message le plus ancien !
+    const prevMsgTime = rawHistory[1]?.created_at ? new Date(rawHistory[1].created_at).getTime() : 0;
+    const isNewSession = !prevMsgTime || (now - prevMsgTime > 48 * 3_600_000);
+
+    const allFormattedHistory = [...rawHistory]
       .reverse()
       .map((m) => ({
         role: m.direction === 'inbound' ? ('user' as const) : ('assistant' as const),
@@ -497,13 +518,7 @@ export async function POST(req: NextRequest) {
         created_at: m.created_at,
         metadata: m.metadata,
       }));
-
-    // Note : history[0] est le message entrant qui vient d'être inséré à l'étape 1.
-    // Le dernier message précédent est donc history[1].
-    // Une session de recherche immobilière reste active pendant 7 jours (évite l'amnésie
-    // quand un prospect répond quelques heures ou 2 jours plus tard).
-    const prevMsgTime = history?.[1]?.created_at ? new Date(history[1].created_at).getTime() : 0;
-    const isNewSession = !prevMsgTime || (now - prevMsgTime > 7 * 24 * 3_600_000);
+    const formattedHistory = filterCurrentSessionHistory(allFormattedHistory, 48 * 3_600_000);
 
     // Détection d'une conversation déjà gérée par un commercial humain (< 24 h)
     const hasHumanTakeover =
@@ -720,8 +735,20 @@ export async function POST(req: NextRequest) {
     // 2f. QUALIFICATION DÉTERMINISTE (Cahier des règles §5-7) — en code, pas via
     // l'IA : TYPE + ZONE + BUDGET obligatoires AVANT toute proposition. Ne
     // s'applique PAS à une visite / sélection d'un bien déjà proposé (→ flux LLM).
+    const hasProposedBiensInSession = formattedHistory.some(
+      (m) =>
+        m.role === 'assistant' &&
+        (m.content.includes('disponible dans notre catalogue') ||
+          /\/(biens|offre-flash|annonce)\//.test(m.content)),
+    );
+    const hasExplicitBienLinkOrRef =
+      /offre-flash\/\d+|\/biens\/[a-f0-9-]{8}|\/annonce\/\d+|\b[A-Z]{3}-[A-Z]{2,4}-[VL]-[A-Z0-9]{4,}\b/i.test(
+        userMessage,
+      );
     const isVisiteOrSelection =
-      detectVisiteIntent(userMessage) || SELECTS_BIEN_REGEX.test(userMessage);
+      hasExplicitBienLinkOrRef ||
+      (hasProposedBiensInSession &&
+        (detectVisiteIntent(userMessage) || SELECTS_BIEN_REGEX.test(userMessage)));
     if (!isVisiteOrSelection) {
       const qual = qualify(userMessage, formattedHistory, { isNewSession, fallbackProfile });
       if (!qual.hasAll3) {
