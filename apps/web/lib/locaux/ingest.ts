@@ -1,6 +1,10 @@
 import crypto from 'crypto'
 import { createLocauxAdminClient } from '@/lib/supabase/locaux'
-import { extractBienFromWhatsApp, type ExtractedBien } from '@/lib/extractors/whatsapp-bien-extractor'
+import {
+  extractBienDeterministic,
+  extractBienFromWhatsApp,
+  type ExtractedBien,
+} from '@/lib/extractors/whatsapp-bien-extractor'
 
 export interface IngestWhatsAppListingParams {
   rawMessage: string
@@ -113,7 +117,7 @@ export async function ingestWhatsAppListingToLocaux(
   let extracted = params.preExtracted ?? null
   if (!extracted || !('prix_mois_fcfa' in extracted)) {
     const res = await extractBienFromWhatsApp(raw).catch(() => ({ data: null }))
-    extracted = res.data
+    extracted = res.data ?? extractBienDeterministic(raw)
   }
 
   if (!extracted || extracted.confidence < 0.6) {
