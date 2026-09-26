@@ -53,52 +53,41 @@ function formatDate(iso: string | null): string {
 }
 
 export default async function AdminOutreachPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login?next=/admin/outreach')
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-  if (profile?.role !== 'admin') notFound()
-
   // Cast service client en any : les tables outreach (017) ne sont pas dans le type généré.
+  // AdminLayout vérifie déjà l'authentification et le rôle admin.
   const admin = createAdminClient() as unknown as {
     from: (table: string) => any
   }
 
-  // Prospects (last 100)
-  const { data: prospectsRaw } = await admin
-    .from('agent_prospects')
-    .select('*')
-    .order('last_seen_at', { ascending: false })
-    .limit(100)
+  const [
+    { data: prospectsRaw },
+    { data: countsRaw },
+    { count: clickedCount },
+  ] = await Promise.all([
+    admin
+      .from('agent_prospects')
+      .select('*')
+      .order('last_seen_at', { ascending: false })
+      .limit(100),
+    admin
+      .from('agent_prospects')
+      .select('status, opt_out'),
+    admin
+      .from('agent_outreach_log')
+      .select('*', { count: 'exact', head: true })
+      .in('delivery_status', ['clicked', 'converted']),
+  ])
 
   const prospects = (prospectsRaw ?? []) as ProspectRow[]
-
-  // Stats globales (counts par status)
-  const { data: countsRaw } = await admin
-    .from('agent_prospects')
-    .select('status, opt_out')
-
   const counts = (countsRaw ?? []) as { status: string; opt_out: boolean }[]
   const stats: OutreachStats = {
     total: counts.length,
     invited: counts.filter(c => c.status === 'invited').length,
-    clicked: 0,
+    clicked: clickedCount ?? 0,
     converted: counts.filter(c => c.status === 'converted').length,
     opted_out: counts.filter(c => c.opt_out).length,
     pending: counts.filter(c => c.status === 'new' || c.status === 'queued').length,
   }
-
-  // Compteur de clicks via outreach_log
-  const { count: clickedCount } = await admin
-    .from('agent_outreach_log')
-    .select('*', { count: 'exact', head: true })
-    .in('delivery_status', ['clicked', 'converted'])
-  stats.clicked = clickedCount ?? 0
 
   const conversionRate = stats.invited > 0
     ? ((stats.converted / stats.invited) * 100).toFixed(1)

@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
+import { unstable_cache } from 'next/cache'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { locauxReadClients } from '@/lib/supabase/locaux'
 import { Clock, MapPin, ShieldCheck, Flame } from 'lucide-react'
 import { AnimatedCounter, AnimatedLabel } from './AnimatedCounter'
@@ -84,58 +85,67 @@ async function computeAdvisorResponseDelay(
   return { label: formatDelay(avg), hint: 'live' }
 }
 
-/**
- * Bandeau de chiffres clés — preuves de valeur tangibles.
- * Server component qui fetch les vraies métriques temps réel.
- *
- * Quatre stats visibles :
- *   • Biens vérifiés (table biens)
- *   • Offres flash actives (table locaux)
- *   • Communes couvertes
- *   • Délai moyen de réponse (statique pour l'instant — 1h)
- */
-export async function StatsRibbon() {
-  const supabase = await createClient()
+const getStatsRibbonData = unstable_cache(
+  async () => {
+    const supabase = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { auth: { persistSession: false, autoRefreshToken: false } },
+    )
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const biensQ = (supabase as any)
-    .from('biens')
-    .select('id, commune', { count: 'exact' })
-    .eq('statut', 'publie')
-
-  // Offres flash : ancien + nouveau projet locaux fusionnés.
-  const flashQs = locauxReadClients().map((locaux) =>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (locaux as any)
-      .from('locaux')
+    const biensQ = (supabase as any)
+      .from('biens')
       .select('id, commune', { count: 'exact' })
-      // Politique permissive alignée sur le catalogue (consolidated.ts) : NULL accepté.
-      .not('status', 'eq', 'inactive')
-      .not('is_duplicate', 'is', true)
-      .or('disponible.is.null,disponible.neq.non'),
-  )
+      .eq('statut', 'publie')
+      .limit(300)
 
-  const [biensRes, flashNew, flashLegacy, delay] = await Promise.all([
-    biensQ,
-    flashQs[0],
-    flashQs[1],
-    computeAdvisorResponseDelay(supabase),
-  ])
+    const flashQs = locauxReadClients().map((locaux) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (locaux as any)
+        .from('locaux')
+        .select('id, commune', { count: 'exact' })
+        .not('status', 'eq', 'inactive')
+        .not('is_duplicate', 'is', true)
+        .or('disponible.is.null,disponible.neq.non')
+        .limit(300),
+    )
 
-  const biensCount = biensRes?.count ?? 0
-  const flashCount = (flashNew?.count ?? 0) + (flashLegacy?.count ?? 0)
+    const [biensRes, delay, ...flashResults] = await Promise.all([
+      biensQ,
+      computeAdvisorResponseDelay(supabase),
+      ...flashQs.map((q) => Promise.resolve(q).catch(() => ({ data: [], count: 0 }))),
+    ])
 
-  // Communes uniques (union des trois sources)
-  const communes = new Set<string>()
-  for (const row of (biensRes?.data ?? []) as { commune?: string | null }[]) {
-    if (row.commune) communes.add(row.commune.trim().toLowerCase())
-  }
-  for (const res of [flashNew, flashLegacy]) {
-    for (const row of (res?.data ?? []) as { commune?: string | null }[]) {
+    const biensCount = biensRes?.count ?? 0
+    const flashCount = flashResults.reduce((acc, r) => acc + (r?.count ?? 0), 0)
+
+    const communes = new Set<string>()
+    for (const row of (biensRes?.data ?? []) as { commune?: string | null }[]) {
       if (row.commune) communes.add(row.commune.trim().toLowerCase())
     }
-  }
-  const communesCount = communes.size
+    for (const res of flashResults) {
+      for (const row of (res?.data ?? []) as { commune?: string | null }[]) {
+        if (row.commune) communes.add(row.commune.trim().toLowerCase())
+      }
+    }
+    return {
+      biensCount,
+      flashCount,
+      communesCount: communes.size,
+      delay,
+    }
+  },
+  ['stats-ribbon-v2'],
+  { revalidate: 600 },
+)
+
+/**
+ * Bandeau de chiffres clés — preuves de valeur tangibles.
+ * Server component qui fetch les vraies métriques (cachées 10 min).
+ */
+export async function StatsRibbon() {
+  const { biensCount, flashCount, communesCount, delay } = await getStatsRibbonData()
 
   const stats = [
     {

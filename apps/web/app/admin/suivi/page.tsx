@@ -133,14 +133,6 @@ function applySearch<T extends { biens: { titre: string; commune: string | null 
 }
 
 export default async function AdminSuiviPage({ searchParams }: PageProps) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login?next=/admin/suivi')
-
-  const { data: profile } = await supabase
-    .from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') notFound()
-
   const sp = await searchParams
   const tab: Tab = sp.tab || 'visites'
   const view: View = sp.view || 'kanban'
@@ -153,19 +145,25 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
 
   const admin = createAdminClient()
 
-  // Counts globaux (toujours affichés en haut)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { count: visitesPending } = await (admin as any)
-    .from('visites').select('id', { count: 'exact', head: true })
-    .eq('admin_validation_status', 'pending')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { count: reservationsPending } = await (admin as any)
-    .from('reservations').select('id', { count: 'exact', head: true })
-    .eq('admin_validation_status', 'pending')
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { count: contactsPending } = await (admin as any)
-    .from('contact_requests').select('id', { count: 'exact', head: true })
-    .eq('admin_validation_status', 'pending')
+  // Counts globaux (toujours affichés en haut) lancés en parallèle
+  const [
+    { count: visitesPending },
+    { count: reservationsPending },
+    { count: contactsPending },
+  ] = await Promise.all([
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (admin as any)
+      .from('visites').select('id', { count: 'exact', head: true })
+      .eq('admin_validation_status', 'pending'),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (admin as any)
+      .from('reservations').select('id', { count: 'exact', head: true })
+      .eq('admin_validation_status', 'pending'),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (admin as any)
+      .from('contact_requests').select('id', { count: 'exact', head: true })
+      .eq('admin_validation_status', 'pending'),
+  ])
 
   // Données : en kanban on prend tout (3 colonnes), en liste on filtre par status
   let visites: VisiteRow[] = []

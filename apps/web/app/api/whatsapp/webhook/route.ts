@@ -539,15 +539,21 @@ export async function POST(req: NextRequest) {
         if (!extractedListing) {
           const parsedOffer = qualify(userMessage);
           if (parsedOffer.propertyType || parsedOffer.zone || parsedOffer.budget) {
+            const isVente = parsedOffer.transaction === 'achat';
             extractedListing = {
+              titre: userMessage.slice(0, 80),
               type_bien: (parsedOffer.propertyType as ExtractedBien['type_bien']) ?? 'appartement',
-              type_offre: parsedOffer.transaction === 'achat' ? 'vente' : 'location',
               commune: parsedOffer.zone ?? 'Abidjan',
               quartier: null,
-              prix: parsedOffer.budget ?? null,
-              superficie: null,
-              chambres: null,
-              description_courte: userMessage.slice(0, 140),
+              description: userMessage.slice(0, 500),
+              surface_m2: null,
+              nb_pieces: null,
+              nb_chambres: null,
+              nb_salles_bain: null,
+              prix_mois_fcfa: !isVente ? (parsedOffer.budget ?? null) : null,
+              prix_nuit_fcfa: null,
+              prix_vente_fcfa: isVente ? (parsedOffer.budget ?? null) : null,
+              equipements: [],
               confidence: 0.8,
             };
           }

@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
+import { unstable_cache } from 'next/cache'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { STATUTS_PUBLICS } from '@/lib/catalogue/statuts'
 import { HeroEditorial } from '@/components/landing/HeroEditorial'
 import { JourneyShortcuts } from '@/components/landing/JourneyShortcuts'
@@ -20,51 +21,53 @@ import { formatFCFA } from '@/lib/format'
 
 export const revalidate = 300 // ISR: revalide toutes les 5 min
 
-export default async function HomePage() {
-  const supabase = await createClient()
+const getHomeBiens = unstable_cache(
+  async () => {
+    const supabase = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { auth: { persistSession: false, autoRefreshToken: false } },
+    )
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: biens } = await (supabase as any)
-    .from('biens')
-    .select('id, titre, commune, quartier, type_bien, latitude, longitude, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces, est_disponible, is_verifie, score_ia, statut')
-    .in('statut', [...STATUTS_PUBLICS])
-    // Cap homepage to last 80 biens — used by NearMe/Featured/Hero sections
-    // (top 8 photos for Hero, top 3 premium, NearMe filters client-side).
-    .order('is_verifie', { ascending: false })
-    .order('created_at', { ascending: false })
-    .limit(80)
-
-  const biensList = (biens ?? []).map((b: any) => ({
-    ...b,
-    latitude: b.latitude ? Number(String(b.latitude).replace(',', '.')) : null,
-    longitude: b.longitude ? Number(String(b.longitude).replace(',', '.')) : null,
-    prix_mois_fcfa: b.prix_mois_fcfa ? Number(b.prix_mois_fcfa) : null,
-    prix_nuit_fcfa: b.prix_nuit_fcfa ? Number(b.prix_nuit_fcfa) : null,
-    prix_vente_fcfa: b.prix_vente_fcfa ? Number(b.prix_vente_fcfa) : null,
-  }))
-
-  // Fetch cover photos for all biens
-  let photoMap: Record<string, string> = {}
-  if (biensList.length > 0) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: medias } = await (supabase as any)
-      .from('biens_medias')
-      .select('bien_id, url, est_couverture')
-      .in('bien_id', biensList.map((b: any) => b.id))
-      .eq('type', 'photo')
-      .order('ordre', { ascending: true })
+    const { data: biens } = await (supabase as any)
+      .from('biens')
+      .select(
+        'id, titre, commune, quartier, type_bien, latitude, longitude, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces, est_disponible, is_verifie, score_ia, statut, biens_medias(url, est_couverture, ordre, type)',
+      )
+      .in('statut', [...STATUTS_PUBLICS])
+      .order('is_verifie', { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(80)
 
-    if (medias) {
-      for (const m of medias as { bien_id: string; url: string; est_couverture: boolean }[]) {
-        if (!photoMap[m.bien_id] || m.est_couverture) photoMap[m.bien_id] = m.url
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (biens ?? []).map((b: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const photos = ((b.biens_medias ?? []) as any[])
+        .filter((m) => m.type === 'photo')
+        .sort((a, c) => {
+          if (a.est_couverture) return -1
+          if (c.est_couverture) return 1
+          return (a.ordre ?? 0) - (c.ordre ?? 0)
+        })
+      const { biens_medias: _omit, ...rest } = b
+      return {
+        ...rest,
+        latitude: b.latitude ? Number(String(b.latitude).replace(',', '.')) : null,
+        longitude: b.longitude ? Number(String(b.longitude).replace(',', '.')) : null,
+        prix_mois_fcfa: b.prix_mois_fcfa ? Number(b.prix_mois_fcfa) : null,
+        prix_nuit_fcfa: b.prix_nuit_fcfa ? Number(b.prix_nuit_fcfa) : null,
+        prix_vente_fcfa: b.prix_vente_fcfa ? Number(b.prix_vente_fcfa) : null,
+        photo_url: photos[0]?.url ?? null,
       }
-    }
-  }
+    })
+  },
+  ['home-biens-v2'],
+  { revalidate: 300 },
+)
 
-  const biensWithPhoto = biensList.map((b: any) => ({
-    ...b,
-    photo_url: photoMap[b.id] ?? null,
-  }))
+export default async function HomePage() {
+  const biensWithPhoto = await getHomeBiens()
 
   // Arrière-plan Hero — image éditoriale curatée : villa de luxe moderne avec
   // grande piscine, ambiance résidence de standing.

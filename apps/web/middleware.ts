@@ -20,6 +20,28 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Routes protégées par login. Liste explicite, pas de match large : '/pro'
+  // matchait à tort /proprietaires (page publique d'explication offre).
+  const protectedRoutes = ['/client', '/admin', '/dashboard', '/mes-biens', '/mes-avis', '/mes-visites', '/visites', '/quittances', '/profil', '/avis-recus', '/reservations']
+  const isProtected = protectedRoutes.some((route) =>
+    request.nextUrl.pathname.startsWith(route)
+  )
+
+  // Fast-path : les pages publiques ne doivent JAMAIS bloquer sur un aller-retour
+  // réseau Supabase Auth dans le middleware.
+  if (!isProtected) {
+    return NextResponse.next({ request })
+  }
+
+  const hasAuthCookie = request.cookies.getAll().some((c) => c.name.startsWith('sb-'))
+  if (!hasAuthCookie) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    const redirectTo = request.nextUrl.pathname + request.nextUrl.search
+    url.searchParams.set('redirect', redirectTo)
+    return NextResponse.redirect(url)
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -48,14 +70,7 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Routes protégées par login. Liste explicite, pas de match large : '/pro'
-  // matchait à tort /proprietaires (page publique d'explication offre).
-  const protectedRoutes = ['/client', '/admin', '/dashboard', '/mes-biens', '/mes-avis', '/mes-visites', '/visites', '/quittances', '/profil', '/avis-recus', '/reservations']
-  const isProtected = protectedRoutes.some((route) =>
-    request.nextUrl.pathname.startsWith(route)
-  )
-
-  if (isProtected && !user) {
+  if (!user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     // Include search parameters (like ?bienId=...) in the redirect parameter

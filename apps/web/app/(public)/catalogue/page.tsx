@@ -130,7 +130,7 @@ export default async function CataloguePage({ searchParams }: PageProps) {
     var communes = communes_
   } else {
     const [catalogue, communes_, flashTotal, webStatus] = await Promise.all([
-      getConsolidatedCatalogue({ ...filters, limitPerSource: 500 }),
+      getConsolidatedCatalogue({ ...filters, limitPerSource: 120 }),
       getCatalogueCommunes(sourceFilter),
       getLocauxCount(filters),
       getAnnoncesCountStatus(filters),

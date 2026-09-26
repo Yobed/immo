@@ -48,27 +48,30 @@ interface PageProps {
 export default async function ProspectDetailPage({ params }: PageProps) {
   const { id } = await params
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect(`/login?next=/admin/prospects/${id}`)
-  const { data: me } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (me?.role !== 'admin') notFound()
-
   const admin = createAdminClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: p } = await (admin as any).from('prospects').select('*').eq('id', id).maybeSingle()
-  if (!p) notFound()
 
+  // AdminLayout vérifie déjà l'authentification et le rôle admin ; on lance
+  // toutes les lectures de la fiche prospect en parallèle dès le 1er aller-retour.
   const [
+    { data: p },
     { count: contactCount },
     { count: visiteCount },
     { count: reservationCount },
     timelineResult,
     visitesResult,
+    { data: adminsRaw },
   ] = await Promise.all([
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (admin as any).from('prospects').select('*').eq('id', id).maybeSingle(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (admin as any).from('contact_requests').select('id', { count: 'exact', head: true }).eq('prospect_id', id),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (admin as any).from('visites').select('id', { count: 'exact', head: true }).eq('prospect_id', id),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (admin as any).from('reservations').select('id', { count: 'exact', head: true }).eq('prospect_id', id),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any).rpc('crm_prospect_timeline', { p_id: id, p_limit: 50 }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (admin as any)
       .from('visites')
       .select(`
@@ -77,7 +80,11 @@ export default async function ProspectDetailPage({ params }: PageProps) {
       `)
       .eq('prospect_id', id)
       .order('date_souhaitee', { ascending: false }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (admin as any).from('profiles').select('id, full_name').eq('role', 'admin').order('full_name'),
   ])
+  if (!p) notFound()
+
   const crmEvents = timelineResult.error ? null : timelineResult.data as Array<{ id: string; event_type: string; from_status: string | null; to_status: string | null; note: string | null; created_at: string; actor_name?: string | null; origin?: string }>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const confirmedVisites = ((visitesResult.data ?? []) as any[]).filter(
@@ -86,10 +93,6 @@ export default async function ProspectDetailPage({ params }: PageProps) {
 
   const st = (p.statut in STATUT_META ? p.statut : 'nouveau') as Statut
 
-  // Commerciaux (admins) pour l'assignation
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: adminsRaw } = await (admin as any)
-    .from('profiles').select('id, full_name').eq('role', 'admin').order('full_name')
   const admins = (adminsRaw ?? []) as { id: string; full_name: string | null }[]
   const assignedName = admins.find((a) => a.id === p.assigned_to)?.full_name ?? null
 

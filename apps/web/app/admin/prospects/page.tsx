@@ -92,25 +92,6 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
   if (assigned === 'unassigned') query = query.is('assigned_to', null)
   else if (assigned && /^[0-9a-f-]{36}$/i.test(assigned)) query = query.eq('assigned_to', assigned)
   if (q) query = query.or(`nom.ilike.%${q}%,phone.ilike.%${q}%,commune.ilike.%${q}%,quartier.ilike.%${q}%`)
-  const { data } = await query
-  const rows = (data ?? []) as ProspectRow[]
-
-  const { data: assigneeRows } = await (admin as any)
-    .from('profiles')
-    .select('id, full_name')
-    .not('full_name', 'is', null)
-    .order('full_name', { ascending: true })
-    .limit(100)
-  const assignees = (assigneeRows ?? []) as { id: string; full_name: string | null }[]
-
-  // Noms des commerciaux assignés
-  const assignedIds = Array.from(new Set(rows.map((r) => r.assigned_to).filter(Boolean))) as string[]
-  const nameById: Record<string, string> = {}
-  if (assignedIds.length) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: profs } = await (admin as any).from('profiles').select('id, full_name').in('id', assignedIds)
-    for (const p of (profs ?? []) as { id: string; full_name: string | null }[]) nameById[p.id] = p.full_name || ''
-  }
 
   const countOf = async (s?: Statut) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -118,9 +99,28 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
     if (s) c = c.eq('statut', s)
     return (await c).count ?? 0
   }
-  const [total, nNouveau, nEnCours, nTraite] = await Promise.all([
-    countOf(), countOf('nouveau'), countOf('en_cours'), countOf('traite'),
+
+  const [{ data }, { data: assigneeRows }, total, nNouveau, nEnCours, nTraite] = await Promise.all([
+    query,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (admin as any)
+      .from('profiles')
+      .select('id, full_name')
+      .not('full_name', 'is', null)
+      .order('full_name', { ascending: true })
+      .limit(100),
+    countOf(),
+    countOf('nouveau'),
+    countOf('en_cours'),
+    countOf('traite'),
   ])
+
+  const rows = (data ?? []) as ProspectRow[]
+  const assignees = (assigneeRows ?? []) as { id: string; full_name: string | null }[]
+
+  // Noms des commerciaux assignés (réutilisés depuis assignees sans requête supplémentaire)
+  const nameById: Record<string, string> = {}
+  for (const p of assignees) nameById[p.id] = p.full_name || ''
 
   const qs = (extra: Record<string, string>) => {
     const sp = new URLSearchParams()

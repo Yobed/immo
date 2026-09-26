@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { unstable_cache } from 'next/cache'
 import { Radio, ArrowUpRight, MapPin } from 'lucide-react'
 import { locauxReadClients, byDatePubDesc } from '@/lib/supabase/locaux'
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -25,33 +26,39 @@ function timeBadge(iso: string, locale: string): string {
   return fr ? `il y a ${d}j` : `${d}d ago`
 }
 
-export async function FlashOffersSection() {
-  const t = await getDictionary()
-  const locale = await getLocale()
-  // Ancien + nouveau projet locaux fusionnés (historique conservé).
-  const fetchFrom = async (c: SupabaseClient): Promise<LocauxRow[]> => {
-    const { data: rows } = await c
-      .from('locaux')
-      // SECURITY: telephone, telephone_bien, publie_par, groupe_whatsapp_origine
-      // omis — données identifiantes propriétaire/source.
-      .select('id,ref_bien,type_de_bien,type_offre,zone_geographique,commune,quartier,prix,prix_normalise,caracteristiques,meubles,chambre,disponible,surface,date_publication,lien_image,message_initial,status,is_duplicate,date_expiration,created_at')
-      // ⚠️ Politique permissive alignée sur le catalogue (consolidated.ts) : NULL = accepté.
-      // .eq('status','active') / .eq('is_duplicate',false) excluait à tort tous les NULL.
-      // (lien_image requis car cette vitrine landing affiche des cartes avec photo.)
-      .not('status', 'eq', 'inactive')
-      .not('is_duplicate', 'is', true)
-      .neq('lien_image', '')
-      .not('lien_image', 'is', null)
-      .order('date_publication', { ascending: false, nullsFirst: false })
-      .limit(12)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (rows ?? []) as any as LocauxRow[]
-  }
+const getLandingFlashOffers = unstable_cache(
+  async (): Promise<BienExterne[]> => {
+    const fetchFrom = async (c: SupabaseClient): Promise<LocauxRow[]> => {
+      const { data: rows } = await c
+        .from('locaux')
+        // SECURITY: telephone, telephone_bien, publie_par, groupe_whatsapp_origine
+        // omis — données identifiantes propriétaire/source.
+        .select('id,ref_bien,type_de_bien,type_offre,zone_geographique,commune,quartier,prix,prix_normalise,caracteristiques,meubles,chambre,disponible,surface,date_publication,lien_image,message_initial,status,is_duplicate,date_expiration,created_at')
+        .not('status', 'eq', 'inactive')
+        .not('is_duplicate', 'is', true)
+        .neq('lien_image', '')
+        .not('lien_image', 'is', null)
+        .order('date_publication', { ascending: false, nullsFirst: false })
+        .limit(12)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (rows ?? []) as any as LocauxRow[]
+    }
 
-  const parts = await Promise.all(
-    locauxReadClients().map((c) => fetchFrom(c).catch(() => [] as LocauxRow[])),
-  )
-  const biens = parts.flat().sort(byDatePubDesc).map(mapLocauxRow).filter((b) => b.is_actif).slice(0, 6)
+    const parts = await Promise.all(
+      locauxReadClients().map((c) => fetchFrom(c).catch(() => [] as LocauxRow[])),
+    )
+    return parts.flat().sort(byDatePubDesc).map(mapLocauxRow).filter((b) => b.is_actif).slice(0, 6)
+  },
+  ['landing-flash-offers-v2'],
+  { revalidate: 300 },
+)
+
+export async function FlashOffersSection() {
+  const [t, locale, biens] = await Promise.all([
+    getDictionary(),
+    getLocale(),
+    getLandingFlashOffers(),
+  ])
   if (biens.length === 0) return null
 
   return (

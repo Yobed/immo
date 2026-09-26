@@ -7,6 +7,8 @@
  */
 // Note : pas d'import 'server-only' (package non installé sur Vercel) — la
 // protection est implicite via les appels Supabase server-side dans createClient().
+import { unstable_cache } from 'next/cache'
+import { createClient as createSupabaseClient, type SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import {
   createLocauxClient,
@@ -16,7 +18,6 @@ import {
   locauxClientForId,
   byDatePubDesc,
 } from '@/lib/supabase/locaux'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { createAnnoncesClient } from '@/lib/supabase/annonces'
 import { mapLocauxRow, type LocauxRow } from '@/lib/locaux/mapper'
 import { formatFCFA } from '@/lib/format'
@@ -24,6 +25,19 @@ import { publicDescription } from './public-description'
 import { STATUTS_PUBLICS } from './statuts'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bogbesgroup.com'
+
+let _publicBogbes: SupabaseClient | null = null
+function getPublicBogbesClient(): SupabaseClient {
+  if (_publicBogbes) return _publicBogbes
+  _publicBogbes = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: { persistSession: false, autoRefreshToken: false },
+    },
+  )
+  return _publicBogbes
+}
 
 export interface ConsolidatedBien {
   /** ID unique inter-sources, préfixé : "bogbes:UUID" ou "flash:1234" */
@@ -104,7 +118,7 @@ const PERIPHERIE_OR_CLAUSE =
 
 async function fetchBogbes(filters: ConsolidatedFilters): Promise<ConsolidatedBien[]> {
   if (filters.source && filters.source !== 'bogbes') return []
-  const supabase = await createClient()
+  const supabase = getPublicBogbesClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   // biens_medias capped at 6 rows/bien — we only need cover + a few extras for cards.
   // Left join (no !inner) so biens without medias still appear with a placeholder.
@@ -245,7 +259,7 @@ async function fetchLocaux(filters: ConsolidatedFilters): Promise<ConsolidatedBi
       .not('is_duplicate', 'is', true)
       .or('disponible.is.null,disponible.neq.non')
       .order('date_publication', { ascending: false })
-      .limit(Math.min(500, Math.max(120, (filters.limitPerSource ?? DEFAULT_LIMIT) * 2)))
+      .limit(Math.min(200, Math.max(20, Math.round((filters.limitPerSource ?? DEFAULT_LIMIT) * 1.5))))
 
     if (filters.commune) {
       q = isPeripherieCommune(filters.commune)
@@ -795,55 +809,35 @@ function titleCaseCommune(s: string): string {
  * @param source  null = les deux sources ; 'bogbes' / 'flash' pour restreindre.
  * @param limit   nombre max de communes renvoyées (par fréquence décroissante).
  */
-export async function getCatalogueCommunes(
-  source: 'bogbes' | 'flash' | 'web' | null = null,
-  limit = 16,
-): Promise<string[]> {
-  const counts = new Map<string, { label: string; n: number }>()
-  const add = (raw: unknown) => {
-    if (typeof raw !== 'string') return
-    const trimmed = raw.trim()
-    if (!trimmed) return
-    const key = trimmed.toLowerCase()
-    const cur = counts.get(key)
-    if (cur) cur.n += 1
-    else counts.set(key, { label: titleCaseCommune(trimmed), n: 1 })
-  }
+const computeCatalogueCommunesCached = unstable_cache(
+  async (
+    source: 'bogbes' | 'flash' | 'web' | null,
+    limit: number,
+  ): Promise<string[]> => {
+    const counts = new Map<string, { label: string; n: number }>()
+    const add = (raw: unknown) => {
+      if (typeof raw !== 'string') return
+      const trimmed = raw.trim()
+      if (!trimmed) return
+      const key = trimmed.toLowerCase()
+      const cur = counts.get(key)
+      if (cur) cur.n += 1
+      else counts.set(key, { label: titleCaseCommune(trimmed), n: 1 })
+    }
 
-  const tasks: Promise<void>[] = []
+    const tasks: Promise<void>[] = []
 
-  if (!source || source === 'bogbes') {
-    tasks.push(
-      (async () => {
-        try {
-          const supabase = await createClient()
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data } = await (supabase as any)
-            .from('biens')
-            .select('commune')
-            .in('statut', [...STATUTS_PUBLICS])
-            .limit(1000)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          for (const r of (data ?? []) as any[]) add(r.commune)
-        } catch {
-          /* source indisponible — on ignore */
-        }
-      })(),
-    )
-  }
-
-  if (!source || source === 'flash') {
-    for (const sb of locauxReadClients()) {
+    if (!source || source === 'bogbes') {
       tasks.push(
         (async () => {
           try {
+            const supabase = getPublicBogbesClient()
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const { data } = await (sb as any)
-              .from('locaux')
+            const { data } = await (supabase as any)
+              .from('biens')
               .select('commune')
-              .not('status', 'eq', 'inactive')
-              .not('is_duplicate', 'is', true)
-              .limit(1000)
+              .in('statut', [...STATUTS_PUBLICS])
+              .limit(400)
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             for (const r of (data ?? []) as any[]) add(r.commune)
           } catch {
@@ -852,33 +846,64 @@ export async function getCatalogueCommunes(
         })(),
       )
     }
-  }
 
-  if (!source || source === 'web') {
-    tasks.push(
-      (async () => {
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data } = await (createAnnoncesClient() as any)
-            .from('v_annonces')
-            .select('commune')
-            .gt('nb_photos', 0)
-            .limit(1000)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          for (const r of (data ?? []) as any[]) add(r.commune)
-        } catch {
-          /* source indisponible — on ignore */
-        }
-      })(),
-    )
-  }
+    if (!source || source === 'flash') {
+      for (const sb of locauxReadClients()) {
+        tasks.push(
+          (async () => {
+            try {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const { data } = await (sb as any)
+                .from('locaux')
+                .select('commune')
+                .not('status', 'eq', 'inactive')
+                .not('is_duplicate', 'is', true)
+                .limit(400)
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              for (const r of (data ?? []) as any[]) add(r.commune)
+            } catch {
+              /* source indisponible — on ignore */
+            }
+          })(),
+        )
+      }
+    }
 
-  await Promise.all(tasks)
+    if (!source || source === 'web') {
+      tasks.push(
+        (async () => {
+          try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { data } = await (createAnnoncesClient() as any)
+              .from('v_annonces')
+              .select('commune')
+              .gt('nb_photos', 0)
+              .limit(400)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            for (const r of (data ?? []) as any[]) add(r.commune)
+          } catch {
+            /* source indisponible — on ignore */
+          }
+        })(),
+      )
+    }
 
-  return [...counts.values()]
-    .sort((a, b) => b.n - a.n || a.label.localeCompare(b.label))
-    .slice(0, limit)
-    .map((c) => c.label)
+    await Promise.all(tasks)
+
+    return [...counts.values()]
+      .sort((a, b) => b.n - a.n || a.label.localeCompare(b.label))
+      .slice(0, limit)
+      .map((c) => c.label)
+  },
+  ['catalogue-communes-v2'],
+  { revalidate: 900 },
+)
+
+export async function getCatalogueCommunes(
+  source: 'bogbes' | 'flash' | 'web' | null = null,
+  limit = 16,
+): Promise<string[]> {
+  return computeCatalogueCommunesCached(source, limit)
 }
 
 // ─── Pagination serveur pour les offres flash ────────────────────────────────
@@ -935,7 +960,7 @@ export async function getLocauxPagedItems(
       return { rows: data as LocauxRow[], count: count ?? 0 }
     }
 
-    // Lecture publique sur tous les projets locaux actifs (FRESH, MID, OLD)
+    // Lecture publique sur tous les projets locaux actifs (FRESH, MID)
     const parts = await Promise.all(
       locauxReadClients().map((sb) => runOn(sb).catch(() => ({ rows: [] as LocauxRow[], count: 0 }))),
     )
@@ -994,7 +1019,7 @@ export async function getLocauxPagedItems(
 /** Retourne uniquement le nombre total de biens BOGBE'S actifs correspondant aux filtres. */
 export async function getBogbesCount(filters: ConsolidatedFilters): Promise<number> {
   try {
-    const supabase = await createClient()
+    const supabase = getPublicBogbesClient()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let q = (supabase as any)
       .from('biens')

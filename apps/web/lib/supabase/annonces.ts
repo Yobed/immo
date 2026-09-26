@@ -15,13 +15,24 @@ let _client: SupabaseClient | null = null
  * server-side — c'est le cas : consolidated.ts (Server Components) et
  * lib/ai/tools.ts (route API Sapphire).
  */
+const fetchWithTimeout: typeof fetch = (input, init) => {
+  const timeoutSignal = AbortSignal.timeout(3500)
+  const signal = init?.signal
+    ? AbortSignal.any([init.signal, timeoutSignal])
+    : timeoutSignal
+  return fetch(input, { ...init, signal })
+}
+
 export function createAnnoncesClient(): SupabaseClient {
   if (_client) return _client
   const key = process.env.SCRAPING_SUPABASE_SERVICE_ROLE_KEY?.trim().replace(/^\ufeff/, '')
   if (!key) throw new Error('SCRAPING_SUPABASE_SERVICE_ROLE_KEY missing')
   _client = createClient(process.env.SCRAPING_SUPABASE_URL?.trim() || ANNONCES_URL, key, {
     auth: { persistSession: false, autoRefreshToken: false },
-    global: { headers: { 'X-Source': 'immo-ci-annonces' } },
+    global: {
+      headers: { 'X-Source': 'immo-ci-annonces' },
+      fetch: fetchWithTimeout,
+    },
   })
   return _client
 }

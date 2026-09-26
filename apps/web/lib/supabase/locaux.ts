@@ -32,12 +32,26 @@ let _prevFreshAdmin: SupabaseClient | null = null
 let _midAdmin: SupabaseClient | null = null
 let _oldAdmin: SupabaseClient | null = null
 
+const fetchWithTimeout: typeof fetch = (input, init) => {
+  const timeoutSignal = AbortSignal.timeout(3500)
+  const signal = init?.signal
+    ? AbortSignal.any([init.signal, timeoutSignal])
+    : timeoutSignal
+  return fetch(input, { ...init, signal })
+}
+
 const OPTS = {
   auth: { persistSession: false, autoRefreshToken: false },
-  global: { headers: { 'X-Source': 'immo-ci-offre-flash' } },
+  global: {
+    headers: { 'X-Source': 'immo-ci-offre-flash' },
+    fetch: fetchWithTimeout,
+  },
 } as const
 
-const ADMIN_OPTS = { auth: { persistSession: false, autoRefreshToken: false } } as const
+const ADMIN_OPTS = {
+  auth: { persistSession: false, autoRefreshToken: false },
+  global: { fetch: fetchWithTimeout },
+} as const
 
 function svcKey(name: string): string {
   const raw = process.env[name]
@@ -77,13 +91,15 @@ export function createLocauxLegacyClient(): SupabaseClient {
   return _old
 }
 
-/** Les sources de lecture, plus récent d'abord (listes fusionnées). */
+/**
+ * Les sources de lecture actives, plus récent d'abord (listes fusionnées).
+ * Note: PREV_FRESH (HTTP 402 quota dépassé) et OLD (DNS supprimé) sont exclus
+ * pour éviter de bloquer ou ralentir chaque requête catalogue/admin.
+ */
 export function locauxReadClients(): SupabaseClient[] {
   return [
     createLocauxClient(),
-    createLocauxPrevFreshClient(),
     createLocauxMidClient(),
-    createLocauxLegacyClient(),
   ]
 }
 
