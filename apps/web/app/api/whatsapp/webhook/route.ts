@@ -480,14 +480,14 @@ export async function POST(req: NextRequest) {
     const now = Date.now();
     const marks = ((sysMarks as unknown) as { body: string; created_at: string }[]) ?? [];
 
-    // 2. Historique de conversation (10 derniers messages réels, hors marqueurs system)
+    // 2. Historique de conversation (30 derniers messages réels, hors marqueurs system)
     const { data: history } = await supabase
       .from('whatsapp_messages')
       .select('direction, body, created_at, metadata')
       .eq('jid', jid)
       .in('direction', ['inbound', 'outbound'])
       .order('created_at', { ascending: false })
-      .limit(10);
+      .limit(30);
 
     const formattedHistory = ((history as any[]) || [])
       .reverse()
@@ -500,8 +500,10 @@ export async function POST(req: NextRequest) {
 
     // Note : history[0] est le message entrant qui vient d'être inséré à l'étape 1.
     // Le dernier message précédent est donc history[1].
+    // Une session de recherche immobilière reste active pendant 7 jours (évite l'amnésie
+    // quand un prospect répond quelques heures ou 2 jours plus tard).
     const prevMsgTime = history?.[1]?.created_at ? new Date(history[1].created_at).getTime() : 0;
-    const isNewSession = !prevMsgTime || (now - prevMsgTime > 2 * 3_600_000);
+    const isNewSession = !prevMsgTime || (now - prevMsgTime > 7 * 24 * 3_600_000);
 
     // Détection d'une conversation déjà gérée par un commercial humain (< 24 h)
     const hasHumanTakeover =
@@ -589,10 +591,12 @@ export async function POST(req: NextRequest) {
         body: 'LISTING_PROVIDER',
         metadata: { signals: sig },
       });
-      const alreadyReplied = formattedHistory.some(
-        (m) => m.role === 'assistant' && m.content.startsWith('Merci pour votre proposition'),
-      );
-      if (!alreadyReplied && !hasHumanTakeover) {
+      const alreadyReplied =
+        hasHumanTakeover ||
+        formattedHistory.some(
+          (m) => m.role === 'assistant' && m.content.startsWith('Merci pour votre proposition'),
+        );
+      if (!alreadyReplied) {
         const advisorPhone = process.env.SAPPHIRE_ADVISOR_PHONE || '+2250544872051';
         await wasenderSendMessage(
           advisorPhone,
@@ -610,7 +614,7 @@ export async function POST(req: NextRequest) {
       }
       return NextResponse.json({
         status: 'ok',
-        branch: alreadyReplied || hasHumanTakeover ? 'listing_muted' : 'listing_partner',
+        branch: alreadyReplied ? 'listing_muted' : 'listing_partner',
       });
     }
 
@@ -695,13 +699,31 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: 'ok', branch: 'offtopic_silence' });
     }
 
+    // Récupération des critères déjà enregistrés sur la fiche prospect CRM (évite l'oubli sur les longues conversations)
+    let fallbackProfile: { propertyType?: string | null; zone?: string | null; budget?: number | null } | undefined;
+    if (capturedProspectId) {
+      const { data: pRow } = await supabase
+        .from('prospects')
+        .select('type_bien, commune, quartier, budget')
+        .eq('id', capturedProspectId)
+        .maybeSingle();
+      if (pRow) {
+        const row = pRow as { type_bien?: string | null; commune?: string | null; quartier?: string | null; budget?: number | null };
+        fallbackProfile = {
+          propertyType: row.type_bien ?? null,
+          zone: row.quartier || row.commune || null,
+          budget: row.budget ?? null,
+        };
+      }
+    }
+
     // 2f. QUALIFICATION DÉTERMINISTE (Cahier des règles §5-7) — en code, pas via
     // l'IA : TYPE + ZONE + BUDGET obligatoires AVANT toute proposition. Ne
     // s'applique PAS à une visite / sélection d'un bien déjà proposé (→ flux LLM).
     const isVisiteOrSelection =
       detectVisiteIntent(userMessage) || SELECTS_BIEN_REGEX.test(userMessage);
     if (!isVisiteOrSelection) {
-      const qual = qualify(userMessage, formattedHistory, { isNewSession });
+      const qual = qualify(userMessage, formattedHistory, { isNewSession, fallbackProfile });
       if (!qual.hasAll3) {
         const sendFixed = async (text: string, type: string) => {
           await humanReplyDelay(text, requestStartedAt);
@@ -710,8 +732,8 @@ export async function POST(req: NextRequest) {
             .from('whatsapp_messages')
             .insert({ jid, direction: 'outbound', body: text, metadata: { type } });
         };
-        // 1er contact (aucun message assistant) OU nouvelle session après inactivité avec salutation → message de bienvenue (Règle 1).
-        // Garde anti-spam : on ne renvoie JAMAIS le WELCOME_MESSAGE s'il a déjà été envoyé dans l'historique récent.
+        // 1er contact (aucun message assistant) OU nouvelle session après inactivité (> 7j) avec salutation → message de bienvenue (Règle 1).
+        // Garde anti-spam : on ne renvoie JAMAIS le WELCOME_MESSAGE s'il a déjà été envoyé dans l'historique.
         const alreadyWelcomed = formattedHistory.some(
           (m) => m.role === 'assistant' && m.content.includes('Bienvenue chez Bogbe'),
         );
@@ -743,7 +765,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Contexte immobilier (biens + médias) — historique passé pour retrouver commune/type des échanges précédents
-    const qual = qualify(userMessage, formattedHistory, { isNewSession });
+    const qual = qualify(userMessage, formattedHistory, { isNewSession, fallbackProfile });
     const context = await getAIBienContext(userMessage, formattedHistory, qual);
 
     // 2g. Client qualifié mais AUCUN bien en zone/budget → message conseiller

@@ -53,9 +53,9 @@ console.log('--- TEST 5 & 6 : RÈGLES 5 & 6 - Démarcheurs / Propriétaires / Of
 assert.ok(routeSource.includes('isPartnerOrListingOffer'), 'Fonction isPartnerOrListingOffer présente');
 assert.ok(qualSource.includes('isClientSearchIntent'), 'Fonction isClientSearchIntent présente dans qualification');
 assert.ok(routeSource.includes('isClientSearchIntent,'), 'isClientSearchIntent importée dans route');
-assert.ok(routeSource.includes('if (isClientSearchIntent(text))'), 'Garde isClientSearchIntent dans isPartnerOrListingOffer');
+assert.ok(qualSource.includes('if (isClientSearchIntent(text))'), 'Garde isClientSearchIntent dans isListingOrPartnerOffer');
 assert.ok(routeSource.includes('!clientSearching && isPartnerOrListingOffer'), 'Garde clientSearching avant isListing');
-assert.ok(routeSource.includes('listingSignals(text) >= 3'), 'Annonce brute >= 3 signaux bascule en partenaire');
+assert.ok(qualSource.includes('listingSignals(text) >= 3'), 'Annonce brute >= 3 signaux bascule en partenaire');
 assert.ok(routeSource.includes('https://www.bogbesgroup.com/register'), 'Lien register partenaire exact');
 assert.ok(routeSource.includes("body: 'LISTING_PROVIDER'"), 'Marqueur système LISTING_PROVIDER');
 assert.ok(routeSource.includes("branch: alreadyReplied ? 'listing_muted' : 'listing_partner'"), 'Arrêt immédiat sans questionnaire client');

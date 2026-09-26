@@ -39,8 +39,20 @@ const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u
  * Quartiers fréquemment cités → commune de rattachement.
  */
 const QUARTIER_COMMUNE: Record<string, string> = {
+  angree: 'Cocody',
+  'angrée': 'Cocody',
   angre: 'Cocody',
   'angré': 'Cocody',
+  'belle ville': 'Cocody',
+  belleville: 'Cocody',
+  abobote: 'Cocody',
+  'aboboté': 'Cocody',
+  dokui: 'Cocody',
+  gestoci: 'Cocody',
+  mahou: 'Cocody',
+  '7e tranche': 'Cocody',
+  '8e tranche': 'Cocody',
+  '9e tranche': 'Cocody',
   riviera: 'Cocody',
   bonoumin: 'Cocody',
   palmeraie: 'Cocody',
@@ -56,6 +68,8 @@ const QUARTIER_COMMUNE: Record<string, string> = {
   danga: 'Cocody',
   faya: 'Cocody',
   attoban: 'Cocody',
+  chateau: 'Cocody',
+  'château': 'Cocody',
   abatta: 'Bingerville',
   'zone 4': 'Marcory',
   bietry: 'Marcory',
@@ -67,8 +81,6 @@ const QUARTIER_COMMUNE: Record<string, string> = {
   sicogi: 'Yopougon',
   vridi: 'Port-Bouët',
   gonzagueville: 'Port-Bouët',
-  chateau: 'Yopougon',
-  'château': 'Yopougon',
   bracodi: 'Adjamé',
 }
 
@@ -206,10 +218,12 @@ export async function getAIBienContext(
     userMessage + ' ' + (history?.slice(-8).map((m) => m.content).join(' ') ?? ''),
   )
 
-  // 1. Communes citées
+  // 1. Communes citées (avec frontières de mots pour éviter que "Aboboté" matche "Abobo")
   for (const c of COMMUNES_CI) {
     const clean = norm(c === 'Bassam (Grand-Bassam)' ? 'bassam' : c)
-    if (msgNorm.includes(clean) && !zoneTerms.includes(clean)) {
+    const escaped = clean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const communeRe = new RegExp(`(?<![a-z0-9])${escaped}(?![a-z0-9])`, 'i')
+    if (communeRe.test(msgNorm) && !zoneTerms.includes(clean)) {
       zoneTerms.push(clean)
     }
   }

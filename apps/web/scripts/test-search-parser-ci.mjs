@@ -77,6 +77,39 @@ assert.ok(!reminderNoKnown.includes("C'est bien noté"), 'Pas d accusé si rien 
 assert.ok(reminderNoKnown.includes('Pour que je puisse vous proposer les biens les plus adaptés'), 'Garde le marqueur strict');
 console.log('✓ Test 4 validé');
 
+console.log('--- TEST 5 : Cas réel prospect b20dae3c (Maman De Néroi) ---');
+// 1. "Apparemment deux pièces" (faute de frappe mobile pour "Appartement deux pièces")
+const pApparemment = parseSearchQuery('Apparemment deux pièces');
+assert.equal(pApparemment.type_bien, 'appartement', '"Apparemment deux pièces" -> appartement');
+
+// 2. "Excusez est ce que je peux avoir une deux pièces de 90 mill"
+const p90mill = parseSearchQuery('Excusez est ce que je peux avoir une deux pièces de 90 mill');
+assert.equal(p90mill.type_bien, 'appartement', '"une deux pièces" -> appartement');
+assert.equal(p90mill.prix_max, '90000', '"90 mill" -> 90000');
+
+// 3. "Aboboté" ne doit JAMAIS matcher la commune "Abobo" (rattaché à Cocody)
+const pAbobote = parseSearchQuery('Aboboté');
+assert.equal(pAbobote.commune, 'Cocody', '"Aboboté" -> Cocody (jamais Abobo)');
+const qAbobote = qualify('Aboboté');
+assert.equal(qAbobote.zone, 'Cocody', '"Aboboté" qualifié sur Cocody');
+
+// 4. "Belle ville" reconnu comme quartier
+const qBelleville = qualify('Belle ville');
+assert.equal(qBelleville.zone, 'Belle ville', '"Belle ville" reconnu comme quartier');
+
+// 5. Qualification complète dès le 3e message de Maman De Néroi (Zone -> Type -> Budget)
+const qMaman = qualify('Et mon budget c’est maximum est de 80000', [
+  { role: 'user', content: 'Angrée château , angrée deux plateaux,' },
+  { role: 'assistant', content: 'Relance' },
+  { role: 'user', content: 'Apparemment deux pièces' },
+]);
+assert.equal(qMaman.propertyType, 'appartement');
+assert.equal(qMaman.zone, 'Angré');
+assert.equal(qMaman.budget, 80000);
+assert.equal(qMaman.transaction, 'location');
+assert.equal(qMaman.hasAll3, true);
+console.log('✓ Test 5 validé');
+
 console.log('\n========================================================');
 console.log('TOUS LES TESTS DU MOTEUR DE QUALIFICATION SONT VALIDÉS !');
 console.log('========================================================');

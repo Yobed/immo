@@ -32,16 +32,48 @@ export function canonicalPhone(raw: string): string {
 
 // Quartiers fréquents (best-effort) — complète le `commune` du parseur.
 const QUARTIERS = [
-  'angré', 'angre', 'riviera', 'bonoumin', 'palmeraie', 'deux plateaux', '2 plateaux',
-  'vallon', 'cocovico', 'synacass', 'djorobité', 'akouédo', 'danga', 'zone 4', 'biétry',
-  'bietry', 'anoumabo', 'niangon', 'selmer', 'toits rouges', 'vridi', 'gonzagueville',
-  'abatta', 'bonoua', 'faya', 'bracodi', 'sicogi', 'ficgayo', 'lokoua', 'attoban',
+  'angrée', 'angré', 'angre', 'belle ville', 'belleville', 'aboboté', 'abobote',
+  'riviera', 'bonoumin', 'palmeraie', 'deux plateaux', '2 plateaux',
+  'vallon', 'cocovico', 'synacass', 'djorobité', 'djorobite', 'akouédo', 'akouedo',
+  'danga', 'zone 4', 'biétry', 'bietry', 'anoumabo', 'niangon', 'selmer',
+  'toits rouges', 'vridi', 'gonzagueville', 'abatta', 'bonoua', 'faya',
+  'bracodi', 'sicogi', 'ficgayo', 'lokoua', 'attoban', 'château', 'chateau',
+  'dokui', 'gestoci', 'mahou', '7e tranche', '8e tranche', '9e tranche',
 ]
 
-function detectQuartier(text: string): string | null {
+const QUARTIER_TO_COMMUNE: Record<string, string> = {
+  angrée: 'Cocody', angré: 'Cocody', angre: 'Cocody',
+  'belle ville': 'Cocody', belleville: 'Cocody',
+  aboboté: 'Cocody', abobote: 'Cocody',
+  riviera: 'Cocody', bonoumin: 'Cocody', palmeraie: 'Cocody',
+  'deux plateaux': 'Cocody', '2 plateaux': 'Cocody',
+  vallon: 'Cocody', cocovico: 'Cocody', synacass: 'Cocody',
+  djorobité: 'Cocody', djorobite: 'Cocody', akouédo: 'Cocody', akouedo: 'Cocody',
+  danga: 'Cocody', faya: 'Cocody', attoban: 'Cocody',
+  château: 'Cocody', chateau: 'Cocody',
+  dokui: 'Cocody', gestoci: 'Cocody', mahou: 'Cocody',
+  '7e tranche': 'Cocody', '8e tranche': 'Cocody', '9e tranche': 'Cocody',
+  'zone 4': 'Marcory', biétry: 'Marcory', bietry: 'Marcory', anoumabo: 'Marcory',
+  niangon: 'Yopougon', selmer: 'Yopougon', 'toits rouges': 'Yopougon',
+  sicogi: 'Yopougon', ficgayo: 'Yopougon', lokoua: 'Yopougon',
+  vridi: 'Port-Bouët', gonzagueville: 'Port-Bouët',
+  abatta: 'Bingerville',
+  bracodi: 'Adjamé',
+}
+
+function detectQuartier(text: string): { quartier: string | null; commune: string | null } {
   const t = text.toLowerCase()
-  for (const q of QUARTIERS) if (t.includes(q)) return q.charAt(0).toUpperCase() + q.slice(1)
-  return null
+  for (const q of QUARTIERS) {
+    if (t.includes(q)) {
+      const normalizedLabel =
+        q === 'angrée' || q === 'angre' ? 'Angré'
+        : q === 'belleville' ? 'Belle ville'
+        : q === 'abobote' ? 'Aboboté'
+        : q.charAt(0).toUpperCase() + q.slice(1)
+      return { quartier: normalizedLabel, commune: QUARTIER_TO_COMMUNE[q] ?? null }
+    }
+  }
+  return { quartier: null, commune: null }
 }
 
 /** Détecte une échéance d'acquisition/emménagement dans un message. */
@@ -106,14 +138,15 @@ export async function captureProspect(args: CaptureArgs): Promise<string | null>
   }
 
   const p = parseSearchQuery(message)
+  const qInfo = detectQuartier(message)
   const found = {
     type_bien: p.type_bien || null,
-    commune: p.commune || null,
-    quartier: detectQuartier(message),
+    commune: p.commune || qInfo.commune || null,
+    quartier: qInfo.quartier,
     budget: p.prix_max ? parseInt(p.prix_max, 10) : null,
     date_souhaitee: detectTimeframe(message),
   }
-  const hasSignal = !!(found.type_bien || found.commune || found.budget != null)
+  const hasSignal = !!(found.type_bien || found.commune || found.quartier || found.budget != null)
   const declaredName = detectDeclaredName(message, history)
 
   const sb = getClient()

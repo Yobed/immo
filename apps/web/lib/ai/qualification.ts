@@ -8,11 +8,18 @@ import { parseSearchQuery } from '../searchParser.ts'
 
 // Quartiers reconnus comme « zone » (le parseur ne connaît que les communes).
 export const QUARTIERS_ZONE = [
-  'angré', 'angre', 'riviera', 'bonoumin', 'palmeraie', 'deux plateaux', '2 plateaux',
+  'angrée', 'angré', 'angre', 'belle ville', 'belleville', 'aboboté', 'abobote',
+  'riviera golf', 'riviera 2', 'riviera 3', 'riviera 4', 'riviera palmeraie', 'riviera bonoumin',
+  'riviera faya', 'riviera', 'bonoumin', 'palmeraie', 'deux plateaux', '2 plateaux',
   'vallon', 'cocovico', 'synacass', 'akouédo', 'akouedo', 'danga', 'zone 4', 'biétry', 'bietry',
-  'anoumabo', 'niangon', 'selmer', 'toits rouges', 'vridi', 'gonzagueville', 'abatta',
-  'bonoua', 'faya', 'bracodi', 'sicogi', 'attoban', 'château', 'chateau', 'djorobite', 'djorobité',
-  'bassam', 'grand-bassam', 'songon', 'anyama', 'bingerville',
+  'anoumabo', 'niangon', 'selmer', 'toits rouges', 'toit rouge', 'maroc', 'anador', 'sopim',
+  'ananeraie', 'sideci', 'banco', 'gesco', 'azito', 'wassakara', 'andokoi', 'kouté', 'koute',
+  'millionnaire', 'koweit', 'koweït', 'pk18', 'pk 18', 'avocatier', 'ndotre', 'n\'dotré', 'ndotré',
+  'jules verne', 'cite ado', 'cité ado', 'remblais', 'sogephia', 'williamsville', 'paillet',
+  'vridi', 'gonzagueville', 'abatta', 'bonoua', 'faya', 'bracodi', 'sicogi', 'attoban',
+  'château', 'chateau', 'djorobite', 'djorobité', 'dokui', 'gestoci', 'mahou',
+  '7e tranche', '8e tranche', '9e tranche', '7ème tranche', '8ème tranche', '9ème tranche',
+  'bassam', 'grand-bassam', 'songon', 'anyama', 'bingerville', 'm\'badon', 'mbadon', 'mpouto', 'm\'pouto',
 ]
 
 export function detectQuartierZone(text: string): string | null {
@@ -21,7 +28,16 @@ export function detectQuartierZone(text: string): string | null {
     return "Périphérie d'Abidjan"
   }
   for (const q of QUARTIERS_ZONE) {
-    if (t.includes(q)) return q.charAt(0).toUpperCase() + q.slice(1)
+    const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const re = new RegExp(`(?:^|[^a-z0-9éèêëàâîïôùûç])(${escaped})(?:$|[^a-z0-9éèêëàâîïôùûç])`, 'i')
+    if (re.test(t)) {
+      if (q === 'angrée' || q === 'angre') return 'Angré'
+      if (q === 'belleville') return 'Belle ville'
+      if (q === 'abobote') return 'Aboboté'
+      if (q === 'toit rouge') return 'Toits rouges'
+      if (q === 'koweit') return 'Koweït'
+      return q.charAt(0).toUpperCase() + q.slice(1)
+    }
   }
   return null
 }
@@ -187,8 +203,35 @@ export interface Qualification {
   propertyType: string | null
   zone: string | null
   budget: number | null
+  nbPieces?: number | null
   hasAll3: boolean
   missing: ('type' | 'zone' | 'budget')[]
+}
+
+/**
+ * Conserve uniquement les messages appartenant à la session de conversation courante :
+ * dès qu'un écart > maxGapMs (défaut 2h) existe entre deux messages consécutifs,
+ * on coupe l'historique antérieur pour éviter de mélanger une recherche d'il y a plusieurs jours/semaines.
+ */
+export function filterCurrentSessionHistory<T extends { role: string; content: string; created_at?: string }>(
+  history?: T[],
+  maxGapMs = 2 * 3_600_000,
+): T[] {
+  if (!history || history.length === 0) return []
+  const result: T[] = []
+  let nextTime: number | null = null
+  for (let i = history.length - 1; i >= 0; i--) {
+    const item = history[i]
+    const t = item.created_at ? new Date(item.created_at).getTime() : null
+    if (nextTime != null && t != null && !Number.isNaN(t) && nextTime - t > maxGapMs) {
+      break
+    }
+    result.unshift(item)
+    if (t != null && !Number.isNaN(t)) {
+      nextTime = t
+    }
+  }
+  return result
 }
 
 /**
@@ -197,24 +240,52 @@ export interface Qualification {
  */
 export function qualify(
   message: string,
-  history?: { role: string; content: string }[],
-  options?: { isNewSession?: boolean },
+  history?: { role: string; content: string; created_at?: string }[],
+  options?: {
+    isNewSession?: boolean
+    fallbackProfile?: { propertyType?: string | null; zone?: string | null; budget?: number | null }
+  },
 ): Qualification {
   const isFresh = options?.isNewSession || FRESH_SEARCH_RE.test(message)
-  const recentUser = isFresh
-    ? []
-    : (history ?? []).filter((m) => m.role === 'user').slice(-8).map((m) => m.content)
-  const combined = [message, ...recentUser].join('  ')
+  const sessionHistory = isFresh ? [] : filterCurrentSessionHistory(history)
+  // Exclure du `recentUser` le dernier message s'il est identique à `message` (déjà inséré en DB à l'étape 1)
+  const rawUserMsgs = sessionHistory.filter((m) => m.role === 'user').slice(-20).map((m) => m.content)
+  if (rawUserMsgs.length > 0 && rawUserMsgs[rawUserMsgs.length - 1].trim() === message.trim()) {
+    rawUserMsgs.pop()
+  }
+  const recentUser = isFresh ? [] : rawUserMsgs
+  // Ordre du plus récent au plus ancien pour que parseSearchQuery(combined) trouve d'abord les critères récents
+  const newestFirst = [message, ...[...recentUser].reverse()]
+  const combined = newestFirst.join('  ')
 
   const pMsg = parseSearchQuery(message)
   const pAll = parseSearchQuery(combined)
 
-  const propertyType = isFresh ? (pMsg.type_bien ?? null) : (pMsg.type_bien || pAll.type_bien || null)
+  // Parcours du message le plus récent au plus ancien pour toujours privilégier
+  // la dernière précision du client (ex: budget révisé de 80k à 90k ou nouveau quartier).
+  let latestType: string | null = null
+  let latestZone: string | null = null
+  let latestBudgetStr: string | null = null
+  let latestNbPieces: number | null = null
+  for (const m of newestFirst) {
+    const pm = parseSearchQuery(m)
+    if (!latestType && pm.type_bien) latestType = pm.type_bien
+    if (!latestZone) latestZone = detectQuartierZone(m) || pm.commune || null
+    if (!latestBudgetStr && pm.prix_max) latestBudgetStr = pm.prix_max
+    if (!latestNbPieces && pm.nb_pieces) latestNbPieces = pm.nb_pieces
+  }
+
+  const fb = isFresh ? undefined : options?.fallbackProfile
+  const propertyType = isFresh
+    ? (pMsg.type_bien ?? null)
+    : (pMsg.type_bien || latestType || pAll.type_bien || fb?.propertyType || null)
+  const msgZone = detectQuartierZone(message) || pMsg.commune || null
   const zone = isFresh
-    ? (pMsg.commune || detectQuartierZone(message) || null)
-    : (pMsg.commune || detectQuartierZone(message) || pAll.commune || detectQuartierZone(combined) || null)
-  const budgetStr = isFresh ? pMsg.prix_max : (pMsg.prix_max || pAll.prix_max)
-  const budget = budgetStr ? parseInt(budgetStr, 10) : null
+    ? msgZone
+    : (msgZone || latestZone || detectQuartierZone(combined) || pAll.commune || fb?.zone || null)
+  const budgetStr = isFresh ? pMsg.prix_max : (pMsg.prix_max || latestBudgetStr || pAll.prix_max)
+  const budget = budgetStr ? parseInt(budgetStr, 10) : (fb?.budget ?? null)
+  const nbPieces = isFresh ? (pMsg.nb_pieces ?? null) : (pMsg.nb_pieces || latestNbPieces || pAll.nb_pieces || null)
   const transaction = detectTransaction(isFresh ? message : combined, budget, propertyType)
 
   const missing: ('type' | 'zone' | 'budget')[] = []
@@ -222,7 +293,7 @@ export function qualify(
   if (!zone) missing.push('zone')
   if (budget == null) missing.push('budget')
 
-  return { transaction, propertyType, zone, budget, hasAll3: missing.length === 0, missing }
+  return { transaction, propertyType, zone, budget, nbPieces, hasAll3: missing.length === 0, missing }
 }
 
 // ─── Messages fixes stricts (Cahier des 7 règles) ──────────────────────────
@@ -252,13 +323,20 @@ export function buildQualifReminder(
   known?: { propertyType?: string | null; zone?: string | null; budget?: number | null },
 ): string {
   const acknowledgments: string[] = []
-  if (known?.propertyType) acknowledgments.push(`votre recherche de **${known.propertyType}**`)
-  if (known?.zone) acknowledgments.push(`dans le secteur de **${known.zone}**`)
-  if (known?.budget) acknowledgments.push(`avec un budget d'environ **${known.budget.toLocaleString('fr-FR')} FCFA**`)
+  if (known?.propertyType) {
+    acknowledgments.push(`votre recherche de *${known.propertyType}*`)
+    if (known?.zone) acknowledgments.push(`dans le secteur de *${known.zone}*`)
+  } else if (known?.zone) {
+    acknowledgments.push(`votre recherche dans le secteur de *${known.zone}*`)
+  }
+  if (known?.budget) {
+    const prefix = acknowledgments.length === 0 ? 'votre recherche ' : ''
+    acknowledgments.push(`${prefix}avec un budget d'environ *${known.budget.toLocaleString('fr-FR')} FCFA*`)
+  }
 
   let intro = ''
   if (acknowledgments.length > 0) {
-    intro = `C'est bien noté pour ${acknowledgments.join(', ')} ! 🙏\n\n`
+    intro = `C'est bien noté pour ${acknowledgments.join(' ')} ! 🙏\n\n`
   }
 
   const items: string[] = []
