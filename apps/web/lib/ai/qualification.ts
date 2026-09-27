@@ -23,6 +23,7 @@ export const QUARTIERS_ZONE = [
   'vridi', 'gonzagueville', 'gonzague', 'abatta', 'feh kessé', 'feh kesse', 'feu kesse', 'bonoua', 'faya', 'faye', 'bracodi', 'sicogi', 'attoban',
   'château', 'chateau', 'djorobite', 'djorobité', 'dokui', 'gestoci', 'mahou',
   '7e tranche', '8e tranche', '9e tranche', '7ème tranche', '8ème tranche', '9ème tranche', '7eme tranche', '8eme tranche', '9eme tranche',
+  'carrefour terminus 42', 'terminus 42', 'terminus 81-82', 'terminus 81', 'terminus 82', 'terminus 40', 'terminus 47', 'terminus 27',
   'bassam', 'grand-bassam', 'songon', 'anyama', 'bingerville', 'm\'badon', 'mbadon', 'm badon', 'mpouto', 'm\'pouto',
 ]
 
@@ -214,6 +215,7 @@ export interface Qualification {
   transaction: 'location' | 'achat' | null
   propertyType: string | null
   zone: string | null
+  budgetMin?: number | null
   budget: number | null
   nbPieces?: number | null
   hasAll3: boolean
@@ -255,7 +257,7 @@ export function qualify(
   history?: { role: string; content: string; created_at?: string }[],
   options?: {
     isNewSession?: boolean
-    fallbackProfile?: { propertyType?: string | null; zone?: string | null; budget?: number | null }
+    fallbackProfile?: { propertyType?: string | null; zone?: string | null; budget?: number | null; budgetMin?: number | null }
   },
 ): Qualification {
   const isFresh = options?.isNewSession || FRESH_SEARCH_RE.test(message)
@@ -278,12 +280,16 @@ export function qualify(
   let latestType: string | null = null
   let latestZone: string | null = null
   let latestBudgetStr: string | null = null
+  let latestBudgetMinStr: string | null = null
   let latestNbPieces: number | null = null
   for (const m of newestFirst) {
     const pm = parseSearchQuery(m)
     if (!latestType && pm.type_bien) latestType = pm.type_bien
     if (!latestZone) latestZone = pm.commune || detectQuartierZone(m) || null
-    if (!latestBudgetStr && pm.prix_max) latestBudgetStr = pm.prix_max
+    if (!latestBudgetStr && pm.prix_max) {
+      latestBudgetStr = pm.prix_max
+      latestBudgetMinStr = pm.prix_min ?? null
+    }
     if (!latestNbPieces && pm.nb_pieces) latestNbPieces = pm.nb_pieces
   }
 
@@ -296,7 +302,11 @@ export function qualify(
     ? msgZone
     : (msgZone || latestZone || pAll.commune || detectQuartierZone(combined) || fb?.zone || null)
   const budgetStr = isFresh ? pMsg.prix_max : (pMsg.prix_max || latestBudgetStr || pAll.prix_max)
+  const budgetMinStr = isFresh
+    ? pMsg.prix_min
+    : (pMsg.prix_max ? pMsg.prix_min : (latestBudgetStr ? latestBudgetMinStr : pAll.prix_min))
   const budget = budgetStr ? parseInt(budgetStr, 10) : (fb?.budget ?? null)
+  const budgetMin = budgetMinStr ? parseInt(budgetMinStr, 10) : (fb?.budgetMin ?? null)
   const nbPieces = isFresh ? (pMsg.nb_pieces ?? null) : (pMsg.nb_pieces || latestNbPieces || pAll.nb_pieces || null)
   const transaction = detectTransaction(isFresh ? message : combined, budget, propertyType)
 
@@ -305,7 +315,7 @@ export function qualify(
   if (!zone) missing.push('zone')
   if (budget == null) missing.push('budget')
 
-  return { transaction, propertyType, zone, budget, nbPieces, hasAll3: missing.length === 0, missing }
+  return { transaction, propertyType, zone, budgetMin, budget, nbPieces, hasAll3: missing.length === 0, missing }
 }
 
 // ─── Messages fixes stricts (Cahier des 7 règles) ──────────────────────────
@@ -332,7 +342,7 @@ export const QUALIF_REMINDER_MARKER = /proposer les biens les plus adapt[ée]s/i
 /** Règle 2 : Relance unique ciblée sur les éléments manquants */
 export function buildQualifReminder(
   missing: ('type' | 'zone' | 'budget')[],
-  known?: { propertyType?: string | null; zone?: string | null; budget?: number | null },
+  known?: { propertyType?: string | null; zone?: string | null; budgetMin?: number | null; budget?: number | null },
 ): string {
   const acknowledgments: string[] = []
   if (known?.propertyType) {
@@ -343,7 +353,13 @@ export function buildQualifReminder(
   }
   if (known?.budget) {
     const prefix = acknowledgments.length === 0 ? 'votre recherche ' : ''
-    acknowledgments.push(`${prefix}avec un budget d'environ *${known.budget.toLocaleString('fr-FR')} FCFA*`)
+    if (known?.budgetMin && known.budgetMin < known.budget) {
+      acknowledgments.push(
+        `${prefix}avec un budget compris entre *${known.budgetMin.toLocaleString('fr-FR')}* et *${known.budget.toLocaleString('fr-FR')} FCFA*`,
+      )
+    } else {
+      acknowledgments.push(`${prefix}avec un budget d'environ *${known.budget.toLocaleString('fr-FR')} FCFA*`)
+    }
   }
 
   let intro = ''

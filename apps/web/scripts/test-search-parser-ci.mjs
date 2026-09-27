@@ -243,15 +243,24 @@ assert.equal(qualify('Siporex').zone, 'Siporex', 'Siporex détecté');
 console.log('✓ Test 8 validé');
 
 console.log('\n--- TEST 9 : Cas réels issus de l\'audit complet des 358 prospects & 4000 messages ---');
-// 1. DZ : "les studios de 50 60 65 70" ne doit JAMAIS concaténer en 50 606 570 FCFA !
+// 1. DZ : "les studios de 50 60 65 70" -> intervalle [50 000, 70 000 FCFA]
 const qDZ = qualify('Est ce que vous trouvez les studios de 50 60 65 70 pour les gens à Yopougon');
-assert.equal(qDZ.budget, 70000, '"50 60 65 70" -> 70 000 FCFA (et non 50 606 570)');
+assert.equal(qDZ.budgetMin, 50000, '"50 60 65 70" -> budgetMin = 50 000 FCFA');
+assert.equal(qDZ.budget, 70000, '"50 60 65 70" -> budget = 70 000 FCFA (et non 50 606 570)');
 
-// 2. Oknel Assou : "De 80 90 100 120" -> 120 000 FCFA
+// 2. Oknel Assou : "De 80 90 100 120" (et "De 80 90 100 12 0") -> intervalle [80 000, 120 000 FCFA]
 const qOknel = qualify('De 80 90 100 120');
-assert.equal(qOknel.budget, 120000, '"De 80 90 100 120" -> 120 000 FCFA');
+assert.equal(qOknel.budgetMin, 80000, '"De 80 90 100 120" -> budgetMin = 80 000 FCFA');
+assert.equal(qOknel.budget, 120000, '"De 80 90 100 120" -> budget = 120 000 FCFA');
+const qOknelTypo = qualify('De 80 90 100 12 0');
+assert.equal(qOknelTypo.budgetMin, 80000, '"De 80 90 100 12 0" -> budgetMin = 80 000 FCFA');
+assert.equal(qOknelTypo.budget, 120000, '"De 80 90 100 12 0" -> budget = 120 000 FCFA');
 
-// 3. Rachelle Bissou : "carrefour terminus 42 100.000f ko" -> "terminus 42" ignoré, budget = 100 000 FCFA
+// 3. Rachelle Bissou : "carrefour terminus 42 100.000f" -> Zone "Carrefour terminus 42" et budget = 100 000 FCFA
+const qRachelleDirect = qualify('carrefour terminus 42 100.000f');
+assert.equal(qRachelleDirect.zone, 'Carrefour terminus 42', '"carrefour terminus 42" reconnu comme zone');
+assert.equal(qRachelleDirect.budget, 100000, '"carrefour terminus 42 100.000f" -> budget = 100 000 FCFA');
+assert.equal(qRachelleDirect.budgetMin, null, 'Pas d intervalle sur 100.000f seul');
 const qRachelle = qualify('Je veux à angré non loin du carrefour terminus 42 100.000f ko');
 assert.equal(qRachelle.budget, 100000, '"terminus 42 100.000f" -> 100 000 FCFA (et non 42 100 000)');
 assert.equal(qRachelle.zone, 'Angré', 'Zone Angré détectée');
@@ -265,33 +274,42 @@ assert.equal(qTraLou.transaction, 'achat', 'Transaction achat');
 const qVictoire = qualify('Superficie 1000 à 1500 m2 Budget du client 1 milliard au Plateau');
 assert.equal(qVictoire.budget, 1000000000, '"1 milliard" -> 1 000 000 000 FCFA');
 const qGrizz = qualify("immeuble R+4 d'une valeur allant de 900 millions à 1 milliards");
-assert.equal(qGrizz.budget, 1000000000, '"900 millions à 1 milliards" -> 1 000 000 000 FCFA');
+assert.equal(qGrizz.budgetMin, 900000000, '"900 millions à 1 milliards" -> budgetMin = 900 000 000 FCFA');
+assert.equal(qGrizz.budget, 1000000000, '"900 millions à 1 milliards" -> budget = 1 000 000 000 FCFA');
 
-// 6. Mr. Donatien BLE & maxessoh1952 : caution mentionnée à côté du loyer mensuel
+// 6. Mr. Donatien BLE & maxessoh1952 : caution mentionnée à côté d'une plage de loyer mensuel
 const qDonatien = qualify("J'ai une cotion de 200milles je voudrais un studio de 45 ou 50milles franc à Yopougon");
-assert.equal(qDonatien.budget, 50000, 'Caution de 200 milles ignorée au profit du loyer de 50 milles');
+assert.equal(qDonatien.budgetMin, 45000, '"45 ou 50milles" -> budgetMin = 45 000 FCFA');
+assert.equal(qDonatien.budget, 50000, 'Caution de 200 milles ignorée au profit du loyer max de 50 milles');
 const qMaxessoh = qualify('Budget 150 mille besoin de maison de 30 ou 35 milles francs CFA à abobo');
-assert.equal(qMaxessoh.budget, 35000, 'Caution globale de 150 mille ignorée au profit du loyer de 35 milles');
+assert.equal(qMaxessoh.budgetMin, 30000, '"30 ou 35 milles" -> budgetMin = 30 000 FCFA');
+assert.equal(qMaxessoh.budget, 35000, 'Caution globale de 150 mille ignorée au profit du loyer max de 35 milles');
 
 // 7. Coffi Reine & Mireille Désirée : vraies clientes qui ne doivent JAMAIS être classées comme vendeuses
 const msgCoffiReine = "Bonjour madame monsieur, est ce possible d'avoir une 2 pièces à 70 000 ou 80 000f en location à marcory ?";
 assert.equal(isClientSearchIntent(msgCoffiReine), true, '"est ce possible d\'avoir..." est une recherche client');
 assert.equal(isListingOrPartnerOffer(msgCoffiReine, false), false, 'Coffi Reine ne doit pas être classée comme vendeuse');
+const qCoffiReine = qualify(msgCoffiReine);
+assert.equal(qCoffiReine.budgetMin, 70000, '"70 000 ou 80 000f" -> budgetMin = 70 000 FCFA');
+assert.equal(qCoffiReine.budget, 80000, '"70 000 ou 80 000f" -> budget = 80 000 FCFA');
 const msgMireille = 'Recherche un studio pour location\nLoyer: 50.000f\nZones souhaitées: Yopougon camp militaire';
 assert.equal(isClientSearchIntent(msgMireille), true, '"Recherche un studio..." en début de message est une recherche client');
 assert.equal(isListingOrPartnerOffer(msgMireille, false), false, 'Mireille Désirée ne doit pas être classée comme vendeuse');
 
-// 8. Shorthands de pièces & types ("2 chambres salon", "2 PCS", "2p ou 3p", "180 maxi", "65/70 budget")
+// 8. Shorthands de pièces & intervalles ("2 chambres salon", "2 PCS", "60 à 80mille", "180 maxi", "65/70 budget")
 const qDaniel = qualify('Je cherche deux chambres salon à Yopougon 100 000');
 assert.equal(qDaniel.propertyType, 'appartement', '"deux chambres salon" -> appartement');
 assert.equal(qDaniel.nbPieces, 3, '"deux chambres salon" -> 3 pièces');
 const qLebehi = qualify('2 PCS Yopougon 60 à 80mille');
 assert.equal(qLebehi.propertyType, 'appartement', '"2 PCS" -> appartement');
 assert.equal(qLebehi.nbPieces, 2, '"2 PCS" -> 2 pièces');
+assert.equal(qLebehi.budgetMin, 60000, '"60 à 80mille" -> budgetMin = 60 000 FCFA');
+assert.equal(qLebehi.budget, 80000, '"60 à 80mille" -> budget = 80 000 FCFA');
 const qMaxi = qualify('Location 180 maxi');
 assert.equal(qMaxi.budget, 180000, '"180 maxi" -> 180 000 FCFA');
 const qRosine = qualify('65/70 budget');
-assert.equal(qRosine.budget, 70000, '"65/70 budget" -> 70 000 FCFA');
+assert.equal(qRosine.budgetMin, 65000, '"65/70 budget" -> budgetMin = 65 000 FCFA');
+assert.equal(qRosine.budget, 70000, '"65/70 budget" -> budget = 70 000 FCFA');
 
 // 9. Fautes de frappe communes/quartiers & protection "Man"
 assert.equal(qualify('Studio a macory').zone, 'Marcory', '"macory" -> Marcory');

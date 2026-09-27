@@ -50,6 +50,7 @@ const QUARTIERS = [
   'bracodi', 'williamsville', 'paillet', 'sicogi', 'ficgayo', 'lokoua', 'attoban', 'château', 'chateau',
   'dokui', 'gestoci', 'mahou', '7e tranche', '8e tranche', '9e tranche', '7ème tranche', '8ème tranche', '9ème tranche', '7eme tranche', '8eme tranche', '9eme tranche',
   'pk18', 'pk 18', 'avocatier', 'ndotre', 'n\'dotré', 'ndotré', 'akeikoi', 'akéikoi', 'biabou', 'abobo baoulé', 'abobo baoule',
+  'carrefour terminus 42', 'terminus 42', 'terminus 81-82', 'terminus 81', 'terminus 82', 'terminus 40', 'terminus 47', 'terminus 27',
 ]
 
 const QUARTIER_TO_COMMUNE: Record<string, string> = {
@@ -72,6 +73,7 @@ const QUARTIER_TO_COMMUNE: Record<string, string> = {
   '7e tranche': 'Cocody', '8e tranche': 'Cocody', '9e tranche': 'Cocody',
   '7ème tranche': 'Cocody', '8ème tranche': 'Cocody', '9ème tranche': 'Cocody',
   '7eme tranche': 'Cocody', '8eme tranche': 'Cocody', '9eme tranche': 'Cocody',
+  'carrefour terminus 42': 'Cocody', 'terminus 42': 'Cocody', 'terminus 81-82': 'Cocody', 'terminus 81': 'Cocody', 'terminus 82': 'Cocody',
   'zone 4': 'Marcory', biétry: 'Marcory', bietry: 'Marcory', anoumabo: 'Marcory',
   remblais: 'Koumassi', sogephia: 'Koumassi', colombe: 'Koumassi',
   niangon: 'Yopougon', selmer: 'Yopougon', 'toits rouges': 'Yopougon', 'toit rouge': 'Yopougon', 'tout rouge': 'Yopougon', 'petit toit rouge': 'Yopougon',
@@ -83,6 +85,7 @@ const QUARTIER_TO_COMMUNE: Record<string, string> = {
   beago: 'Yopougon', béago: 'Yopougon', 'camp militaire': 'Yopougon', 'mamie adjoua': 'Yopougon',
   km17: 'Yopougon', 'km 17': 'Yopougon', bimbresso: 'Yopougon',
   'cite ado': 'Yopougon', 'cité ado': 'Yopougon',
+  'terminus 40': 'Yopougon', 'terminus 47': 'Yopougon', 'terminus 27': 'Yopougon',
   sicogi: 'Yopougon', ficgayo: 'Yopougon', lokoua: 'Yopougon',
   vridi: 'Port-Bouët', gonzagueville: 'Port-Bouët', gonzague: 'Port-Bouët',
   abatta: 'Bingerville', 'jules verne': 'Bingerville', 'feh kessé': 'Bingerville', 'feh kesse': 'Bingerville', 'feu kesse': 'Bingerville',

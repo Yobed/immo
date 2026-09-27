@@ -172,6 +172,14 @@ const QUARTIER_COMMUNE: Record<string, string> = {
   bracodi: 'Adjamé',
   williamsville: 'Adjamé',
   paillet: 'Adjamé',
+  'carrefour terminus 42': 'Cocody',
+  'terminus 42': 'Cocody',
+  'terminus 81-82': 'Cocody',
+  'terminus 81': 'Cocody',
+  'terminus 82': 'Cocody',
+  'terminus 40': 'Yopougon',
+  'terminus 47': 'Yopougon',
+  'terminus 27': 'Yopougon',
 }
 
 /** Étiquette de provenance montrée au LLM. Doit rester honnête : une annonce web
@@ -282,6 +290,7 @@ export async function getAIBienContext(
     if (qualification.propertyType) p.type_bien = qualification.propertyType
     if (qualification.zone) p.commune = qualification.zone
     if (qualification.budget) p.prix_max = String(qualification.budget)
+    if (qualification.budgetMin) p.prix_min = String(qualification.budgetMin)
     if (qualification.nbPieces) p.nb_pieces = qualification.nbPieces
   }
 
@@ -298,6 +307,7 @@ export async function getAIBienContext(
     if (pFromHistory.commune) p.commune = pFromHistory.commune
     if (pFromHistory.type_bien) p.type_bien = pFromHistory.type_bien
     if (pFromHistory.prix_max) p.prix_max = pFromHistory.prix_max
+    if (pFromHistory.prix_min) p.prix_min = pFromHistory.prix_min
     if (pFromHistory.q) p.q = pFromHistory.q
     if (pFromHistory.equipements?.length) p.equipements = pFromHistory.equipements
     if (pFromHistory.nb_pieces) p.nb_pieces = pFromHistory.nb_pieces
@@ -364,9 +374,9 @@ export async function getAIBienContext(
     return null
   }
 
-  // Plafond budgétaire strict (Règle 3) : budgetMax = budget
+  // Plafond budgétaire strict (Règle 3) : budgetMax = budget, avec prise en compte de l'intervalle [budgetMin, budget]
   const budget = p.prix_max ? parseInt(p.prix_max, 10) : null
-  const budgetMin = undefined
+  const budgetMin = p.prix_min ? parseInt(p.prix_min, 10) : undefined
   const budgetMax = budget ? budget * BUDGET_CAP_FACTOR : undefined
 
   // Si plusieurs communes sont demandées (ex: Cocody + Bingerville), on ne filtre pas par
@@ -394,10 +404,13 @@ export async function getAIBienContext(
 
   // Post-filtrage strict sur le budget (Règle 3) :
   // Si budget spécifié, JAMAIS de bien dont le prix est supérieur au budget,
-  // et exclusion des biens avec prix inconnu / sur demande pour éviter les dépassements.
+  // et si intervalle [budgetMin, budget] spécifié, on filtre dans la plage demandée.
   let validItems = items
   if (budget != null) {
     validItems = items.filter((b) => b.prix_value != null && b.prix_value <= budget)
+  }
+  if (budgetMin != null) {
+    validItems = validItems.filter((b) => b.prix_value != null && b.prix_value >= budgetMin)
   }
   // Exclusion des prix aberrants issus d'erreurs d'extraction (< 15 000 FCFA, ex: "2 735 FCFA / mois")
   validItems = validItems.filter((b) => b.prix_value == null || b.prix_value >= 15_000)
@@ -500,6 +513,9 @@ export async function getAIBienContext(
       if (q === 'blaukoss' || q === 'blokoss' || q === 'blockhauss') {
         return /\b(?:blo?koss|blockhauss)\b/i.test(bz)
       }
+      if (q === 'carrefour terminus 42' || q === 'terminus 42') {
+        return /\bterminus\s*42\b/i.test(bz)
+      }
       return false
     }
     // Détecter tous les quartiers précis cités par le client (ex: 'maroc', 'faya', 'riviera 2', 'angre')
@@ -534,9 +550,15 @@ INSTRUCTION : remercie brièvement le client puis dis EXACTEMENT : "Un conseille
   if (p.commune) critereLines.push(`- Zone : ${p.commune}`)
   if (p.type_bien) critereLines.push(`- Type : ${p.type_bien}`)
   if (budget && budgetMax != null) {
-    critereLines.push(
-      `- Budget client : ${formatFCFA(budget)} (plafond strict appliqué : aucun bien au-delà de ${formatFCFA(budgetMax)})`,
-    )
+    if (budgetMin != null && budgetMin < budget) {
+      critereLines.push(
+        `- Budget client : de ${formatFCFA(budgetMin)} à ${formatFCFA(budget)} (intervalle strict appliqué : entre ${formatFCFA(budgetMin)} et ${formatFCFA(budgetMax)})`,
+      )
+    } else {
+      critereLines.push(
+        `- Budget client : ${formatFCFA(budget)} (plafond strict appliqué : aucun bien au-delà de ${formatFCFA(budgetMax)})`,
+      )
+    }
   }
   if (p.equipements?.length) critereLines.push(`- Équipements : ${p.equipements.join(', ')}`)
 
@@ -598,6 +620,7 @@ Le client demande des photos/vidéos.
   const params = new URLSearchParams()
   if (p.commune) params.append('commune', p.commune)
   if (p.type_bien) params.append('type_bien', p.type_bien)
+  if (p.prix_min) params.append('prix_min', p.prix_min)
   if (p.prix_max) params.append('prix_max', p.prix_max)
 
   const catalogueUrl = params.toString()

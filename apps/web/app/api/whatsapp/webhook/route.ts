@@ -824,6 +824,7 @@ export async function POST(req: NextRequest) {
           propertyType: qual.propertyType,
           zone: qual.zone,
           budget: qual.budget,
+          budgetMin: qual.budgetMin,
         });
         await sendFixed(personalized, 'qualif_reminder');
         return NextResponse.json({ status: 'ok', branch: 'qualif_reminder' });
@@ -860,11 +861,16 @@ export async function POST(req: NextRequest) {
 
       // Notification au conseiller humain avec les critères qualifiés
       const advisorPhone = process.env.SAPPHIRE_ADVISOR_PHONE || '+2250544872051';
+      const budgetAlertStr = qual.budget
+        ? qual.budgetMin && qual.budgetMin < qual.budget
+          ? `${qual.budgetMin.toLocaleString('fr-FR')} à ${qual.budget.toLocaleString('fr-FR')} FCFA`
+          : `${qual.budget.toLocaleString('fr-FR')} FCFA`
+        : 'Non précisé';
       const advisorAlert = `🔔 Nouveau prospect qualifié (0 bien catalogue correspondant) :
 👤 ${contactName} — ${senderPn}
 🏠 Type : ${qual.propertyType || 'Non précisé'}
 📍 Zone : ${qual.zone || 'Non précisée'}
-💰 Budget : ${qual.budget ? qual.budget.toLocaleString('fr-FR') + ' FCFA' : 'Non précisé'}
+💰 Budget : ${budgetAlertStr}
 💬 Message : "${userMessage.slice(0, 250)}"`;
       await wasenderSendMessage(advisorPhone, advisorAlert, 'text').catch(() => null);
 

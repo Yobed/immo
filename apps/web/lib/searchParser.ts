@@ -7,6 +7,7 @@ export interface ParsedSearchQuery {
   type_bien?: string;
   nb_pieces?: number;
   equipements?: string[];
+  prix_min?: string;
   prix_max?: string;
 }
 
@@ -257,7 +258,7 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
     .replace(/\b(?:contact(?:ez)?(?:\s*[-nous]+)?(?:\s+au)?|t[ée]l(?:[ée]phone)?|whatsapp|appeler|num[ée]ro|infoline)\s*[:.]?\s*\+?\d[\d\s.-]{7,14}\b/gi, ' ')
     .replace(/(?:\+?225[\s.-]?)?\b0[157](?:[\s.-]?\d{2}){4}\b/g, ' ')
     .replace(/\b\d+(?:[.,]\d+)?\s*(?:m2|m²|ha\b|hectares?|lots?)\b/gi, ' ')
-    .replace(/\b(?:terminus|bus|ligne)\s*\d{1,3}\b/gi, ' ')
+    .replace(/\b(?:carrefour\s+)?(?:terminus|bus|ligne)\s*\d{1,3}(?:\s*[-/]\s*\d{1,3})?\b/gi, ' ')
     .replace(/\b\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})\b/g, ' ')
     .replace(/(\d[\d\s.,]*)\s*(?:f|fcfa|frs?)?\s*[x×*]\s*[2-9]\s*(?:mois)?(?:\s*=\s*\d[\d\s.,]*(?:\s*(?:f|fcfa|frs?))?)?/gi, '$1 ')
 
@@ -284,11 +285,37 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
     lower = lower.replace(m[0], '')
   }
 
+  // Fourchette en millions ("de 20 à 30 millions", "entre 1,5 et 2 millions")
+  const millionRangeMatches = [
+    ...lower.matchAll(/\b(\d+(?:[.,]\d+)?)\s*(?:millions?\s*)?(?:[àa]|au?|-|\/|et|ou)\s*(\d+(?:[.,]\d+)?)\s*millions?\b/gi),
+  ]
+  for (const m of millionRangeMatches) {
+    const n1 = Math.round(parseFloat(m[1].replace(',', '.')) * 1_000_000)
+    const n2 = Math.round(parseFloat(m[2].replace(',', '.')) * 1_000_000)
+    if (n1 > 0 && n2 > n1) {
+      priceVals.push(n1, n2)
+      lower = lower.replace(m[0], '')
+    }
+  }
+
   // "2 millions" / "1.5million" → ×1_000_000 (must be before "mil" to avoid conflict)
   const millionMatches = [...lower.matchAll(/(\d+(?:[.,]\d+)?)\s*millions?/gi)]
   for (const m of millionMatches) {
     priceVals.push(Math.round(parseFloat(m[1].replace(',', '.')) * 1_000_000))
     lower = lower.replace(m[0], '')
+  }
+
+  // Fourchette en milliers avec unité explicite ("45 ou 50milles", "60 à 80mille", "30 ou 35 milles", "70k à 80k")
+  const milKRangeMatches = [
+    ...lower.matchAll(/\b(\d+(?:[.,]\d+)?)\s*(?:mil(?:l+e*s?|s)?|k)?\s*(?:[àa]|au?|-|\/|et|ou)\s*(\d+(?:[.,]\d+)?)\s*(?:mil(?:l+e*s?|s)?|k)\b/gi),
+  ]
+  for (const m of milKRangeMatches) {
+    const n1 = Math.round(parseFloat(m[1].replace(',', '.')) * 1_000)
+    const n2 = Math.round(parseFloat(m[2].replace(',', '.')) * 1_000)
+    if (n1 > 0 && n2 > n1) {
+      priceVals.push(n1, n2)
+      lower = lower.replace(m[0], '')
+    }
   }
 
   // "25 mil" / "90 mill" / "500mil" / "250 mille" / "300 milles" → ×1_000
@@ -310,6 +337,8 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
   // et sans jamais fusionner des listes de petits nombres comme "50 60 65 70" !
   lower = lower.replace(/\b\d{1,4}(?:\.\d{3})+(?=\D|$)/g, (m) => m.replace(/\./g, ''))
   lower = lower.replace(/\b\d{1,4}(?:\s+(?:000|500|250|750))+(?=\D|$)/g, (m) => m.replace(/\s+/g, ''))
+  // Tolérance pour espace de frappe dans une liste croissante après 100 (ex: "De 80 90 100 12 0" → "De 80 90 100 120")
+  lower = lower.replace(/\b(100\s+[1-9]\d)\s+0\b/g, '$10')
 
   // 4a. Montant isolé (ex: "250", "250 max", "180 maxi", "250k", "250 mille")
   // En Côte d'Ivoire dans une recherche immo, un nombre isolé entre 20 et 999
@@ -323,7 +352,7 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
     }
   }
 
-  // 4b. Énumérations croissantes en milliers implicites (ex: "studios de 50 60 65 70", "De 80 90 100 120")
+  // 4b. Énumérations croissantes en milliers implicites (ex: "studios de 50 60 65 70" -> 50k à 70k, "De 80 90 100 120" -> 80k à 120k)
   const listBudgetMatches = [
     ...lower.matchAll(/\b(\d{2,3}(?:\s+\d{2,3}){2,5})\b/g),
   ]
@@ -331,7 +360,7 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
     const nums = m[1].trim().split(/\s+/).map((x) => parseInt(x, 10))
     const isAscending = nums.every((n, idx) => n >= 15 && n < 1000 && (idx === 0 || (n > nums[idx - 1] && n <= nums[idx - 1] * 2)))
     if (isAscending) {
-      priceVals.push(nums[nums.length - 1] * 1000)
+      priceVals.push(nums[0] * 1000, nums[nums.length - 1] * 1000)
       lower = lower.replace(m[0], '')
     }
   }
@@ -345,7 +374,7 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
     const n1 = parseInt(m[1], 10)
     const n2 = parseInt(m[2], 10)
     if (n1 >= 15 && n2 > n1 && n2 < 1000 && n2 <= n1 * 3) {
-      priceVals.push(n2 * 1000)
+      priceVals.push(n1 * 1000, n2 * 1000)
       lower = lower.replace(m[0], '')
     }
   }
@@ -383,7 +412,12 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
   }
 
   if (priceVals.length > 0) {
-    result.prix_max = Math.max(...priceVals).toString()
+    const maxVal = Math.max(...priceVals)
+    const minVal = Math.min(...priceVals)
+    result.prix_max = maxVal.toString()
+    if (minVal < maxVal && minVal >= maxVal * 0.25) {
+      result.prix_min = minVal.toString()
+    }
   }
   
   // Clean up remaining query words like "je", "cherche", "un", "a", "avec", "de", "pour"
