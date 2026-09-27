@@ -25,8 +25,9 @@ import type { Qualification } from './qualification'
  *  JAMAIS de dépassement. Moins cher = toujours proposable. */
 const BUDGET_CAP_FACTOR = 1.0
 
-/** Max biens retournés par source (BOGBE'S + offres flash) */
-const MAX_PER_SOURCE = 3
+/** Max biens récupérés par source avant post-filtrage strict (quartier, budget, pièces).
+ *  Le nombre final envoyé à Sapphire reste plafonné par SAPPHIRE_MAX_RESULTS (5). */
+const MAX_PER_SOURCE = 40
 /** Total max envoyé à l'IA (toutes sources confondues) */
 const SAPPHIRE_MAX_RESULTS = 5
 
@@ -63,16 +64,21 @@ const QUARTIER_COMMUNE: Record<string, string> = {
   'riviera palmeraie': 'Cocody',
   'riviera bonoumin': 'Cocody',
   'riviera faya': 'Cocody',
+  'riviera ciad': 'Cocody',
+  ciad: 'Cocody',
   riviera: 'Cocody',
   bonoumin: 'Cocody',
+  bounoumin: 'Cocody',
   palmeraie: 'Cocody',
   'deux plateaux': 'Cocody',
   'deux plateau': 'Cocody',
   '2 plateaux': 'Cocody',
   '2 plateau': 'Cocody',
+  'las palmas': 'Cocody',
   vallon: 'Cocody',
   cocovico: 'Cocody',
   synacass: 'Cocody',
+  sinacassi: 'Cocody',
   djorobite: 'Cocody',
   'djorobité': 'Cocody',
   akouedo: 'Cocody',
@@ -80,34 +86,54 @@ const QUARTIER_COMMUNE: Record<string, string> = {
   danga: 'Cocody',
   aghien: 'Cocody',
   anono: 'Cocody',
+  blokoss: 'Cocody',
+  blaukoss: 'Cocody',
+  blockhauss: 'Cocody',
+  djibi: 'Cocody',
+  '22ieme': 'Cocody',
+  '22eme': 'Cocody',
+  '22e': 'Cocody',
   golf: 'Cocody',
   golfe: 'Cocody',
+  'cite sir': 'Cocody',
+  'cité sir': 'Cocody',
+  'st viateur': 'Cocody',
+  'saint viateur': 'Cocody',
   faya: 'Cocody',
+  faye: 'Cocody',
   attoban: 'Cocody',
   chateau: 'Cocody',
   'château': 'Cocody',
   mbadon: 'Cocody',
   'm\'badon': 'Cocody',
+  'm badon': 'Cocody',
   mpouto: 'Cocody',
   'm\'pouto': 'Cocody',
   abatta: 'Bingerville',
   'jules verne': 'Bingerville',
+  'feh kesse': 'Bingerville',
+  'feh kessé': 'Bingerville',
+  'feu kesse': 'Bingerville',
   'zone 4': 'Marcory',
   bietry: 'Marcory',
   'biétry': 'Marcory',
   anoumabo: 'Marcory',
   remblais: 'Koumassi',
   sogephia: 'Koumassi',
+  colombe: 'Koumassi',
   niangon: 'Yopougon',
   selmer: 'Yopougon',
   'toits rouges': 'Yopougon',
   'toit rouge': 'Yopougon',
+  'tout rouge': 'Yopougon',
+  'petit toit rouge': 'Yopougon',
   sicogi: 'Yopougon',
   maroc: 'Yopougon',
   anador: 'Yopougon',
   sopim: 'Yopougon',
   ananeraie: 'Yopougon',
   sideci: 'Yopougon',
+  siporex: 'Yopougon',
   banco: 'Yopougon',
   gesco: 'Yopougon',
   azito: 'Yopougon',
@@ -119,6 +145,15 @@ const QUARTIER_COMMUNE: Record<string, string> = {
   koweit: 'Yopougon',
   'koweït': 'Yopougon',
   'nouveau bureau': 'Yopougon',
+  abobodoume: 'Yopougon',
+  'abobodoumé': 'Yopougon',
+  beago: 'Yopougon',
+  'béago': 'Yopougon',
+  'camp militaire': 'Yopougon',
+  'mamie adjoua': 'Yopougon',
+  km17: 'Yopougon',
+  'km 17': 'Yopougon',
+  bimbresso: 'Yopougon',
   'cite ado': 'Yopougon',
   'cité ado': 'Yopougon',
   pk18: 'Abobo',
@@ -128,8 +163,12 @@ const QUARTIER_COMMUNE: Record<string, string> = {
   'ndotré': 'Abobo',
   akeikoi: 'Abobo',
   'akéikoi': 'Abobo',
+  biabou: 'Abobo',
+  'abobo baoule': 'Abobo',
+  'abobo baoulé': 'Abobo',
   vridi: 'Port-Bouët',
   gonzagueville: 'Port-Bouët',
+  gonzague: 'Port-Bouët',
   bracodi: 'Adjamé',
   williamsville: 'Adjamé',
   paillet: 'Adjamé',
@@ -275,6 +314,12 @@ export async function getAIBienContext(
 
   // 1. Communes citées (avec frontières de mots pour éviter que "Aboboté" matche "Abobo" ou "2 plateau" matche "Plateau")
   for (const c of COMMUNES_CI) {
+    if (c === 'Man') {
+      if (/\b(?:[àa]|de|sur|vers|ville\s+de|commune\s+de)\s+man\b/i.test(msgNormForCommunes) && !zoneTerms.includes('man')) {
+        zoneTerms.push('man')
+      }
+      continue
+    }
     const clean = norm(c === 'Bassam (Grand-Bassam)' ? 'bassam' : c)
     const escaped = clean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     const communeRe = new RegExp(`(?<![a-z0-9_])${escaped}(?![a-z0-9_])`, 'i')
@@ -370,6 +415,23 @@ export async function getAIBienContext(
     )
   }
 
+  // Exclusion stricte des résidences meublées / tarifs à la nuitée ("Studio meublé · 30 000 FCFA", "25 000 FCFA / nuit")
+  // lorsque le client recherche une location classique non meublée.
+  const wantsFurnished =
+    p.type_bien === 'residence_meublee' ||
+    p.equipements?.includes('meuble') ||
+    /\b(meubl[ée]|r[ée]sidence\s+meubl[ée]e|nuit[ée]e?|par\s+jour|par\s+nuit)\b/i.test(msgNorm)
+  if (!wantsFurnished) {
+    validItems = validItems.filter(
+      (b) =>
+        b.type_bien !== 'residence_meublee' &&
+        b.prix_period !== 'nuit' &&
+        !/\b(meubl[eé]|r[eé]sidence\s+meubl[eé]e|par\s+nuit|\/\s*nuit|nuit[eé]e|par\s+jour|\/\s*jour)\b/i.test(
+          `${b.titre ?? ''} ${b.prix_label ?? ''}`,
+        ),
+    )
+  }
+
   // Post-filtrage strict sur le type de bien :
   // Ne JAMAIS proposer un terrain, un hôtel, un commerce ou un bureau quand le client demande un logement résidentiel
   if (p.type_bien) {
@@ -382,10 +444,10 @@ export async function getAIBienContext(
         }
       }
       if (reqType === 'villa' || reqType === 'maison') {
-        return /\b(villa|maison|duplex|triplex)\b/i.test(bType)
+        return /\b(villa|maison|duplex|triplex|appartement)\b/i.test(bType)
       }
       if (reqType === 'appartement') {
-        return /\b(appartement|appart|f[2-6]|[2-6]\s*pi[eè]ces?)\b/i.test(bType)
+        return /\b(appartement|appart|maison|f[2-6]|[2-6]\s*pi[eè]ces?)\b/i.test(bType)
       }
       if (reqType === 'studio') {
         return /\b(studio|chambre|1\s*pi[eè]ce|f1)\b/i.test(bType)
@@ -412,14 +474,43 @@ export async function getAIBienContext(
   let zoned = validItems
   if (zoneTerms.length > 0) {
     const bienZone = (b: ConsolidatedBien) => norm(`${b.commune ?? ''} ${b.quartier ?? ''} ${b.titre} ${b.description ?? ''}`)
+    const matchesQuartier = (bz: string, q: string): boolean => {
+      if (bz.includes(q)) return true
+      if (['2 plateaux', '2 plateau', 'deux plateaux', 'deux plateau'].includes(q)) {
+        return /(?:\b2\s*plateaux?\b|\bdeux[\s-]*plateaux?\b|\bii\s*plateaux?\b)/i.test(bz)
+      }
+      if (q === 'toits rouges' || q === 'toit rouge' || q === 'tout rouge') {
+        return /toits?\s+rouges?/i.test(bz)
+      }
+      if (q === 'bonoumin' || q === 'bounoumin') {
+        return /bou?noumin/i.test(bz)
+      }
+      if (q === 'ndotre') {
+        return /n['’\s]*dotr[eé]/i.test(bz)
+      }
+      if (q === 'faye' || q === 'faya') {
+        return /\bfaya\b/i.test(bz)
+      }
+      if (q === 'gonzague' || q === 'gonzagueville') {
+        return /\bgonzague(?:ville)?\b/i.test(bz)
+      }
+      if (q === 'm badon' || q === 'mbadon' || q === "m'badon") {
+        return /\bm['’\s]*badon\b/i.test(bz)
+      }
+      if (q === 'blaukoss' || q === 'blokoss' || q === 'blockhauss') {
+        return /\b(?:blo?koss|blockhauss)\b/i.test(bz)
+      }
+      return false
+    }
     // Détecter tous les quartiers précis cités par le client (ex: 'maroc', 'faya', 'riviera 2', 'angre')
     const quartiersDemandes = zoneTerms.filter((t) => QUARTIER_COMMUNE[t] != null)
     const quartierDemande = quartiersDemandes[0]
     const hasOnlyQuartier = quartiersDemandes.length > 0
     if (hasOnlyQuartier && quartierDemande) {
-      const inQuartier = validItems.filter((b) =>
-        quartiersDemandes.some((q) => bienZone(b).includes(q)),
-      )
+      const inQuartier = validItems.filter((b) => {
+        const bz = bienZone(b)
+        return quartiersDemandes.some((q) => matchesQuartier(bz, q))
+      })
       if (inQuartier.length > 0) {
         zoned = inQuartier
       } else {

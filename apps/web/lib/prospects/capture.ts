@@ -34,17 +34,22 @@ export function canonicalPhone(raw: string): string {
 const QUARTIERS = [
   'angrée', 'angré', 'angre', 'belle ville', 'belleville', 'aboboté', 'abobote',
   'riviera golf', 'riviera 2', 'riviera 3', 'riviera 4', 'riviera palmeraie', 'riviera bonoumin',
-  'riviera faya', 'riviera', 'bonoumin', 'palmeraie', 'deux plateaux', 'deux plateau', '2 plateaux', '2 plateau',
-  'vallon', 'cocovico', 'synacass', 'djorobité', 'djorobite', 'akouédo', 'akouedo',
-  'danga', 'aghien', 'anono', 'golf', 'golfe', 'm\'badon', 'mbadon', 'mpouto', 'm\'pouto',
-  'zone 4', 'biétry', 'bietry', 'anoumabo', 'remblais', 'sogephia',
-  'niangon', 'selmer', 'toits rouges', 'toit rouge', 'maroc', 'anador', 'sopim',
-  'ananeraie', 'sideci', 'banco', 'gesco', 'azito', 'wassakara', 'andokoi',
-  'kouté', 'koute', 'millionnaire', 'koweit', 'koweït', 'nouveau bureau', 'cite ado', 'cité ado',
-  'vridi', 'gonzagueville', 'abatta', 'jules verne', 'bonoua', 'faya',
+  'riviera faya', 'riviera ciad', 'riviera', 'bonoumin', 'bounoumin', 'palmeraie', 'ciad',
+  'deux plateaux', 'deux plateau', '2 plateaux', '2 plateau', 'las palmas',
+  'vallon', 'cocovico', 'synacass', 'sinacassi', 'djorobité', 'djorobite', 'akouédo', 'akouedo',
+  'danga', 'aghien', 'anono', 'blokoss', 'blaukoss', 'blockhauss', 'djibi', 'golf', 'golfe',
+  'cité sir', 'cite sir', 'st viateur', 'saint viateur',
+  'm\'badon', 'mbadon', 'm badon', 'mpouto', 'm\'pouto',
+  'zone 4', 'biétry', 'bietry', 'anoumabo', 'remblais', 'sogephia', 'colombe',
+  'niangon', 'selmer', 'toits rouges', 'toit rouge', 'tout rouge', 'petit toit rouge', 'maroc', 'anador', 'sopim',
+  'ananeraie', 'sideci', 'siporex', 'banco', 'gesco', 'azito', 'wassakara', 'andokoi',
+  'kouté', 'koute', 'millionnaire', 'koweit', 'koweït', 'nouveau bureau', 'abobodoumé', 'abobodoume',
+  'beago', 'béago', 'camp militaire', 'mamie adjoua', 'km17', 'km 17', 'bimbresso',
+  'cite ado', 'cité ado',
+  'vridi', 'gonzagueville', 'gonzague', 'abatta', 'jules verne', 'feh kessé', 'feh kesse', 'feu kesse', 'bonoua', 'faya', 'faye',
   'bracodi', 'williamsville', 'paillet', 'sicogi', 'ficgayo', 'lokoua', 'attoban', 'château', 'chateau',
-  'dokui', 'gestoci', 'mahou', '7e tranche', '8e tranche', '9e tranche',
-  'pk18', 'pk 18', 'avocatier', 'ndotre', 'n\'dotré', 'ndotré', 'akeikoi', 'akéikoi',
+  'dokui', 'gestoci', 'mahou', '7e tranche', '8e tranche', '9e tranche', '7ème tranche', '8ème tranche', '9ème tranche', '7eme tranche', '8eme tranche', '9eme tranche',
+  'pk18', 'pk 18', 'avocatier', 'ndotre', 'n\'dotré', 'ndotré', 'akeikoi', 'akéikoi', 'biabou', 'abobo baoulé', 'abobo baoule',
 ]
 
 const QUARTIER_TO_COMMUNE: Record<string, string> = {
@@ -52,31 +57,39 @@ const QUARTIER_TO_COMMUNE: Record<string, string> = {
   'belle ville': 'Cocody', belleville: 'Cocody',
   aboboté: 'Cocody', abobote: 'Cocody',
   'riviera golf': 'Cocody', 'riviera 2': 'Cocody', 'riviera 3': 'Cocody', 'riviera 4': 'Cocody',
-  'riviera palmeraie': 'Cocody', 'riviera bonoumin': 'Cocody', 'riviera faya': 'Cocody',
-  riviera: 'Cocody', bonoumin: 'Cocody', palmeraie: 'Cocody',
-  'deux plateaux': 'Cocody', 'deux plateau': 'Cocody', '2 plateaux': 'Cocody', '2 plateau': 'Cocody',
-  vallon: 'Cocody', cocovico: 'Cocody', synacass: 'Cocody',
+  'riviera palmeraie': 'Cocody', 'riviera bonoumin': 'Cocody', 'riviera faya': 'Cocody', 'riviera ciad': 'Cocody',
+  riviera: 'Cocody', bonoumin: 'Cocody', bounoumin: 'Cocody', palmeraie: 'Cocody', ciad: 'Cocody',
+  'deux plateaux': 'Cocody', 'deux plateau': 'Cocody', '2 plateaux': 'Cocody', '2 plateau': 'Cocody', 'las palmas': 'Cocody',
+  vallon: 'Cocody', cocovico: 'Cocody', synacass: 'Cocody', sinacassi: 'Cocody',
   djorobité: 'Cocody', djorobite: 'Cocody', akouédo: 'Cocody', akouedo: 'Cocody',
-  danga: 'Cocody', aghien: 'Cocody', anono: 'Cocody', golf: 'Cocody', golfe: 'Cocody',
-  'm\'badon': 'Cocody', mbadon: 'Cocody', mpouto: 'Cocody', 'm\'pouto': 'Cocody',
-  faya: 'Cocody', attoban: 'Cocody',
+  danga: 'Cocody', aghien: 'Cocody', anono: 'Cocody', blokoss: 'Cocody', blaukoss: 'Cocody', blockhauss: 'Cocody',
+  djibi: 'Cocody', golf: 'Cocody', golfe: 'Cocody',
+  'cité sir': 'Cocody', 'cite sir': 'Cocody', 'st viateur': 'Cocody', 'saint viateur': 'Cocody',
+  'm\'badon': 'Cocody', mbadon: 'Cocody', 'm badon': 'Cocody', mpouto: 'Cocody', 'm\'pouto': 'Cocody',
+  faya: 'Cocody', faye: 'Cocody', attoban: 'Cocody',
   château: 'Cocody', chateau: 'Cocody',
   dokui: 'Cocody', gestoci: 'Cocody', mahou: 'Cocody',
   '7e tranche': 'Cocody', '8e tranche': 'Cocody', '9e tranche': 'Cocody',
+  '7ème tranche': 'Cocody', '8ème tranche': 'Cocody', '9ème tranche': 'Cocody',
+  '7eme tranche': 'Cocody', '8eme tranche': 'Cocody', '9eme tranche': 'Cocody',
   'zone 4': 'Marcory', biétry: 'Marcory', bietry: 'Marcory', anoumabo: 'Marcory',
-  remblais: 'Koumassi', sogephia: 'Koumassi',
-  niangon: 'Yopougon', selmer: 'Yopougon', 'toits rouges': 'Yopougon', 'toit rouge': 'Yopougon',
+  remblais: 'Koumassi', sogephia: 'Koumassi', colombe: 'Koumassi',
+  niangon: 'Yopougon', selmer: 'Yopougon', 'toits rouges': 'Yopougon', 'toit rouge': 'Yopougon', 'tout rouge': 'Yopougon', 'petit toit rouge': 'Yopougon',
   maroc: 'Yopougon', anador: 'Yopougon', sopim: 'Yopougon', ananeraie: 'Yopougon',
-  sideci: 'Yopougon', banco: 'Yopougon', gesco: 'Yopougon', azito: 'Yopougon',
+  sideci: 'Yopougon', siporex: 'Yopougon', banco: 'Yopougon', gesco: 'Yopougon', azito: 'Yopougon',
   wassakara: 'Yopougon', andokoi: 'Yopougon', kouté: 'Yopougon', koute: 'Yopougon',
   millionnaire: 'Yopougon', koweit: 'Yopougon', koweït: 'Yopougon', 'nouveau bureau': 'Yopougon',
+  abobodoumé: 'Yopougon', abobodoume: 'Yopougon',
+  beago: 'Yopougon', béago: 'Yopougon', 'camp militaire': 'Yopougon', 'mamie adjoua': 'Yopougon',
+  km17: 'Yopougon', 'km 17': 'Yopougon', bimbresso: 'Yopougon',
   'cite ado': 'Yopougon', 'cité ado': 'Yopougon',
   sicogi: 'Yopougon', ficgayo: 'Yopougon', lokoua: 'Yopougon',
-  vridi: 'Port-Bouët', gonzagueville: 'Port-Bouët',
-  abatta: 'Bingerville', 'jules verne': 'Bingerville',
+  vridi: 'Port-Bouët', gonzagueville: 'Port-Bouët', gonzague: 'Port-Bouët',
+  abatta: 'Bingerville', 'jules verne': 'Bingerville', 'feh kessé': 'Bingerville', 'feh kesse': 'Bingerville', 'feu kesse': 'Bingerville',
   bracodi: 'Adjamé', williamsville: 'Adjamé', paillet: 'Adjamé',
   pk18: 'Abobo', 'pk 18': 'Abobo', avocatier: 'Abobo',
-  ndotre: 'Abobo', 'n\'dotré': 'Abobo', ndotré: 'Abobo', akeikoi: 'Abobo', akéikoi: 'Abobo',
+  ndotre: 'Abobo', 'n\'dotré': 'Abobo', ndotré: 'Abobo', akeikoi: 'Abobo', akéikoi: 'Abobo', biabou: 'Abobo',
+  'abobo baoulé': 'Abobo', 'abobo baoule': 'Abobo',
 }
 
 function detectQuartier(text: string): { quartier: string | null; commune: string | null } {
@@ -89,10 +102,17 @@ function detectQuartier(text: string): { quartier: string | null; commune: strin
         q === 'angrée' || q === 'angre' ? 'Angré'
         : q === 'belleville' ? 'Belle ville'
         : q === 'abobote' ? 'Aboboté'
-        : q === 'toit rouge' ? 'Toits rouges'
+        : q === 'bounoumin' ? 'Bonoumin'
+        : q === 'toit rouge' || q === 'tout rouge' ? 'Toits rouges'
         : q === 'koweit' ? 'Koweït'
         : q === '2 plateau' ? '2 plateaux'
         : q === 'deux plateau' ? 'Deux plateaux'
+        : q === 'faye' ? 'Faya'
+        : q === 'gonzague' ? 'Gonzagueville'
+        : q === 'm badon' || q === 'mbadon' ? 'M\'badon'
+        : q === 'blaukoss' ? 'Blokoss'
+        : q === 'sinacassi' ? 'Synacass'
+        : q === 'feh kesse' || q === 'feu kesse' ? 'Feh Kessé'
         : q.charAt(0).toUpperCase() + q.slice(1)
       return { quartier: normalizedLabel, commune: QUARTIER_TO_COMMUNE[q] ?? null }
     }

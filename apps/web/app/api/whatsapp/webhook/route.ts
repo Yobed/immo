@@ -511,6 +511,17 @@ export async function POST(req: NextRequest) {
     const prevMsgTime = rawHistory[1]?.created_at ? new Date(rawHistory[1].created_at).getTime() : 0;
     const isNewSession = !prevMsgTime || (now - prevMsgTime > 48 * 3_600_000);
 
+    // Garde anti-rafale / double clic pub : si le message précédent est aussi un message entrant
+    // strictement identique reçu il y a moins de 60 secondes, on ignore ce doublon pour éviter
+    // d'envoyer 2 fois le message de bienvenue en parallèle.
+    if (
+      rawHistory[1]?.direction === 'inbound' &&
+      (rawHistory[1]?.body || '').trim() === userMessage.trim() &&
+      now - prevMsgTime < 60_000
+    ) {
+      return NextResponse.json({ status: 'ok', branch: 'duplicate_inbound_burst' });
+    }
+
     const allFormattedHistory = [...rawHistory]
       .reverse()
       .map((m) => ({
@@ -521,15 +532,15 @@ export async function POST(req: NextRequest) {
       }));
     const formattedHistory = filterCurrentSessionHistory(allFormattedHistory, 48 * 3_600_000);
 
-    // Détection d'une conversation déjà gérée par un commercial humain (< 24 h)
+    // Détection d'une conversation déjà gérée par un commercial humain (< 7 jours sur message commercial, < 24 h sur marqueur)
     const hasHumanTakeover =
       marks.some((m) => m.body === 'HUMAN_TAKEOVER' && now - new Date(m.created_at).getTime() < 24 * 3_600_000) ||
-      formattedHistory.some(
+      allFormattedHistory.some(
         (m) =>
           m.role === 'assistant' &&
           (m.metadata?.actor_type === 'commercial' || m.metadata?.trace_source === 'human_takeover') &&
           m.created_at &&
-          now - new Date(m.created_at).getTime() < 24 * 3_600_000,
+          now - new Date(m.created_at).getTime() < 7 * 24 * 3_600_000,
       );
 
     // 2b. ANNONCE / PROPOSITION entrante (agent/proprio/démarcheur qui CONFIE ou PUBLIE un bien) → ne
@@ -649,7 +660,7 @@ export async function POST(req: NextRequest) {
       console.error('[whatsapp] CRM prospect capture failed', error);
     }
 
-    // Si un commercial humain a déjà pris la main sur cette conversation (< 24 h),
+    // Si un commercial humain a déjà pris la main sur cette conversation (< 7 jours),
     // Sapphire ne répond JAMAIS à sa place (évite d'envoyer « Bienvenue chez Bogbe's » au milieu d'un échange humain).
     if (hasHumanTakeover) {
       return NextResponse.json({ status: 'ok', branch: 'human_takeover_mute' });
@@ -758,6 +769,17 @@ export async function POST(req: NextRequest) {
       if (!qual.hasAll3) {
         const sendFixed = async (text: string, type: string) => {
           await humanReplyDelay(text, requestStartedAt);
+          if (rawHistory[0]?.created_at) {
+            const { data: newerMsgs } = await supabase
+              .from('whatsapp_messages')
+              .select('id')
+              .eq('jid', jid)
+              .gt('created_at', rawHistory[0].created_at)
+              .limit(1);
+            if (newerMsgs && newerMsgs.length > 0) {
+              return;
+            }
+          }
           await wasenderSendMessage(replyTarget, text, 'text');
           await supabase
             .from('whatsapp_messages')
@@ -774,10 +796,10 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ status: 'ok', branch: 'welcome' });
         }
 
-        // Si le prospect a déjà reçu le message de bienvenue et reclique simplement sur la pub
-        // (« Bonjour ! Puis-je en savoir plus à ce sujet ? ») sans donner le moindre critère,
+        // Si le prospect a déjà reçu une réponse dans la session courante et reclique simplement sur la pub
+        // (« Bonjour ! Puis-je en savoir plus à ce sujet ? ») ou renvoie « Bonjour » sans aucun nouveau critère,
         // on ne gaspille pas l'unique relance de qualification : on attend sa vraie réponse.
-        if (alreadyWelcomed && !hasAnyCriterion && isGreeting) {
+        if ((alreadyWelcomed || (!isNewSession && !!lastAssistantMsg)) && !bringsQualInfo && isGreeting) {
           return NextResponse.json({ status: 'ok', branch: 'duplicate_greeting_silent' });
         }
 
@@ -801,10 +823,10 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ status: 'ok', branch: 'qualif_reminder' });
       }
 
-      // Si le prospect a DÉJÀ reçu des propositions de biens dans la session courante
+      // Si le prospect a DÉJÀ reçu une réponse dans la session courante (propositions de biens ou transmission conseiller)
       // et reclique par erreur sur une pub (« Bonjour ! Puis-je en savoir plus à ce sujet ? ») sans nouveau critère,
-      // on ne lui renvoie pas une 2e fois la même liste de biens.
-      if (!isNewSession && isGreeting && !bringsQualInfo && !hasExplicitBienLinkOrRef && hasProposedBiensInSession) {
+      // on ne lui renvoie pas une 2e fois la même réponse.
+      if (!isNewSession && isGreeting && !bringsQualInfo && !hasExplicitBienLinkOrRef && !!lastAssistantMsg) {
         return NextResponse.json({ status: 'ok', branch: 'ad_reopen_silent' });
       }
     }

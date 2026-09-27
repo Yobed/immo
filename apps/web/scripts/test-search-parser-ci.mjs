@@ -203,8 +203,46 @@ assert.equal(pNouveauBureau.commune, 'Yopougon', '"Yopougon Nouveau bureau" -> c
 // 9. Tima : "WILLIAMSVILLE" reconnu comme zone
 const qTima = qualify('WILLIAMSVILLE');
 assert.equal(qTima.zone, 'Williamsville', '"WILLIAMSVILLE" reconnu comme quartier');
+
+// 10. Thread #1 (Jean Bedel) : "300 milles" (avec 's') et "Budjet" (avec 'j')
+const qJeanBedel = qualify('Je veux une maison basse 4 pièces a Cocody riviera 2 Budjet 300 milles');
+assert.equal(qJeanBedel.propertyType, 'villa', '"maison basse 4 pièces" -> villa');
+assert.equal(qJeanBedel.zone, 'Cocody', '"Cocody riviera 2" -> Cocody');
+assert.equal(qJeanBedel.budget, 300000, '"Budjet 300 milles" -> 300000');
+assert.equal(qJeanBedel.hasAll3, true, 'Qualifié dès le 1er message');
+
+// 11. Thread #10 (Fatima) : "3pices" (faute de frappe sans 'è')
+const qFatima = qualify('Maison basse de 3pices ou 4 pièces à yopougon');
+assert.equal(qFatima.propertyType, 'villa', '"Maison basse de 3pices" -> villa');
+assert.equal(qFatima.nbPieces, 3, '"3pices" -> 3 pièces');
+
+// 12. Thread #18 (Bamba) & Thread #62 (Elvis) : "taux de bail : 250 000" et "coût 100000"
+const qBamba = qualify('À louer, magasin, Abobo, taux de bail : 250 000 f / mois');
+assert.equal(qBamba.budget, 250000, '"taux de bail : 250 000 f" -> 250000');
+const qElvis = qualify('En location maison de trois pièces Yopougon coût 100000');
+assert.equal(qElvis.budget, 100000, '"coût 100000" -> 100000');
+assert.equal(qElvis.hasAll3, true, 'Qualifié avec "coût 100000"');
+
+// 13. Thread #36 (Constantin) & Thread #52 (Estelle) : réponse commençant par "À louer..." ne doit JAMAIS être classée comme offre partenaire
+assert.equal(
+  isListingOrPartnerOffer('À louer dans un premier temps', true),
+  false,
+  '"À louer dans un premier temps" est une réponse prospect, pas une annonce propriétaire',
+);
+assert.equal(
+  isListingOrPartnerOffer('A louer \n Budget 180 000 (4 pièces)\n Ou 140 000 (3 pièces)\n Zone angré', true),
+  false,
+  '"A louer Budget 180 000..." est une réponse prospect, pas une annonce propriétaire',
+);
+
+// 14. Nouveaux quartiers détectés dans les discussions réelles (Bounoumin, Djibi, Siporex, Abobodoumé)
+assert.equal(qualify('Riviera Bounoumin').zone, 'Riviera bonoumin', 'Riviera Bounoumin détecté');
+assert.equal(qualify('Bounoumin').zone, 'Bonoumin', 'Bounoumin détecté');
+assert.equal(qualify('Angré Djibi').zone, 'Angré', 'Angré Djibi détecté');
+assert.equal(qualify('Siporex').zone, 'Siporex', 'Siporex détecté');
 console.log('✓ Test 8 validé');
 
 console.log('\n========================================================');
 console.log('TOUS LES TESTS DU MOTEUR DE QUALIFICATION SONT VALIDÉS !');
 console.log('========================================================');
+

@@ -275,6 +275,8 @@ async function fetchLocaux(filters: ConsolidatedFilters): Promise<ConsolidatedBi
     if (filters.type_bien) {
       if (filters.type_bien === 'villa' || filters.type_bien === 'maison') {
         q = q.or('type_de_bien.ilike.%villa%,type_de_bien.ilike.%maison%,type_de_bien.ilike.%duplex%')
+      } else if (filters.type_bien === 'appartement') {
+        q = q.or('type_de_bien.ilike.%appart%,type_de_bien.ilike.%maison%')
       } else {
         q = q.ilike('type_de_bien', `%${filters.type_bien}%`)
       }
@@ -342,6 +344,15 @@ async function fetchLocaux(filters: ConsolidatedFilters): Promise<ConsolidatedBi
         if (filters.prix_min != null && b.prix_value < filters.prix_min) return false
         if (filters.prix_max != null && b.prix_value > filters.prix_max) return false
         return true
+      })
+      .sort((a, b) => {
+        // Quand un budget max est demandé, placer en tête les biens ayant un prix chiffré connu
+        if (filters.prix_max != null) {
+          const aHas = a.prix_value != null ? 0 : 1
+          const bHas = b.prix_value != null ? 0 : 1
+          if (aHas !== bHas) return aHas - bHas
+        }
+        return 0
       })
       .slice(0, filters.limitPerSource ?? DEFAULT_LIMIT)
       .map((b) => {

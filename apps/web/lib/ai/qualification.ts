@@ -9,18 +9,21 @@ import { parseSearchQuery } from '../searchParser.ts'
 // Quartiers reconnus comme « zone » (le parseur ne connaît que les communes).
 export const QUARTIERS_ZONE = [
   'angrée', 'angré', 'angre', 'belle ville', 'belleville', 'aboboté', 'abobote',
-  'riviera golf', 'riviera 2', 'riviera 3', 'riviera 4', 'riviera palmeraie', 'riviera bonoumin',
-  'riviera faya', 'riviera', 'bonoumin', 'palmeraie', 'deux plateaux', 'deux plateau', '2 plateaux', '2 plateau',
-  'vallon', 'cocovico', 'synacass', 'akouédo', 'akouedo', 'danga', 'aghien', 'anono', 'golf', 'golfe',
-  'zone 4', 'biétry', 'bietry', 'anoumabo', 'niangon', 'selmer', 'toits rouges', 'toit rouge',
-  'maroc', 'anador', 'sopim', 'ananeraie', 'sideci', 'banco', 'gesco', 'azito', 'wassakara',
-  'andokoi', 'kouté', 'koute', 'millionnaire', 'koweit', 'koweït', 'nouveau bureau',
-  'pk18', 'pk 18', 'avocatier', 'ndotre', 'n\'dotré', 'ndotré', 'akeikoi', 'akéikoi',
-  'jules verne', 'cite ado', 'cité ado', 'remblais', 'sogephia', 'williamsville', 'paillet',
-  'vridi', 'gonzagueville', 'abatta', 'bonoua', 'faya', 'bracodi', 'sicogi', 'attoban',
+  'riviera golf', 'riviera 2', 'riviera 3', 'riviera 4', 'riviera palmeraie', 'riviera bonoumin', 'riviera bounoumin',
+  'riviera faya', 'riviera ciad', 'riviera', 'bonoumin', 'bounoumin', 'palmeraie', 'ciad',
+  'deux plateaux', 'deux plateau', '2 plateaux', '2 plateau', 'las palmas',
+  'vallon', 'cocovico', 'synacass', 'sinacassi', 'akouédo', 'akouedo', 'danga', 'aghien', 'anono', 'blokoss', 'blaukoss', 'blockhauss',
+  'djibi', '22ieme', '22e', '22ème', 'golf', 'golfe', 'cité sir', 'cite sir', 'st viateur', 'saint viateur',
+  'zone 4', 'biétry', 'bietry', 'anoumabo', 'niangon', 'selmer', 'toits rouges', 'toit rouge', 'tout rouge', 'petit toit rouge',
+  'maroc', 'anador', 'sopim', 'ananeraie', 'sideci', 'siporex', 'banco', 'gesco', 'azito', 'wassakara',
+  'andokoi', 'kouté', 'koute', 'millionnaire', 'koweit', 'koweït', 'nouveau bureau', 'abobodoumé', 'abobodoume',
+  'beago', 'béago', 'camp militaire', 'mamie adjoua', 'km17', 'km 17', 'bimbresso',
+  'pk18', 'pk 18', 'avocatier', 'ndotre', 'n\'dotré', 'ndotré', 'akeikoi', 'akéikoi', 'biabou', 'abobo baoulé', 'abobo baoule',
+  'jules verne', 'cite ado', 'cité ado', 'remblais', 'sogephia', 'colombe', 'williamsville', 'paillet',
+  'vridi', 'gonzagueville', 'gonzague', 'abatta', 'feh kessé', 'feh kesse', 'feu kesse', 'bonoua', 'faya', 'faye', 'bracodi', 'sicogi', 'attoban',
   'château', 'chateau', 'djorobite', 'djorobité', 'dokui', 'gestoci', 'mahou',
-  '7e tranche', '8e tranche', '9e tranche', '7ème tranche', '8ème tranche', '9ème tranche',
-  'bassam', 'grand-bassam', 'songon', 'anyama', 'bingerville', 'm\'badon', 'mbadon', 'mpouto', 'm\'pouto',
+  '7e tranche', '8e tranche', '9e tranche', '7ème tranche', '8ème tranche', '9ème tranche', '7eme tranche', '8eme tranche', '9eme tranche',
+  'bassam', 'grand-bassam', 'songon', 'anyama', 'bingerville', 'm\'badon', 'mbadon', 'm badon', 'mpouto', 'm\'pouto',
 ]
 
 export function detectQuartierZone(text: string): string | null {
@@ -35,10 +38,18 @@ export function detectQuartierZone(text: string): string | null {
       if (q === 'angrée' || q === 'angre') return 'Angré'
       if (q === 'belleville') return 'Belle ville'
       if (q === 'abobote') return 'Aboboté'
-      if (q === 'toit rouge') return 'Toits rouges'
+      if (q === 'riviera bounoumin') return 'Riviera bonoumin'
+      if (q === 'bounoumin') return 'Bonoumin'
+      if (q === 'toit rouge' || q === 'tout rouge') return 'Toits rouges'
       if (q === 'koweit') return 'Koweït'
       if (q === '2 plateau') return '2 plateaux'
       if (q === 'deux plateau') return 'Deux plateaux'
+      if (q === 'faye') return 'Faya'
+      if (q === 'gonzague') return 'Gonzagueville'
+      if (q === 'm badon' || q === 'mbadon') return 'M\'badon'
+      if (q === 'blaukoss') return 'Blokoss'
+      if (q === 'sinacassi') return 'Synacass'
+      if (q === 'feh kesse' || q === 'feu kesse') return 'Feh Kessé'
       return q.charAt(0).toUpperCase() + q.slice(1)
     }
   }
@@ -56,7 +67,7 @@ export function detectTransaction(
 ): 'location' | 'achat' | null {
   const t = text.toLowerCase()
   if (/\b(louer|location|en\s+location|loyer|bail|lou[ée])\b|[àa]\s+lou[ée]r?/.test(t)) return 'location'
-  if (/\b(acheter|achat|vente|acqu[ée]rir|acquisition)\b|[àa]\s+vendre/.test(t)) return 'achat'
+  if (/\b(acheter|achat|vente|acqu[ée]rir|acquisition|vendez)\b|[àa]\s+vendre/.test(t)) return 'achat'
   // En Côte d'Ivoire, un budget <= 5 000 000 FCFA pour une maison/villa/appartement sans mention d'achat
   // correspond à un loyer mensuel et non à une acquisition immobilière (qui démarre à 15-20M+).
   if (budget != null && budget > 0 && budget <= 5_000_000 && propertyType !== 'terrain') {
@@ -96,9 +107,9 @@ const EXPLICIT_SUPPLY_RE = new RegExp(
     /\b(nous\s+disposons\s+d['’\s]|je\s+dispose\s+d['’\s]|on\s+dispose\s+d['’\s]|nous\s+avons\s+un(e)?\s+(chambre|studio|villa|appartement|terrain|parcelle))\b/.source,
     /\b(j['’]\s*ai\s+(un|une|des|\d+)\s*(bien|villa|maison|appartement|terrain|studio|duplex|immeuble|magasin|bureau|local|portes?))\b/.source,
     /\b(voici\s+une\s+(autre\s+)?offre\s+que\s+j['’]envoie|offre\s+que\s+j['’]envoie)\b/.source,
-    /\b(conditions?\s*[:.]?\s*\d|cdt\s*[:.]?\s*\d+\s*mois|\d[\d\s.,]*\s*(?:f|fcfa|fr|frs|mil(?:le)?s?|k)?\s*[x×*]\s*[4567]\b)/.source,
+    /\b(conditions?\s*[:.]?\s*\d|cdt\s*[:.]?\s*\d+\s*mois)\b/.source,
     /\b(visites?\s*:?\s*\d+\s*(?:f|fcfa|fr|mille)|frais\s+de\s+visites?|part\s+de\s+porte|dont\s+\d[\d\s.,]*\s*(?:f|fcfa)?\s*de\s+commission|obligatoire\s+pour\s+les\s+d[ée]ma(?:r)?ch(?:e|ai)urs?)\b/.source,
-    /^\s*\*?(?:[àa]\s+louer|[àa]\s+vendre|location\s*:|vente\s*:|en\s+vente\b|chambre\s+froide\s+en\s+vente|entrep[ôo]t\s+en\s+vente|terrain\s+[àa]\s+vendre|[ée]cole\s+[àa]\s+vendre|studio\s+[àa]\s+louer|villa\s+[àa]\s+louer)/i.source,
+    /^\s*\*?(?:location\s*:|vente\s*:|en\s+vente\b|chambre\s+froide\s+en\s+vente|entrep[ôo]t\s+en\s+vente|terrain\s+[àa]\s+vendre|[ée]cole\s+[àa]\s+vendre|studio\s+[àa]\s+louer|villa\s+[àa]\s+louer)/i.source,
   ].join('|'),
   'i',
 )
@@ -110,7 +121,7 @@ const EXPLICIT_SUPPLY_RE = new RegExp(
  */
 export function isBrokerBroadcastSearch(text: string): boolean {
   const t = text.toLowerCase()
-  return /\b(bon(jour|soir)\s+(la\s+)?(grande\s+)?famille|bonjour\s+les\s+coll[èe]gues|mon\s+client\s+direct|un\s+client\s+est\s+[àa]\s+la\s+recherche|besoin\s+pour\s+achat|budget\s+du\s+client|pour\s+mon\s+client)\b/i.test(
+  return /\b(bon(jour|soir)\s+(la\s+)?(grande\s+)?famille|bonjour\s+les\s+coll[èe]gues|mon\s+client\s+direct|un\s+client\s+est\s+[àa]\s+la\s+recherche|j['’]ai\s+un\s+(client|op[ée]rateur|acqu[ée]reur|investisseur)\s+qui\s+(cherche|recherche|a\s+besoin)|besoin\s+pour\s+achat|budget\s+du\s+client|pour\s+mon\s+client)\b/i.test(
     t,
   )
 }
@@ -134,13 +145,13 @@ export function isClientSearchIntent(text: string): boolean {
 
   const searchPhrases = [
     /\b(je\s+cherche|je\s+recherche|on\s+cherche|nous\s+cherchons|client\s+(?:direct\s+)?(?:qui\s+)?(?:cherche|recherche|a\s+besoin)|est\s+[àa]\s+la\s+recherche\s+d)\b/i,
-    /\b^\s*(?:bonjour|bonsoir|salut|bjr|bsr|svp|urgent[\s!]*)*\s*cherche\s+(un|une|des|\d+)/i,
+    /^\s*(?:bonjour|bonsoir|salut|bjr|bsr|svp|urgent[\s!.,]*)*\s*(?:re)?cherche\s+(un|une|des|\d+)/i,
     /\b(je\s+suis\s+[àa]\s+la\s+recherche|en\s+qu[êe]te\s+d['’])\b/i,
     /\b(je\s+veux|je\s+voudrais|j['’]aimerais|je\s+souhaite|souhaiterais)\s+(louer|acheter|visiter|trouver|avoir|prendre|emm[ée]nager|un|une|des|ce|le|la|habiter)\b/i,
     /\b((?:j['’]ai\s+|a\s+)?besoin\s+(?:pour\s+achat\s+)?d['’e]\s*(un|une|des|\d+)?\s*(bien|appartement|villa|maison|studio|duplex|terrain|parcelle|entrep[ôo]t|logement|bureau|local|chambre|toit|hectares?|ha\b))\b/i,
     /\b(trouver\s+(un|une|des)\s+(bien|appartement|villa|maison|studio|duplex|terrain|logement))\b/i,
-    /\b(avez[-\s]vous|est[-\s]ce\s+que\s+vous\s+avez|auriez[-\s]vous)\b/i,
-    /\b(mon\s+budget|notre\s+budget|budget\s+du\s+client|budget\s+(?:max(?:imum)?\s*)?(?:compris\s+entre\s+|est\s+de\s+)?[:=]?\s*\d+)\b/i,
+    /\b(avez[-\s]vous|est[-\s]ce\s+que\s+vous\s+avez|auriez[-\s]vous|possible\s+d['’]avoir|puis[-\s]je\s+avoir|peut[-\s]on\s+avoir|est[-\s]ce\s+possible\s+d['’]avoir)\b/i,
+    /\b(mon\s+budget|notre\s+budget|budget\s+du\s+client|budget\s+(?:max(?:i|imum)?\s*)?(?:compris\s+entre\s+|est\s+de\s+)?[:=]?\s*\d+|zones?\s+souhait[ée]es?|maison\s+basse\s+souhait[ée]e)\b/i,
     /\b(pour\s+(y\s+)?habiter|pour\s+emm[ée]nager|pour\s+mon\s+s[ée]jour)\b/i,
   ]
 
