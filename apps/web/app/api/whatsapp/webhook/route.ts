@@ -479,19 +479,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: 'ok', branch: 'guard_silence' });
     }
 
-    // 1c. Mutes actifs : reprise humaine (24 h) OU fournisseur de biens
+    // 1c. Mutes actifs : reprise humaine (7 jours) OU fournisseur de biens
     // identifié (24 h) OU prise en charge conseiller après 0 résultat (24 h).
+    const HUMAN_TAKEOVER_WINDOW_MS = 7 * 24 * 3_600_000;
+    const SYSTEM_MUTE_24H_MS = 24 * 3_600_000;
     const { data: sysMarks } = await supabase
       .from('whatsapp_messages')
       .select('body, created_at')
       .eq('jid', jid)
       .eq('direction', 'system')
       .in('body', ['HUMAN_TAKEOVER', 'LISTING_PROVIDER', 'COUNSELOR_HANDOFF'])
-      .gte('created_at', new Date(Date.now() - 24 * 3_600_000).toISOString())
+      .gte('created_at', new Date(Date.now() - HUMAN_TAKEOVER_WINDOW_MS).toISOString())
       .order('created_at', { ascending: false })
-      .limit(5);
+      .limit(10);
     const now = Date.now();
-    const marks = ((sysMarks as unknown) as { body: string; created_at: string }[]) ?? [];
+    const marks = (((sysMarks as unknown) as { body: string; created_at: string }[]) ?? []).filter((m) => {
+      if (!m.created_at) return true;
+      const age = now - new Date(m.created_at).getTime();
+      return m.body === 'HUMAN_TAKEOVER' ? age < HUMAN_TAKEOVER_WINDOW_MS : age < SYSTEM_MUTE_24H_MS;
+    });
 
     // 2. Historique de conversation (30 derniers messages réels, hors marqueurs system)
     const { data: history } = await supabase
@@ -532,15 +538,15 @@ export async function POST(req: NextRequest) {
       }));
     const formattedHistory = filterCurrentSessionHistory(allFormattedHistory, 48 * 3_600_000);
 
-    // Détection d'une conversation déjà gérée par un commercial humain (< 7 jours sur message commercial, < 24 h sur marqueur)
+    // Détection d'une conversation déjà gérée par un commercial humain (< 7 jours sur message commercial ou marqueur HUMAN_TAKEOVER)
     const hasHumanTakeover =
-      marks.some((m) => m.body === 'HUMAN_TAKEOVER' && now - new Date(m.created_at).getTime() < 24 * 3_600_000) ||
+      marks.some((m) => m.body === 'HUMAN_TAKEOVER') ||
       allFormattedHistory.some(
         (m) =>
           m.role === 'assistant' &&
           (m.metadata?.actor_type === 'commercial' || m.metadata?.trace_source === 'human_takeover') &&
           m.created_at &&
-          now - new Date(m.created_at).getTime() < 7 * 24 * 3_600_000,
+          now - new Date(m.created_at).getTime() < HUMAN_TAKEOVER_WINDOW_MS,
       );
 
     // 2b. ANNONCE / PROPOSITION entrante (agent/proprio/démarcheur qui CONFIE ou PUBLIE un bien) → ne

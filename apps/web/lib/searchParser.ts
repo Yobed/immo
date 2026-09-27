@@ -186,10 +186,10 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
     if (c === 'Man') {
       // "Man" est un mot court fréquent dans les pseudos ou tournures ("man", "management"...) :
       // on exige une préposition de lieu explicite ("à Man", "de Man", "sur Man", "ville de Man").
-      const manRe = /\b(?:[àa]|de|sur|vers|ville\s+de|commune\s+de)\s+man\b/i
+      const manRe = /(?:^|[\s,.;:!?])(?:[àa]|de|sur|vers|ville\s+de|commune\s+de)\s+man\b/i
       if (manRe.test(lower)) {
         result.commune = 'Man'
-        lower = lower.replace(manRe, '')
+        lower = lower.replace(manRe, ' ')
         break
       }
       continue
@@ -271,7 +271,7 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
     lower = withoutCaution
   }
   const explicitRentAfterCaution = lower.match(
-    /\bbud[gj]et\s+\d+(?:[.,]\d+)?\s*(?:mil(?:l+e*s?|s)?|k|f|fcfa)?\b.*?\b(?:besoin\s+de\s+|cherche\s+|voudrais\s+|veux\s+)?(?:maison|studio|appart(?:ement)?|chambre|logement|loyer)\s+(?:de|[àa])\s+(\d.*)$/i,
+    /\bbud[gj]et\s+\d+(?:[.,]\d+)?\s*(?:mil(?:l+e*s?|s)?|k|f|fcfa)?\b.*?\b(?:(?:besoin|cherche|voudrais|veux)(?:\s+(?:de|d['’]?\s*(?:un|une)))?\s+|(?:maison|studio|appart(?:ement)?|chambre|logement|loyer)\s+)(?:de|[àa])\s*(\d.*)$/i,
   )
   if (explicitRentAfterCaution && /\d/.test(explicitRentAfterCaution[1])) {
     lower = explicitRentAfterCaution[1]
@@ -370,8 +370,8 @@ export function parseSearchQuery(text: string): ParsedSearchQuery {
     }
   }
 
-  // Standard large numbers: "500000", "35000000" (les groupes de milliers séparés par espace/point ont déjà été normalisés ci-dessus)
-  const priceMatches = lower.match(/\b\d{5,10}\b/g)
+  // Standard large numbers: "500000", "100000f", "35000000" (les groupes de milliers séparés par espace/point ont déjà été normalisés ci-dessus)
+  const priceMatches = lower.match(/(?<![0-9])\d{5,10}(?![0-9])/g)
   if (priceMatches) {
     priceMatches.forEach(pm => {
       const v = parseInt(pm, 10)

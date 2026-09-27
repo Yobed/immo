@@ -315,7 +315,7 @@ export async function getAIBienContext(
   // 1. Communes citées (avec frontières de mots pour éviter que "Aboboté" matche "Abobo" ou "2 plateau" matche "Plateau")
   for (const c of COMMUNES_CI) {
     if (c === 'Man') {
-      if (/\b(?:[àa]|de|sur|vers|ville\s+de|commune\s+de)\s+man\b/i.test(msgNormForCommunes) && !zoneTerms.includes('man')) {
+      if (/(?:^|[\s,.;:!?])(?:[àa]|de|sur|vers|ville\s+de|commune\s+de)\s+man\b/i.test(msgNormForCommunes) && !zoneTerms.includes('man')) {
         zoneTerms.push('man')
       }
       continue
