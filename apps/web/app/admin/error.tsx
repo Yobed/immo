@@ -41,10 +41,10 @@ export default function AdminError({
             <RotateCw className="w-4 h-4" /> Réessayer
           </button>
           <Link
-            href="/admin/suivi"
+            href="/admin"
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] text-xs text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-hover)] transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" /> Retour au suivi
+            <ArrowLeft className="w-4 h-4" /> Retour au cockpit
           </Link>
         </div>
       </div>

@@ -1,10 +1,11 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { redirect, notFound } from 'next/navigation'
-import { Search, Trash2, Eye, ShieldCheck, ShieldAlert, RotateCcw, Phone, Calendar, Pencil, Undo2, AlertTriangle } from 'lucide-react'
+import { Search, Trash2, Eye, ShieldCheck, ShieldAlert, RotateCcw, Phone, Calendar, Pencil, Undo2, AlertTriangle, MessageCircle, ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { formatFCFA } from '@/lib/format'
+import { whatsappLink } from '@/lib/whatsapp'
 import { deleteBienAction, restoreBienAction, purgeBienAction, suspendreBienAction, republierBienAction } from './actions'
 
 export const runtime = 'nodejs'
@@ -139,7 +140,13 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
               </p>
             </div>
           </div>
-          <Link href="/" className="text-[var(--text-subtle)] hover:text-[var(--text)] text-xs font-medium">← Retour app</Link>
+          <div className="flex items-center gap-3">
+            <Link href="/admin" className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--accent-luxury)] hover:underline">
+              <ArrowLeft className="w-3.5 h-3.5" /> Cockpit
+            </Link>
+            <span className="text-[var(--border)]">·</span>
+            <Link href="/" className="text-[var(--text-subtle)] hover:text-[var(--text)] text-xs font-medium">App publique</Link>
+          </div>
         </div>
 
         {/* Filters */}
@@ -216,13 +223,26 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
                     </p>
                     <p className="text-[var(--text)] font-semibold text-sm mb-3">{priceDisplay(bien)}</p>
 
-                    <div className="space-y-1 text-xs text-[var(--text-muted)] mb-3">
+                    <div className="space-y-1.5 text-xs text-[var(--text-muted)] mb-3">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <p className="flex items-center gap-1.5">
+                          <Phone className="w-3 h-3 text-[var(--text-subtle)]" />
+                          <span className="font-medium text-[var(--text)]">{phoneDisplay}</span>
+                        </p>
+                        {bien.profiles?.phone && (
+                          <a
+                            href={whatsappLink(bien.profiles.phone, `Bonjour ${bien.profiles.full_name || ''}, je vous contacte depuis l'administration Le Néré au sujet de votre bien "${bien.titre}".`) ?? undefined}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors"
+                            title="Contacter le propriétaire sur WhatsApp"
+                          >
+                            <MessageCircle className="w-3 h-3 text-emerald-600" /> WhatsApp
+                          </a>
+                        )}
+                      </div>
                       <p className="flex items-center gap-1.5">
-                        <Phone className="w-3 h-3" />
-                        <span className="font-medium text-[var(--text)]">{phoneDisplay}</span>
-                      </p>
-                      <p className="flex items-center gap-1.5">
-                        <Calendar className="w-3 h-3" />
+                        <Calendar className="w-3 h-3 text-[var(--text-subtle)]" />
                         {date}
                       </p>
                     </div>

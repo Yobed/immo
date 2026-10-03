@@ -1,5 +1,6 @@
+import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
-import { Activity, BarChart3, MessageCircle, CalendarDays, CreditCard, DatabaseZap } from 'lucide-react'
+import { Activity, BarChart3, MessageCircle, CalendarDays, CreditCard, DatabaseZap, ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { ActionQueue } from '@/components/admin/ActionQueue'
@@ -35,9 +36,9 @@ async function fetchAllRows<T>(
 export default async function AdminPerformancePage({ searchParams }: { searchParams: Promise<{ period?: string }> }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login?redirect=/admin/performance')
+  if (!user) redirect('/login?next=/admin/performance')
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') redirect('/login?redirect=/admin/performance')
+  if (profile?.role !== 'admin') redirect('/login?next=/admin/performance')
 
   const params = await searchParams
   const period: Period = params.period === '7' || params.period === '90' ? Number(params.period) as Period : 30
@@ -158,6 +159,14 @@ export default async function AdminPerformancePage({ searchParams }: { searchPar
   return (
     <main className="min-h-screen bg-[var(--surface-hover)]">
       <div className="max-w-[1500px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <Link
+          href="/admin"
+          className="inline-flex items-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text)] mb-4 transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          Retour au cockpit
+        </Link>
+
         <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-7">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--accent-luxury)] mb-2">Pilotage commercial</p>
@@ -166,9 +175,13 @@ export default async function AdminPerformancePage({ searchParams }: { searchPar
           </div>
           <div className="flex rounded-xl border border-[var(--border)] bg-[var(--surface-card)] p-1 self-start sm:self-auto">
             {[7, 30, 90].map((days) => (
-              <a key={days} href={`/admin/performance?period=${days}`} className={`min-h-[40px] px-3 sm:px-4 rounded-lg inline-flex items-center text-xs font-bold ${period === days ? 'bg-[var(--text)] text-[var(--surface-card)]' : 'text-[var(--text-muted)] hover:text-[var(--text)]'}`}>
+              <Link
+                key={days}
+                href={`/admin/performance?period=${days}`}
+                className={`min-h-[40px] px-3 sm:px-4 rounded-lg inline-flex items-center text-xs font-bold transition-colors ${period === days ? 'bg-[var(--text)] text-[var(--surface-card)]' : 'text-[var(--text-muted)] hover:text-[var(--text)]'}`}
+              >
                 {days} jours
-              </a>
+              </Link>
             ))}
           </div>
         </header>

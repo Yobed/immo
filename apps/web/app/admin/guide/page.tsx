@@ -137,7 +137,19 @@ export default function AdminGuidePage() {
   return (
     <main className="min-h-screen bg-[var(--surface-hover)]">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <Link href="/admin/performance" className="mb-6 inline-flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--text)]"><ArrowLeft className="h-4 w-4" /> Retour à Performance</Link>
+        <div className="mb-6 flex items-center gap-3 text-sm">
+          <Link href="/admin" className="inline-flex items-center gap-1.5 text-[var(--accent-luxury)] hover:underline font-bold">
+            <ArrowLeft className="h-4 w-4" /> Retour au cockpit
+          </Link>
+          <span className="text-[var(--border)]">·</span>
+          <Link href="/admin/performance" className="text-[var(--text-muted)] hover:text-[var(--text)]">
+            Performance
+          </Link>
+          <span className="text-[var(--border)]">·</span>
+          <Link href="/admin/suivi" className="text-[var(--text-muted)] hover:text-[var(--text)]">
+            Suivi
+          </Link>
+        </div>
 
         <header className="rounded-3xl border border-[var(--border)] bg-[var(--surface-card)] p-6 sm:p-8">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--accent-luxury)]">Mode d’emploi administrateur</p>
@@ -184,7 +196,23 @@ export default function AdminGuidePage() {
           <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--surface-card)] p-5"><div className="flex items-center gap-2"><MessageCircle className="h-5 w-5 text-[var(--accent-luxury)]" /><h3 className="font-bold text-[var(--text)]">Quand un prospect écrit sur WhatsApp</h3></div><p className="mt-2 text-sm leading-relaxed text-[var(--text-muted)]">Ouvrir Suivi, retrouver ou créer la fiche par téléphone, vérifier la référence du bien, assigner un conseiller puis répondre depuis le parcours prévu. Si WhatsApp ne trouve pas le numéro, conserver la demande dans Suivi, vérifier le format international et utiliser la notification interne; ne jamais contourner le suivi en partageant le contact du propriétaire.</p></div>
         </section>
 
-        <footer className="mt-10 flex flex-wrap gap-3 border-t border-[var(--border)] pt-6"><Link href="/admin/suivi" className="inline-flex items-center gap-2 rounded-xl bg-[var(--text)] px-4 py-3 text-sm font-bold text-[var(--surface-card)]">Ouvrir Suivi <ArrowRight className="h-4 w-4" /></Link><Link href="/admin/performance" className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] px-4 py-3 text-sm font-bold text-[var(--text)]">Voir Performance</Link><Link href="/admin/prospects/qualite" className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] px-4 py-3 text-sm font-bold text-[var(--text)]">Contrôler la qualité</Link><Link href="/admin/prospects/doublons" className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] px-4 py-3 text-sm font-bold text-[var(--text)]">Traiter les doublons</Link></footer>
+        <footer className="mt-10 flex flex-wrap gap-3 border-t border-[var(--border)] pt-6">
+          <Link href="/admin" className="inline-flex items-center gap-2 rounded-xl bg-[var(--text)] px-4 py-3 text-sm font-bold text-[var(--surface-card)]">
+            Cockpit <ArrowRight className="h-4 w-4" />
+          </Link>
+          <Link href="/admin/suivi" className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] px-4 py-3 text-sm font-bold text-[var(--text)]">
+            Ouvrir Suivi
+          </Link>
+          <Link href="/admin/performance" className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] px-4 py-3 text-sm font-bold text-[var(--text)]">
+            Voir Performance
+          </Link>
+          <Link href="/admin/prospects/qualite" className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] px-4 py-3 text-sm font-bold text-[var(--text)]">
+            Contrôler la qualité
+          </Link>
+          <Link href="/admin/prospects/doublons" className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] px-4 py-3 text-sm font-bold text-[var(--text)]">
+            Traiter les doublons
+          </Link>
+        </footer>
       </div>
     </main>
   )

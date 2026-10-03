@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
 import {
   ArrowLeft, ShieldCheck, Phone, Calendar, MapPin, User,
-  CheckCircle2, XCircle, MessageCircle, Home, Wallet,
+  CheckCircle2, XCircle, MessageCircle, Home, Wallet, Sparkles,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -110,6 +110,34 @@ export default async function ReservationDetailPage({ params }: PageProps) {
   const ownerName = reservation.proprietaire?.full_name || '—'
   const ownerPhone = reservation.proprietaire?.phone || null
 
+  // CRM Prospect lookup (enrichissement automatique si prospect connu)
+  let prospect: {
+    id: string
+    nom: string | null
+    statut: string
+    contact_type?: string | null
+    budget?: number | null
+    commune?: string | null
+    quartier?: string | null
+    type_bien?: string | null
+    dernier_message?: string | null
+  } | null = null
+
+  if (visitorPhone) {
+    const rawDigits = visitorPhone.replace(/\D/g, '')
+    const digits = rawDigits.startsWith('225') ? rawDigits.slice(3) : rawDigits
+    const { data: foundProspect } = await (admin as any)
+      .from('prospects')
+      .select('id, nom, statut, contact_type, budget, commune, quartier, type_bien, dernier_message')
+      .or(`phone.ilike.%${digits}%,phone.ilike.%${rawDigits}%`)
+      .limit(1)
+      .maybeSingle()
+
+    if (foundProspect) {
+      prospect = foundProspect
+    }
+  }
+
   const isPending = reservation.admin_validation_status === 'pending'
   const nbJours = diffDays(reservation.date_debut, reservation.date_fin)
 
@@ -160,12 +188,69 @@ export default async function ReservationDetailPage({ params }: PageProps) {
                 {visitorPhone || '—'}
               </span>
               {visitorPhone && (
-                <a href={whatsappLink(visitorPhone)!} target="_blank" rel="noopener noreferrer" className="min-h-[44px] inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-sm font-bold">
+                <a href={whatsappLink(visitorPhone) ?? undefined} target="_blank" rel="noopener noreferrer" className="min-h-[44px] inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-sm font-bold">
                   <MessageCircle className="w-4 h-4" /> WhatsApp
                 </a>
               )}
             </div>
           </section>
+
+          {/* Qualification CRM & Sapphire */}
+          {prospect && (
+            <section className="bg-gradient-to-br from-amber-500/10 via-[var(--surface-card)] to-purple-500/10 rounded-2xl border border-[var(--border)] p-6 shadow-sm">
+              <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-[var(--text)]">
+                    Qualification CRM &amp; Sapphire AI
+                  </h2>
+                </div>
+                <Link
+                  href={`/admin/prospects/${prospect.id}`}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-[var(--surface)] hover:bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--text)] transition-colors shadow-sm"
+                >
+                  Voir fiche CRM complète →
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                <div className="bg-[var(--surface)] p-3 rounded-xl border border-[var(--border)]">
+                  <p className="text-[10px] font-bold text-[var(--text-subtle)] uppercase">Budget exprimé</p>
+                  <p className="text-sm font-bold text-[var(--text)] mt-0.5">
+                    {prospect.budget ? formatFCFA(prospect.budget) : 'Non précisé'}
+                  </p>
+                </div>
+                <div className="bg-[var(--surface)] p-3 rounded-xl border border-[var(--border)]">
+                  <p className="text-[10px] font-bold text-[var(--text-subtle)] uppercase">Recherche ciblée</p>
+                  <p className="text-sm font-bold text-[var(--text)] mt-0.5 truncate">
+                    {[prospect.type_bien, prospect.commune, prospect.quartier].filter(Boolean).join(' · ') || 'Critères libres'}
+                  </p>
+                </div>
+                <div className="bg-[var(--surface)] p-3 rounded-xl border border-[var(--border)]">
+                  <p className="text-[10px] font-bold text-[var(--text-subtle)] uppercase">Nature &amp; Statut</p>
+                  <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                      prospect.contact_type === 'agent' ? 'bg-purple-100 text-purple-900 border-purple-200' : 'bg-emerald-100 text-emerald-900 border-emerald-200'
+                    }`}>
+                      {prospect.contact_type === 'agent' ? 'Agent démarcheur' : 'Client direct'}
+                    </span>
+                    <span className="text-xs text-[var(--text-muted)] font-medium capitalize">
+                      · {prospect.statut.replace('_', ' ')}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {prospect.dernier_message && (
+                <div className="bg-[var(--surface)] p-3 rounded-xl border border-[var(--border)] text-xs text-[var(--text-muted)]">
+                  <p className="font-bold text-[var(--text)] mb-1 flex items-center gap-1 text-[11px]">
+                    <MessageCircle className="w-3 h-3 text-emerald-600" /> Dernier échange Sapphire :
+                  </p>
+                  <p className="italic line-clamp-3">« {prospect.dernier_message} »</p>
+                </div>
+              )}
+            </section>
+          )}
 
           {/* Propriétaire */}
           <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-6">

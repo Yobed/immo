@@ -14,9 +14,9 @@ type DuplicateGroup = { phone_normalized: string; duplicate_count: number; prosp
 export default async function ProspectDuplicatesPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login?redirect=/admin/prospects/doublons')
+  if (!user) redirect('/login?next=/admin/prospects/doublons')
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') redirect('/login?redirect=/admin/prospects/doublons')
+  if (profile?.role !== 'admin') redirect('/login?next=/admin/prospects/doublons')
 
   const admin = createAdminClient()
   const { data, error } = await (admin as any).from('v_prospect_duplicates')
@@ -33,9 +33,19 @@ export default async function ProspectDuplicatesPage() {
 
   return <main className="min-h-screen bg-[var(--surface-hover)]">
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-      <Link href="/admin/performance" className="inline-flex min-h-11 items-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--text)] mb-5">
-        <ArrowLeft className="w-4 h-4" /> Retour à Performance
-      </Link>
+      <div className="flex items-center gap-3 mb-5 text-sm">
+        <Link href="/admin/prospects" className="inline-flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text)] transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Pipeline CRM
+        </Link>
+        <span className="text-[var(--border)]">·</span>
+        <Link href="/admin" className="text-[var(--text-muted)] hover:text-[var(--text)] transition-colors">
+          Cockpit
+        </Link>
+        <span className="text-[var(--border)]">·</span>
+        <Link href="/admin/performance" className="text-[var(--text-muted)] hover:text-[var(--text)] transition-colors">
+          Performance
+        </Link>
+      </div>
       <header className="flex items-start gap-3 mb-7">
         <Copy className="w-6 h-6 text-[var(--accent-luxury)] mt-1" />
         <div><h1 className="text-2xl font-black text-[var(--text)]">Doublons potentiels</h1>
