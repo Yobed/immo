@@ -218,6 +218,36 @@ function humanTraceContext(text: string): { property_ref: string | null; propert
   return { property_ref: propertyRef, property_url: propertyUrl };
 }
 
+/**
+ * Numéros WhatsApp des administrateurs et conseillers alertés (toi + associé).
+ * Lit ADMIN_WHATSAPP_NUMBERS en priorité, avec repli sur SAPPHIRE_ADMIN_PHONES,
+ * SAPPHIRE_ADVISOR_PHONE, ou les numéros par défaut des deux associés.
+ */
+function getAdminPhones(): string[] {
+  const raw =
+    process.env.ADMIN_WHATSAPP_NUMBERS ||
+    process.env.SAPPHIRE_ADMIN_PHONES ||
+    process.env.SAPPHIRE_ADVISOR_PHONE ||
+    '+2250789263373,+2250778311541';
+  return raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+/**
+ * Alerte tous les administrateurs configurés en parallèle via Wasender.
+ */
+async function notifyAdmins(message: string): Promise<void> {
+  const phones = getAdminPhones();
+  for (const phone of phones) {
+    await wasenderSendMessage(phone, message, 'text').catch((err) => {
+      console.error(`[whatsapp] Failed to notify admin ${phone}:`, err);
+      return null;
+    });
+  }
+}
+
 export async function POST(req: NextRequest) {
   const requestStartedAt = Date.now();
   try {
@@ -676,12 +706,9 @@ export async function POST(req: NextRequest) {
           (m) => m.role === 'assistant' && m.content.startsWith('Merci pour votre proposition'),
         );
       if (!alreadyReplied) {
-        const advisorPhone = process.env.SAPPHIRE_ADVISOR_PHONE || '+2250544872051';
-        await wasenderSendMessage(
-          advisorPhone,
+        await notifyAdmins(
           `📥 Annonce reçue en DM (démarcheur/agence ?)\n👤 ${contactName} — ${senderPn}\n💬 "${userMessage.slice(0, 300)}"`,
-          'text',
-        ).catch(() => null);
+        );
         await humanReplyDelay(PARTNER_REPLY, requestStartedAt);
         await wasenderSendMessage(replyTarget, PARTNER_REPLY, 'text');
         await supabase.from('whatsapp_messages').insert({
@@ -863,8 +890,7 @@ export async function POST(req: NextRequest) {
         );
         if (reminderSent) {
           // Règle 2 : Sapphire ne relance plus et reste silencieuse.
-          // MAIS pour ne pas perdre le lead, on alerte discrètement le conseiller humain pour qu'il prenne le relais.
-          const advisorPhone = process.env.SAPPHIRE_ADVISOR_PHONE || '+2250544872051';
+          // MAIS pour ne pas perdre le lead, on alerte discrètement les administrateurs pour qu'ils prennent le relais.
           const alertAlreadySent = marks.some((m) => m.body === 'QUALIF_SILENCE_ALERTED');
           if (!alertAlreadySent) {
             await supabase.from('whatsapp_messages').insert({
@@ -877,7 +903,7 @@ export async function POST(req: NextRequest) {
 👤 ${contactName} — ${senderPn}
 💬 Dernier message : "${userMessage}"
 👉 Critères encore manquants : ${qual.missing.join(', ')}. Prendre le relais manuellement !`;
-            await wasenderSendMessage(advisorPhone, qualAlert, 'text').catch(() => null);
+            await notifyAdmins(qualAlert);
           }
           return NextResponse.json({ status: 'ok', branch: 'qualif_silence' });
         }
@@ -922,8 +948,7 @@ export async function POST(req: NextRequest) {
         metadata: { type: 'counselor_handoff', qual },
       });
 
-      // Notification au conseiller humain avec les critères qualifiés
-      const advisorPhone = process.env.SAPPHIRE_ADVISOR_PHONE || '+2250544872051';
+      // Notification aux administrateurs / conseillers avec les critères qualifiés (Règle 4)
       const budgetAlertStr = qual.budget
         ? qual.budgetMin && qual.budgetMin < qual.budget
           ? `${qual.budgetMin.toLocaleString('fr-FR')} à ${qual.budget.toLocaleString('fr-FR')} FCFA`
@@ -935,7 +960,7 @@ export async function POST(req: NextRequest) {
 📍 Zone : ${qual.zone || 'Non précisée'}
 💰 Budget : ${budgetAlertStr}
 💬 Message : "${userMessage.slice(0, 250)}"`;
-      await wasenderSendMessage(advisorPhone, advisorAlert, 'text').catch(() => null);
+      await notifyAdmins(advisorAlert);
 
       return NextResponse.json({ status: 'ok', branch: 'no_results' });
     }
@@ -995,19 +1020,12 @@ export async function POST(req: NextRequest) {
       // Notifier les admins DÈS LE 1er échec : on vient de promettre au prospect
       // « un conseiller prend le relais », donc un humain doit vraiment être
       // alerté immédiatement. Lien wa.me cliquable pour répondre en 1 tap.
-      // SAPPHIRE_ADMIN_PHONES = liste séparée par virgules (plusieurs admins),
-      // fallback sur SAPPHIRE_ADVISOR_PHONE (numéro unique).
-      const adminPhones = (
-        process.env.SAPPHIRE_ADMIN_PHONES || process.env.SAPPHIRE_ADVISOR_PHONE || '+2250544872051'
-      ).split(',').map((s) => s.trim()).filter(Boolean);
       const waLink = `https://wa.me/${senderPn.replace(/[^0-9]/g, '')}`;
       const advisorMsg = `🔔 Sapphire n'a pas pu répondre — prendre la main
 👤 ${contactName} — ${senderPn}
 💬 "${userMessage.slice(0, 300)}"
 ➡️ Répondre directement : ${waLink}`;
-      for (const p of adminPhones) {
-        await wasenderSendMessage(p, advisorMsg, 'text').catch(() => null);
-      }
+      await notifyAdmins(advisorMsg);
 
       if (isSapphireFallback(lastAssistant)) {
         // 2e échec consécutif → message d'escalade au prospect (les admins
@@ -1083,8 +1101,7 @@ export async function POST(req: NextRequest) {
         }
       } else {
         // Offre flash → pas de FK valide vers la table biens.
-        // On notifie le conseiller humain par Wasender pour qu'il prenne le relais.
-        const advisorPhone = process.env.SAPPHIRE_ADVISOR_PHONE || '+2250544872051';
+        // On notifie les administrateurs par Wasender pour qu'ils prennent le relais.
         const flashUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bogbesgroup.com'}/offre-flash/${rdvCheck.bienId}`;
         const advisorMsg = `🔔 RDV demandé sur OFFRE FLASH #${rdvCheck.bienId}
 👤 ${contactName} — ${senderPn}
@@ -1092,7 +1109,7 @@ export async function POST(req: NextRequest) {
 🔗 ${flashUrl}
 
 Message client : "${userMessage.slice(0, 200)}"`;
-        await wasenderSendMessage(advisorPhone, advisorMsg, 'text').catch(() => null);
+        await notifyAdmins(advisorMsg);
 
         // Log dans whatsapp_messages pour traçabilité
         await supabase.from('whatsapp_messages').insert({
