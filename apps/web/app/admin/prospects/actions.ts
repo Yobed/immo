@@ -21,6 +21,15 @@ async function update(form: FormData, operation: string, values: Record<string, 
 export async function setProspectStatutAction(form: FormData): Promise<CrmActionResult> {
   return update(form, 'status', { statut: String(form.get('statut') || '') })
 }
+
+/** Passe automatiquement le prospect en 'contacte' dès qu'un conseiller clique sur Contacter WhatsApp. */
+export async function markProspectContactedAction(id: string, version: number): Promise<CrmActionResult> {
+  const form = new FormData()
+  form.set('id', id)
+  form.set('version', String(version))
+  form.set('statut', 'contacte')
+  return setProspectStatutAction(form)
+}
 export async function setProspectNoteAction(form: FormData): Promise<CrmActionResult> {
   return update(form, 'note', { note: String(form.get('note') || '').trim() })
 }

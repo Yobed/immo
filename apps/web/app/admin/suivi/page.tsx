@@ -8,6 +8,7 @@ import {
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { formatFCFA } from '@/lib/format'
+import { InlineVisiteActions } from '@/components/admin/InlineVisiteActions'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -580,48 +581,56 @@ function VisiteCard({ v, compact = false }: { v: VisiteRow; compact?: boolean })
   const visitorName = v.locataire?.full_name || v.client_name || 'Visiteur'
   const visitorPhone = v.locataire?.phone || v.client_phone || '—'
   return (
-    <Link
-      href={`/admin/suivi/visites/${v.id}`}
-      className="bg-[var(--surface-card)] rounded-xl border border-[var(--border)] hover:border-[var(--border)] hover:shadow-md transition-all p-3 flex flex-col gap-2"
-    >
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <h3 className="font-bold text-[var(--text)] text-sm line-clamp-1">{v.biens?.titre || 'Bien'}</h3>
-          <p className="text-[var(--text-muted)] text-xs flex items-center gap-1 mt-0.5">
-            <MapPin className="w-3 h-3" />
-            {v.biens?.commune || '—'}
-            {v.source === 'whatsapp' && <span className="ml-1 text-emerald-600">· WA</span>}
-          </p>
+    <div className="bg-[var(--surface-card)] rounded-xl border border-[var(--border)] hover:border-slate-300 hover:shadow-md transition-all p-3 flex flex-col justify-between">
+      <div>
+        <Link href={`/admin/suivi/visites/${v.id}`} className="group block">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <h3 className="font-bold text-[var(--text)] text-sm line-clamp-1 group-hover:text-[var(--accent-luxury)] transition-colors">
+                {v.biens?.titre || 'Bien'}
+              </h3>
+              <p className="text-[var(--text-muted)] text-xs flex items-center gap-1 mt-0.5">
+                <MapPin className="w-3 h-3" />
+                {v.biens?.commune || '—'}
+                {v.source === 'whatsapp' && <span className="ml-1 text-emerald-600 font-bold">· WA</span>}
+              </p>
+            </div>
+            {!compact && adminBadge(v.admin_validation_status)}
+          </div>
+
+          <div className="space-y-0.5 text-xs text-[var(--text-muted)] mt-2">
+            <p className="flex items-center gap-1.5">
+              <User className="w-3 h-3 text-[var(--text-subtle)]" />
+              <span className="font-semibold text-[var(--text)] truncate">{visitorName}</span>
+            </p>
+            <p className="flex items-center gap-1.5">
+              <Phone className="w-3 h-3 text-[var(--text-subtle)]" />
+              <span className="truncate">{visitorPhone}</span>
+            </p>
+            <p className="flex items-center gap-1.5">
+              <Calendar className="w-3 h-3 text-[var(--text-subtle)]" />
+              <span className="font-medium text-[var(--text)]">{formatDate(v.date_souhaitee)}</span>
+              {v.heure_debut && v.heure_fin && (
+                <>
+                  <Clock className="w-3 h-3 text-[var(--text-subtle)] ml-1" />
+                  {v.heure_debut} - {v.heure_fin}
+                </>
+              )}
+            </p>
+          </div>
+        </Link>
+      </div>
+
+      <div>
+        <InlineVisiteActions visiteId={v.id} status={v.admin_validation_status} />
+        <div className="flex items-center justify-between pt-1.5 mt-2 border-t border-[var(--border)] text-[10px] text-[var(--text-subtle)]">
+          <Link href={`/admin/suivi/visites/${v.id}`} className="hover:underline">
+            Reçue {formatDateTime(v.created_at)}
+          </Link>
+          <NotifDots ownerNotified={!!v.owner_notified_at} visitorNotified={!!v.visitor_notified_at} />
         </div>
-        {!compact && adminBadge(v.admin_validation_status)}
       </div>
-
-      <div className="space-y-0.5 text-xs text-[var(--text-muted)]">
-        <p className="flex items-center gap-1.5">
-          <User className="w-3 h-3 text-[var(--text-subtle)]" />
-          <span className="font-semibold text-[var(--text)] truncate">{visitorName}</span>
-        </p>
-        <p className="flex items-center gap-1.5">
-          <Phone className="w-3 h-3 text-[var(--text-subtle)]" />
-          <span className="truncate">{visitorPhone}</span>
-        </p>
-        <p className="flex items-center gap-1.5">
-          <Calendar className="w-3 h-3 text-[var(--text-subtle)]" />
-          {formatDate(v.date_souhaitee)}
-          {v.heure_debut && v.heure_fin && (
-            <>
-              <Clock className="w-3 h-3 text-[var(--text-subtle)] ml-1" />
-              {v.heure_debut} - {v.heure_fin}
-            </>
-          )}
-        </p>
-      </div>
-
-      <div className="flex items-center justify-between pt-1.5 border-t border-[var(--border)] text-[10px] text-[var(--text-subtle)]">
-        <span>Reçue {formatDateTime(v.created_at)}</span>
-        <NotifDots ownerNotified={!!v.owner_notified_at} visitorNotified={!!v.visitor_notified_at} />
-      </div>
-    </Link>
+    </div>
   )
 }
 

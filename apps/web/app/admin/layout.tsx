@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic'
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login?redirect=/admin/suivi')
+  if (!user) redirect('/login?redirect=/admin')
 
   const admin = createAdminClient()
   const [{ data: profile }, pendingRes] = await Promise.all([
@@ -49,7 +49,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </p>
           <div className="flex flex-col gap-2">
             <Link
-              href="/login?redirect=/admin/suivi"
+              href="/login?redirect=/admin"
               className="inline-flex justify-center items-center rounded-xl bg-amber-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-amber-950 transition-colors"
             >
               Changer de compte

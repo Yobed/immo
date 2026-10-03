@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
-import { ShieldCheck, CheckSquare, Home, Building2, LogOut, ClipboardCheck, Flame, Users, Megaphone, UserSearch, Send, BarChart3, ScanSearch, BookOpen } from 'lucide-react'
+import { ShieldCheck, CheckSquare, Home, Building2, LogOut, ClipboardCheck, Flame, Users, Megaphone, UserSearch, Send, BarChart3, ScanSearch, BookOpen, LayoutDashboard } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface AdminShellProps {
@@ -14,36 +14,29 @@ interface AdminShellProps {
 
 const ADMIN_NAV_GROUPS = [
   {
-    label: 'À traiter',
+    label: 'Opérations',
     items: [
-      { href: '/admin/suivi', label: 'Suivi', icon: CheckSquare, badge: false },
-      { href: '/admin/prospects', label: 'Prospects', icon: UserSearch, badge: false },
-      { href: '/admin/performance', label: 'Performance', icon: BarChart3, badge: false },
-      { href: '/admin/prospects/qualite', label: 'Qualité', icon: ScanSearch, badge: false },
-      { href: '/admin/guide', label: 'Guide', icon: BookOpen, badge: false },
+      { href: '/admin', label: 'Cockpit', icon: LayoutDashboard, badge: false },
+      { href: '/admin/prospects', label: 'Prospects CRM', icon: UserSearch, badge: false },
+      { href: '/admin/suivi', label: 'Visites & Suivi', icon: CheckSquare, badge: false },
     ],
   },
   {
-    label: 'Annonces',
+    label: 'Catalogue',
     items: [
       { href: '/admin/validation', label: 'Validation', icon: ClipboardCheck, badge: true },
-      { href: '/admin/moderation', label: 'Modération', icon: ShieldCheck, badge: false },
       { href: '/admin/flash', label: 'Offres flash', icon: Flame, badge: false },
+      { href: '/admin/moderation', label: 'Modération', icon: ShieldCheck, badge: false },
     ],
   },
   {
-    label: 'Équipe',
+    label: 'Équipe & Gestion',
     items: [
+      { href: '/admin/performance', label: 'Performance', icon: BarChart3, badge: false },
       { href: '/admin/comptes', label: 'Comptes', icon: Users, badge: false },
-      { href: '/admin/kyc', label: 'KYC', icon: ShieldCheck, badge: false },
       { href: '/admin/demarcheurs', label: 'Démarcheurs', icon: Megaphone, badge: false },
-    ],
-  },
-  {
-    label: 'Système',
-    items: [
-      { href: '/admin/outreach', label: 'Outreach', icon: Send, badge: false },
-      { href: '/admin/errors', label: 'Erreurs', icon: ClipboardCheck, badge: false },
+      { href: '/admin/guide', label: 'Guide', icon: BookOpen, badge: false },
+      { href: '/admin/errors', label: 'Erreurs', icon: ScanSearch, badge: false },
     ],
   },
 ]
@@ -70,7 +63,7 @@ export function AdminShell({ email, pendingCount = 0, children }: AdminShellProp
       <header className="sticky top-0 z-40 bg-[var(--background)]/95 backdrop-blur-md text-[var(--text)] border-b border-[var(--border)] shadow-md">
         {/* Ligne 1 : marque + liens croisés (jamais mélangés aux modules) */}
         <div className="max-w-[1400px] mx-auto px-4 lg:px-6 h-14 flex items-center gap-3">
-          <Link href="/admin/suivi" className="flex items-center gap-2 shrink-0 group">
+          <Link href="/admin" className="flex items-center gap-2 shrink-0 group">
             <Image src="/bogbes-logo.png" alt="BOGBE'S GROUPE" width={28} height={28} className="w-7 h-7 object-contain" />
             <span className="inline-flex items-center gap-1.5">
               <span className="font-display text-sm font-bold tracking-tight">BOGBE&apos;S</span>
