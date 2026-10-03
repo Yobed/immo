@@ -17,11 +17,11 @@ type ProspectRow = {
   assigned_to: string | null
 }
 
-async function fetchAllProspects(admin: ReturnType<typeof createAdminClient>): Promise<{ rows: ProspectRow[]; error?: string }> {
+async function fetchAllProspects(admin: ReturnType<typeof createAdminClient>, maxRows = 3000): Promise<{ rows: ProspectRow[]; error?: string }> {
   const pageSize = 1000
   const rows: ProspectRow[] = []
   try {
-    for (let from = 0; ; from += pageSize) {
+    for (let from = 0; from < maxRows; from += pageSize) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (admin as any)
         .from('prospects')
@@ -33,6 +33,7 @@ async function fetchAllProspects(admin: ReturnType<typeof createAdminClient>): P
       rows.push(...batch)
       if (batch.length < pageSize) return { rows }
     }
+    return { rows }
   } catch (err) {
     return { rows: [], error: err instanceof Error ? err.message : 'Erreur inconnue' }
   }
@@ -41,10 +42,10 @@ async function fetchAllProspects(admin: ReturnType<typeof createAdminClient>): P
 export default async function ProspectQualityPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login?redirect=/admin/prospects/qualite')
+  if (!user) redirect('/login?next=/admin/prospects/qualite')
   const admin = createAdminClient()
   const { data: profile } = await (admin as any).from('profiles').select('role').eq('id', user.id).maybeSingle()
-  if (profile?.role !== 'admin') redirect('/login?redirect=/admin/prospects/qualite')
+  if (profile?.role !== 'admin') redirect('/login?next=/admin/prospects/qualite')
   const { rows, error: fetchError } = await fetchAllProspects(admin)
 
   const checks = [

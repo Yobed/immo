@@ -61,7 +61,11 @@ export default async function AdminOutreachPage() {
 
   const [
     { data: prospectsRaw },
-    { data: countsRaw },
+    { count: totalCount },
+    { count: invitedCount },
+    { count: convertedCount },
+    { count: optedOutCount },
+    { count: pendingCount },
     { count: clickedCount },
   ] = await Promise.all([
     admin
@@ -71,7 +75,23 @@ export default async function AdminOutreachPage() {
       .limit(100),
     admin
       .from('agent_prospects')
-      .select('status, opt_out'),
+      .select('id', { count: 'exact', head: true }),
+    admin
+      .from('agent_prospects')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'invited'),
+    admin
+      .from('agent_prospects')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'converted'),
+    admin
+      .from('agent_prospects')
+      .select('id', { count: 'exact', head: true })
+      .eq('opt_out', true),
+    admin
+      .from('agent_prospects')
+      .select('id', { count: 'exact', head: true })
+      .in('status', ['new', 'queued']),
     admin
       .from('agent_outreach_log')
       .select('*', { count: 'exact', head: true })
@@ -79,14 +99,13 @@ export default async function AdminOutreachPage() {
   ])
 
   const prospects = (prospectsRaw ?? []) as ProspectRow[]
-  const counts = (countsRaw ?? []) as { status: string; opt_out: boolean }[]
   const stats: OutreachStats = {
-    total: counts.length,
-    invited: counts.filter(c => c.status === 'invited').length,
+    total: totalCount ?? 0,
+    invited: invitedCount ?? 0,
     clicked: clickedCount ?? 0,
-    converted: counts.filter(c => c.status === 'converted').length,
-    opted_out: counts.filter(c => c.opt_out).length,
-    pending: counts.filter(c => c.status === 'new' || c.status === 'queued').length,
+    converted: convertedCount ?? 0,
+    opted_out: optedOutCount ?? 0,
+    pending: pendingCount ?? 0,
   }
 
   const conversionRate = stats.invited > 0
