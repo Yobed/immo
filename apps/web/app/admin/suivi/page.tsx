@@ -267,7 +267,7 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
       <div className="bg-[var(--surface-card)] border-b border-[var(--border)]">
         <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <ShieldCheck className="w-6 h-6 text-[var(--text)]" />
+            <ShieldCheck className="w-6 h-6 text-[var(--accent-luxury)]" />
             <div>
               <h1 className="font-bold text-[var(--text)] text-lg leading-none">Suivi & Intermédiation</h1>
               <p className="text-[var(--text-subtle)] text-xs mt-1">
@@ -289,7 +289,7 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
           >
             <Home className="w-4 h-4" /> Visites
             {(visitesPending ?? 0) > 0 && (
-              <span className="px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px]">{visitesPending}</span>
+              <span className="px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-black">{visitesPending}</span>
             )}
           </Link>
           <Link
@@ -300,7 +300,7 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
           >
             <BedDouble className="w-4 h-4" /> Réservations
             {(reservationsPending ?? 0) > 0 && (
-              <span className="px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px]">{reservationsPending}</span>
+              <span className="px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-black">{reservationsPending}</span>
             )}
           </Link>
           <Link
@@ -311,7 +311,7 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
           >
             <MessageCircle className="w-4 h-4" /> Contacts
             {(contactsPending ?? 0) > 0 && (
-              <span className="px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px]">{contactsPending}</span>
+              <span className="px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-black">{contactsPending}</span>
             )}
           </Link>
           </div>
