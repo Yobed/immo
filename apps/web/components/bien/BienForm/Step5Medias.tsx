@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { MediaUploader } from '@/components/media/MediaUploader'
 import { MediaSortable } from '@/components/media/MediaSortable'
@@ -19,45 +19,68 @@ interface Media {
 
 interface Step5MediasProps {
   bienId: string
+  onBack?: () => void
 }
 
-export function Step5Medias({ bienId }: Step5MediasProps) {
+export function Step5Medias({ bienId, onBack }: Step5MediasProps) {
   const [medias, setMedias] = useState<Media[]>([])
   const [activeType, setActiveType] = useState<MediaType>('photo')
   const [publishing, setPublishing] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [publishError, setPublishError] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
-  useEffect(() => {
-    supabase
+  const loadMedias = useCallback(async () => {
+    try {
+      const res = await authFetch(`/api/biens/${bienId}/medias`)
+      if (res.ok) {
+        const data = (await res.json()) as Media[]
+        setMedias(data)
+        return
+      }
+    } catch {
+      // Fallback client Supabase
+    }
+    const { data } = await supabase
       .from('biens_medias')
       .select('id, url, type, titre, ordre, est_couverture')
       .eq('bien_id', bienId)
+      .order('est_couverture', { ascending: false })
       .order('ordre', { ascending: true })
-      .then(({ data }) => { if (data) setMedias(data as Media[]) })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bienId])
+    if (data) setMedias(data as Media[])
+  }, [bienId, supabase])
+
+  useEffect(() => {
+    loadMedias()
+  }, [loadMedias])
 
   const handlePublish = async () => {
+    if (uploading) return
     setPublishing(true)
-    // L'annonce part en validation admin (en_attente) avant d'être publiée.
-    await authFetch(`/api/biens/${bienId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ statut: 'en_attente' }),
-    })
-    setPublishing(false)
-    router.push('/mes-biens?soumis=1')
+    setPublishError(null)
+    try {
+      // L'annonce part en validation admin (en_attente) avant d'être publiée.
+      const res = await authFetch(`/api/biens/${bienId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ statut: 'en_attente' }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: `Erreur HTTP ${res.status}` }))
+        setPublishError(err.error || 'Impossible de soumettre l\'annonce')
+        setPublishing(false)
+        return
+      }
+      router.push('/mes-biens?soumis=1')
+    } catch (e) {
+      setPublishError((e as Error).message || 'Erreur réseau lors de la publication')
+      setPublishing(false)
+    }
   }
 
   const handleUploadComplete = (_url: string, _type: MediaType) => {
-    // Refresh medialist after upload
-    supabase
-      .from('biens_medias')
-      .select('id, url, type, titre, ordre, est_couverture')
-      .eq('bien_id', bienId)
-      .order('ordre', { ascending: true })
-      .then(({ data }) => { if (data) setMedias(data as Media[]) })
+    loadMedias()
   }
 
   const tabs: { type: MediaType; label: string }[] = [
@@ -69,16 +92,28 @@ export function Step5Medias({ bienId }: Step5MediasProps) {
 
   return (
     <div className="space-y-6">
-      <h2 className="font-display text-2xl text-[var(--text)]">Médias du bien</h2>
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="font-display text-2xl text-[var(--text)]">Médias du bien</h2>
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            disabled={uploading || publishing}
+            className="text-xs font-sans text-[var(--text-muted)] hover:text-[var(--text)] underline disabled:opacity-50"
+          >
+            ← Modifier les informations
+          </button>
+        )}
+      </div>
 
       {/* Onglets type */}
-      <div className="flex gap-2 border-b border-[var(--border)]">
+      <div className="flex gap-2 border-b border-[var(--border)] overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.type}
             type="button"
             onClick={() => setActiveType(tab.type)}
-            className={`px-4 py-2 text-sm font-sans border-b-2 transition-colors ${
+            className={`px-4 py-2 text-sm font-sans border-b-2 transition-colors whitespace-nowrap ${
               activeType === tab.type
                 ? 'border-[var(--accent-luxury)] text-[var(--accent-luxury)] font-medium'
                 : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text)]'
@@ -97,6 +132,7 @@ export function Step5Medias({ bienId }: Step5MediasProps) {
         bienId={bienId}
         type={activeType}
         onUploadComplete={handleUploadComplete}
+        onUploadingChange={setUploading}
       />
 
       {/* Liste ordonnée */}
@@ -106,7 +142,13 @@ export function Step5Medias({ bienId }: Step5MediasProps) {
             Médias uploadés ({medias.length}) — glisser pour réordonner
           </h3>
           {/* key force le remontage du composant quand la liste change (useState interne) */}
-          <MediaSortable key={medias.map((m) => m.id).join(',')} bienId={bienId} initialMedias={medias} />
+          <MediaSortable key={medias.map((m) => `${m.id}:${m.est_couverture ? 1 : 0}`).join(',')} bienId={bienId} initialMedias={medias} />
+        </div>
+      )}
+
+      {publishError && (
+        <div className="p-3 rounded-btn bg-danger/10 border border-danger/30 text-danger text-sm font-sans">
+          {publishError}
         </div>
       )}
 
@@ -114,18 +156,23 @@ export function Step5Medias({ bienId }: Step5MediasProps) {
       <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-[var(--border)]">
         <button
           type="button"
+          disabled={uploading || publishing}
           onClick={() => router.push('/mes-biens')}
-          className="flex-1 py-3 px-6 rounded-btn border border-[var(--border)] font-sans text-sm text-[var(--text)] hover:border-primary/40 transition-colors"
+          className="flex-1 py-3 px-6 rounded-btn border border-[var(--border)] font-sans text-sm text-[var(--text)] hover:border-primary/40 transition-colors disabled:opacity-50"
         >
           Enregistrer en brouillon
         </button>
         <button
           type="button"
           onClick={handlePublish}
-          disabled={publishing}
+          disabled={publishing || uploading}
           className="flex-1 py-3 px-6 rounded-btn bg-primary text-white font-sans font-medium text-sm hover:bg-primary/90 transition-colors disabled:opacity-60"
         >
-          {publishing ? 'Publication…' : 'Publier l\'annonce'}
+          {uploading
+            ? 'Upload des médias en cours…'
+            : publishing
+              ? 'Publication…'
+              : 'Publier l\'annonce'}
         </button>
       </div>
     </div>

@@ -61,35 +61,76 @@ function pickField(fields: TallyField[], predicate: (f: TallyField) => boolean):
 }
 
 function readPhone(fields: TallyField[]): string | null {
-  const f = pickField(fields, x =>
-    x.type === 'PHONE_NUMBER' ||
-    /phone|telephone|t.l.phone|whatsapp/i.test(x.label || '')
-  )
+  const f =
+    pickField(
+      fields,
+      (x) =>
+        x.type === 'PHONE_NUMBER' ||
+        x.type === 'INPUT_PHONE_NUMBER' ||
+        /phone|telephone|t.l.phone|whatsapp|num.ro/i.test(x.label || ''),
+    ) ||
+    pickField(
+      fields,
+      (x) =>
+        typeof x.value === 'string' &&
+        /^\+?[0-9\s()-]{8,16}$/.test(x.value.trim()),
+    )
   if (!f || typeof f.value !== 'string') return null
-  return normalizePhone(f.value)
+  const norm = normalizePhone(f.value)
+  return norm.replace(/\D/g, '').length >= 8 ? norm : null
 }
 
 function readRawText(fields: TallyField[]): string | null {
-  const f = pickField(fields, x =>
-    (x.type === 'TEXTAREA' || x.type === 'INPUT_TEXT') &&
-    /annonce|message|texte|brut|description/i.test(x.label || '')
-  ) || pickField(fields, x => x.type === 'TEXTAREA')
+  const f =
+    pickField(
+      fields,
+      (x) =>
+        (x.type === 'TEXTAREA' || x.type === 'INPUT_TEXT') &&
+        /annonce|message|texte|brut|description|bien/i.test(x.label || ''),
+    ) ||
+    pickField(fields, (x) => x.type === 'TEXTAREA') ||
+    pickField(
+      fields,
+      (x) =>
+        x.type === 'INPUT_TEXT' &&
+        typeof x.value === 'string' &&
+        x.value.trim().length >= 10,
+    )
   if (!f || typeof f.value !== 'string') return null
   return f.value.trim() || null
 }
 
-function readImages(fields: TallyField[]): string[] {
-  const urls: string[] = []
+interface ParsedTallyMedia {
+  url: string
+  type: 'photo' | 'video'
+  mimeType?: string
+  name?: string
+}
+
+function isVideoFile(item: TallyFile): boolean {
+  const mime = (item.mimeType || '').toLowerCase()
+  if (mime.startsWith('video/')) return true
+  const target = `${item.name || ''} ${item.url || ''}`.toLowerCase()
+  return /\.(mp4|mov|webm|mkv|3gp|m4v|avi)(\?|$)/i.test(target)
+}
+
+function readMediaFiles(fields: TallyField[]): ParsedTallyMedia[] {
+  const items: ParsedTallyMedia[] = []
   for (const f of fields) {
-    if (f.type !== 'FILE_UPLOAD') continue
+    if (f.type !== 'FILE_UPLOAD' && !Array.isArray(f.value)) continue
     if (!Array.isArray(f.value)) continue
     for (const item of f.value as TallyFile[]) {
       if (item && typeof item.url === 'string' && /^https?:\/\//.test(item.url)) {
-        urls.push(item.url)
+        items.push({
+          url: item.url,
+          type: isVideoFile(item) ? 'video' : 'photo',
+          mimeType: item.mimeType,
+          name: item.name,
+        })
       }
     }
   }
-  return urls
+  return items
 }
 
 async function findOrCreateUserByPhone(phone: string): Promise<string> {
@@ -137,19 +178,36 @@ let bucketEnsured = false
 async function ensureBucket(): Promise<void> {
   if (bucketEnsured) return
   const admin = createAdminClient()
-  await admin.storage.createBucket(STORAGE_BUCKET, {
+  const opts = {
     public: true,
-    fileSizeLimit: 15 * 1024 * 1024,
-    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'],
-  }).catch(() => {})
+    fileSizeLimit: 50 * 1024 * 1024,
+    allowedMimeTypes: [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/webp',
+      'image/heic',
+      'image/heif',
+      'video/mp4',
+      'video/quicktime',
+      'video/webm',
+      'video/x-matroska',
+      'video/3gpp',
+    ],
+  }
+  const { error } = await admin.storage.createBucket(STORAGE_BUCKET, opts)
+  if (error) {
+    await admin.storage.updateBucket(STORAGE_BUCKET, opts).catch(() => {})
+  }
   bucketEnsured = true
 }
 
-async function uploadImageFromUrl(
+async function uploadMediaFromUrl(
   bienId: string,
-  sourceUrl: string,
-  index: number
+  media: ParsedTallyMedia,
+  index: number,
 ): Promise<{ url: string | null; error?: string; provider?: string }> {
+  const isVideo = media.type === 'video'
   // 1. Cloudinary en priorité si creds dispos
   const cn = process.env.CLOUDINARY_CLOUD_NAME?.trim().replace(/^﻿/, '')
   const ck = process.env.CLOUDINARY_API_KEY?.trim().replace(/^﻿/, '')
@@ -157,44 +215,56 @@ async function uploadImageFromUrl(
   if (cn && ck && cs) {
     cloudinary.config({ cloud_name: cn, api_key: ck, api_secret: cs })
     try {
-      const result = await cloudinary.uploader.upload(sourceUrl, {
+      const result = await cloudinary.uploader.upload(media.url, {
         folder: `biens/${bienId}`,
         public_id: `tally-${Date.now()}-${index}`,
-        resource_type: 'image',
-        timeout: 60000,
+        resource_type: isVideo ? 'video' : 'image',
+        timeout: 45000,
       })
       return { url: result.secure_url, provider: 'cloudinary' }
     } catch (e) {
       // Fallback Supabase si Cloudinary échoue
       const cloudinaryErr = (e as Error).message?.slice(0, 80) || 'unknown'
-      const fallback = await uploadToSupabase(bienId, sourceUrl, index)
+      const fallback = await uploadToSupabase(bienId, media, index)
       return fallback.url
         ? { ...fallback, provider: `supabase(after_cloudinary_fail:${cloudinaryErr})` }
         : { url: null, error: `cloudinary:${cloudinaryErr} | ${fallback.error}` }
     }
   }
   // 2. Pas de creds Cloudinary → Supabase direct
-  return uploadToSupabase(bienId, sourceUrl, index)
+  return uploadToSupabase(bienId, media, index)
 }
 
 async function uploadToSupabase(
   bienId: string,
-  sourceUrl: string,
-  index: number
+  media: ParsedTallyMedia,
+  index: number,
 ): Promise<{ url: string | null; error?: string; provider?: string }> {
   try {
     await ensureBucket()
-    const res = await fetch(sourceUrl)
+    const res = await fetch(media.url)
     if (!res.ok) return { url: null, error: `fetch_${res.status}` }
     const arrayBuffer = await res.arrayBuffer()
-    if (arrayBuffer.byteLength > 50 * 1024 * 1024) return { url: null, error: 'too_large' }
+    if (arrayBuffer.byteLength > 100 * 1024 * 1024) return { url: null, error: 'too_large' }
 
-    let contentType = res.headers.get('content-type') || 'image/jpeg'
-    if (!contentType.startsWith('image/')) contentType = 'image/jpeg'
-    const ext = contentType.includes('png') ? 'png'
-      : contentType.includes('webp') ? 'webp'
-      : contentType.includes('heic') ? 'heic'
-      : 'jpg'
+    const isVideo = media.type === 'video'
+    let contentType = res.headers.get('content-type') || media.mimeType || (isVideo ? 'video/mp4' : 'image/jpeg')
+    if (!isVideo && !contentType.startsWith('image/')) contentType = 'image/jpeg'
+    if (isVideo && !contentType.startsWith('video/')) contentType = 'video/mp4'
+
+    const ext = isVideo
+      ? contentType.includes('quicktime')
+        ? 'mov'
+        : contentType.includes('webm')
+          ? 'webm'
+          : 'mp4'
+      : contentType.includes('png')
+        ? 'png'
+        : contentType.includes('webp')
+          ? 'webp'
+          : contentType.includes('heic')
+            ? 'heic'
+            : 'jpg'
     const path = `${bienId}/tally-${Date.now()}-${index}.${ext}`
 
     const admin = createAdminClient()
@@ -227,6 +297,69 @@ Ce lien valide votre numéro et publie votre annonce en 1 clic. Valide 7 jours.`
   await wasenderSendMessage(phone, text, 'text')
 }
 
+/**
+ * Insère immédiatement les médias (avec l'URL Tally initiale pour qu'aucun bien
+ * ne se retrouve jamais sans photo/vidéo en cas d'interruption serverless), puis
+ * ré-héberge tous les fichiers en parallèle sur Cloudinary / Supabase Storage
+ * et met à jour chaque ligne de biens_medias dès que l'upload est terminé.
+ */
+async function attachAndRehostMedias(
+  bienId: string,
+  mediaFiles: ParsedTallyMedia[],
+): Promise<{ inserted: number; rehosted: number; trace: string[] }> {
+  const trace: string[] = []
+  if (mediaFiles.length === 0) return { inserted: 0, rehosted: 0, trace }
+
+  const admin = createAdminClient()
+  let firstPhotoAssigned = false
+  const initialRows = mediaFiles.map((m, i) => {
+    const isCover = m.type === 'photo' && !firstPhotoAssigned
+    if (isCover) firstPhotoAssigned = true
+    return {
+      bien_id: bienId,
+      type: m.type,
+      url: m.url,
+      ordre: i,
+      est_couverture: isCover,
+    }
+  })
+
+  const { data: insertedRows, error: insErr } = await admin
+    .from('biens_medias')
+    .insert(initialRows)
+    .select('id, ordre')
+
+  if (insErr || !insertedRows) {
+    trace.push(`initial_insert_fail:${insErr?.message?.slice(0, 80)}`)
+    return { inserted: 0, rehosted: 0, trace }
+  }
+
+  const idByOrdre = new Map<number, string>()
+  for (const r of insertedRows as { id: string; ordre: number }[]) {
+    idByOrdre.set(r.ordre, r.id)
+  }
+
+  let rehosted = 0
+  await Promise.allSettled(
+    mediaFiles.map(async (m, i) => {
+      const r = await uploadMediaFromUrl(bienId, m, i)
+      if (r.url) {
+        rehosted++
+        trace.push(`media${i}:ok:${r.provider || 'cloud'}`)
+        const rowId = idByOrdre.get(i)
+        if (rowId) {
+          await admin.from('biens_medias').update({ url: r.url }).eq('id', rowId)
+        }
+      } else {
+        // On conserve l'URL Tally déjà insérée dans biens_medias !
+        trace.push(`media${i}:kept_tally_url(${r.error})`)
+      }
+    }),
+  )
+
+  return { inserted: insertedRows.length, rehosted, trace }
+}
+
 import { waitUntil } from '@vercel/functions'
 
 export async function POST(req: NextRequest) {
@@ -250,13 +383,12 @@ export async function POST(req: NextRequest) {
   const fields = payload.data?.fields ?? []
   const phone = readPhone(fields)
   const rawText = readRawText(fields)
-  const imageUrls = readImages(fields)
+  const mediaFiles = readMediaFiles(fields)
 
   if (!phone) return NextResponse.json({ error: 'missing_phone' }, { status: 400 })
   if (!rawText) return NextResponse.json({ error: 'missing_raw_text' }, { status: 400 })
 
   // Idempotence: dérive un UUID stable depuis submissionId/responseId/eventId.
-  // Si Tally retry le même webhook → même bien.id → INSERT conflict → no-op.
   const submissionKey =
     payload.data?.submissionId ||
     payload.data?.responseId ||
@@ -264,16 +396,36 @@ export async function POST(req: NextRequest) {
     null
   const stableBienId = submissionKey ? deriveBienId(submissionKey) : null
 
-  // Idempotence: si on a déjà un bien avec cet ID stable, c'est un retry Tally.
-  // On répond tout de suite sans rien refaire (pas de re-upload, pas de re-WhatsApp).
   const admin = createAdminClient()
   if (stableBienId) {
     const { data: existing } = await admin
       .from('biens')
-      .select('id, titre')
+      .select('id, titre, proprietaire_id')
       .eq('id', stableBienId)
       .maybeSingle()
     if (existing) {
+      // Si un premier appel avait créé le bien mais avait été interrompu avant d'insérer les médias,
+      // on rattrape les médias manquants en tâche de fond !
+      if (mediaFiles.length > 0) {
+        const { count } = await admin
+          .from('biens_medias')
+          .select('id', { count: 'exact', head: true })
+          .eq('bien_id', existing.id)
+        if ((count ?? 0) === 0) {
+          waitUntil(
+            (async () => {
+              await attachAndRehostMedias(existing.id, mediaFiles)
+              await sendConfirmationWhatsApp(phone, existing.id, existing.proprietaire_id, existing.titre).catch(() => null)
+            })(),
+          )
+          return NextResponse.json({
+            ok: true,
+            bien_id: existing.id,
+            dedup: 'tally_retry_recovered_medias',
+            submission_key: submissionKey,
+          })
+        }
+      }
       return NextResponse.json({
         ok: true,
         bien_id: existing.id,
@@ -283,13 +435,9 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // ACK immédiat (< 1 s) : Tally coupe à 10 s puis rejoue 5 fois — chaque
-  // soumission apparaissait « Failed » alors que le serveur finissait le
-  // travail après la coupure. Le traitement lourd (extraction IA, création
-  // compte, upload photos, confirmation WhatsApp) part en tâche de fond ;
-  // l'id stable neutralise les retries qui se croiseraient malgré tout.
+  // ACK immédiat (< 1 s)
   waitUntil(
-    processTallySubmission({ phone, rawText, imageUrls, stableBienId }).catch((e: Error) =>
+    processTallySubmission({ phone, rawText, mediaFiles, stableBienId }).catch((e: Error) =>
       console.error('[tally-webhook] traitement de fond échoué:', e?.message),
     ),
   )
@@ -300,29 +448,33 @@ export async function POST(req: NextRequest) {
 async function processTallySubmission(args: {
   phone: string
   rawText: string
-  imageUrls: string[]
+  mediaFiles: ParsedTallyMedia[]
   stableBienId: string | null
 }): Promise<void> {
-  const { phone, rawText, imageUrls, stableBienId } = args
+  const { phone, rawText, mediaFiles, stableBienId } = args
 
-  const extResult = await extractBienFromWhatsApp(rawText).catch((e: Error) => ({
-    data: null,
-    trace: [`fatal:${e.message?.slice(0, 100)}`],
-  }))
+  // Exécuter l'extraction IA (avec garde-fou de 10 s max) ET la création/recherche utilisateur EN PARALLÈLE
+  const extractionWithTimeout = Promise.race([
+    extractBienFromWhatsApp(rawText).catch((e: Error) => ({
+      data: null,
+      trace: [`fatal:${e.message?.slice(0, 100)}`],
+    })),
+    new Promise<{ data: null; trace: string[] }>((resolve) =>
+      setTimeout(() => resolve({ data: null, trace: ['timeout_10s'] }), 10_000),
+    ),
+  ])
+
+  const [extResult, userId] = await Promise.all([
+    extractionWithTimeout,
+    findOrCreateUserByPhone(phone),
+  ])
   const extracted = extResult.data
-
-  const userId = await findOrCreateUserByPhone(phone)
   const admin = createAdminClient()
 
   const bienInsert = {
     ...(stableBienId && { id: stableBienId }),
     proprietaire_id: userId,
-    // en_attente (pas brouillon) : les offres du formulaire doivent apparaître
-    // dans la file de validation admin — le proprio « téléphone » ne se
-    // connectera jamais pour promouvoir un brouillon lui-même.
     statut: 'en_attente' as const,
-    // Jamais « Annonce en attente de validation » : ce placeholder s'affichait
-    // comme TITRE public et faisait croire aux admins que la validation échouait.
     titre: extracted?.titre || `${extracted?.type_bien ?? 'Appartement'} — ${extracted?.commune ?? 'Abidjan'} (à compléter)`,
     description: extracted?.description || rawText.slice(0, 1800),
     type_bien: extracted?.type_bien || 'appartement',
@@ -344,8 +496,7 @@ async function processTallySubmission(args: {
     .select('id, titre')
     .single()
 
-  // Race condition: 2e retry arrivé entre le SELECT et le INSERT → conflit PK,
-  // l'autre exécution a déjà tout pris en charge.
+  // Race condition: 2e retry arrivé entre le SELECT et le INSERT → conflit PK
   if (bienErr?.code === '23505' && stableBienId) return
 
   if (bienErr || !bien) {
@@ -353,51 +504,32 @@ async function processTallySubmission(args: {
     return
   }
 
-  const uploadTrace: string[] = []
-  let uploadedCount = 0
-  if (imageUrls.length > 0) {
-    const uploaded: string[] = []
-    for (let i = 0; i < imageUrls.length; i++) {
-      const r = await uploadImageFromUrl(bien.id, imageUrls[i], i)
-      if (r.url) {
-        uploaded.push(r.url)
-        uploadTrace.push(`img${i}:ok`)
-      } else {
-        uploadTrace.push(`img${i}:fail:${r.error}`)
-      }
-    }
-    uploadedCount = uploaded.length
-    if (uploaded.length > 0) {
-      const mediasRows = uploaded.map((url, i) => ({
-        bien_id: bien.id,
-        type: 'photo' as const,
-        url,
-        ordre: i,
-        est_couverture: i === 0,
-      }))
-      const { error: medErr } = await admin.from('biens_medias').insert(mediasRows)
-      if (medErr) uploadTrace.push(`db_insert_fail:${medErr.message?.slice(0, 80)}`)
-    }
-  }
-
-  await sendConfirmationWhatsApp(phone, bien.id, userId, bien.titre).catch(() => null)
-
-  notifyAdminBienSubmitted(admin, {
-    id: bien.id,
-    titre: bien.titre,
-    typeBien: extracted?.type_bien,
-    commune: extracted?.commune,
-    quartier: extracted?.quartier,
-    prix: extracted?.prix_mois_fcfa || extracted?.prix_nuit_fcfa || extracted?.prix_vente_fcfa,
-    proprietairePhone: phone,
-  }).catch((err) => {
-    // eslint-disable-next-line no-console
-    console.error('[tally-webhook] Failed to notify admin', err)
-  })
+  // En parallèle :
+  // 1) Insertion immédiate des médias dans biens_medias + ré-hébergement parallèle vers Cloudinary/Supabase
+  // 2) Envoi WhatsApp de confirmation au propriétaire
+  // 3) Notification WhatsApp aux administrateurs
+  const [mediaRes] = await Promise.all([
+    attachAndRehostMedias(bien.id, mediaFiles),
+    sendConfirmationWhatsApp(phone, bien.id, userId, bien.titre).catch((err) => {
+      console.error('[tally-webhook] sendConfirmationWhatsApp failed:', err)
+      return null
+    }),
+    notifyAdminBienSubmitted(admin, {
+      id: bien.id,
+      titre: bien.titre,
+      typeBien: extracted?.type_bien,
+      commune: extracted?.commune,
+      quartier: extracted?.quartier,
+      prix: extracted?.prix_mois_fcfa || extracted?.prix_nuit_fcfa || extracted?.prix_vente_fcfa,
+      proprietairePhone: phone,
+    }).catch((err) => {
+      console.error('[tally-webhook] Failed to notify admin', err)
+    }),
+  ])
 
   console.log(
-    `[tally-webhook] bien ${bien.id} créé — confiance ${extracted?.confidence ?? 0}, photos ${uploadedCount}/${imageUrls.length}`,
-    uploadTrace.length ? uploadTrace.join(',') : '',
+    `[tally-webhook] bien ${bien.id} créé — confiance ${extracted?.confidence ?? 0}, médias insérés ${mediaRes.inserted}/${mediaFiles.length} (ré-hébergés ${mediaRes.rehosted})`,
+    mediaRes.trace.length ? mediaRes.trace.join(',') : '',
   )
 }
 

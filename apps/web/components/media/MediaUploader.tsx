@@ -1,6 +1,6 @@
 'use client'
 import React, { useRef, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { authFetch } from '@/lib/auth-fetch'
 
 type MediaType = 'photo' | 'video' | 'vue_360' | 'plan'
 
@@ -8,6 +8,7 @@ interface MediaUploaderProps {
   bienId: string
   type: MediaType
   onUploadComplete: (url: string, type: MediaType) => void
+  onUploadingChange?: (uploading: boolean) => void
 }
 
 const MEDIA_ICONS: Record<MediaType, React.ReactNode> = {
@@ -42,64 +43,236 @@ const CONFIG: Record<MediaType, {
   hint: string
   size: string
 }> = {
-  photo:   { resourceType: 'image', accept: 'image/jpg,image/jpeg,image/png,image/webp', multiple: true,  hint: 'Cliquer pour ajouter des photos',          size: 'JPG, PNG, WEBP — max 15 MB' },
-  video:   { resourceType: 'video', accept: 'video/mp4,video/quicktime,video/webm',      multiple: false, hint: 'Cliquer pour ajouter une vidéo',            size: 'MP4, MOV, WEBM — max 50 MB' },
-  vue_360: { resourceType: 'image', accept: 'image/jpg,image/jpeg,image/png',            multiple: false, hint: 'Image panoramique équirectangulaire',        size: 'JPG, PNG — max 50 MB' },
-  plan:    { resourceType: 'auto',  accept: 'application/pdf,image/jpg,image/jpeg,image/png', multiple: false, hint: 'Plan du bien (PDF ou image)',          size: 'PDF, JPG, PNG — max 20 MB' },
+  photo:   { resourceType: 'image', accept: 'image/jpg,image/jpeg,image/png,image/webp,image/heic,image/heif,image/*', multiple: true,  hint: 'Cliquer ou glisser pour ajouter des photos', size: 'JPG, PNG, WEBP, HEIC — max 20 MB par photo' },
+  video:   { resourceType: 'video', accept: 'video/mp4,video/quicktime,video/webm,video/x-matroska,video/3gpp,video/*', multiple: true,  hint: 'Cliquer ou glisser pour ajouter une vidéo',  size: 'MP4, MOV, WEBM — max 100 MB' },
+  vue_360: { resourceType: 'image', accept: 'image/jpg,image/jpeg,image/png,image/webp',                                multiple: false, hint: 'Image panoramique équirectangulaire',        size: 'JPG, PNG, WEBP — max 50 MB' },
+  plan:    { resourceType: 'auto',  accept: 'application/pdf,image/jpg,image/jpeg,image/png,image/webp',                multiple: false, hint: 'Plan du bien (PDF ou image)',                size: 'PDF, JPG, PNG — max 20 MB' },
 }
 
-async function getAuthHeader(): Promise<Record<string, string>> {
-  const supabase = createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  return session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}
+interface SignedUploadResponse {
+  cloudinary: {
+    uploadUrl: string
+    apiKey: string
+    timestamp: number
+    signature: string
+    folder: string
+    publicId: string
+    resourceType: 'image' | 'video' | 'raw'
+  } | null
+  supabase: {
+    signedUrl: string
+    token: string
+    path: string
+    publicUrl: string
+    contentType: string
+  } | null
+  error?: string
 }
 
-export function MediaUploader({ bienId, type, onUploadComplete }: MediaUploaderProps) {
+function xhrUploadToCloudinary(
+  file: File,
+  params: NonNullable<SignedUploadResponse['cloudinary']>,
+  onProgress: (pct: number) => void,
+): Promise<{ url: string; duration?: number }> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    const fd = new FormData()
+    fd.append('file', file)
+    fd.append('api_key', params.apiKey)
+    fd.append('timestamp', String(params.timestamp))
+    fd.append('signature', params.signature)
+    fd.append('folder', params.folder)
+    fd.append('public_id', params.publicId)
+
+    xhr.upload.onprogress = (evt) => {
+      if (evt.lengthComputable && evt.total > 0) {
+        onProgress(Math.min(95, Math.round((evt.loaded / evt.total) * 95)))
+      }
+    }
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const json = JSON.parse(xhr.responseText) as { secure_url?: string; duration?: number }
+          if (json.secure_url) {
+            resolve({
+              url: json.secure_url,
+              duration: typeof json.duration === 'number' ? Math.round(json.duration) : undefined,
+            })
+            return
+          }
+        } catch {
+          // ignore parse error below
+        }
+      }
+      reject(new Error(`Cloudinary HTTP ${xhr.status}: ${xhr.responseText?.slice(0, 120) || 'erreur'}`))
+    }
+    xhr.onerror = () => reject(new Error('Erreur réseau vers Cloudinary'))
+    xhr.ontimeout = () => reject(new Error('Délai dépassé vers Cloudinary'))
+    xhr.timeout = 5 * 60 * 1000
+    xhr.open('POST', params.uploadUrl, true)
+    xhr.send(fd)
+  })
+}
+
+function xhrUploadToSupabaseSignedUrl(
+  file: File,
+  params: NonNullable<SignedUploadResponse['supabase']>,
+  onProgress: (pct: number) => void,
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.upload.onprogress = (evt) => {
+      if (evt.lengthComputable && evt.total > 0) {
+        onProgress(Math.min(95, Math.round((evt.loaded / evt.total) * 95)))
+      }
+    }
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(params.publicUrl)
+      } else {
+        reject(new Error(`Supabase Storage HTTP ${xhr.status}: ${xhr.responseText?.slice(0, 120) || 'erreur'}`))
+      }
+    }
+    xhr.onerror = () => reject(new Error('Erreur réseau vers Supabase Storage'))
+    xhr.ontimeout = () => reject(new Error('Délai dépassé vers Supabase Storage'))
+    xhr.timeout = 5 * 60 * 1000
+    xhr.open('PUT', params.signedUrl, true)
+    xhr.setRequestHeader('Content-Type', params.contentType || file.type || 'application/octet-stream')
+    xhr.send(file)
+  })
+}
+
+export function MediaUploader({ bienId, type, onUploadComplete, onUploadingChange }: MediaUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [currentFileLabel, setCurrentFileLabel] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
 
   const cfg = CONFIG[type]
 
-  const uploadFile = async (file: File, auth: Record<string, string>) => {
+  const updateUploading = (val: boolean) => {
+    setUploading(val)
+    onUploadingChange?.(val)
+  }
+
+  const uploadSingleFile = async (file: File, onFileProgress: (pct: number) => void): Promise<string> => {
+    // 1. Demander une URL signée (requête JSON < 1 KB -> ne déclenche jamais la limite 4.5 MB de Vercel)
+    const signRes = await authFetch(`/api/biens/${bienId}/upload-url`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type,
+        mime: file.type,
+        size: file.size,
+        filename: file.name,
+      }),
+    })
+
+    if (signRes.ok) {
+      const signed = (await signRes.json()) as SignedUploadResponse
+      let uploadedUrl: string | null = null
+      let durationSec: number | undefined
+      const directErrors: string[] = []
+
+      // 1a. Upload direct navigateur -> Cloudinary
+      if (signed.cloudinary) {
+        try {
+          const r = await xhrUploadToCloudinary(file, signed.cloudinary, onFileProgress)
+          uploadedUrl = r.url
+          durationSec = r.duration
+        } catch (e) {
+          directErrors.push((e as Error).message)
+        }
+      }
+
+      // 1b. Fallback direct navigateur -> Supabase Storage
+      if (!uploadedUrl && signed.supabase) {
+        try {
+          uploadedUrl = await xhrUploadToSupabaseSignedUrl(file, signed.supabase, onFileProgress)
+        } catch (e) {
+          directErrors.push((e as Error).message)
+        }
+      }
+
+      // 1c. Enregistrer le média dans biens_medias
+      if (uploadedUrl) {
+        onFileProgress(98)
+        const saveRes = await authFetch(`/api/biens/${bienId}/medias`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: uploadedUrl,
+            type,
+            titre: file.name.replace(/\.[^/.]+$/, '').slice(0, 120) || null,
+            ...(durationSec ? { duree_sec: durationSec } : {}),
+          }),
+        })
+        if (!saveRes.ok) {
+          const errBody = await saveRes.text().catch(() => '')
+          throw new Error(`Enregistrement média échoué (${saveRes.status}): ${errBody.slice(0, 120)}`)
+        }
+        onFileProgress(100)
+        return uploadedUrl
+      }
+
+      // Si le fichier dépasse 4.4 MB et que les uploads directs ont échoué, remonter l'erreur directe
+      if (file.size > 4.4 * 1024 * 1024 && directErrors.length > 0) {
+        throw new Error(`Échec de l'envoi direct (${directErrors.join(' | ')})`)
+      }
+    } else {
+      const signErr = await signRes.json().catch(() => ({ error: `HTTP ${signRes.status}` }))
+      if (signRes.status === 401 || signRes.status === 403 || signRes.status === 413 || signRes.status === 415) {
+        throw new Error(signErr.error || `Erreur ${signRes.status}`)
+      }
+    }
+
+    // 2. Fallback serveur (/api/biens/[id]/upload) pour les petits fichiers (< 4.4 MB)
     const fd = new FormData()
     fd.append('file', file)
     fd.append('type', type)
 
-    const res = await fetch(`/api/biens/${bienId}/upload`, {
+    const res = await authFetch(`/api/biens/${bienId}/upload`, {
       method: 'POST',
-      headers: auth,
       body: fd,
     })
     if (!res.ok) {
       const errText = await res.text().catch(() => '')
       throw new Error(`Upload ${res.status}: ${errText.slice(0, 120)}`)
     }
-    const data = await res.json() as { url: string }
+    const data = (await res.json()) as { url: string }
+    onFileProgress(100)
     return data.url
   }
 
   const handleFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return
-    setUploading(true)
+    updateUploading(true)
     setError(null)
     setProgress(0)
 
     const arr = Array.from(files)
-    const auth = await getAuthHeader()
+    const errors: string[] = []
 
     for (let i = 0; i < arr.length; i++) {
+      const file = arr[i]
+      setCurrentFileLabel(`${file.name} (${i + 1}/${arr.length})`)
       try {
-        const url = await uploadFile(arr[i], auth)
+        const url = await uploadSingleFile(file, (filePct) => {
+          const overall = Math.round(((i * 100 + filePct) / arr.length))
+          setProgress(overall)
+        })
         onUploadComplete(url, type)
-        setProgress(Math.round(((i + 1) / arr.length) * 100))
       } catch (e) {
-        setError(String(e))
+        errors.push(`${file.name}: ${(e as Error).message || String(e)}`)
       }
     }
 
-    setUploading(false)
+    if (errors.length > 0) {
+      setError(errors.join(' • '))
+    }
+    setCurrentFileLabel('')
+    updateUploading(false)
     if (inputRef.current) inputRef.current.value = ''
   }
 
@@ -118,6 +291,17 @@ export function MediaUploader({ bienId, type, onUploadComplete }: MediaUploaderP
         type="button"
         disabled={uploading}
         onClick={() => inputRef.current?.click()}
+        onDragOver={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+        onDrop={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          if (!uploading && e.dataTransfer?.files?.length) {
+            handleFiles(e.dataTransfer.files)
+          }
+        }}
         className="w-full p-10 border-2 border-dashed border-primary/40 rounded-card hover:border-primary hover:bg-primary-light/20 transition-colors text-center disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {uploading ? (
@@ -128,7 +312,9 @@ export function MediaUploader({ bienId, type, onUploadComplete }: MediaUploaderP
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <p className="text-sm text-muted font-sans">Upload en cours… {progress}%</p>
+            <p className="text-sm text-muted font-sans">
+              Upload en cours… {progress}% {currentFileLabel ? `— ${currentFileLabel}` : ''}
+            </p>
           </div>
         ) : (
           <>

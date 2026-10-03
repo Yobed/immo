@@ -71,6 +71,7 @@ export default async function ProspectDuplicatesPage() {
             </a>
             <a
               href="/api/admin/prospects/export"
+              download="prospects.csv"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text)] border border-[var(--border)] bg-[var(--surface-card)] hover:bg-[var(--surface-hover)] transition-colors"
             >
               <Download className="w-3.5 h-3.5 text-[var(--text-subtle)]" />

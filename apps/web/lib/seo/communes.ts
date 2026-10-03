@@ -170,6 +170,42 @@ export const SEO_COMMUNES: SeoCommune[] = [
     quartiers: [],
   },
   {
+    slug: 'bonoua',
+    nom: 'Bonoua',
+    isAbidjan: false,
+    searchTerm: 'bonoua',
+    apropos:
+      "Située à l'est de Grand-Bassam sur l'axe international vers le Ghana, Bonoua connaît un fort essor industriel et résidentiel. Ses grands terrains constructibles et ses nouvelles cités attirent familles et investisseurs à moins de 45 minutes d'Abidjan.",
+    quartiers: ['Zone Industrielle', 'Samo', 'Yaou'],
+  },
+  {
+    slug: 'jacqueville',
+    nom: 'Jacqueville',
+    isAbidjan: false,
+    searchTerm: 'jacqueville',
+    apropos:
+      "Reliée à Abidjan par le pont Philippe-Grégoire-Yacé, Jacqueville séduit par son cordon littoral entre mer et lagune Ébrié. Terrains en bordure d'eau, villas balnéaires et résidences secondaires y offrent un cadre paisible à proximité de la capitale.",
+    quartiers: ['Avagou', 'Addah'],
+  },
+  {
+    slug: 'bouake',
+    nom: 'Bouaké',
+    isAbidjan: false,
+    searchTerm: 'bouak',
+    apropos:
+      "Deuxième métropole de Côte d'Ivoire et carrefour stratégique du centre du pays, Bouaké propose un marché immobilier actif et abordable : villas familiales, appartements, locaux commerciaux et terrains.",
+    quartiers: ['Air France', 'Kennedy', 'Commerce', 'Nimbo'],
+  },
+  {
+    slug: 'san-pedro',
+    nom: 'San-Pédro',
+    isAbidjan: false,
+    searchTerm: 'san-p',
+    apropos:
+      "Premier port cacaoyer mondial et pôle balnéaire du Sud-Ouest ivoirien, San-Pédro combine dynamisme économique et cadre côtier. La demande en logements meublés, appartements et bureaux y est soutenue toute l'année.",
+    quartiers: ['Balmer', 'Cité', 'Bardo', 'Lac'],
+  },
+  {
     slug: 'yamoussoukro',
     nom: 'Yamoussoukro',
     isAbidjan: false,

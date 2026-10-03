@@ -8,6 +8,7 @@ import { Step1Infos } from './Step1Infos'
 import { Step2Prix } from './Step2Prix'
 import { Step3Localisation } from './Step3Localisation'
 import { Step4Equipements } from './Step4Equipements'
+import { Step5Medias } from './Step5Medias'
 import { Button } from '@/components/ui'
 import { useAIListingAnalyzer } from '@/hooks/useAIListingAnalyzer'
 import { AIQualityMeter } from '../AIQualityMeter'
@@ -47,7 +48,7 @@ const STEP_LABELS: Record<number, { label: string; sub: string }> = {
   2: { label: 'Prix', sub: 'Loyer ou vente' },
   3: { label: 'Localisation', sub: 'Commune et carte' },
   4: { label: 'Équipements', sub: 'Caractéristiques' },
-  5: { label: 'Médias', sub: 'Confirmation' },
+  5: { label: 'Médias', sub: 'Photos, vidéos & publication' },
 }
 
 function validateStep(
@@ -100,6 +101,7 @@ interface BienFormProps {
 
 export function BienForm({ defaultValues, bienId }: BienFormProps) {
   const [step, setStep] = useState(1)
+  const [savedBienId, setSavedBienId] = useState<string | undefined>(bienId)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const router = useRouter()
@@ -136,8 +138,9 @@ export function BienForm({ defaultValues, bienId }: BienFormProps) {
         score_ia: aiAnalysis.score,
       } as unknown as Record<string, unknown>
 
-      const result = bienId
-        ? await updateBien(bienId, data)
+      const targetId = savedBienId || bienId
+      const result = targetId
+        ? await updateBien(targetId, data)
         : await createBien(data)
 
       if ('error' in result) {
@@ -145,7 +148,11 @@ export function BienForm({ defaultValues, bienId }: BienFormProps) {
         return
       }
 
-      window.location.href = `/mes-biens/${result.id}/modifier?step=medias`
+      setSavedBienId(result.id)
+      if (typeof window !== 'undefined') {
+        window.history.replaceState(null, '', `/mes-biens/${result.id}/modifier?step=medias`)
+      }
+      setStep(5)
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Erreur inattendue lors de la sauvegarde')
     } finally {
@@ -153,10 +160,15 @@ export function BienForm({ defaultValues, bienId }: BienFormProps) {
     }
   }
 
-  const handleNext = () => {
+  const handleNext = async () => {
     const values = form.getValues()
     const ok = validateStep(step, values, form.setError, form.clearErrors)
-    if (ok) setStep(s => s + 1)
+    if (!ok) return
+    if (step === 4) {
+      await handleFinalSubmit()
+      return
+    }
+    setStep(s => s + 1)
   }
 
   return (
@@ -220,18 +232,14 @@ export function BienForm({ defaultValues, bienId }: BienFormProps) {
             {step === 2 && <Step2Prix form={form} />}
             {step === 3 && <Step3Localisation form={form} />}
             {step === 4 && <Step4Equipements form={form} />}
-            {step === 5 && (
+            {step === 5 && savedBienId && (
+              <Step5Medias bienId={savedBienId} onBack={() => setStep(4)} />
+            )}
+            {step === 5 && !savedBienId && (
               <div className="text-center py-6">
-                <div className="flex justify-center mb-4">
-                  <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-accent">
-                    <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
-                  </svg>
-                </div>
                 <p className="font-display text-xl text-[var(--text)] mb-2">Prêt à ajouter les médias ?</p>
                 <p className="font-sans text-[var(--text-muted)] text-sm">
-                  {bienId
-                    ? "Les informations seront mises à jour. Vous pourrez gérer photos, vidéos et vue 360° à l'étape suivante."
-                    : "L'annonce sera créée en brouillon. Vous pourrez ajouter photos, vidéos et vue 360° à l'étape suivante."}
+                  Cliquez ci-dessous pour enregistrer les informations et ajouter vos photos et vidéos.
                 </p>
               </div>
             )}
@@ -242,27 +250,29 @@ export function BienForm({ defaultValues, bienId }: BienFormProps) {
               </div>
             )}
 
-            <div className="flex justify-between mt-8">
-              {step > 1 && (
-                <Button type="button" variant="outline" onClick={() => setStep(s => s - 1)}>
-                  Précédent
-                </Button>
-              )}
-              {step < TOTAL_STEPS ? (
-                <Button type="button" className="ml-auto" onClick={handleNext}>
-                  Suivant
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  className="ml-auto"
-                  loading={isSubmitting}
-                  onClick={handleFinalSubmit}
-                >
-                  Continuer vers les médias
-                </Button>
-              )}
-            </div>
+            {!(step === 5 && savedBienId) && (
+              <div className="flex justify-between mt-8">
+                {step > 1 && (
+                  <Button type="button" variant="outline" onClick={() => setStep(s => s - 1)}>
+                    Précédent
+                  </Button>
+                )}
+                {step < TOTAL_STEPS ? (
+                  <Button type="button" className="ml-auto" loading={isSubmitting} onClick={handleNext}>
+                    {step === 4 ? 'Continuer vers les médias' : 'Suivant'}
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    className="ml-auto"
+                    loading={isSubmitting}
+                    onClick={handleFinalSubmit}
+                  >
+                    Continuer vers les médias
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         </div>
 

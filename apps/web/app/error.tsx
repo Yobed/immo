@@ -86,13 +86,13 @@ export default function GlobalError({
             <RotateCw className="w-4 h-4" />
             {t.errors.retry}
           </button>
-          <a
+          <Link
             href="/"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-white/15 text-white/80 hover:text-white hover:border-white/30 font-sans text-[11px] uppercase tracking-[0.2em] transition-colors"
           >
             <Home className="w-4 h-4" />
             {t.nav.home}
-          </a>
+          </Link>
           <a
             href="https://wa.me/2250544872051"
             target="_blank"

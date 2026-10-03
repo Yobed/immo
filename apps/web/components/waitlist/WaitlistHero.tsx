@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { track } from '@/lib/analytics/events'
 
 /* ─────────────────────────────────────────────
@@ -238,12 +239,12 @@ export function WaitlistHero() {
           </div>
           <span className="font-bold text-white font-display tracking-tight">BOGBE'S GROUPE</span>
         </div>
-        <a
+        <Link
           href="/"
           className="text-sm text-[var(--text-subtle)] hover:text-white transition-colors"
         >
           Voir les annonces →
-        </a>
+        </Link>
       </nav>
 
       {/* Main content */}

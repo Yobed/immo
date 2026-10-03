@@ -20,6 +20,10 @@ const nextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 'res.cloudinary.com' },
       { protocol: 'https', hostname: '*.supabase.co' },
+      { protocol: 'https', hostname: 'images.coinafrique.com' },
+      { protocol: 'https', hostname: '*.coinafrique.com' },
+      { protocol: 'https', hostname: 'ivoiredomi.ci' },
+      { protocol: 'https', hostname: '*.amazonaws.com' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'www.wasenderapi.com' },
       { protocol: 'https', hostname: 'wasenderapi.com' },

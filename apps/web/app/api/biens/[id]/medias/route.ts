@@ -8,23 +8,48 @@ async function resolveClient(request: Request, bienId: string): Promise<{
   ok: boolean
   reason?: 'auth' | 'forbidden'
 }> {
-  const { user, supabase } = await getServerUser(request)
-  if (!user) return { client: supabase, ok: false, reason: 'auth' }
+  const { user } = await getServerUser(request)
+  const admin = createAdminClient() as unknown as SupabaseClient
+  if (!user) return { client: admin, ok: false, reason: 'auth' }
 
-  const { data: profile } = await supabase
+  const { data: profile } = await admin
     .from('profiles')
     .select('role')
     .eq('id', user.id)
-    .single()
-  if (profile?.role === 'admin') {
-    return { client: createAdminClient() as unknown as SupabaseClient, ok: true }
+    .maybeSingle()
+  if ((profile as { role?: string } | null)?.role === 'admin') {
+    return { client: admin, ok: true }
   }
 
-  const { data: bien } = await supabase
-    .from('biens').select('id').eq('id', bienId).eq('proprietaire_id', user.id).single()
-  if (!bien) return { client: supabase, ok: false, reason: 'forbidden' }
+  const { data: bien } = await admin
+    .from('biens')
+    .select('id')
+    .eq('id', bienId)
+    .eq('proprietaire_id', user.id)
+    .maybeSingle()
+  if (!bien) return { client: admin, ok: false, reason: 'forbidden' }
 
-  return { client: supabase, ok: true }
+  return { client: admin, ok: true }
+}
+
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const r = await resolveClient(request, id)
+  if (!r.ok) {
+    const status = r.reason === 'auth' ? 401 : 403
+    const error = r.reason === 'auth' ? 'Non authentifié' : 'Non autorisé'
+    return NextResponse.json({ error }, { status })
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (r.client.from('biens_medias') as any)
+    .select('id, url, type, titre, ordre, est_couverture, embed_url, duree_sec')
+    .eq('bien_id', id)
+    .order('est_couverture', { ascending: false })
+    .order('ordre', { ascending: true })
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+  return NextResponse.json(data ?? [])
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -37,9 +62,38 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   const body = await request.json()
+  const type = body.type || 'photo'
+
+  // Vérifier les médias existants pour attribuer automatiquement la couverture et l'ordre
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: existing } = await (r.client.from('biens_medias') as any)
+    .select('id, type, ordre, est_couverture')
+    .eq('bien_id', id)
+
+  const existingList = (existing ?? []) as { id: string; type: string; ordre: number | null; est_couverture: boolean | null }[]
+  const hasCoverPhoto = existingList.some((m) => m.type === 'photo' && m.est_couverture)
+  const maxOrdre = existingList.reduce((max, m) => Math.max(max, typeof m.ordre === 'number' ? m.ordre : 0), -1)
+
+  const estCouverture =
+    typeof body.est_couverture === 'boolean'
+      ? body.est_couverture
+      : type === 'photo' && !hasCoverPhoto
+  const ordre =
+    typeof body.ordre === 'number'
+      ? body.ordre
+      : estCouverture && maxOrdre < 0
+        ? 0
+        : maxOrdre + 1
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (r.client.from('biens_medias') as any)
-    .insert({ ...body, bien_id: id })
+    .insert({
+      ...body,
+      bien_id: id,
+      type,
+      ordre,
+      est_couverture: estCouverture,
+    })
     .select()
     .single()
 

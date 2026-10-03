@@ -48,6 +48,11 @@ export function TiltCard({
   // Position du highlight glossy (en % sur la carte)
   const glossyX = useTransform(x, [-0.5, 0.5], ['0%', '100%'])
   const glossyY = useTransform(y, [-0.5, 0.5], ['0%', '100%'])
+  const glossyBackground = useTransform(
+    [glossyX, glossyY],
+    ([gx, gy]) =>
+      `radial-gradient(circle 240px at ${gx} ${gy}, rgba(255,255,255,0.45), transparent 60%)`,
+  )
 
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
     if (prefersReducedMotion) return
@@ -98,11 +103,7 @@ export function TiltCard({
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 rounded-[inherit] mix-blend-soft-light opacity-0 group-hover:opacity-100 transition-opacity duration-300"
             style={{
-              background: useTransform(
-                [glossyX, glossyY],
-                ([gx, gy]) =>
-                  `radial-gradient(circle 240px at ${gx} ${gy}, rgba(255,255,255,0.45), transparent 60%)`,
-              ),
+              background: glossyBackground,
             }}
           />
         )}

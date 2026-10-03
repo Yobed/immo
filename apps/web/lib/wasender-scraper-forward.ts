@@ -1,4 +1,4 @@
-const FORWARD_TIMEOUT_MS = 15_000
+const FORWARD_TIMEOUT_MS = 5_000
 
 /**
  * Regex identifying property keywords, listing terms, or real-estate vocabulary

@@ -132,7 +132,7 @@ export async function wasenderSendMessage(
   // Research says E.164.
   const cleanTo = to.includes('@') ? to : (to.startsWith('+') ? to : `+${to.replace(/\D/g, '')}`);
 
-  let payload: any = {
+  const payload: any = {
     to: cleanTo,
     text: content
   };

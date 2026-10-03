@@ -50,30 +50,35 @@ async function ensureBucket(): Promise<void> {
   if (bucketEnsured) return
   const admin = createAdminClient()
   const allMimes = Array.from(new Set(Object.values(MEDIA_CONFIG).flatMap(c => c.mimes)))
-  await admin.storage.createBucket(STORAGE_BUCKET, {
+  const opts = {
     public: true,
     fileSizeLimit: 50 * 1024 * 1024,
     allowedMimeTypes: allMimes,
-  }).catch(() => {})
+  }
+  const { error } = await admin.storage.createBucket(STORAGE_BUCKET, opts)
+  if (error) {
+    await admin.storage.updateBucket(STORAGE_BUCKET, opts).catch(() => {})
+  }
   bucketEnsured = true
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id: bienId } = await params
 
-  const { user, supabase } = await getServerUser(request)
+  const { user } = await getServerUser(request)
   if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
 
-  const { data: profile } = await supabase
+  const adminAuth = createAdminClient()
+  const { data: profile } = await adminAuth
     .from('profiles')
     .select('role')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
   const isAdmin = profile?.role === 'admin'
 
   if (!isAdmin) {
-    const { data: bien } = await supabase
-      .from('biens').select('id').eq('id', bienId).eq('proprietaire_id', user.id).single()
+    const { data: bien } = await adminAuth
+      .from('biens').select('id').eq('id', bienId).eq('proprietaire_id', user.id).maybeSingle()
     if (!bien) return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
   }
 
@@ -93,7 +98,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const maxMB = Math.round(cfg.maxBytes / (1024 * 1024))
     return NextResponse.json({ error: `Fichier trop volumineux (max ${maxMB} MB)` }, { status: 413 })
   }
-  const mime = file.type || 'application/octet-stream'
+  const mime = file.type || (type === 'video' ? 'video/mp4' : 'image/jpeg')
   if (!cfg.mimes.includes(mime)) {
     return NextResponse.json({
       error: `Format non supporté pour "${type}": ${mime}. Acceptés: ${cfg.mimes.join(', ')}`,
@@ -157,11 +162,22 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     provider = 'supabase'
   }
 
-  // 3. Insert dans biens_medias (admin client pour bypass RLS)
+  // 3. Insert dans biens_medias (admin client pour bypass RLS + auto-couverture)
   const adminDB = createAdminClient()
+  const { data: existing } = await adminDB
+    .from('biens_medias')
+    .select('id, type, ordre, est_couverture')
+    .eq('bien_id', bienId)
+
+  const existingList = (existing ?? []) as { id: string; type: string; ordre: number | null; est_couverture: boolean | null }[]
+  const hasCoverPhoto = existingList.some((m) => m.type === 'photo' && m.est_couverture)
+  const maxOrdre = existingList.reduce((max, m) => Math.max(max, typeof m.ordre === 'number' ? m.ordre : 0), -1)
+  const estCouverture = type === 'photo' && !hasCoverPhoto
+  const ordre = estCouverture && maxOrdre < 0 ? 0 : maxOrdre + 1
+
   const { data: media, error: mErr } = await adminDB
     .from('biens_medias')
-    .insert({ bien_id: bienId, type, url, ordre: 99 })
+    .insert({ bien_id: bienId, type, url, ordre, est_couverture: estCouverture })
     .select()
     .single()
   if (mErr) {

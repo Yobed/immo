@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { PremiumBienCard } from '@/components/bien/PremiumBienCard'
 
 export default async function FavorisPage() {
@@ -17,7 +18,7 @@ export default async function FavorisPage() {
   const biens = ((favoris ?? []).map((f) => f.biens).filter(Boolean)) as any[]
 
   // Requête séparée pour les photos de couverture
-  let coverMap: Record<string, string> = {}
+  const coverMap: Record<string, string> = {}
   if (biens.length > 0) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: medias } = await (supabase as any)
@@ -43,9 +44,9 @@ export default async function FavorisPage() {
         {biens.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-muted font-sans mb-2">Vous n&apos;avez pas encore de favoris.</p>
-            <a href="/biens" className="text-sm text-primary font-sans hover:underline">
+            <Link href="/biens" className="text-sm text-primary font-sans hover:underline">
               Parcourir les annonces →
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

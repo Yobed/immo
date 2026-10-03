@@ -54,7 +54,7 @@ export default async function MesAnnoncesPage({
   const bienRows = (biens ?? []) as (BienRow & { est_disponible: boolean })[]
 
   // Requête séparée pour les photos — plus fiable que le nested select
-  let coverMap: Record<string, string> = {}
+  const coverMap: Record<string, string> = {}
   if (bienRows.length > 0) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: medias } = await (supabase as any)

@@ -1,4 +1,5 @@
 .vercel
+.vercel.old
 .env*.local
 
 # Playwright

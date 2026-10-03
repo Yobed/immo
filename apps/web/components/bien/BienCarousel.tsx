@@ -168,7 +168,6 @@ export function BienCarousel({ medias, isHero = false, externalFilter }: BienCar
   const availableTypes = Array.from(new Set(medias.map((m) => m.type)))
   const filters: FilterType[] = ['all', ...availableTypes]
 
-  const [isFullscreen, setIsFullscreen] = useState(false)
 
   return (
     <div className={cn("w-full relative", !isHero && "space-y-3", isHero && "h-full")}>
