@@ -84,7 +84,7 @@ export default async function AdminValidationPage() {
           // Jamais « 0 annonce 🎉 » quand la requête a ÉCHOUÉ : le badge du
           // header peut afficher un compte > 0 pendant que la page dit vide —
           // les admins croyaient la file cassée (capture du 23/07).
-          <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-8 text-center">
+          <div className="bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-2xl p-8 text-center">
             <p className="text-sm font-bold mb-1">Erreur de chargement de la file.</p>
             <p className="text-xs">Actualisez la page (tirez vers le bas sur mobile). Si ça persiste, signalez-le.</p>
           </div>
@@ -106,14 +106,14 @@ export default async function AdminValidationPage() {
               })
 
               return (
-                <div key={bien.id} className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] overflow-hidden flex flex-col">
+                <div key={bien.id} className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] hover:border-[var(--accent-luxury)]/40 hover:shadow-lg transition-all overflow-hidden flex flex-col">
                   <div className="aspect-video bg-[var(--surface-hover)] relative">
                     {cover ? (
                       <Image src={cover} alt={bien.titre} fill className="object-cover" sizes="400px" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-[var(--text-subtle)] text-xs">Pas de photo</div>
                     )}
-                    <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border bg-amber-100 text-amber-700 border-amber-200">
+                    <div className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide border bg-amber-500/90 backdrop-blur text-slate-950 border-amber-400/50 shadow-sm">
                       En attente
                     </div>
                     <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur text-white text-[10px] font-bold">
@@ -127,9 +127,9 @@ export default async function AdminValidationPage() {
                       <MapPin className="w-3 h-3" />
                       {bien.commune}{bien.quartier ? ` · ${bien.quartier}` : ''} · {bien.type_bien}
                     </p>
-                    <p className="text-[var(--text)] font-semibold text-sm mb-3">{priceDisplay(bien)}</p>
+                    <p className="text-[var(--accent-luxury)] font-bold text-sm mb-3">{priceDisplay(bien)}</p>
 
-                    <div className="space-y-1 text-xs text-[var(--text-muted)] mb-3">
+                    <div className="space-y-1.5 text-xs text-[var(--text-muted)] mb-3">
                       <div className="flex items-center justify-between gap-1.5 flex-wrap">
                         <p className="flex items-center gap-1.5 min-w-0">
                           <Phone className="w-3 h-3 text-[var(--text-subtle)] shrink-0" />
@@ -141,7 +141,7 @@ export default async function AdminValidationPage() {
                             href={whatsappLink(bien.profiles.phone, `Bonjour ${bien.profiles.full_name || ''}, je vous contacte depuis Gravel Immo concernant votre annonce « ${bien.titre} » soumise pour validation.`) ?? undefined}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded-md transition-colors"
+                            className="inline-flex items-center gap-1 text-[11px] font-black text-white bg-[#25D366] hover:bg-[#20ba5a] px-2.5 py-1 rounded-lg transition-all shadow-sm active:scale-95"
                           >
                             <MessageCircle className="w-3 h-3" /> WhatsApp
                           </a>
@@ -158,7 +158,7 @@ export default async function AdminValidationPage() {
                         <Link
                           href={`/biens/${bien.id}`}
                           target="_blank"
-                          className="flex items-center gap-1 px-3 py-2 bg-[var(--surface-hover)] hover:bg-[var(--surface-hover)] text-[var(--text)] rounded-lg text-xs font-medium transition-colors"
+                          className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 min-h-[36px] bg-[var(--surface)] hover:bg-[var(--surface-hover)] text-[var(--text)] border border-[var(--border)] rounded-xl text-xs font-bold transition-colors"
                         >
                           <Eye className="w-3.5 h-3.5" />
                           Aperçu
@@ -167,7 +167,7 @@ export default async function AdminValidationPage() {
                           <input type="hidden" name="bienId" value={bien.id} />
                           <button
                             type="submit"
-                            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-colors shadow-sm"
+                            className="w-full flex items-center justify-center gap-1.5 min-h-[36px] px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black transition-all shadow-sm active:scale-95"
                           >
                             <Check className="w-3.5 h-3.5" />
                             Approuver

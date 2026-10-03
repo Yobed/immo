@@ -34,25 +34,25 @@ export function InlineVisiteActions({ visiteId, status }: InlineVisiteActionsPro
   }
 
   return (
-    <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-[var(--border)]">
+    <div className="flex items-center gap-2 mt-2.5 pt-2.5 border-t border-[var(--border)]">
       <button
         type="button"
         disabled={isPending}
         onClick={handleApprove}
-        className="flex-1 inline-flex items-center justify-center gap-1 px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-lg text-xs font-bold transition-colors shadow-sm"
+        className="flex-1 min-h-[36px] inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-xl text-xs font-black transition-all shadow-sm"
         title="Valider la visite et notifier le propriétaire et le visiteur sur WhatsApp"
       >
-        {isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+        {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
         <span>{isPending ? 'Validation…' : 'Valider'}</span>
       </button>
 
       <Link
         href={`/admin/suivi/visites/${visiteId}`}
         onClick={(e) => e.stopPropagation()}
-        className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg text-xs font-bold transition-colors"
+        className="min-h-[36px] inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-xl text-xs font-bold transition-colors"
         title="Refuser ou voir tous les détails"
       >
-        <X className="w-3 h-3" />
+        <X className="w-3.5 h-3.5" />
         <span>Refuser</span>
       </Link>
     </div>

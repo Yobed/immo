@@ -57,9 +57,9 @@ function isAgentProspect(p: { source_detail?: string | null; dernier_message?: s
 
 function adminBadge(status: string) {
   const map: Record<string, string> = {
-    pending: 'bg-amber-100 text-amber-700 border-amber-200',
-    approved: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-    rejected: 'bg-red-100 text-red-700 border-red-200',
+    pending: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+    approved: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+    rejected: 'bg-rose-500/15 text-rose-400 border-rose-500/30',
   }
   const labels: Record<string, string> = {
     pending: 'En attente de validation',
@@ -220,7 +220,7 @@ export default async function VisiteDetailPage({ params }: PageProps) {
                   href={whatsappLink(visitorPhone) ?? undefined}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="min-h-[44px] inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-sm font-bold"
+                  className="min-h-[44px] inline-flex items-center gap-2 px-4 py-2.5 bg-[#25D366] hover:bg-[#20ba5a] text-white rounded-xl text-sm font-bold shadow-sm active:scale-95 transition-all"
                 >
                   <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
                 </a>
@@ -304,17 +304,17 @@ export default async function VisiteDetailPage({ params }: PageProps) {
                   href={whatsappLink(ownerPhone) ?? undefined}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="min-h-[44px] inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-sm font-bold"
+                  className="min-h-[44px] inline-flex items-center gap-2 px-4 py-2.5 bg-[#25D366] hover:bg-[#20ba5a] text-white rounded-xl text-sm font-black shadow-sm transition-all active:scale-95"
                 >
                   <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
                 </a>
               )}
             </div>
             {!visite.owner_notified_at && isPending && (
-              <p className="mt-3 text-xs text-amber-600 italic">⚠️ Le propriétaire n'a PAS encore été averti (validation requise).</p>
+              <p className="mt-3 text-xs text-amber-400 font-medium italic">⚠️ Le propriétaire n'a PAS encore été averti (validation requise).</p>
             )}
             {visite.owner_notified_at && (
-              <p className="mt-3 text-xs text-emerald-600 italic">✅ Propriétaire averti le {formatDateTime(visite.owner_notified_at)}</p>
+              <p className="mt-3 text-xs text-emerald-400 font-medium italic">✅ Propriétaire averti le {formatDateTime(visite.owner_notified_at)}</p>
             )}
           </section>
 
@@ -366,13 +366,13 @@ export default async function VisiteDetailPage({ params }: PageProps) {
                 href={`/api/admin/visites/${id}/fiche`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--text)] text-[var(--surface-card)] text-xs font-bold hover:opacity-90 transition-opacity"
+                className="min-h-[40px] inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--text)] text-[var(--surface-card)] text-xs font-black hover:opacity-90 transition-opacity"
               >
                 <FileText className="w-4 h-4" /> Ouvrir &amp; Imprimer le PDF
               </a>
               <a
                 href={`/api/admin/visites/${id}/fiche?download=1`}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] text-xs font-bold text-[var(--text)] hover:bg-[var(--surface-hover)] transition-colors"
+                className="min-h-[40px] inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] text-xs font-bold text-[var(--text)] hover:bg-[var(--surface-hover)] transition-colors"
               >
                 Télécharger le fichier PDF
               </a>
@@ -384,14 +384,14 @@ export default async function VisiteDetailPage({ params }: PageProps) {
             <CrmActionForm action={setVisiteOutcomeAction} className="space-y-3">
                 <input type="hidden" name="visiteId" value={id} />
                 <input type="hidden" name="version" value={visite.version} />
-              <select name="outcome" defaultValue={visite.outcome ?? ''} required className="w-full px-3 py-2 border border-[var(--border)] rounded-lg text-sm bg-[var(--surface)] text-[var(--text)]">
+              <select name="outcome" defaultValue={visite.outcome ?? ''} required className="w-full px-3 py-2 border border-[var(--border)] rounded-xl text-sm bg-[var(--surface)] text-[var(--text)]">
                 <option value="">Résultat de la visite</option><option value="realisee">Visite réalisée</option><option value="annulee">Annulée</option><option value="no_show">Prospect absent</option><option value="non_conclue">Visite sans suite</option>
               </select>
-              <select name="lossReason" defaultValue={visite.loss_reason ?? ''} className="w-full px-3 py-2 border border-[var(--border)] rounded-lg text-sm bg-[var(--surface)] text-[var(--text)]">
+              <select name="lossReason" defaultValue={visite.loss_reason ?? ''} className="w-full px-3 py-2 border border-[var(--border)] rounded-xl text-sm bg-[var(--surface)] text-[var(--text)]">
                   <option value="">Motif si la visite n&apos;a pas abouti</option><option value="prix">Prix</option><option value="bien_indisponible">Bien indisponible</option><option value="proprietaire_injoignable">Propriétaire injoignable</option><option value="prospect_absent">Prospect absent</option><option value="documents_incomplets">Documents incomplets</option><option value="autre">Autre</option>
               </select>
-              <textarea name="outcomeNote" defaultValue={visite.outcome_note ?? ''} rows={3} placeholder="Ce qui s&apos;est passé, prochaine étape…" className="w-full px-3 py-2 border border-[var(--border)] rounded-lg text-sm bg-[var(--surface)] text-[var(--text)] resize-none" />
-              <button type="submit" className="w-full px-4 py-2.5 rounded-xl bg-[var(--text)] text-[var(--surface-card)] text-sm font-bold">Enregistrer le compte rendu</button>
+              <textarea name="outcomeNote" defaultValue={visite.outcome_note ?? ''} rows={3} placeholder="Ce qui s&apos;est passé, prochaine étape…" className="w-full px-3 py-2 border border-[var(--border)] rounded-xl text-sm bg-[var(--surface)] text-[var(--text)] resize-none" />
+              <button type="submit" className="w-full min-h-[40px] px-4 py-2.5 rounded-xl bg-[var(--accent-luxury)] text-[#0b1530] text-sm font-black hover:brightness-110 shadow-sm transition-all active:scale-[0.99]">Enregistrer le compte rendu</button>
             </CrmActionForm>
           </section>
         </div>
@@ -400,8 +400,8 @@ export default async function VisiteDetailPage({ params }: PageProps) {
         <aside className="space-y-6">
           {/* Actions */}
           {isPending ? (
-            <section className="bg-[var(--surface-card)] rounded-2xl border-2 border-amber-300 p-6 sticky top-6">
-              <h2 className="font-bold text-[var(--text)] mb-1">Action requise</h2>
+            <section className="bg-[var(--surface-card)] rounded-2xl border-2 border-amber-500/40 p-6 sticky top-6 shadow-xl">
+              <h2 className="font-black text-amber-400 mb-1 flex items-center gap-2 text-base">Action requise</h2>
               <p className="text-[var(--text-muted)] text-xs mb-4">
                 Le propriétaire et le visiteur attendent votre validation.
               </p>
@@ -412,13 +412,13 @@ export default async function VisiteDetailPage({ params }: PageProps) {
                   name="note"
                   rows={2}
                   placeholder="Note interne (optionnelle)"
-                  className="w-full px-3 py-2 border border-[var(--border)] rounded-lg text-sm focus:outline-none focus:border-slate-400"
+                  className="w-full px-3 py-2 border border-[var(--border)] rounded-xl text-sm bg-[var(--surface)] text-[var(--text)] focus:outline-none focus:border-[var(--accent-luxury)]/60 transition-colors"
                 />
                 <button
                   type="submit"
                   name="action"
                   value="approve"
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold transition-colors"
+                  className="w-full min-h-[44px] flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-black shadow-md hover:shadow-emerald-900/30 transition-all active:scale-[0.98]"
                 >
                   <CheckCircle2 className="w-4 h-4" /> Valider et notifier
                 </button>
@@ -426,7 +426,7 @@ export default async function VisiteDetailPage({ params }: PageProps) {
                   type="submit"
                   name="action"
                   value="reject"
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[var(--surface-card)] hover:bg-red-50 text-red-600 border border-red-200 rounded-xl text-sm font-bold transition-colors"
+                  className="w-full min-h-[44px] flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-xl text-sm font-bold transition-all active:scale-[0.98]"
                 >
                   <XCircle className="w-4 h-4" /> Refuser
                 </button>

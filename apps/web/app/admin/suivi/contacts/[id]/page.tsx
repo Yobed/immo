@@ -45,17 +45,17 @@ function StatusBadge({ status }: { status: ContactRow['admin_validation_status']
   const map = {
     pending: {
       label: 'En attente',
-      cls: 'bg-amber-100 text-amber-700 border-amber-200',
+      cls: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
       Icon: Clock,
     },
     approved: {
       label: 'Approuvée',
-      cls: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+      cls: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
       Icon: CheckCircle2,
     },
     rejected: {
       label: 'Refusée',
-      cls: 'bg-red-100 text-red-700 border-red-200',
+      cls: 'bg-rose-500/15 text-rose-400 border-rose-500/30',
       Icon: XCircle,
     },
   }
@@ -197,10 +197,10 @@ export default async function ContactDetailPage({ params }: PageProps) {
                 <span
                   className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
                     ageH >= 6
-                      ? 'bg-red-100 text-red-700 border-red-200'
+                      ? 'bg-rose-500/15 text-rose-400 border-rose-500/30'
                       : ageH >= 2
-                        ? 'bg-amber-100 text-amber-700 border-amber-200'
-                        : 'bg-emerald-100 text-emerald-700 border-emerald-200'
+                        ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+                        : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
                   }`}
                 >
                   <Clock className="w-3.5 h-3.5" />
@@ -232,7 +232,7 @@ export default async function ContactDetailPage({ params }: PageProps) {
                       <a
                         href={visitorWa}
                         target="_blank" rel="noopener noreferrer"
-                        className="ml-0 sm:ml-auto min-h-[44px] inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold rounded-lg transition"
+                        className="ml-0 sm:ml-auto min-h-[44px] inline-flex items-center gap-2 px-4 py-2.5 bg-[#25D366] hover:bg-[#20ba5a] text-white text-sm font-black rounded-xl shadow-sm transition-all active:scale-95"
                       >
                         <MessageCircle className="w-3.5 h-3.5" />
                         WhatsApp
@@ -296,7 +296,7 @@ export default async function ContactDetailPage({ params }: PageProps) {
                     <p className="text-[10px] font-bold text-[var(--text-subtle)] uppercase">Nature &amp; Statut</p>
                     <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
-                        prospect.contact_type === 'agent' ? 'bg-purple-100 text-purple-900 border-purple-200' : 'bg-emerald-100 text-emerald-900 border-emerald-200'
+                        prospect.contact_type === 'agent' ? 'bg-purple-500/15 text-purple-300 border-purple-500/30' : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
                       }`}>
                         {prospect.contact_type === 'agent' ? 'Agent démarcheur' : 'Client direct'}
                       </span>
@@ -322,14 +322,14 @@ export default async function ContactDetailPage({ params }: PageProps) {
             <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-5">
               <h2 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-subtle)] mb-3 flex items-center gap-2">
                 <Home className="w-3.5 h-3.5" />
-                Propriétaire {isFlash && <span className="text-orange-500">(scrapé WhatsApp)</span>}
+                Propriétaire {isFlash && <span className="text-amber-400">(scrapé WhatsApp)</span>}
               </h2>
               {ownerPhone ? (
                 <div className="space-y-3">
                   {isFlash && (
-                    <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 flex items-start gap-2">
-                      <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                      <p className="text-xs text-amber-800 leading-relaxed">
+                    <div className="rounded-xl bg-amber-500/10 border border-amber-500/30 p-3 flex items-start gap-2">
+                      <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                      <p className="text-xs text-amber-300 leading-relaxed font-medium">
                         Ce propriétaire n&apos;est pas inscrit sur la plateforme. Contactez-le directement
                         pour confirmer la disponibilité et organiser une visite.
                       </p>
@@ -337,7 +337,7 @@ export default async function ContactDetailPage({ params }: PageProps) {
                   )}
                   {ownerName && <p className="text-lg font-bold text-[var(--text)]">{ownerName}</p>}
                   <div className="flex items-center gap-2 text-sm">
-                    <Phone className={`w-4 h-4 ${isFlash ? 'text-orange-600' : 'text-emerald-600'}`} />
+                    <Phone className={`w-4 h-4 ${isFlash ? 'text-amber-400' : 'text-emerald-400'}`} />
                     <a href={`tel:${ownerPhone}`} className="text-[var(--text)] font-mono hover:underline">
                       {ownerPhone}
                     </a>
@@ -345,9 +345,7 @@ export default async function ContactDetailPage({ params }: PageProps) {
                       <a
                         href={ownerWa}
                         target="_blank" rel="noopener noreferrer"
-                        className={`ml-0 sm:ml-auto min-h-[44px] inline-flex items-center gap-2 px-4 py-2.5 text-white text-sm font-bold rounded-lg transition ${
-                          isFlash ? 'bg-orange-600 hover:bg-orange-500' : 'bg-emerald-600 hover:bg-emerald-500'
-                        }`}
+                        className="ml-0 sm:ml-auto min-h-[44px] inline-flex items-center gap-2 px-4 py-2.5 bg-[#25D366] hover:bg-[#20ba5a] text-white text-sm font-black rounded-xl shadow-sm transition-all active:scale-95"
                       >
                         <MessageCircle className="w-3.5 h-3.5" />
                         WhatsApp proprio
@@ -406,14 +404,14 @@ export default async function ContactDetailPage({ params }: PageProps) {
                     rows={2}
                     maxLength={500}
                     placeholder="Note interne (optionnelle)"
-                    className="w-full px-3 py-2 text-sm border border-[var(--border)] rounded-lg bg-[var(--surface-card)] text-[var(--text)] placeholder:text-[var(--text-subtle)] focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 resize-none"
+                    className="w-full px-3 py-2 text-sm border border-[var(--border)] rounded-xl bg-[var(--surface)] text-[var(--text)] placeholder:text-[var(--text-subtle)] focus:outline-none focus:border-[var(--accent-luxury)]/60 resize-none transition-colors"
                   />
                   <div className="flex gap-2">
                     <button
                       type="submit"
                       name="action"
                       value="approve"
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-bold transition"
+                      className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-black shadow-md transition-all active:scale-[0.98]"
                     >
                       <CheckCircle2 className="w-4 h-4" />
                       Approuver
@@ -422,7 +420,7 @@ export default async function ContactDetailPage({ params }: PageProps) {
                       type="submit"
                       name="action"
                       value="reject"
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-lg text-sm font-bold transition"
+                      className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5 py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-xl text-sm font-bold transition-all active:scale-[0.98]"
                     >
                       <XCircle className="w-4 h-4" />
                       Refuser

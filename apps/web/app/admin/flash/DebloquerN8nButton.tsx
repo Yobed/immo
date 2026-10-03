@@ -38,7 +38,7 @@ export function DebloquerN8nButton() {
         type="button"
         disabled={loading}
         onClick={handleUnblock}
-        className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition-all shadow-sm disabled:opacity-50"
+        className="min-h-[40px] flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-black transition-all shadow-sm disabled:opacity-50 active:scale-95"
         title="Purger les exécutions zombies (> 5 min) qui bloquent la file de scraping WhatsApp"
       >
         <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />

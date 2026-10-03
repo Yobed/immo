@@ -52,12 +52,12 @@ export function WhatsAppContactButton({
 
   const baseCls =
     variant === 'compact'
-      ? 'inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm'
-      : 'inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-sm'
+      ? 'min-h-[36px] inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all shadow-sm active:scale-95'
+      : 'min-h-[40px] inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all shadow-sm active:scale-95'
 
   const toneCls = justContacted
-    ? 'bg-blue-600 hover:bg-blue-700 text-white'
-    : 'bg-emerald-600 hover:bg-emerald-700 text-white hover:shadow-emerald-600/20'
+    ? 'bg-sky-600 hover:bg-sky-500 text-white shadow-sky-600/20'
+    : 'bg-[#25D366] hover:bg-[#20ba5a] text-white shadow-[#25D366]/20'
 
   return (
     <button

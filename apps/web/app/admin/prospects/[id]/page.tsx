@@ -29,16 +29,16 @@ type WhatsAppMetadata = {
 }
 
 const STATUT_META: Record<Statut, { label: string; cls: string }> = {
-  nouveau: { label: 'Nouveau', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-amber-300' },
-  contacte: { label: 'Contacté', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-blue-300' },
-  visite_planifiee: { label: 'Visite planifiée', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-purple-300' },
-  visite_realisee: { label: 'Visite réalisée', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-indigo-300' },
-  relance: { label: 'Relance', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-orange-300' },
-  gagne: { label: 'Gagné', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-emerald-300' },
-  perdu: { label: 'Perdu', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-slate-300' },
-  en_cours: { label: 'En cours (historique)', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-blue-300' },
-  rdv: { label: 'Rendez-vous (historique)', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-purple-300' },
-  traite: { label: 'Traité — résultat à qualifier', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-slate-300' },
+  nouveau: { label: 'Nouveau', cls: 'bg-amber-500/15 text-amber-400 border-amber-500/30' },
+  contacte: { label: 'Contacté', cls: 'bg-sky-500/15 text-sky-400 border-sky-500/30' },
+  visite_planifiee: { label: 'Visite planifiée', cls: 'bg-purple-500/15 text-purple-400 border-purple-500/30' },
+  visite_realisee: { label: 'Visite réalisée', cls: 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30' },
+  relance: { label: 'Relance', cls: 'bg-orange-500/15 text-orange-400 border-orange-500/30' },
+  gagne: { label: 'Gagné', cls: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' },
+  perdu: { label: 'Perdu', cls: 'bg-rose-500/15 text-rose-400 border-rose-500/30' },
+  en_cours: { label: 'En cours (historique)', cls: 'bg-sky-500/15 text-sky-400 border-sky-500/30' },
+  rdv: { label: 'Rendez-vous (historique)', cls: 'bg-purple-500/15 text-purple-400 border-purple-500/30' },
+  traite: { label: 'Traité — résultat à qualifier', cls: 'bg-slate-500/15 text-slate-300 border-slate-500/30' },
 }
 const FLOW: Statut[] = ['nouveau', 'contacte', 'visite_planifiee', 'visite_realisee', 'relance', 'gagne', 'perdu']
 
@@ -187,8 +187,8 @@ export default async function ProspectDetailPage({ params }: PageProps) {
               <span
                 className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
                   currentType === 'agent'
-                    ? 'bg-purple-100 text-purple-900 border-purple-300 dark:bg-purple-950 dark:text-purple-200 dark:border-purple-800'
-                    : 'bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-800'
+                    ? 'bg-purple-500/15 text-purple-300 border-purple-500/30'
+                    : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
                 }`}
               >
                 {currentType === 'agent' ? <Briefcase className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
@@ -225,7 +225,7 @@ export default async function ProspectDetailPage({ params }: PageProps) {
               href={`/api/admin/prospects/${p.id}/fiche-visite?typeContact=${currentType}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[var(--text)] hover:opacity-90 text-[var(--surface-card)] rounded-xl text-sm font-bold shadow-sm transition-opacity"
+              className="min-h-[40px] inline-flex items-center gap-1.5 px-3.5 py-2 bg-[var(--text)] hover:opacity-90 text-[var(--surface-card)] rounded-xl text-sm font-black shadow-sm transition-opacity"
             >
               <FileText className="w-4 h-4" /> Bon de visite PDF {confirmedVisites.length > 0 ? `(${confirmedVisites.length} confirmé${confirmedVisites.length > 1 ? 's' : ''})` : ''}
             </a>
@@ -409,7 +409,7 @@ export default async function ProspectDetailPage({ params }: PageProps) {
                     <input type="hidden" name="version" value={p.version} />
                     <input type="hidden" name="statut" value={s} />
                     <button type="submit"
-                      className={`w-full px-2 py-2 rounded-lg text-xs font-bold border transition-colors ${
+                      className={`min-h-[36px] w-full px-2 py-2 rounded-xl text-xs font-bold border transition-all active:scale-95 ${
                         st === s ? STATUT_META[s].cls : 'bg-[var(--surface-hover)] text-[var(--text-muted)] border-transparent hover:text-[var(--text)]'
                       }`}>
                       {STATUT_META[s].label}
@@ -428,13 +428,13 @@ export default async function ProspectDetailPage({ params }: PageProps) {
                 <input type="hidden" name="id" value={p.id} />
                 <input type="hidden" name="version" value={p.version} />
                 <select name="assigned_to" defaultValue={p.assigned_to ?? ''}
-                  className="flex-1 px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)]">
+                  className="flex-1 min-h-[36px] px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)]">
                   <option value="">— Non assigné —</option>
                   {admins.map((a) => <option key={a.id} value={a.id}>{a.full_name || a.id.slice(0, 8)}</option>)}
                 </select>
-                <button type="submit" className="px-3 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold">OK</button>
+                <button type="submit" className="min-h-[36px] px-4 py-2 bg-[var(--accent-luxury)] hover:brightness-110 text-[#0b1530] rounded-xl text-xs font-black shadow-sm transition-all active:scale-95">OK</button>
               </CrmActionForm>
-              {assignedName && <p className="text-[11px] text-emerald-700 mt-2">Suivi par <strong>{assignedName}</strong></p>}
+              {assignedName && <p className="text-[11px] text-emerald-400 font-medium mt-2">Suivi par <strong>{assignedName}</strong></p>}
             </section>
 
             {/* Relance */}
@@ -446,8 +446,8 @@ export default async function ProspectDetailPage({ params }: PageProps) {
                 <input type="hidden" name="id" value={p.id} />
                 <input type="hidden" name="version" value={p.version} />
                 <input type="date" name="relance_le" defaultValue={p.relance_le ?? ''}
-                  className="flex-1 px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)]" />
-                <button type="submit" className="px-3 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold">OK</button>
+                  className="flex-1 min-h-[36px] px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)]" />
+                <button type="submit" className="min-h-[36px] px-4 py-2 bg-[var(--accent-luxury)] hover:brightness-110 text-[#0b1530] rounded-xl text-xs font-black shadow-sm transition-all active:scale-95">OK</button>
               </CrmActionForm>
             </section>
 
@@ -461,8 +461,8 @@ export default async function ProspectDetailPage({ params }: PageProps) {
                 <input type="hidden" name="version" value={p.version} />
                 <textarea name="note" rows={4} defaultValue={p.note ?? ''} maxLength={500}
                   placeholder="Historique des échanges, prochaines étapes…"
-                  className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] resize-none" />
-                <button type="submit" className="w-full px-3 py-2 bg-[var(--accent-luxury)] text-[var(--on-accent)] rounded-lg text-xs font-bold">
+                  className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)] resize-none focus:outline-none focus:border-[var(--accent-luxury)]/60 transition-colors" />
+                <button type="submit" className="w-full min-h-[40px] px-3 py-2 bg-[var(--accent-luxury)] hover:brightness-110 text-[#0b1530] rounded-xl text-xs font-black shadow-sm transition-all active:scale-[0.99]">
                   Enregistrer la note
                 </button>
               </CrmActionForm>
@@ -474,7 +474,7 @@ export default async function ProspectDetailPage({ params }: PageProps) {
               <CrmActionForm action={setProspectOutcomeAction} className="space-y-2">
                 <input type="hidden" name="id" value={p.id} />
                 <input type="hidden" name="version" value={p.version} />
-                <select name="perte_motif" defaultValue={p.perte_motif ?? ''} className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)]">
+                <select name="perte_motif" defaultValue={p.perte_motif ?? ''} className="w-full min-h-[36px] px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)]">
                   <option value="">Motif de perte (si applicable)</option>
                   <option value="prix">Prix trop élevé</option>
                   <option value="bien_indisponible">Bien indisponible</option>
@@ -483,11 +483,11 @@ export default async function ProspectDetailPage({ params }: PageProps) {
                   <option value="documents_incomplets">Documents incomplets</option>
                   <option value="autre">Autre</option>
                 </select>
-                <textarea name="loss_note" defaultValue={p.loss_note ?? ''} rows={2} maxLength={2000} placeholder="Précision obligatoire si le motif est « Autre »" className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] resize-none" />
-                <input name="prochaine_action" defaultValue={p.prochaine_action ?? ''} placeholder="Prochaine action à effectuer" className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)]" />
+                <textarea name="loss_note" defaultValue={p.loss_note ?? ''} rows={2} maxLength={2000} placeholder="Précision obligatoire si le motif est « Autre »" className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)] resize-none focus:outline-none focus:border-[var(--accent-luxury)]/60 transition-colors" />
+                <input name="prochaine_action" defaultValue={p.prochaine_action ?? ''} placeholder="Prochaine action à effectuer" className="w-full min-h-[36px] px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)]" />
                 <p className="text-[11px] text-[var(--text-muted)]">Heure d’Abidjan (UTC)</p>
-                <input type="datetime-local" name="prochaine_action_at" defaultValue={p.prochaine_action_at ? new Date(p.prochaine_action_at).toISOString().slice(0, 16) : ''} className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)]" />
-                <button type="submit" className="w-full px-3 py-2 bg-[var(--text)] text-[var(--surface-card)] rounded-lg text-xs font-bold">Enregistrer le suivi</button>
+                <input type="datetime-local" name="prochaine_action_at" defaultValue={p.prochaine_action_at ? new Date(p.prochaine_action_at).toISOString().slice(0, 16) : ''} className="w-full min-h-[36px] px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)]" />
+                <button type="submit" className="w-full min-h-[40px] px-3 py-2 bg-[var(--text)] text-[var(--surface-card)] rounded-xl text-xs font-black shadow-sm hover:opacity-90 transition-opacity active:scale-[0.99]">Enregistrer le suivi</button>
               </CrmActionForm>
             </section>
           </aside>

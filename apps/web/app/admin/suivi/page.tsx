@@ -8,6 +8,7 @@ import {
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { formatFCFA } from '@/lib/format'
+import { whatsappLink } from '@/lib/whatsapp'
 import { InlineSuiviActions } from '@/components/admin/InlineSuiviActions'
 
 export const runtime = 'nodejs'
@@ -83,16 +84,16 @@ interface ContactRow {
 }
 
 const STATUS_META: Record<AdminStatus, { label: string; cls: string; col: string; icon: typeof Hourglass }> = {
-  pending:  { label: 'En attente', cls: 'bg-amber-100 text-amber-700 border-amber-200',     col: 'border-t-amber-400',   icon: Hourglass },
-  approved: { label: 'Validées',   cls: 'bg-emerald-100 text-emerald-700 border-emerald-200', col: 'border-t-emerald-400', icon: CheckCircle2 },
-  rejected: { label: 'Refusées',   cls: 'bg-red-100 text-red-700 border-red-200',           col: 'border-t-red-400',     icon: XCircle },
+  pending:  { label: 'En attente', cls: 'bg-amber-500/15 text-amber-400 border-amber-500/30',     col: 'border-t-amber-500',   icon: Hourglass },
+  approved: { label: 'Validées',   cls: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30', col: 'border-t-emerald-500', icon: CheckCircle2 },
+  rejected: { label: 'Refusées',   cls: 'bg-rose-500/15 text-rose-400 border-rose-500/30',         col: 'border-t-rose-500',     icon: XCircle },
 }
 
 function adminBadge(status: AdminStatus) {
   const s = STATUS_META[status]
   const Icon = s.icon
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${s.cls}`}>
+    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${s.cls}`}>
       <Icon className="w-3 h-3" />
       {s.label}
     </span>
@@ -107,14 +108,14 @@ function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
 }
 
-/** Ancienneté colorée d'une demande en attente (vert < 2 h, ambre < 6 h, rouge au-delà). */
+/** Ancienneté colorée d'une demande en attente (vert < 2 h, ambre < 6 h, rose au-delà). */
 function ageLabel(iso: string): { label: string; cls: string } {
   const h = Math.floor((Date.now() - new Date(iso).getTime()) / 3_600_000)
-  if (h < 1) return { label: "à l'instant", cls: 'bg-emerald-100 text-emerald-700' }
-  if (h < 2) return { label: `${h} h`, cls: 'bg-emerald-100 text-emerald-700' }
-  if (h < 6) return { label: `${h} h`, cls: 'bg-amber-100 text-amber-700' }
+  if (h < 1) return { label: "à l'instant", cls: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' }
+  if (h < 2) return { label: `${h} h`, cls: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' }
+  if (h < 6) return { label: `${h} h`, cls: 'bg-amber-500/15 text-amber-400 border border-amber-500/30' }
   const d = Math.floor(h / 24)
-  return { label: d >= 1 ? `${d} j` : `${h} h`, cls: 'bg-red-100 text-red-700' }
+  return { label: d >= 1 ? `${d} j` : `${h} h`, cls: 'bg-rose-500/15 text-rose-400 border border-rose-500/30' }
 }
 
 function applySearch<T extends { biens: { titre: string; commune: string | null } | null }>(
@@ -417,16 +418,16 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
 
 function MetricCard({ label, value, hint, tone }: { label: string; value: number | string; hint: string; tone: 'amber' | 'emerald' | 'red' | 'blue' }) {
   const tones = {
-    amber: 'border-amber-200 bg-amber-50 text-amber-800',
-    emerald: 'border-emerald-200 bg-emerald-50 text-emerald-800',
-    red: 'border-red-200 bg-red-50 text-red-800',
-    blue: 'border-blue-200 bg-blue-50 text-blue-800',
+    amber: 'border-l-amber-500 border-amber-500/30 text-amber-400',
+    emerald: 'border-l-emerald-500 border-emerald-500/30 text-emerald-400',
+    red: 'border-l-rose-500 border-rose-500/30 text-rose-400',
+    blue: 'border-l-sky-500 border-sky-500/30 text-sky-400',
   }
   return (
-    <div className={`rounded-2xl border p-4 ${tones[tone]}`}>
-      <p className="text-[10px] font-bold uppercase tracking-wider opacity-75">{label}</p>
-      <p className="mt-1 text-2xl font-black tabular-nums">{value}</p>
-      <p className="mt-1 text-[11px] opacity-75">{hint}</p>
+    <div className={`rounded-2xl border border-[var(--border)] border-l-4 bg-[var(--surface-card)] p-4 shadow-sm ${tones[tone]}`}>
+      <p className="text-[10px] font-bold uppercase tracking-wider">{label}</p>
+      <p className="mt-1 text-2xl font-black text-[var(--text)] tabular-nums">{value}</p>
+      <p className="mt-1 text-[11px] text-[var(--text-muted)]">{hint}</p>
     </div>
   )
 }
@@ -523,7 +524,7 @@ function ContactCard({ c, compact = false }: { c: ContactRow; compact?: boolean 
   const pending = c.admin_validation_status === 'pending'
   const age = ageLabel(c.created_at)
   return (
-    <div className="bg-[var(--surface-card)] rounded-xl border border-[var(--border)] hover:border-slate-300 hover:shadow-md transition-all p-3 flex flex-col justify-between">
+    <div className="bg-[var(--surface-card)] rounded-xl border border-[var(--border)] hover:border-[var(--accent-luxury)]/40 hover:shadow-lg transition-all p-3.5 flex flex-col justify-between">
       <div>
         <Link href={`/admin/suivi/contacts/${c.id}`} className="group block">
           <div className="flex items-start justify-between gap-2">
@@ -538,22 +539,36 @@ function ContactCard({ c, compact = false }: { c: ContactRow; compact?: boolean 
             <div className="flex flex-col items-end gap-1 shrink-0">
               {!compact && adminBadge(c.admin_validation_status)}
               {pending && (
-                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${age.cls}`}>{age.label}</span>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${age.cls}`}>{age.label}</span>
               )}
             </div>
           </div>
 
-          <div className="space-y-0.5 text-xs text-[var(--text-muted)] mt-2">
+          <div className="space-y-1 text-xs text-[var(--text-muted)] mt-2.5">
             <p className="flex items-center gap-1.5">
               <User className="w-3 h-3 text-[var(--text-subtle)]" />
               <span className="font-semibold text-[var(--text)] truncate">{c.visitor_name || 'Visiteur'}</span>
             </p>
-            <p className="flex items-center gap-1.5">
-              <Phone className="w-3 h-3 text-[var(--text-subtle)]" />
-              <span className="truncate">{c.visitor_phone || '—'}</span>
-            </p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="flex items-center gap-1.5 min-w-0">
+                <Phone className="w-3 h-3 text-[var(--text-subtle)] shrink-0" />
+                <span className="truncate font-mono text-[11px]">{c.visitor_phone || '—'}</span>
+              </p>
+              {c.visitor_phone && c.visitor_phone !== '—' && (
+                <a
+                  href={whatsappLink(c.visitor_phone) ?? '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#25D366] hover:bg-[#20ba5a] text-white text-[11px] font-black shadow-sm active:scale-95 transition-all shrink-0"
+                  title="Contacter le visiteur sur WhatsApp"
+                >
+                  <MessageCircle className="w-3 h-3" /> WhatsApp
+                </a>
+              )}
+            </div>
             {c.reason && (
-              <p className="flex items-start gap-1.5 line-clamp-2">
+              <p className="flex items-start gap-1.5 line-clamp-2 pt-0.5">
                 <MessageCircle className="w-3 h-3 text-[var(--text-subtle)] mt-0.5 shrink-0" />
                 <span className="line-clamp-2">{c.reason}</span>
               </p>
@@ -590,7 +605,7 @@ function VisiteCard({ v, compact = false }: { v: VisiteRow; compact?: boolean })
   const visitorName = v.locataire?.full_name || v.client_name || 'Visiteur'
   const visitorPhone = v.locataire?.phone || v.client_phone || '—'
   return (
-    <div className="bg-[var(--surface-card)] rounded-xl border border-[var(--border)] hover:border-slate-300 hover:shadow-md transition-all p-3 flex flex-col justify-between">
+    <div className="bg-[var(--surface-card)] rounded-xl border border-[var(--border)] hover:border-[var(--accent-luxury)]/40 hover:shadow-lg transition-all p-3.5 flex flex-col justify-between">
       <div>
         <Link href={`/admin/suivi/visites/${v.id}`} className="group block">
           <div className="flex items-start justify-between gap-2">
@@ -601,22 +616,36 @@ function VisiteCard({ v, compact = false }: { v: VisiteRow; compact?: boolean })
               <p className="text-[var(--text-muted)] text-xs flex items-center gap-1 mt-0.5">
                 <MapPin className="w-3 h-3" />
                 {v.biens?.commune || '—'}
-                {v.source === 'whatsapp' && <span className="ml-1 text-emerald-600 font-bold">· WA</span>}
+                {v.source === 'whatsapp' && <span className="ml-1 text-emerald-400 font-bold">· WA</span>}
               </p>
             </div>
             {!compact && adminBadge(v.admin_validation_status)}
           </div>
 
-          <div className="space-y-0.5 text-xs text-[var(--text-muted)] mt-2">
+          <div className="space-y-1 text-xs text-[var(--text-muted)] mt-2.5">
             <p className="flex items-center gap-1.5">
               <User className="w-3 h-3 text-[var(--text-subtle)]" />
               <span className="font-semibold text-[var(--text)] truncate">{visitorName}</span>
             </p>
-            <p className="flex items-center gap-1.5">
-              <Phone className="w-3 h-3 text-[var(--text-subtle)]" />
-              <span className="truncate">{visitorPhone}</span>
-            </p>
-            <p className="flex items-center gap-1.5">
+            <div className="flex items-center justify-between gap-2">
+              <p className="flex items-center gap-1.5 min-w-0">
+                <Phone className="w-3 h-3 text-[var(--text-subtle)] shrink-0" />
+                <span className="truncate font-mono text-[11px]">{visitorPhone}</span>
+              </p>
+              {visitorPhone && visitorPhone !== '—' && (
+                <a
+                  href={whatsappLink(visitorPhone) ?? '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#25D366] hover:bg-[#20ba5a] text-white text-[11px] font-black shadow-sm active:scale-95 transition-all shrink-0"
+                  title="Contacter le visiteur sur WhatsApp"
+                >
+                  <MessageCircle className="w-3 h-3" /> WhatsApp
+                </a>
+              )}
+            </div>
+            <p className="flex items-center gap-1.5 pt-0.5">
               <Calendar className="w-3 h-3 text-[var(--text-subtle)]" />
               <span className="font-medium text-[var(--text)]">{formatDate(v.date_souhaitee)}</span>
               {v.heure_debut && v.heure_fin && (
@@ -650,7 +679,7 @@ function VisiteCard({ v, compact = false }: { v: VisiteRow; compact?: boolean })
 
 function ReservationCard({ r, compact = false }: { r: ReservationRow; compact?: boolean }) {
   return (
-    <div className="bg-[var(--surface-card)] rounded-xl border border-[var(--border)] hover:border-slate-300 hover:shadow-md transition-all p-3 flex flex-col justify-between">
+    <div className="bg-[var(--surface-card)] rounded-xl border border-[var(--border)] hover:border-[var(--accent-luxury)]/40 hover:shadow-lg transition-all p-3.5 flex flex-col justify-between">
       <div>
         <Link href={`/admin/suivi/reservations/${r.id}`} className="group block">
           <div className="flex items-start justify-between gap-2">
@@ -664,20 +693,34 @@ function ReservationCard({ r, compact = false }: { r: ReservationRow; compact?: 
             {!compact && adminBadge(r.admin_validation_status)}
           </div>
 
-          <div className="space-y-0.5 text-xs text-[var(--text-muted)] mt-2">
+          <div className="space-y-1 text-xs text-[var(--text-muted)] mt-2.5">
             <p className="flex items-center gap-1.5">
               <User className="w-3 h-3 text-[var(--text-subtle)]" />
               <span className="font-semibold text-[var(--text)] truncate">{r.locataire?.full_name || 'Visiteur'}</span>
             </p>
-            <p className="flex items-center gap-1.5">
-              <Phone className="w-3 h-3 text-[var(--text-subtle)]" />
-              <span className="truncate">{r.locataire?.phone || '—'}</span>
-            </p>
-            <p className="flex items-center gap-1.5">
+            <div className="flex items-center justify-between gap-2">
+              <p className="flex items-center gap-1.5 min-w-0">
+                <Phone className="w-3 h-3 text-[var(--text-subtle)] shrink-0" />
+                <span className="truncate font-mono text-[11px]">{r.locataire?.phone || '—'}</span>
+              </p>
+              {r.locataire?.phone && r.locataire.phone !== '—' && (
+                <a
+                  href={whatsappLink(r.locataire.phone) ?? '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#25D366] hover:bg-[#20ba5a] text-white text-[11px] font-black shadow-sm active:scale-95 transition-all shrink-0"
+                  title="Contacter le locataire sur WhatsApp"
+                >
+                  <MessageCircle className="w-3 h-3" /> WhatsApp
+                </a>
+              )}
+            </div>
+            <p className="flex items-center gap-1.5 pt-0.5">
               <Calendar className="w-3 h-3 text-[var(--text-subtle)]" />
               {formatDate(r.date_debut)} → {formatDate(r.date_fin)}
             </p>
-            <p className="font-bold text-[var(--text)] text-sm pt-1">
+            <p className="font-bold text-[var(--accent-luxury)] text-sm pt-1">
               {formatFCFA(r.montant_total_fcfa ?? 0)}
             </p>
           </div>

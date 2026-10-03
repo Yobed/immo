@@ -64,16 +64,16 @@ interface PageProps {
 }
 
 const STATUT_META: Record<Statut, { label: string; hint: string; cls: string; dot: string; col: string }> = {
-  nouveau: { label: 'Nouveau', hint: 'À contacter', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-amber-300', dot: 'bg-amber-500', col: 'border-t-amber-400' },
-  contacte: { label: 'Contacté', hint: 'Échange en cours', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-blue-300', dot: 'bg-blue-500', col: 'border-t-blue-400' },
-  visite_planifiee: { label: 'Visite planifiée', hint: 'Préparer le rendez-vous', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-purple-300', dot: 'bg-purple-500', col: 'border-t-purple-400' },
-  visite_realisee: { label: 'Visite réalisée', hint: 'Recueillir le retour', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-indigo-300', dot: 'bg-indigo-500', col: 'border-t-indigo-400' },
-  relance: { label: 'Relance', hint: 'Prochaine action', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-orange-300', dot: 'bg-orange-500', col: 'border-t-orange-400' },
-  gagne: { label: 'Gagné', hint: 'Dossier conclu', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-emerald-300', dot: 'bg-emerald-500', col: 'border-t-emerald-400' },
-  perdu: { label: 'Perdu', hint: 'Motif à analyser', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-slate-300', dot: 'bg-slate-500', col: 'border-t-slate-400' },
-  en_cours: { label: 'Contacté', hint: 'Échange en cours', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-blue-300', dot: 'bg-blue-500', col: 'border-t-blue-400' },
-  rdv: { label: 'Visite planifiée', hint: 'Préparer le rendez-vous', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-purple-300', dot: 'bg-purple-500', col: 'border-t-purple-400' },
-  traite: { label: 'À qualifier', hint: 'Ancien statut à reclasser', cls: 'bg-[var(--surface-hover)] text-[var(--text)] border-slate-300', dot: 'bg-slate-400', col: 'border-t-slate-300' },
+  nouveau: { label: 'Nouveau', hint: 'À contacter', cls: 'bg-amber-500/15 text-amber-400 border-amber-500/30', dot: 'bg-amber-400', col: 'border-t-amber-400' },
+  contacte: { label: 'Contacté', hint: 'Échange en cours', cls: 'bg-sky-500/15 text-sky-400 border-sky-500/30', dot: 'bg-sky-400', col: 'border-t-sky-400' },
+  visite_planifiee: { label: 'Visite planifiée', hint: 'Préparer le rendez-vous', cls: 'bg-purple-500/15 text-purple-400 border-purple-500/30', dot: 'bg-purple-400', col: 'border-t-purple-400' },
+  visite_realisee: { label: 'Visite réalisée', hint: 'Recueillir le retour', cls: 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30', dot: 'bg-indigo-400', col: 'border-t-indigo-400' },
+  relance: { label: 'Relance', hint: 'Prochaine action', cls: 'bg-orange-500/15 text-orange-400 border-orange-500/30', dot: 'bg-orange-400', col: 'border-t-orange-400' },
+  gagne: { label: 'Gagné', hint: 'Dossier conclu', cls: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30', dot: 'bg-emerald-400', col: 'border-t-emerald-400' },
+  perdu: { label: 'Perdu', hint: 'Motif à analyser', cls: 'bg-rose-500/15 text-rose-400 border-rose-500/30', dot: 'bg-rose-400', col: 'border-t-rose-400' },
+  en_cours: { label: 'Contacté', hint: 'Échange en cours', cls: 'bg-sky-500/15 text-sky-400 border-sky-500/30', dot: 'bg-sky-400', col: 'border-t-sky-400' },
+  rdv: { label: 'Visite planifiée', hint: 'Préparer le rendez-vous', cls: 'bg-purple-500/15 text-purple-400 border-purple-500/30', dot: 'bg-purple-400', col: 'border-t-purple-400' },
+  traite: { label: 'À qualifier', hint: 'Ancien statut à reclasser', cls: 'bg-slate-500/15 text-slate-300 border-slate-500/30', dot: 'bg-slate-400', col: 'border-t-slate-400' },
 }
 const KANBAN_COLS: Statut[] = ['nouveau', 'contacte', 'visite_planifiee', 'visite_realisee', 'relance', 'gagne', 'perdu', 'traite']
 const NEXT: Partial<Record<Statut, Statut>> = { nouveau: 'contacte', contacte: 'visite_planifiee', visite_planifiee: 'visite_realisee', visite_realisee: 'relance', relance: 'gagne' }
@@ -172,13 +172,13 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
             href="/api/admin/fiche-visite"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-[var(--text)] hover:opacity-90 text-[var(--surface-card)] rounded-xl text-sm font-bold shadow-sm transition-opacity"
+            className="min-h-[40px] inline-flex items-center gap-1.5 px-4 py-2 bg-[var(--text)] hover:opacity-90 text-[var(--surface-card)] rounded-xl text-sm font-black shadow-sm transition-opacity"
           >
             <FileText className="w-4 h-4" /> Fiche de visite (PDF)
           </a>
           <a
             href="/api/admin/prospects/export"
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold"
+            className="min-h-[40px] inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-black shadow-sm transition-colors"
           >
             <Download className="w-4 h-4" /> Exporter CSV
           </a>
@@ -356,7 +356,7 @@ function KanbanCard({ r, assignedName }: { r: ProspectRow; assignedName?: string
       <Link href={`/admin/prospects/${r.id}`} className="min-w-0">
         <div className="flex items-center gap-1.5 flex-wrap">
           <p className="font-bold text-[var(--text)] text-sm truncate hover:text-[var(--accent-luxury)]">{r.nom || 'Prospect'}</p>
-          <span className={`px-1.5 py-0.2 rounded text-[9px] font-bold border ${isAgent ? 'bg-purple-100 text-purple-900 border-purple-300' : 'bg-emerald-100 text-emerald-900 border-emerald-300'}`}>
+          <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-bold border ${isAgent ? 'bg-purple-500/15 text-purple-300 border-purple-500/30' : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'}`}>
             {isAgent ? 'Agent' : 'Client'}
           </span>
         </div>
@@ -365,9 +365,9 @@ function KanbanCard({ r, assignedName }: { r: ProspectRow; assignedName?: string
       <CriteriaLine r={r} />
       <div className="flex items-center gap-2 text-[10px] text-[var(--text-subtle)] flex-wrap">
         <span className="inline-flex items-center gap-1"><Clock className="w-2.5 h-2.5" />{relative(r.last_seen)}</span>
-        {assignedName && <span className="inline-flex items-center gap-1 text-emerald-700"><UserCheck className="w-2.5 h-2.5" />{assignedName}</span>}
-      {r.relance_le && <span className="inline-flex items-center gap-1 text-purple-600"><CalendarClock className="w-2.5 h-2.5" />{new Date(r.relance_le).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>}
-        {r.prochaine_action_at && <span className="inline-flex items-center gap-1 text-orange-600"><CalendarClock className="w-2.5 h-2.5" />action {new Date(r.prochaine_action_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>}
+        {assignedName && <span className="inline-flex items-center gap-1 text-emerald-400 font-medium"><UserCheck className="w-2.5 h-2.5" />{assignedName}</span>}
+      {r.relance_le && <span className="inline-flex items-center gap-1 text-purple-400 font-medium"><CalendarClock className="w-2.5 h-2.5" />{new Date(r.relance_le).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>}
+        {r.prochaine_action_at && <span className="inline-flex items-center gap-1 text-amber-400 font-medium"><CalendarClock className="w-2.5 h-2.5" />action {new Date(r.prochaine_action_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>}
       </div>
       <div className="flex items-center gap-1.5 mt-1">
         <WhatsAppContactButton
@@ -380,7 +380,7 @@ function KanbanCard({ r, assignedName }: { r: ProspectRow; assignedName?: string
         />
         <a href={`/api/admin/prospects/${r.id}/fiche-visite?typeContact=${isAgent ? 'agent' : 'prospect'}`} target="_blank" rel="noopener noreferrer"
           title="Bon de visite (PDF)"
-          className="inline-flex items-center justify-center px-2 py-1.5 bg-[var(--surface-hover)] hover:bg-[var(--border)] text-[var(--text)] rounded-lg text-[11px] font-bold">
+          className="min-h-[36px] inline-flex items-center justify-center px-2 py-1.5 bg-[var(--surface-hover)] hover:bg-[var(--border)] text-[var(--text)] rounded-xl text-[11px] font-bold transition-all active:scale-95">
           <FileText className="w-3.5 h-3.5" />
         </a>
         {next && (
@@ -389,7 +389,7 @@ function KanbanCard({ r, assignedName }: { r: ProspectRow; assignedName?: string
             <input type="hidden" name="version" value={r.version} />
             <input type="hidden" name="statut" value={next} />
             <button type="submit" title={`Vers « ${STATUT_META[next].label} »`}
-              className="inline-flex items-center justify-center px-2 py-1.5 bg-[var(--surface-hover)] hover:bg-[var(--border)] text-[var(--text)] rounded-lg">
+              className="min-h-[36px] inline-flex items-center justify-center px-2 py-1.5 bg-[var(--surface-hover)] hover:bg-[var(--border)] text-[var(--text)] rounded-xl transition-all active:scale-95">
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </CrmActionForm>
@@ -404,32 +404,32 @@ function ListRow({ r, assignedName }: { r: ProspectRow; assignedName?: string })
   const meta = STATUT_META[st]
   const isAgent = isAgentContact(r)
   return (
-    <div className="bg-[var(--surface-card)] rounded-xl border border-[var(--border)] p-4 flex flex-wrap items-start gap-x-4 gap-y-2">
+    <div className="bg-[var(--surface-card)] rounded-xl border border-[var(--border)] p-4 flex flex-wrap items-start gap-x-4 gap-y-2 hover:border-[var(--accent-luxury)]/30 transition-colors">
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 flex-wrap">
           <Link href={`/admin/prospects/${r.id}`} className="font-bold text-[var(--text)] text-sm truncate hover:text-[var(--accent-luxury)]">{r.nom || 'Prospect'}</Link>
           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${meta.cls}`}>{meta.label}</span>
-          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${isAgent ? 'bg-purple-100 text-purple-900 border-purple-300' : 'bg-emerald-100 text-emerald-900 border-emerald-300'}`}>
+          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${isAgent ? 'bg-purple-500/15 text-purple-300 border-purple-500/30' : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'}`}>
             {isAgent ? <Briefcase className="w-2.5 h-2.5" /> : <User className="w-2.5 h-2.5" />}
             {isAgent ? 'Agent démarcheur' : 'Client direct'}
           </span>
-          {assignedName && <span className="inline-flex items-center gap-1 text-[10px] text-emerald-700"><UserCheck className="w-3 h-3" />{assignedName}</span>}
-          {r.relance_le && <span className="inline-flex items-center gap-1 text-[10px] text-purple-600"><CalendarClock className="w-3 h-3" />relance {new Date(r.relance_le).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>}
+          {assignedName && <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-medium"><UserCheck className="w-3 h-3" />{assignedName}</span>}
+          {r.relance_le && <span className="inline-flex items-center gap-1 text-[10px] text-purple-400 font-medium"><CalendarClock className="w-3 h-3" />relance {new Date(r.relance_le).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>}
         </div>
         <p className="text-xs text-[var(--text-muted)] font-mono mt-0.5">+225 {r.phone.replace(/^225/, '')} · {r.message_count} msg · {relative(r.last_seen)}</p>
         <div className="mt-1"><CriteriaLine r={r} /></div>
         {r.dernier_message && (
           <p className="text-[11px] text-[var(--text-muted)] italic mt-1 flex items-start gap-1">
-            <MessageCircle className="w-3 h-3 mt-0.5 shrink-0" /><span className="line-clamp-1">« {r.dernier_message} »</span>
+            <MessageCircle className="w-3 h-3 mt-0.5 shrink-0 text-emerald-500" /><span className="line-clamp-1">« {r.dernier_message} »</span>
           </p>
         )}
-        {r.note && <p className="text-[11px] text-[var(--text)] mt-1 bg-amber-50 border border-amber-200 rounded px-2 py-1 line-clamp-1">📝 {r.note}</p>}
-        {r.perte_motif && <p className="text-[11px] text-red-700 mt-1 bg-red-50 border border-red-200 rounded px-2 py-1 line-clamp-1">Motif de perte : {r.perte_motif}</p>}
+        {r.note && <p className="text-[11px] text-amber-300 font-medium mt-1 bg-amber-500/10 border border-amber-500/30 rounded-lg px-2 py-1 line-clamp-1">📝 {r.note}</p>}
+        {r.perte_motif && <p className="text-[11px] text-rose-300 font-medium mt-1 bg-rose-500/10 border border-rose-500/30 rounded-lg px-2 py-1 line-clamp-1">Motif de perte : {r.perte_motif}</p>}
       </div>
       <div className="flex flex-col items-end gap-1.5 shrink-0">
         <div className="flex items-center gap-1.5">
           <a href={`/api/admin/prospects/${r.id}/fiche-visite?typeContact=${isAgent ? 'agent' : 'prospect'}`} target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-2 bg-[var(--surface-hover)] hover:bg-[var(--border)] text-[var(--text)] rounded-lg text-xs font-bold border border-[var(--border)]">
+            className="min-h-[36px] inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface-hover)] hover:bg-[var(--border)] text-[var(--text)] rounded-xl text-xs font-bold border border-[var(--border)] transition-all active:scale-95">
             <FileText className="w-3.5 h-3.5" /> Bon de visite
           </a>
           <WhatsAppContactButton
@@ -449,10 +449,10 @@ function ListRow({ r, assignedName }: { r: ProspectRow; assignedName?: string })
 
 function Stat({ label, value, icon: Icon, tone = 'default' }: { label: string; value: number; icon: typeof Users; tone?: 'default' | 'amber' | 'blue' | 'emerald' }) {
   const cls =
-    tone === 'amber' ? 'bg-amber-500/10 border-amber-500/20 text-amber-600'
-    : tone === 'blue' ? 'bg-blue-500/10 border-blue-500/20 text-blue-600'
-    : tone === 'emerald' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600'
-    : 'bg-[var(--surface-card)] border-[var(--border)] text-[var(--text)]'
+    tone === 'amber' ? 'bg-amber-500/10 border-amber-500/20 text-amber-400 border-l-4 border-l-amber-400'
+    : tone === 'blue' ? 'bg-sky-500/10 border-sky-500/20 text-sky-400 border-l-4 border-l-sky-400'
+    : tone === 'emerald' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 border-l-4 border-l-emerald-400'
+    : 'bg-[var(--surface-card)] border-[var(--border)] text-[var(--text)] border-l-4 border-l-[var(--border)]'
   return (
     <div className={`px-4 py-3 rounded-xl border ${cls}`}>
       <p className="text-xs font-bold uppercase tracking-wider opacity-80 inline-flex items-center gap-1.5"><Icon className="w-3.5 h-3.5" />{label}</p>

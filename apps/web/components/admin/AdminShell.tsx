@@ -105,9 +105,9 @@ export function AdminShell({ email, pendingCount = 0, children }: AdminShellProp
         {/* Navigation par missions : les modules sont regroupés pour réduire la charge cognitive. */}
         <div className="max-w-[1400px] mx-auto px-3 lg:px-5 pb-2">
           <nav aria-label="Navigation administrateur" className="flex items-start gap-3 overflow-x-auto no-scrollbar">
-            {ADMIN_NAV_GROUPS.map((group) => (
-              <div key={group.label} className="shrink-0 border-l border-[var(--border)] pl-2 first:border-l-0 first:pl-0">
-                <p className="px-2 mb-1 text-[9px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">{group.label}</p>
+            {ADMIN_NAV_GROUPS.map((group, idx) => (
+              <div key={group.label} className={`shrink-0 ${idx > 0 ? 'border-l border-[var(--border)] pl-3 ml-1' : ''}`}>
+                <p className="px-2 mb-1 text-[9px] font-extrabold uppercase tracking-[0.22em] text-[var(--accent-luxury)]/90">{group.label}</p>
                 <div className="flex items-center gap-1">
                   {group.items.map((item) => {
                     const active =
@@ -125,16 +125,16 @@ export function AdminShell({ email, pendingCount = 0, children }: AdminShellProp
                         key={item.href}
                         href={item.href}
                         aria-current={active ? 'page' : undefined}
-                        className={`relative flex min-h-[40px] items-center gap-1.5 px-3 rounded-lg text-[13px] font-semibold whitespace-nowrap transition-colors ${
+                        className={`relative flex min-h-[38px] items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-bold whitespace-nowrap transition-all ${
                           active
-                            ? 'bg-[var(--accent-luxury-muted)] text-[var(--accent-luxury)] border-l-2 border-[var(--accent-luxury)] shadow-none'
+                            ? 'bg-[var(--accent-luxury)] text-[#0b1530] shadow-sm'
                             : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface-hover)]'
                         }`}
                       >
-                        <Icon className="w-3.5 h-3.5" />
+                        <Icon className={`w-3.5 h-3.5 ${active ? 'text-[#0b1530]' : 'text-[var(--text-subtle)]'}`} />
                         <span>{item.label}</span>
                         {item.badge && pendingCount > 0 && (
-                          <span className={`ml-0.5 min-w-[20px] h-[20px] px-1 inline-flex items-center justify-center rounded-full text-[10px] font-bold ${active ? 'bg-[var(--accent-luxury)] text-[var(--on-accent)]' : 'bg-[var(--accent-luxury-muted)] text-[var(--accent-luxury)]'}`}>
+                          <span className={`ml-1 min-w-[18px] h-[18px] px-1.5 inline-flex items-center justify-center rounded-full text-[10px] font-black ${active ? 'bg-[#0b1530] text-[var(--accent-luxury)]' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}`}>
                             {pendingCount > 99 ? '99+' : pendingCount}
                           </span>
                         )}

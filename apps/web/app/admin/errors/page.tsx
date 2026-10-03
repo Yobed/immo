@@ -91,7 +91,7 @@ export default async function AdminErrorsPage({ searchParams }: PageProps) {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--text-muted)]">Disponibilité</p>
-            <p className={`mt-1 text-sm font-semibold ${health.status === 'ok' ? 'text-emerald-700' : 'text-amber-700'}`}>
+            <p className={`mt-1 text-sm font-semibold ${health.status === 'ok' ? 'text-emerald-400' : 'text-amber-400'}`}>
               {health.status === 'ok' ? 'Toutes les dépendances répondent.' : 'Une dépendance nécessite une vérification.'}
             </p>
           </div>
@@ -142,7 +142,7 @@ export default async function AdminErrorsPage({ searchParams }: PageProps) {
 
 function HealthCheck({ icon: Icon, label, ok }: { icon: typeof Database; label: string; ok: boolean }) {
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-semibold ${ok ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-700' : 'border-red-500/30 bg-red-500/10 text-red-700'}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-semibold ${ok ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400' : 'border-rose-500/30 bg-rose-500/10 text-rose-400'}`}>
       <Icon className="h-3.5 w-3.5" /> {label} · {ok ? 'OK' : 'À vérifier'}
     </span>
   )
@@ -157,15 +157,15 @@ interface StatusCardProps {
 }
 function StatusCard({ label, value, href, active, variant }: StatusCardProps) {
   const colors = {
-    danger: 'bg-red-500/10 border-red-500/30 text-red-600',
-    warning: 'bg-amber-500/10 border-amber-500/30 text-amber-600',
-    success: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600',
-    muted: 'bg-slate-500/10 border-slate-500/30 text-slate-500',
+    danger: 'bg-rose-500/10 border-rose-500/30 text-rose-400',
+    warning: 'bg-amber-500/10 border-amber-500/30 text-amber-400',
+    success: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400',
+    muted: 'bg-slate-500/10 border-slate-500/30 text-slate-400',
   }[variant]
   return (
     <Link
       href={href}
-      className={`block px-4 py-3 rounded-xl border transition-all ${colors} ${active ? 'ring-2 ring-current' : 'opacity-70 hover:opacity-100'}`}
+      className={`block px-4 py-3 rounded-xl border transition-all ${colors} ${active ? 'ring-2 ring-current font-bold' : 'opacity-70 hover:opacity-100'}`}
     >
       <p className="text-[10px] font-bold uppercase tracking-wider">{label}</p>
       <p className="font-display text-2xl font-black tabular-nums mt-1">{value}</p>
@@ -214,7 +214,7 @@ function ErrorRow({ log }: { log: ErrorLog }) {
               <summary className="cursor-pointer text-[10px] text-[var(--text-muted)] hover:text-[var(--text)]">
                 Contexte JSON
               </summary>
-              <pre className="mt-2 p-3 rounded bg-slate-50 text-slate-800 text-[10px] leading-relaxed overflow-x-auto whitespace-pre-wrap">
+              <pre className="mt-2 p-3 rounded-xl bg-[var(--surface-hover)] text-[var(--text)] border border-[var(--border)] text-[10px] leading-relaxed overflow-x-auto whitespace-pre-wrap">
                 {JSON.stringify(log.context, null, 2)}
               </pre>
             </details>
@@ -233,7 +233,7 @@ function ErrorRow({ log }: { log: ErrorLog }) {
                     <input type="hidden" name="status" value="investigating" />
                     <button
                       type="submit"
-                      className="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition-colors inline-flex items-center gap-1"
+                      className="min-h-[32px] px-3 py-1 rounded-xl text-xs font-bold bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 border border-amber-500/30 transition-all inline-flex items-center gap-1.5"
                     >
                       <Clock className="w-3 h-3" /> En cours
                     </button>
@@ -243,7 +243,7 @@ function ErrorRow({ log }: { log: ErrorLog }) {
                     <input type="hidden" name="status" value="resolved" />
                     <button
                       type="submit"
-                      className="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition-colors inline-flex items-center gap-1"
+                      className="min-h-[32px] px-3 py-1 rounded-xl text-xs font-black bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition-all inline-flex items-center gap-1.5"
                     >
                       <CheckCircle2 className="w-3 h-3" /> Résoudre
                     </button>
@@ -253,7 +253,7 @@ function ErrorRow({ log }: { log: ErrorLog }) {
                     <input type="hidden" name="status" value="ignored" />
                     <button
                       type="submit"
-                      className="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 transition-colors inline-flex items-center gap-1"
+                      className="min-h-[32px] px-3 py-1 rounded-xl text-xs font-bold bg-[var(--surface)] hover:bg-[var(--surface-hover)] text-[var(--text-muted)] border border-[var(--border)] transition-all inline-flex items-center gap-1.5"
                     >
                       <EyeOff className="w-3 h-3" /> Ignorer
                     </button>
@@ -267,7 +267,7 @@ function ErrorRow({ log }: { log: ErrorLog }) {
                     <input type="hidden" name="status" value="resolved" />
                     <button
                       type="submit"
-                      className="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition-colors inline-flex items-center gap-1"
+                      className="min-h-[32px] px-3 py-1 rounded-xl text-xs font-black bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition-all inline-flex items-center gap-1.5"
                     >
                       <CheckCircle2 className="w-3 h-3" /> Résoudre
                     </button>
@@ -277,7 +277,7 @@ function ErrorRow({ log }: { log: ErrorLog }) {
                     <input type="hidden" name="status" value="open" />
                     <button
                       type="submit"
-                      className="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors inline-flex items-center gap-1"
+                      className="min-h-[32px] px-3 py-1 rounded-xl text-xs font-bold bg-[var(--surface)] hover:bg-[var(--surface-hover)] text-[var(--text)] border border-[var(--border)] transition-all inline-flex items-center gap-1.5"
                     >
                       <RotateCcw className="w-3 h-3" /> Rouvrir
                     </button>
@@ -290,7 +290,7 @@ function ErrorRow({ log }: { log: ErrorLog }) {
                   <input type="hidden" name="status" value="open" />
                   <button
                     type="submit"
-                    className="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors inline-flex items-center gap-1"
+                    className="min-h-[32px] px-3 py-1 rounded-xl text-xs font-bold bg-[var(--surface)] hover:bg-[var(--surface-hover)] text-[var(--text)] border border-[var(--border)] transition-all inline-flex items-center gap-1.5"
                   >
                     <RotateCcw className="w-3 h-3" /> Rouvrir
                   </button>

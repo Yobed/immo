@@ -158,20 +158,20 @@ export default async function AdminCockpitPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            <Link
-              href="/admin/prospects"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[var(--surface-hover)] hover:bg-[var(--border)] text-[var(--text)] border border-[var(--border)] rounded-xl text-xs font-bold transition-colors"
-            >
-              <Users className="w-3.5 h-3.5 text-[var(--accent-luxury)]" />
-              <span>Ouvrir Pipeline CRM</span>
-            </Link>
+          <div className="flex items-center gap-2.5 flex-wrap">
             <Link
               href="/admin/suivi"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[var(--text)] hover:opacity-90 text-[var(--surface-card)] rounded-xl text-xs font-bold transition-opacity shadow-sm"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-[var(--accent-luxury)] hover:brightness-110 text-[#0b1530] rounded-xl text-xs font-black transition-all shadow-md"
             >
-              <CheckSquare className="w-3.5 h-3.5" />
+              <CheckSquare className="w-4 h-4" />
               <span>File de Suivi ({countVisitesPending + countReservationsPending})</span>
+            </Link>
+            <Link
+              href="/admin/prospects"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-[var(--surface)] hover:bg-[var(--surface-hover)] text-[var(--text)] border border-[var(--border)] rounded-xl text-xs font-bold transition-colors"
+            >
+              <Users className="w-4 h-4 text-[var(--accent-luxury)]" />
+              <span>Ouvrir Pipeline CRM</span>
             </Link>
           </div>
         </div>
@@ -179,79 +179,87 @@ export default async function AdminCockpitPage() {
 
       <div className="max-w-[1400px] mx-auto px-4 lg:px-6 py-6 space-y-6">
         {/* 2. Bandeau des 4 KPIs d'Urgence */}
-        <section aria-label="Indicateurs prioritaires" className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        <section aria-label="Indicateurs prioritaires" className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 md:gap-4">
           <Link
             href="/admin/suivi?tab=visites&status=pending"
-            className="group rounded-2xl border border-amber-200 bg-amber-50/70 hover:bg-amber-50 p-4 transition-all hover:shadow-md"
+            className="group rounded-2xl border border-[var(--border)] border-l-4 border-l-amber-500 bg-[var(--surface-card)] hover:border-amber-500/50 p-4 sm:p-5 transition-all hover:-translate-y-0.5 hover:shadow-lg flex flex-col justify-between"
           >
             <div className="flex items-center justify-between">
-              <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-amber-600" />
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                  <Calendar className="w-3.5 h-3.5" />
+                </span>
                 Visites à valider
               </span>
-              <span className="text-xs text-amber-700 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+              <span className="text-xs text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
             </div>
-            <p className="mt-2 text-3xl font-black text-amber-950 tabular-nums">
+            <p className="mt-3 text-3xl font-black text-[var(--text)] tabular-nums">
               {countVisitesPending}
             </p>
-            <p className="mt-1 text-[11px] text-amber-800/80">
-              Notification automatique au proprio & visiteur
+            <p className="mt-1 text-[11px] text-[var(--text-muted)]">
+              Notification automatique au proprio &amp; visiteur
             </p>
           </Link>
 
           <Link
             href="/admin/prospects?statut=nouveau"
-            className="group rounded-2xl border border-blue-200 bg-blue-50/70 hover:bg-blue-50 p-4 transition-all hover:shadow-md"
+            className="group rounded-2xl border border-[var(--border)] border-l-4 border-l-blue-500 bg-[var(--surface-card)] hover:border-blue-500/50 p-4 sm:p-5 transition-all hover:-translate-y-0.5 hover:shadow-lg flex flex-col justify-between"
           >
             <div className="flex items-center justify-between">
-              <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider text-blue-800 flex items-center gap-1.5">
-                <MessageCircle className="w-3.5 h-3.5 text-blue-600" />
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-blue-400 flex items-center gap-2">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                  <MessageCircle className="w-3.5 h-3.5" />
+                </span>
                 Prospects à contacter
               </span>
-              <span className="text-xs text-blue-700 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+              <span className="text-xs text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
             </div>
-            <p className="mt-2 text-3xl font-black text-blue-950 tabular-nums">
+            <p className="mt-3 text-3xl font-black text-[var(--text)] tabular-nums">
               {countProspectsNouveau}
             </p>
-            <p className="mt-1 text-[11px] text-blue-800/80">
+            <p className="mt-1 text-[11px] text-[var(--text-muted)]">
               Leads chauds WhatsApp non traités
             </p>
           </Link>
 
           <Link
             href="/admin/validation"
-            className="group rounded-2xl border border-purple-200 bg-purple-50/70 hover:bg-purple-50 p-4 transition-all hover:shadow-md"
+            className="group rounded-2xl border border-[var(--border)] border-l-4 border-l-purple-500 bg-[var(--surface-card)] hover:border-purple-500/50 p-4 sm:p-5 transition-all hover:-translate-y-0.5 hover:shadow-lg flex flex-col justify-between"
           >
             <div className="flex items-center justify-between">
-              <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider text-purple-800 flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-purple-600" />
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-purple-400 flex items-center gap-2">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                </span>
                 Annonces à valider
               </span>
-              <span className="text-xs text-purple-700 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+              <span className="text-xs text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
             </div>
-            <p className="mt-2 text-3xl font-black text-purple-950 tabular-nums">
+            <p className="mt-3 text-3xl font-black text-[var(--text)] tabular-nums">
               {countBiensPending}
             </p>
-            <p className="mt-1 text-[11px] text-purple-800/80">
+            <p className="mt-1 text-[11px] text-[var(--text-muted)]">
               Biens soumis en attente de mise en ligne
             </p>
           </Link>
 
           <Link
             href="/admin/suivi?tab=reservations"
-            className="group rounded-2xl border border-emerald-200 bg-emerald-50/70 hover:bg-emerald-50 p-4 transition-all hover:shadow-md"
+            className="group rounded-2xl border border-[var(--border)] border-l-4 border-l-emerald-500 bg-[var(--surface-card)] hover:border-emerald-500/50 p-4 sm:p-5 transition-all hover:-translate-y-0.5 hover:shadow-lg flex flex-col justify-between"
           >
             <div className="flex items-center justify-between">
-              <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                </span>
                 Demandes d&apos;intermédiation
               </span>
-              <span className="text-xs text-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+              <span className="text-xs text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
             </div>
-            <p className="mt-2 text-3xl font-black text-emerald-950 tabular-nums">
+            <p className="mt-3 text-3xl font-black text-[var(--text)] tabular-nums">
               {countReservationsPending + countContactsPending}
             </p>
-            <p className="mt-1 text-[11px] text-emerald-800/80">
+            <p className="mt-1 text-[11px] text-[var(--text-muted)]">
               {countReservationsPending} réservations · {countContactsPending} contacts
             </p>
           </Link>
@@ -265,7 +273,7 @@ export default async function AdminCockpitPage() {
             <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-5 shadow-sm">
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--border)]">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-amber-100 text-amber-800">
+                  <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
                     <Calendar className="w-4 h-4" />
                   </div>
                   <div>
@@ -315,10 +323,10 @@ export default async function AdminCockpitPage() {
                               <span
                                 className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
                                   isPending
-                                    ? 'bg-amber-100 text-amber-800 border-amber-300'
+                                    ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
                                     : v.admin_validation_status === 'approved'
-                                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                                    : 'bg-red-100 text-red-800 border-red-300'
+                                    ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                                    : 'bg-rose-500/15 text-rose-400 border-rose-500/30'
                                 }`}
                               >
                                 {isPending ? 'En attente' : v.admin_validation_status === 'approved' ? 'Validée' : 'Refusée'}
@@ -349,10 +357,11 @@ export default async function AdminCockpitPage() {
                                 href={whatsappLink(visitorPhone) ?? '#'}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="p-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-colors"
+                                className="min-h-[36px] px-2.5 py-1.5 rounded-xl bg-[#25D366] hover:bg-[#20ba5a] text-white flex items-center gap-1.5 text-xs font-black shadow-sm active:scale-95 transition-all"
                                 title="Contacter le client sur WhatsApp"
                               >
                                 <MessageCircle className="w-3.5 h-3.5" />
+                                <span className="hidden sm:inline">WhatsApp</span>
                               </a>
                             )}
                           </div>
@@ -371,7 +380,7 @@ export default async function AdminCockpitPage() {
             <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-5 shadow-sm">
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--border)]">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-purple-100 text-purple-800">
+                  <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
                     <BellRing className="w-4 h-4" />
                   </div>
                   <div>
@@ -383,7 +392,7 @@ export default async function AdminCockpitPage() {
                     </p>
                   </div>
                 </div>
-                <span className="text-[11px] font-bold text-purple-700 bg-purple-100 px-2.5 py-0.5 rounded-full">
+                <span className="text-[11px] font-bold text-purple-400 bg-purple-500/15 border border-purple-500/30 px-2.5 py-0.5 rounded-full">
                   Temps réel
                 </span>
               </div>
@@ -412,10 +421,10 @@ export default async function AdminCockpitPage() {
                             <span
                               className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
                                 isSilence
-                                  ? 'bg-amber-100 text-amber-900 border-amber-300'
+                                  ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
                                   : isHandoff
-                                  ? 'bg-blue-100 text-blue-900 border-blue-300'
-                                  : 'bg-purple-100 text-purple-900 border-purple-300'
+                                  ? 'bg-sky-500/15 text-sky-400 border-sky-500/30'
+                                  : 'bg-purple-500/15 text-purple-400 border-purple-500/30'
                               }`}
                             >
                               {isSilence
@@ -446,7 +455,7 @@ export default async function AdminCockpitPage() {
                             href={whatsappLink(phone) ?? '#'}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shrink-0 transition-colors shadow-sm"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] bg-[#25D366] hover:bg-[#20ba5a] text-white rounded-xl text-xs font-black shrink-0 transition-all shadow-sm active:scale-95"
                           >
                             <MessageCircle className="w-3.5 h-3.5" />
                             <span className="hidden sm:inline">Prendre la main</span>
@@ -466,7 +475,7 @@ export default async function AdminCockpitPage() {
             <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-5 shadow-sm">
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--border)]">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-blue-100 text-blue-800">
+                  <div className="p-2 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20">
                     <Users className="w-4 h-4" />
                   </div>
                   <div>
@@ -550,7 +559,7 @@ export default async function AdminCockpitPage() {
             <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-5 shadow-sm">
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--border)]">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-xl bg-purple-100 text-purple-800">
+                  <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
                     <ShieldCheck className="w-4 h-4" />
                   </div>
                   <div>

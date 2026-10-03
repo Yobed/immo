@@ -64,7 +64,7 @@ export function KycInlineActions({ userId, cniPath, selfiePath, statut }: Props)
   }
 
   const btnDoc =
-    'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-[var(--border)] bg-[var(--surface-card)] text-[var(--text)] hover:bg-[var(--surface-hover)] disabled:opacity-40'
+    'min-h-[36px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] hover:bg-[var(--surface-hover)] disabled:opacity-40 transition-colors'
 
   return (
     <div className="space-y-3">
@@ -80,7 +80,7 @@ export function KycInlineActions({ userId, cniPath, selfiePath, statut }: Props)
 
       {/* Décision */}
       {done ? (
-        <p className={`text-sm font-bold ${done === 'verifie' ? 'text-emerald-600' : 'text-red-600'}`}>
+        <p className={`text-sm font-bold ${done === 'verifie' ? 'text-emerald-400' : 'text-rose-400'}`}>
           {done === 'verifie' ? '✅ KYC validé — enregistré.' : '❌ KYC rejeté — enregistré.'}
         </p>
       ) : (
@@ -89,7 +89,7 @@ export function KycInlineActions({ userId, cniPath, selfiePath, statut }: Props)
             type="button"
             onClick={() => act('valider')}
             disabled={busy !== null}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50 transition-colors"
+            className="min-h-[36px] inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-50 shadow-sm transition-all active:scale-95"
           >
             {busy === 'valider' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Valider le KYC
           </button>
@@ -97,14 +97,14 @@ export function KycInlineActions({ userId, cniPath, selfiePath, statut }: Props)
             type="button"
             onClick={() => act('rejeter')}
             disabled={busy !== null}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 transition-colors"
+            className="min-h-[36px] inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 disabled:opacity-50 transition-all active:scale-95"
           >
             {busy === 'rejeter' ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />} Rejeter
           </button>
         </div>
       )}
 
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs text-rose-400 font-medium">{error}</p>}
       {!done && statut && (
         <p className="text-[11px] text-[var(--text-subtle)]">
           Statut actuel : {statut === 'verifie' ? 'vérifié' : statut === 'en_cours' ? 'à valider' : statut}

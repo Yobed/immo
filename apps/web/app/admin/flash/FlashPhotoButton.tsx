@@ -56,11 +56,11 @@ export function FlashPhotoButton({ locauxId, hasPhoto }: { locauxId: number; has
         type="button"
         disabled={busy}
         onClick={() => inputRef.current?.click()}
-        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-xs font-bold transition-colors disabled:opacity-50"
+        className="flex-1 min-h-[36px] flex items-center justify-center gap-1.5 px-3 py-2 bg-[var(--surface)] hover:bg-[var(--surface-hover)] text-[var(--text)] border border-[var(--border)] rounded-xl text-xs font-bold transition-all disabled:opacity-50 active:scale-95"
       >
         <ImagePlus className="w-3.5 h-3.5" /> {busy ? 'Envoi…' : hasPhoto ? 'Remplacer' : 'Photo'}
       </button>
-      {err && <p className="w-full text-[10px] text-red-500 mt-1 basis-full">{err}</p>}
+      {err && <p className="w-full text-[10px] text-rose-400 font-medium mt-1 basis-full">{err}</p>}
     </>
   )
 }

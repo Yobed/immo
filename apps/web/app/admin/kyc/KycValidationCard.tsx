@@ -97,8 +97,8 @@ export function KycValidationCard({ profile }: KycValidationCardProps) {
       <div
         className={`p-5 rounded-2xl border ${
           done === 'verifie'
-            ? 'bg-emerald-50/40 border-emerald-200 text-emerald-900'
-            : 'bg-red-50/40 border-red-200 text-red-900'
+            ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+            : 'bg-rose-500/15 border-rose-500/30 text-rose-400'
         }`}
       >
         <p className="text-sm font-bold inline-flex items-center gap-2">
@@ -119,7 +119,7 @@ export function KycValidationCard({ profile }: KycValidationCardProps) {
   }
 
   return (
-    <article className="p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border)] hover:border-amber-400/40 transition-colors">
+    <article className="p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border)] hover:border-[var(--accent-luxury)]/40 transition-colors">
       {/* Header — identité */}
       <header className="flex items-start justify-between gap-3 mb-4">
         <div className="min-w-0 flex-1">
@@ -143,7 +143,7 @@ export function KycValidationCard({ profile }: KycValidationCardProps) {
             </p>
           </div>
         </div>
-        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md bg-amber-500/10 text-amber-700 border border-amber-500/20 shrink-0">
+        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">
           {profile.role || 'rôle?'}
         </span>
       </header>
@@ -166,7 +166,7 @@ export function KycValidationCard({ profile }: KycValidationCardProps) {
 
       {/* Actions */}
       {error && (
-        <div className="mb-3 px-3 py-2 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700">
+        <div className="mb-3 px-3 py-2 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-400 font-medium">
           {error}
         </div>
       )}
@@ -175,7 +175,7 @@ export function KycValidationCard({ profile }: KycValidationCardProps) {
           type="button"
           onClick={() => handleAction('rejeter')}
           disabled={!!submitting}
-          className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm font-bold hover:bg-red-100 disabled:opacity-50 transition-colors"
+          className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm font-bold hover:bg-rose-500/20 disabled:opacity-50 transition-all active:scale-[0.98]"
         >
           {submitting === 'rejeter' ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -188,7 +188,7 @@ export function KycValidationCard({ profile }: KycValidationCardProps) {
           type="button"
           onClick={() => handleAction('valider')}
           disabled={!!submitting || (!profile.kyc_cni_url && !profile.kyc_selfie_url)}
-          className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+          className="flex-1 min-h-[44px] inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-black hover:bg-emerald-500 disabled:opacity-50 shadow-md transition-all active:scale-[0.98]"
         >
           {submitting === 'valider' ? (
             <Loader2 className="w-4 h-4 animate-spin" />

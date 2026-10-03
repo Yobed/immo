@@ -38,16 +38,16 @@ interface BienRow {
 
 function statusBadge(statut: string) {
   const map: Record<string, { label: string; cls: string }> = {
-    publie: { label: 'Publié', cls: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
-    en_attente: { label: 'En attente', cls: 'bg-amber-100 text-amber-700 border-amber-200' },
-    refuse: { label: 'Refusé', cls: 'bg-red-100 text-red-700 border-red-200' },
+    publie: { label: 'Publié', cls: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' },
+    en_attente: { label: 'En attente', cls: 'bg-amber-500/15 text-amber-400 border-amber-500/30' },
+    refuse: { label: 'Refusé', cls: 'bg-rose-500/15 text-rose-400 border-rose-500/30' },
     brouillon: { label: 'Brouillon', cls: 'bg-[var(--surface-hover)] text-[var(--text-muted)] border-[var(--border)]' },
-    suspendu: { label: 'Suspendu', cls: 'bg-orange-100 text-orange-700 border-orange-200' },
+    suspendu: { label: 'Suspendu', cls: 'bg-amber-500/15 text-amber-400 border-amber-500/30' },
     archive: { label: 'Archivé', cls: 'bg-[var(--surface-hover)] text-[var(--text-muted)] border-[var(--border)]' },
   }
   const s = map[statut] ?? { label: statut, cls: 'bg-[var(--surface-hover)] text-[var(--text-muted)] border-[var(--border)]' }
   return (
-    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${s.cls}`}>
+    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${s.cls}`}>
       {s.label}
     </span>
   )
@@ -174,7 +174,7 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
             <option value="suspendu">Suspendus</option>
             <option value="archive">🗑️ Corbeille</option>
           </select>
-          <button type="submit" className="px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-colors">
+          <button type="submit" className="px-5 py-2.5 min-h-[40px] bg-[var(--accent-luxury)] text-[#0b1530] rounded-xl text-sm font-black hover:brightness-110 shadow-sm transition-all active:scale-95">
             Rechercher
           </button>
           {(q || statut !== 'all') && (
@@ -201,7 +201,7 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
               })
 
               return (
-                <div key={bien.id} className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] overflow-hidden flex flex-col">
+                <div key={bien.id} className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] hover:border-[var(--accent-luxury)]/40 hover:shadow-lg transition-all overflow-hidden flex flex-col">
                   {/* Image */}
                   <div className="aspect-video bg-[var(--surface-hover)] relative">
                     {cover ? (
@@ -221,7 +221,7 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
                     <p className="text-[var(--text-muted)] text-xs mb-2">
                       {bien.commune}{bien.quartier ? ` · ${bien.quartier}` : ''} · {bien.type_bien}
                     </p>
-                    <p className="text-[var(--text)] font-semibold text-sm mb-3">{priceDisplay(bien)}</p>
+                    <p className="text-[var(--accent-luxury)] font-bold text-sm mb-3">{priceDisplay(bien)}</p>
 
                     <div className="space-y-1.5 text-xs text-[var(--text-muted)] mb-3">
                       <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -234,10 +234,10 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
                             href={whatsappLink(bien.profiles.phone, `Bonjour ${bien.profiles.full_name || ''}, je vous contacte depuis l'administration Le Néré au sujet de votre bien "${bien.titre}".`) ?? undefined}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black text-white bg-[#25D366] hover:bg-[#20ba5a] shadow-sm active:scale-95 transition-all"
                             title="Contacter le propriétaire sur WhatsApp"
                           >
-                            <MessageCircle className="w-3 h-3 text-emerald-600" /> WhatsApp
+                            <MessageCircle className="w-3 h-3" /> WhatsApp
                           </a>
                         )}
                       </div>
@@ -252,7 +252,7 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
                       <Link
                         href={`/biens/${bien.id}`}
                         target="_blank"
-                        className="flex items-center gap-1 px-3 py-1.5 bg-[var(--surface-hover)] hover:bg-[var(--surface-hover)] text-[var(--text)] rounded-lg text-xs font-medium transition-colors"
+                        className="inline-flex items-center gap-1.5 min-h-[36px] px-3.5 py-1.5 bg-[var(--surface)] hover:bg-[var(--surface-hover)] text-[var(--text)] border border-[var(--border)] rounded-xl text-xs font-bold transition-colors"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         Voir
@@ -262,7 +262,7 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
                         <Link
                           href={`/mes-biens/${bien.id}/modifier`}
                           target="_blank"
-                          className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-bold transition-colors"
+                          className="inline-flex items-center gap-1.5 min-h-[36px] px-3.5 py-1.5 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 rounded-xl text-xs font-bold transition-colors"
                         >
                           <Pencil className="w-3.5 h-3.5" />
                           Modifier
@@ -272,7 +272,7 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
                       {bien.statut === 'publie' && (
                         <form action={suspendreBienAction}>
                           <input type="hidden" name="bienId" value={bien.id} />
-                          <button type="submit" className="flex items-center gap-1 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-lg text-xs font-bold transition-colors">
+                          <button type="submit" className="inline-flex items-center gap-1.5 min-h-[36px] px-3.5 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-bold transition-colors">
                             <ShieldAlert className="w-3.5 h-3.5" />
                             Suspendre
                           </button>
@@ -282,7 +282,7 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
                       {(bien.statut === 'suspendu' || bien.statut === 'brouillon') && (
                         <form action={republierBienAction}>
                           <input type="hidden" name="bienId" value={bien.id} />
-                          <button type="submit" className="flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold transition-colors">
+                          <button type="submit" className="inline-flex items-center gap-1.5 min-h-[36px] px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold transition-colors">
                             <RotateCcw className="w-3.5 h-3.5" />
                             Republier
                           </button>
@@ -294,7 +294,7 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
                           <input type="hidden" name="bienId" value={bien.id} />
                           <button
                             type="submit"
-                            className="flex items-center gap-1 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg text-xs font-bold transition-colors"
+                            className="inline-flex items-center gap-1.5 min-h-[36px] px-3.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-xl text-xs font-bold transition-colors"
                             title="Envoyer à la corbeille (récupérable)"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -307,7 +307,7 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
                             <input type="hidden" name="bienId" value={bien.id} />
                             <button
                               type="submit"
-                              className="flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold transition-colors"
+                              className="inline-flex items-center gap-1.5 min-h-[36px] px-3.5 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold transition-colors"
                               title="Restaurer (republier)"
                             >
                               <Undo2 className="w-3.5 h-3.5" />
@@ -318,7 +318,7 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
                             <input type="hidden" name="bienId" value={bien.id} />
                             <button
                               type="submit"
-                              className="flex items-center gap-1 px-3 py-1.5 bg-red-700 hover:bg-red-800 text-white rounded-lg text-xs font-bold transition-colors"
+                              className="inline-flex items-center gap-1.5 min-h-[36px] px-3.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-black shadow-sm transition-colors"
                               title="Suppression DÉFINITIVE (Storage + DB)"
                             >
                               <AlertTriangle className="w-3.5 h-3.5" />
