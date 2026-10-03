@@ -11,6 +11,7 @@ import {
   Clock3,
   Flame,
   GitMerge,
+  LayoutDashboard,
   Link2,
   ListChecks,
   LockKeyhole,
@@ -40,14 +41,14 @@ type ModuleGroup = {
 
 const moduleGroups: ModuleGroup[] = [
   {
-    title: 'À traiter',
-    description: 'Le travail quotidien des conseillers et des administrateurs.',
+    title: 'Opérations',
+    description: 'Le centre de commandement et le travail quotidien des conseillers et administrateurs.',
     items: [
-      { title: 'Suivi', href: '/admin/suivi', description: 'La boîte de réception des contacts, visites et réservations.', action: 'Ouvrir une demande, vérifier le bien et la source, puis approuver ou rejeter avec un motif.', icon: ClipboardCheck },
-      { title: 'Prospects', href: '/admin/prospects', description: 'Une fiche unique par prospect et son pipeline commercial.', action: 'Assigner un conseiller, changer le statut, noter l’échange, planifier une relance et consulter l’historique.', icon: Users },
+      { title: 'Cockpit', href: '/admin', description: 'Le centre de commandement quotidien avec urgences, escalades Sapphire et alertes directes.', action: 'Piloter les 4 urgences clés, valider les visites imminentes et reprendre la main sur WhatsApp en un clic.', icon: LayoutDashboard },
+      { title: 'Prospects CRM', href: '/admin/prospects', description: 'Le pipeline horizontal interactif pour qualifier et convertir chaque lead.', action: 'Filtrer par commune, isoler clients directs et démarcheurs, assigner et faire progresser les étapes.', icon: Users },
+      { title: 'Suivi des demandes', href: '/admin/suivi', description: 'La boîte de validation directe des visites, réservations et contacts.', action: 'Vérifier le bien et valider en 1 clic avec notifications automatiques au propriétaire et au visiteur.', icon: ClipboardCheck },
       { title: 'Performance', href: '/admin/performance', description: 'Le pilotage par période, conseiller, source, commune et type de bien.', action: 'Lire le tunnel contact → visite → réservation et traiter la file d’actions prioritaires.', icon: BarChart3 },
-      { title: 'Qualité', href: '/admin/prospects/qualite', description: 'Le contrôle des fiches incomplètes ou non reliées.', action: 'Corriger les téléphones, responsables, sources, références de bien et dates manquantes.', icon: ScanSearch },
-      { title: 'Guide', href: '/admin/guide', description: 'Ce mode d’emploi opérationnel.', action: 'Revenir ici pour les règles métier et la routine de traitement.', icon: BookOpen },
+      { title: 'Qualité CRM', href: '/admin/prospects/qualite', description: 'Le contrôle des fiches incomplètes ou non reliées.', action: 'Corriger les téléphones, responsables, sources, références de bien et dates manquantes.', icon: ScanSearch },
     ],
   },
   {

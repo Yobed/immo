@@ -117,14 +117,21 @@ export default async function AdminComptesPage({ searchParams }: PageProps) {
     created_at: string
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: biensRaw } = await (supabase as any)
-    .from('biens')
-    .select('id, proprietaire_id, titre, type_bien, statut, commune, quartier, prix_mois_fcfa, prix_vente_fcfa, created_at')
-    .order('created_at', { ascending: false })
+  // Détail des biens par compte (borné strictement aux profils affichés)
+  const profileIds = profiles.map((p) => p.id)
+  let biensRaw: UserBienSummary[] = []
+  if (profileIds.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: bData } = await (supabase as any)
+      .from('biens')
+      .select('id, proprietaire_id, titre, type_bien, statut, commune, quartier, prix_mois_fcfa, prix_vente_fcfa, created_at')
+      .in('proprietaire_id', profileIds)
+      .order('created_at', { ascending: false })
+    biensRaw = (bData ?? []) as UserBienSummary[]
+  }
 
   const biensByUser = new Map<string, UserBienSummary[]>()
-  for (const b of (biensRaw ?? []) as UserBienSummary[]) {
+  for (const b of biensRaw) {
     if (b.proprietaire_id) {
       const list = biensByUser.get(b.proprietaire_id) || []
       list.push(b)

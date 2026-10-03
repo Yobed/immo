@@ -73,7 +73,7 @@ export default async function AdminCockpitPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (admin.from('prospects') as any).select('id', { count: 'exact', head: true }).is('merged_into', null),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (admin.from('biens') as any).select('id', { count: 'exact', head: true }).eq('statut', 'disponible'),
+    (admin.from('biens') as any).select('id', { count: 'exact', head: true }).eq('statut', 'publie'),
   ])
 
   const countVisitesPending = visitesPendingRes?.count ?? 0

@@ -15,6 +15,7 @@ import {
   setProspectOutcomeAction, setProspectTypeAction,
 } from '../actions'
 import { CrmActionForm } from '@/components/admin/CrmActionForm'
+import { WhatsAppContactButton } from '@/components/admin/WhatsAppContactButton'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -228,14 +229,12 @@ export default async function ProspectDetailPage({ params }: PageProps) {
             >
               <FileText className="w-4 h-4" /> Bon de visite PDF {confirmedVisites.length > 0 ? `(${confirmedVisites.length} confirmé${confirmedVisites.length > 1 ? 's' : ''})` : ''}
             </a>
-            <a
-              href={whatsappLink(p.phone) ?? '#'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-bold"
-            >
-              <MessageCircle className="w-4 h-4" /> Contacter
-            </a>
+            <WhatsAppContactButton
+              phone={p.phone}
+              prospectId={p.id}
+              prospectVersion={p.version}
+              currentStatus={p.statut}
+            />
           </div>
         </div>
 

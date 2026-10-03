@@ -1,6 +1,7 @@
 import { Megaphone, MapPin, Calendar, CheckCircle2, MessageCircle, Building2 } from 'lucide-react'
 import { getTopDemarcheurs, normalizePhone } from '@/lib/locaux/demarcheurs'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { whatsappLink } from '@/lib/whatsapp'
 
 export const dynamic = 'force-dynamic'
 
@@ -77,7 +78,7 @@ export default async function AdminDemarcheursPage() {
         <div className="space-y-2">
           {top.map((d, i) => {
             const inscrit = registered.has(d.phone)
-            const waLink = `https://wa.me/225${d.phone}?text=${encodeURIComponent(ONBOARDING_MSG)}`
+            const waLink = whatsappLink(`225${d.phone}`, ONBOARDING_MSG) ?? `https://wa.me/225${d.phone}?text=${encodeURIComponent(ONBOARDING_MSG)}`
             const last = d.lastDate
               ? new Date(d.lastDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
               : '—'

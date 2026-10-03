@@ -128,7 +128,7 @@ export default async function AdminModerationPage({ searchParams }: PageProps) {
   return (
     <main className="min-h-screen bg-[var(--surface-hover)]">
       {/* Header */}
-      <div className="bg-[var(--surface-card)] border-b border-[var(--border)] sticky top-0 z-10">
+      <div className="bg-[var(--surface-card)] border-b border-[var(--border)]">
         <div className="max-w-[1400px] mx-auto px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <ShieldCheck className="w-6 h-6 text-[var(--text)]" />
