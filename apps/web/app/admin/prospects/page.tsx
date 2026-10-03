@@ -2,11 +2,12 @@ import Link from 'next/link'
 import {
   Users, MessageCircle, Calendar, Wallet, Download, Home, Clock,
   Inbox, PhoneCall, CheckCircle2, CalendarClock, LayoutGrid, List as ListIcon,
-  ChevronRight, UserCheck, FileText, Briefcase, User,
+  ChevronRight, UserCheck, FileText, Briefcase, User, RotateCcw, Filter,
 } from 'lucide-react'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { formatFCFA } from '@/lib/format'
 import { whatsappLink } from '@/lib/whatsapp'
+import { COMMUNES_ABIDJAN } from '@/shared-pkg/constants/communes'
 import { setProspectStatutAction } from './actions'
 import { bulkSetProspectStatutAction } from './actions'
 import { CrmActionForm } from '@/components/admin/CrmActionForm'
@@ -52,7 +53,14 @@ function isAgentContact(r: ProspectRow): boolean {
 }
 
 interface PageProps {
-  searchParams: Promise<{ q?: string; statut?: string; view?: string; assigned?: string }>
+  searchParams: Promise<{
+    q?: string
+    statut?: string
+    view?: string
+    assigned?: string
+    commune?: string
+    contactType?: string
+  }>
 }
 
 const STATUT_META: Record<Statut, { label: string; hint: string; cls: string; dot: string; col: string }> = {
@@ -83,7 +91,7 @@ function stOf(s: string): Statut {
 }
 
 export default async function AdminProspectsPage({ searchParams }: PageProps) {
-  const { q, statut, view: viewParam, assigned } = await searchParams
+  const { q, statut, view: viewParam, assigned, commune, contactType } = await searchParams
   const view: View = viewParam === 'kanban' ? 'kanban' : 'list'
   const admin = createAdminClient()
 
@@ -92,6 +100,7 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
   if (view === 'list' && statut && statut in STATUT_META) query = query.eq('statut', statut)
   if (assigned === 'unassigned') query = query.is('assigned_to', null)
   else if (assigned && /^[0-9a-f-]{36}$/i.test(assigned)) query = query.eq('assigned_to', assigned)
+  if (commune) query = query.ilike('commune', `%${commune}%`)
   if (q) query = query.or(`nom.ilike.%${q}%,phone.ilike.%${q}%,commune.ilike.%${q}%,quartier.ilike.%${q}%`)
 
   const countOf = async (s?: Statut) => {
@@ -116,7 +125,13 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
     countOf('traite'),
   ])
 
-  const rows = (data ?? []) as ProspectRow[]
+  let rows = (data ?? []) as ProspectRow[]
+  if (contactType === 'agent') {
+    rows = rows.filter((r) => isAgentContact(r))
+  } else if (contactType === 'client') {
+    rows = rows.filter((r) => !isAgentContact(r))
+  }
+
   const assignees = (assigneeRows ?? []) as { id: string; full_name: string | null }[]
 
   // Noms des commerciaux assignés (réutilisés depuis assignees sans requête supplémentaire)
@@ -127,6 +142,8 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
     const sp = new URLSearchParams()
     if (q) sp.set('q', q)
     if (assigned) sp.set('assigned', assigned)
+    if (commune) sp.set('commune', commune)
+    if (contactType) sp.set('contactType', contactType)
     for (const [k, v] of Object.entries(extra)) if (v) sp.set(k, v)
     const s = sp.toString()
     return `/admin/prospects${s ? `?${s}` : ''}`
@@ -139,14 +156,14 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
   for (const r of rows) byStatut[stOf(r.statut)].push(r)
 
   return (
-    <main className="max-w-6xl mx-auto px-4 py-6 lg:py-10">
+    <main className={`${view === 'kanban' ? 'max-w-[1800px]' : 'max-w-6xl'} mx-auto px-4 py-6 lg:py-10 transition-all`}>
       <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="inline-flex items-center gap-2 mb-2">
             <Users className="w-5 h-5 text-[var(--accent-luxury)]" />
             <h1 className="font-display text-2xl md:text-3xl font-bold text-[var(--text)]">Prospects</h1>
           </div>
-            <p className="text-sm text-[var(--text-muted)]">
+          <p className="text-sm text-[var(--text-muted)]">
             Une action à la fois : avancez chaque prospect jusqu&apos;à la conclusion.
           </p>
         </div>
@@ -175,40 +192,101 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
         <Stat label="À reclasser" value={nTraite} icon={CheckCircle2} />
       </div>
 
-      {/* Barre : bascule vue + recherche */}
-      <div className="flex flex-wrap items-center gap-3 mb-5">
-        <div className="flex items-center gap-1 bg-[var(--surface-hover)] p-1 rounded-xl">
-          <Link href={qs({ view: 'kanban' })}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold ${view === 'kanban' ? 'bg-[var(--surface-card)] text-[var(--text)] shadow-sm' : 'text-[var(--text-muted)]'}`}>
-            <LayoutGrid className="w-3.5 h-3.5" /> Pipeline
-          </Link>
-          <Link href={qs({ view: 'list' })}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold ${view === 'list' ? 'bg-[var(--surface-card)] text-[var(--text)] shadow-sm' : 'text-[var(--text-muted)]'}`}>
-            <ListIcon className="w-3.5 h-3.5" /> Liste
-          </Link>
-        </div>
-        {view === 'list' && (
-          <div className="flex items-center gap-1 bg-[var(--surface-hover)] p-1 rounded-xl flex-wrap">
-            {[{ k: '', l: 'Tous' }, { k: 'nouveau', l: 'Nouveaux' }, { k: 'contacte', l: 'Contactés' }, { k: 'visite_planifiee', l: 'Visites planifiées' }, { k: 'visite_realisee', l: 'Visites réalisées' }, { k: 'relance', l: 'Relances' }, { k: 'gagne', l: 'Gagnés' }, { k: 'perdu', l: 'Perdus' }, { k: 'traite', l: 'À reclasser' }].map((t) => (
-              <Link key={t.l} href={qs({ view: 'list', statut: t.k })}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold ${(statut ?? '') === t.k ? 'bg-[var(--surface-card)] text-[var(--text)] shadow-sm' : 'text-[var(--text-muted)]'}`}>
-                {t.l}
-              </Link>
-            ))}
+      {/* Barre : bascule vue + recherche + filtres */}
+      <div className="flex flex-col gap-3 mb-6 bg-[var(--surface-card)] p-3 sm:p-4 rounded-2xl border border-[var(--border)] shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          {/* Bascule Vue */}
+          <div className="flex items-center gap-1 bg-[var(--surface-hover)] p-1 rounded-xl">
+            <Link href={qs({ view: 'kanban' })}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${view === 'kanban' ? 'bg-[var(--surface-card)] text-[var(--text)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text)]'}`}>
+              <LayoutGrid className="w-3.5 h-3.5" /> Pipeline
+            </Link>
+            <Link href={qs({ view: 'list' })}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${view === 'list' ? 'bg-[var(--surface-card)] text-[var(--text)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text)]'}`}>
+              <ListIcon className="w-3.5 h-3.5" /> Liste
+            </Link>
           </div>
-        )}
-        <form className="flex items-center gap-2 flex-1 min-w-[220px]">
+
+          {/* Filtres rapides de statut en vue liste */}
+          {view === 'list' && (
+            <div className="flex items-center gap-1 bg-[var(--surface-hover)] p-1 rounded-xl flex-wrap">
+              {[{ k: '', l: 'Tous' }, { k: 'nouveau', l: 'Nouveaux' }, { k: 'contacte', l: 'Contactés' }, { k: 'visite_planifiee', l: 'Visites planifiées' }, { k: 'visite_realisee', l: 'Visites réalisées' }, { k: 'relance', l: 'Relances' }, { k: 'gagne', l: 'Gagnés' }, { k: 'perdu', l: 'Perdus' }, { k: 'traite', l: 'À reclasser' }].map((t) => (
+                <Link key={t.l} href={qs({ view: 'list', statut: t.k })}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${(statut ?? '') === t.k ? 'bg-[var(--surface-card)] text-[var(--text)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text)]'}`}>
+                  {t.l}
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {/* Reset button if any filter active */}
+          {(q || assigned || commune || contactType || (view === 'list' && statut)) && (
+            <Link
+              href={view === 'kanban' ? '/admin/prospects?view=kanban' : '/admin/prospects'}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs text-red-600 hover:text-red-700 font-medium"
+            >
+              <RotateCcw className="w-3 h-3" /> Réinitialiser
+            </Link>
+          )}
+        </div>
+
+        {/* Formulaire filtres multi-critères */}
+        <form className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-2 border-t border-[var(--border)]">
           <input type="hidden" name="view" value={view} />
           {statut && <input type="hidden" name="statut" value={statut} />}
-          <input type="text" name="q" defaultValue={q ?? ''} placeholder="Nom, numéro, commune…"
-            className="flex-1 px-4 py-2 bg-[var(--surface-card)] border border-[var(--border)] rounded-xl text-sm text-[var(--text)] focus:outline-none focus:border-[var(--accent-luxury)]" />
-          <select name="assigned" defaultValue={assigned ?? ''} aria-label="Filtrer par conseiller"
-            className="max-w-[12rem] rounded-xl border border-[var(--border)] bg-[var(--surface-card)] px-3 py-2 text-xs font-semibold text-[var(--text)]">
-            <option value="">Tous les conseillers</option>
-            <option value="unassigned">Non assignés</option>
-            {assignees.map((person) => <option key={person.id} value={person.id}>{person.full_name}</option>)}
+
+          <input
+            type="text"
+            name="q"
+            defaultValue={q ?? ''}
+            placeholder="Rechercher nom, +225, quartier…"
+            className="w-full px-3.5 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-xl text-xs text-[var(--text)] focus:outline-none focus:border-[var(--accent-luxury)]"
+          />
+
+          <select
+            name="commune"
+            defaultValue={commune ?? ''}
+            aria-label="Filtrer par commune"
+            className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs font-semibold text-[var(--text)]"
+          >
+            <option value="">Toutes les communes</option>
+            {COMMUNES_ABIDJAN.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
           </select>
-          <button type="submit" className="px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800">OK</button>
+
+          <select
+            name="contactType"
+            defaultValue={contactType ?? ''}
+            aria-label="Filtrer par type de contact"
+            className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs font-semibold text-[var(--text)]"
+          >
+            <option value="">Tous les contacts</option>
+            <option value="client">Clients directs</option>
+            <option value="agent">Agents / Démarcheurs</option>
+          </select>
+
+          <div className="flex gap-2">
+            <select
+              name="assigned"
+              defaultValue={assigned ?? ''}
+              aria-label="Filtrer par conseiller"
+              className="flex-1 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs font-semibold text-[var(--text)]"
+            >
+              <option value="">Tous les conseillers</option>
+              <option value="unassigned">Non assignés</option>
+              {assignees.map((person) => (
+                <option key={person.id} value={person.id}>{person.full_name}</option>
+              ))}
+            </select>
+
+            <button
+              type="submit"
+              className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors"
+            >
+              Filtrer
+            </button>
+          </div>
         </form>
       </div>
 
@@ -222,22 +300,22 @@ export default async function AdminProspectsPage({ searchParams }: PageProps) {
           <p className="text-[var(--text-muted)] text-sm">Aucun prospect pour ce filtre.</p>
         </div>
       ) : view === 'kanban' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" aria-label="Pipeline des prospects">
+        <div className="flex gap-4 overflow-x-auto pb-6 pt-1 items-start min-h-[calc(100vh-280px)] scrollbar-thin" aria-label="Pipeline des prospects">
           {KANBAN_COLS.map((col) => {
             const meta = STATUT_META[col]
             const items = byStatut[col]
             return (
-              <div key={col} className={`bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] border-t-4 ${meta.col} flex flex-col`}>
-                <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between">
+              <div key={col} className={`w-[290px] shrink-0 bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] border-t-4 ${meta.col} flex flex-col shadow-sm`}>
+                <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between bg-[var(--surface-card)] rounded-t-xl sticky top-0 z-10">
                   <span className="font-bold text-[var(--text)] text-sm flex items-center gap-1.5">
                     <span className={`w-2 h-2 rounded-full ${meta.dot}`} /> {meta.label}
                   </span>
-                  <span className="text-xs font-bold text-[var(--text-subtle)]">{items.length}</span>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[var(--surface-hover)] text-[var(--text-muted)]">{items.length}</span>
                 </div>
-                <p className="px-4 pt-2 text-[11px] text-[var(--text-muted)]">{meta.hint}</p>
+                <p className="px-4 pt-2.5 text-[11px] text-[var(--text-muted)] font-medium">{meta.hint}</p>
                 <div className="p-2.5 flex flex-col gap-2.5 max-h-[calc(100vh-320px)] overflow-y-auto">
                   {items.length === 0 ? (
-                    <p className="text-[var(--text-subtle)] text-xs italic text-center py-6">Vide</p>
+                    <p className="text-[var(--text-subtle)] text-xs italic text-center py-8">Vide</p>
                   ) : items.map((r) => <KanbanCard key={r.id} r={r} assignedName={r.assigned_to ? nameById[r.assigned_to] : undefined} />)}
                 </div>
               </div>

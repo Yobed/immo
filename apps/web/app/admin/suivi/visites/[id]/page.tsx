@@ -2,10 +2,11 @@ import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
 import {
   ArrowLeft, ShieldCheck, Phone, Calendar, Clock, MapPin, User,
-  CheckCircle2, XCircle, MessageCircle, Home, FileText,
+  CheckCircle2, XCircle, MessageCircle, Home, FileText, Sparkles,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { formatFCFA } from '@/lib/format'
 import { validateVisiteAction, setVisiteOutcomeAction } from '../../actions'
 import { CrmActionForm } from '@/components/admin/CrmActionForm'
 import { whatsappLink } from '@/lib/whatsapp'
@@ -44,6 +45,14 @@ function formatDateTime(iso: string) {
     hour: '2-digit',
     minute: '2-digit',
   })
+}
+
+function isAgentProspect(p: { source_detail?: string | null; dernier_message?: string | null }): boolean {
+  if (p.source_detail === 'agent') return true
+  if (p.source_detail === 'prospect') return false
+  return /mon client|mes clients|notre client|mandant|confr[èe]re|cabinet|d[ée]marcheur|demarcheur|interm[ée]diaire|apporteur|pour un client|pour mon client|cherche pour client/i.test(
+    p.dernier_message || '',
+  )
 }
 
 function adminBadge(status: string) {
@@ -111,6 +120,37 @@ export default async function VisiteDetailPage({ params }: PageProps) {
   const ownerName = visite.proprietaire?.full_name || '—'
   const ownerPhone = visite.proprietaire?.phone || null
 
+  // Recherche du prospect CRM associé par numéro de téléphone
+  let prospect: {
+    id: string
+    nom: string | null
+    phone: string
+    type_bien: string | null
+    commune: string | null
+    quartier: string | null
+    budget: number | null
+    statut: string
+    dernier_message: string | null
+    source_detail?: string | null
+  } | null = null
+
+  if (visitorPhone) {
+    const rawDigits = visitorPhone.replace(/[^0-9]/g, '')
+    const cleanDigits = rawDigits.startsWith('225') ? rawDigits.slice(3) : rawDigits
+    if (cleanDigits.length >= 8) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: prospectData } = await (admin as any)
+        .from('prospects')
+        .select('id, nom, phone, type_bien, commune, quartier, budget, statut, dernier_message, source_detail')
+        .or(`phone.ilike.%${cleanDigits}%,phone.eq.${rawDigits},phone.eq.225${cleanDigits}`)
+        .is('merged_into', null)
+        .order('last_seen', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      prospect = prospectData
+    }
+  }
+
   const isPending = visite.admin_validation_status === 'pending'
 
   return (
@@ -177,7 +217,7 @@ export default async function VisiteDetailPage({ params }: PageProps) {
               </span>
               {visitorPhone && (
                 <a
-                  href={whatsappLink(visitorPhone)!}
+                  href={whatsappLink(visitorPhone) ?? undefined}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="min-h-[44px] inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-sm font-bold"
@@ -190,6 +230,63 @@ export default async function VisiteDetailPage({ params }: PageProps) {
               )}
             </div>
           </section>
+
+          {/* Qualification CRM & Sapphire */}
+          {prospect && (
+            <section className="bg-gradient-to-br from-amber-500/10 via-[var(--surface-card)] to-purple-500/10 rounded-2xl border border-[var(--border)] p-6 shadow-sm">
+              <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-[var(--text)]">
+                    Qualification CRM &amp; Sapphire AI
+                  </h2>
+                </div>
+                <Link
+                  href={`/admin/prospects/${prospect.id}`}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-[var(--surface)] hover:bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--text)] transition-colors shadow-sm"
+                >
+                  Voir fiche CRM complète →
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                <div className="bg-[var(--surface)] p-3 rounded-xl border border-[var(--border)]">
+                  <p className="text-[10px] font-bold text-[var(--text-subtle)] uppercase">Budget exprimé</p>
+                  <p className="text-sm font-bold text-[var(--text)] mt-0.5">
+                    {prospect.budget ? formatFCFA(prospect.budget) : 'Non précisé'}
+                  </p>
+                </div>
+                <div className="bg-[var(--surface)] p-3 rounded-xl border border-[var(--border)]">
+                  <p className="text-[10px] font-bold text-[var(--text-subtle)] uppercase">Recherche ciblée</p>
+                  <p className="text-sm font-bold text-[var(--text)] mt-0.5 truncate">
+                    {[prospect.type_bien, prospect.commune, prospect.quartier].filter(Boolean).join(' · ') || 'Critères libres'}
+                  </p>
+                </div>
+                <div className="bg-[var(--surface)] p-3 rounded-xl border border-[var(--border)]">
+                  <p className="text-[10px] font-bold text-[var(--text-subtle)] uppercase">Nature &amp; Statut</p>
+                  <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                      isAgentProspect(prospect) ? 'bg-purple-100 text-purple-900 border-purple-200' : 'bg-emerald-100 text-emerald-900 border-emerald-200'
+                    }`}>
+                      {isAgentProspect(prospect) ? 'Agent démarcheur' : 'Client direct'}
+                    </span>
+                    <span className="text-xs text-[var(--text-muted)] font-medium capitalize">
+                      · {prospect.statut.replace('_', ' ')}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {prospect.dernier_message && (
+                <div className="bg-[var(--surface)] p-3 rounded-xl border border-[var(--border)] text-xs text-[var(--text-muted)]">
+                  <p className="font-bold text-[var(--text)] mb-1 flex items-center gap-1 text-[11px]">
+                    <MessageCircle className="w-3 h-3 text-emerald-600" /> Dernier échange Sapphire :
+                  </p>
+                  <p className="italic line-clamp-3">« {prospect.dernier_message} »</p>
+                </div>
+              )}
+            </section>
+          )}
 
           {/* Propriétaire */}
           <section className="bg-[var(--surface-card)] rounded-2xl border border-[var(--border)] p-6">
@@ -204,7 +301,7 @@ export default async function VisiteDetailPage({ params }: PageProps) {
               </span>
               {ownerPhone && (
                 <a
-                  href={whatsappLink(ownerPhone)!}
+                  href={whatsappLink(ownerPhone) ?? undefined}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="min-h-[44px] inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-sm font-bold"
