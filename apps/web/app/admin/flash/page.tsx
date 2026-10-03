@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { Search, Flame, EyeOff, RotateCcw, MapPin, Calendar, AlertTriangle, CheckCircle2, Ban } from 'lucide-react'
+import { Search, Flame, EyeOff, RotateCcw, MapPin, Calendar, AlertTriangle, CheckCircle2, Ban, Eye } from 'lucide-react'
 import { locauxReadClients, byDatePubDesc } from '@/lib/supabase/locaux'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { retirerFlashAction, restaurerFlashAction, marquerOccupeAction, marquerDisponibleAction } from './actions'
@@ -207,17 +207,25 @@ export default async function AdminFlashPage({ searchParams }: PageProps) {
                     </p>
 
                     <div className="mt-auto pt-3 border-t border-[var(--border)] flex flex-col gap-2">
-                      {/* Ligne 1 : disponibilité + photo */}
-                      <div className="flex gap-2 flex-wrap">
+                      {/* Ligne 1 : disponibilité + aperçu + photo */}
+                      <div className="flex gap-2 flex-wrap items-center">
+                        <Link
+                          href={`/offre-flash/${row.id}`}
+                          target="_blank"
+                          title="Aperçu public de l'offre flash"
+                          className="flex items-center gap-1 px-3 py-2 bg-[var(--surface-hover)] hover:bg-[var(--border)] text-[var(--text)] rounded-lg text-xs font-semibold transition-colors"
+                        >
+                          <Eye className="w-3.5 h-3.5" /> Aperçu
+                        </Link>
                         {isOccupe ? (
-                          <form action={marquerDisponibleAction} className="flex-1">
+                          <form action={marquerDisponibleAction} className="flex-1 min-w-[120px]">
                             <input type="hidden" name="id" value={row.id} />
                             <button type="submit" className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-colors">
                               <CheckCircle2 className="w-3.5 h-3.5" /> Disponible
                             </button>
                           </form>
                         ) : (
-                          <form action={marquerOccupeAction} className="flex-1">
+                          <form action={marquerOccupeAction} className="flex-1 min-w-[120px]">
                             <input type="hidden" name="id" value={row.id} />
                             <button type="submit" className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition-colors">
                               <Ban className="w-3.5 h-3.5" /> Occupé
