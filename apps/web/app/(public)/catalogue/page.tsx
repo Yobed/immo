@@ -16,7 +16,7 @@ import { formatCount } from '@/lib/format'
 // Next 15 interdit `ssr: false` avec next/dynamic dans un Server Component.
 // Voir components/catalogue/CatalogueMapLoader.tsx.
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 120 // Cache ISR CDN 2 min : réduit de 95% la conso CPU Vercel
 export const metadata = {
   title: "Catalogue immobilier complet à Abidjan — 9000+ biens",
   description: "Trouvez votre bien à Abidjan : villas, appartements, studios et résidences meublées à Cocody, Plateau, Marcory, Yopougon. Catalogue vérifié BOGBE'S + offres flash WhatsApp en temps réel.",
@@ -87,6 +87,7 @@ export default async function CataloguePage({ searchParams }: PageProps) {
   let sourceUnavailable = false
   let paginated: typeof items = []
   let totalPages = 0
+  let communes: string[] = []
 
   if (sourceFilter === 'flash') {
     const [{ items: flashItems, total: flashTotal }, communes_, bogbesCount, webStatus] = await Promise.all([
@@ -107,7 +108,7 @@ export default async function CataloguePage({ searchParams }: PageProps) {
       web: webTotal,
       total: bogbesCount + flashTotal + webTotal,
     }
-    var communes = communes_
+    communes = communes_
   } else if (sourceFilter === 'web') {
     const [{ items: webItems, total: webTotal, unavailable }, communes_, bogbesCount, flashTotal] = await Promise.all([
       getAnnoncesPagedItems(filters, pageIdx, PAGE_SIZE),
@@ -127,7 +128,7 @@ export default async function CataloguePage({ searchParams }: PageProps) {
       total: bogbesCount + flashTotal + webTotal,
     }
     sourceUnavailable = unavailable
-    var communes = communes_
+    communes = communes_
   } else {
     const [catalogue, communes_, flashTotal, webStatus] = await Promise.all([
       getConsolidatedCatalogue({ ...filters, limitPerSource: 120 }),
@@ -148,7 +149,7 @@ export default async function CataloguePage({ searchParams }: PageProps) {
     displayTotal = sourceFilter === 'bogbes' ? catalogue.counts.bogbes : counts.total
     paginated = catalogue.items.slice(pageIdx * PAGE_SIZE, (pageIdx + 1) * PAGE_SIZE)
     totalPages = Math.ceil(total / PAGE_SIZE)
-    var communes = communes_
+    communes = communes_
   }
 
   // Preuve sociale RÉELLE : vues 7j des biens BOGBE'S visibles (1 requête sur la

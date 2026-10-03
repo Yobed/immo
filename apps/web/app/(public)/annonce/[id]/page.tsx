@@ -11,7 +11,7 @@ import { SITE_URL } from '@/lib/env'
 import { createClient } from '@/lib/supabase/server'
 import { createAnnoncesClient } from '@/lib/supabase/annonces'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 600 // Cache ISR CDN 10 min
 
 interface PageProps {
   params: Promise<{ id: string }>

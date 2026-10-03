@@ -777,12 +777,126 @@ export async function chatImmobilier(messages: ChatMessage[], context?: string):
   return FALLBACK_REPLY
 }
 
-export async function chatImmobilierStream(messages: ChatMessage[], context?: string): Promise<ReadableStream | null> {
+function textToStream(text: string): ReadableStream<Uint8Array> {
+  const encoder = new TextEncoder()
+  return new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(encoder.encode(text))
+      controller.close()
+    },
+  })
+}
+
+async function geminiStream(
+  messages: ChatMessage[],
+  system: string,
+): Promise<ReadableStream<Uint8Array> | null> {
+  if (!GEMINI_API_KEY) return null
+
+  const contents = messages
+    .filter((m) => m.role !== 'system' && m.content)
+    .map((m) => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }],
+    }))
+  if (contents.length === 0) return null
+
+  try {
+    const response = await fetchWithTimeout(
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:streamGenerateContent?alt=sse`,
+      {
+        method: 'POST',
+        headers: {
+          'x-goog-api-key': GEMINI_API_KEY,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: system }] },
+          contents,
+          generationConfig: {
+            temperature: 0.2,
+            maxOutputTokens: 800,
+            thinkingConfig: { thinkingBudget: 0 },
+          },
+        }),
+      },
+      8000
+    )
+
+    if (!response.ok || !response.body) {
+      console.warn(`[Gemini stream] HTTP ${response.status}`)
+      return null
+    }
+
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder()
+    const encoder = new TextEncoder()
+    let buffer = ''
+
+    return new ReadableStream<Uint8Array>({
+      async pull(controller) {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) {
+            controller.close()
+            return
+          }
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split('\n')
+          buffer = lines.pop() || ''
+
+          for (const line of lines) {
+            const trimmed = line.trim()
+            if (trimmed.startsWith('data: ')) {
+              try {
+                const json = JSON.parse(trimmed.slice(6))
+                const text = json.candidates?.[0]?.content?.parts?.[0]?.text
+                if (text) {
+                  controller.enqueue(encoder.encode(text))
+                }
+              } catch {
+                // Ignore parse errors on malformed chunks
+              }
+            }
+          }
+        }
+      },
+      cancel() {
+        reader.cancel()
+      },
+    })
+  } catch (e) {
+    console.warn('[Gemini stream] failed:', (e as Error).message)
+    return null
+  }
+}
+
+export async function chatImmobilierStream(messages: ChatMessage[], context?: string): Promise<ReadableStream<Uint8Array>> {
   const system = (context
     ? `${SYSTEM_PROMPT_IMMOBILIER_CI}\n\n== CATALOGUE DES BIENS DISPONIBLES ==\n${context}`
     : SYSTEM_PROMPT_IMMOBILIER_CI) + FINAL_RULES_REMINDER;
 
-  // Stage 1 — Try Groq stream
+  // Stage 1 — Gemini stream (Google AI Studio : robuste, gratuit et rapide)
+  if (GEMINI_API_KEY) {
+    try {
+      const gStream = await geminiStream(messages, system);
+      if (gStream) return gStream;
+    } catch (e) {
+      console.warn('[Sapphire stream] Gemini stream failed, trying geminiFetch:', (e as Error).message);
+    }
+
+    // Repli direct sur geminiFetch si le streaming SSE a échoué
+    try {
+      const gText = await geminiFetch(messages, system);
+      if (gText) {
+        return textToStream(sanitizeOutput(gText));
+      }
+    } catch (e) {
+      console.warn('[Sapphire stream] Gemini fetch fallback failed:', (e as Error).message);
+    }
+  }
+
+  // Stage 2 — Try Groq stream si clé disponible
   if (GROQ_API_KEY) {
     try {
       const groqResp = await fetch(GROQ_BASE_URL, {
@@ -799,16 +913,52 @@ export async function chatImmobilierStream(messages: ChatMessage[], context?: st
           stream: true,
         }),
       });
-      if (groqResp.ok && groqResp.body) return groqResp.body;
-      // 401 / 402 / 429 etc. → log + fall through to OpenRouter
-      const errBody = await groqResp.text().catch(() => '<no body>');
-      console.warn(`[Sapphire stream] Groq KO ${groqResp.status} ${errBody.slice(0, 200)} → OpenRouter fallback`);
+      if (groqResp.ok && groqResp.body) {
+        // Transform OpenAI SSE to clean text chunks
+        const reader = groqResp.body.getReader();
+        const decoder = new TextDecoder();
+        const encoder = new TextEncoder();
+        let buffer = '';
+
+        return new ReadableStream<Uint8Array>({
+          async pull(controller) {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) {
+                controller.close();
+                return;
+              }
+              buffer += decoder.decode(value, { stream: true });
+              const lines = buffer.split('\n');
+              buffer = lines.pop() || '';
+
+              for (const line of lines) {
+                const trimmed = line.trim();
+                if (trimmed.startsWith('data: ') && trimmed !== 'data: [DONE]') {
+                  try {
+                    const json = JSON.parse(trimmed.slice(6));
+                    const text = json.choices?.[0]?.delta?.content;
+                    if (text) {
+                      controller.enqueue(encoder.encode(text));
+                    }
+                  } catch {
+                    // Ignore parse error
+                  }
+                }
+              }
+            }
+          },
+          cancel() {
+            reader.cancel();
+          },
+        });
+      }
     } catch (e) {
       console.warn('[Sapphire stream] Groq fetch failed:', (e as Error).message);
     }
   }
 
-  // Stage 2 — OpenRouter stream fallback (paid Qwen model)
+  // Stage 3 — OpenRouter stream fallback
   if (OPENROUTER_API_KEY) {
     try {
       const orResp = await fetch(OPENROUTER_BASE_URL, {
@@ -827,16 +977,57 @@ export async function chatImmobilierStream(messages: ChatMessage[], context?: st
           stream: true,
         }),
       });
-      if (orResp.ok && orResp.body) return orResp.body;
-      const errBody = await orResp.text().catch(() => '<no body>');
-      console.error(`[Sapphire stream] OpenRouter KO ${orResp.status} ${errBody.slice(0, 200)}`);
+      if (orResp.ok && orResp.body) {
+        const reader = orResp.body.getReader();
+        const decoder = new TextDecoder();
+        const encoder = new TextEncoder();
+        let buffer = '';
+
+        return new ReadableStream<Uint8Array>({
+          async pull(controller) {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) {
+                controller.close();
+                return;
+              }
+              buffer += decoder.decode(value, { stream: true });
+              const lines = buffer.split('\n');
+              buffer = lines.pop() || '';
+
+              for (const line of lines) {
+                const trimmed = line.trim();
+                if (trimmed.startsWith('data: ') && trimmed !== 'data: [DONE]') {
+                  try {
+                    const json = JSON.parse(trimmed.slice(6));
+                    const text = json.choices?.[0]?.delta?.content;
+                    if (text) {
+                      controller.enqueue(encoder.encode(text));
+                    }
+                  } catch {
+                    // Ignore parse error
+                  }
+                }
+              }
+            }
+          },
+          cancel() {
+            reader.cancel();
+          },
+        });
+      }
     } catch (e) {
       console.error('[Sapphire stream] OpenRouter fetch failed:', (e as Error).message);
     }
   }
 
-  // Stage 3 — Both providers down : retourner null (le caller affichera un fallback texte)
-  return null;
+  // Stage 4 — Ultime filet : réponse de courtoisie professionnelle (garantie zéro crash)
+  const defaultReply =
+    "Bonjour, je suis Sapphire, votre conseillère immobilière BOGBE'S GROUPE.\n\n" +
+    "Pour vous orienter avec précision vers les biens disponibles à Abidjan et en Côte d'Ivoire, " +
+    "veuillez me préciser votre recherche (commune, type de bien, budget).\n\n" +
+    "Vous pouvez également nous joindre directement sur WhatsApp au +225 05 44 87 20 51 pour un accompagnement immédiat.";
+  return textToStream(defaultReply);
 }
 
 export async function scorerAnnonce(bienData: Record<string, unknown>) {
@@ -858,3 +1049,20 @@ export async function genererDescription(caracteristiques: Record<string, unknow
   );
   return result || '';
 }
+
+/**
+ * Appel LLM rapide multi-provider (Groq -> Gemini -> OpenRouter) pour tâches
+ * d'arrière-plan (réflexion de mémoire Hindsight, synthèse, extraction).
+ */
+export async function fastLLMComplete(prompt: string, systemPrompt?: string): Promise<string | null> {
+  const messages: ChatMessage[] = [{ role: 'user', content: prompt }]
+  const sys = systemPrompt || 'Tu es un assistant IA précis, analytique et concis.'
+  const groq = await groqFetch(messages, sys)
+  if (groq) return sanitizeOutput(groq)
+  const gemini = await geminiFetch(messages, sys)
+  if (gemini) return sanitizeOutput(gemini)
+  const or = await openRouterFetch(messages, sys)
+  if (or) return sanitizeOutput(or)
+  return null
+}
+

@@ -58,9 +58,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { data: bien } = await (supabase as any)
     .from('biens')
     .select(`
-      titre, description, commune, quartier, adresse, type_bien,
-      prix_mois_fcfa, prix_vente_fcfa, surface_m2, nbr_chambre, nbr_salle_bain,
-      note_moyenne,
+      titre, description, commune, quartier, adresse_complete, type_bien,
+      prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_chambres, nb_salles_bain,
       biens_medias(url, est_couverture, ordre),
       profiles!proprietaire_id(full_name, phone)
     `)
@@ -81,7 +80,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const lieu = [bien.quartier, bien.commune].filter(Boolean).join(', ')
   const prix = bien.prix_vente_fcfa
     ? formatFCFA(bien.prix_vente_fcfa)
-    : bien.prix_mois_fcfa ? `${formatFCFA(bien.prix_mois_fcfa)}/mois` : ''
+    : bien.prix_nuit_fcfa
+      ? `${formatFCFA(bien.prix_nuit_fcfa)}/nuit`
+      : bien.prix_mois_fcfa ? `${formatFCFA(bien.prix_mois_fcfa)}/mois` : ''
   // Description : ~155 chars max pour ne pas être tronquée mobile/Google.
   const desc = `${bien.type_bien} à ${lieu}${prix ? ` — ${prix}` : ''}. Annonce vérifiée BOGBE'S GROUPE, sans arnaque.`.slice(0, 155)
 
@@ -93,14 +94,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     description: bien.description,
     commune: bien.commune,
     quartier: bien.quartier,
-    adresse: bien.adresse,
+    adresse: bien.adresse_complete,
     type_bien: bien.type_bien,
     prix_vente_fcfa: bien.prix_vente_fcfa,
     prix_mois_fcfa: bien.prix_mois_fcfa,
     surface_m2: bien.surface_m2,
-    nbr_chambre: bien.nbr_chambre,
-    nbr_salle_bain: bien.nbr_salle_bain,
-    note_moyenne: bien.note_moyenne,
+    nbr_chambre: bien.nb_chambres,
+    nbr_salle_bain: bien.nb_salles_bain,
+    note_moyenne: undefined,
     avis_count: 0, // Could be fetched from avis table
     coverImage: photo,
     allImages: allPhotos,
@@ -222,7 +223,11 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
     </div>
   ) : null
 
-  const medias = ((bien.biens_medias as any[]) ?? []).sort((a: any, b: any) => a.ordre - b.ordre)
+  const medias = ((bien.biens_medias as any[]) ?? []).slice().sort((a: any, b: any) => {
+    if (a.est_couverture && !b.est_couverture) return -1
+    if (!a.est_couverture && b.est_couverture) return 1
+    return (a.ordre ?? 0) - (b.ordre ?? 0)
+  })
   let videoMedias = medias.filter((m: any) => m.type === 'video')
 
   if (videoMedias.length === 0) {
@@ -234,7 +239,7 @@ export default async function FicheBienPage({ params }: { params: Promise<{ id: 
     }]
   }
 
-  const vue360Medias = medias.filter((m: any) => m.type === '360')
+  const vue360Medias = medias.filter((m: any) => m.type === 'vue_360' || m.type === '360')
   const isNuitee = bien.type_bien?.toLowerCase().includes('meublee') ||
                    bien.type_bien?.toLowerCase().includes('meublé') ||
                    bien.type_bien?.toLowerCase().includes('nuit') ||

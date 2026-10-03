@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -21,6 +21,8 @@ import { useT } from '@/lib/i18n/client'
 import { useVoiceSearch, parseVoiceCommand } from '@/hooks/useVoiceSearch'
 import { formatFCFA } from '@/lib/format'
 
+import { COMMUNES_CI } from '@immo-ci/shared/constants/communes'
+
 const TYPE_FILTERS: { label: string; value: string; icon: LucideIcon }[] = [
   { label: 'Proche de moi',     value: 'near_me',           icon: MapPin },
   { label: 'Tous',              value: '',                  icon: Home },
@@ -33,7 +35,7 @@ const TYPE_FILTERS: { label: string; value: string; icon: LucideIcon }[] = [
   { label: 'Terrains',          value: 'terrain',           icon: Shovel },
 ]
 
-const COMMUNES = ['Cocody', 'Plateau', 'Yopougon', 'Marcory', 'Treichville', 'Adjamé', 'Abobo', 'Koumassi', 'Port-Bouët']
+const COMMUNES = COMMUNES_CI
 
 
 type BienRow = {

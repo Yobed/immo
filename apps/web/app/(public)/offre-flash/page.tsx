@@ -9,7 +9,7 @@ import { Pagination } from '@/components/ui/Pagination'
 import { getLocauxPagedItems, getCatalogueCommunes, type ConsolidatedFilters } from '@/lib/catalogue/consolidated'
 import { formatCount } from '@/lib/format'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 60 // Cache ISR CDN 1 min : protège le CPU Vercel des rafales
 export const metadata = {
   title: "Offres flash WhatsApp — bons plans immobiliers en temps réel",
   description: "9 000+ annonces immobilières captées sur les groupes WhatsApp de Côte d'Ivoire. Validation conseiller incluse avant chaque visite. Pas d'arnaque, pas d'intermédiaires douteux.",

@@ -1,5 +1,7 @@
-/** @type {import('next').NextConfig} */
+import path from 'node:path'
+
 const nextConfig = {
+  ...(process.env.VERCEL ? {} : { outputFileTracingRoot: path.resolve(import.meta.dirname, '../../') }),
   transpilePackages: ['@immo-ci/shared'],
   // RESA-03 FIX: Evite le crash "ba.Component is not a constructor" de react-pdf
   // dans les App Router route handlers. Sans ceci, next build reussit mais la route
@@ -13,6 +15,8 @@ const nextConfig = {
     ],
   },
   images: {
+    minimumCacheTTL: 2592000,
+    formats: ['image/webp', 'image/avif'],
     remotePatterns: [
       { protocol: 'https', hostname: 'res.cloudinary.com' },
       { protocol: 'https', hostname: '*.supabase.co' },

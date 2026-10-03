@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { getSeoCommune, communePageMeta } from '@/lib/seo/communes'
 import { CommuneLanding } from '@/components/seo/CommuneLanding'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300 // Cache ISR CDN 5 min
 
 interface Props {
   params: Promise<{ commune: string }>

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { waitUntil } from '@vercel/functions';
 import { createClient } from '@supabase/supabase-js';
 import { wasenderSendMessage, verifyWasenderSignature } from '@/lib/wasender';
 import { locauxClientForId } from '@/lib/supabase/locaux';
@@ -30,6 +31,7 @@ import {
   getN8nScraperWebhookUrl,
   shouldForwardGroupMessageToScraper,
 } from '@/lib/wasender-scraper-forward';
+import { recall as hindsightRecall, retain as hindsightRetain, reflect as hindsightReflect } from '@/lib/memory/hindsight';
 
 // Le délai anti-ban (humanReplyDelay) + l'appel LLM peuvent dépasser les 10-15 s
 // par défaut d'une fonction Vercel → on s'octroie 60 s.
@@ -431,11 +433,14 @@ export async function POST(req: NextRequest) {
           }
         })();
 
-        const [forwardResult] = await Promise.all([forwardPromise, outreachPromise]);
-        if (!forwardResult.ok) {
-          console.warn(`[group-scraper] n8n delivery status=${forwardResult.status ?? 'network'} (direct FRESH ingest active)`);
-        }
-        console.log('[group-scraper] group message ingested to FRESH and forwarded to n8n');
+        waitUntil(
+          Promise.allSettled([forwardPromise, outreachPromise]).then(([forwardResult]) => {
+            if (forwardResult.status === 'fulfilled' && !forwardResult.value.ok) {
+              console.warn(`[group-scraper] n8n delivery status=${forwardResult.value.status ?? 'network'} (direct FRESH ingest active)`);
+            }
+            console.log('[group-scraper] group message ingested to FRESH and forwarded to n8n (bg)');
+          })
+        );
         return NextResponse.json({ status: 'ok', branch: 'group_forwarded' });
       }
       return NextResponse.json({ status: 'ignored', reason: 'group_message_not_forwarded' });
@@ -894,6 +899,16 @@ export async function POST(req: NextRequest) {
       enrichedContext = (enrichedContext || '') + rdvInstructions;
     }
 
+    // 4b. Mémoire cognitive Hindsight (Recall du modèle mental du prospect)
+    try {
+      const memory = await hindsightRecall(senderPn);
+      if (memory.promptContext) {
+        enrichedContext = `${memory.promptContext}\n\n${enrichedContext}`;
+      }
+    } catch (e) {
+      console.warn('[Hindsight] recall error in webhook:', e);
+    }
+
     // 5. Réponse Sapphire via Groq
     const aiResponse = await chatImmobilier(formattedHistory, enrichedContext);
 
@@ -1144,6 +1159,19 @@ Message client : "${userMessage.slice(0, 200)}"`;
       body: cleanText || aiResponse,
       metadata: { mediaUrls, model: getLastSapphireRoute() },
     });
+
+    // 11. Hindsight Retain & Reflect (asynchrone en arrière-plan)
+    waitUntil(
+      hindsightRetain({
+        entityId: senderPn,
+        prospectId: capturedProspectId ?? null,
+        channel: 'whatsapp',
+        type: hasVisiteIntent ? 'visit_request' : 'message',
+        content: `Client: "${userMessage}" | Réponse: "${(cleanText || aiResponse).slice(0, 300)}"`,
+      })
+        .then(() => hindsightReflect(senderPn))
+        .catch((err) => console.warn('[Hindsight][wa] background retain/reflect failed:', err))
+    );
 
     return NextResponse.json({ status: 'ok' });
   } catch (error: any) {
