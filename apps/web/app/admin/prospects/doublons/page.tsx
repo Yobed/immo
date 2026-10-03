@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
-import { Copy, ArrowLeft, ExternalLink, AlertTriangle, Users, ShieldCheck, RotateCcw, FileText, Download, CheckCircle2 } from 'lucide-react'
+import { Copy, ExternalLink, AlertTriangle, FileText, Download, CheckCircle2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { CrmActionForm } from '@/components/admin/CrmActionForm'
@@ -35,78 +35,69 @@ export default async function ProspectDuplicatesPage() {
 
   return (
     <main className="min-h-screen bg-[var(--surface-hover)] pb-12">
-      <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-6">
-        {/* Navigation secondaire CRM */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[var(--border)]">
-          <div className="flex items-center gap-2 flex-wrap">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-5">
+        {/* Navigation secondaire CRM épurée */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[var(--border)]">
+          <div className="flex items-center gap-1 bg-[var(--surface-hover)] p-0.5 rounded-lg border border-[var(--border)]">
             <Link
               href="/admin/prospects"
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[var(--surface-card)] hover:bg-[var(--surface-hover)] text-[var(--text-muted)] hover:text-[var(--text)] border border-[var(--border)] transition-colors"
+              className="px-3 py-1 rounded-md text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text)] transition-colors"
             >
-              <Users className="w-3.5 h-3.5" />
-              <span>Pipeline CRM</span>
+              Pipeline & Leads
             </Link>
             <Link
               href="/admin/prospects/qualite"
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[var(--surface-card)] hover:bg-[var(--surface-hover)] text-[var(--text-muted)] hover:text-[var(--text)] border border-[var(--border)] transition-colors"
+              className="px-3 py-1 rounded-md text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text)] transition-colors"
             >
-              <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-              <span>Qualité CRM</span>
+              Qualité des données
             </Link>
             <Link
               href="/admin/prospects/doublons"
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[var(--accent-luxury)] text-[#0b1530] shadow-sm"
+              className="px-3 py-1 rounded-md text-xs font-semibold bg-[var(--surface-card)] text-[var(--text)] shadow-xs"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Doublons</span>
+              Doublons
             </Link>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
             <a
               href="/api/admin/fiche-visite"
               target="_blank"
               rel="noopener noreferrer"
-              className="min-h-[38px] inline-flex items-center gap-2 px-3.5 py-1.5 bg-[var(--surface-card)] hover:bg-[var(--surface-hover)] text-[var(--text)] border border-[var(--border)] rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text)] border border-[var(--border)] bg-[var(--surface-card)] hover:bg-[var(--surface-hover)] transition-colors"
             >
-              <FileText className="w-4 h-4 text-[var(--accent-luxury)]" />
-              <span>Fiche de visite (PDF)</span>
+              <FileText className="w-3.5 h-3.5 text-[var(--text-subtle)]" />
+              <span>Fiche vierge (PDF)</span>
             </a>
             <a
               href="/api/admin/prospects/export"
-              className="min-h-[38px] inline-flex items-center gap-2 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all active:scale-95"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text)] border border-[var(--border)] bg-[var(--surface-card)] hover:bg-[var(--surface-hover)] transition-colors"
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-3.5 h-3.5 text-[var(--text-subtle)]" />
               <span>Exporter CSV</span>
             </a>
           </div>
         </div>
 
         {/* Titre */}
-        <header>
-          <div className="inline-flex items-center gap-2 mb-1.5">
-            <div className="w-8 h-8 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-400">
-              <Copy className="w-4 h-4" />
-            </div>
-            <h1 className="font-display text-2xl md:text-3xl font-bold text-[var(--text)]">Gestion des Doublons CRM</h1>
-          </div>
-          <p className="text-sm text-[var(--text-muted)]">
-            Fusionnez les fiches ayant le même numéro de téléphone pour centraliser l&apos;historique sans perte d&apos;activité.
+        <div>
+          <h1 className="text-xl font-semibold text-[var(--text)] tracking-tight">Gestion des doublons</h1>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">
+            Fusion des fiches ayant le même numéro de contact pour consolider l&apos;historique sans perte.
           </p>
-        </header>
+        </div>
 
         {error ? (
-          <div role="alert" className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-5 text-sm text-rose-300">
-            Impossible de charger les doublons. Vérifiez que la migration CRM est appliquée.
+          <div role="alert" className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-xs text-rose-300">
+            Impossible de charger les doublons.
           </div>
         ) : groups.length === 0 ? (
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-card)] p-12 text-center shadow-sm">
-            <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto mb-3" />
-            <p className="font-bold text-[var(--text)] text-base">Aucun doublon détecté</p>
-            <p className="text-xs text-[var(--text-muted)] mt-1">Toutes les fiches prospects ont un numéro de contact distinct.</p>
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] p-8 text-center text-xs text-[var(--text-muted)]">
+            <CheckCircle2 className="w-5 h-5 text-emerald-400 mx-auto mb-2" />
+            Aucun doublon détecté dans la base.
           </div>
         ) : (
-          <div className="space-y-5">
+          <div className="space-y-4">
             {groups.map((group) => (
               <DuplicateGroupCard key={group.phone_normalized} group={group} prospects={prospects} />
             ))}
@@ -123,53 +114,52 @@ function DuplicateGroupCard({ group, prospects }: { group: DuplicateGroup; prosp
   if (!defaultPrimary || !defaultDuplicate) return null
 
   return (
-    <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface-card)] p-5 md:p-6 shadow-sm space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[var(--border)]">
-        <div>
-          <p className="font-mono font-bold text-[var(--text)] text-base">+{group.phone_normalized}</p>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">
-            {group.duplicate_count} fiches identifiées · dernière activité {new Date(group.last_seen).toLocaleDateString('fr-FR')}
-          </p>
+    <section className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] p-4 space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-[var(--border)]/60">
+        <div className="flex items-center gap-2">
+          <span className="font-mono font-semibold text-xs text-[var(--text)]">+{group.phone_normalized}</span>
+          <span className="text-[11px] text-[var(--text-subtle)]">
+            ({group.duplicate_count} fiches · actif le {new Date(group.last_seen).toLocaleDateString('fr-FR')})
+          </span>
         </div>
-        <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 bg-amber-500/15 border border-amber-500/30 rounded-full px-3 py-1">
-          <AlertTriangle className="w-3.5 h-3.5" />
-          Vérification humaine requise
+        <span className="text-[10px] font-medium text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+          À vérifier
         </span>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-3">
+      <div className="grid sm:grid-cols-2 gap-2">
         {group.prospect_ids.map((id) => (
           <Link
             key={id}
             href={`/admin/prospects/${id}`}
-            className="flex min-h-16 items-center justify-between gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface-hover)] px-4 py-3 hover:border-[var(--accent-luxury)] transition-all group"
+            className="flex items-center justify-between gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-2.5 hover:bg-[var(--surface-hover)] transition-colors group text-xs"
           >
             <div>
-              <span className="block text-sm font-bold text-[var(--text)] group-hover:text-[var(--accent-luxury)] transition-colors">
+              <p className="font-medium text-[var(--text)] group-hover:text-[var(--accent-luxury)] transition-colors">
                 {prospects[id]?.nom || 'Prospect sans nom'}
-              </span>
-              <span className="block text-xs text-[var(--text-muted)] mt-0.5">
+              </p>
+              <p className="text-[11px] text-[var(--text-subtle)]">
                 Statut : {prospects[id]?.statut || 'Non renseigné'}
-              </span>
+              </p>
             </div>
-            <ExternalLink className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--text)] transition-colors" />
+            <ExternalLink className="w-3.5 h-3.5 text-[var(--text-subtle)]" />
           </Link>
         ))}
       </div>
 
       <CrmActionForm
         action={mergeProspectsAction}
-        className="rounded-xl border border-[var(--border)] bg-[var(--surface-hover)] p-4 space-y-3"
+        className="rounded-lg border border-[var(--border)]/60 bg-[var(--surface)] p-3 space-y-3"
       >
         <input type="hidden" name="request_id" value={crypto.randomUUID()} />
-        <div className="grid sm:grid-cols-2 gap-3">
-          <label className="text-xs font-bold text-[var(--text)]">
-            Fiche principale à conserver
+        <div className="grid sm:grid-cols-2 gap-3 text-xs">
+          <label className="text-[var(--text-muted)] font-medium">
+            Conserver (fiche principale)
             <select
               name="primary_id"
               defaultValue={defaultPrimary}
-              aria-label="Fiche principale à conserver"
-              className="mt-1 min-h-[38px] w-full rounded-xl border border-[var(--border)] bg-[var(--surface-card)] px-3 text-xs font-semibold text-[var(--text)] focus:outline-none focus:border-[var(--accent-luxury)]"
+              aria-label="Fiche principale"
+              className="mt-1 h-8 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-card)] px-2 text-xs text-[var(--text)] focus:outline-none focus:border-[var(--accent-luxury)]"
             >
               {group.prospect_ids.map((id) => (
                 <option key={id} value={id}>
@@ -178,13 +168,13 @@ function DuplicateGroupCard({ group, prospects }: { group: DuplicateGroup; prosp
               ))}
             </select>
           </label>
-          <label className="text-xs font-bold text-[var(--text)]">
-            Fiche secondaire à archiver
+          <label className="text-[var(--text-muted)] font-medium">
+            Archiver (fiche doublon)
             <select
               name="duplicate_id"
               defaultValue={defaultDuplicate}
-              aria-label="Fiche secondaire à archiver"
-              className="mt-1 min-h-[38px] w-full rounded-xl border border-[var(--border)] bg-[var(--surface-card)] px-3 text-xs font-semibold text-[var(--text)] focus:outline-none focus:border-[var(--accent-luxury)]"
+              aria-label="Fiche secondaire"
+              className="mt-1 h-8 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-card)] px-2 text-xs text-[var(--text)] focus:outline-none focus:border-[var(--accent-luxury)]"
             >
               {group.prospect_ids.map((id) => (
                 <option key={id} value={id}>
@@ -194,15 +184,17 @@ function DuplicateGroupCard({ group, prospects }: { group: DuplicateGroup; prosp
             </select>
           </label>
         </div>
-        <p className="text-[11px] text-[var(--text-muted)]">
-          Les informations complémentaires restent consultables. La fusion réassigne l&apos;ensemble des interactions à la fiche principale sans perturber le suivi commercial.
-        </p>
-        <button
-          type="submit"
-          className="min-h-[40px] rounded-xl bg-[var(--accent-luxury)] hover:brightness-110 text-[#0b1530] px-5 text-xs font-black shadow-sm transition-all active:scale-95"
-        >
-          Confirmer la fusion des deux fiches
-        </button>
+        <div className="flex items-center justify-between gap-3 pt-1">
+          <p className="text-[11px] text-[var(--text-subtle)]">
+            L&apos;historique sera transféré sans interruption de suivi.
+          </p>
+          <button
+            type="submit"
+            className="h-8 px-3 rounded-lg bg-[var(--text)] text-[var(--surface-card)] hover:opacity-90 text-xs font-semibold shrink-0 transition-opacity"
+          >
+            Fusionner
+          </button>
+        </div>
       </CrmActionForm>
     </section>
   )

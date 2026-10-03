@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
-import { AlertTriangle, ArrowLeft, CheckCircle2, ShieldCheck, Users, RotateCcw, FileText, Download } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, FileText, Download } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -65,122 +65,111 @@ export default async function ProspectQualityPage() {
 
   return (
     <main className="min-h-screen bg-[var(--surface-hover)] pb-12">
-      <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-6">
-        {/* Navigation secondaire CRM */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[var(--border)]">
-          <div className="flex items-center gap-2 flex-wrap">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-5">
+        {/* Navigation secondaire CRM épurée */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[var(--border)]">
+          <div className="flex items-center gap-1 bg-[var(--surface-hover)] p-0.5 rounded-lg border border-[var(--border)]">
             <Link
               href="/admin/prospects"
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[var(--surface-card)] hover:bg-[var(--surface-hover)] text-[var(--text-muted)] hover:text-[var(--text)] border border-[var(--border)] transition-colors"
+              className="px-3 py-1 rounded-md text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text)] transition-colors"
             >
-              <Users className="w-3.5 h-3.5" />
-              <span>Pipeline CRM</span>
+              Pipeline & Leads
             </Link>
             <Link
               href="/admin/prospects/qualite"
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[var(--accent-luxury)] text-[#0b1530] shadow-sm"
+              className="px-3 py-1 rounded-md text-xs font-semibold bg-[var(--surface-card)] text-[var(--text)] shadow-xs"
             >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Qualité CRM</span>
+              Qualité des données
             </Link>
             <Link
               href="/admin/prospects/doublons"
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[var(--surface-card)] hover:bg-[var(--surface-hover)] text-[var(--text-muted)] hover:text-[var(--text)] border border-[var(--border)] transition-colors"
+              className="px-3 py-1 rounded-md text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text)] transition-colors"
             >
-              <RotateCcw className="w-3.5 h-3.5 text-sky-400" />
-              <span>Doublons</span>
+              Doublons
             </Link>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
             <a
               href="/api/admin/fiche-visite"
               target="_blank"
               rel="noopener noreferrer"
-              className="min-h-[38px] inline-flex items-center gap-2 px-3.5 py-1.5 bg-[var(--surface-card)] hover:bg-[var(--surface-hover)] text-[var(--text)] border border-[var(--border)] rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text)] border border-[var(--border)] bg-[var(--surface-card)] hover:bg-[var(--surface-hover)] transition-colors"
             >
-              <FileText className="w-4 h-4 text-[var(--accent-luxury)]" />
-              <span>Fiche de visite (PDF)</span>
+              <FileText className="w-3.5 h-3.5 text-[var(--text-subtle)]" />
+              <span>Fiche vierge (PDF)</span>
             </a>
             <a
               href="/api/admin/prospects/export"
-              className="min-h-[38px] inline-flex items-center gap-2 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-sm transition-all active:scale-95"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text)] border border-[var(--border)] bg-[var(--surface-card)] hover:bg-[var(--surface-hover)] transition-colors"
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-3.5 h-3.5 text-[var(--text-subtle)]" />
               <span>Exporter CSV</span>
             </a>
           </div>
         </div>
 
         {/* Titre */}
-        <header>
-          <div className="inline-flex items-center gap-2 mb-1.5">
-            <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
-              <ShieldCheck className="w-4 h-4" />
-            </div>
-            <h1 className="font-display text-2xl md:text-3xl font-bold text-[var(--text)]">Qualité des données CRM</h1>
-          </div>
-          <p className="text-sm text-[var(--text-muted)]">
-            Détection automatique des fiches incomplètes pour préserver la qualité de la relance commerciale.
+        <div>
+          <h1 className="text-xl font-semibold text-[var(--text)] tracking-tight">Qualité des données</h1>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">
+            Contrôle d&apos;intégrité pour repérer les fiches incomplètes avant qu&apos;elles n&apos;affectent la relance.
           </p>
-        </header>
+        </div>
 
         {fetchError && (
-          <div role="alert" className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-5 text-sm text-rose-300">
+          <div role="alert" className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-xs text-rose-300">
             {fetchError}
           </div>
         )}
 
-        {/* Synthèse anomalie */}
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-card)] p-5 md:p-6 shadow-sm flex items-center gap-4">
-          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${
-            totalIssues ? 'bg-amber-500/15 border-amber-500/30 text-amber-400' : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
-          }`}>
-            {totalIssues ? <AlertTriangle className="w-6 h-6" /> : <CheckCircle2 className="w-6 h-6" />}
+        {/* Résumé compact */}
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] p-4 flex items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2.5">
+            {totalIssues > 0 ? (
+              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+            ) : (
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            )}
+            <span className="text-[var(--text)]">
+              <strong>{totalIssues}</strong> anomalie(s) sur un total de <strong>{rows.length}</strong> fiches analysées.
+            </span>
           </div>
-          <div>
-            <p className="text-3xl font-black font-display text-[var(--text)] tabular-nums">{totalIssues}</p>
-            <p className="text-xs text-[var(--text-muted)]">
-              anomalie(s) identifiée(s) sur un total de {rows.length} fiches prospects analysées
-            </p>
-          </div>
+          {totalIssues === 0 && (
+            <span className="text-emerald-400 font-medium text-[11px]">Toutes les fiches sont complètes ✓</span>
+          )}
         </div>
 
         {/* Grille des contrôles */}
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 gap-3.5">
           {issues.map((issue) => (
             <section
               key={issue.key}
-              className="rounded-2xl border border-[var(--border)] bg-[var(--surface-card)] p-5 shadow-sm space-y-3"
+              className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] p-4 space-y-2.5"
             >
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="font-bold text-[var(--text)] text-sm">{issue.label}</h2>
-                <span className={`text-xs font-black px-2.5 py-0.5 rounded-full border ${
-                  issue.count > 0
-                    ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
-                    : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-                }`}>
-                  {issue.count} anomalie{issue.count > 1 ? 's' : ''}
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="font-medium text-[var(--text)] text-xs">{issue.label}</h2>
+                <span className="text-[11px] font-mono text-[var(--text-subtle)]">
+                  {issue.count}
                 </span>
               </div>
               {issue.count > 0 ? (
-                <div className="space-y-1.5">
-                  <p className="text-[11px] text-[var(--text-subtle)] font-medium">Exemples à corriger :</p>
+                <div className="space-y-1 pt-1 border-t border-[var(--border)]/60">
                   {issue.examples.map((row) => (
                     <Link
                       key={row.id}
                       href={`/admin/prospects/${row.id}`}
-                      className="block rounded-xl bg-[var(--surface-hover)] border border-[var(--border)] px-3 py-2 text-xs text-[var(--text)] hover:text-[var(--accent-luxury)] hover:border-[var(--accent-luxury)]/40 transition-colors"
+                      className="flex items-center justify-between py-1 px-2 rounded hover:bg-[var(--surface-hover)] text-xs text-[var(--text)] transition-colors"
                     >
-                      <span className="font-bold">{row.nom || 'Prospect sans nom'}</span>
-                      <span className="text-[var(--text-muted)] font-mono ml-2">
-                        {row.phone ? `+225 ${row.phone.replace(/^225/, '')}` : 'aucun numéro'}
+                      <span className="font-medium truncate">{row.nom || 'Prospect sans nom'}</span>
+                      <span className="text-[11px] text-[var(--text-subtle)] font-mono ml-2 shrink-0">
+                        {row.phone ? `+225 ${row.phone.replace(/^225/, '')}` : 'sans numéro'}
                       </span>
                     </Link>
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-emerald-400 font-medium">Aucune anomalie détectée sur ce critère ✓</p>
+                <p className="text-[11px] text-[var(--text-subtle)] italic">Aucune anomalie</p>
               )}
             </section>
           ))}
