@@ -89,8 +89,8 @@ const STATUS_META: Record<AdminStatus, { label: string; cls: string; col: string
   rejected: { label: 'Refusées',   cls: 'bg-rose-500/15 text-rose-400 border-rose-500/30',         col: 'border-t-rose-500',     icon: XCircle },
 }
 
-function adminBadge(status: AdminStatus) {
-  const s = STATUS_META[status]
+function adminBadge(status: AdminStatus | string | null | undefined) {
+  const s = (status && STATUS_META[status as AdminStatus]) || STATUS_META.pending
   const Icon = s.icon
   return (
     <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${s.cls}`}>
@@ -523,58 +523,57 @@ function ContactCard({ c, compact = false }: { c: ContactRow; compact?: boolean 
   const titre = c.biens?.titre || c.flash_titre || 'Bien'
   const pending = c.admin_validation_status === 'pending'
   const age = ageLabel(c.created_at)
+  const detailUrl = `/admin/suivi/contacts/${c.id}`
+
   return (
     <div className="bg-[var(--surface-card)] rounded-xl border border-[var(--border)] hover:border-[var(--accent-luxury)]/40 hover:shadow-lg transition-all p-3.5 flex flex-col justify-between">
       <div>
-        <Link href={`/admin/suivi/contacts/${c.id}`} className="group block">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <h3 className="font-bold text-[var(--text)] text-sm line-clamp-1 group-hover:text-[var(--accent-luxury)] transition-colors">{titre}</h3>
-              <p className="text-[var(--text-muted)] text-xs flex items-center gap-1 mt-0.5">
-                <MapPin className="w-3 h-3" />
-                {c.biens?.commune || '—'}
-                {isFlash && <span className="ml-1 text-orange-500 font-bold">· ⚡ flash</span>}
-              </p>
-            </div>
-            <div className="flex flex-col items-end gap-1 shrink-0">
-              {!compact && adminBadge(c.admin_validation_status)}
-              {pending && (
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${age.cls}`}>{age.label}</span>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-1 text-xs text-[var(--text-muted)] mt-2.5">
-            <p className="flex items-center gap-1.5">
-              <User className="w-3 h-3 text-[var(--text-subtle)]" />
-              <span className="font-semibold text-[var(--text)] truncate">{c.visitor_name || 'Visiteur'}</span>
+        <div className="flex items-start justify-between gap-2">
+          <Link href={detailUrl} className="group min-w-0 flex-1 block">
+            <h3 className="font-bold text-[var(--text)] text-sm line-clamp-1 group-hover:text-[var(--accent-luxury)] transition-colors">{titre}</h3>
+            <p className="text-[var(--text-muted)] text-xs flex items-center gap-1 mt-0.5">
+              <MapPin className="w-3 h-3" />
+              {c.biens?.commune || '—'}
+              {isFlash && <span className="ml-1 text-orange-500 font-bold">· ⚡ flash</span>}
             </p>
-            <div className="flex items-center justify-between gap-2">
-              <p className="flex items-center gap-1.5 min-w-0">
-                <Phone className="w-3 h-3 text-[var(--text-subtle)] shrink-0" />
-                <span className="truncate font-mono text-[11px]">{c.visitor_phone || '—'}</span>
-              </p>
-              {c.visitor_phone && c.visitor_phone !== '—' && (
-                <a
-                  href={whatsappLink(c.visitor_phone) ?? '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#25D366] hover:bg-[#20ba5a] text-white text-[11px] font-black shadow-sm active:scale-95 transition-all shrink-0"
-                  title="Contacter le visiteur sur WhatsApp"
-                >
-                  <MessageCircle className="w-3 h-3" /> WhatsApp
-                </a>
-              )}
-            </div>
-            {c.reason && (
-              <p className="flex items-start gap-1.5 line-clamp-2 pt-0.5">
-                <MessageCircle className="w-3 h-3 text-[var(--text-subtle)] mt-0.5 shrink-0" />
-                <span className="line-clamp-2">{c.reason}</span>
-              </p>
+          </Link>
+          <div className="flex flex-col items-end gap-1 shrink-0">
+            {!compact && adminBadge(c.admin_validation_status)}
+            {pending && (
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${age.cls}`}>{age.label}</span>
             )}
           </div>
-        </Link>
+        </div>
+
+        <div className="space-y-1 text-xs text-[var(--text-muted)] mt-2.5">
+          <Link href={detailUrl} className="flex items-center gap-1.5 hover:text-[var(--text)]">
+            <User className="w-3 h-3 text-[var(--text-subtle)]" />
+            <span className="font-semibold text-[var(--text)] truncate">{c.visitor_name || 'Visiteur'}</span>
+          </Link>
+          <div className="flex items-center justify-between gap-2">
+            <p className="flex items-center gap-1.5 min-w-0">
+              <Phone className="w-3 h-3 text-[var(--text-subtle)] shrink-0" />
+              <span className="truncate font-mono text-[11px]">{c.visitor_phone || '—'}</span>
+            </p>
+            {c.visitor_phone && c.visitor_phone !== '—' && (
+              <a
+                href={whatsappLink(c.visitor_phone) ?? '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#25D366] hover:bg-[#20ba5a] text-white text-[11px] font-black shadow-sm active:scale-95 transition-all shrink-0"
+                title="Contacter le visiteur sur WhatsApp"
+              >
+                <MessageCircle className="w-3 h-3" /> WhatsApp
+              </a>
+            )}
+          </div>
+          {c.reason && (
+            <Link href={detailUrl} className="flex items-start gap-1.5 line-clamp-2 pt-0.5 hover:text-[var(--text)]">
+              <MessageCircle className="w-3 h-3 text-[var(--text-subtle)] mt-0.5 shrink-0" />
+              <span className="line-clamp-2">{c.reason}</span>
+            </Link>
+          )}
+        </div>
       </div>
 
       <div>
@@ -582,10 +581,10 @@ function ContactCard({ c, compact = false }: { c: ContactRow; compact?: boolean 
           entityId={c.id}
           entityType="contact"
           status={c.admin_validation_status}
-          detailUrl={`/admin/suivi/contacts/${c.id}`}
+          detailUrl={detailUrl}
         />
         <div className="flex items-center justify-between pt-1.5 mt-2 border-t border-[var(--border)] text-[10px] text-[var(--text-subtle)]">
-          <Link href={`/admin/suivi/contacts/${c.id}`} className="hover:underline">Reçue {formatDateTime(c.created_at)}</Link>
+          <Link href={detailUrl} className="hover:underline">Reçue {formatDateTime(c.created_at)}</Link>
           <NotifDots ownerNotified={!!c.owner_notified_at} visitorNotified={!!c.visitor_notified_at} />
         </div>
       </div>
@@ -604,59 +603,58 @@ function EmptyState({ label }: { label: string }) {
 function VisiteCard({ v, compact = false }: { v: VisiteRow; compact?: boolean }) {
   const visitorName = v.locataire?.full_name || v.client_name || 'Visiteur'
   const visitorPhone = v.locataire?.phone || v.client_phone || '—'
+  const detailUrl = `/admin/suivi/visites/${v.id}`
+
   return (
     <div className="bg-[var(--surface-card)] rounded-xl border border-[var(--border)] hover:border-[var(--accent-luxury)]/40 hover:shadow-lg transition-all p-3.5 flex flex-col justify-between">
       <div>
-        <Link href={`/admin/suivi/visites/${v.id}`} className="group block">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <h3 className="font-bold text-[var(--text)] text-sm line-clamp-1 group-hover:text-[var(--accent-luxury)] transition-colors">
-                {v.biens?.titre || 'Bien'}
-              </h3>
-              <p className="text-[var(--text-muted)] text-xs flex items-center gap-1 mt-0.5">
-                <MapPin className="w-3 h-3" />
-                {v.biens?.commune || '—'}
-                {v.source === 'whatsapp' && <span className="ml-1 text-emerald-400 font-bold">· WA</span>}
-              </p>
-            </div>
-            {!compact && adminBadge(v.admin_validation_status)}
-          </div>
+        <div className="flex items-start justify-between gap-2">
+          <Link href={detailUrl} className="group min-w-0 flex-1 block">
+            <h3 className="font-bold text-[var(--text)] text-sm line-clamp-1 group-hover:text-[var(--accent-luxury)] transition-colors">
+              {v.biens?.titre || 'Bien'}
+            </h3>
+            <p className="text-[var(--text-muted)] text-xs flex items-center gap-1 mt-0.5">
+              <MapPin className="w-3 h-3" />
+              {v.biens?.commune || '—'}
+              {v.source === 'whatsapp' && <span className="ml-1 text-emerald-400 font-bold">· WA</span>}
+            </p>
+          </Link>
+          {!compact && adminBadge(v.admin_validation_status)}
+        </div>
 
-          <div className="space-y-1 text-xs text-[var(--text-muted)] mt-2.5">
-            <p className="flex items-center gap-1.5">
-              <User className="w-3 h-3 text-[var(--text-subtle)]" />
-              <span className="font-semibold text-[var(--text)] truncate">{visitorName}</span>
+        <div className="space-y-1 text-xs text-[var(--text-muted)] mt-2.5">
+          <Link href={detailUrl} className="flex items-center gap-1.5 hover:text-[var(--text)]">
+            <User className="w-3 h-3 text-[var(--text-subtle)]" />
+            <span className="font-semibold text-[var(--text)] truncate">{visitorName}</span>
+          </Link>
+          <div className="flex items-center justify-between gap-2">
+            <p className="flex items-center gap-1.5 min-w-0">
+              <Phone className="w-3 h-3 text-[var(--text-subtle)] shrink-0" />
+              <span className="truncate font-mono text-[11px]">{visitorPhone}</span>
             </p>
-            <div className="flex items-center justify-between gap-2">
-              <p className="flex items-center gap-1.5 min-w-0">
-                <Phone className="w-3 h-3 text-[var(--text-subtle)] shrink-0" />
-                <span className="truncate font-mono text-[11px]">{visitorPhone}</span>
-              </p>
-              {visitorPhone && visitorPhone !== '—' && (
-                <a
-                  href={whatsappLink(visitorPhone) ?? '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#25D366] hover:bg-[#20ba5a] text-white text-[11px] font-black shadow-sm active:scale-95 transition-all shrink-0"
-                  title="Contacter le visiteur sur WhatsApp"
-                >
-                  <MessageCircle className="w-3 h-3" /> WhatsApp
-                </a>
-              )}
-            </div>
-            <p className="flex items-center gap-1.5 pt-0.5">
-              <Calendar className="w-3 h-3 text-[var(--text-subtle)]" />
-              <span className="font-medium text-[var(--text)]">{formatDate(v.date_souhaitee)}</span>
-              {v.heure_debut && v.heure_fin && (
-                <>
-                  <Clock className="w-3 h-3 text-[var(--text-subtle)] ml-1" />
-                  {v.heure_debut} - {v.heure_fin}
-                </>
-              )}
-            </p>
+            {visitorPhone && visitorPhone !== '—' && (
+              <a
+                href={whatsappLink(visitorPhone) ?? '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#25D366] hover:bg-[#20ba5a] text-white text-[11px] font-black shadow-sm active:scale-95 transition-all shrink-0"
+                title="Contacter le visiteur sur WhatsApp"
+              >
+                <MessageCircle className="w-3 h-3" /> WhatsApp
+              </a>
+            )}
           </div>
-        </Link>
+          <Link href={detailUrl} className="flex items-center gap-1.5 pt-0.5 hover:text-[var(--text)]">
+            <Calendar className="w-3 h-3 text-[var(--text-subtle)]" />
+            <span className="font-medium text-[var(--text)]">{formatDate(v.date_souhaitee)}</span>
+            {v.heure_debut && v.heure_fin && (
+              <>
+                <Clock className="w-3 h-3 text-[var(--text-subtle)] ml-1" />
+                {v.heure_debut} - {v.heure_fin}
+              </>
+            )}
+          </Link>
+        </div>
       </div>
 
       <div>
@@ -664,10 +662,10 @@ function VisiteCard({ v, compact = false }: { v: VisiteRow; compact?: boolean })
           entityId={v.id}
           entityType="visite"
           status={v.admin_validation_status}
-          detailUrl={`/admin/suivi/visites/${v.id}`}
+          detailUrl={detailUrl}
         />
         <div className="flex items-center justify-between pt-1.5 mt-2 border-t border-[var(--border)] text-[10px] text-[var(--text-subtle)]">
-          <Link href={`/admin/suivi/visites/${v.id}`} className="hover:underline">
+          <Link href={detailUrl} className="hover:underline">
             Reçue {formatDateTime(v.created_at)}
           </Link>
           <NotifDots ownerNotified={!!v.owner_notified_at} visitorNotified={!!v.visitor_notified_at} />
@@ -678,53 +676,52 @@ function VisiteCard({ v, compact = false }: { v: VisiteRow; compact?: boolean })
 }
 
 function ReservationCard({ r, compact = false }: { r: ReservationRow; compact?: boolean }) {
+  const detailUrl = `/admin/suivi/reservations/${r.id}`
+
   return (
     <div className="bg-[var(--surface-card)] rounded-xl border border-[var(--border)] hover:border-[var(--accent-luxury)]/40 hover:shadow-lg transition-all p-3.5 flex flex-col justify-between">
       <div>
-        <Link href={`/admin/suivi/reservations/${r.id}`} className="group block">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <h3 className="font-bold text-[var(--text)] text-sm line-clamp-1 group-hover:text-[var(--accent-luxury)] transition-colors">{r.biens?.titre || 'Bien'}</h3>
-              <p className="text-[var(--text-muted)] text-xs flex items-center gap-1 mt-0.5">
-                <MapPin className="w-3 h-3" />
-                {r.biens?.commune || '—'}
-              </p>
-            </div>
-            {!compact && adminBadge(r.admin_validation_status)}
-          </div>
+        <div className="flex items-start justify-between gap-2">
+          <Link href={detailUrl} className="group min-w-0 flex-1 block">
+            <h3 className="font-bold text-[var(--text)] text-sm line-clamp-1 group-hover:text-[var(--accent-luxury)] transition-colors">{r.biens?.titre || 'Bien'}</h3>
+            <p className="text-[var(--text-muted)] text-xs flex items-center gap-1 mt-0.5">
+              <MapPin className="w-3 h-3" />
+              {r.biens?.commune || '—'}
+            </p>
+          </Link>
+          {!compact && adminBadge(r.admin_validation_status)}
+        </div>
 
-          <div className="space-y-1 text-xs text-[var(--text-muted)] mt-2.5">
-            <p className="flex items-center gap-1.5">
-              <User className="w-3 h-3 text-[var(--text-subtle)]" />
-              <span className="font-semibold text-[var(--text)] truncate">{r.locataire?.full_name || 'Visiteur'}</span>
+        <div className="space-y-1 text-xs text-[var(--text-muted)] mt-2.5">
+          <Link href={detailUrl} className="flex items-center gap-1.5 hover:text-[var(--text)]">
+            <User className="w-3 h-3 text-[var(--text-subtle)]" />
+            <span className="font-semibold text-[var(--text)] truncate">{r.locataire?.full_name || 'Visiteur'}</span>
+          </Link>
+          <div className="flex items-center justify-between gap-2">
+            <p className="flex items-center gap-1.5 min-w-0">
+              <Phone className="w-3 h-3 text-[var(--text-subtle)] shrink-0" />
+              <span className="truncate font-mono text-[11px]">{r.locataire?.phone || '—'}</span>
             </p>
-            <div className="flex items-center justify-between gap-2">
-              <p className="flex items-center gap-1.5 min-w-0">
-                <Phone className="w-3 h-3 text-[var(--text-subtle)] shrink-0" />
-                <span className="truncate font-mono text-[11px]">{r.locataire?.phone || '—'}</span>
-              </p>
-              {r.locataire?.phone && r.locataire.phone !== '—' && (
-                <a
-                  href={whatsappLink(r.locataire.phone) ?? '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#25D366] hover:bg-[#20ba5a] text-white text-[11px] font-black shadow-sm active:scale-95 transition-all shrink-0"
-                  title="Contacter le locataire sur WhatsApp"
-                >
-                  <MessageCircle className="w-3 h-3" /> WhatsApp
-                </a>
-              )}
-            </div>
-            <p className="flex items-center gap-1.5 pt-0.5">
-              <Calendar className="w-3 h-3 text-[var(--text-subtle)]" />
-              {formatDate(r.date_debut)} → {formatDate(r.date_fin)}
-            </p>
-            <p className="font-bold text-[var(--accent-luxury)] text-sm pt-1">
-              {formatFCFA(r.montant_total_fcfa ?? 0)}
-            </p>
+            {r.locataire?.phone && r.locataire.phone !== '—' && (
+              <a
+                href={whatsappLink(r.locataire.phone) ?? '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#25D366] hover:bg-[#20ba5a] text-white text-[11px] font-black shadow-sm active:scale-95 transition-all shrink-0"
+                title="Contacter le locataire sur WhatsApp"
+              >
+                <MessageCircle className="w-3 h-3" /> WhatsApp
+              </a>
+            )}
           </div>
-        </Link>
+          <Link href={detailUrl} className="flex items-center gap-1.5 pt-0.5 hover:text-[var(--text)]">
+            <Calendar className="w-3 h-3 text-[var(--text-subtle)]" />
+            {formatDate(r.date_debut)} → {formatDate(r.date_fin)}
+          </Link>
+          <p className="font-bold text-[var(--accent-luxury)] text-sm pt-1">
+            {formatFCFA(r.montant_total_fcfa ?? 0)}
+          </p>
+        </div>
       </div>
 
       <div>
@@ -732,10 +729,10 @@ function ReservationCard({ r, compact = false }: { r: ReservationRow; compact?: 
           entityId={r.id}
           entityType="reservation"
           status={r.admin_validation_status}
-          detailUrl={`/admin/suivi/reservations/${r.id}`}
+          detailUrl={detailUrl}
         />
         <div className="flex items-center justify-between pt-1.5 mt-2 border-t border-[var(--border)] text-[10px] text-[var(--text-subtle)]">
-          <Link href={`/admin/suivi/reservations/${r.id}`} className="hover:underline">Reçue {formatDateTime(r.created_at)}</Link>
+          <Link href={detailUrl} className="hover:underline">Reçue {formatDateTime(r.created_at)}</Link>
           <NotifDots ownerNotified={!!r.owner_notified_at} visitorNotified={!!r.visitor_notified_at} />
         </div>
       </div>
