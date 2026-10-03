@@ -56,17 +56,17 @@ export default async function AdminDemarcheursPage() {
       </header>
 
       <div className="grid grid-cols-3 gap-3 mb-6">
-        <div className="px-4 py-3 rounded-xl bg-[var(--surface-card)] border border-[var(--border)]">
+        <div className="px-4 py-3 rounded-2xl bg-[var(--surface-card)] border border-[var(--border)]">
           <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-subtle)]">Top affichés</p>
           <p className="font-display text-3xl font-black text-[var(--text)] tabular-nums mt-1">{top.length}</p>
         </div>
-        <div className="px-4 py-3 rounded-xl bg-orange-500/10 border border-orange-500/20">
-          <p className="text-xs font-bold uppercase tracking-wider text-orange-700">Offres cumulées</p>
-          <p className="font-display text-3xl font-black text-orange-600 tabular-nums mt-1">{totalOffres.toLocaleString('fr-FR')}</p>
+        <div className="px-4 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/30">
+          <p className="text-xs font-bold uppercase tracking-wider text-amber-400">Offres cumulées</p>
+          <p className="font-display text-3xl font-black text-amber-400 tabular-nums mt-1">{totalOffres.toLocaleString('fr-FR')}</p>
         </div>
-        <div className="px-4 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-          <p className="text-xs font-bold uppercase tracking-wider text-emerald-700">Déjà inscrits</p>
-          <p className="font-display text-3xl font-black text-emerald-600 tabular-nums mt-1">{dejaInscrits}</p>
+        <div className="px-4 py-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30">
+          <p className="text-xs font-bold uppercase tracking-wider text-emerald-400">Déjà inscrits</p>
+          <p className="font-display text-3xl font-black text-emerald-400 tabular-nums mt-1">{dejaInscrits}</p>
         </div>
       </div>
 
@@ -85,7 +85,7 @@ export default async function AdminDemarcheursPage() {
             return (
               <div
                 key={d.phone}
-                className="bg-[var(--surface-card)] rounded-xl border border-[var(--border)] px-4 py-3 flex flex-wrap items-center gap-x-4 gap-y-2"
+                className="bg-[var(--surface-card)] rounded-xl border border-[var(--border)] px-4 py-3 flex flex-wrap items-center gap-x-4 gap-y-2 hover:border-[var(--accent-luxury)]/30 transition-colors"
               >
                 <span className="w-7 h-7 shrink-0 rounded-full bg-[var(--surface-hover)] flex items-center justify-center text-xs font-black text-[var(--text-muted)] tabular-nums">
                   {i + 1}
@@ -94,7 +94,7 @@ export default async function AdminDemarcheursPage() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-bold text-[var(--text)] text-sm truncate">{d.name || 'Démarcheur'}</span>
                     {inscrit && (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 inline-flex items-center gap-1">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 inline-flex items-center gap-1">
                         <CheckCircle2 className="w-3 h-3" /> Déjà inscrit
                       </span>
                     )}
@@ -106,17 +106,17 @@ export default async function AdminDemarcheursPage() {
                   </p>
                 </div>
                 <div className="text-center shrink-0">
-                  <p className="font-display text-2xl font-black text-orange-600 tabular-nums leading-none">{d.count}</p>
+                  <p className="font-display text-2xl font-black text-amber-400 tabular-nums leading-none">{d.count}</p>
                   <p className="text-[10px] text-[var(--text-subtle)] uppercase tracking-wide">offres</p>
                 </div>
                 <a
                   href={waLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-colors ${
+                  className={`shrink-0 min-h-[38px] flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black transition-all shadow-sm active:scale-95 ${
                     inscrit
-                      ? 'bg-[var(--surface-hover)] text-[var(--text-muted)] hover:bg-[var(--border)]'
-                      : 'bg-green-600 hover:bg-green-700 text-white'
+                      ? 'bg-[var(--surface-hover)] text-[var(--text-muted)] hover:bg-[var(--border)] border border-[var(--border)]'
+                      : 'bg-[#25D366] hover:bg-[#20ba5a] text-white'
                   }`}
                 >
                   <MessageCircle className="w-3.5 h-3.5" /> Contacter

@@ -184,7 +184,7 @@ export default function AdminGuidePage() {
         <section id="regles" className="mt-12 scroll-mt-6">
           <SectionHeading eyebrow="Contrôles obligatoires" title="Règles métier à respecter" text="Ces règles protègent le prospect, évitent les faux indicateurs et garantissent une trace exploitable par toute l’équipe." />
           <div className="grid gap-3 md:grid-cols-2">{rules.map((rule) => { const Icon = rule.icon; return <div key={rule.title} className="rounded-2xl border border-[var(--border)] bg-[var(--surface-card)] p-5"><div className="flex items-start gap-3"><Icon className="mt-0.5 h-5 w-5 shrink-0 text-[var(--accent-luxury)]" /><div><h3 className="font-bold text-[var(--text)]">{rule.title}</h3><p className="mt-2 text-sm leading-relaxed text-[var(--text-muted)]">{rule.text}</p></div></div></div> })}</div>
-          <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-5"><h3 className="font-bold text-amber-950">Champs qui rendent une action valide</h3><ul className="mt-3 grid gap-2 text-sm leading-relaxed text-amber-900 sm:grid-cols-2"><li>• Relance : prochaine action + date obligatoires.</li><li>• Perdu : motif obligatoire; si « autre », une note explique le cas.</li><li>• Visite non réalisée : résultat + raison + compte rendu.</li><li>• Refus d’une demande : motif écrit, compréhensible par le prospect.</li><li>• Gagné : réservation approuvée reliée au bien.</li><li>• Toute modification : version actuelle de la fiche.</li></ul></div>
+          <div className="mt-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5"><h3 className="font-bold text-amber-400">Champs qui rendent une action valide</h3><ul className="mt-3 grid gap-2 text-sm leading-relaxed text-amber-200/90 sm:grid-cols-2"><li>• Relance : prochaine action + date obligatoires.</li><li>• Perdu : motif obligatoire; si « autre », une note explique le cas.</li><li>• Visite non réalisée : résultat + raison + compte rendu.</li><li>• Refus d’une demande : motif écrit, compréhensible par le prospect.</li><li>• Gagné : réservation approuvée reliée au bien.</li><li>• Toute modification : version actuelle de la fiche.</li></ul></div>
         </section>
 
         <section id="routine" className="mt-12 scroll-mt-6">
@@ -197,19 +197,19 @@ export default function AdminGuidePage() {
         </section>
 
         <footer className="mt-10 flex flex-wrap gap-3 border-t border-[var(--border)] pt-6">
-          <Link href="/admin" className="inline-flex items-center gap-2 rounded-xl bg-[var(--text)] px-4 py-3 text-sm font-bold text-[var(--surface-card)]">
+          <Link href="/admin" className="inline-flex items-center gap-2 rounded-xl bg-[var(--accent-luxury)] text-[#0b1530] px-4 py-3 text-sm font-black shadow-sm hover:brightness-110 active:scale-95 transition-all">
             Cockpit <ArrowRight className="h-4 w-4" />
           </Link>
-          <Link href="/admin/suivi" className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] px-4 py-3 text-sm font-bold text-[var(--text)]">
+          <Link href="/admin/suivi" className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] hover:bg-[var(--surface-hover)] px-4 py-3 text-sm font-bold text-[var(--text)] transition-colors">
             Ouvrir Suivi
           </Link>
-          <Link href="/admin/performance" className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] px-4 py-3 text-sm font-bold text-[var(--text)]">
+          <Link href="/admin/performance" className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] hover:bg-[var(--surface-hover)] px-4 py-3 text-sm font-bold text-[var(--text)] transition-colors">
             Voir Performance
           </Link>
-          <Link href="/admin/prospects/qualite" className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] px-4 py-3 text-sm font-bold text-[var(--text)]">
+          <Link href="/admin/prospects/qualite" className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] hover:bg-[var(--surface-hover)] px-4 py-3 text-sm font-bold text-[var(--text)] transition-colors">
             Contrôler la qualité
           </Link>
-          <Link href="/admin/prospects/doublons" className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] px-4 py-3 text-sm font-bold text-[var(--text)]">
+          <Link href="/admin/prospects/doublons" className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] hover:bg-[var(--surface-hover)] px-4 py-3 text-sm font-bold text-[var(--text)] transition-colors">
             Traiter les doublons
           </Link>
         </footer>

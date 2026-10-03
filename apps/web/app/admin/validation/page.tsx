@@ -113,7 +113,7 @@ export default async function AdminValidationPage() {
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-[var(--text-subtle)] text-xs">Pas de photo</div>
                     )}
-                    <div className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide border bg-amber-500/90 backdrop-blur text-slate-950 border-amber-400/50 shadow-sm">
+                    <div className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border bg-amber-500/15 backdrop-blur-md text-amber-400 border-amber-500/30 shadow-sm">
                       En attente
                     </div>
                     <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur text-white text-[10px] font-bold">
@@ -138,7 +138,7 @@ export default async function AdminValidationPage() {
                         </p>
                         {bien.profiles?.phone && (
                           <a
-                            href={whatsappLink(bien.profiles.phone, `Bonjour ${bien.profiles.full_name || ''}, je vous contacte depuis Gravel Immo concernant votre annonce « ${bien.titre} » soumise pour validation.`) ?? undefined}
+                            href={whatsappLink(bien.profiles.phone, `Bonjour ${bien.profiles.full_name || ''}, je vous contacte depuis BOGBE'S GROUPE concernant votre annonce « ${bien.titre} » soumise pour validation.`) ?? undefined}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 text-[11px] font-black text-white bg-[#25D366] hover:bg-[#20ba5a] px-2.5 py-1 rounded-lg transition-all shadow-sm active:scale-95"
