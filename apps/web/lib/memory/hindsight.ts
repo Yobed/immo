@@ -327,6 +327,15 @@ export async function reflect(entityId: string): Promise<ProspectMentalModel | n
       .eq('entity_id', cleanId)
       .maybeSingle()
 
+    // Protection anti-rafale (debounce) : si une réflexion a déjà eu lieu il y a moins de 45s,
+    // on ne relance pas une analyse LLM redondante pour économiser les quotas et éviter les conflits d'écriture.
+    if (currentModel?.last_reflected_at) {
+      const elapsed = Date.now() - new Date(currentModel.last_reflected_at).getTime()
+      if (elapsed < 45_000) {
+        return currentModel as ProspectMentalModel
+      }
+    }
+
     // 3. Appel de réflexion cognitive via LLM
     const reflectionPrompt = `Tu es le moteur cognitif d'analyse de prospects pour BOGBE'S GROUPE (immobilier de prestige à Abidjan).
 Analyse l'historique d'interactions ci-dessous et produis la synthèse à jour du modèle mental du prospect.

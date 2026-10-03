@@ -256,6 +256,7 @@ export async function POST(req: NextRequest) {
     }
     console.log(`[Webhook] accepted event=${normalizedEvent} fromMe=${msg.key?.fromMe === true}`);
 
+    const supabase = getSupabase();
     const jid = msg.key?.remoteJid;
     const userMessage =
       msg.messageBody ||
@@ -274,8 +275,7 @@ export async function POST(req: NextRequest) {
     // → marqueur HUMAN_TAKEOVER : le bot se taira 60 min dans cette conversation.
     if (msg.key?.fromMe) {
       if (jid && typeof userMessage === 'string' && userMessage.trim()) {
-        const sb = getSupabase();
-        const { data: recentOut } = await sb
+        const { data: recentOut } = await supabase
           .from('whatsapp_messages')
           .select('body, metadata')
           .eq('direction', 'outbound')
@@ -298,7 +298,7 @@ export async function POST(req: NextRequest) {
         if (!isOurBot) {
           const rawHumanPhone = jid.split('@')[0] ?? '';
           const trace = humanTraceContext(userMessage);
-          const { data: prospect } = await sb
+          const { data: prospect } = await supabase
             .from('prospects')
             .select('id')
             .is('merged_into', null)
@@ -317,13 +317,13 @@ export async function POST(req: NextRequest) {
 
           // Store the exact human text before muting Sapphire. This is the
           // canonical conversation record shown to administrators.
-          await sb.from('whatsapp_messages').insert({
+          await supabase.from('whatsapp_messages').insert({
             jid,
             direction: 'outbound',
             body: userMessage,
             metadata: traceMetadata,
           });
-          const { error: crmError } = await sb.rpc('crm_record_human_whatsapp_reply', {
+          const { error: crmError } = await supabase.rpc('crm_record_human_whatsapp_reply', {
             p_phone: rawHumanPhone,
             p_jid: jid,
             p_message: userMessage,
@@ -331,7 +331,7 @@ export async function POST(req: NextRequest) {
           });
           if (crmError) console.error('[whatsapp] CRM human reply trace failed', crmError);
 
-          await sb.from('whatsapp_messages').insert({
+          await supabase.from('whatsapp_messages').insert({
             jid,
             direction: 'system',
             body: 'HUMAN_TAKEOVER',
@@ -360,6 +360,50 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: 'ignored', reason: 'system_loop_suppression' });
     }
 
+    const isGroup = typeof jid === 'string' && jid.endsWith('@g.us');
+
+    // Détection des messages vocaux (Audio PTT) et positions GPS
+    const isAudio = !!(
+      msg.message?.audioMessage ||
+      msg.message?.pttMessage ||
+      msg.messageType === 'audio' ||
+      msg.type === 'audio' ||
+      msg.mediaType === 'audio'
+    );
+    const isLocation = !!(msg.message?.locationMessage || msg.location);
+
+    if (isAudio && senderPn && !msg.key?.fromMe && !isGroup) {
+      const audioNotice =
+        "Bonjour ! J'ai bien reçu votre message vocal 🎙️.\n\n" +
+        "Pour que je puisse vous orienter au mieux, pourriez-vous m'écrire votre recherche en quelques mots (commune, type de bien, budget) ?\n\n" +
+        "Je vérifie notre catalogue et vous réponds instantanément ! 🔑";
+      await humanReplyDelay(audioNotice, requestStartedAt);
+      await wasenderSendMessage(replyTarget, audioNotice, 'text');
+      await supabase.from('whatsapp_messages').insert({
+        jid,
+        direction: 'outbound',
+        body: audioNotice,
+        metadata: { type: 'audio_notice' },
+      });
+      return NextResponse.json({ status: 'ok', branch: 'audio_notice_sent' });
+    }
+
+    if (isLocation && senderPn && !msg.key?.fromMe && !isGroup) {
+      const locNotice =
+        "J'ai bien reçu votre repère géographique 📍.\n\n" +
+        "Quel type de bien (appartement, villa, studio, terrain...) et quel budget maximum recherchez-vous dans ce secteur ?\n\n" +
+        "Je consulte immédiatement notre catalogue pour vous proposer les meilleures options.";
+      await humanReplyDelay(locNotice, requestStartedAt);
+      await wasenderSendMessage(replyTarget, locNotice, 'text');
+      await supabase.from('whatsapp_messages').insert({
+        jid,
+        direction: 'outbound',
+        body: locNotice,
+        metadata: { type: 'location_notice' },
+      });
+      return NextResponse.json({ status: 'ok', branch: 'location_notice_sent' });
+    }
+
     if (!senderPn || !userMessage) {
       return NextResponse.json({ status: 'ignored' });
     }
@@ -368,7 +412,6 @@ export async function POST(req: NextRequest) {
     // WhatsApp groups. Forward the original Wasender payload once, then stop:
     // the website must never let a group offer silently disappear nor DM the
     // sender as if they were a prospect.
-    const isGroup = typeof jid === 'string' && jid.endsWith('@g.us');
     if (isGroup) {
       if (shouldForwardGroupMessageToScraper(normalizedEvent, jid, msg.key?.fromMe, userMessage)) {
         const scraperUrl = getN8nScraperWebhookUrl(process.env.N8N_SCRAPER_WEBHOOK_URL);
@@ -455,8 +498,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: 'ok', branch: 'duplicate' });
     }
 
-    const supabase = getSupabase();
-
     // ─── Opt-out : STOP / STOPPER / etc. ───
     if (OPT_OUT_REGEX.test(userMessage)) {
       await recordOptOut(senderPn);
@@ -484,9 +525,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: 'ok', branch: 'guard_silence' });
     }
 
-    // 1c. Mutes actifs : reprise humaine (7 jours) OU fournisseur de biens
+    // 1c. Mutes actifs : reprise humaine (24 h max) OU fournisseur de biens
     // identifié (24 h) OU prise en charge conseiller après 0 résultat (24 h).
-    const HUMAN_TAKEOVER_WINDOW_MS = 7 * 24 * 3_600_000;
+    const HUMAN_TAKEOVER_WINDOW_MS = 24 * 3_600_000;
     const SYSTEM_MUTE_24H_MS = 24 * 3_600_000;
     const { data: sysMarks } = await supabase
       .from('whatsapp_messages')
@@ -821,6 +862,23 @@ export async function POST(req: NextRequest) {
           (m) => m.role === 'assistant' && QUALIF_REMINDER_MARKER.test(m.content),
         );
         if (reminderSent) {
+          // Règle 2 : Sapphire ne relance plus et reste silencieuse.
+          // MAIS pour ne pas perdre le lead, on alerte discrètement le conseiller humain pour qu'il prenne le relais.
+          const advisorPhone = process.env.SAPPHIRE_ADVISOR_PHONE || '+2250544872051';
+          const alertAlreadySent = marks.some((m) => m.body === 'QUALIF_SILENCE_ALERTED');
+          if (!alertAlreadySent) {
+            await supabase.from('whatsapp_messages').insert({
+              jid,
+              direction: 'system',
+              body: 'QUALIF_SILENCE_ALERTED',
+              metadata: { userMessage, senderPn, missing: qual.missing },
+            });
+            const qualAlert = `⚠️ Prospect en attente de qualification :
+👤 ${contactName} — ${senderPn}
+💬 Dernier message : "${userMessage}"
+👉 Critères encore manquants : ${qual.missing.join(', ')}. Prendre le relais manuellement !`;
+            await wasenderSendMessage(advisorPhone, qualAlert, 'text').catch(() => null);
+          }
           return NextResponse.json({ status: 'ok', branch: 'qualif_silence' });
         }
 

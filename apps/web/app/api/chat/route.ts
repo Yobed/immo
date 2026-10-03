@@ -23,7 +23,13 @@ export async function POST(req: NextRequest) {
     const dynamicSearchContext = await getAIBienContext(lastUserMessage)
 
     // Identifiant d'entité pour la mémoire biomimétique Hindsight (téléphone, userId ou cookie de session)
-    const entityId = phone || userId || req.headers.get('x-user-id') || req.cookies.get('bogbes_chat_session')?.value || ''
+    let sessionId = req.cookies.get('bogbes_chat_session')?.value
+    let isNewSessionCookie = false
+    if (!sessionId && !phone && !userId) {
+      sessionId = `anon_${crypto.randomUUID()}`
+      isNewSessionCookie = true
+    }
+    const entityId = phone || userId || req.headers.get('x-user-id') || sessionId || ''
     let memoryContext = ''
     if (entityId) {
       try {
@@ -65,17 +71,20 @@ export async function POST(req: NextRequest) {
 
     const stream = await chatImmobilierStream(messages, combinedContext)
 
-    if (!stream) {
-      throw new Error('Impossible de démarrer le flux avec OpenRouter')
+    const responseHeaders = new Headers({
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    })
+
+    if (isNewSessionCookie && sessionId) {
+      responseHeaders.append(
+        'Set-Cookie',
+        `bogbes_chat_session=${sessionId}; Path=/; Max-Age=31536000; SameSite=Lax`
+      )
     }
 
-    return new Response(stream, {
-      headers: {
-        'Content-Type': 'text/event-stream; charset=utf-8',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
-    })
+    return new Response(stream, { headers: responseHeaders })
   } catch (error: unknown) {
     const err = error as Error
     console.error('[Chat API] failed:', err.message)
