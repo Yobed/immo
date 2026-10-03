@@ -8,7 +8,7 @@ import {
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { formatFCFA } from '@/lib/format'
-import { InlineVisiteActions } from '@/components/admin/InlineVisiteActions'
+import { InlineSuiviActions } from '@/components/admin/InlineSuiviActions'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -263,7 +263,7 @@ export default async function AdminSuiviPage({ searchParams }: PageProps) {
 
   return (
     <main className="min-h-screen bg-[var(--surface-hover)]">
-      <div className="bg-[var(--surface-card)] border-b border-[var(--border)] sticky top-0 z-10">
+      <div className="bg-[var(--surface-card)] border-b border-[var(--border)]">
         <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <ShieldCheck className="w-6 h-6 text-[var(--text)]" />
@@ -523,49 +523,58 @@ function ContactCard({ c, compact = false }: { c: ContactRow; compact?: boolean 
   const pending = c.admin_validation_status === 'pending'
   const age = ageLabel(c.created_at)
   return (
-    <Link
-      href={`/admin/suivi/contacts/${c.id}`}
-      className="bg-[var(--surface-card)] rounded-xl border border-[var(--border)] hover:border-[var(--border)] hover:shadow-md transition-all p-3 flex flex-col gap-2"
-    >
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <h3 className="font-bold text-[var(--text)] text-sm line-clamp-1">{titre}</h3>
-          <p className="text-[var(--text-muted)] text-xs flex items-center gap-1 mt-0.5">
-            <MapPin className="w-3 h-3" />
-            {c.biens?.commune || '—'}
-            {isFlash && <span className="ml-1 text-orange-500 font-bold">· ⚡ flash</span>}
-          </p>
-        </div>
-        <div className="flex flex-col items-end gap-1 shrink-0">
-          {!compact && adminBadge(c.admin_validation_status)}
-          {pending && (
-            <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${age.cls}`}>{age.label}</span>
-          )}
-        </div>
+    <div className="bg-[var(--surface-card)] rounded-xl border border-[var(--border)] hover:border-slate-300 hover:shadow-md transition-all p-3 flex flex-col justify-between">
+      <div>
+        <Link href={`/admin/suivi/contacts/${c.id}`} className="group block">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <h3 className="font-bold text-[var(--text)] text-sm line-clamp-1 group-hover:text-[var(--accent-luxury)] transition-colors">{titre}</h3>
+              <p className="text-[var(--text-muted)] text-xs flex items-center gap-1 mt-0.5">
+                <MapPin className="w-3 h-3" />
+                {c.biens?.commune || '—'}
+                {isFlash && <span className="ml-1 text-orange-500 font-bold">· ⚡ flash</span>}
+              </p>
+            </div>
+            <div className="flex flex-col items-end gap-1 shrink-0">
+              {!compact && adminBadge(c.admin_validation_status)}
+              {pending && (
+                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${age.cls}`}>{age.label}</span>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-0.5 text-xs text-[var(--text-muted)] mt-2">
+            <p className="flex items-center gap-1.5">
+              <User className="w-3 h-3 text-[var(--text-subtle)]" />
+              <span className="font-semibold text-[var(--text)] truncate">{c.visitor_name || 'Visiteur'}</span>
+            </p>
+            <p className="flex items-center gap-1.5">
+              <Phone className="w-3 h-3 text-[var(--text-subtle)]" />
+              <span className="truncate">{c.visitor_phone || '—'}</span>
+            </p>
+            {c.reason && (
+              <p className="flex items-start gap-1.5 line-clamp-2">
+                <MessageCircle className="w-3 h-3 text-[var(--text-subtle)] mt-0.5 shrink-0" />
+                <span className="line-clamp-2">{c.reason}</span>
+              </p>
+            )}
+          </div>
+        </Link>
       </div>
 
-      <div className="space-y-0.5 text-xs text-[var(--text-muted)]">
-        <p className="flex items-center gap-1.5">
-          <User className="w-3 h-3 text-[var(--text-subtle)]" />
-          <span className="font-semibold text-[var(--text)] truncate">{c.visitor_name || 'Visiteur'}</span>
-        </p>
-        <p className="flex items-center gap-1.5">
-          <Phone className="w-3 h-3 text-[var(--text-subtle)]" />
-          <span className="truncate">{c.visitor_phone || '—'}</span>
-        </p>
-        {c.reason && (
-          <p className="flex items-start gap-1.5 line-clamp-2">
-            <MessageCircle className="w-3 h-3 text-[var(--text-subtle)] mt-0.5 shrink-0" />
-            <span className="line-clamp-2">{c.reason}</span>
-          </p>
-        )}
+      <div>
+        <InlineSuiviActions
+          entityId={c.id}
+          entityType="contact"
+          status={c.admin_validation_status}
+          detailUrl={`/admin/suivi/contacts/${c.id}`}
+        />
+        <div className="flex items-center justify-between pt-1.5 mt-2 border-t border-[var(--border)] text-[10px] text-[var(--text-subtle)]">
+          <Link href={`/admin/suivi/contacts/${c.id}`} className="hover:underline">Reçue {formatDateTime(c.created_at)}</Link>
+          <NotifDots ownerNotified={!!c.owner_notified_at} visitorNotified={!!c.visitor_notified_at} />
+        </div>
       </div>
-
-      <div className="flex items-center justify-between pt-1.5 border-t border-[var(--border)] text-[10px] text-[var(--text-subtle)]">
-        <span>Reçue {formatDateTime(c.created_at)}</span>
-        <NotifDots ownerNotified={!!c.owner_notified_at} visitorNotified={!!c.visitor_notified_at} />
-      </div>
-    </Link>
+    </div>
   )
 }
 
@@ -622,7 +631,12 @@ function VisiteCard({ v, compact = false }: { v: VisiteRow; compact?: boolean })
       </div>
 
       <div>
-        <InlineVisiteActions visiteId={v.id} status={v.admin_validation_status} />
+        <InlineSuiviActions
+          entityId={v.id}
+          entityType="visite"
+          status={v.admin_validation_status}
+          detailUrl={`/admin/suivi/visites/${v.id}`}
+        />
         <div className="flex items-center justify-between pt-1.5 mt-2 border-t border-[var(--border)] text-[10px] text-[var(--text-subtle)]">
           <Link href={`/admin/suivi/visites/${v.id}`} className="hover:underline">
             Reçue {formatDateTime(v.created_at)}
@@ -636,44 +650,53 @@ function VisiteCard({ v, compact = false }: { v: VisiteRow; compact?: boolean })
 
 function ReservationCard({ r, compact = false }: { r: ReservationRow; compact?: boolean }) {
   return (
-    <Link
-      href={`/admin/suivi/reservations/${r.id}`}
-      className="bg-[var(--surface-card)] rounded-xl border border-[var(--border)] hover:border-[var(--border)] hover:shadow-md transition-all p-3 flex flex-col gap-2"
-    >
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <h3 className="font-bold text-[var(--text)] text-sm line-clamp-1">{r.biens?.titre || 'Bien'}</h3>
-          <p className="text-[var(--text-muted)] text-xs flex items-center gap-1 mt-0.5">
-            <MapPin className="w-3 h-3" />
-            {r.biens?.commune || '—'}
-          </p>
+    <div className="bg-[var(--surface-card)] rounded-xl border border-[var(--border)] hover:border-slate-300 hover:shadow-md transition-all p-3 flex flex-col justify-between">
+      <div>
+        <Link href={`/admin/suivi/reservations/${r.id}`} className="group block">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <h3 className="font-bold text-[var(--text)] text-sm line-clamp-1 group-hover:text-[var(--accent-luxury)] transition-colors">{r.biens?.titre || 'Bien'}</h3>
+              <p className="text-[var(--text-muted)] text-xs flex items-center gap-1 mt-0.5">
+                <MapPin className="w-3 h-3" />
+                {r.biens?.commune || '—'}
+              </p>
+            </div>
+            {!compact && adminBadge(r.admin_validation_status)}
+          </div>
+
+          <div className="space-y-0.5 text-xs text-[var(--text-muted)] mt-2">
+            <p className="flex items-center gap-1.5">
+              <User className="w-3 h-3 text-[var(--text-subtle)]" />
+              <span className="font-semibold text-[var(--text)] truncate">{r.locataire?.full_name || 'Visiteur'}</span>
+            </p>
+            <p className="flex items-center gap-1.5">
+              <Phone className="w-3 h-3 text-[var(--text-subtle)]" />
+              <span className="truncate">{r.locataire?.phone || '—'}</span>
+            </p>
+            <p className="flex items-center gap-1.5">
+              <Calendar className="w-3 h-3 text-[var(--text-subtle)]" />
+              {formatDate(r.date_debut)} → {formatDate(r.date_fin)}
+            </p>
+            <p className="font-bold text-[var(--text)] text-sm pt-1">
+              {formatFCFA(r.montant_total_fcfa ?? 0)}
+            </p>
+          </div>
+        </Link>
+      </div>
+
+      <div>
+        <InlineSuiviActions
+          entityId={r.id}
+          entityType="reservation"
+          status={r.admin_validation_status}
+          detailUrl={`/admin/suivi/reservations/${r.id}`}
+        />
+        <div className="flex items-center justify-between pt-1.5 mt-2 border-t border-[var(--border)] text-[10px] text-[var(--text-subtle)]">
+          <Link href={`/admin/suivi/reservations/${r.id}`} className="hover:underline">Reçue {formatDateTime(r.created_at)}</Link>
+          <NotifDots ownerNotified={!!r.owner_notified_at} visitorNotified={!!r.visitor_notified_at} />
         </div>
-        {!compact && adminBadge(r.admin_validation_status)}
       </div>
-
-      <div className="space-y-0.5 text-xs text-[var(--text-muted)]">
-        <p className="flex items-center gap-1.5">
-          <User className="w-3 h-3 text-[var(--text-subtle)]" />
-          <span className="font-semibold text-[var(--text)] truncate">{r.locataire?.full_name || 'Visiteur'}</span>
-        </p>
-        <p className="flex items-center gap-1.5">
-          <Phone className="w-3 h-3 text-[var(--text-subtle)]" />
-          <span className="truncate">{r.locataire?.phone || '—'}</span>
-        </p>
-        <p className="flex items-center gap-1.5">
-          <Calendar className="w-3 h-3 text-[var(--text-subtle)]" />
-          {formatDate(r.date_debut)} → {formatDate(r.date_fin)}
-        </p>
-        <p className="font-bold text-[var(--text)] text-sm pt-1">
-          {formatFCFA(r.montant_total_fcfa ?? 0)}
-        </p>
-      </div>
-
-      <div className="flex items-center justify-between pt-1.5 border-t border-[var(--border)] text-[10px] text-[var(--text-subtle)]">
-        <span>Reçue {formatDateTime(r.created_at)}</span>
-        <NotifDots ownerNotified={!!r.owner_notified_at} visitorNotified={!!r.visitor_notified_at} />
-      </div>
-    </Link>
+    </div>
   )
 }
 

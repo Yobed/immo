@@ -11,10 +11,16 @@ type Row = { id: string; created_at: string; admin_validation_status: 'pending' 
 type ProspectMetricRow = { id: string; assigned_to: string | null; prochaine_action_at: string | null; statut: string; phone?: string | null; commune?: string | null; type_bien?: string | null; first_seen: string }
 type ConversionRow = { label: string; total: number; visits: number; reservations: number; rate: number }
 
-async function fetchAllRows<T>(client: any, table: string, selection: string, options: { since?: string; orderBy?: string } = {}): Promise<T[]> {
+async function fetchAllRows<T>(
+  client: any,
+  table: string,
+  selection: string,
+  options: { since?: string; orderBy?: string; maxRows?: number } = {},
+): Promise<T[]> {
   const pageSize = 1000
+  const maxRows = options.maxRows ?? 3000
   const rows: T[] = []
-  for (let from = 0; ; from += pageSize) {
+  for (let from = 0; from < maxRows; from += pageSize) {
     let query = client.from(table).select(selection).order(options.orderBy ?? 'created_at', { ascending: true }).range(from, from + pageSize - 1)
     if (options.since) query = query.gte(options.orderBy ?? 'created_at', options.since)
     const { data, error } = await query
@@ -23,6 +29,7 @@ async function fetchAllRows<T>(client: any, table: string, selection: string, op
     rows.push(...batch)
     if (batch.length < pageSize) return rows
   }
+  return rows
 }
 
 export default async function AdminPerformancePage({ searchParams }: { searchParams: Promise<{ period?: string }> }) {
