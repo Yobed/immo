@@ -36,7 +36,6 @@ const getHomeBiens = unstable_cache(
         'id, titre, commune, quartier, type_bien, latitude, longitude, prix_mois_fcfa, prix_nuit_fcfa, prix_vente_fcfa, surface_m2, nb_pieces, est_disponible, is_verifie, score_ia, statut, biens_medias(url, est_couverture, ordre, type)',
       )
       .in('statut', [...STATUTS_PUBLICS])
-      .order('is_verifie', { ascending: false })
       .order('created_at', { ascending: false })
       .limit(80)
 

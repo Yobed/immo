@@ -152,13 +152,15 @@ export function locauxAdminForId(id: number): SupabaseClient {
   return createLocauxLegacyAdminClient()
 }
 
-/** Tri fusionné des sources : date_publication (ou created_at) décroissante (ISO texte). */
+/** Tri fusionné des sources : date_publication (ou created_at) décroissante (timestamp numérique exact). */
 export function byDatePubDesc(
   a: { date_publication?: string | null; created_at?: string | null },
   b: { date_publication?: string | null; created_at?: string | null },
 ): number {
-  const da = a.date_publication || a.created_at || ''
-  const db = b.date_publication || b.created_at || ''
-  return db.localeCompare(da)
+  const da = a.date_publication || a.created_at
+  const db = b.date_publication || b.created_at
+  const ta = da ? new Date(da).getTime() : 0
+  const tb = db ? new Date(db).getTime() : 0
+  return (isNaN(tb) ? 0 : tb) - (isNaN(ta) ? 0 : ta)
 }
 

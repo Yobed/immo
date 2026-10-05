@@ -75,7 +75,7 @@ export default async function CataloguePage({ searchParams }: PageProps) {
     equipements: equipementsArr && equipementsArr.length > 0 ? equipementsArr : undefined,
     prix_min: sp.prix_min ? Number(sp.prix_min) : undefined,
     prix_max: sp.prix_max ? Number(sp.prix_max) : undefined,
-    sort: (sp.sort as ConsolidatedFilters['sort']) || 'verified_first',
+    sort: (sp.sort as ConsolidatedFilters['sort']) || 'recent',
   }
 
   // Vue "flash only" : pagination serveur directe (tous les biens, sans cap mémoire).

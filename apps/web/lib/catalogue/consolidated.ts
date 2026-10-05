@@ -11,9 +11,6 @@ import { unstable_cache } from 'next/cache'
 import { createClient as createSupabaseClient, type SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import {
-  createLocauxClient,
-  createLocauxAdminClient,
-  createLocauxLegacyClient,
   locauxReadClients,
   locauxClientForId,
   byDatePubDesc,
@@ -740,47 +737,62 @@ export function isUnderOneMonth(dateIso?: string | null): boolean {
   return Date.now() - t <= ONE_MONTH_MS
 }
 
+function toTimestamp(dateIso?: string | null): number {
+  if (!dateIso) return 0
+  const t = new Date(dateIso).getTime()
+  return isNaN(t) ? 0 : t
+}
+
+function compareChronologicalDesc(a: ConsolidatedBien, b: ConsolidatedBien): number {
+  const ta = toTimestamp(a.date_publication || a.date_scraping)
+  const tb = toTimestamp(b.date_publication || b.date_scraping)
+  if (tb !== ta) return tb - ta
+  // Égalité exacte : photo d'abord, puis vérifié, puis source BOGBE'S
+  if (hasPhoto(a) !== hasPhoto(b)) return hasPhoto(a) - hasPhoto(b)
+  if (a.is_verifie !== b.is_verifie) return a.is_verifie ? -1 : 1
+  return isNotre(a) - isNotre(b)
+}
+
 function sortConsolidated(items: ConsolidatedBien[], sort: ConsolidatedFilters['sort']): ConsolidatedBien[] {
   const arr = items.slice()
   switch (sort) {
-    case 'recent':
-      arr.sort((a, b) => {
-        // 1) Moins d'un mois en priorité absolue (< 30 jours)
-        const aMonth = isUnderOneMonth(a.date_publication) ? 0 : 1
-        const bMonth = isUnderOneMonth(b.date_publication) ? 0 : 1
-        if (aMonth !== bMonth) return aMonth - bMonth
-        // 2) Plus récent en premier
-        return new Date(b.date_publication).getTime() - new Date(a.date_publication).getTime()
-      })
-      break
     case 'price_asc':
-      arr.sort((a, b) => (a.prix_value ?? Number.POSITIVE_INFINITY) - (b.prix_value ?? Number.POSITIVE_INFINITY))
+      arr.sort((a, b) => {
+        const pa = a.prix_value ?? Number.POSITIVE_INFINITY
+        const pb = b.prix_value ?? Number.POSITIVE_INFINITY
+        if (pa !== pb) return pa - pb
+        return compareChronologicalDesc(a, b)
+      })
       break
     case 'price_desc':
-      arr.sort((a, b) => (b.prix_value ?? 0) - (a.prix_value ?? 0))
+      arr.sort((a, b) => {
+        const pa = a.prix_value ?? 0
+        const pb = b.prix_value ?? 0
+        if (pb !== pa) return pb - pa
+        return compareChronologicalDesc(a, b)
+      })
       break
     case 'verified_first':
-    default:
       arr.sort((a, b) => {
-        // 1) Règle d'or : biens récents de moins d'un mois (< 30 jours) EN PRIORITÉ
-        const aMonth = isUnderOneMonth(a.date_publication) ? 0 : 1
-        const bMonth = isUnderOneMonth(b.date_publication) ? 0 : 1
-        if (aMonth !== bMonth) return aMonth - bMonth
+        // Biens récents (< 7 jours) : ordre chronologique strict
+        const ta = toTimestamp(a.date_publication || a.date_scraping)
+        const tb = toTimestamp(b.date_publication || b.date_scraping)
+        const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000
+        const now = Date.now()
+        const aRecent = now - ta < SEVEN_DAYS
+        const bRecent = now - tb < SEVEN_DAYS
+        if (aRecent && bRecent) return tb - ta
 
-        // 2) Au sein de la même fenêtre (tous deux < 1 mois ou tous deux > 1 mois) :
-        // Biens vérifiés BOGBE'S en avant
+        // Pour les biens plus anciens, vérifiés d'abord
         if (a.is_verifie && !b.is_verifie) return -1
         if (!a.is_verifie && b.is_verifie) return 1
-
-        // 3) Biens avec photo d'abord
-        if (hasPhoto(a) !== hasPhoto(b)) return hasPhoto(a) - hasPhoto(b)
-
-        // 4) Biens BOGBE'S en avant
-        if (isNotre(a) !== isNotre(b)) return isNotre(a) - isNotre(b)
-
-        // 5) Date la plus récente d'abord (du plus récent au plus ancien)
-        return new Date(b.date_publication).getTime() - new Date(a.date_publication).getTime()
+        return compareChronologicalDesc(a, b)
       })
+      break
+    case 'recent':
+    default:
+      arr.sort(compareChronologicalDesc)
+      break
   }
   return arr
 }
