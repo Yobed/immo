@@ -208,20 +208,29 @@ export function MobileMenu({ links, user }: MobileMenuProps) {
         {/* FOOTER — preferences (theme + lang) + auth CTAs (if not logged in) */}
         <div className="border-t border-[var(--border)] bg-[var(--surface-card)] px-5 py-4 space-y-4 shrink-0">
           {!user && (
-            <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                <Link
+                  href="/login"
+                  onClick={close}
+                  className="py-3 border border-[var(--border)] text-[var(--text)] font-bold uppercase tracking-[0.15em] text-[10px] rounded-xl text-center bg-[var(--surface)] hover:bg-[var(--surface-hover)] transition-all active:scale-[0.98]"
+                >
+                  Se connecter
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={close}
+                  className="py-3 bg-[var(--accent-luxury)] text-[var(--on-accent)] font-bold uppercase tracking-[0.15em] text-[10px] rounded-xl text-center shadow-md transition-all active:scale-[0.98]"
+                >
+                  Créer un compte
+                </Link>
+              </div>
               <Link
-                href="/login"
+                href="/register?role=pro"
                 onClick={close}
-                className="py-3 border border-[var(--border)] text-[var(--text)] font-bold uppercase tracking-[0.15em] text-[10px] rounded-xl text-center bg-[var(--surface)] hover:bg-[var(--surface-hover)] transition-all active:scale-[0.98]"
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-amber-500/10 border border-amber-500/25 text-amber-700 dark:text-amber-300 font-bold uppercase tracking-wider text-[10px] rounded-xl text-center hover:bg-amber-500/20 transition-all"
               >
-                Se connecter
-              </Link>
-              <Link
-                href="/register"
-                onClick={close}
-                className="py-3 bg-[var(--accent-luxury)] text-[var(--on-accent)] font-bold uppercase tracking-[0.15em] text-[10px] rounded-xl text-center shadow-md transition-all active:scale-[0.98]"
-              >
-                Créer un compte
+                <span>👑 Vous êtes démarcheur ou agence ? Espace Pro</span>
               </Link>
             </div>
           )}

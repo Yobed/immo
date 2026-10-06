@@ -9,11 +9,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { motion } from 'framer-motion'
-import { UserPlus, Mail, Lock, User, CheckCircle2, ArrowRight } from 'lucide-react'
+import { UserPlus, Mail, Lock, User, CheckCircle2, ArrowRight, Phone, Sparkles, Building2, Home, Compass } from 'lucide-react'
 
 const registerSchema = z.object({
   full_name: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
   email: z.string().email('Adresse e-mail invalide'),
+  phone: z.string().trim().max(30, 'Numéro trop long').optional().or(z.literal('')),
   password: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
   role: z.enum(['locataire', 'proprietaire', 'agence']),
 })
@@ -28,15 +29,29 @@ function RegisterContent() {
   const [googleLoading, setGoogleLoading] = useState(false)
   const searchParams = useSearchParams()
   const referralCode = searchParams.get('ref')
+  const roleParam = (searchParams.get('role') || searchParams.get('type') || '').toLowerCase()
+
+  const initialRole: 'locataire' | 'proprietaire' | 'agence' =
+    roleParam === 'pro' || roleParam === 'agence' || roleParam === 'demarcheur' || roleParam === 'courtier'
+      ? 'agence'
+      : roleParam === 'proprietaire' || roleParam === 'bailleur'
+      ? 'proprietaire'
+      : 'locataire'
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { role: 'locataire' },
+    defaultValues: {
+      role: initialRole,
+      phone: '',
+    },
   })
+
+  const currentRole = watch('role')
 
   const supabase = createClient()
 
@@ -83,7 +98,11 @@ function RegisterContent() {
       // Compte bien créé mais connexion auto KO → on invite à se connecter.
       setSuccess(true)
     } else {
-      window.location.assign('/profil')
+      if (data.role === 'agence' || data.role === 'proprietaire') {
+        window.location.assign('/dashboard')
+      } else {
+        window.location.assign('/profil')
+      }
       return
     }
     setLoading(false)
@@ -116,7 +135,7 @@ function RegisterContent() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="w-full space-y-10"
+      className="w-full space-y-8"
     >
       {/* Header */}
       <div className="text-center space-y-3">
@@ -124,12 +143,39 @@ function RegisterContent() {
           <UserPlus size={28} strokeWidth={2.5} />
         </div>
         <h1 className="text-3xl md:text-4xl font-black text-[var(--text)] font-display tracking-tight uppercase italic leading-none">
-          {t.auth.registerTitle}
+          {currentRole === 'agence' ? 'Espace Professionnel' : currentRole === 'proprietaire' ? 'Espace Propriétaire' : t.auth.registerTitle}
         </h1>
         <p className="text-[13px] text-[var(--text-muted)] font-medium tracking-wide">
-          {t.auth.registerSubtitleShort}
+          {currentRole === 'agence'
+            ? 'Démarcheurs, Agences & Courtiers : rejoignez notre réseau'
+            : currentRole === 'proprietaire'
+            ? 'Louez ou vendez vos biens en toute tranquillité'
+            : t.auth.registerSubtitleShort}
         </p>
       </div>
+
+      {/* Bannière d'accompagnement Pro / Propriétaire */}
+      {currentRole === 'agence' ? (
+        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-start gap-3">
+          <Sparkles className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+          <div className="text-left text-xs leading-relaxed text-[var(--text)]">
+            <span className="font-bold text-amber-600 dark:text-amber-400 block uppercase tracking-wider text-[11px] mb-0.5">
+              Avantages Partenaire Pro
+            </span>
+            Publication assistée de vos biens, multidiffusion WhatsApp, réception directe des demandes de visite et gestion simplifiée de vos annonces.
+          </div>
+        </div>
+      ) : currentRole === 'proprietaire' ? (
+        <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-start gap-3">
+          <Home className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+          <div className="text-left text-xs leading-relaxed text-[var(--text)]">
+            <span className="font-bold text-emerald-600 dark:text-emerald-400 block uppercase tracking-wider text-[11px] mb-0.5">
+              Espace Bailleurs & Propriétaires
+            </span>
+            Sécurisez vos locations et ventes. Vos biens sont validés et mis en avant auprès de locataires et acheteurs sérieux.
+          </div>
+        </div>
+      ) : null}
 
       {/* Social */}
       <div className="space-y-4">
@@ -163,13 +209,60 @@ function RegisterContent() {
         )}
 
         <div className="space-y-5">
+          {/* Sélection du rôle */}
+          <div className="space-y-2.5">
+            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] ml-1">
+              Vous êtes :
+            </label>
+            <div className="grid grid-cols-3 gap-2.5">
+              <label className="relative group cursor-pointer">
+                <input type="radio" value="locataire" {...register('role')} className="sr-only peer" />
+                <div className="p-3 sm:p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-center peer-checked:border-[var(--accent-luxury)] peer-checked:bg-accent-luxury/10 peer-checked:shadow-sm transition-all flex flex-col items-center justify-center min-h-[82px]">
+                  <Compass size={18} className="text-muted/60 mb-1 peer-checked:text-[var(--accent-luxury)]" />
+                  <span className="text-[11px] font-black uppercase tracking-wider text-[var(--text)] leading-tight">
+                    Particulier
+                  </span>
+                  <span className="text-[9px] text-[var(--text-muted)] mt-0.5 leading-tight">
+                    Locataire / Achat
+                  </span>
+                </div>
+              </label>
+
+              <label className="relative group cursor-pointer">
+                <input type="radio" value="proprietaire" {...register('role')} className="sr-only peer" />
+                <div className="p-3 sm:p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-center peer-checked:border-[var(--accent-luxury)] peer-checked:bg-accent-luxury/10 peer-checked:shadow-sm transition-all flex flex-col items-center justify-center min-h-[82px]">
+                  <Home size={18} className="text-muted/60 mb-1 peer-checked:text-[var(--accent-luxury)]" />
+                  <span className="text-[11px] font-black uppercase tracking-wider text-[var(--text)] leading-tight">
+                    Propriétaire
+                  </span>
+                  <span className="text-[9px] text-[var(--text-muted)] mt-0.5 leading-tight">
+                    Bailleur / Vente
+                  </span>
+                </div>
+              </label>
+
+              <label className="relative group cursor-pointer">
+                <input type="radio" value="agence" {...register('role')} className="sr-only peer" />
+                <div className="p-3 sm:p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-center peer-checked:border-[var(--accent-luxury)] peer-checked:bg-accent-luxury/10 peer-checked:shadow-sm transition-all flex flex-col items-center justify-center min-h-[82px]">
+                  <Building2 size={18} className="text-muted/60 mb-1 peer-checked:text-[var(--accent-luxury)]" />
+                  <span className="text-[11px] font-black uppercase tracking-wider text-[var(--text)] leading-tight">
+                    Pro Immo
+                  </span>
+                  <span className="text-[9px] text-[var(--text-muted)] mt-0.5 leading-tight">
+                    Démarcheur / Agence
+                  </span>
+                </div>
+              </label>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] ml-1">
-              <User size={12} className="text-[var(--accent-luxury)]" /> {t.auth.fullName}
+              <User size={12} className="text-[var(--accent-luxury)]" /> {currentRole === 'agence' ? 'Nom commercial ou Nom complet' : t.auth.fullName}
             </label>
             <input
               {...register('full_name')}
-              placeholder={t.auth.fullNamePlaceholderEx}
+              placeholder={currentRole === 'agence' ? 'Ex: Cabinet Kouassi / Roger Démarcheur' : t.auth.fullNamePlaceholderEx}
               autoComplete="name"
               aria-required="true"
               aria-invalid={errors.full_name ? 'true' : 'false'}
@@ -179,6 +272,30 @@ function RegisterContent() {
             {errors.full_name && (
               <p id="reg-fullname-error" role="alert" className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.full_name.message}</p>
             )}
+          </div>
+
+          {/* Numéro WhatsApp */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between ml-1">
+              <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">
+                <Phone size={12} className="text-[var(--accent-luxury)]" /> Numéro WhatsApp
+              </label>
+              <span className="text-[9px] font-bold text-[var(--accent-luxury)] uppercase tracking-wider">
+                {currentRole === 'agence' ? 'Fortement recommandé' : 'Optionnel'}
+              </span>
+            </div>
+            <input
+              {...register('phone')}
+              placeholder="+225 07 00 00 00 00"
+              type="tel"
+              autoComplete="tel"
+              className="w-full px-6 py-4 bg-[var(--surface)] border border-[var(--border)] rounded-2xl focus:outline-none focus:ring-4 focus:ring-[var(--accent-glow)] focus:border-[var(--accent-luxury)] transition-all text-base font-bold text-[var(--text)] placeholder:text-muted/20"
+            />
+            <p className="text-[10px] text-[var(--text-muted)] ml-1">
+              {currentRole === 'agence'
+                ? 'Permet à l’équipe et aux prospects de vous joindre immédiatement pour vos annonces.'
+                : 'Utilisé pour les confirmations de visites et le suivi WhatsApp.'}
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -218,32 +335,6 @@ function RegisterContent() {
               <p id="reg-password-error" role="alert" className="text-[10px] font-bold text-red-500 ml-1 uppercase tracking-wider">{errors.password.message}</p>
             )}
           </div>
-
-          <div className="space-y-3 pt-2">
-            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)] ml-1">
-              {t.auth.yourProfile}
-            </label>
-            <div className="grid grid-cols-3 gap-3">
-              <label className="relative group cursor-pointer">
-                <input type="radio" value="locataire" {...register('role')} className="sr-only peer" />
-                <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-center peer-checked:border-[var(--accent-luxury)] peer-checked:bg-accent-luxury/5 transition-all">
-                  <span className="text-[11px] font-black uppercase tracking-widest text-[var(--text-muted)] peer-checked:text-[var(--accent-luxury)]">{t.auth.renter}</span>
-                </div>
-              </label>
-              <label className="relative group cursor-pointer">
-                <input type="radio" value="proprietaire" {...register('role')} className="sr-only peer" />
-                <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-center peer-checked:border-[var(--accent-luxury)] peer-checked:bg-accent-luxury/5 transition-all">
-                  <span className="text-[11px] font-black uppercase tracking-widest text-[var(--text-muted)] peer-checked:text-[var(--accent-luxury)]">{t.auth.owner}</span>
-                </div>
-              </label>
-              <label className="relative group cursor-pointer">
-                <input type="radio" value="agence" {...register('role')} className="sr-only peer" />
-                <div className="p-4 rounded-2xl border border-[var(--border)] bg-[var(--surface)] text-center peer-checked:border-[var(--accent-luxury)] peer-checked:bg-accent-luxury/5 transition-all">
-                  <span className="text-[11px] font-black uppercase tracking-widest text-[var(--text-muted)] peer-checked:text-[var(--accent-luxury)]">Agence</span>
-                </div>
-              </label>
-            </div>
-          </div>
         </div>
 
         <button
@@ -253,7 +344,7 @@ function RegisterContent() {
         >
           {loading ? t.auth.creating : (
             <>
-              {t.auth.submitRegister} <ArrowRight size={14} />
+              {currentRole === 'agence' ? 'Créer mon compte Pro' : t.auth.submitRegister} <ArrowRight size={14} />
             </>
           )}
         </button>

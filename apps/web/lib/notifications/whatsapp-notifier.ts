@@ -98,6 +98,8 @@ function getBaseUrl(): string {
     .trim()
 }
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
 function formatDateFR(iso: string): string {
   try {
     return new Date(iso).toLocaleDateString('fr-FR', {
@@ -394,7 +396,12 @@ export async function notifyAdminVisitRequest(
   // eslint-disable-next-line no-console
   console.log(`[whatsapp-notifier] Sending to ${admins.length} admins: ${admins.join(', ')}`)
 
-  for (const phone of admins) {
+  for (let i = 0; i < admins.length; i++) {
+    if (i > 0) {
+      // Respect Wasender rate-limit (max 1 message per 5s per account)
+      await sleep(5200)
+    }
+    const phone = admins[i]
     const result = await send(phone, message)
     if (result.success) sent++
     else failed++
@@ -543,7 +550,12 @@ export async function notifyAdminReservationRequest(
   let sent = 0
   let failed = 0
 
-  for (const phone of admins) {
+  for (let i = 0; i < admins.length; i++) {
+    if (i > 0) {
+      // Respect Wasender rate-limit (max 1 message per 5s per account)
+      await sleep(5200)
+    }
+    const phone = admins[i]
     const result = await send(phone, message)
     if (result.success) sent++
     else failed++
@@ -755,7 +767,12 @@ export async function notifyAdminContactRequest(
   let sent = 0
   let failed = 0
 
-  for (const phone of admins) {
+  for (let i = 0; i < admins.length; i++) {
+    if (i > 0) {
+      // Respect Wasender rate-limit (max 1 message per 5s per account)
+      await sleep(5200)
+    }
+    const phone = admins[i]
     const result = await send(phone, message)
     if (result.success) sent++
     else failed++
@@ -906,7 +923,12 @@ export async function notifyAdminNewUser(
 
   let sent = 0
   let failed = 0
-  for (const phone of admins) {
+  for (let i = 0; i < admins.length; i++) {
+    if (i > 0) {
+      // Respect Wasender rate-limit (max 1 message per 5s per account)
+      await sleep(5200)
+    }
+    const phone = admins[i]
     const result = await send(phone, message)
     if (result.success) sent++
     else failed++
@@ -967,7 +989,12 @@ export async function notifyAdminBienSubmitted(
 
   let sent = 0
   let failed = 0
-  for (const phone of admins) {
+  for (let i = 0; i < admins.length; i++) {
+    if (i > 0) {
+      // Respect Wasender rate-limit (max 1 message per 5s per account)
+      await sleep(5200)
+    }
+    const phone = admins[i]
     const result = await send(phone, message)
     if (result.success) sent++
     else failed++

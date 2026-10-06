@@ -135,6 +135,14 @@ export default async function PublicLayout({ children }: { children: React.React
               <div className="flex items-center gap-1.5">
                 <MagneticWrapper>
                   <Link
+                    href="/register?role=pro"
+                    className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-500/10 border border-amber-500/25 rounded-btn hover:bg-amber-500/20 transition-colors whitespace-nowrap mr-1"
+                  >
+                    👑 Espace Pro
+                  </Link>
+                </MagneticWrapper>
+                <MagneticWrapper>
+                  <Link
                     href="/login"
                     className="px-2.5 py-2 font-sans text-[13px] font-medium text-[var(--text-muted)] hover:text-[var(--text)] transition-colors duration-200 rounded-btn hover:bg-[var(--surface)] whitespace-nowrap"
                   >

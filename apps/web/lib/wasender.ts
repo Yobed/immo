@@ -100,7 +100,27 @@ async function wasenderFetch(endpoint: string, options: RequestInit = {}) {
     const response = await fetch(url, { ...options, headers });
     const data = await response.json();
 
-    if (!response.ok) {
+    const isRateLimited = (resp: Response, payload: any) => {
+      const msg = typeof payload?.message === 'string' ? payload.message : '';
+      return resp.status === 429 || /5 seconds|protection enabled|rate limit/i.test(msg);
+    };
+
+    if (!response.ok || (data && data.success === false && isRateLimited(response, data))) {
+      if (isRateLimited(response, data)) {
+        console.warn(`[Wasender] Rate limit / account protection (1 msg / 5s) hit on [${endpoint}]. Waiting 5.5s before retry...`);
+        await new Promise((r) => setTimeout(r, 5500));
+        const retryResp = await fetch(url, { ...options, headers });
+        const retryData = await retryResp.json().catch(() => ({}));
+        if (!retryResp.ok) {
+          console.error(`Wasender API Error after retry [${endpoint}]:`, retryData);
+          return { success: false, message: retryData.message || 'API Error after retry' } as WasenderSendResponse;
+        }
+        if (typeof retryData.success === 'undefined') {
+          retryData.success = true;
+        }
+        return retryData as WasenderSendResponse;
+      }
+
       console.error(`Wasender API Error [${endpoint}]:`, data);
       // Normalise en WasenderSendResponse pour les erreurs HTTP
       return { success: false, message: data.message || 'API Error' } as WasenderSendResponse;

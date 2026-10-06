@@ -23,6 +23,8 @@ function sanitizeKey(raw: string | undefined): string | undefined {
   return raw.replace(/[^!-~]/g, "");
 }
 
+import { SITE_URL } from '@/lib/env';
+
 const GROQ_API_KEY = sanitizeKey(process.env.GROQ_API_KEY);
 const GROQ_MODEL = process.env.GROQ_MODEL || 'qwen/qwen3.8-27b';
 // Modèle de secours actif sur Groq avec bucket distinct
@@ -30,12 +32,10 @@ const GROQ_FALLBACK_MODEL = process.env.GROQ_FALLBACK_MODEL || 'openai/gpt-oss-2
 const GROQ_BASE_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 // Google AI Studio (Gemini) — quota gratuit par jour ≫ Groq free (le vrai
-// filet de sécurité sous forte demande). Modèle 2.5 requis : le free tier
-// de gemini-2.0-flash est à 0 depuis le passage aux 2.5 (vérifié en live).
+// filet de sécurité sous forte demande). Modèle 2.5 flash actif et vérifié en direct.
 const GEMINI_API_KEY = sanitizeKey(process.env.GEMINI_API_KEY);
-// gemini-flash-latest : bucket de quota séparé de gemini-2.5-flash (qui sature
-// vite sous les rafales de trafic pub). Vérifié en live : 200 vs 429.
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-flash-latest';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+
 
 const OPENROUTER_API_KEY = sanitizeKey(process.env.OPENROUTER_API_KEY);
 // Modèle chinois PAYANT très bon marché = filet fiable quand Groq/Gemini
@@ -87,8 +87,6 @@ async function fetchWithTimeout(
     clearTimeout(timer)
   }
 }
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bogbesgroup.com';
 
 function requireGroqKey(): string {
   if (!GROQ_API_KEY) {
@@ -608,17 +606,26 @@ export function formatDeterministicBiensReply(context?: string): string | null {
   const formattedItems: string[] = []
 
   for (const block of bienBlocks.slice(0, 3)) {
-    const titreMatch = block.match(/Titre:\s*([^\n]+)/)
-    const locMatch = block.match(/Localisation:\s*([^\n]+)/)
-    const prixMatch = block.match(/Prix:\s*([^\n]+)/)
-    const lienMatch = block.match(/Lien fiche:\s*([^\n]+)/)
-    const sourceMatch = block.match(/Source:\s*([^\n]+)/)
+    const titreMatch = block.match(/Titre:\s*([^\r\n]+)/)
+    const locMatch = block.match(/Localisation:\s*([^\r\n]+)/)
+    const prixMatch = block.match(/Prix:\s*([^\r\n]+)/)
+    const lienMatch = block.match(/Lien fiche:\s*([^\r\n]+)/)
+    const sourceMatch = block.match(/Source:\s*([^\r\n]+)/)
+    const idMatch = block.match(/ID:\s*([^\r\n]+)/)
 
     const titre = titreMatch ? titreMatch[1].trim() : 'Bien disponible'
     const loc = locMatch ? locMatch[1].trim() : ''
     const prix = prixMatch ? prixMatch[1].trim() : ''
-    const lien = lienMatch ? lienMatch[1].trim() : ''
+    let lien = lienMatch ? lienMatch[1].replace(/[\r\n\s]+$/g, '').trim() : ''
     const source = sourceMatch ? sourceMatch[1].trim() : ''
+    const id = idMatch ? idMatch[1].trim() : ''
+
+    // Filet de sécurité absolu : si le lien est tronqué au nom de domaine, on le reconstruit
+    if ((!lien || lien === SITE_URL || lien === `${SITE_URL}/` || !/\/(?:biens|offre-flash|annonce)\//.test(lien)) && id) {
+      if (source === 'flash') lien = `${SITE_URL}/offre-flash/${id}`
+      else if (source === 'web') lien = `${SITE_URL}/annonce/${id}`
+      else lien = `${SITE_URL}/biens/${id}`
+    }
 
     if (!lien) continue
 

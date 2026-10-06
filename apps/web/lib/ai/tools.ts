@@ -31,7 +31,7 @@ const MAX_PER_SOURCE = 40
 /** Total max envoyé à l'IA (toutes sources confondues) */
 const SAPPHIRE_MAX_RESULTS = 5
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bogbesgroup.com'
+import { SITE_URL } from '@/lib/env'
 
 /** Normalisation zone : minuscules sans accents pour comparer commune/quartier. */
 const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')

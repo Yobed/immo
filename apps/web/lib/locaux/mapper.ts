@@ -217,6 +217,13 @@ function isStillActive(row: LocauxRow): boolean {
   if (row.status && row.status.toLowerCase() === 'inactive') return false
   if (row.is_duplicate === true) return false
   if (row.disponible && row.disponible.toLowerCase().trim() === 'non') return false
+
+  // Sécurité anti-boucle : exclure impérativement les messages du bot ré-aspirés par le scraper WhatsApp
+  if (row.publie_par && /BOGBE/i.test(row.publie_par)) return false
+  if (row.telephone_bien && /2250?544872051|22544872051/.test(row.telephone_bien)) return false
+  if (row.telephone && /2250?544872051|22544872051/.test(row.telephone)) return false
+  if (row.message_initial && row.message_initial.includes('Voici ce qui est disponible dans notre catalogue')) return false
+
   return true
 }
 

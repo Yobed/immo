@@ -18,6 +18,7 @@ const schema = z.object({
   email: z.string().trim().email(),
   password: z.string().min(6).max(72),
   role: z.enum(['locataire', 'proprietaire', 'agence']),
+  phone: z.string().trim().max(30).nullish(),
   referral_code: z.string().max(40).nullish(),
 })
 
@@ -31,14 +32,19 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ error: 'Informations invalides.' }, { status: 400 })
   }
-  const { full_name, email, password, role, referral_code } = parsed.data
+  const { full_name, email, password, role, phone, referral_code } = parsed.data
 
   const admin = createAdminClient()
   const { data, error } = await admin.auth.admin.createUser({
     email,
     password,
     email_confirm: true, // aucun mail envoyé → contourne le rate limit Supabase
-    user_metadata: { full_name, role, referral_code: referral_code ?? null },
+    user_metadata: {
+      full_name,
+      role,
+      phone: phone || null,
+      referral_code: referral_code ?? null,
+    },
   })
 
   if (error) {
@@ -50,11 +56,17 @@ export async function POST(req: NextRequest) {
   }
 
   if (data?.user) {
+    if (phone) {
+      // Met à jour le numéro WhatsApp dans le profil créé par le trigger auth
+      await admin.from('profiles').update({ phone }).eq('id', data.user.id)
+    }
+
     notifyAdminNewUser(admin, {
       id: data.user.id,
       fullName: full_name,
       email,
       role,
+      phone: phone || null,
       referralCode: referral_code ?? null,
     }).catch((err) => {
       // eslint-disable-next-line no-console

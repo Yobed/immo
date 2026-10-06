@@ -21,7 +21,7 @@ import { formatFCFA } from '@/lib/format'
 import { publicDescription } from './public-description'
 import { STATUTS_PUBLICS } from './statuts'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bogbesgroup.com'
+import { SITE_URL } from '@/lib/env'
 
 let _publicBogbes: SupabaseClient | null = null
 function getPublicBogbesClient(): SupabaseClient {

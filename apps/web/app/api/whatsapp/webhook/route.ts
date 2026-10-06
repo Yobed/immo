@@ -3,6 +3,8 @@ import { waitUntil } from '@vercel/functions';
 import { createClient } from '@supabase/supabase-js';
 import { wasenderSendMessage, verifyWasenderSignature } from '@/lib/wasender';
 import { locauxClientForId } from '@/lib/supabase/locaux';
+import { createAnnoncesClient } from '@/lib/supabase/annonces';
+import { SITE_URL } from '@/lib/env';
 import { chatImmobilier, isSapphireFallback, SAPPHIRE_ESCALATION, getLastSapphireRoute, hasPropertyIntent, isGreetingOrAdOpener } from '@/lib/ai';
 import { getAIBienContext } from '@/lib/ai/tools';
 import {
@@ -384,7 +386,8 @@ export async function POST(req: NextRequest) {
         userMessage.startsWith('📥 Annonce') ||
         userMessage.startsWith('🔔 ') ||
         userMessage.startsWith('Merci pour votre proposition') ||
-        userMessage.startsWith('Bienvenue chez BOGBE')
+        userMessage.startsWith('Bienvenue chez BOGBE') ||
+        userMessage.startsWith('Voici ce qui est disponible dans notre catalogue')
       )
     ) {
       return NextResponse.json({ status: 'ignored', reason: 'system_loop_suppression' });
@@ -1125,17 +1128,17 @@ Message client : "${userMessage.slice(0, 200)}"`;
     const cleanedAi = aiResponse.replace(/\[RDV_CONFIRME[^\]]*\]/gi, '').trim();
     const { cleanText: rawText, mediaUrls } = extractMediaTags(cleanedAi);
 
-    // 7b. Pré-remplir les liens /biens/<id> et /offre-flash/<id> avec le tél
+    // 7b. Pré-remplir les liens /biens/<id>, /offre-flash/<id> et /annonce/<id> avec le tél
     // + le nom du client. Le formulaire "Demander une visite" lit ces params
     // et pré-remplit ses champs → 0 friction pour le client venu via Sapphire.
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bogbesgroup.com';
+    const siteUrl = SITE_URL;
     const siteUrlEscaped = siteUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const prefillParams = new URLSearchParams({
       prefill_phone: senderPn,
       prefill_name: contactName || '',
     }).toString();
     const linkRegex = new RegExp(
-      `(${siteUrlEscaped}/(?:biens|offre-flash)/[a-zA-Z0-9-]+)(\\?[^\\s]*)?`,
+      `(${siteUrlEscaped}/(?:biens|offre-flash|annonce)/[a-zA-Z0-9-]+)(\\?[^\\s]*)?`,
       'g',
     );
     const cleanText = rawText.replace(linkRegex, (_match, base, existingQs) => {
@@ -1160,7 +1163,7 @@ Message client : "${userMessage.slice(0, 200)}"`;
     // Wasender (1 msg/5 s) rejette un envoi séparé texte puis image.
     let coverPhoto: string | null = null;
     if (mediaUrls.length === 0 && cleanText) {
-      const linkRe = new RegExp(`${siteUrlEscaped}/(biens|offre-flash)/([a-zA-Z0-9-]+)`, 'g');
+      const linkRe = new RegExp(`${siteUrlEscaped}/(biens|offre-flash|annonce)/([a-zA-Z0-9-]+)`, 'g');
       const links: Array<{ kind: string; id: string }> = [];
       const seenIds = new Set<string>();
       let lm: RegExpExecArray | null;
@@ -1184,6 +1187,19 @@ Message client : "${userMessage.slice(0, 200)}"`;
             .order('ordre', { ascending: true })
             .limit(1);
           coverPhoto = med?.[0]?.url ?? null;
+        } else if (l.kind === 'annonce') {
+          try {
+            const sbAnn = createAnnoncesClient();
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { data: ann } = await (sbAnn as any)
+              .from('v_annonces')
+              .select('photo_principale, photos')
+              .eq('id', Number(l.id))
+              .maybeSingle();
+            coverPhoto = ann?.photo_principale || ann?.photos?.[0] || null;
+          } catch {
+            // source annonces indisponible
+          }
         } else {
           try {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
