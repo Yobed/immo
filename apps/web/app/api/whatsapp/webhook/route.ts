@@ -124,8 +124,8 @@ const NEW_NEED_REGEX = /\b(cherche|voudrais|aimerais|besoin|louer|acheter|autre\
  *  orientation plateforme (créer un compte + publier) — rien de plus. */
 const PARTNER_REPLY = `Merci pour votre proposition 🙏
 
-Pour une prise en charge et un meilleur suivi de votre bien, créez votre compte et publiez-le directement sur notre plateforme :
-https://www.bogbesgroup.com/register
+Pour une prise en charge et un meilleur suivi de votre bien, créez votre compte professionnel et publiez-le directement sur notre plateforme :
+https://www.bogbesgroup.com/register?role=pro
 
 Notre équipe le validera rapidement.`;
 
@@ -1133,27 +1133,25 @@ Message client : "${userMessage.slice(0, 200)}"`;
     // et pré-remplit ses champs → 0 friction pour le client venu via Sapphire.
     const siteUrl = SITE_URL;
     const siteUrlEscaped = siteUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const prefillParams = new URLSearchParams({
-      prefill_phone: senderPn,
-      prefill_name: contactName || '',
-    }).toString();
+    const cleanSenderPhone = senderPn ? senderPn.replace(/[^0-9]/g, '') : '';
+    const hostPattern = `(?:https?:\\/\\/(?:www\\.)?bogbesgroup\\.com|${siteUrlEscaped})`;
     const linkRegex = new RegExp(
-      `(${siteUrlEscaped}/(?:biens|offre-flash|annonce)/[a-zA-Z0-9-]+)(\\?[^\\s]*)?`,
+      `(${hostPattern}/(?:biens|offre-flash|annonce)/[a-zA-Z0-9_-]+)(\\?[^\\s]*)?`,
       'g',
     );
     const cleanText = rawText.replace(linkRegex, (_match, base, existingQs) => {
-      // Normalisation : le LLM recopie les URLs de l'historique, parfois avec
-      // des prefill_* déjà dupliqués → on purge tout prefill_* existant et on
-      // remet UN seul jeu propre (les autres params éventuels sont conservés).
+      // Normalisation : s'assurer du host canonique SITE_URL et purifier les query params
+      const canonicalBase = base.replace(/^https?:\/\/(?:www\.)?bogbesgroup\.com/, SITE_URL);
       const kept = new URLSearchParams();
       if (existingQs) {
         for (const [k, v] of new URLSearchParams(String(existingQs).slice(1))) {
           if (!k.startsWith('prefill_') && !kept.has(k)) kept.append(k, v);
         }
       }
-      kept.set('prefill_phone', senderPn);
-      kept.set('prefill_name', contactName || '');
-      return `${base}?${kept.toString()}`;
+      if (cleanSenderPhone) kept.set('prefill_phone', cleanSenderPhone);
+      if (contactName) kept.set('prefill_name', contactName);
+      const qs = kept.toString();
+      return qs ? `${canonicalBase}?${qs}` : canonicalBase;
     });
 
     // 8a. Preuve visuelle : couverture du premier bien proposé dans la réponse.
@@ -1163,7 +1161,7 @@ Message client : "${userMessage.slice(0, 200)}"`;
     // Wasender (1 msg/5 s) rejette un envoi séparé texte puis image.
     let coverPhoto: string | null = null;
     if (mediaUrls.length === 0 && cleanText) {
-      const linkRe = new RegExp(`${siteUrlEscaped}/(biens|offre-flash|annonce)/([a-zA-Z0-9-]+)`, 'g');
+      const linkRe = new RegExp(`${hostPattern}/(biens|offre-flash|annonce)/([a-zA-Z0-9_-]+)`, 'g');
       const links: Array<{ kind: string; id: string }> = [];
       const seenIds = new Set<string>();
       let lm: RegExpExecArray | null;

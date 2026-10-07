@@ -49,14 +49,9 @@ const OPENROUTER_PAID_MODELS = (
 ).split(',').map((s) => s.trim()).filter((model) => model.length > 0 && !model.endsWith(':free'));
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
-// Vercel functions cap at 10 s. Budgeting for the worst case:
-//   Greeting fast-path: ~5 ms
-//   Groq attempt:       up to 5 s   (then retry once → up to 5 s more if needed)
-//   OpenRouter attempt: up to 5 s
-//   DB writes / send:    ~1 s
-// Keeping each LLM call at 5 s leaves room for the cascade to bail out gracefully
-// instead of hitting Vercel's hard kill at 10 s.
-const PROVIDER_TIMEOUT_MS = 5000;
+// Vercel serverless functions on WhatsApp webhook have maxDuration = 60s.
+// Keeping provider timeout at 10s ensures reliable completion even during peak network latency.
+const PROVIDER_TIMEOUT_MS = 10000;
 
 /**
  * OpenRouter is Sapphire's last provider fallback. Keep this branch bounded:
@@ -697,9 +692,9 @@ export async function chatImmobilier(messages: ChatMessage[], context?: string):
   const groqResult = await groqFetch(trimmed, system)
   if (groqResult) {
     let cleaned = sanitizeOutput(groqResult)
-    // Garde anti-oubli : si des biens étaient présents dans le catalogue mais que le LLM n'a inclus aucun lien
-    if (context && context.includes('--- BIEN 1') && !cleaned.includes('http')) {
-      console.warn('[Sapphire] LLM response lacked property links despite catalog presence -> applying deterministic presentation')
+    // Garde anti-oubli : si des biens étaient présents dans le catalogue mais que le LLM n'a inclus aucun lien de fiche précis (/biens, /offre-flash, /annonce)
+    if (context && context.includes('--- BIEN 1') && !/\/(?:biens|offre-flash|annonce)\/[a-zA-Z0-9_-]+/.test(cleaned)) {
+      console.warn('[Sapphire] LLM response lacked specific property links despite catalog presence -> applying deterministic presentation')
       const deterministic = formatDeterministicBiensReply(context)
       if (deterministic) cleaned = deterministic
     }
@@ -720,8 +715,8 @@ export async function chatImmobilier(messages: ChatMessage[], context?: string):
   const geminiResult = await geminiFetch(trimmed, system)
   if (geminiResult) {
     let cleaned = sanitizeOutput(geminiResult)
-    if (context && context.includes('--- BIEN 1') && !cleaned.includes('http')) {
-      console.warn('[Sapphire] Gemini response lacked property links despite catalog presence -> applying deterministic presentation')
+    if (context && context.includes('--- BIEN 1') && !/\/(?:biens|offre-flash|annonce)\/[a-zA-Z0-9_-]+/.test(cleaned)) {
+      console.warn('[Sapphire] Gemini response lacked specific property links despite catalog presence -> applying deterministic presentation')
       const deterministic = formatDeterministicBiensReply(context)
       if (deterministic) cleaned = deterministic
     }
@@ -741,8 +736,8 @@ export async function chatImmobilier(messages: ChatMessage[], context?: string):
   const openRouterResult = await openRouterFetch(trimmed, system)
   if (openRouterResult) {
     let cleaned = sanitizeOutput(openRouterResult)
-    if (context && context.includes('--- BIEN 1') && !cleaned.includes('http')) {
-      console.warn('[Sapphire] OpenRouter response lacked property links despite catalog presence -> applying deterministic presentation')
+    if (context && context.includes('--- BIEN 1') && !/\/(?:biens|offre-flash|annonce)\/[a-zA-Z0-9_-]+/.test(cleaned)) {
+      console.warn('[Sapphire] OpenRouter response lacked specific property links despite catalog presence -> applying deterministic presentation')
       const deterministic = formatDeterministicBiensReply(context)
       if (deterministic) cleaned = deterministic
     }
