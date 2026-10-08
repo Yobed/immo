@@ -332,7 +332,7 @@ Pour mieux vous accompagner, merci de nous préciser :
 🔹 À quelle date souhaitez-vous disposer du bien ?
 
 🌐 Vous pouvez également consulter directement nos annonces ici :
-https://bogbesgroup.com
+https://www.bogbesgroup.com/biens
 
 Votre futur bien est peut-être déjà disponible ! 🔑`
 
