@@ -1,0 +1,48 @@
+# .github/workflows/daily-firecrawl-scraping.yml
+# Crawl et ingestion automatique quotidienne d'annonces fraîches via Firecrawl
+# Respecte le quota de 0 FCFA de stockage et ignore les doublons déjà en base.
+
+name: Daily Real Estate Scraping (Firecrawl)
+
+on:
+  schedule:
+    # Tournée quotidienne à 10:00 UTC (10h00 heure d'Abidjan GMT)
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Nombre d annonces fraîches à cibler (ex: 50, 100)'
+        required: false
+        default: '50'
+
+jobs:
+  scrape:
+    name: Crawl & Ingest Fresh Listings
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install minimal root dependencies
+        run: |
+          npm install @supabase/supabase-js cloudinary
+
+      - name: Run Firecrawl Multi-Category Pipeline
+        run: |
+          TARGET=${{ github.event.inputs.target || '50' }}
+          echo "🚀 Lancement de la collecte avec cible = $TARGET annonces fraîches..."
+          node scripts/firecrawl-scraper.mjs --all --target=$TARGET
+        env:
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+          SCRAPING_SUPABASE_URL: ${{ secrets.SCRAPING_SUPABASE_URL }}
+          SCRAPING_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SCRAPING_SUPABASE_SERVICE_ROLE_KEY }}
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
