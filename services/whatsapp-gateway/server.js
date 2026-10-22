@@ -45,6 +45,90 @@ let lastMessageAt = null;
 let lastConnectionEvents = [];
 let lastDisconnectReason = null;
 
+// ─── 🛡️ BOUCLIER ANTI-BAN WHATSAPP (SÉCURITÉ MAXIMALE) ────────────────────────
+let reconnectAttempts = 0;
+function getReconnectDelay() {
+  reconnectAttempts++;
+  // Exponential backoff : 5s, 10s, 20s, 40s, max 60s + gigue aléatoire (1 à 4s)
+  const base = Math.min(60000, 5000 * Math.pow(1.8, Math.min(reconnectAttempts - 1, 5)));
+  const jitter = Math.floor(Math.random() * 4000);
+  return Math.floor(base + jitter);
+}
+
+const outboundQueue = [];
+let isProcessingQueue = false;
+let dailyOutboundCount = 0;
+let lastOutboundResetDay = new Date().toDateString();
+const MAX_DAILY_OUTBOUND = 100; // Protection stricte : max 100 envois/24h sur ligne de scraping
+
+function checkDailyReset() {
+  const today = new Date().toDateString();
+  if (today !== lastOutboundResetDay) {
+    dailyOutboundCount = 0;
+    lastOutboundResetDay = today;
+  }
+}
+
+async function enqueueOutboundMessage(task) {
+  checkDailyReset();
+  if (dailyOutboundCount >= MAX_DAILY_OUTBOUND) {
+    throw new Error(`[Bouclier Anti-Ban] Quota de sécurité atteint (${MAX_DAILY_OUTBOUND} msg/jour). Envoi bloqué pour préserver le numéro.`);
+  }
+
+  return new Promise((resolve, reject) => {
+    outboundQueue.push({ task, resolve, reject });
+    processOutboundQueue();
+  });
+}
+
+async function processOutboundQueue() {
+  if (isProcessingQueue || outboundQueue.length === 0) return;
+  isProcessingQueue = true;
+
+  while (outboundQueue.length > 0) {
+    const item = outboundQueue.shift();
+    try {
+      if (!sock || connectionStatus !== 'connected') {
+        throw new Error('Passerelle WhatsApp déconnectée');
+      }
+
+      const { to, text, content } = item.task;
+
+      // 1. Simulation humaine : "en train d'écrire..." (composing)
+      try {
+        await sock.sendPresenceUpdate('composing', to);
+      } catch {}
+
+      // 2. Délai de frappe réaliste proportionnel au message (ex: 2.5s à 7s aléatoire)
+      const textLen = (text || '').length;
+      const humanDelayMs = Math.min(8000, 1800 + textLen * 18) + Math.random() * 2000;
+      await new Promise((r) => setTimeout(r, humanDelayMs));
+
+      // 3. Pause naturelle avant émission
+      try {
+        await sock.sendPresenceUpdate('paused', to);
+      } catch {}
+
+      // 4. Transmission réelle du message
+      const result = await sock.sendMessage(to, content);
+      dailyOutboundCount++;
+      logger.info({ to, dailyOutboundCount }, '✅ [Anti-Ban] Message transmis avec délai humain réaliste');
+
+      item.resolve(result);
+
+      // 5. Anti-burst cooling delay (5 à 9 secondes minimum entre 2 messages différents)
+      if (outboundQueue.length > 0) {
+        const coolingMs = 5000 + Math.random() * 4000;
+        await new Promise((r) => setTimeout(r, coolingMs));
+      }
+    } catch (err) {
+      item.reject(err);
+    }
+  }
+
+  isProcessingQueue = false;
+}
+
 try {
   if (!existsSync(AUTH_DIR)) {
     mkdirSync(AUTH_DIR, { recursive: true });
@@ -90,6 +174,7 @@ async function connectToWhatsApp() {
       keepAliveIntervalMs: 15000,
       syncFullHistory: false,
       shouldSyncHistoryMessage: () => false,
+      markOnlineOnConnect: false, // Discrétion maximale : ne pas diffuser "en ligne" 24h/24 à tout le carnet
       appStateMacVerification: {
         patch: false,
         snapshot: false,
@@ -144,7 +229,8 @@ async function connectToWhatsApp() {
       if (connection === 'close') {
         const statusCode = lastDisconnect?.error?.output?.statusCode;
         const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-        logger.warn(`Connexion Baileys fermée. Code: ${statusCode}. Reconnexion: ${shouldReconnect}`);
+        const delay = getReconnectDelay();
+        logger.warn(`Connexion Baileys fermée. Code: ${statusCode}. Reconnexion dans ${Math.round(delay/1000)}s (Tentative #${reconnectAttempts}): ${shouldReconnect}`);
 
         connectionStatus = 'logged_out';
         qrCodeDataUrl = null;
@@ -152,15 +238,12 @@ async function connectToWhatsApp() {
         connectedPhone = null;
 
         if (shouldReconnect) {
-          reconnectTimer = setTimeout(connectToWhatsApp, 3500);
+          reconnectTimer = setTimeout(connectToWhatsApp, delay);
         } else {
-          logger.info('Session déconnectée par l\'utilisateur. Nettoyage auth...');
-          try {
-            if (existsSync(AUTH_DIR)) rmSync(AUTH_DIR, { recursive: true, force: true });
-          } catch {}
-          reconnectTimer = setTimeout(connectToWhatsApp, 2000);
+          logger.error('Session WhatsApp déconnectée par Meta (Logged Out). Alerte admin requise.');
         }
       } else if (connection === 'open') {
+        reconnectAttempts = 0; // Réinitialisation du compteur anti-tempête
         connectionStatus = 'connected';
         qrCodeDataUrl = null;
         currentPairingCode = null;
@@ -290,6 +373,7 @@ function requireApiKey(req, res, next) {
 // ─── Routes API (Compatibles Wasender & Standard Gateway) ─────────────────────
 
 const handleStatus = (req, res) => {
+  checkDailyReset();
   res.json({
     success: true,
     status: connectionStatus,
@@ -298,6 +382,13 @@ const handleStatus = (req, res) => {
       received: totalMessagesReceived,
       forwarded: totalMessagesForwarded,
       lastMessageAt,
+    },
+    antiBan: {
+      enabled: true,
+      dailyOutbound: dailyOutboundCount,
+      dailyLimit: MAX_DAILY_OUTBOUND,
+      queuePending: outboundQueue.length,
+      mode: 'passive_scraping_safe',
     },
     instance: 'bogbes-whatsapp-gateway',
     timestamp: new Date().toISOString(),
@@ -352,36 +443,43 @@ const handleSendMessage = async (req, res) => {
   }
 
   try {
-    let result = null;
+    let content = null;
 
     if (imageUrl) {
-      result = await sock.sendMessage(cleanTo, {
+      content = {
         image: { url: imageUrl },
         caption: text || '',
-      });
+      };
     } else if (videoUrl) {
-      result = await sock.sendMessage(cleanTo, {
+      content = {
         video: { url: videoUrl },
         caption: text || '',
-      });
+      };
     } else if (documentUrl) {
-      result = await sock.sendMessage(cleanTo, {
+      content = {
         document: { url: documentUrl },
         mimetype: 'application/pdf',
         fileName: 'document.pdf',
         caption: text || '',
-      });
+      };
     } else if (audioUrl) {
-      result = await sock.sendMessage(cleanTo, {
+      content = {
         audio: { url: audioUrl },
         mimetype: 'audio/mp4',
         ptt: true,
-      });
+      };
     } else {
-      result = await sock.sendMessage(cleanTo, {
+      content = {
         text: text || '',
-      });
+      };
     }
+
+    // 🛡️ Passage obligatoire par la file sécurisée Anti-Ban (Typing presence + Délai humain + Quota)
+    const result = await enqueueOutboundMessage({
+      to: cleanTo,
+      text: text || '',
+      content,
+    });
 
     return res.json({
       success: true,
