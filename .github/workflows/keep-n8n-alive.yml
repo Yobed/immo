@@ -1,0 +1,26 @@
+name: Keep Services Alive (Anti-Sleep)
+
+on:
+  schedule:
+    # Exécution toutes les 10 minutes pour maintenir HF Space et Render actifs 24h/24
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping-services:
+    name: Ping Cloud Services
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Ping n8n HF Space
+        run: |
+          echo "Pinging n8n HF Space..."
+          STATUS_N8N=$(curl -s -o /dev/null -w "%{http_code}" -m 15 https://kassio1-n8n-free.hf.space/healthz || echo "000")
+          echo "n8n status: $STATUS_N8N"
+
+      - name: Ping Render WhatsApp Gateway
+        run: |
+          echo "Pinging Render WhatsApp Gateway..."
+          STATUS_WA=$(curl -s -o /dev/null -w "%{http_code}" -m 15 https://bogbes-whatsapp-gateway.onrender.com/status || echo "000")
+          echo "WhatsApp Gateway status: $STATUS_WA"
