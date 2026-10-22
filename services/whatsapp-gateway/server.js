@@ -1,0 +1,766 @@
+import express from 'express';
+import cors from 'cors';
+import QRCode from 'qrcode';
+import pino from 'pino';
+import { existsSync, rmSync, mkdirSync } from 'node:fs';
+import { resolve } from 'node:path';
+import makeWASocket, {
+  DisconnectReason,
+  useMultiFileAuthState,
+  fetchLatestBaileysVersion,
+  Browsers,
+} from '@whiskeysockets/baileys';
+
+const PORT = parseInt(process.env.PORT || '5685', 10);
+function findAuthDir() {
+  if (process.env.AUTH_DIR && existsSync(process.env.AUTH_DIR)) return process.env.AUTH_DIR;
+  const candidates = [
+    resolve(process.cwd(), 'auth'),
+    resolve(process.cwd(), 'wa_auth'),
+    resolve(process.cwd(), 'services/whatsapp-gateway/auth'),
+    resolve(process.cwd(), 'scratch/wa_auth'),
+  ];
+  for (const c of candidates) {
+    if (existsSync(c) && existsSync(resolve(c, 'creds.json'))) return c;
+  }
+  return process.env.AUTH_DIR || resolve(process.cwd(), 'auth');
+}
+const AUTH_DIR = findAuthDir();
+const API_KEY = process.env.WHATSAPP_API_KEY || process.env.API_KEY || 'bogbes_secret_key_2026';
+const WEBHOOK_URL = process.env.WEBHOOK_URL || 'https://www.bogbesgroup.com/api/whatsapp/webhook';
+const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || process.env.WASSENDER_WEBHOOK_SECRET || 'a8271744c3bba421d49850cd785ff068';
+const N8N_SCRAPER_URL = process.env.N8N_SCRAPER_URL || 'https://kassio1-n8n-free.hf.space/webhook/wassender-immobilier';
+
+const logger = pino({ level: 'info' });
+
+let sock = null;
+let qrCodeDataUrl = null;
+let currentPairingCode = null;
+let connectionStatus = 'logged_out'; // 'connected' | 'connecting' | 'logged_out'
+let connectedPhone = null;
+let reconnectTimer = null;
+let totalMessagesReceived = 0;
+let totalMessagesForwarded = 0;
+let lastMessageAt = null;
+let lastConnectionEvents = [];
+let lastDisconnectReason = null;
+
+try {
+  if (!existsSync(AUTH_DIR)) {
+    mkdirSync(AUTH_DIR, { recursive: true });
+  }
+} catch (e) {
+  logger.warn({ err: e.message }, 'Pre-creation of AUTH_DIR skipped');
+}
+
+const app = express();
+app.use(cors());
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ extended: true, limit: '20mb' }));
+
+/**
+ * Initialise ou reconnecte le socket Baileys WhatsApp
+ */
+async function connectToWhatsApp() {
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+
+  if (sock) {
+    try {
+      sock.ev.removeAllListeners();
+      sock.end();
+    } catch {}
+    sock = null;
+  }
+
+  try {
+    const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
+    logger.info('Démarrage Baileys avec version stable native');
+
+    connectionStatus = 'connecting';
+
+    sock = makeWASocket({
+      logger: pino({ level: 'info' }),
+      auth: state,
+      browser: ['Windows', 'Chrome', '124.0.0.0'],
+      connectTimeoutMs: 60000,
+      defaultQueryTimeoutMs: 60000,
+      keepAliveIntervalMs: 15000,
+      syncFullHistory: false,
+      shouldSyncHistoryMessage: () => false,
+      appStateMacVerification: {
+        patch: false,
+        snapshot: false,
+      },
+      options: {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+          'Origin': 'https://web.whatsapp.com',
+        },
+      },
+    });
+
+    sock.ev.on('creds.update', saveCreds);
+
+    sock.ev.on('connection.update', async (update) => {
+      logger.info({ connection: update.connection, hasQr: !!update.qr, lastDisconnect: update.lastDisconnect?.error?.message }, 'Event connection.update');
+      const { connection, lastDisconnect, qr } = update;
+
+      lastConnectionEvents.push({
+        time: new Date().toISOString(),
+        connection,
+        hasQr: !!qr,
+        err: lastDisconnect?.error?.message,
+        statusCode: lastDisconnect?.error?.output?.statusCode,
+      });
+      if (lastConnectionEvents.length > 20) lastConnectionEvents.shift();
+
+      if (lastDisconnect) {
+        lastDisconnectReason = {
+          time: new Date().toISOString(),
+          message: lastDisconnect.error?.message,
+          statusCode: lastDisconnect.error?.output?.statusCode,
+          stack: lastDisconnect.error?.stack,
+        };
+      }
+
+      if (qr) {
+        try {
+          qrCodeDataUrl = await QRCode.toDataURL(qr, { width: 320, margin: 2 });
+          connectionStatus = 'connecting';
+          logger.info('Nouveau QR Code WhatsApp généré avec succès');
+
+          try {
+            await QRCode.toFile(resolve(process.cwd(), 'scratch', 'whatsapp-qr.png'), qr, { width: 400, margin: 2 });
+            await QRCode.toFile('C:\\Users\\WILFRIED\\.gemini\\antigravity\\brain\\8dde7a4f-e08b-405a-a498-2fcaa606451d\\whatsapp-qr.png', qr, { width: 400, margin: 2 });
+          } catch {}
+        } catch (err) {
+          logger.error('Erreur génération QR Code DataURL:', err);
+        }
+      }
+
+      if (connection === 'close') {
+        const statusCode = lastDisconnect?.error?.output?.statusCode;
+        const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
+        logger.warn(`Connexion Baileys fermée. Code: ${statusCode}. Reconnexion: ${shouldReconnect}`);
+
+        connectionStatus = 'logged_out';
+        qrCodeDataUrl = null;
+        currentPairingCode = null;
+        connectedPhone = null;
+
+        if (shouldReconnect) {
+          reconnectTimer = setTimeout(connectToWhatsApp, 3500);
+        } else {
+          logger.info('Session déconnectée par l\'utilisateur. Nettoyage auth...');
+          try {
+            if (existsSync(AUTH_DIR)) rmSync(AUTH_DIR, { recursive: true, force: true });
+          } catch {}
+          reconnectTimer = setTimeout(connectToWhatsApp, 2000);
+        }
+      } else if (connection === 'open') {
+        connectionStatus = 'connected';
+        qrCodeDataUrl = null;
+        currentPairingCode = null;
+        connectedPhone = sock.user?.id ? sock.user.id.split(':')[0].replace(/\D/g, '') : null;
+        logger.info(`✅ Connecté à WhatsApp ! Numéro: +${connectedPhone}`);
+      }
+    });
+
+    // Ingestion & Relai des messages entrants
+    sock.ev.on('messages.upsert', async ({ messages, type }) => {
+      if (type !== 'notify') return;
+
+      for (const msg of messages) {
+        if (!msg.message) continue;
+        totalMessagesReceived++;
+        lastMessageAt = new Date().toISOString();
+        const jid = msg.key.remoteJid || '';
+        const fromMe = msg.key.fromMe || false;
+
+        const text =
+          msg.message.conversation ||
+          msg.message.extendedTextMessage?.text ||
+          msg.message.imageMessage?.caption ||
+          msg.message.videoMessage?.caption ||
+          '';
+
+        const isGroup = jid.endsWith('@g.us');
+
+        // 1. Message de groupe WhatsApp -> Relai direct Scraper n8n
+        if (isGroup && !fromMe && N8N_SCRAPER_URL) {
+          totalMessagesForwarded++;
+          const groupPayload = {
+            event: 'messages-group.received',
+            data: {
+              messages: [msg],
+              message: msg,
+              key: msg.key,
+              groupName: '',
+            },
+            sender: msg.key.participant || jid,
+            from: jid,
+            text,
+            message: msg,
+            timestamp: Date.now(),
+          };
+          forwardToWebhook(N8N_SCRAPER_URL, groupPayload).catch(() => null);
+        }
+
+        // 2. Message direct 1-à-1 -> Relai Next.js (CRM / Sapphire IA)
+        if (!isGroup && WEBHOOK_URL) {
+          const payload = {
+            event: fromMe ? 'messages.sent' : 'messages.received',
+            data: {
+              id: msg.key.id,
+              from: jid,
+              to: sock.user?.id || '',
+              body: text,
+              fromMe,
+              pushName: msg.pushName || '',
+              timestamp: msg.messageTimestamp,
+              key: msg.key,
+              message: msg.message,
+            },
+          };
+          forwardToWebhook(WEBHOOK_URL, payload, WEBHOOK_SECRET).catch(() => null);
+        }
+      }
+    });
+  } catch (err) {
+    logger.error('Erreur connectToWhatsApp:', err);
+    connectionStatus = 'logged_out';
+    reconnectTimer = setTimeout(connectToWhatsApp, 5000);
+  }
+}
+
+/**
+ * Relai payload vers webhook distant avec tolérance aux pannes et repli
+ */
+async function forwardToWebhook(url, payload, secret = '') {
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (secret) {
+      headers['X-Webhook-Signature'] = secret;
+    }
+    const res = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) {
+      logger.info(`✅ Webhook transmis avec succès vers ${url} (status ${res.status})`);
+    } else {
+      logger.warn(`Webhook ${url} a répondu avec statut ${res.status}`);
+    }
+  } catch (err) {
+    logger.error(`Échec relai webhook vers ${url}: ${err.message}`);
+    // Si c'est l'URL locale 127.0.0.1 qui a échoué, tenter le repli direct vers n8n Cloud
+    if (url.includes('127.0.0.1') && !url.includes('hf.space')) {
+      const fallbackUrl = 'https://kassio1-n8n-free.hf.space/webhook/wassender-immobilier';
+      try {
+        await fetch(fallbackUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        logger.info(`✅ Message relayé avec succès vers n8n Cloud via repli: ${fallbackUrl}`);
+      } catch (e) {
+        logger.error(`Échec repli n8n cloud: ${e.message}`);
+      }
+    }
+  }
+}
+
+// ─── Authentification API ───────────────────────────────────────────────────
+function requireApiKey(req, res, next) {
+  if (!API_KEY) return next();
+  const auth = req.headers.authorization || '';
+  const token = auth.replace(/^Bearer\s+/i, '').trim();
+  const keyParam = req.query.apiKey || req.headers['x-api-key'];
+
+  if (token === API_KEY || keyParam === API_KEY) {
+    return next();
+  }
+  return res.status(401).json({ success: false, message: 'Non autorisé: Clé API invalide' });
+}
+
+// ─── Routes API (Compatibles Wasender & Standard Gateway) ─────────────────────
+
+const handleStatus = (req, res) => {
+  res.json({
+    success: true,
+    status: connectionStatus,
+    phone: connectedPhone,
+    stats: {
+      received: totalMessagesReceived,
+      forwarded: totalMessagesForwarded,
+      lastMessageAt,
+    },
+    instance: 'bogbes-whatsapp-gateway',
+    timestamp: new Date().toISOString(),
+  });
+};
+app.get('/status', handleStatus);
+app.get('/api/status', handleStatus);
+
+app.get(['/debug-wa', '/api/debug-wa'], (req, res) => {
+  res.json({
+    status: connectionStatus,
+    phone: connectedPhone,
+    authDir: AUTH_DIR,
+    stats: {
+      received: totalMessagesReceived,
+      forwarded: totalMessagesForwarded,
+      lastMessageAt,
+    },
+    events: lastConnectionEvents,
+    lastDisconnect: lastDisconnectReason,
+  });
+});
+
+const handleSendMessage = async (req, res) => {
+  if (connectionStatus !== 'connected' || !sock) {
+    return res.status(503).json({
+      success: false,
+      message: 'Passerelle WhatsApp déconnectée. Veuillez scanner le QR code ou associer votre numéro.',
+      status: connectionStatus,
+    });
+  }
+
+  const { to, text, imageUrl, videoUrl, documentUrl, audioUrl } = req.body;
+  if (!to) {
+    return res.status(400).json({ success: false, message: 'Destinataire "to" requis' });
+  }
+
+  let cleanTo = String(to).replace(/\D/g, '');
+  if (!cleanTo.endsWith('@g.us')) {
+    try {
+      const [waContact] = await sock.onWhatsApp(cleanTo);
+      if (waContact?.jid) {
+        cleanTo = waContact.jid;
+      } else if (!cleanTo.endsWith('@s.whatsapp.net')) {
+        cleanTo = `${cleanTo}@s.whatsapp.net`;
+      }
+    } catch {
+      if (!cleanTo.endsWith('@s.whatsapp.net')) {
+        cleanTo = `${cleanTo}@s.whatsapp.net`;
+      }
+    }
+  }
+
+  try {
+    let result = null;
+
+    if (imageUrl) {
+      result = await sock.sendMessage(cleanTo, {
+        image: { url: imageUrl },
+        caption: text || '',
+      });
+    } else if (videoUrl) {
+      result = await sock.sendMessage(cleanTo, {
+        video: { url: videoUrl },
+        caption: text || '',
+      });
+    } else if (documentUrl) {
+      result = await sock.sendMessage(cleanTo, {
+        document: { url: documentUrl },
+        mimetype: 'application/pdf',
+        fileName: 'document.pdf',
+        caption: text || '',
+      });
+    } else if (audioUrl) {
+      result = await sock.sendMessage(cleanTo, {
+        audio: { url: audioUrl },
+        mimetype: 'audio/mp4',
+        ptt: true,
+      });
+    } else {
+      result = await sock.sendMessage(cleanTo, {
+        text: text || '',
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: 'Message envoyé avec succès',
+      data: {
+        msgId: result?.key?.id || Date.now(),
+        id: result?.key?.id,
+        jid: cleanTo,
+        status: 'sent',
+      },
+    });
+  } catch (err) {
+    logger.error(`Erreur envoi message vers ${cleanTo}:`, err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+app.post('/send-message', requireApiKey, handleSendMessage);
+app.post('/api/send-message', requireApiKey, handleSendMessage);
+
+const handleOnWhatsApp = async (req, res) => {
+  const phone = req.params.phone?.replace(/\D/g, '');
+  if (!phone || !sock) {
+    return res.json({ success: false, onWhatsApp: false });
+  }
+  try {
+    const [result] = await sock.onWhatsApp(phone);
+    return res.json({ success: true, onWhatsApp: result?.exists || false, jid: result?.jid });
+  } catch {
+    return res.json({ success: false, onWhatsApp: false });
+  }
+};
+app.get('/on-whatsapp/:phone', requireApiKey, handleOnWhatsApp);
+app.get('/api/on-whatsapp/:phone', requireApiKey, handleOnWhatsApp);
+
+// Association alternative par Code à 8 chiffres (Sans Caméra)
+const handlePairingCode = async (req, res) => {
+  const phone = String(req.body.phone || req.query.phone || '').replace(/\D/g, '');
+  if (!phone) {
+    return res.status(400).json({ success: false, message: 'Numéro de téléphone requis (ex: 2250789263373)' });
+  }
+  if (!sock) {
+    return res.status(503).json({ success: false, message: 'Passerelle non initialisée' });
+  }
+  try {
+    logger.info(`Génération du code d'association pour le numéro: +${phone}`);
+    const code = await sock.requestPairingCode(phone);
+    currentPairingCode = code;
+    logger.info(`Code d'association généré avec succès: ${code}`);
+
+    if (req.is('json') || req.headers.accept?.includes('application/json') || req.headers['content-type']?.includes('application/json')) {
+      return res.json({ success: true, code, phone });
+    }
+    return res.redirect('/?code=' + encodeURIComponent(code));
+  } catch (err) {
+    logger.error('Erreur requestPairingCode:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+app.post('/api/pairing-code', handlePairingCode);
+app.get('/api/pairing-code', handlePairingCode);
+
+const handleDisconnect = async (req, res) => {
+  try {
+    if (sock) await sock.logout();
+    if (existsSync(AUTH_DIR)) rmSync(AUTH_DIR, { recursive: true, force: true });
+    connectionStatus = 'logged_out';
+    connectedPhone = null;
+    qrCodeDataUrl = null;
+    currentPairingCode = null;
+    reconnectTimer = setTimeout(connectToWhatsApp, 1500);
+
+    if (req.accepts('html')) {
+      return res.redirect('/');
+    }
+    return res.json({ success: true, message: 'Session réinitialisée' });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+app.post('/api/disconnect', handleDisconnect);
+app.get('/api/disconnect', handleDisconnect);
+
+// Redirections préventives vers l'accueil
+app.get('/api', (req, res) => res.redirect('/' + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '')));
+app.get('/api/', (req, res) => res.redirect('/' + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '')));
+
+// ─── Dashboard Web & QR Code ────────────────────────────────────────────────
+const renderDashboard = (req, res) => {
+  const isConnected = connectionStatus === 'connected';
+  const displayedCode = req.query.code || currentPairingCode;
+
+  res.send(`
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BOGBE'S GROUPE — Passerelle WhatsApp Privée</title>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --card: #131d35;
+      --border: #1e293b;
+      --accent: #10b981;
+      --gold: #d4af37;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 24px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 36px;
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 16px;
+    }
+    .badge.connected { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge.connecting { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge.logged_out { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    h1 { font-size: 22px; font-weight: 800; margin: 0 0 8px; color: var(--gold); }
+    p { color: var(--muted); font-size: 13px; line-height: 1.5; margin: 0 0 24px; }
+    .qr-box {
+      background: #ffffff;
+      padding: 16px;
+      border-radius: 18px;
+      display: inline-block;
+      margin: 0 auto 20px;
+      box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.4);
+    }
+    .qr-box img { display: block; width: 240px; height: 240px; }
+    .pairing-box {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      margin-top: 20px;
+      text-align: left;
+    }
+    .pairing-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #38bdf8;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .code-display {
+      background: #0f172a;
+      border: 2px dashed #38bdf8;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 0.25em;
+      text-align: center;
+      color: #38bdf8;
+      margin: 12px 0;
+      font-family: monospace;
+    }
+    .input-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    input[type="text"] {
+      flex: 1;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      color: #f8fafc;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+    }
+    .btn-action {
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-action:hover { background: #0369a1; }
+    .spinner {
+      display: inline-block;
+      width: 44px;
+      height: 44px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-radius: 50%;
+      border-top-color: var(--gold);
+      animation: spin 1s ease-in-out infinite;
+      margin: 30px 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .info {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 12px;
+      text-align: left;
+      margin-bottom: 24px;
+    }
+    .info div { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .info div:last-child { margin-bottom: 0; }
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-danger:hover { opacity: 0.9; }
+  </style>
+  ${!isConnected && !displayedCode ? '<meta http-equiv="refresh" content="5">' : ''}
+</head>
+<body>
+  <div class="card">
+    <div class="badge ${connectionStatus}">
+      ● ${connectionStatus === 'connected' ? 'Connecté' : connectionStatus === 'connecting' ? 'Attente d\'association' : 'Initialisation...'}
+    </div>
+
+    <h1>BOGBE'S GROUPE</h1>
+    <p>Passerelle WhatsApp Souveraine & 100% Gratuite (0 FCFA/mois)</p>
+
+    ${
+      isConnected
+        ? `
+        <div style="font-size: 56px; margin: 20px 0;">✅</div>
+        <h2 style="font-size: 18px; margin: 0 0 8px; color: #34d399;">WhatsApp opérationnel</h2>
+        <p style="margin-bottom: 24px;">Numéro connecté : <strong>+${connectedPhone || 'Inconnu'}</strong></p>
+        <div class="info">
+          <div><span style="color:var(--muted)">Moteur :</span> <strong>Baileys (WebSockets)</strong></div>
+          <div><span style="color:var(--muted)">Relai CRM Next.js :</span> <strong>Actif (Direct)</strong></div>
+          <div><span style="color:var(--muted)">Relai Scraper n8n :</span> <strong>Localhost (Port 5670)</strong></div>
+        </div>
+        <form method="POST" action="api/disconnect">
+          <button type="submit" class="btn-danger">Déconnecter la session</button>
+        </form>
+      `
+        : `
+        ${
+          qrCodeDataUrl
+            ? `
+            <div class="qr-box">
+              <img src="${qrCodeDataUrl}" alt="Scanner le QR Code WhatsApp">
+            </div>
+            <p style="font-size: 12px;">Méthode 1 : Scannez ce QR Code depuis WhatsApp > Appareils connectés.</p>
+          `
+            : `
+            <div class="spinner"></div>
+            <p style="font-size: 12px;">Génération du flux de connexion...</p>
+          `
+        }
+
+        ${
+          displayedCode
+            ? `
+            <div class="pairing-box">
+              <div class="pairing-title">📱 Code d'association généré</div>
+              <div class="code-display">${displayedCode}</div>
+              <p style="font-size: 11px; margin: 0; color: var(--muted);">
+                Sur votre téléphone : WhatsApp > <strong>Appareils connectés</strong> > <strong>Associer avec un numéro de téléphone</strong> et entrez ce code.
+              </p>
+            </div>
+          `
+            : `
+            <div class="pairing-box">
+              <div class="pairing-title">✨ Méthode 2 : Associer par Numéro (Sans Caméra)</div>
+              <p style="font-size: 11px; margin-bottom: 8px;">Entrez votre numéro WhatsApp pour recevoir un code à 8 chiffres :</p>
+              <form id="pair-form" onsubmit="handlePairing(event)" class="input-group">
+                <input type="text" id="pair-phone" name="phone" placeholder="ex: 2250789263373" required>
+                <button type="submit" id="pair-btn" class="btn-action">Obtenir le code</button>
+              </form>
+              <div id="pair-dynamic-result" style="display:none; margin-top:12px;">
+                <div class="code-display" id="pair-dynamic-code"></div>
+                <p style="font-size: 11px; margin: 6px 0 0; color: #34d399; font-weight:600;">
+                  Code actif ! Ouvrez WhatsApp > Appareils connectés > Associer avec un numéro de téléphone et tapez ce code.
+                </p>
+              </div>
+            </div>
+          `
+        }
+      `
+    }
+  </div>
+
+  <script>
+    // Polling régulier pour détecter la connexion instantanément
+    let isConnected = ${isConnected};
+    if (!isConnected) {
+      setInterval(async () => {
+        try {
+          const res = await fetch('/status');
+          const data = await res.json();
+          if (data.status === 'connected') {
+            window.location.reload();
+          }
+        } catch {}
+      }, 2500);
+
+      // Rafraîchir le QR code s'il n'est pas scanné au bout de 25s
+      setTimeout(() => {
+        window.location.reload();
+      }, 25000);
+    }
+
+    async function handlePairing(e) {
+      e.preventDefault();
+      const btn = document.getElementById('pair-btn');
+      const phoneInput = document.getElementById('pair-phone');
+      const resBox = document.getElementById('pair-dynamic-result');
+      const codeElem = document.getElementById('pair-dynamic-code');
+
+      btn.disabled = true;
+      btn.innerText = 'Génération...';
+
+      try {
+        const res = await fetch('api/pairing-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: phoneInput.value })
+        });
+        const data = await res.json();
+        if (data.success && data.code) {
+          codeElem.innerText = data.code;
+          resBox.style.display = 'block';
+        } else {
+          alert('Erreur: ' + (data.message || 'Impossible de générer le code'));
+        }
+      } catch (err) {
+        alert('Erreur de communication: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Obtenir le code';
+      }
+    }
+  </script>
+</body>
+</html>
+  `);
+};
+
+app.get(['/', '/index.html', '/api', '/api/'], renderDashboard);
+
+app.listen(PORT, '0.0.0.0', () => {
+  logger.info(`Passerelle WhatsApp Baileys active sur http://0.0.0.0:${PORT}`);
+  connectToWhatsApp().catch(err => logger.error('Erreur démarrage initial Baileys:', err));
+});

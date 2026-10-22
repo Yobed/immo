@@ -1,0 +1,17 @@
+{
+  "name": "bogbes-whatsapp-gateway",
+  "version": "1.0.0",
+  "description": "Passerelle WhatsApp autonome et gratuite pour BOGBE'S GROUPE (alternative à Wasender)",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.18",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "pino": "^9.6.0",
+    "qrcode": "^1.5.4"
+  }
+}

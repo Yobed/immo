@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: bogbes-whatsapp-gateway
+    runtime: docker
+    dockerfilePath: ./services/whatsapp-gateway/Dockerfile
+    dockerContext: ./services/whatsapp-gateway
+    region: frankfurt
+    plan: free
+    healthCheckPath: /status
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: API_KEY
+        value: bogbes_secret_key_2026
+      - key: WEBHOOK_URL
+        value: https://www.bogbesgroup.com/api/whatsapp/webhook
+      - key: WEBHOOK_SECRET
+        value: a8271744c3bba421d49850cd785ff068
+      - key: N8N_SCRAPER_URL
+        value: https://kassio1-n8n-free.hf.space/webhook/wassender-immobilier
