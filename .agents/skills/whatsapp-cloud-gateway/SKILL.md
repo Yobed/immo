@@ -428,14 +428,32 @@ services:
         value: votre_secret_de_signature
       - key: N8N_SCRAPER_URL
         value: https://votre-n8n.hf.space/webhook/scraper
+      - key: N8N_HEALTH_URL
+        value: https://votre-n8n.hf.space/healthz
+      - key: PUBLIC_URL
+        value: https://bogbes-whatsapp-gateway.onrender.com
+      - key: SUPABASE_URL
+        value: https://votre-projet.supabase.co
+      - key: SUPABASE_KEY
+        value: votre_supabase_service_role_key
 ```
 
 ---
 
-### Étape 4 : Le Mécanisme Anti-Sommeil 24h/24 (`keep-alive.yml`)
+### Étape 4 : La Double Protection Anti-Sommeil et Persistance Cloud
 
-Sur le plan gratuit Render, les conteneurs s'endorment après 15 minutes sans requête HTTP.
-Ajoutez ce workflow GitHub Actions pour forcer l'éveil 24h/24 :
+Sur le plan gratuit Render, les conteneurs s'endorment après 15 minutes sans requête HTTP entrante.
+Pour éliminer tout risque d'arrêt :
+
+1. **Auto-Ping Symbiotique Interne (4 minutes) :**
+   Le serveur envoie un ping HTTP à sa propre URL publique toutes les 4 minutes (ce qui réinitialise le compteur d'inactivité de Render) et ping en même temps n8n sur Hugging Face Space.
+
+2. **Persistance des Clés Baileys dans Supabase Storage :**
+   Le dossier de session `/app/auth` est automatiquement synchronisé en 1 bundle compressé dans un bucket privé Supabase Storage (`whatsapp-auth/session_bundle.json`).
+   Au redémarrage du conteneur, les clés cryptographiques sont immédiatement réinjectées, rendant la session 100% insensible aux disques éphémères.
+
+3. **Workflow GitHub Actions Externe (5 minutes) :**
+Ajoutez ce workflow GitHub Actions en redondance externe :
 
 ```yaml
 # .github/workflows/keep-alive.yml
@@ -443,7 +461,7 @@ name: Keep Services Alive (Anti-Sleep)
 
 on:
   schedule:
-    - cron: '*/10 * * * *' # Toutes les 10 minutes
+    - cron: '*/5 * * * *' # Toutes les 5 minutes
   workflow_dispatch:
 
 jobs:

@@ -2,8 +2,8 @@ name: Keep Services Alive (Anti-Sleep)
 
 on:
   schedule:
-    # Exécution toutes les 10 minutes pour maintenir HF Space et Render actifs 24h/24
-    - cron: '*/10 * * * *'
+    # Exécution toutes les 5 minutes pour maintenir HF Space et Render actifs 24h/24
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 jobs:

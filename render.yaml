@@ -18,3 +18,11 @@ services:
         value: a8271744c3bba421d49850cd785ff068
       - key: N8N_SCRAPER_URL
         value: https://kassio1-n8n-free.hf.space/webhook/wassender-immobilier
+      - key: N8N_HEALTH_URL
+        value: https://kassio1-n8n-free.hf.space/healthz
+      - key: PUBLIC_URL
+        value: https://bogbes-whatsapp-gateway.onrender.com
+      - key: SUPABASE_URL
+        value: https://fzccugmyoglemjwidqrl.supabase.co
+      - key: SUPABASE_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ6Y2N1Z215b2dsZW1qd2lkcXJsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MDM0MjQyNiwiZXhwIjoyMTA1OTE4NDI2fQ.SfKL0NUJUVF4dI5Vn1nCDHzxCa_P05pnIiy33f5yHDk

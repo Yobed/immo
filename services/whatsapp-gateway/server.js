@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import QRCode from 'qrcode';
 import pino from 'pino';
-import { existsSync, rmSync, mkdirSync } from 'node:fs';
+import { existsSync, rmSync, mkdirSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import makeWASocket, {
   DisconnectReason,
@@ -30,8 +30,82 @@ const API_KEY = process.env.WHATSAPP_API_KEY || process.env.API_KEY || 'bogbes_s
 const WEBHOOK_URL = process.env.WEBHOOK_URL || 'https://www.bogbesgroup.com/api/whatsapp/webhook';
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || process.env.WASSENDER_WEBHOOK_SECRET || 'a8271744c3bba421d49850cd785ff068';
 const N8N_SCRAPER_URL = process.env.N8N_SCRAPER_URL || 'https://kassio1-n8n-free.hf.space/webhook/wassender-immobilier';
+const N8N_HEALTH_URL = process.env.N8N_HEALTH_URL || 'https://kassio1-n8n-free.hf.space/healthz';
+const PUBLIC_GATEWAY_URL = process.env.PUBLIC_URL || 'https://bogbes-whatsapp-gateway.onrender.com';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://fzccugmyoglemjwidqrl.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ6Y2N1Z215b2dsZW1qd2lkcXJsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MDM0MjQyNiwiZXhwIjoyMTA1OTE4NDI2fQ.SfKL0NUJUVF4dI5Vn1nCDHzxCa_P05pnIiy33f5yHDk';
 
 const logger = pino({ level: 'info' });
+
+// ─── ☁️ SAUVEGARDE ET RESTAURATION SESSION SUPABASE CLOUD ────────────────────
+async function restoreSessionFromCloud(dir) {
+  if (!SUPABASE_URL || !SUPABASE_KEY) return false;
+  try {
+    logger.info('☁️ Recherche sauvegarde session dans Supabase Storage (whatsapp-auth)...');
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/authenticated/whatsapp-auth/session_bundle.json`, {
+      headers: {
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        apikey: SUPABASE_KEY,
+      },
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!res.ok) {
+      logger.info(`ℹ️ Pas d'archive distante trouvée (statut ${res.status}). Initialisation locale.`);
+      return false;
+    }
+    const bundle = await res.json();
+    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+    let count = 0;
+    for (const [file, content] of Object.entries(bundle)) {
+      writeFileSync(resolve(dir, file), content, 'utf8');
+      count++;
+    }
+    logger.info(`✅ Session WhatsApp restaurée avec succès depuis Supabase Cloud (${count} fichiers injectés).`);
+    return true;
+  } catch (err) {
+    logger.warn(`⚠️ Erreur restauration session cloud: ${err.message}`);
+    return false;
+  }
+}
+
+let syncTimeout = null;
+async function backupSessionToCloud(dir) {
+  if (!SUPABASE_URL || !SUPABASE_KEY || !existsSync(dir)) return;
+  try {
+    const files = readdirSync(dir).filter(f => f.endsWith('.json'));
+    if (files.length === 0 || !files.includes('creds.json')) return;
+
+    const bundle = {};
+    for (const f of files) {
+      bundle[f] = readFileSync(resolve(dir, f), 'utf8');
+    }
+    const body = JSON.stringify(bundle);
+
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/whatsapp-auth/session_bundle.json`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        apikey: SUPABASE_KEY,
+        'x-upsert': 'true',
+        'Content-Type': 'application/json',
+      },
+      body,
+      signal: AbortSignal.timeout(20000),
+    });
+    if (res.ok) {
+      logger.info(`☁️ Sauvegarde session WhatsApp synchronisée vers Supabase (${files.length} fichiers sauvegardés).`);
+    } else {
+      logger.warn(`⚠️ Échec backup session Supabase: statut ${res.status}`);
+    }
+  } catch (err) {
+    logger.warn(`⚠️ Erreur backup session Supabase: ${err.message}`);
+  }
+}
+
+function triggerCloudSync(dir) {
+  if (syncTimeout) clearTimeout(syncTimeout);
+  syncTimeout = setTimeout(() => backupSessionToCloud(dir), 8000);
+}
 
 let sock = null;
 let qrCodeDataUrl = null;
@@ -160,6 +234,7 @@ async function connectToWhatsApp() {
   }
 
   try {
+    await restoreSessionFromCloud(AUTH_DIR);
     const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
     logger.info('Démarrage Baileys avec version stable native');
 
@@ -187,7 +262,10 @@ async function connectToWhatsApp() {
       },
     });
 
-    sock.ev.on('creds.update', saveCreds);
+    sock.ev.on('creds.update', async () => {
+      await saveCreds();
+      triggerCloudSync(AUTH_DIR);
+    });
 
     sock.ev.on('connection.update', async (update) => {
       logger.info({ connection: update.connection, hasQr: !!update.qr, lastDisconnect: update.lastDisconnect?.error?.message }, 'Event connection.update');
@@ -249,6 +327,7 @@ async function connectToWhatsApp() {
         currentPairingCode = null;
         connectedPhone = sock.user?.id ? sock.user.id.split(':')[0].replace(/\D/g, '') : null;
         logger.info(`✅ Connecté à WhatsApp ! Numéro: +${connectedPhone}`);
+        triggerCloudSync(AUTH_DIR);
       }
     });
 
@@ -858,7 +937,44 @@ const renderDashboard = (req, res) => {
 
 app.get(['/', '/index.html', '/api', '/api/'], renderDashboard);
 
+// ─── 🔄 BOUCLE ANTI-VEILLE CLOUD 24/7 (SYMBIOTIC KEEP-ALIVE) ─────────────────
+function startKeepAliveLoop() {
+  const INTERVAL_MS = 4 * 60 * 1000; // 4 minutes (inférieur au timeout d'inactivité Render de 15 min)
+  logger.info('🔄 Démarrage du bouclier anti-veille 24/7 (cycle: 4 min)...');
+
+  // Premier auto-ping différé 45s après le démarrage
+  setTimeout(runPingCycle, 45000);
+  setInterval(runPingCycle, INTERVAL_MS);
+
+  async function runPingCycle() {
+    // 1. Auto-ping de sa propre URL publique pour forcer une requête entrante dans Render
+    if (PUBLIC_GATEWAY_URL) {
+      try {
+        const pingUrl = `${PUBLIC_GATEWAY_URL}/status`;
+        const res = await fetch(pingUrl, { signal: AbortSignal.timeout(12000) });
+        logger.info(`🏓 [Anti-Veille Render] Auto-ping public OK (statut ${res.status})`);
+      } catch (err) {
+        logger.warn(`⚠️ [Anti-Veille Render] Auto-ping: ${err.message}`);
+      }
+    }
+
+    // 2. Ping de n8n sur Hugging Face Space pour maintenir le traitement actif
+    if (N8N_HEALTH_URL) {
+      try {
+        const res = await fetch(N8N_HEALTH_URL, { signal: AbortSignal.timeout(12000) });
+        logger.info(`🏓 [Anti-Veille n8n] Ping n8n Space OK (statut ${res.status})`);
+      } catch (err) {
+        logger.warn(`⚠️ [Anti-Veille n8n] Ping: ${err.message}`);
+      }
+    }
+
+    // 3. Sauvegarde de sécurité périodique de la session WhatsApp dans Supabase
+    triggerCloudSync(AUTH_DIR);
+  }
+}
+
 app.listen(PORT, '0.0.0.0', () => {
   logger.info(`Passerelle WhatsApp Baileys active sur http://0.0.0.0:${PORT}`);
   connectToWhatsApp().catch(err => logger.error('Erreur démarrage initial Baileys:', err));
+  startKeepAliveLoop();
 });
