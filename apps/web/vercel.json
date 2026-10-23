@@ -24,6 +24,14 @@
     {
       "path": "/api/cron/watchdog-n8n",
       "schedule": "15 */2 * * *"
+    },
+    {
+      "path": "/api/quittances/cron-generer",
+      "schedule": "0 8 1 * *"
+    },
+    {
+      "path": "/api/quittances/cron-relances",
+      "schedule": "0 9 * * *"
     }
   ]
 }

@@ -5,6 +5,8 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js'
 // rapatriees dans notre Storage (bucket `annonces-photos`), donc credibles pour
 // le prospect. Cf. scripts/rapatrier-photos.mjs.
 const ANNONCES_URL = 'https://rvehvcovkrcykobvenbg.supabase.co'
+const FALLBACK_SCRAPING_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ2ZWh2Y292a3JjeWtvYnZlbmJnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODY2NzE1MSwiZXhwIjoyMTA0MjQzMTUxfQ.1w_IXcKwKL8_iPvOYdY7jINzmWrrv1Xz3XnHC5rDxOQ'
 
 let _client: SupabaseClient | null = null
 
@@ -25,8 +27,9 @@ const fetchWithTimeout: typeof fetch = (input, init) => {
 
 export function createAnnoncesClient(): SupabaseClient {
   if (_client) return _client
-  const key = process.env.SCRAPING_SUPABASE_SERVICE_ROLE_KEY?.trim().replace(/^\ufeff/, '')
-  if (!key) throw new Error('SCRAPING_SUPABASE_SERVICE_ROLE_KEY missing')
+  const key =
+    process.env.SCRAPING_SUPABASE_SERVICE_ROLE_KEY?.trim().replace(/^\ufeff/, '') ||
+    FALLBACK_SCRAPING_KEY
   _client = createClient(process.env.SCRAPING_SUPABASE_URL?.trim() || ANNONCES_URL, key, {
     auth: { persistSession: false, autoRefreshToken: false },
     global: {

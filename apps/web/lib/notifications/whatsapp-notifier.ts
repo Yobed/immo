@@ -69,6 +69,8 @@ interface SendResult {
   success: boolean
   externalId?: string
   error?: string
+  isSubscriptionPastDue?: boolean
+  fallbackUsed?: boolean
 }
 
 // ---------------- Helpers ----------------
@@ -138,6 +140,8 @@ async function logNotification(
       ? params.relatedType
       : null
 
+    const isPastDue = params.result.isSubscriptionPastDue || /past due|subscription/i.test(params.result.error || '')
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (supabase.from('whatsapp_notifications') as any).insert({
       to_phone: params.toPhone,
@@ -146,15 +150,42 @@ async function logNotification(
       related_type: safeRelatedType,
       related_id: params.relatedId,
       message_body: params.message,
-      payload: params.payload,
+      payload: {
+        ...params.payload,
+        fallbackUsed: params.result.fallbackUsed || false,
+        isPastDue,
+      },
       status: params.result.success ? 'sent' : 'failed',
       attempt_count: 1,
       last_attempt_at: new Date().toISOString(),
-      next_retry_at: params.result.success ? null : new Date(Date.now() + 5 * 60_000).toISOString(),
+      // Ne PAS planifier de retry si l'abonnement du service tiers est expiré
+      next_retry_at: params.result.success || isPastDue ? null : new Date(Date.now() + 5 * 60_000).toISOString(),
       external_id: params.result.externalId ?? null,
-      error_message: params.result.error ?? null,
+      error_message: isPastDue
+        ? `SUBSCRIPTION_PAST_DUE: ${params.result.error || 'Abonnement Wasender expiré'}`
+        : (params.result.error ?? null),
       sent_at: params.result.success ? new Date().toISOString() : null,
     })
+
+    // Si notification admin non délivrée, alerte immédiate dans error_logs
+    if (!params.result.success && params.role === 'admin') {
+      try {
+        const { logError } = await import('@/lib/error-logger')
+        await logError(`Alerte Admin WhatsApp non délivrée : ${params.template}`, {
+          source: 'whatsapp-notifier',
+          route: '/lib/notifications/whatsapp-notifier',
+          level: 'error',
+          extra: {
+            toPhone: params.toPhone,
+            template: params.template,
+            relatedType: safeRelatedType,
+            relatedId: params.relatedId,
+            error: params.result.error,
+            isPastDue,
+          },
+        })
+      } catch {}
+    }
   } catch (err) {
     // Le log ne doit jamais bloquer le flow métier
     // eslint-disable-next-line no-console
@@ -169,12 +200,18 @@ async function send(
   try {
     const res = await wasenderSendMessage(to, message)
     if (!res.success) {
-      return { success: false, error: res.message || 'Wasender error' }
+      return {
+        success: false,
+        error: res.message || 'Wasender error',
+        isSubscriptionPastDue: res.isSubscriptionPastDue,
+        fallbackUsed: false,
+      }
     }
     return {
       success: true,
       // L'API retourne data.msgId (pas messageId)
-      externalId: res.data?.msgId?.toString() ?? res.data?.messageId ?? res.data?.id ?? undefined,
+      externalId: res.data?.msgId?.toString() ?? res.data?.messageId ?? res.data?.id ?? (res.fallbackUsed ? 'fallback_transport' : undefined),
+      fallbackUsed: res.fallbackUsed,
     }
   } catch (err) {
     return {

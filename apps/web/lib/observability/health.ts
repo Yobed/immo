@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createAnnoncesClient } from '@/lib/supabase/annonces'
 import { locauxReadClients } from '@/lib/supabase/locaux'
+import { wasenderGetStatus, type WasenderStatusResult } from '@/lib/wasender'
 
 export interface HealthSnapshot {
   status: 'ok' | 'degraded'
@@ -9,7 +10,9 @@ export interface HealthSnapshot {
     catalogue: boolean
     freshLocaux: boolean
     n8n: boolean
+    wasender: boolean
   }
+  wasenderDetails?: WasenderStatusResult
   checkedAt: string
 }
 
@@ -19,8 +22,11 @@ export interface HealthSnapshot {
  * 2. Base catalogue web (v_annonces)
  * 3. Bases d'ingestion WhatsApp (locaux)
  * 4. Moteur de scraping n8n (/healthz)
+ * 5. Passerelle WhatsApp Wasender (/status)
  */
 export async function getHealthSnapshot(): Promise<HealthSnapshot> {
+  let fetchedWasenderStatus: WasenderStatusResult | undefined
+
   const checks = await Promise.allSettled([
     // 1. Supabase Principal
     (async () => {
@@ -65,18 +71,33 @@ export async function getHealthSnapshot(): Promise<HealthSnapshot> {
         clearTimeout(timeoutId)
       }
     })(),
+    // 5. Passerelle WhatsApp (Wasender)
+    (async () => {
+      const ws = await wasenderGetStatus()
+      fetchedWasenderStatus = ws
+      if (!ws.connected) {
+        throw new Error(`WhatsApp disconnected: ${ws.message} (${ws.status})`)
+      }
+      return ws
+    })(),
   ])
 
   const supabase = checks[0]?.status === 'fulfilled'
   const catalogue = checks[1]?.status === 'fulfilled'
   const freshLocaux = checks[2]?.status === 'fulfilled'
   const n8n = checks[3]?.status === 'fulfilled'
+  const wasender = checks[4]?.status === 'fulfilled'
 
-  const allOk = supabase && catalogue && freshLocaux && n8n
+  const allOk = supabase && catalogue && freshLocaux && n8n && wasender
 
   return {
     status: allOk ? 'ok' : 'degraded',
-    checks: { supabase, catalogue, freshLocaux, n8n },
+    checks: { supabase, catalogue, freshLocaux, n8n, wasender },
+    wasenderDetails: fetchedWasenderStatus ?? {
+      connected: false,
+      status: 'error',
+      message: 'Impossible de contacter Wasender',
+    },
     checkedAt: new Date().toISOString(),
   }
 }

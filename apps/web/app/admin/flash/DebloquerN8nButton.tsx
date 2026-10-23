@@ -16,14 +16,19 @@ export function DebloquerN8nButton() {
     setStatus('idle')
     setMessage(null)
     try {
-      await debloquerN8nAction()
-      setStatus('success')
-      setMessage('File n8n débloquée avec succès !')
+      const res = await debloquerN8nAction()
+      if (res?.ok) {
+        setStatus('success')
+        setMessage(res.message || 'File n8n débloquée avec succès !')
+      } else {
+        setStatus('error')
+        setMessage(res?.message || 'Instance n8n inaccessible')
+      }
       router.refresh()
       setTimeout(() => {
         setStatus('idle')
         setMessage(null)
-      }, 5000)
+      }, 6000)
     } catch (err) {
       setStatus('error')
       setMessage((err as Error).message || 'Erreur lors du déblocage')

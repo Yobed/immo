@@ -9,7 +9,12 @@ export async function GET() {
   const health = await getHealthSnapshot()
   const ok = health.status === 'ok'
   return NextResponse.json(
-    { status: health.status, checks: health.checks, generatedAt: health.checkedAt },
+    {
+      status: health.status,
+      checks: health.checks,
+      wasender: health.wasenderDetails,
+      generatedAt: health.checkedAt,
+    },
     { status: ok ? 200 : 503, headers: { 'Cache-Control': 'no-store' } },
   )
 }

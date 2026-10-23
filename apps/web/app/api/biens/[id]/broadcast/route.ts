@@ -83,7 +83,15 @@ Intéressé(e) ? Répondez ici pour plus d'infos ou pour planifier une visite. �
     const phone = r.jid.split('@')[0]
     try {
       const result = await wasenderSendMessage(phone, message, 'text')
-      if (result.success === true) sent++
+      if (result.success === true) {
+        sent++
+      } else {
+        errors.push(`${phone}: ${result.message || 'error'}`)
+        if (result.isSubscriptionPastDue) {
+          // Interruption immédiate si l'abonnement du service tiers a expiré
+          break
+        }
+      }
     } catch (err: any) {
       errors.push(`${phone}: ${err.message}`)
     }

@@ -1,5 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
-import { AlertOctagon, AlertTriangle, Info, Clock, User as UserIcon, Code, Database, Globe2, CheckCircle2, RotateCcw, EyeOff, ArrowLeft } from 'lucide-react'
+import { AlertOctagon, AlertTriangle, Info, Clock, User as UserIcon, Code, Database, Globe2, CheckCircle2, RotateCcw, EyeOff, ArrowLeft, MessageSquare, Cpu, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import { getHealthSnapshot } from '@/lib/observability/health'
 import { updateErrorStatusAction } from './actions'
@@ -102,7 +102,29 @@ export default async function AdminErrorsPage({ searchParams }: PageProps) {
         <div className="mt-3 flex flex-wrap gap-2 text-xs">
           <HealthCheck icon={Database} label="Base CRM" ok={health.checks.supabase} />
           <HealthCheck icon={Globe2} label="Catalogue web" ok={health.checks.catalogue} />
+          <HealthCheck icon={Cpu} label="Moteur IA n8n" ok={health.checks.n8n} />
+          <HealthCheck
+            icon={MessageSquare}
+            label="WhatsApp (Wasender)"
+            ok={health.checks.wasender}
+            hint={!health.checks.wasender ? health.wasenderDetails?.message : undefined}
+          />
         </div>
+        {!health.checks.wasender && (
+          <div className="mt-3 pt-3 border-t border-amber-500/20 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <span className="text-amber-300">
+              ⚠️ Passerelle WhatsApp indisponible : {health.wasenderDetails?.message || 'Erreur session / paiement'}
+            </span>
+            <a
+              href="https://www.wasenderapi.com"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 font-semibold text-amber-400 hover:text-amber-300 underline underline-offset-2"
+            >
+              Tableau de bord Wasender <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+        )}
       </section>
 
       {/* Filtres status */}
@@ -140,10 +162,13 @@ export default async function AdminErrorsPage({ searchParams }: PageProps) {
   )
 }
 
-function HealthCheck({ icon: Icon, label, ok }: { icon: typeof Database; label: string; ok: boolean }) {
+function HealthCheck({ icon: Icon, label, ok, hint }: { icon: typeof Database | typeof Cpu | typeof MessageSquare; label: string; ok: boolean; hint?: string }) {
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-semibold ${ok ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400' : 'border-rose-500/30 bg-rose-500/10 text-rose-400'}`}>
-      <Icon className="h-3.5 w-3.5" /> {label} · {ok ? 'OK' : 'À vérifier'}
+    <span
+      title={hint}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-semibold ${ok ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400' : 'border-rose-500/30 bg-rose-500/10 text-rose-400'}`}
+    >
+      <Icon className="h-3.5 w-3.5" /> {label} · {ok ? 'OK' : hint ? `À vérifier (${hint})` : 'À vérifier'}
     </span>
   )
 }

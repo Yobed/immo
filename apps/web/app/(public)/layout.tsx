@@ -93,37 +93,41 @@ export default async function PublicLayout({ children }: { children: React.React
             </Link>
           </MagneticWrapper>
 
-          {/* Search bar — desktop only, plus compacte pour libérer de l'espace nav */}
-          <div className="flex-1 max-w-xs xl:max-w-sm hidden md:block">
-            <SearchBar placeholder="Commune, quartier, type..." />
+          {/* Search bar — desktop only */}
+          <div className="flex-1 max-w-xs xl:max-w-sm hidden md:flex items-center">
+            <div className="w-full">
+              <SearchBar placeholder="Commune, quartier, type..." />
+            </div>
           </div>
 
-          {/* Nav desktop */}
-          <nav className="hidden md:flex items-center gap-0.5">
+          {/* Nav desktop avec espacement aéré */}
+          <nav className="hidden md:flex items-center gap-1 lg:gap-2">
             {navLinks.map((link) => (
               <MagneticWrapper key={link.href}>
                 <Link
                   href={link.href}
-                  className="nav-link px-2.5 py-2 font-sans text-[13px] font-medium text-[var(--text-muted)] hover:text-[var(--text)] transition-colors duration-200 rounded-btn hover:bg-[var(--surface)] whitespace-nowrap"
+                  className="nav-link px-3 py-2 font-sans text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text)] transition-colors duration-200 rounded-xl hover:bg-[var(--surface)] whitespace-nowrap"
                 >
                   {link.label}
                 </Link>
               </MagneticWrapper>
             ))}
 
-            <div className="w-px h-5 bg-[var(--border)] mx-1.5" />
+            <div className="w-px h-5 bg-[var(--border)] mx-2" />
 
-            <ThemeToggle />
-            <LanguageSwitcher variant="compact" />
+            <div className="flex items-center gap-1.5">
+              <ThemeToggle />
+              <LanguageSwitcher variant="compact" />
+            </div>
 
-            <div className="w-px h-5 bg-[var(--border)] mx-1.5" />
+            <div className="w-px h-5 bg-[var(--border)] mx-2" />
 
             {user ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 {role === 'pro' && (
                   <Link
                     href="/mes-biens/nouveau"
-                    className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--secondary)] text-white text-[11px] font-sans font-bold uppercase tracking-wider rounded-btn hover:opacity-90 transition-opacity shadow-sm whitespace-nowrap"
+                    className="hidden xl:inline-flex items-center gap-1.5 px-3.5 py-2 bg-[var(--secondary)] text-white text-xs font-sans font-bold uppercase tracking-wider rounded-xl hover:opacity-90 transition-opacity shadow-sm whitespace-nowrap"
                   >
                     <svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" fill="none"><path d="M12 5v14M5 12h14"/></svg>
                     Annonce
@@ -132,11 +136,11 @@ export default async function PublicLayout({ children }: { children: React.React
                 <UserMenu email={user.email ?? ''} role={role} isAdmin={isAdmin} />
               </div>
             ) : (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2.5">
                 <MagneticWrapper>
                   <Link
                     href="/register?role=pro"
-                    className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-500/10 border border-amber-500/25 rounded-btn hover:bg-amber-500/20 transition-colors whitespace-nowrap mr-1"
+                    className="hidden xl:inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-500/10 border border-amber-500/25 rounded-xl hover:bg-amber-500/20 transition-colors whitespace-nowrap"
                   >
                     👑 Espace Pro
                   </Link>
@@ -144,7 +148,7 @@ export default async function PublicLayout({ children }: { children: React.React
                 <MagneticWrapper>
                   <Link
                     href="/login"
-                    className="px-2.5 py-2 font-sans text-[13px] font-medium text-[var(--text-muted)] hover:text-[var(--text)] transition-colors duration-200 rounded-btn hover:bg-[var(--surface)] whitespace-nowrap"
+                    className="px-3.5 py-2 font-sans text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text)] transition-colors duration-200 rounded-xl hover:bg-[var(--surface)] whitespace-nowrap"
                   >
                     Se connecter
                   </Link>
@@ -152,7 +156,7 @@ export default async function PublicLayout({ children }: { children: React.React
                 <MagneticWrapper>
                   <Link
                     href="/register"
-                    className="px-3 py-2 font-sans text-[13px] font-semibold bg-[var(--secondary)] text-[var(--on-accent)] rounded-btn hover:opacity-90 transition-opacity whitespace-nowrap"
+                    className="px-4 py-2 font-sans text-sm font-semibold bg-[var(--secondary)] text-[var(--on-accent)] rounded-xl hover:opacity-90 transition-opacity whitespace-nowrap shadow-sm"
                   >
                     S&apos;inscrire
                   </Link>

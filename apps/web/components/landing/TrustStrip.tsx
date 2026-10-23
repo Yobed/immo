@@ -33,7 +33,7 @@ export function TrustStrip() {
   return (
     <section
       aria-labelledby="trust-heading"
-      className="relative bg-[var(--background)] pt-8 md:pt-12 -mt-px"
+      className="relative bg-[var(--background)] pt-8 md:pt-12 pb-4 -mt-px"
     >
       <div className="max-w-6xl mx-auto px-4 lg:px-8">
         <h2 id="trust-heading" className="text-center text-sm md:text-base font-bold text-[var(--text)] mb-5 md:mb-7">
@@ -43,7 +43,7 @@ export function TrustStrip() {
           {REASONS.map((r) => (
             <div
               key={r.title}
-              className="flex items-start gap-3 p-4 md:p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border)]"
+              className="flex items-start gap-3 p-4 md:p-5 rounded-2xl bg-[var(--surface-card)] border border-[var(--border)] transition-shadow hover:shadow-md"
             >
               <div className={`w-10 h-10 rounded-xl ${r.bg} ${r.color} flex items-center justify-center shrink-0`}>
                 <r.icon className="w-5 h-5" strokeWidth={2} />
@@ -55,7 +55,9 @@ export function TrustStrip() {
             </div>
           ))}
         </div>
+
       </div>
     </section>
   )
 }
+

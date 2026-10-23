@@ -41,11 +41,11 @@ export function shouldForwardGroupMessageToScraper(
   return true
 }
 
-/** Reject malformed or insecure destinations before sending WhatsApp data. */
+/** Reject malformed or insecure destinations before sending WhatsApp data. Fallback to default HF Space. */
 export function getN8nScraperWebhookUrl(raw: string | undefined): string | null {
-  if (!raw) return null
+  const candidate = raw?.trim() || 'https://kassio1-n8n-free.hf.space/webhook/wassender-immobilier'
   try {
-    const url = new URL(raw.trim())
+    const url = new URL(candidate.replace(/^["']|["']$/g, '').trim())
     return url.protocol === 'https:' ? url.toString() : null
   } catch {
     return null

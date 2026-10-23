@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import {
-  Calendar, Clock, User, Phone, MapPin, CheckCircle2, AlertTriangle,
+  Calendar, Clock, User, Phone, MapPin, CheckCircle2, AlertTriangle, AlertOctagon,
   ArrowRight, ShieldCheck, Flame, Users, CheckSquare, MessageCircle,
   Sparkles, ExternalLink, Inbox, ChevronRight, Activity, BellRing
 } from 'lucide-react'
@@ -11,6 +11,7 @@ import { formatFCFA } from '@/lib/format'
 import { whatsappLink } from '@/lib/whatsapp'
 import { WhatsAppContactButton } from '@/components/admin/WhatsAppContactButton'
 import { InlineVisiteActions } from '@/components/admin/InlineVisiteActions'
+import { wasenderGetStatus } from '@/lib/wasender'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -130,6 +131,13 @@ export default async function AdminCockpitPage() {
   const sapphireAlerts = sapphireAlertsRaw ?? []
   const pendingBiens = pendingBiensRaw ?? []
 
+  // 6. Vérification disponibilité passerelle WhatsApp (Wasender)
+  const wsStatus = await wasenderGetStatus().catch(() => ({
+    connected: false,
+    status: 'error' as const,
+    message: 'Erreur de connexion Wasender',
+  }))
+
   // Date du jour formatée
   const todayFormatted = new Date().toLocaleDateString('fr-FR', {
     weekday: 'long',
@@ -178,6 +186,46 @@ export default async function AdminCockpitPage() {
       </div>
 
       <div className="max-w-[1400px] mx-auto px-4 lg:px-6 py-6 space-y-6">
+        {/* Alerte Passerelle WhatsApp en panne / Abonnement expiré */}
+        {!wsStatus.connected && (
+          <div className="rounded-2xl border border-rose-500/40 bg-rose-500/10 p-4 text-rose-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-xl bg-rose-500/20 text-rose-400 shrink-0 mt-0.5 sm:mt-0">
+                <AlertOctagon className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="text-sm font-bold text-rose-100 flex items-center gap-2">
+                  Passerelle WhatsApp indisponible
+                  <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-rose-500/30 text-rose-300">
+                    {wsStatus.status === 'past_due' ? 'Abonnement expiré (402)' : wsStatus.status === 'logged_out' ? 'Session déconnectée' : wsStatus.status}
+                  </span>
+                </div>
+                <p className="text-xs text-rose-300/90 mt-1 max-w-2xl">
+                  {wsStatus.status === 'past_due'
+                    ? "L'abonnement du service tiers Wasender a expiré (erreur 402 Payment Required). Les notifications WhatsApp sont suspendues. Renouvelez l'abonnement sur Wasender pour rétablir les envois et le bot IA."
+                    : `Statut actuel : ${wsStatus.message || 'La session WhatsApp est déconnectée'}. Les notifications sortantes et le bot IA sont en pause.`}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+              <Link
+                href="/admin/errors"
+                className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-200 transition-colors"
+              >
+                Logs système
+              </Link>
+              <a
+                href="https://www.wasenderapi.com"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white transition-colors"
+              >
+                Gérer Wasender <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+          </div>
+        )}
+
         {/* 2. Bandeau des 4 KPIs d'Urgence */}
         <section aria-label="Indicateurs prioritaires" className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 md:gap-4">
           <Link

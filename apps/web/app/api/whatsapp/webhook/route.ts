@@ -242,11 +242,24 @@ function getAdminPhones(): string[] {
  */
 async function notifyAdmins(message: string): Promise<void> {
   const phones = getAdminPhones();
+  let anySuccess = false;
   for (const phone of phones) {
-    await wasenderSendMessage(phone, message, 'text').catch((err) => {
+    const res = await wasenderSendMessage(phone, message, 'text').catch((err) => {
+      // eslint-disable-next-line no-console
       console.error(`[whatsapp] Failed to notify admin ${phone}:`, err);
-      return null;
+      return { success: false, message: err instanceof Error ? err.message : 'Wasender error' };
     });
+    if (res?.success) anySuccess = true;
+  }
+  if (!anySuccess) {
+    try {
+      const { logError } = await import('@/lib/error-logger');
+      await logError(`Alerte Administrateur Sapphire (WhatsApp indisponible) : ${message.slice(0, 150)}`, {
+        source: 'whatsapp-webhook-notifyAdmins',
+        level: 'warn',
+        extra: { fullMessage: message, phones },
+      });
+    } catch {}
   }
 }
 

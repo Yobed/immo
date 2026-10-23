@@ -6,6 +6,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { TYPES_BIEN_LABELS } from '@immo-ci/shared/constants/biens'
 import { MapPin, Maximize2, BedDouble, CalendarCheck, ChevronLeft, ChevronRight, GitCompare, Check } from 'lucide-react'
 import { useT } from '@/lib/i18n/client'
+import { CardActionButtons } from './CardActionButtons'
 
 interface PremiumBienCardProps {
   id: string
@@ -218,25 +219,32 @@ export function PremiumBienCard({
               )}
             </div>
 
-            {/* Badges */}
-            <div className="absolute top-2 left-2 right-2 flex justify-between items-start pointer-events-none">
-              <span className="px-2.5 py-1 rounded-full bg-black/55 backdrop-blur-xl border border-white/12 text-[10px] font-bold uppercase tracking-[0.12em] text-white">
-                {TYPES_BIEN_LABELS[type_bien] ?? type_bien.replace('_', ' ')}
-              </span>
-              {is_verifie && (
-                <motion.span
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: (index % 4) * 0.1 + 0.3, duration: 0.4 }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 text-white text-[10px] font-black uppercase tracking-[0.12em] border border-white/30 shadow-[0_4px_12px_rgba(59,130,246,0.5)]"
-                  title="Bien visité physiquement par l'équipe BOGBE'S"
-                >
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
-                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-                  </svg>
-                  {t.card.verified}
-                </motion.span>
-              )}
+            {/* Badges & Actions Micro-interactions (Interior) */}
+            <div className="absolute top-2 left-2 right-2 flex justify-between items-start pointer-events-none z-30">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="px-2.5 py-1 rounded-full bg-black/55 backdrop-blur-xl border border-white/12 text-[10px] font-bold uppercase tracking-[0.12em] text-white">
+                  {TYPES_BIEN_LABELS[type_bien] ?? type_bien.replace('_', ' ')}
+                </span>
+                {is_verifie && (
+                  <motion.span
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: (index % 4) * 0.1 + 0.3, duration: 0.4 }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 text-white text-[10px] font-black uppercase tracking-[0.12em] border border-white/30 shadow-[0_4px_12px_rgba(59,130,246,0.5)]"
+                    title="Bien visité physiquement par l'équipe BOGBE'S"
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                    </svg>
+                    {t.card.verified}
+                  </motion.span>
+                )}
+              </div>
+
+              {/* Boutons d'interaction : Like avec particle burst & Partage avec CopyButton */}
+              <div className="pointer-events-auto">
+                <CardActionButtons bienId={id} bienTitle={titre} />
+              </div>
             </div>
           </div>
 

@@ -76,12 +76,13 @@ export async function marquerDisponibleAction(formData: FormData): Promise<void>
 }
 
 /**
- * Débloque la file n8n : purge les exécutions zombies ('running' > 5m et 'new' > 10m).
+ * Débloque la file n8n, réveille l'instance Hugging Face et teste la réactivité.
  */
-export async function debloquerN8nAction(): Promise<void> {
+export async function debloquerN8nAction(): Promise<{ ok: boolean; message: string }> {
   await assertAdmin()
   const { cleanZombieN8nExecutions } = await import('@/lib/locaux/dedup')
-  await cleanZombieN8nExecutions()
+  const res = await cleanZombieN8nExecutions()
   revalidatePath('/admin/flash')
+  return { ok: res.n8nHealthy, message: res.message }
 }
 

@@ -83,16 +83,16 @@ export function SmartFilter({ onFilterChange }: SmartFilterProps) {
           />
         </div>
 
-        {/* Type Filter */}
-        <div className="hidden lg:flex items-center gap-1 bg-[var(--background)] px-2 py-1 rounded-xl border border-[var(--border)]">
+        {/* Type Filter avec espacement généreux */}
+        <div className="hidden lg:flex items-center gap-2 bg-[var(--background)] p-1.5 rounded-2xl border border-[var(--border)]">
           <button 
             onClick={() => {
               setTypeBien('')
               onFilterChange({ prixMax, commune, typeBien: '' })
             }}
             className={cn(
-              "px-3 py-1.5 rounded-lg text-[11px] font-bold tracking-wider uppercase transition-all",
-              !typeBien ? "bg-[var(--accent-luxury)] text-[var(--midnight)]" : "text-[var(--text-muted)] hover:text-[var(--off-white)]"
+              "px-4 py-2 rounded-xl text-xs font-semibold tracking-wide uppercase transition-all",
+              !typeBien ? "bg-[var(--accent-luxury)] text-[var(--midnight)] shadow-sm" : "text-[var(--text-muted)] hover:text-[var(--off-white)] hover:bg-white/5"
             )}
           >
             Tous
@@ -106,8 +106,8 @@ export function SmartFilter({ onFilterChange }: SmartFilterProps) {
                 onFilterChange({ prixMax, commune, typeBien: newVal })
               }}
               className={cn(
-                "px-3 py-1.5 rounded-lg text-[11px] font-bold tracking-wider uppercase transition-all whitespace-nowrap",
-                typeBien === t ? "bg-[var(--accent-luxury)] text-[var(--midnight)]" : "text-[var(--text-muted)] hover:text-[var(--off-white)]"
+                "px-4 py-2 rounded-xl text-xs font-semibold tracking-wide uppercase transition-all whitespace-nowrap",
+                typeBien === t ? "bg-[var(--accent-luxury)] text-[var(--midnight)] shadow-sm" : "text-[var(--text-muted)] hover:text-[var(--off-white)] hover:bg-white/5"
               )}
             >
               {TYPES_BIEN_LABELS[t as keyof typeof TYPES_BIEN_LABELS] || t}

@@ -1,4 +1,5 @@
 import { createLocauxClient, createLocauxAdminClient } from '@/lib/supabase/locaux'
+import { checkN8nHealth } from '@/lib/n8n/client'
 
 export interface DedupResult {
   loaded: number
@@ -25,51 +26,78 @@ interface MinimalRow {
 const dateOf = (r: MinimalRow): number =>
   new Date(r.date_publication || r.created_at || 0).getTime()
 
-export async function cleanZombieN8nExecutions(): Promise<{ unblockedRunning: number; unblockedNew: number; purged: number }> {
+export interface CleanZombieN8nResult {
+  unblockedRunning: number
+  unblockedNew: number
+  purged: number
+  n8nHealthy: boolean
+  latencyMs: number
+  message: string
+}
+
+export async function cleanZombieN8nExecutions(): Promise<CleanZombieN8nResult> {
+  // 1. Réveil et contrôle de santé actif de l'instance n8n (Hugging Face)
+  const health = await checkN8nHealth()
+
+  let unblockedRunning = 0
+  let unblockedNew = 0
+  let purged = 0
+
+  // 2. Nettoyage Postgres défensif (uniquement si la table execution_entity existe)
   try {
     const admin = createLocauxAdminClient()
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60_000).toISOString()
-    const tenMinutesAgo = new Date(Date.now() - 10 * 60_000).toISOString()
     const threeDaysAgo = new Date(Date.now() - 3 * 86_400_000).toISOString()
     const now = new Date().toISOString()
 
-    // 1. Débloquer les exécutions en 'running' mortes (> 5 min)
-    const { count: unblockedRunning } = await admin
-      .from('execution_entity')
-      .update({ status: 'error', finished: true, stoppedAt: now }, { count: 'exact' })
-      .eq('status', 'running')
-      .lt('startedAt', fiveMinutesAgo)
+    // Test rapide sans exception bloquante
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: testErr } = await (admin as any).from('execution_entity').select('id', { head: true, count: 'exact' }).limit(1)
+    if (!testErr) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { count: rCount } = await (admin as any)
+        .from('execution_entity')
+        .update({ status: 'error', finished: true, stoppedAt: now }, { count: 'exact' })
+        .eq('status', 'running')
+        .lt('startedAt', fiveMinutesAgo)
+      unblockedRunning = rCount ?? 0
 
-    // 2. Débloquer les exécutions empilées en 'new' ou unfinished orphelines (> 5 min)
-    const { count: unblockedNew } = await admin
-      .from('execution_entity')
-      .update({ status: 'error', finished: true, stoppedAt: now }, { count: 'exact' })
-      .eq('finished', false)
-      .lt('createdAt', fiveMinutesAgo)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { count: nCount } = await (admin as any)
+        .from('execution_entity')
+        .update({ status: 'error', finished: true, stoppedAt: now }, { count: 'exact' })
+        .eq('finished', false)
+        .lt('createdAt', fiveMinutesAgo)
+      unblockedNew = nCount ?? 0
 
-    // 3. Purger les vieilles exécutions (> 3 jours) pour éviter la saturation du quota Postgres 500 Mo
-    let purged = 0
-    try {
-      const { data: deleted } = await admin
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: deleted } = await (admin as any)
         .from('execution_entity')
         .delete()
         .lt('createdAt', threeDaysAgo)
         .select('id')
       purged = deleted?.length ?? 0
-    } catch {
-      /* purge best-effort */
     }
+  } catch {
+    // Best-effort : n8n v2.44.5 gère nativement son stockage via EXECUTIONS_DATA_PRUNE=true
+  }
 
-    const rCount = unblockedRunning ?? 0
-    const nCount = unblockedNew ?? 0
+  const message = health.ok
+    ? `n8n actif (${health.latencyMs}ms)${health.wokenUp ? ' — réveillé avec succès' : ''}`
+    : `Attention : ${health.message}`
 
-    if (rCount > 0 || nCount > 0 || purged > 0) {
-      console.log(`[n8n-watchdog] Unblocked: ${rCount} running, ${nCount} new. Purged: ${purged} old records.`)
-    }
-    return { unblockedRunning: rCount, unblockedNew: nCount, purged }
-  } catch (err) {
-    console.warn('[n8n-watchdog] Error in watchdog:', err)
-    return { unblockedRunning: 0, unblockedNew: 0, purged: 0 }
+  if (unblockedRunning > 0 || unblockedNew > 0 || purged > 0) {
+    // eslint-disable-next-line no-console
+    console.log(`[n8n-watchdog] Unblocked: ${unblockedRunning} running, ${unblockedNew} new. Purged: ${purged} old records.`)
+  }
+
+  return {
+    unblockedRunning,
+    unblockedNew,
+    purged,
+    n8nHealthy: health.ok,
+    latencyMs: health.latencyMs,
+    message,
   }
 }
 
