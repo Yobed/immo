@@ -22,9 +22,17 @@ function sanitizeEnv(raw: string | undefined): string {
   return unquoted.replace(/[^!-~]/g, '');
 }
 
-const WASSENDER_API_KEY = sanitizeEnv(process.env.WHATSAPP_API_KEY || process.env.WASSENDER_API_KEY);
-const WASSENDER_WEBHOOK_SECRET = sanitizeEnv(process.env.WHATSAPP_WEBHOOK_SECRET || process.env.WASSENDER_WEBHOOK_SECRET);
-const BASE_URL = sanitizeEnv(process.env.WHATSAPP_GATEWAY_URL) || 'https://www.wasenderapi.com/api';
+const FALLBACK_GATEWAY_URL = 'https://bogbes-whatsapp-gateway.onrender.com';
+const FALLBACK_API_KEY = 'bogbes_secret_key_2026';
+const FALLBACK_WEBHOOK_SECRET = 'a8271744c3bba421d49850cd785ff068';
+
+const WASSENDER_API_KEY =
+  sanitizeEnv(process.env.WHATSAPP_API_KEY || process.env.WASSENDER_API_KEY) || FALLBACK_API_KEY;
+const WASSENDER_WEBHOOK_SECRET =
+  sanitizeEnv(process.env.WHATSAPP_WEBHOOK_SECRET || process.env.WASSENDER_WEBHOOK_SECRET) ||
+  FALLBACK_WEBHOOK_SECRET;
+const BASE_URL =
+  sanitizeEnv(process.env.WHATSAPP_GATEWAY_URL) || FALLBACK_GATEWAY_URL;
 
 export type WasenderMessageType = 'text' | 'image' | 'video' | 'document' | 'audio';
 
