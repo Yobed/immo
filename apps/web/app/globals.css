@@ -1276,3 +1276,33 @@ html[data-modal-open] .activity-feed {
   }
 }
 
+
+
+/* ─── Suppression stricte des widgets tiers & badge Netlify ───────────────
+   Empêche le Netlify Drawer, le badge promotionnel Netlify et tout overlay
+   involontaire de recouvrir le bouton WhatsApp Sapphire ou les interactions.
+   ─────────────────────────────────────────────────────────────────────── */
+netlify-drawer,
+#netlify-drawer,
+[data-netlify-badge],
+[data-netlify-drawer],
+div[class*="netlify-drawer"],
+iframe[src*="netlify.com"],
+iframe[title*="Netlify"],
+.netlify-badge,
+.netlify-drawer,
+[data-netlify-feedback] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  top: -99999px !important;
+  left: -99999px !important;
+  width: 0 !important;
+  height: 0 !important;
+  max-width: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  z-index: -99999 !important;
+}

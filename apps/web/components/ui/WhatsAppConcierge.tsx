@@ -1,7 +1,6 @@
-﻿"use client";
+"use client";
 
-import { useState } from 'react';
-import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Image from 'next/image';
 
 /**
@@ -13,29 +12,12 @@ export const WhatsAppConcierge = () => {
   const WHATSAPP_NUMBER = "2250544872051";
   const MESSAGE = encodeURIComponent("Bonjour BOGBE'S GROUPE, je souhaiterais obtenir des informations sur un bien immobilier.");
 
-  const { scrollY } = useScroll();
-  const [hidden, setHidden] = useState(false);
-
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    const previous = scrollY.getPrevious() ?? 0;
-    // On cache le bouton si on descend (lecture) et qu'on a dépassé 150px
-    if (latest > previous && latest > 150) {
-      setHidden(true);
-    } else {
-      setHidden(false);
-    }
-  });
-
   return (
     <motion.div 
-      variants={{
-        visible: { y: 0, opacity: 1, scale: 1 },
-        hidden: { y: 80, opacity: 0, scale: 0.8 } // S'efface vers le bas
-      }}
-      initial="visible"
-      animate={hidden ? "hidden" : "visible"}
-      transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="fixed bottom-[6.5rem] right-4 md:bottom-8 md:right-8 z-[90] group"
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-[99999] group pointer-events-auto"
     >
       {/* Tooltip */}
       <div className="absolute bottom-full right-0 mb-4 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none transform translate-y-2 group-hover:translate-y-0">

@@ -177,6 +177,25 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </ThemeProvider>
           </ToastProvider>
         </I18nProvider>
+        {/* Suppression proactive du Netlify Drawer / badge injecté */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){
+              function purgeNetlify(){
+                var sel=['netlify-drawer','#netlify-drawer','[data-netlify-badge]','[data-netlify-drawer]','iframe[src*="netlify.com"]','iframe[title*="Netlify"]','.netlify-badge'];
+                sel.forEach(function(s){
+                  document.querySelectorAll(s).forEach(function(el){ try{ el.remove(); }catch(e){} });
+                });
+              }
+              if(typeof window!=='undefined'){
+                purgeNetlify();
+                if(window.MutationObserver){
+                  new MutationObserver(purgeNetlify).observe(document.documentElement,{childList:true,subtree:true});
+                }
+              }
+            })();`,
+          }}
+        />
       </body>
     </html>
   )

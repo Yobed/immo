@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import Map, { Marker, MapRef } from 'react-map-gl/mapbox'
 import { Search, Loader2, Crosshair, MapPin, X, Maximize2, Minimize2 } from 'lucide-react'
 import 'mapbox-gl/dist/mapbox-gl.css'
+import { MAPBOX_TOKEN } from '@/lib/mapbox'
 
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
 const ABIDJAN = { latitude: 5.3189, longitude: -4.0167 }
 
 interface MapboxFeature {

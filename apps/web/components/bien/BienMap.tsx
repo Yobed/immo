@@ -4,8 +4,8 @@ import Map, { Marker, Source, Layer } from 'react-map-gl/mapbox'
 import { Navigation, Loader2, Maximize2, X, RefreshCw } from 'lucide-react'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import type { Feature } from 'geojson'
+import { MAPBOX_TOKEN } from '@/lib/mapbox'
 
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
 const ABIDJAN_CENTER = { latitude: 5.3189, longitude: -4.0167 }
 
 const routeLayer = {
