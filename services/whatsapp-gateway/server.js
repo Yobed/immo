@@ -107,6 +107,30 @@ function triggerCloudSync(dir) {
   syncTimeout = setTimeout(() => backupSessionToCloud(dir), 8000);
 }
 
+async function purgeCloudSession() {
+  if (!SUPABASE_URL || !SUPABASE_KEY) return;
+  try {
+    logger.info('☁️ Purge de la session WhatsApp dans Supabase Storage (whatsapp-auth)...');
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/whatsapp-auth`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        apikey: SUPABASE_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prefixes: ['session_bundle.json'] }),
+      signal: AbortSignal.timeout(10000),
+    });
+    if (res.ok) {
+      logger.info('✅ Archive cloud session_bundle.json purgée avec succès de Supabase.');
+    } else {
+      logger.warn(`⚠️ Statut purge session Supabase: ${res.status}`);
+    }
+  } catch (err) {
+    logger.warn(`⚠️ Erreur purge session Supabase: ${err.message}`);
+  }
+}
+
 let sock = null;
 let qrCodeDataUrl = null;
 let currentPairingCode = null;
@@ -307,7 +331,8 @@ async function connectToWhatsApp() {
 
       if (connection === 'close') {
         const statusCode = lastDisconnect?.error?.output?.statusCode;
-        const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
+        const isLoggedOut = statusCode === DisconnectReason.loggedOut || statusCode === 401;
+        const shouldReconnect = !isLoggedOut;
         const delay = getReconnectDelay();
         logger.warn(`Connexion Baileys fermée. Code: ${statusCode}. Reconnexion dans ${Math.round(delay/1000)}s (Tentative #${reconnectAttempts}): ${shouldReconnect}`);
 
@@ -319,7 +344,13 @@ async function connectToWhatsApp() {
         if (shouldReconnect) {
           reconnectTimer = setTimeout(connectToWhatsApp, delay);
         } else {
-          logger.error('Session WhatsApp déconnectée par Meta (Logged Out). Alerte admin requise.');
+          logger.error('Session WhatsApp déconnectée par Meta (Logged Out / 401). Purge automatique locale et cloud...');
+          await purgeCloudSession();
+          if (existsSync(AUTH_DIR)) {
+            try { rmSync(AUTH_DIR, { recursive: true, force: true }); } catch {}
+          }
+          reconnectAttempts = 0;
+          reconnectTimer = setTimeout(connectToWhatsApp, 2500);
         }
       } else if (connection === 'open') {
         reconnectAttempts = 0; // Réinitialisation du compteur anti-tempête
@@ -603,11 +634,42 @@ const handlePairingCode = async (req, res) => {
   if (!phone) {
     return res.status(400).json({ success: false, message: 'Numéro de téléphone requis (ex: 2250789263373)' });
   }
-  if (!sock) {
-    return res.status(503).json({ success: false, message: 'Passerelle non initialisée' });
+
+  if (connectionStatus === 'connected') {
+    return res.status(400).json({
+      success: false,
+      message: `La passerelle est déjà connectée au numéro +${connectedPhone}. Cliquez sur 'Déconnecter la session' pour associer un autre numéro.`
+    });
   }
+
   try {
+    // Si pas de socket ou session déjà enregistrée / socket fermé
+    const isRegistered = sock?.authState?.creds?.registered;
+    if (!sock || isRegistered) {
+      logger.info('Purge et recréation d\'une session vierge pour autoriser le code d\'association...');
+      if (sock) {
+        try { sock.ev.removeAllListeners(); sock.end(); } catch {}
+        sock = null;
+      }
+      if (existsSync(AUTH_DIR)) {
+        try { rmSync(AUTH_DIR, { recursive: true, force: true }); } catch {}
+      }
+      await purgeCloudSession();
+      await connectToWhatsApp();
+
+      // Attendre que le socket soit initialisé et prêt
+      for (let i = 0; i < 15; i++) {
+        await new Promise((r) => setTimeout(r, 400));
+        if (sock && !sock.authState?.creds?.registered) break;
+      }
+    }
+
+    if (!sock) {
+      return res.status(503).json({ success: false, message: 'Passerelle en cours d\'initialisation, réessayez dans 3 secondes.' });
+    }
+
     logger.info(`Génération du code d'association pour le numéro: +${phone}`);
+    await new Promise((r) => setTimeout(r, 800));
     const code = await sock.requestPairingCode(phone);
     currentPairingCode = code;
     logger.info(`Code d'association généré avec succès: ${code}`);
@@ -618,7 +680,12 @@ const handlePairingCode = async (req, res) => {
     return res.redirect('/?code=' + encodeURIComponent(code));
   } catch (err) {
     logger.error('Erreur requestPairingCode:', err);
-    return res.status(500).json({ success: false, message: err.message });
+    return res.status(500).json({
+      success: false,
+      message: err.message === 'Connection Closed'
+        ? 'Connexion réinitialisée. Cliquez à nouveau sur "Obtenir le code" pour finaliser.'
+        : err.message
+    });
   }
 };
 app.post('/api/pairing-code', handlePairingCode);
@@ -626,18 +693,29 @@ app.get('/api/pairing-code', handlePairingCode);
 
 const handleDisconnect = async (req, res) => {
   try {
-    if (sock) await sock.logout();
-    if (existsSync(AUTH_DIR)) rmSync(AUTH_DIR, { recursive: true, force: true });
+    logger.info('Demande de réinitialisation/déconnexion reçue...');
+    if (sock) {
+      try { await sock.logout(); } catch {}
+      try { sock.ev.removeAllListeners(); sock.end(); } catch {}
+      sock = null;
+    }
+    if (existsSync(AUTH_DIR)) {
+      try { rmSync(AUTH_DIR, { recursive: true, force: true }); } catch {}
+    }
+    await purgeCloudSession();
+
     connectionStatus = 'logged_out';
     connectedPhone = null;
     qrCodeDataUrl = null;
     currentPairingCode = null;
+    reconnectAttempts = 0;
+    if (reconnectTimer) clearTimeout(reconnectTimer);
     reconnectTimer = setTimeout(connectToWhatsApp, 1500);
 
-    if (req.accepts('html')) {
+    if (req.accepts('html') && !req.is('json')) {
       return res.redirect('/');
     }
-    return res.json({ success: true, message: 'Session réinitialisée' });
+    return res.json({ success: true, message: 'Session réinitialisée (local et cloud purgés)' });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }
@@ -868,12 +946,11 @@ const renderDashboard = (req, res) => {
     }
     .btn-danger:hover { opacity: 0.9; }
   </style>
-  ${!isConnected && !displayedCode ? '<meta http-equiv="refresh" content="5">' : ''}
 </head>
 <body>
   <div class="card">
     <div class="badge ${connectionStatus}">
-      ● ${connectionStatus === 'connected' ? 'Connecté' : connectionStatus === 'connecting' ? 'Attente d\'association' : 'Initialisation...'}
+      ● ${connectionStatus === 'connected' ? 'Connecté' : connectionStatus === 'connecting' ? 'Attente d\'association' : 'Prêt pour association'}
     </div>
 
     <h1>BOGBE'S GROUPE</h1>
@@ -888,9 +965,9 @@ const renderDashboard = (req, res) => {
         <div class="info">
           <div><span style="color:var(--muted)">Moteur :</span> <strong>Baileys (WebSockets)</strong></div>
           <div><span style="color:var(--muted)">Relai CRM Next.js :</span> <strong>Actif (Direct)</strong></div>
-          <div><span style="color:var(--muted)">Relai Scraper n8n :</span> <strong>Localhost (Port 5670)</strong></div>
+          <div><span style="color:var(--muted)">Relai Scraper n8n :</span> <strong>Hugging Face Cloud (24/7)</strong></div>
         </div>
-        <form method="POST" action="api/disconnect">
+        <form method="POST" action="/api/disconnect">
           <button type="submit" class="btn-danger">Déconnecter la session</button>
         </form>
       `
@@ -937,6 +1014,11 @@ const renderDashboard = (req, res) => {
             </div>
           `
         }
+        <form method="POST" action="/api/disconnect" style="margin-top: 18px;">
+          <button type="submit" style="background: transparent; border: 1px solid #334155; color: #94a3b8; padding: 7px 16px; border-radius: 10px; font-size: 11px; cursor: pointer; transition: all 0.2s;">
+            🔄 Réinitialiser la passerelle (Nouveau QR / Code)
+          </button>
+        </form>
       `
     }
   </div>
@@ -954,11 +1036,6 @@ const renderDashboard = (req, res) => {
           }
         } catch {}
       }, 2500);
-
-      // Rafraîchir le QR code s'il n'est pas scanné au bout de 25s
-      setTimeout(() => {
-        window.location.reload();
-      }, 25000);
     }
 
     async function handlePairing(e) {
@@ -972,7 +1049,7 @@ const renderDashboard = (req, res) => {
       btn.innerText = 'Génération...';
 
       try {
-        const res = await fetch('api/pairing-code', {
+        const res = await fetch('/api/pairing-code', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ phone: phoneInput.value })
