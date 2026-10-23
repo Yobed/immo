@@ -1,0 +1,12 @@
+# Configuration Netlify pour le Monorepo Bogbes Immo (0 FCFA/mois)
+[build]
+  base = "apps/web"
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  SECRETS_SCAN_ENABLED = "false"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
