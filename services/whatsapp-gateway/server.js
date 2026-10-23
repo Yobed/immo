@@ -246,10 +246,11 @@ async function connectToWhatsApp() {
       browser: ['Windows', 'Chrome', '124.0.0.0'],
       connectTimeoutMs: 60000,
       defaultQueryTimeoutMs: 60000,
-      keepAliveIntervalMs: 15000,
+      keepAliveIntervalMs: 25000,
       syncFullHistory: false,
       shouldSyncHistoryMessage: () => false,
-      markOnlineOnConnect: false, // Discrétion maximale : ne pas diffuser "en ligne" 24h/24 à tout le carnet
+      markOnlineOnConnect: true, // Requis pour recevoir les messages de groupe en temps réel
+      getMessage: async () => undefined, // Évite les crashs Stream Errored (ack) sur retries
       appStateMacVerification: {
         patch: false,
         snapshot: false,
@@ -328,12 +329,15 @@ async function connectToWhatsApp() {
         connectedPhone = sock.user?.id ? sock.user.id.split(':')[0].replace(/\D/g, '') : null;
         logger.info(`✅ Connecté à WhatsApp ! Numéro: +${connectedPhone}`);
         triggerCloudSync(AUTH_DIR);
+        try {
+          await sock.sendPresenceUpdate('available');
+        } catch {}
       }
     });
 
     // Ingestion & Relai des messages entrants
     sock.ev.on('messages.upsert', async ({ messages, type }) => {
-      if (type !== 'notify') return;
+      logger.info({ count: messages.length, type }, '📥 [Baileys] messages.upsert reçu');
 
       for (const msg of messages) {
         if (!msg.message) continue;
@@ -640,6 +644,64 @@ const handleDisconnect = async (req, res) => {
 };
 app.post('/api/disconnect', handleDisconnect);
 app.get('/api/disconnect', handleDisconnect);
+
+// Liste des groupes WhatsApp actifs surveillés
+app.get(['/groups', '/api/groups'], async (req, res) => {
+  try {
+    if (!sock || connectionStatus !== 'connected') {
+      return res.status(503).json({ success: false, status: connectionStatus, error: 'Passerelle non connectée' });
+    }
+    const groups = await sock.groupFetchAllParticipating();
+    const list = Object.values(groups).map((g) => ({
+      id: g.id,
+      name: g.subject,
+      participants: g.participants?.length || 0,
+      creation: g.creation ? new Date(g.creation * 1000).toISOString() : null,
+    }));
+    return res.json({ success: true, count: list.length, groups: list });
+  } catch (err) {
+    logger.error('Erreur groupFetchAllParticipating:', err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Forcer la présence et la synchronisation
+app.get(['/sync', '/api/sync'], async (req, res) => {
+  try {
+    if (!sock || connectionStatus !== 'connected') {
+      return res.status(503).json({ success: false, error: 'Passerelle non connectée' });
+    }
+    await sock.sendPresenceUpdate('available');
+    return res.json({ success: true, message: 'Présence WhatsApp forcée : disponible' });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Test d'ingestion direct vers n8n (vérifie la chaîne end-to-end)
+app.all(['/test-ingest', '/api/test-ingest'], async (req, res) => {
+  try {
+    const text = req.body?.text || req.query?.text || 'Villa 4 pièces à louer Cocody Angré 350.000 FCFA contact 0778311541';
+    const testPayload = {
+      event: 'messages-group.received',
+      data: {
+        messages: [{
+          key: { remoteJid: '120363404877349153@g.us', fromMe: false, participant: '2250778311541@s.whatsapp.net' },
+          message: { conversation: text },
+          messageTimestamp: Math.floor(Date.now() / 1000),
+        }],
+      },
+      sender: '2250778311541@s.whatsapp.net',
+      from: '120363404877349153@g.us',
+      text,
+      timestamp: Date.now(),
+    };
+    await forwardToWebhook(N8N_SCRAPER_URL, testPayload);
+    return res.json({ success: true, forwardedTo: N8N_SCRAPER_URL, payload: testPayload });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 // Redirections préventives vers l'accueil
 app.get('/api', (req, res) => res.redirect('/' + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '')));
