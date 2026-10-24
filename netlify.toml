@@ -15,8 +15,5 @@
   WHATSAPP_API_KEY = "bogbes_secret_key_2026"
   WHATSAPP_WEBHOOK_SECRET = "a8271744c3bba421d49850cd785ff068"
 
-[functions]
-  directory = "netlify/functions"
-
 [[plugins]]
   package = "@netlify/plugin-nextjs"
