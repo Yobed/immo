@@ -71,3 +71,11 @@ everything-claude-code/
 check_output_enhanced.txt
 .omc/
 *.bak
+
+# Security Scan Reports & Artifacts
+reports/
+gitleaks-report.json
+*.sarif
+
+.netlify/
+apps/web/.netlify/

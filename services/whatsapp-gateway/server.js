@@ -240,6 +240,69 @@ app.use(cors());
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
+// Cache des métadonnées de groupes pour enrichir les payloads n8n
+const groupsMetadataCache = new Map();
+
+/**
+ * Dépaquette récursivement les messages éphémères, viewOnce, documents, etc.
+ */
+function unwrapMessage(msg) {
+  let m = msg;
+  while (m) {
+    if (m.ephemeralMessage?.message) {
+      m = m.ephemeralMessage.message;
+      continue;
+    }
+    if (m.viewOnceMessage?.message) {
+      m = m.viewOnceMessage.message;
+      continue;
+    }
+    if (m.viewOnceMessageV2?.message) {
+      m = m.viewOnceMessageV2.message;
+      continue;
+    }
+    if (m.documentWithCaptionMessage?.message) {
+      m = m.documentWithCaptionMessage.message;
+      continue;
+    }
+    break;
+  }
+  return m || {};
+}
+
+/**
+ * Extrait le texte complet même si le message est éphémère ou sous forme de média
+ */
+function extractMessageText(message) {
+  const inner = unwrapMessage(message);
+  return (
+    inner.conversation ||
+    inner.extendedTextMessage?.text ||
+    inner.imageMessage?.caption ||
+    inner.videoMessage?.caption ||
+    inner.documentMessage?.caption ||
+    ''
+  );
+}
+
+/**
+ * Met à jour le cache des noms de groupes en mémoire
+ */
+async function refreshGroupsCache() {
+  if (!sock) return;
+  try {
+    const participating = await sock.groupFetchAllParticipating();
+    for (const [id, meta] of Object.entries(participating)) {
+      if (meta && meta.subject) {
+        groupsMetadataCache.set(id, meta.subject);
+      }
+    }
+    logger.info(`📋 ${groupsMetadataCache.size} groupes WhatsApp synchronisés dans le cache`);
+  } catch (err) {
+    logger.warn(`Erreur refreshGroupsCache: ${err.message}`);
+  }
+}
+
 /**
  * Initialise ou reconnecte le socket Baileys WhatsApp
  */
@@ -363,6 +426,8 @@ async function connectToWhatsApp() {
         try {
           await sock.sendPresenceUpdate('available');
         } catch {}
+        // Synchronisation asynchrone des métadonnées des groupes
+        refreshGroupsCache().catch(() => null);
       }
     });
 
@@ -377,30 +442,39 @@ async function connectToWhatsApp() {
         const jid = msg.key.remoteJid || '';
         const fromMe = msg.key.fromMe || false;
 
-        const text =
-          msg.message.conversation ||
-          msg.message.extendedTextMessage?.text ||
-          msg.message.imageMessage?.caption ||
-          msg.message.videoMessage?.caption ||
-          '';
+        // Dépaquette les messages éphémères, viewOnce, vidéos, photos avec légende
+        const innerMsg = unwrapMessage(msg.message);
+        const text = extractMessageText(msg.message);
 
         const isGroup = jid.endsWith('@g.us');
 
         // 1. Message de groupe WhatsApp -> Relai direct Scraper n8n
         if (isGroup && !fromMe && N8N_SCRAPER_URL) {
           totalMessagesForwarded++;
+          const groupName = groupsMetadataCache.get(jid) || msg.groupMetadata?.subject || '';
           const groupPayload = {
             event: 'messages-group.received',
             data: {
-              messages: [msg],
-              message: msg,
+              messages: [{
+                ...msg,
+                message: innerMsg,
+              }],
+              message: {
+                ...msg,
+                message: innerMsg,
+              },
               key: msg.key,
-              groupName: '',
+              groupName,
+              groupSubject: groupName,
             },
             sender: msg.key.participant || jid,
             from: jid,
+            groupName,
             text,
-            message: msg,
+            message: {
+              ...msg,
+              message: innerMsg,
+            },
             timestamp: Date.now(),
           };
           forwardToWebhook(N8N_SCRAPER_URL, groupPayload).catch(() => null);
@@ -419,7 +493,7 @@ async function connectToWhatsApp() {
               pushName: msg.pushName || '',
               timestamp: msg.messageTimestamp,
               key: msg.key,
-              message: msg.message,
+              message: innerMsg,
             },
           };
           forwardToWebhook(WEBHOOK_URL, payload, WEBHOOK_SECRET).catch(() => null);
