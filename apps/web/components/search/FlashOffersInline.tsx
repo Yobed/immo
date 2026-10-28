@@ -61,7 +61,8 @@ export async function FlashOffersInline({ filters, limit = 6 }: FlashOffersInlin
     // .eq('status','active') / .eq('is_duplicate',false) excluait à tort tous les NULL.
     .not('status', 'eq', 'inactive')
     .not('is_duplicate', 'is', true)
-    .order('date_publication', { ascending: false, nullsFirst: false })
+    .order('created_at', { ascending: false, nullsFirst: false })
+    .order('id', { ascending: false })
     .limit(limit * 2) // marge pour filtrer is_actif après mapping
 
   if (filters.commune) q = q.ilike('commune', `%${filters.commune}%`)

@@ -38,7 +38,8 @@ const getLandingFlashOffers = unstable_cache(
         .not('is_duplicate', 'is', true)
         .neq('lien_image', '')
         .not('lien_image', 'is', null)
-        .order('date_publication', { ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: false, nullsFirst: false })
+        .order('id', { ascending: false })
         .limit(12)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return (rows ?? []) as any as LocauxRow[]

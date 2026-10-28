@@ -152,15 +152,16 @@ export function locauxAdminForId(id: number): SupabaseClient {
   return createLocauxLegacyAdminClient()
 }
 
-/** Tri fusionné des sources : date_publication (ou created_at) décroissante (timestamp numérique exact). */
+/** Tri fusionné des sources : temps de scrapping (created_at) décroissant en priorité absolue, puis date_publication, puis id. */
 export function byDatePubDesc(
-  a: { date_publication?: string | null; created_at?: string | null },
-  b: { date_publication?: string | null; created_at?: string | null },
+  a: { date_publication?: string | null; created_at?: string | null; id?: number | string },
+  b: { date_publication?: string | null; created_at?: string | null; id?: number | string },
 ): number {
-  const da = a.date_publication || a.created_at
-  const db = b.date_publication || b.created_at
+  const da = a.created_at || a.date_publication
+  const db = b.created_at || b.date_publication
   const ta = da ? new Date(da).getTime() : 0
   const tb = db ? new Date(db).getTime() : 0
-  return (isNaN(tb) ? 0 : tb) - (isNaN(ta) ? 0 : ta)
+  if (tb !== ta) return (isNaN(tb) ? 0 : tb) - (isNaN(ta) ? 0 : ta)
+  return (Number(b.id) || 0) - (Number(a.id) || 0)
 }
 

@@ -267,7 +267,8 @@ async function fetchLocaux(filters: ConsolidatedFilters): Promise<ConsolidatedBi
       .not('status', 'eq', 'inactive')
       .not('is_duplicate', 'is', true)
       .or('disponible.is.null,disponible.neq.non')
-      .order('date_publication', { ascending: false })
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
       .limit(Math.min(200, Math.max(20, Math.round((filters.limitPerSource ?? DEFAULT_LIMIT) * 1.5))))
 
     if (filters.commune) {
@@ -750,9 +751,12 @@ function toTimestamp(dateIso?: string | null): number {
 }
 
 function compareChronologicalDesc(a: ConsolidatedBien, b: ConsolidatedBien): number {
-  const ta = toTimestamp(a.date_publication || a.date_scraping)
-  const tb = toTimestamp(b.date_publication || b.date_scraping)
+  const ta = toTimestamp(a.date_scraping || a.date_publication)
+  const tb = toTimestamp(b.date_scraping || b.date_publication)
   if (tb !== ta) return tb - ta
+  const idA = Number(String(a.sourceId || a.id).replace(/\D/g, '')) || 0
+  const idB = Number(String(b.sourceId || b.id).replace(/\D/g, '')) || 0
+  if (idB !== idA) return idB - idA
   // Égalité exacte : photo d'abord, puis vérifié, puis source BOGBE'S
   if (hasPhoto(a) !== hasPhoto(b)) return hasPhoto(a) - hasPhoto(b)
   if (a.is_verifie !== b.is_verifie) return a.is_verifie ? -1 : 1
@@ -781,8 +785,8 @@ function sortConsolidated(items: ConsolidatedBien[], sort: ConsolidatedFilters['
     case 'verified_first':
       arr.sort((a, b) => {
         // Biens récents (< 7 jours) : ordre chronologique strict
-        const ta = toTimestamp(a.date_publication || a.date_scraping)
-        const tb = toTimestamp(b.date_publication || b.date_scraping)
+        const ta = toTimestamp(a.date_scraping || a.date_publication)
+        const tb = toTimestamp(b.date_scraping || b.date_publication)
         const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000
         const now = Date.now()
         const aRecent = now - ta < SEVEN_DAYS
@@ -979,7 +983,8 @@ export async function getLocauxPagedItems(
         .not('status', 'eq', 'inactive')
         .not('is_duplicate', 'is', true)
         .or('disponible.is.null,disponible.neq.non')
-        .order('date_publication', { ascending: false })
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
         .range(0, to)
 
       if (filters.commune) q = q.ilike('commune', `%${filters.commune}%`)
