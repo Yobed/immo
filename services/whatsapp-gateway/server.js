@@ -13,7 +13,12 @@ import makeWASocket, {
 
 const PORT = parseInt(process.env.PORT || '5685', 10);
 function findAuthDir() {
-  if (process.env.AUTH_DIR && existsSync(process.env.AUTH_DIR)) return process.env.AUTH_DIR;
+  if (process.env.AUTH_DIR) {
+    if (!existsSync(process.env.AUTH_DIR)) {
+      try { mkdirSync(process.env.AUTH_DIR, { recursive: true }); } catch {}
+    }
+    return process.env.AUTH_DIR;
+  }
   const candidates = [
     resolve(process.cwd(), 'auth'),
     resolve(process.cwd(), 'wa_auth'),
@@ -23,7 +28,7 @@ function findAuthDir() {
   for (const c of candidates) {
     if (existsSync(c) && existsSync(resolve(c, 'creds.json'))) return c;
   }
-  return process.env.AUTH_DIR || resolve(process.cwd(), 'auth');
+  return resolve(process.cwd(), 'auth');
 }
 const AUTH_DIR = findAuthDir();
 const API_KEY = process.env.WHATSAPP_API_KEY || process.env.API_KEY || 'bogbes_secret_key_2026';
@@ -90,7 +95,7 @@ async function backupSessionToCloud(dir) {
         'Content-Type': 'application/json',
       },
       body,
-      signal: AbortSignal.timeout(20000),
+      signal: AbortSignal.timeout(90000),
     });
     if (res.ok) {
       logger.info(`☁️ Sauvegarde session WhatsApp synchronisée vers Supabase (${files.length} fichiers sauvegardés).`);
@@ -104,7 +109,7 @@ async function backupSessionToCloud(dir) {
 
 function triggerCloudSync(dir) {
   if (syncTimeout) clearTimeout(syncTimeout);
-  syncTimeout = setTimeout(() => backupSessionToCloud(dir), 8000);
+  syncTimeout = setTimeout(() => backupSessionToCloud(dir), 30000);
 }
 
 async function purgeCloudSession() {
