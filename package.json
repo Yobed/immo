@@ -11,9 +11,16 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "type-check": "turbo type-check",
-    "format": "prettier --write \"**/*.{ts,tsx,json,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "security:secrets": "gitleaks detect --source . --config .gitleaks.toml --no-git",
+    "security:trivy": "trivy fs --scanners vuln,misconfig,secret --skip-dirs node_modules,.next,.turbo .",
+    "security:sast": "eslint --config eslint.security.config.mjs \"apps/**/*.{ts,tsx,js}\"",
+    "security:dep-check": "dependency-check.cmd --project immo --scan package-lock.json --out ./reports/dependency-check",
+    "security:zap-gen": "zap.cmd -cmd -autogenmin zap-automation.yaml",
+    "security:all": "npm run security:secrets && npm run security:trivy && npm run security:sast"
   },
   "devDependencies": {
+    "eslint-plugin-security": "^4.2.0",
     "prettier": "^3.0.0",
     "turbo": "^2.10.12",
     "typescript": "6.0.2"

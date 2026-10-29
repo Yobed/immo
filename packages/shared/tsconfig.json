@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["ES2017"],
+    "target": "ES2022",
+    "lib": ["ES2022"],
     "strict": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
     "skipLibCheck": true,
     "noEmit": true
   },
