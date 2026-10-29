@@ -17,9 +17,11 @@
     "security:sast": "eslint --config eslint.security.config.mjs \"apps/**/*.{ts,tsx,js}\"",
     "security:dep-check": "dependency-check.cmd --project immo --scan package-lock.json --out ./reports/dependency-check",
     "security:zap-gen": "zap.cmd -cmd -autogenmin zap-automation.yaml",
-    "security:all": "npm run security:secrets && npm run security:trivy && npm run security:sast"
+    "security:all": "npm run security:secrets && npm run security:trivy && npm run security:sast",
+    "build:cloudflare": "turbo run build:cloudflare"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.16",
     "eslint-plugin-security": "^4.2.0",
     "prettier": "^3.0.0",
     "turbo": "^2.10.12",
