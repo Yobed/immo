@@ -1,4 +1,11 @@
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 const nextConfig = {
+  outputFileTracingRoot: path.resolve(__dirname, '../../'),
   transpilePackages: ['@immo-ci/shared'],
   // RESA-03 FIX: Evite le crash "ba.Component is not a constructor" de react-pdf
   // dans les App Router route handlers. Sans ceci, next build reussit mais la route

@@ -33,11 +33,20 @@ let _midAdmin: SupabaseClient | null = null
 let _oldAdmin: SupabaseClient | null = null
 
 const fetchWithTimeout: typeof fetch = (input, init) => {
-  const timeoutSignal = AbortSignal.timeout(3500)
-  const signal = init?.signal
-    ? AbortSignal.any([init.signal, timeoutSignal])
-    : timeoutSignal
-  return fetch(input, { ...init, signal })
+  try {
+    const timeoutSignal = typeof AbortSignal?.timeout === 'function' ? AbortSignal.timeout(4500) : undefined
+    let signal: AbortSignal | undefined = timeoutSignal
+    if (init?.signal) {
+      if (timeoutSignal && typeof AbortSignal.any === 'function') {
+        signal = AbortSignal.any([init.signal, timeoutSignal])
+      } else {
+        signal = init.signal
+      }
+    }
+    return fetch(input, { ...init, signal })
+  } catch {
+    return fetch(input, init)
+  }
 }
 
 const OPTS = {
@@ -98,8 +107,8 @@ export function createLocauxLegacyClient(): SupabaseClient {
  */
 export function locauxReadClients(): SupabaseClient[] {
   return [
-    createLocauxClient(),
     createLocauxPrevFreshClient(),
+    createLocauxClient(),
     createLocauxMidClient(),
   ]
 }
