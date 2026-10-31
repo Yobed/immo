@@ -1,0 +1,132 @@
+{
+  "name": "BOGBES - Quittances & Relances Automatiques",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 1 * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        200,
+        220
+      ],
+      "id": "schedule-mensuel",
+      "name": "Chaque 1er du Mois (08h00)"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        200,
+        420
+      ],
+      "id": "schedule-quotidien",
+      "name": "Tous les Jours (09h00)"
+    },
+    {
+      "parameters": {
+        "url": "https://www.bogbesgroup.com/api/quittances/cron-generer",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.CRON_SECRET }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        220
+      ],
+      "id": "http-generer-quittances",
+      "name": "Générer Quittances du Mois"
+    },
+    {
+      "parameters": {
+        "url": "https://www.bogbesgroup.com/api/quittances/cron-relances",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.CRON_SECRET }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        420
+      ],
+      "id": "http-verifier-relances",
+      "name": "Vérifier Échéances & Relances"
+    }
+  ],
+  "connections": {
+    "Chaque 1er du Mois (08h00)": {
+      "main": [
+        [
+          {
+            "node": "Générer Quittances du Mois",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tous les Jours (09h00)": {
+      "main": [
+        [
+          {
+            "node": "Vérifier Échéances & Relances",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

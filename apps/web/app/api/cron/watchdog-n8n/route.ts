@@ -7,9 +7,9 @@ export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 
 /**
- * Watchdog périodique pour la file n8n (Hugging Face Spaces v2.44.5) :
+ * Watchdog périodique pour la file n8n v3 (Hugging Face Spaces v3.0.1) :
  * 1. Ping /healthz pour maintenir le conteneur éveillé (anti-sleep mode)
- * 2. Vérifie la disponibilité du moteur et mesure la latence réseau
+ * 2. Vérifie la disponibilité du moteur v3 et mesure la latence réseau
  * 3. Débloque et purge les exécutions obsolètes
  * 4. Alerte automatiquement dans error_logs si n8n est inaccessible
  */

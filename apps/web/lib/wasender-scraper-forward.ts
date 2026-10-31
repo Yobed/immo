@@ -62,7 +62,12 @@ export async function forwardGroupMessageToScraper(
     const response = await fetch(targetUrl, {
       method: 'POST',
       signal: controller.signal,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'BOGBES-Platform/3.0',
+        'X-Source': 'whatsapp-scraper',
+        'X-N8N-Version': '3.0.1',
+      },
       body: JSON.stringify(payload),
     })
     return { ok: response.ok, status: response.status }

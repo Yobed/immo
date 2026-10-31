@@ -36,7 +36,7 @@ export interface CleanZombieN8nResult {
 }
 
 export async function cleanZombieN8nExecutions(): Promise<CleanZombieN8nResult> {
-  // 1. Réveil et contrôle de santé actif de l'instance n8n (Hugging Face)
+  // 1. Réveil et contrôle de santé actif de l'instance n8n v3 (Hugging Face)
   const health = await checkN8nHealth()
 
   let unblockedRunning = 0

@@ -1,0 +1,125 @@
+{
+  "name": "BOGBES - Hub de Secours WhatsApp (Failover Wasender)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-fallback",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ],
+      "id": "webhook-fallback-trigger",
+      "name": "Webhook Secours WhatsApp"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalisation et analyse de la payload de failover\nconst body = $input.first().json.body || $input.first().json;\n\nconst to = body.to || 'Inconnu';\nconst content = body.content || '';\nconst reason = body.reason || 'wasender_error';\nconst timestamp = body.timestamp || new Date().toISOString();\n\nconst isAdminNotification = to.includes('0789263373') || to.includes('0778311541');\n\nreturn [{\n  json: {\n    to,\n    content,\n    reason,\n    timestamp,\n    isAdminNotification,\n    alertTitle: isAdminNotification ? '🚨 ALERTE ADMIN (Non distribuée sur WhatsApp)' : '⚠️ Message client en souffrance',\n    formattedMessage: `🚨 *ALERTE SECOURS BOGBE'S GROUPE*\\n\\n*Destinataire :* ${to}\\n*Raison échec :* ${reason}\\n*Date :* ${new Date(timestamp).toLocaleString('fr-FR')}\\n\\n*Contenu du message :*\\n${content}`\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ],
+      "id": "code-parser",
+      "name": "Analyse du Message"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-admin",
+              "leftValue": "={{ $json.isAdminNotification }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        680,
+        300
+      ],
+      "id": "if-admin",
+      "name": "Est Alerte Admin ?"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"relayed\": true,\n  \"transport\": \"n8n-v3.0.1-failover\",\n  \"to\": \"{{ $json.to }}\",\n  \"timestamp\": \"{{ $json.timestamp }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        920,
+        300
+      ],
+      "id": "respond-webhook",
+      "name": "Réponse Succès Webhook"
+    }
+  ],
+  "connections": {
+    "Webhook Secours WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Analyse du Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyse du Message": {
+      "main": [
+        [
+          {
+            "node": "Est Alerte Admin ?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Est Alerte Admin ?": {
+      "main": [
+        [
+          {
+            "node": "Réponse Succès Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Réponse Succès Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

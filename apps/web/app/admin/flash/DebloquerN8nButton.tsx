@@ -44,10 +44,10 @@ export function DebloquerN8nButton() {
         disabled={loading}
         onClick={handleUnblock}
         className="min-h-[40px] flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-black transition-all shadow-sm disabled:opacity-50 active:scale-95"
-        title="Purger les exécutions zombies (> 5 min) qui bloquent la file de scraping WhatsApp"
+        title="Purger les exécutions zombies (> 5 min) qui bloquent la file de scraping n8n v3"
       >
         <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-        <span>{loading ? 'Déblocage en cours…' : 'Débloquer file n8n'}</span>
+        <span>{loading ? 'Déblocage en cours…' : 'Débloquer file n8n v3'}</span>
       </button>
       {message && (
         <span className={`text-xs flex items-center gap-1 ${status === 'success' ? 'text-emerald-500 font-semibold' : 'text-red-500'}`}>

@@ -1,0 +1,169 @@
+{
+  "name": "BOGBES - Ingestion & Extraction IA Annonces Flash (n8n v3)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wassender-immobilier",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        180,
+        280
+      ],
+      "id": "webhook-scraper-trigger",
+      "name": "Webhook Messages Groupes WhatsApp"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normaliser le message brut reçu du groupe WhatsApp\nconst item = $input.first().json.body || $input.first().json;\n\nconst rawMessage = item.text || item.body || item.message?.conversation || '';\nconst senderJid = item.sender || item.from || item.key?.remoteJid || '';\nconst senderPhone = senderJid.replace(/\\D/g, '');\n\n// Filtrer les messages trop courts ou non pertinents\nif (!rawMessage || rawMessage.length < 25) {\n  return [];\n}\n\nreturn [{\n  json: {\n    rawMessage,\n    senderPhone: senderPhone || null,\n    receivedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        280
+      ],
+      "id": "code-filter",
+      "name": "Validation & Nettoyage"
+    },
+    {
+      "parameters": {
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.GROQ_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"temperature\": 0.1,\n  \"response_format\": { \"type\": \"json_object\" },\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Tu es un expert immobilier en Côte d'Ivoire. Extrais les données d'une annonce immobilière brute en JSON avec les clés : titre, commune, quartier, type_de_bien (Villa, Appartement, Studio, Terrain, Magasin, Bureau), type_offre (location, vente), prix (numérique sans devise), telephone_bien, description.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": {{ JSON.stringify($json.rawMessage) }}\n    }\n  ]\n}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        620,
+        280
+      ],
+      "id": "http-ai-extraction",
+      "name": "Extraction IA (Groq LLaMA-3.3)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Mappage des champs extraits pour la table 'locaux' Supabase\nconst rawAi = $input.first().json;\nlet parsed = {};\ntry {\n  const content = rawAi.choices?.[0]?.message?.content || '{}';\n  parsed = JSON.parse(content);\n} catch (e) {\n  parsed = {};\n}\n\nconst prev = $('Validation & Nettoyage').first().json;\n\nreturn [{\n  json: {\n    message_initial: prev.rawMessage,\n    commune: parsed.commune || 'Abidjan',\n    quartier: parsed.quartier || null,\n    type_de_bien: parsed.type_de_bien || 'Appartement',\n    type_offre: parsed.type_offre || 'location',\n    prix: parsed.prix ? String(parsed.prix) : 'Prix sur demande',\n    telephone_bien: parsed.telephone_bien || prev.senderPhone || null,\n    disponible: 'oui',\n    status: 'active',\n    is_duplicate: false,\n    date_publication: prev.receivedAt\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        840,
+        280
+      ],
+      "id": "code-format-db",
+      "name": "Mappage Schéma Locaux"
+    },
+    {
+      "parameters": {
+        "url": "https://fzccugmyoglemjwidqrl.supabase.co/rest/v1/locaux",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "{{ $env.FRESH_LOCAUX_SERVICE_ROLE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.FRESH_LOCAUX_SERVICE_ROLE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1060,
+        280
+      ],
+      "id": "http-insert-supabase",
+      "name": "Insertion FRESH Supabase"
+    }
+  ],
+  "connections": {
+    "Webhook Messages Groupes WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Validation & Nettoyage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validation & Nettoyage": {
+      "main": [
+        [
+          {
+            "node": "Extraction IA (Groq LLaMA-3.3)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraction IA (Groq LLaMA-3.3)": {
+      "main": [
+        [
+          {
+            "node": "Mappage Schéma Locaux",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mappage Schéma Locaux": {
+      "main": [
+        [
+          {
+            "node": "Insertion FRESH Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

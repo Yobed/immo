@@ -1,6 +1,6 @@
 /**
- * Client d'orchestration n8n — BOGBE'S GROUPE Platform
- * Gère la communication avec l'instance n8n v2.44.5 hébergée sur Hugging Face Spaces.
+ * Client d'orchestration n8n v3 — BOGBE'S GROUPE Platform
+ * Gère la communication avec l'instance n8n v3 (3.0.1+) hébergée sur Hugging Face Spaces.
  */
 
 function sanitizeUrl(raw: string | undefined, defaultUrl: string): string {
@@ -34,10 +34,11 @@ export interface N8nHealthCheckResult {
   latencyMs: number;
   message: string;
   wokenUp?: boolean;
+  version?: string;
 }
 
 /**
- * Sonde l'état de santé de n8n et réveille le conteneur Hugging Face s'il est en veille (cold start).
+ * Sonde l'état de santé de n8n v3 et réveille le conteneur Hugging Face s'il est en veille (cold start).
  */
 export async function checkN8nHealth(timeoutMs = 8000): Promise<N8nHealthCheckResult> {
   const start = Date.now();
@@ -57,8 +58,9 @@ export async function checkN8nHealth(timeoutMs = 8000): Promise<N8nHealthCheckRe
         ok: true,
         status: res.status,
         latencyMs,
-        message: `n8n v2.44.5 actif (${latencyMs}ms)`,
-        wokenUp: latencyMs > 2500, // Une latence > 2.5s indique souvent la sortie de veille du conteneur
+        version: '3.0.1',
+        message: `n8n v3 actif (${latencyMs}ms)`,
+        wokenUp: latencyMs > 2500, // Une latence > 2.5s indique la sortie de veille du conteneur
       };
     }
 
@@ -66,7 +68,7 @@ export async function checkN8nHealth(timeoutMs = 8000): Promise<N8nHealthCheckRe
       ok: false,
       status: res.status,
       latencyMs,
-      message: `n8n a répondu avec le statut HTTP ${res.status}`,
+      message: `n8n v3 a répondu avec le statut HTTP ${res.status}`,
     };
   } catch (err: any) {
     const latencyMs = Date.now() - start;
@@ -76,8 +78,8 @@ export async function checkN8nHealth(timeoutMs = 8000): Promise<N8nHealthCheckRe
       status: null,
       latencyMs,
       message: isTimeout
-        ? `Délai d'attente dépassé (${timeoutMs}ms) — conteneur en cours de réveil ou inaccessible`
-        : (err?.message || 'Erreur réseau vers n8n'),
+        ? `Délai d'attente dépassé (${timeoutMs}ms) — conteneur n8n v3 en cours de réveil ou inaccessible`
+        : (err?.message || 'Erreur réseau vers n8n v3'),
     };
   } finally {
     clearTimeout(timer);
@@ -85,8 +87,8 @@ export async function checkN8nHealth(timeoutMs = 8000): Promise<N8nHealthCheckRe
 }
 
 /**
- * Envoie une notification de secours à n8n pour transmission multi-canal
- * (Telegram, SMS, Email, Meta Cloud API) lorsque Wasender est indisponible.
+ * Envoie une notification de secours à n8n v3 pour transmission multi-canal
+ * (Telegram, SMS, Email, Meta Cloud API) lorsque la passerelle principale est indisponible.
  */
 export async function forwardToN8nFallback(payload: {
   to: string;
@@ -97,7 +99,7 @@ export async function forwardToN8nFallback(payload: {
   metadata?: Record<string, unknown>;
 }): Promise<{ success: boolean; message: string; httpStatus?: number }> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 6000);
+  const timer = setTimeout(() => controller.abort(), 7000);
 
   try {
     const res = await fetch(N8N_FALLBACK_URL, {
@@ -105,9 +107,11 @@ export async function forwardToN8nFallback(payload: {
       headers: {
         'Content-Type': 'application/json',
         'X-Source': 'bogbes-platform',
+        'X-N8N-Version': '3.0.1',
       },
       body: JSON.stringify({
         ...payload,
+        n8nVersion: '3.0.1',
         timestamp: new Date().toISOString(),
       }),
       signal: controller.signal,
@@ -116,20 +120,20 @@ export async function forwardToN8nFallback(payload: {
     if (res.ok) {
       return {
         success: true,
-        message: 'Notification relayée avec succès vers n8n',
+        message: 'Notification relayée avec succès vers n8n v3',
         httpStatus: res.status,
       };
     }
 
     return {
       success: false,
-      message: `n8n fallback webhook a répondu avec HTTP ${res.status}`,
+      message: `n8n v3 fallback webhook a répondu avec HTTP ${res.status}`,
       httpStatus: res.status,
     };
   } catch (err: any) {
     return {
       success: false,
-      message: err?.message || 'Erreur réseau vers n8n fallback',
+      message: err?.message || 'Erreur réseau vers n8n v3 fallback',
     };
   } finally {
     clearTimeout(timer);
