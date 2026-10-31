@@ -99,6 +99,7 @@ export function createLocauxLegacyClient(): SupabaseClient {
 export function locauxReadClients(): SupabaseClient[] {
   return [
     createLocauxClient(),
+    createLocauxPrevFreshClient(),
     createLocauxMidClient(),
   ]
 }
