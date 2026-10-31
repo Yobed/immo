@@ -4,7 +4,6 @@ import { createClient } from '@/lib/supabase/server'
 import { STATUTS_PUBLICS } from '@/lib/catalogue/statuts'
 import { fetchOgImage } from '@/lib/og/safe-image'
 
-export const runtime = 'edge'
 export const alt = "Bien immobilier - BOGBE'S GROUPE"
 // 800x420 (pas 1200x630) : le PNG photo plein cadre pèse sinon >700Ko et
 // WhatsApp abandonne la vignette au-delà de ~600Ko.

@@ -79,3 +79,7 @@ gitleaks-report.json
 
 .netlify/
 apps/web/.netlify/
+.open-next/
+apps/web/.open-next/
+.wrangler/
+apps/web/.wrangler/

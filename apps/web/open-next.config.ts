@@ -1,15 +1,4 @@
-import type { OpenNextConfig } from "@opennextjs/cloudflare";
+import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 
-const config: OpenNextConfig = {
-  default: {
-    override: {
-      wrapper: "cloudflare-node",
-      converter: "edge",
-      incrementalCache: "dummy",
-      tagCache: "dummy",
-      queue: "dummy",
-    },
-  },
-};
-
-export default config;
+// ponytail: pas de cache incrémental (dummy) ; ajouter R2/KV si ISR/revalidate est requis.
+export default defineCloudflareConfig();

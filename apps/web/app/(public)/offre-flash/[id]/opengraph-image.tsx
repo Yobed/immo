@@ -6,7 +6,6 @@ import { getStaticMapUrl } from '@/lib/mapbox-static'
 import { getCommuneCoords, hasKnownCoords } from '@/lib/commune-coords'
 import { fetchOgImage } from '@/lib/og/safe-image'
 
-export const runtime = 'edge'
 export const alt = "Offre flash immobilière - BOGBE'S GROUPE"
 // 800x420 (pas 1200x630) : le PNG map/photo plein cadre pèse sinon ~1Mo et
 // WhatsApp abandonne la vignette au-delà de ~600Ko.
