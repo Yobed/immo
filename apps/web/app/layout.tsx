@@ -1,44 +1,9 @@
 import type { Metadata, Viewport } from 'next'
-import { Bricolage_Grotesque, EB_Garamond, Manrope, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import { SITE_URL } from '@/lib/env'
 
-// Distinctive typographic system — deliberately off the "AI default" list
-// (no Inter, Outfit, Playfair, Plus Jakarta, DM Sans, Instrument, Fraunces, Newsreader).
-//
-// Display: Bricolage Grotesque — variable contemporary, characterful headlines
-// Serif:   EB Garamond — classical italic for editorial accents
-// Sans:    Manrope — warm geometric body
-// Mono:    JetBrains Mono — kept for numeric/reference text
-const display = Bricolage_Grotesque({
-  subsets: ['latin'],
-  weight: ['500', '700'],
-  variable: '--font-display',
-  display: 'swap',
-  preload: true,
-})
-const serif = EB_Garamond({
-  subsets: ['latin'],
-  weight: ['400', '600'],
-  style: ['normal', 'italic'],
-  variable: '--font-serif',
-  display: 'swap',
-  preload: false,
-})
-const sans = Manrope({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  variable: '--font-sans',
-  display: 'swap',
-  preload: true,
-})
-const mono = JetBrains_Mono({
-  subsets: ['latin'],
-  weight: ['400'],
-  variable: '--font-mono',
-  display: 'swap',
-  preload: false,
-})
+// Typographic system variables configured in globals.css
+
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -106,7 +71,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html
       lang={locale}
-      className={`${display.variable} ${serif.variable} ${sans.variable} ${mono.variable}`}
+      
       suppressHydrationWarning
     >
       <body className="font-sans bg-[var(--background)] text-[var(--text)] antialiased overflow-x-hidden" suppressHydrationWarning>
