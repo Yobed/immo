@@ -6,22 +6,29 @@ import Image from 'next/image';
 import { 
   Camera, Check, Send, Clock, Sparkles, AlertTriangle, 
   ChevronRight, ChevronLeft, Building2, MessageCircle, X, Plus, RefreshCw, 
-  CheckCircle2, ArrowLeft, ExternalLink, Bed, Droplet, Flame, Home, Zap
+  CheckCircle2, ArrowLeft, ExternalLink, Bed, Droplet, Flame, Home, Zap,
+  MessageSquare
 } from 'lucide-react';
 import { useLiveProperties } from '@/lib/useLiveProperties';
-import { Property, ConciergeCheckStatus, PropertyStatus, CleaningGrade } from '@/lib/types';
+import { Property, ConciergeCheckStatus, PropertyStatus, CleaningGrade, ControlPointAudit } from '@/lib/types';
 import { formatFCFA, getWhatsAppLink } from '@/lib/utils';
+
+interface InspectionControlPoint {
+  id: string;
+  label: string;
+  detail: string;
+  status: 'ok' | 'issue';
+  comment: string;
+  quickTags: string[];
+  photoUrl?: string;
+}
 
 interface StepPalier {
   id: string;
   number: number;
   title: string;
   subtitle: string;
-  items: string[];
-  status: 'ok' | 'issue';
-  comment: string;
-  quickTags: string[];
-  photos: string[];
+  points: InspectionControlPoint[];
 }
 
 const INITIAL_PALIERS: StepPalier[] = [
@@ -29,76 +36,161 @@ const INITIAL_PALIERS: StepPalier[] = [
     id: 'sejour',
     number: 1,
     title: 'Séjour & Réception',
-    subtitle: 'Sols, vitrages panoramiques, canapés et dépoussiérage',
-    items: [
-      'Marbres et parquets lustrés sans traces',
-      'Baies vitrées panoramiques nettoyées',
-      'Canapés dépoussiérés et coussins disposés',
+    subtitle: 'Contrôle des sols, vitrages et mobilier',
+    points: [
+      {
+        id: 'p1_sols',
+        label: 'Sols & Marbres',
+        detail: 'Aspiré, lustré, aucune trace de poussière ni tache',
+        status: 'ok',
+        comment: 'Marbres propres et lustrés sans trace.',
+        quickTags: ['Impeccable', 'Lustrage parfait', 'Traces légères à repasser'],
+      },
+      {
+        id: 'p1_vitres',
+        label: 'Baies Vitrées Panoramiques',
+        detail: 'Nettoyées intérieur & extérieur, sans reflets ni traces',
+        status: 'ok',
+        comment: 'Vitrages transparents et sans traces de doigts.',
+        quickTags: ['Zéro trace', 'Baies éclatantes', 'Traces côté jardin'],
+      },
+      {
+        id: 'p1_mobilier',
+        label: 'Canapés, Mobilier & Table',
+        detail: 'Dépoussiérés, coussins d’ornement disposés au cordeau',
+        status: 'ok',
+        comment: 'Coussins et assises en ordre, table dépoussiérée.',
+        quickTags: ['En ordre parfait', 'Coussins alignés', 'Taches sur coussin'],
+      },
     ],
-    status: 'ok',
-    comment: 'Marbres propres, baies vitrées sans reflets, mobilier en parfait état.',
-    quickTags: ['Marbre lustré', 'Vitrages impeccables', 'Coussins disposés', 'Clim 21°C OK'],
-    photos: ['https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=800&q=80'],
   },
   {
     id: 'suites',
     number: 2,
     title: 'Suites & Chambres VIP',
-    subtitle: 'Literie brodée, lits au carré, dressings et coffre-fort',
-    items: [
-      'Lits au carré avec draps en lin brodés',
-      'Dressings et cintres ordonnés',
-      'Coffre-fort et télécommandes testés',
+    subtitle: 'Contrôle de la literie, des dressings et du confort',
+    points: [
+      {
+        id: 'p2_literie',
+        label: 'Literie & Lits au Carré',
+        detail: 'Draps en lin brodé propres, repassés, lits tirés au carré',
+        status: 'ok',
+        comment: 'Lits au carré parfaits, linge frais changé ce matin.',
+        quickTags: ['Lits au carré 5★', 'Linge propre', 'Drap froissé à reprendre'],
+      },
+      {
+        id: 'p2_dressings',
+        label: 'Dressings & Rangement',
+        detail: 'Cintres en bois alignés, étagères dépoussiérées',
+        status: 'ok',
+        comment: 'Dressings ordonnés avec parfum d’ambiance.',
+        quickTags: ['Cintres alignés', 'Dressing propre', 'Cintres manquants'],
+      },
+      {
+        id: 'p2_clim',
+        label: 'Climatisation & Coffre-fort',
+        detail: 'Split silencieux testé à 21°C, coffre-fort testé ouvert',
+        status: 'ok',
+        comment: 'Climatiseurs silencieux à 21°C, coffre réinitialisé.',
+        quickTags: ['Clim 21°C silencieuse', 'Coffre testé OK', 'Télécommande sans pile'],
+      },
     ],
-    status: 'ok',
-    comment: 'Lits au carré impeccables, linge changé, coffre-fort opérationnel.',
-    quickTags: ['Lits au carré', 'Linge propre', 'Dressing ordonné', 'Clim chambre testée'],
-    photos: ['https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80'],
   },
   {
     id: 'sdb',
     number: 3,
     title: 'Salles de Bain & Eaux',
-    subtitle: 'Robinetterie, pression SODECI, serviettes et savons d’accueil',
-    items: [
-      'Mitigeurs et miroirs sans traces de calcaire',
-      'Pression d’eau SODECI et eau chaude immédiate',
-      'Serviettes pliées et kit d’accueil VIP posé',
+    subtitle: 'Contrôle robinetterie, serviettes et pression SODECI',
+    points: [
+      {
+        id: 'p3_robinets',
+        label: 'Robinetterie & Mitigeurs',
+        detail: 'Chromages brillants, aucune trace de calcaire, bondes nettes',
+        status: 'ok',
+        comment: 'Mitigeurs étincelants sans calcaire.',
+        quickTags: ['Chromage étincelant', 'Aucun calcaire', 'Traces sur mitigeur'],
+      },
+      {
+        id: 'p3_pression',
+        label: 'Pression SODECI & Eau Chaude',
+        detail: 'Surpresseur actif, jet de douche puissant, eau chaude rapide',
+        status: 'ok',
+        comment: 'Excellente pression d’eau, chauffe-eau instantané.',
+        quickTags: ['Pression SODECI OK', 'Eau chaude rapide', 'Pression faible'],
+      },
+      {
+        id: 'p3_serviettes',
+        label: 'Serviettes & Kit VIP',
+        detail: 'Serviettes de bain moelleuses pliées, savons d’accueil posés',
+        status: 'ok',
+        comment: 'Serviettes brodées et kit cosmétique d’accueil en place.',
+        quickTags: ['Kit VIP complet', 'Serviettes moelleuses', 'Savons manquants'],
+      },
     ],
-    status: 'ok',
-    comment: 'Pression parfaite, eau chaude testée, serviettes et savons VIP en place.',
-    quickTags: ['Pression SODECI OK', 'Eau chaude testée', 'Serviettes pliées', 'Savons posés'],
-    photos: ['https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=800&q=80'],
   },
   {
     id: 'cuisine',
     number: 4,
     title: 'Cuisine & Cellier',
-    subtitle: 'Réfrigérateur, four, machine à café et kit de bienvenue',
-    items: [
-      'Réfrigérateur vidé, nettoyé et désinfecté',
-      'Machine à café détartrée et verres étincelants',
-      'Champagne et eaux minérales au frais',
+    subtitle: 'Contrôle électroménager, propreté et boissons fraîches',
+    points: [
+      {
+        id: 'p4_frigo',
+        label: 'Réfrigérateur & Électroménager',
+        detail: 'Intérieur désinfecté, sans odeur, plaques et four dégraissés',
+        status: 'ok',
+        comment: 'Réfrigérateur vidé et désinfecté, four propre.',
+        quickTags: ['Frigo désinfecté', 'Four impeccable', 'Odeur dans le frigo'],
+      },
+      {
+        id: 'p4_cafe',
+        label: 'Machine à Café & Vaisselle',
+        detail: 'Machine détartrée, capsules disponibles, verres étincelants',
+        status: 'ok',
+        comment: 'Machine opérationnelle avec capsules offertes, verres nets.',
+        quickTags: ['Machine détartrée', 'Verres brillants', 'Recharge capsules requise'],
+      },
+      {
+        id: 'p4_cellier',
+        label: 'Cellier & Kit de Bienvenue',
+        detail: 'Bouteilles d’eau et champagne au frais, poubelles vidées',
+        status: 'ok',
+        comment: 'Champagne et eaux au frais, poubelles désinfectées.',
+        quickTags: ['Boissons au frais', 'Poubelles neuves', 'Bouteilles manquantes'],
+      },
     ],
-    status: 'ok',
-    comment: 'Réfrigérateur et cave propres, boissons fraîches au cellier.',
-    quickTags: ['Frigo & Four propres', 'Champagne au frais', 'Machine café OK', 'Poubelles vides'],
-    photos: ['https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=800&q=80'],
   },
   {
     id: 'technique',
     number: 5,
     title: 'Extérieur, Piscine & Énergie',
-    subtitle: 'Piscine filtrée, groupe électrogène 40 kVA et accès',
-    items: [
-      'Piscine limpide filtrée et terrasse balayée',
-      'Groupe électrogène 40 kVA paré (fioul à 100%)',
-      'Trousseau complet et télécommande portail vérifiés',
+    subtitle: 'Contrôle bassin, groupe 40 kVA et accès sécurisés',
+    points: [
+      {
+        id: 'p5_piscine',
+        label: 'Piscine & Terrasse',
+        detail: 'Bassin limpide filtré, skimmers vidés, deck teck balayé',
+        status: 'ok',
+        comment: 'Eau cristalline filtrée, abords de piscine balayés.',
+        quickTags: ['Bassin limpide 100%', 'Deck balayé', 'Feuilles dans l’eau'],
+      },
+      {
+        id: 'p5_groupe',
+        label: 'Groupe Électrogène 40 kVA',
+        detail: 'Réservoir de fioul plein, inverseur automatique prêt',
+        status: 'ok',
+        comment: 'Groupe 40 kVA paré avec plein de fioul vérifié.',
+        quickTags: ['Fioul 100% paré', 'Inverseur testé', 'Niveau fioul bas'],
+      },
+      {
+        id: 'p5_cles',
+        label: 'Clés, Badges & Portail',
+        detail: 'Trousseau complet, télécommande du portail motorisé testée',
+        status: 'ok',
+        comment: 'Pass et télécommandes du portail testés opérationnels.',
+        quickTags: ['Pass & badges OK', 'Portail motorisé OK', 'Pile télécommande faible'],
+      },
     ],
-    status: 'ok',
-    comment: 'Piscine propre, groupe 40 kVA paré, pass et portail fonctionnels.',
-    quickTags: ['Bassin filtré', 'Groupe 40 kVA OK', 'Terrasse balayée', 'Pass portail OK'],
-    photos: ['https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?auto=format&fit=crop&w=800&q=80'],
   },
 ];
 
@@ -125,6 +217,8 @@ export default function PhasedConciergeCheckPage() {
   const [isSending, setIsSending] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
+  // Suivi du point actif pour l'upload de photo
+  const [targetPointIdForPhoto, setTargetPointIdForPhoto] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Initialisation du premier bien et de l'heure
@@ -151,55 +245,93 @@ export default function PhasedConciergeCheckPage() {
     return `${m}m ${s < 10 ? '0' : ''}${s}s`;
   };
 
-  // Actions sur le palier actif
   const activePalier = paliers[currentStepIndex];
 
-  const updateActiveStatus = (status: 'ok' | 'issue') => {
+  // Mise à jour d'un point de contrôle spécifique
+  const updatePointStatus = (pointId: string, status: 'ok' | 'issue') => {
     setPaliers((prev) =>
-      prev.map((p, idx) => (idx === currentStepIndex ? { ...p, status } : p))
-    );
-  };
-
-  const updateActiveComment = (comment: string) => {
-    setPaliers((prev) =>
-      prev.map((p, idx) => (idx === currentStepIndex ? { ...p, comment } : p))
-    );
-  };
-
-  const addTagToActiveComment = (tag: string) => {
-    setPaliers((prev) =>
-      prev.map((p, idx) => {
-        if (idx !== currentStepIndex) return p;
-        const newComment = p.comment ? `${p.comment} • ${tag}` : tag;
-        return { ...p, comment: newComment };
+      prev.map((palier, pIdx) => {
+        if (pIdx !== currentStepIndex) return palier;
+        return {
+          ...palier,
+          points: palier.points.map((pt) =>
+            pt.id === pointId ? { ...pt, status } : pt
+          ),
+        };
       })
     );
   };
 
+  const updatePointComment = (pointId: string, comment: string) => {
+    setPaliers((prev) =>
+      prev.map((palier, pIdx) => {
+        if (pIdx !== currentStepIndex) return palier;
+        return {
+          ...palier,
+          points: palier.points.map((pt) =>
+            pt.id === pointId ? { ...pt, comment } : pt
+          ),
+        };
+      })
+    );
+  };
+
+  const addTagToPointComment = (pointId: string, tag: string) => {
+    setPaliers((prev) =>
+      prev.map((palier, pIdx) => {
+        if (pIdx !== currentStepIndex) return palier;
+        return {
+          ...palier,
+          points: palier.points.map((pt) => {
+            if (pt.id !== pointId) return pt;
+            const newComment = pt.comment ? `${pt.comment} • ${tag}` : tag;
+            return { ...pt, comment: newComment };
+          }),
+        };
+      })
+    );
+  };
+
+  // Gestion de la prise de photo sur un point de contrôle
+  const triggerPhotoForPoint = (pointId: string) => {
+    setTargetPointIdForPhoto(pointId);
+    fileInputRef.current?.click();
+  };
+
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !targetPointIdForPhoto) return;
     const reader = new FileReader();
     reader.onload = () => {
       if (reader.result) {
         const url = reader.result as string;
         setPaliers((prev) =>
-          prev.map((p, idx) =>
-            idx === currentStepIndex ? { ...p, photos: [url, ...p.photos] } : p
-          )
+          prev.map((palier, pIdx) => {
+            if (pIdx !== currentStepIndex) return palier;
+            return {
+              ...palier,
+              points: palier.points.map((pt) =>
+                pt.id === targetPointIdForPhoto ? { ...pt, photoUrl: url } : pt
+              ),
+            };
+          })
         );
       }
     };
     reader.readAsDataURL(file);
   };
 
-  const removePhotoFromActive = (photoIdx: number) => {
+  const removePhotoFromPoint = (pointId: string) => {
     setPaliers((prev) =>
-      prev.map((p, idx) =>
-        idx === currentStepIndex
-          ? { ...p, photos: p.photos.filter((_, i) => i !== photoIdx) }
-          : p
-      )
+      prev.map((palier, pIdx) => {
+        if (pIdx !== currentStepIndex) return palier;
+        return {
+          ...palier,
+          points: palier.points.map((pt) =>
+            pt.id === pointId ? { ...pt, photoUrl: undefined } : pt
+          ),
+        };
+      })
     );
   };
 
@@ -220,13 +352,21 @@ export default function PhasedConciergeCheckPage() {
       maintenance: 'a_revoir',
     };
 
-    // Assemblage des commentaires de tous les paliers
-    const notesSummary = paliers
-      .map((p) => `• [Palier ${p.number} - ${p.title} : ${p.status === 'ok' ? 'Conforme' : 'À reprendre'}]\n  ${p.comment}`)
-      .join('\n\n');
+    // Synthèse détaillée par point de contrôle
+    const pointsSummaryLines: string[] = [];
+    const allPhotos: string[] = [];
 
-    // Collecte de toutes les photos des paliers
-    const allPhotos = paliers.flatMap((p) => p.photos);
+    paliers.forEach((palier) => {
+      pointsSummaryLines.push(`📋 [Palier ${palier.number} : ${palier.title}]`);
+      palier.points.forEach((pt) => {
+        const statusIcon = pt.status === 'ok' ? '✅' : '⚠️';
+        pointsSummaryLines.push(`  ${statusIcon} ${pt.label} : ${pt.comment || 'Vérifié conforme'}`);
+        if (pt.photoUrl) allPhotos.push(pt.photoUrl);
+      });
+      pointsSummaryLines.push('');
+    });
+
+    const fullNotesSummary = pointsSummaryLines.join('\n');
 
     await submitInspection({
       property_id: currentProperty.id,
@@ -242,21 +382,28 @@ export default function PhasedConciergeCheckPage() {
       availability_status: propStatusMap[finalStatusChoice],
       cleaning_grade: gradeMap[finalStatusChoice],
       checklist: {
-        cleaning: paliers[0].status === 'ok',
-        linen: paliers[1].status === 'ok',
-        plumbing: paliers[2].status === 'ok',
-        welcome_kit: paliers[3].status === 'ok',
-        ac_electricity: paliers[4].status === 'ok',
+        cleaning: paliers[0].points.every((pt) => pt.status === 'ok'),
+        linen: paliers[1].points.every((pt) => pt.status === 'ok'),
+        plumbing: paliers[2].points.every((pt) => pt.status === 'ok'),
+        welcome_kit: paliers[3].points.every((pt) => pt.status === 'ok'),
+        ac_electricity: paliers[4].points.every((pt) => pt.status === 'ok'),
         keys_security: true,
       },
       zone_details: paliers.map((p) => ({
         id: p.id,
         name: p.title,
-        status: p.status === 'ok' ? 'ok' : 'issue',
-        comment: p.comment,
-        photos: p.photos,
+        status: p.points.every((pt) => pt.status === 'ok') ? 'ok' : 'issue',
+        comment: p.points.map((pt) => `${pt.label}: ${pt.comment}`).join(' | '),
+        points: p.points.map((pt) => ({
+          id: pt.id,
+          label: pt.label,
+          status: pt.status,
+          comment: pt.comment,
+          photo_url: pt.photoUrl,
+        })),
+        photos: p.points.map((pt) => pt.photoUrl).filter(Boolean) as string[],
       })),
-      notes: notesSummary,
+      notes: fullNotesSummary,
       photos: allPhotos,
     });
 
@@ -290,7 +437,7 @@ export default function PhasedConciergeCheckPage() {
             </span>
             <div>
               <span className="text-xs font-bold block leading-none">Supervision Ménage</span>
-              <span className="text-[10px] text-[#8C8275]">Check par Paliers</span>
+              <span className="text-[10px] text-[#8C8275]">Contrôle Point par Point</span>
             </div>
           </Link>
 
@@ -307,7 +454,7 @@ export default function PhasedConciergeCheckPage() {
       <main className="max-w-lg mx-auto px-4 pt-4 space-y-4">
 
         {/* ========================================================================= */}
-        {/* 2. BIEN SÉLECTIONNÉ (COMPACT & CLAIR)                                     */}
+        {/* 2. BIEN SÉLECTIONNÉ (COMPACT)                                             */}
         {/* ========================================================================= */}
         <section className="bg-white rounded-2xl p-3 border border-[#EAE5DC] shadow-xs flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
@@ -338,7 +485,7 @@ export default function PhasedConciergeCheckPage() {
           </button>
         </section>
 
-        {/* Sélecteur de bien si déplié */}
+        {/* Sélecteur si cliqué */}
         {showPropertyPicker && (
           <div className="bg-white rounded-2xl p-3 border border-[#EAE5DC] space-y-1.5 max-h-56 overflow-y-auto">
             <span className="text-[11px] text-[#6E665B] block font-medium">Touchez un bien :</span>
@@ -362,7 +509,7 @@ export default function PhasedConciergeCheckPage() {
         )}
 
         {/* ========================================================================= */}
-        {/* 3. BARRE DE PROGRESSION DES PALIERS (1 à 5 + BILAN)                        */}
+        {/* 3. STEPPER DES 5 PALIERS                                                  */}
         {/* ========================================================================= */}
         <div className="bg-white rounded-2xl p-2.5 border border-[#EAE5DC] shadow-xs">
           <div className="flex items-center justify-between mb-2 px-1 text-xs font-semibold">
@@ -370,11 +517,10 @@ export default function PhasedConciergeCheckPage() {
               {isLastReviewStep ? 'Palier Final : Validation' : `Palier ${currentStepIndex + 1} sur 5`}
             </span>
             <span className="text-[#9E7431] font-mono font-bold">
-              {isLastReviewStep ? '100%' : `${Math.round(((currentStepIndex) / 5) * 100)}%`}
+              {isLastReviewStep ? '100%' : `${Math.round((currentStepIndex / 5) * 100)}%`}
             </span>
           </div>
 
-          {/* Stepper horizontal cliquable */}
           <div className="grid grid-cols-6 gap-1.5">
             {paliers.map((p, idx) => {
               const isCurrent = currentStepIndex === idx;
@@ -395,13 +541,12 @@ export default function PhasedConciergeCheckPage() {
                 >
                   <span className="text-xs block leading-none font-bold">P{p.number}</span>
                   <span className="text-[9px] block truncate px-1 mt-0.5">
-                    {p.id === 'sejour' ? 'Séjour' : p.id === 'suites' ? 'Suites' : p.id === 'sdb' ? 'Bains' : p.id === 'cuisine' ? 'Cuisine' : 'Technique'}
+                    {p.id === 'sejour' ? 'Séjour' : p.id === 'suites' ? 'Suites' : p.id === 'sdb' ? 'Bains' : p.id === 'cuisine' ? 'Cuisine' : 'Extérieur'}
                   </span>
                 </button>
               );
             })}
 
-            {/* Bouton Étape Finale */}
             <button
               type="button"
               onClick={() => setCurrentStepIndex(5)}
@@ -410,7 +555,7 @@ export default function PhasedConciergeCheckPage() {
                   ? 'bg-emerald-600 text-white font-bold ring-2 ring-emerald-400'
                   : 'bg-[#F5F2EB] text-[#7A746B] hover:bg-[#EAE5DC]'
               }`}
-              title="Bilan Final"
+              title="Bilan"
             >
               <span className="text-xs block leading-none font-bold">✓</span>
               <span className="text-[9px] block truncate px-1 mt-0.5">Bilan</span>
@@ -419,21 +564,16 @@ export default function PhasedConciergeCheckPage() {
         </div>
 
         {/* ========================================================================= */}
-        {/* 4. CONTENU DU PALIER ACTIF (1 À LA FOIS = FAIBLE CHARGE COGNITIVE)        */}
+        {/* 4. PALIER ACTIF : LES POINTS OBLIGATOIRES AVEC LEURS REMARQUES DÉDIÉES    */}
         {/* ========================================================================= */}
         {!isLastReviewStep && activePalier && (
-          <section className="bg-white rounded-3xl p-5 border border-[#EAE5DC] shadow-xs space-y-4 animate-in fade-in duration-150">
+          <section className="bg-white rounded-3xl p-4 sm:p-5 border border-[#EAE5DC] shadow-xs space-y-4 animate-in fade-in duration-150">
             
-            {/* En-tête du Palier */}
+            {/* Titre du palier */}
             <div className="border-b border-[#F0EBE1] pb-3">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-[#9E7431] font-bold">
-                  Palier {activePalier.number} sur 5
-                </span>
-                <span className="text-xs text-[#8C8275] font-mono">
-                  {activePalier.photos.length} photo(s)
-                </span>
-              </div>
+              <span className="text-[10px] font-mono uppercase tracking-wider text-[#9E7431] font-bold block">
+                Palier {activePalier.number} sur 5
+              </span>
               <h3 className="text-base font-bold text-[#191715] mt-0.5">
                 {activePalier.title}
               </h3>
@@ -442,126 +582,125 @@ export default function PhasedConciergeCheckPage() {
               </p>
             </div>
 
-            {/* Éléments vérifiés dans ce palier */}
-            <div className="bg-[#FAF8F5] rounded-2xl p-3.5 border border-[#EAE5DC] space-y-2">
-              <span className="text-[10px] font-mono uppercase text-[#8C8275] font-bold block">
-                Points de contrôle obligatoires :
-              </span>
-              <ul className="space-y-1.5 text-xs text-[#191715]">
-                {activePalier.items.map((it, i) => (
-                  <li key={i} className="flex items-center gap-2">
-                    <span className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px] font-bold shrink-0">
-                      ✓
-                    </span>
-                    <span>{it}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Statut du Palier : Conforme ou À corriger */}
-            <div className="space-y-1.5">
-              <span className="text-xs font-semibold text-[#8C8275] block">
-                Résultat pour ce palier :
-              </span>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => updateActiveStatus('ok')}
-                  className={`py-3 px-3 rounded-2xl border text-center transition-all flex items-center justify-center gap-2 ${
-                    activePalier.status === 'ok'
-                      ? 'bg-emerald-50 border-emerald-500 text-emerald-950 font-bold ring-2 ring-emerald-500/20'
-                      : 'bg-[#FAF8F5] border-[#EAE5DC] text-[#6E665B] hover:bg-white'
+            {/* LISTE DES POINTS DE CONTRÔLE AVEC LEUR PROPRE CHAMP REMARQUE */}
+            <div className="space-y-4">
+              {activePalier.points.map((pt, ptIdx) => (
+                <div
+                  key={pt.id}
+                  className={`p-3.5 rounded-2xl border transition-all space-y-2.5 ${
+                    pt.status === 'ok'
+                      ? 'bg-[#FAF8F5] border-[#E8E4DC]'
+                      : 'bg-amber-50/70 border-amber-300 ring-1 ring-amber-300'
                   }`}
                 >
-                  <span className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold">
-                    ✓
-                  </span>
-                  <span className="text-xs">Conforme 5★</span>
-                </button>
+                  
+                  {/* Ligne 1 : Intitulé du point + Boutons d'état */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-bold text-[#191715]">
+                          {ptIdx + 1}. {pt.label}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[#7A746B] mt-0.5">
+                        {pt.detail}
+                      </p>
+                    </div>
 
-                <button
-                  type="button"
-                  onClick={() => updateActiveStatus('issue')}
-                  className={`py-3 px-3 rounded-2xl border text-center transition-all flex items-center justify-center gap-2 ${
-                    activePalier.status === 'issue'
-                      ? 'bg-amber-50 border-amber-500 text-amber-950 font-bold ring-2 ring-amber-500/20'
-                      : 'bg-[#FAF8F5] border-[#EAE5DC] text-[#6E665B] hover:bg-white'
-                  }`}
-                >
-                  <span className="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold">
-                    ⚠️
-                  </span>
-                  <span className="text-xs">À corriger</span>
-                </button>
-              </div>
-            </div>
-
-            {/* COMMENTAIRE DÉDIÉ DU PALIER */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-[#8C8275] block">
-                Commentaire sur ce palier :
-              </label>
-              <textarea
-                value={activePalier.comment}
-                onChange={(e) => updateActiveComment(e.target.value)}
-                rows={2}
-                placeholder={`Remarques pour ${activePalier.title}...`}
-                className="w-full bg-[#FAF8F5] border border-[#DDD7CC] rounded-2xl p-3 text-xs text-[#191715] focus:outline-none focus:border-[#9E7431] shadow-inner"
-              />
-
-              {/* Puces rapides en 1 clic */}
-              <div className="flex flex-wrap gap-1.5 pt-1">
-                {activePalier.quickTags.map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => addTagToActiveComment(tag)}
-                    className="text-[11px] px-2.5 py-1 rounded-full bg-[#F5F2EB] text-[#554E45] hover:bg-[#EAE5DC] border border-[#E0DCD3]"
-                  >
-                    + {tag}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* PREUVE PHOTO DU PALIER */}
-            <div className="space-y-2 pt-1 border-t border-[#F0EBE1]">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-[#8C8275]">
-                  Photo de ce palier ({activePalier.photos.length})
-                </span>
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="text-xs font-bold text-[#9E7431] flex items-center gap-1 hover:underline"
-                >
-                  <Camera className="w-3.5 h-3.5" />
-                  <span>Prendre photo</span>
-                </button>
-              </div>
-
-              {/* Vignettes photos */}
-              {activePalier.photos.length > 0 && (
-                <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                  {activePalier.photos.map((pUrl, i) => (
-                    <div key={i} className="relative w-16 h-16 rounded-2xl overflow-hidden border border-[#EAE5DC] shrink-0 bg-black/10">
-                      <Image src={pUrl} alt="Photo palier" fill className="object-cover" />
+                    {/* Boutons d'état du point */}
+                    <div className="flex items-center gap-1.5 shrink-0">
                       <button
                         type="button"
-                        onClick={() => removePhotoFromActive(i)}
-                        className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 hover:bg-rose-600 text-white flex items-center justify-center text-xs"
+                        onClick={() => updatePointStatus(pt.id, 'ok')}
+                        className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${
+                          pt.status === 'ok'
+                            ? 'bg-emerald-600 text-white shadow-xs'
+                            : 'bg-white border border-[#DDD7CC] text-[#6E665B] hover:bg-[#F2EFE9]'
+                        }`}
                       >
-                        ×
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Conforme</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => updatePointStatus(pt.id, 'issue')}
+                        className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${
+                          pt.status === 'issue'
+                            ? 'bg-amber-500 text-black shadow-xs font-black'
+                            : 'bg-white border border-[#DDD7CC] text-[#6E665B] hover:bg-[#F2EFE9]'
+                        }`}
+                      >
+                        <AlertTriangle className="w-3.5 h-3.5" />
+                        <span>À revoir</span>
                       </button>
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Ligne 2 : CHAMP DE REMARQUE DÉDIÉ DIRECTEMENT À CE POINT */}
+                  <div className="space-y-1.5 pt-1">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[10px] font-mono uppercase tracking-wider text-[#7A746B] font-bold flex items-center gap-1">
+                        <MessageSquare className="w-3 h-3 text-[#9E7431]" />
+                        <span>Remarque sur &quot;{pt.label}&quot; :</span>
+                      </label>
+
+                      {/* Bouton photo sur ce point */}
+                      <button
+                        type="button"
+                        onClick={() => triggerPhotoForPoint(pt.id)}
+                        className="text-[11px] font-bold text-[#9E7431] flex items-center gap-1 hover:underline cursor-pointer"
+                        title="Prendre une photo pour ce point précis"
+                      >
+                        <Camera className="w-3 h-3" />
+                        <span>{pt.photoUrl ? 'Changer photo' : '+ Photo'}</span>
+                      </button>
+                    </div>
+
+                    <input
+                      type="text"
+                      value={pt.comment}
+                      onChange={(e) => updatePointComment(pt.id, e.target.value)}
+                      placeholder={`Votre remarque sur ${pt.label.toLowerCase()}...`}
+                      className="w-full bg-white text-[#191715] border border-[#DDD7CC] rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#9E7431] shadow-xs placeholder:text-[#9A9387]"
+                    />
+
+                    {/* Puces de remarques rapides pour ce point */}
+                    <div className="flex flex-wrap items-center gap-1 pt-0.5">
+                      {pt.quickTags.map((tag) => (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => addTagToPointComment(pt.id, tag)}
+                          className="text-[10px] px-2 py-0.5 rounded-full bg-white text-[#554E45] hover:bg-[#EAE5DC] border border-[#E0DCD3] transition-colors"
+                        >
+                          + {tag}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Miniature de photo si jointe */}
+                    {pt.photoUrl && (
+                      <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-[#9E7431]/40 mt-1.5 shadow-xs">
+                        <Image src={pt.photoUrl} alt="Photo du point" fill className="object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => removePhotoFromPoint(pt.id)}
+                          className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/75 hover:bg-rose-600 text-white flex items-center justify-center text-xs"
+                          title="Supprimer la photo"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
                 </div>
-              )}
+              ))}
             </div>
 
             {/* NAVIGATION DU STEPPER */}
-            <div className="pt-2 flex items-center justify-between gap-3">
+            <div className="pt-2 flex items-center justify-between gap-3 border-t border-[#F0EBE1]">
               <button
                 type="button"
                 onClick={() => setCurrentStepIndex(Math.max(0, currentStepIndex - 1))}
@@ -577,7 +716,7 @@ export default function PhasedConciergeCheckPage() {
                 onClick={() => setCurrentStepIndex(currentStepIndex + 1)}
                 className="flex-1 py-3 px-4 rounded-xl bg-[#191715] hover:bg-[#9E7431] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow transition-colors"
               >
-                <span>Valider &amp; Palier Suivant</span>
+                <span>Valider le Palier {activePalier.number} &amp; Suivant</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -586,49 +725,69 @@ export default function PhasedConciergeCheckPage() {
         )}
 
         {/* ========================================================================= */}
-        {/* 5. ÉTAPE FINALE : BILAN GLOBAL & DIFFUSION ÉCOSYSTÈME                     */}
+        {/* 5. ÉTAPE FINALE : BILAN & REMARQUES CENTRALISÉES                          */}
         {/* ========================================================================= */}
         {isLastReviewStep && (
           <section className="bg-white rounded-3xl p-5 border border-[#EAE5DC] shadow-xs space-y-4 animate-in fade-in duration-150">
             <div className="text-center border-b border-[#F0EBE1] pb-3">
               <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full font-bold">
-                ✓ Les 5 Paliers ont été vérifiés
+                ✓ Tous les points de contrôle ont été commentés
               </span>
               <h3 className="text-base font-bold text-[#191715] mt-1.5">
-                Bilan &amp; Statut de Disponibilité
+                Bilan &amp; Remarques par Point
               </h3>
               <p className="text-xs text-[#6E665B]">
-                Durée totale de l&apos;audit : <strong className="text-[#191715] font-mono">{formatTimer(seconds)}</strong>
+                Durée d&apos;intervention : <strong className="text-[#191715] font-mono">{formatTimer(seconds)}</strong>
               </p>
             </div>
 
-            {/* Récapitulatif compact des 5 paliers */}
-            <div className="space-y-1.5 text-xs">
-              {paliers.map((p) => (
-                <div
-                  key={p.id}
-                  onClick={() => setCurrentStepIndex(p.number - 1)}
-                  className="p-2.5 rounded-xl bg-[#FAF8F5] border border-[#EAE5DC] flex items-center justify-between cursor-pointer hover:bg-white"
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
-                      p.status === 'ok' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'
-                    }`}>
-                      {p.status === 'ok' ? '✓' : '!'}
+            {/* Récapitulatif point par point */}
+            <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
+              {paliers.map((palier) => (
+                <div key={palier.id} className="p-3 rounded-2xl bg-[#FAF8F5] border border-[#EAE5DC] space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#9E7431]">
+                      Palier {palier.number} • {palier.title}
                     </span>
-                    <span className="font-bold truncate">{p.title}</span>
+                    <button
+                      type="button"
+                      onClick={() => setCurrentStepIndex(palier.number - 1)}
+                      className="text-[10px] text-[#8C8275] hover:underline"
+                    >
+                      Modifier ✎
+                    </button>
                   </div>
-                  <span className="text-[10px] text-[#8C8275] font-mono shrink-0 ml-2">
-                    Modifier ✎
-                  </span>
+
+                  <div className="space-y-1">
+                    {palier.points.map((pt) => (
+                      <div key={pt.id} className="text-xs flex items-start gap-2 bg-white p-2 rounded-xl border border-[#F0EBE1]">
+                        <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 mt-0.5 ${
+                          pt.status === 'ok' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'
+                        }`}>
+                          {pt.status === 'ok' ? '✓' : '!'}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <strong className="text-[11px] block">{pt.label}</strong>
+                          <span className="text-[11px] text-[#6E665B] block italic">
+                            « {pt.comment || 'Conforme aux standards'} »
+                          </span>
+                        </div>
+                        {pt.photoUrl && (
+                          <span className="text-[10px] font-mono text-[#9E7431] bg-[#F5F0E6] px-1.5 py-0.5 rounded shrink-0">
+                            📷 Photo
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
 
-            {/* Choix du statut commercial à propager */}
+            {/* Statut final à diffuser */}
             <div className="space-y-2 pt-2 border-t border-[#F0EBE1]">
               <span className="text-xs font-semibold text-[#8C8275] block">
-                Statut officiel à diffuser sur le site &amp; Flipbook :
+                Statut officiel à diffuser en direct :
               </span>
 
               <div className="grid grid-cols-3 gap-2">
@@ -673,14 +832,13 @@ export default function PhasedConciergeCheckPage() {
               </div>
             </div>
 
-            {/* Bouton de retour vers un palier */}
             <div className="pt-1 text-center">
               <button
                 type="button"
                 onClick={() => setCurrentStepIndex(4)}
                 className="text-xs text-[#8C8275] hover:underline"
               >
-                ◀ Revenir au Palier 5 (Extérieur &amp; Énergie)
+                ◀ Revenir au Palier 5
               </button>
             </div>
 
@@ -704,12 +862,12 @@ export default function PhasedConciergeCheckPage() {
               {isSending ? (
                 <>
                   <RefreshCw className="w-5 h-5 animate-spin" />
-                  <span>Certification en cours...</span>
+                  <span>Transmission du rapport...</span>
                 </>
               ) : (
                 <>
                   <Send className="w-4 h-4" />
-                  <span>TRANSMETTRE LE RAPPORT COMPLET (5 PALIERS)</span>
+                  <span>TRANSMETTRE TOUTES LES REMARQUES AU CRM</span>
                 </>
               )}
             </button>
@@ -719,7 +877,7 @@ export default function PhasedConciergeCheckPage() {
               onClick={() => setCurrentStepIndex(currentStepIndex + 1)}
               className="w-full py-3.5 rounded-2xl bg-[#191715] hover:bg-[#9E7431] text-white font-bold text-xs flex items-center justify-center gap-2 shadow transition-all cursor-pointer"
             >
-              <span>Continuer vers le Palier {currentStepIndex + 2} / 5</span>
+              <span>Valider &amp; Passer au Palier {currentStepIndex + 2} / 5</span>
               <ChevronRight className="w-4 h-4" />
             </button>
           )}
@@ -737,9 +895,9 @@ export default function PhasedConciergeCheckPage() {
             </div>
 
             <div>
-              <h3 className="text-lg font-bold text-[#1A1816]">Audit Certifié !</h3>
+              <h3 className="text-lg font-bold text-[#1A1816]">Contrôle Validé !</h3>
               <p className="text-xs text-[#6E665B] mt-1">
-                Les 5 paliers de <strong>{currentProperty?.title}</strong> ont été enregistrés et synchronisés.
+                Toutes les remarques par point de contrôle de <strong>{currentProperty?.title}</strong> ont été synchronisées.
               </p>
             </div>
 
@@ -753,10 +911,6 @@ export default function PhasedConciergeCheckPage() {
                 <strong className="text-emerald-700">{formatTimer(seconds)}</strong>
               </div>
               <div className="flex justify-between">
-                <span>Paliers validés :</span>
-                <strong>5 sur 5</strong>
-              </div>
-              <div className="flex justify-between">
                 <span>Statut diffusé :</span>
                 <strong className="text-[#9E7431] uppercase">
                   {finalStatusChoice === 'ready' ? 'Disponible' : finalStatusChoice === 'cleaning' ? 'Nettoyage' : 'Maintenance'}
@@ -768,14 +922,14 @@ export default function PhasedConciergeCheckPage() {
               <a
                 href={getWhatsAppLink(
                   '2250788421920',
-                  `✅ *Rapport d'Audit par Paliers*\n\nBien : *${currentProperty?.title}* (${currentProperty?.reference})\nInspecteur : ${inspectorName}\n\n⏱️ Début : ${startedAt} • Durée : ${formatTimer(seconds)}\n\n📋 *Synthèse des 5 Paliers :*\n${paliers.map((p) => `• P${p.number} ${p.title} : ${p.status === 'ok' ? 'Conforme 5★' : 'À revoir'}`).join('\n')}\n\nStatut commercial : ${finalStatusChoice === 'ready' ? '100% Prêt & Disponible' : finalStatusChoice === 'cleaning' ? 'En cours de nettoyage' : 'Maintenance'}\n\n👉 Le CRM et le Flipbook sont à jour en direct.`
+                  `✅ *Rapport d'Audit Contrôle Point par Point*\n\nBien : *${currentProperty?.title}* (${currentProperty?.reference})\nInspecteur : ${inspectorName}\n\n⏱️ Début : ${startedAt} • Durée : ${formatTimer(seconds)}\n\n📋 *Remarques par Point de Contrôle :*\n${paliers.map((p) => p.points.map((pt) => `• ${pt.label} (${pt.status === 'ok' ? 'OK' : 'À revoir'}) : ${pt.comment}`).join('\n')).join('\n')}\n\nStatut commercial : ${finalStatusChoice === 'ready' ? '100% Prêt & Disponible' : finalStatusChoice === 'cleaning' ? 'En cours de nettoyage' : 'Maintenance'}\n\n👉 Le CRM et le Flipbook sont à jour en direct.`
                 )}
                 target="_blank"
                 rel="noreferrer"
                 className="w-full py-3.5 rounded-xl bg-[#25D366] hover:bg-[#20BA59] text-black font-bold text-xs flex items-center justify-center gap-2 shadow"
               >
                 <MessageCircle className="w-4 h-4" />
-                <span>Transmettre le Rapport à la Direction</span>
+                <span>Transmettre le Rapport Détaillé (WhatsApp)</span>
               </a>
 
               <button

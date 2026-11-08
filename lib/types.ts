@@ -36,12 +36,21 @@ export interface ConciergeChecklist {
   welcome_kit: boolean;      // Bouteille d'eau, kit d'accueil VIP
 }
 
+export interface ControlPointAudit {
+  id: string;
+  label: string;
+  status: 'ok' | 'issue';
+  comment: string;
+  photo_url?: string;
+}
+
 export interface ZoneInspectionDetail {
   id: string;
   name: string; // ex: 'Salon & Réception', 'Suites & Chambres', etc.
   status: 'ok' | 'issue' | 'recheck';
   comment?: string;
   photos?: string[];
+  points?: ControlPointAudit[];
 }
 
 export interface ConciergeInspection {
