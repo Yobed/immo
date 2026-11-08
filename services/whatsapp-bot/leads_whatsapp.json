@@ -1,0 +1,129 @@
+[
+  {
+    "id": "cont-001",
+    "full_name": "Jean-Philippe Konan",
+    "phone": "+225 07 48 22 11 00",
+    "email": "jp.konan@africafund.ci",
+    "type": "tenant",
+    "lead_score": "hot",
+    "qualification_score": 98,
+    "budget_min": 1500000,
+    "budget_max": 2000000,
+    "preferred_districts": [
+      "Cocody Riviera Golf",
+      "Cocody Ambassades",
+      "Riviera Beverly Hills"
+    ],
+    "preferred_types": [
+      "villa"
+    ],
+    "profession": "Directeur Général Panafricain (Fonds Private Equity)",
+    "residence_country": "Côte d'Ivoire (Abidjan)",
+    "financial_readiness": "Bail corporate pris en charge par le fonds + caution 2 mois consignée sous séquestre notarié",
+    "kyc_status": "valid",
+    "timeline": "1_month",
+    "key_interests": [
+      "Bail Corporate",
+      "Piscine 14m",
+      "Groupe Insonorisé 40 kVA",
+      "Séquestre Notarié",
+      "Sécurité Riviera Golf",
+      "Bail Diplomatique"
+    ],
+    "notes": "Locataire corporate haut standing. Recherche villa contemporaine pour emménagement rapide. Visite confirmée avec son épouse et son juriste d'entreprise. • Remonté depuis WhatsApp en direct : Demande de visite formulée pour Samedi 14 Novembre 2026 à 15:30. Budget qualifié : 2.0M FCFA. Secteur : Cocody Riviera Golf, Cocody Ambassades, Riviera Beverly Hills.",
+    "last_interaction": "Aujourd'hui 11:13 via WhatsApp • Demande de visite formulée pour Samedi 14 Novembre 2026 à 15:30. Budget qualifié : 2.0M FCFA. Secteur : Cocody Riviera Golf, Cocody Ambassades, Riviera Beverly Hills.",
+    "source": "whatsapp",
+    "created_at": "2026-11-05T09:30:00Z",
+    "objections": [
+      {
+        "id": "obj-001",
+        "category": "sequestre",
+        "objection": "Garantie de restitution intégrale du dépôt de garantie (caution 2 mois)",
+        "client_statement": "En fin de bail, comment s'assurer que le bailleur ne retient pas la caution abusivement pour de l'usure normale ?",
+        "recommended_response": "Le dépôt de garantie de 2 mois est consigné sous séquestre notarié. L'état des lieux d'entrée et de sortie est dressé contradictoirement par commissaire de justice, garantissant la restitution sous 15 jours.",
+        "proof_document": "Protocole de Séquestre Notarié & Grille de Vétusté CIMA",
+        "status": "resolved"
+      },
+      {
+        "id": "obj-002",
+        "category": "technique",
+        "objection": "Prise en charge de la maintenance du groupe électrogène et de la piscine",
+        "client_statement": "Qui assure les entretiens périodiques du groupe 40 kVA et les produits de traitement du bassin ?",
+        "recommended_response": "Le bailleur a souscrit un contrat de maintenance trimestriel tout compris avec Perkins CI et un pisciniste agréé, inclus dans les charges locatives.",
+        "proof_document": "Contrat d'Entretien Perkins & Attestation de Révision",
+        "status": "resolved"
+      }
+    ],
+    "whatsapp_history": [
+      {
+        "id": "msg-001",
+        "sender": "client",
+        "sender_name": "Jean-Philippe Konan",
+        "timestamp": "Hier 14:10",
+        "text": "Bonjour, j'ai consulté votre fiche pour la Villa Riviera Golf 4 (Réf. VIL-RG-2026). Ce bien meublé est-il disponible pour une prise de bail corporate au 1er décembre ?",
+        "status": "read"
+      },
+      {
+        "id": "msg-002",
+        "sender": "agent",
+        "sender_name": "Aya (Agent IA Cabinet)",
+        "timestamp": "Hier 14:11",
+        "text": "Bonjour M. Konan. Oui, cette villa meublée de 650 m² est libre d'occupation et éligible au bail société avec dépôt de garantie consigné sous séquestre notarié. Avez-vous pu consulter notre plaquette numérique ?",
+        "status": "read"
+      },
+      {
+        "id": "msg-003",
+        "sender": "client",
+        "sender_name": "Jean-Philippe Konan",
+        "timestamp": "Hier 14:15",
+        "text": "Oui, très claire. Notre siège exige un groupe électrogène de secours insonorisé et une attestation de titre régulier du bailleur.",
+        "status": "read"
+      },
+      {
+        "id": "msg-004",
+        "sender": "agent",
+        "sender_name": "Koffi Fabrice (Négociateur Senior)",
+        "timestamp": "Hier 14:22",
+        "text": "Absolument M. Konan. Le groupe 40 kVA avec inverseur automatique est contrôlé, et le titre ACD du propriétaire est audité au Guichet Unique MCLU. Visite possible samedi 15h30 ?",
+        "media_type": "document",
+        "media_label": "Fiche_Technique_Equipements_VIL-RG.pdf",
+        "status": "read"
+      },
+      {
+        "id": "msg-005",
+        "sender": "client",
+        "sender_name": "Jean-Philippe Konan",
+        "timestamp": "Aujourd'hui 11:20",
+        "text": "Parfait. Notre DRH confirme la visite samedi 15h30. Nous prévoyons 2 mois de caution + 2 mois d'avance sous séquestre.",
+        "status": "read"
+      },
+      {
+        "id": "msg-006",
+        "sender": "agent",
+        "sender_name": "Koffi Fabrice (Négociateur Senior)",
+        "timestamp": "Aujourd'hui 11:24",
+        "text": "Créneau confirmé pour samedi 15h30. Je vous transmets le protocole d'accès et le projet de bail type corporate.",
+        "media_type": "property_card",
+        "media_label": "Projet_Bail_Corporate_Prestige_2026.pdf",
+        "status": "read"
+      },
+      {
+        "id": "wa-in-1794136432076-c",
+        "sender": "client",
+        "sender_name": "Jean-Philippe Konan",
+        "timestamp": "Aujourd'hui 11:13",
+        "text": "Bonjour Aya, notre chancellerie valide la Villa Cocody Riviera Golf à 4 500 000 FCFA/mois avec 2 mois sous séquestre notarié. Visite samedi à 15h30 possible ?",
+        "status": "read"
+      },
+      {
+        "id": "wa-in-1794136432076-a",
+        "sender": "agent",
+        "sender_name": "Aya (Agent IA Cabinet)",
+        "timestamp": "Aujourd'hui 11:13",
+        "text": "Bien noté M. Konan, visite et bail pré-enregistrés.",
+        "status": "read"
+      }
+    ],
+    "lease_status": "candidate"
+  }
+]

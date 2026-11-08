@@ -1,5 +1,0 @@
-export * from './types'
-export * from './constants/communes'
-export * from './constants/biens'
-export * from './utils/formatFCFA'
-export * from './utils/formatDate'
