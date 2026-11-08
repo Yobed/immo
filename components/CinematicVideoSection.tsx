@@ -118,7 +118,7 @@ export default function CinematicVideoSection() {
 
           {/* Indicateur d'enregistrement 4K minimaliste */}
           <div className="absolute top-5 left-6 flex items-center gap-2 pointer-events-none z-20 text-[11px] font-mono">
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-red-500" />
             <span className="font-semibold text-white tracking-wider">4K CINEMA • 60 FPS</span>
           </div>
 

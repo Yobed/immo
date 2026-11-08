@@ -67,13 +67,13 @@ export default function CatalogueShareModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="dark:bg-[#121110] bg-[#FAF8F5] border dark:border-white/10 border-black/10 rounded-3xl max-w-lg w-full p-6 sm:p-8 dark:shadow-[0_25px_70px_rgba(0,0,0,0.95)] shadow-2xl relative space-y-6 text-[#141210] dark:text-[#F5F2EB] select-none">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div className="bg-white border border-[#EAE5DC] rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative space-y-6 text-[#191715] select-none">
         
         {/* Bouton Fermer */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-full dark:text-white/50 dark:hover:text-white dark:hover:bg-white/10 text-black/50 hover:text-black hover:bg-black/5 transition-colors cursor-pointer"
+          className="absolute top-5 right-5 p-2 rounded-full text-[#8C8275] hover:text-[#191715] hover:bg-[#FAF8F5] transition-colors cursor-pointer"
           aria-label="Fermer la fenêtre"
         >
           <X className="w-5 h-5" />
@@ -81,21 +81,21 @@ export default function CatalogueShareModal({
 
         {/* En-tête */}
         <div className="space-y-1.5 pr-8">
-          <div className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-[#947346] dark:text-[#C8A97E] font-semibold">
+          <div className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-[#9E7431] font-semibold">
             <BookOpen className="w-3.5 h-3.5" />
             <span>Livre Virtuel Feuilletable sur Mobile</span>
           </div>
-          <h3 className="text-xl sm:text-2xl font-display font-medium text-[#141210] dark:text-white">
+          <h3 className="text-xl sm:text-2xl font-display font-medium text-[#191715]">
             Partager le Flipbook 3D
           </h3>
-          <p className="text-xs text-[#6B655D] dark:text-[#A39C92] font-light leading-relaxed">
+          <p className="text-xs text-[#6E665B] font-light leading-relaxed">
             Vos clients et investisseurs peuvent feuilleter l&apos;ouvrage tactile directement sur leur téléphone, avec le toucher de papier et les vidéos 4K intégrées.
           </p>
         </div>
 
         {/* 1. SECTION QR CODE : SCAN DIRECT SUR SMARTPHONE */}
-        <div className="p-4 rounded-2xl dark:bg-white/5 bg-white border dark:border-white/10 border-black/10 flex flex-col sm:flex-row items-center gap-5">
-          <div className="relative w-32 h-32 rounded-xl overflow-hidden bg-white p-2 border border-black/10 shrink-0 shadow-sm">
+        <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#EAE5DC] flex flex-col sm:flex-row items-center gap-5">
+          <div className="relative w-32 h-32 rounded-xl overflow-hidden bg-white p-2 border border-[#DDD7CC] shrink-0 shadow-xs">
             <img
               src={qrCodeImageUrl}
               alt="QR Code Flipbook 3D Abidjan 2026"
@@ -104,8 +104,8 @@ export default function CatalogueShareModal({
           </div>
 
           <div className="space-y-2 text-center sm:text-left flex-1">
-            <div className="flex items-center justify-center sm:justify-start gap-1.5 text-xs font-semibold text-[#141210] dark:text-white">
-              <QrCode className="w-4 h-4 text-[#947346] dark:text-[#C8A97E]" />
+            <div className="flex items-center justify-center sm:justify-start gap-1.5 text-xs font-semibold text-[#191715]">
+              <QrCode className="w-4 h-4 text-[#9E7431]" />
               <span>QR Code Immédiat</span>
             </div>
             <p className="text-[11px] text-[#6B655D] dark:text-[#A39C92] font-light leading-relaxed">
@@ -143,7 +143,7 @@ export default function CatalogueShareModal({
             <button
               type="button"
               onClick={handleNativeShare}
-              className="w-full py-3 px-5 rounded-full dark:bg-white/10 dark:hover:bg-white/20 dark:text-white bg-black/5 hover:bg-black/10 text-[#141210] text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer border dark:border-white/10 border-black/10"
+              className="w-full py-3 px-5 rounded-full bg-[#FAF8F5] hover:bg-[#F2EFE9] text-[#191715] text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer border border-[#DDD7CC]"
             >
               <Share2 className="w-4 h-4" />
               <span>Partager le Flipbook (AirDrop, Messages, Mail)</span>
@@ -152,7 +152,7 @@ export default function CatalogueShareModal({
 
           {/* Lien Direct du Flipbook Copiable */}
           <div className="flex items-center gap-2">
-            <div className="flex-1 px-3.5 py-2.5 rounded-xl dark:bg-white/5 bg-white border dark:border-white/10 border-black/10 text-xs font-mono text-[#6B655D] dark:text-[#A39C92] truncate">
+            <div className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#FAF8F5] border border-[#DDD7CC] text-xs font-mono text-[#6E665B] truncate">
               {flipbookMobileUrl}
             </div>
 
@@ -162,7 +162,7 @@ export default function CatalogueShareModal({
               className={`px-4 py-2.5 rounded-xl text-xs font-mono flex items-center gap-1.5 transition-all cursor-pointer shrink-0 font-semibold ${
                 copied
                   ? 'bg-emerald-600 text-white'
-                  : 'dark:bg-white dark:text-[#0A0908] bg-[#141210] text-white hover:bg-[#947346]'
+                  : 'bg-[#191715] text-white hover:bg-[#9E7431]'
               }`}
             >
               {copied ? (
@@ -182,8 +182,8 @@ export default function CatalogueShareModal({
         </div>
 
         {/* 3. TEST DIRECT DU FLIPBOOK MOBILE */}
-        <div className="pt-4 border-t dark:border-white/10 border-black/10 flex items-center justify-between text-xs font-mono">
-          <span className="text-[#6B655D] dark:text-[#A39C92]">
+        <div className="pt-4 border-t border-[#EAE5DC] flex items-center justify-between text-xs font-mono">
+          <span className="text-[#7A746B]">
             Ouvrir la liseuse plein écran :
           </span>
 
@@ -191,7 +191,7 @@ export default function CatalogueShareModal({
             href={flipbookMobileUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-[#947346] dark:text-[#C8A97E] hover:underline font-semibold"
+            className="flex items-center gap-1.5 text-[#9E7431] hover:underline font-semibold"
           >
             <span>Tester la Liseuse Mobile 3D</span>
             <ExternalLink className="w-3.5 h-3.5" />

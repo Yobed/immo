@@ -90,17 +90,17 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             </span>
             {property.status === 'cleaning' || property.concierge_status === 'cleaning' ? (
               <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/90 backdrop-blur-md text-white border border-amber-300 shadow-2xs flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-white" />
                 <span>Nettoyage</span>
               </span>
             ) : property.status === 'reserved' || property.concierge_status === 'reserved' ? (
               <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-700/90 backdrop-blur-md text-white border border-purple-300 shadow-2xs flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-white" />
                 <span>Réservé</span>
               </span>
             ) : (
               <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-700/90 backdrop-blur-md text-white border border-emerald-300 shadow-2xs flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-white" />
                 <span>Disponible</span>
               </span>
             )}

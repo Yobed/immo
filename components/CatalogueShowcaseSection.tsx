@@ -79,35 +79,35 @@ export default function CatalogueShowcaseSection() {
           <TiltCard tiltStrength={8} className="max-w-md w-full">
             <Link 
               href="/catalogue"
-              className="group block relative aspect-[3/4] rounded-3xl overflow-hidden bg-gradient-to-br from-[#1C1A17] via-[#121110] to-[#0A0908] border border-[#C8A97E]/30 dark:shadow-[0_40px_100px_rgba(0,0,0,0.95)] shadow-[0_30px_70px_rgba(20,18,16,0.18)] p-8 sm:p-10 flex flex-col justify-between"
+              className="group block relative aspect-[3/4] rounded-3xl overflow-hidden bg-gradient-to-br from-[#FAF8F5] via-[#F4EFE6] to-[#ECE5D8] border border-[#C8A97E]/50 shadow-[0_25px_60px_rgba(20,18,16,0.12)] p-8 sm:p-10 flex flex-col justify-between"
             >
               {/* Reflet Spéculaire & Reliure Dorée */}
-              <div className="absolute top-0 bottom-0 left-0 w-6 bg-gradient-to-r from-black/80 via-white/5 to-transparent border-r border-[#C8A97E]/20" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,_rgba(200,169,126,0.12)_0%,_transparent_65%)] pointer-events-none" />
+              <div className="absolute top-0 bottom-0 left-0 w-6 bg-gradient-to-r from-[#C8A97E]/30 via-white/40 to-transparent border-r border-[#C8A97E]/30" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,_rgba(200,169,126,0.15)_0%,_transparent_65%)] pointer-events-none" />
 
               {/* Haut de Couverture */}
               <div className="space-y-4 pl-4 relative z-10">
                 <div className="flex items-center justify-between">
-                  <div className="w-9 h-9 rounded-xl bg-white text-[#0A0908] flex items-center justify-center font-display font-bold text-base shadow-lg">
+                  <div className="w-9 h-9 rounded-xl bg-[#191715] text-white flex items-center justify-center font-display font-bold text-base shadow-md">
                     A
                   </div>
-                  <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#C8A97E]">
+                  <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#9E7431] font-semibold">
                     Édition 2026
                   </span>
                 </div>
 
                 <div className="pt-8 space-y-1">
-                  <span className="text-[11px] font-mono uppercase tracking-widest text-white/50 block">
+                  <span className="text-[11px] font-mono uppercase tracking-widest text-[#7A746B] block">
                     Portefeuille Privé
                   </span>
-                  <h3 className="text-3xl sm:text-4xl font-display font-medium text-white tracking-tight leading-tight group-hover:text-[#C8A97E] transition-colors">
+                  <h3 className="text-3xl sm:text-4xl font-display font-medium text-[#191715] tracking-tight leading-tight group-hover:text-[#9E7431] transition-colors">
                     Catalogue Prestige Abidjan
                   </h3>
                 </div>
               </div>
 
               {/* Centre : Image Monographique Intégrée */}
-              <div className="relative aspect-[16/10] rounded-2xl overflow-hidden border border-white/10 shadow-2xl my-4 ml-4">
+              <div className="relative aspect-[16/10] rounded-2xl overflow-hidden border border-[#E0DCD3] shadow-lg my-4 ml-4">
                 <Image
                   src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=85"
                   alt="Catalogue Couverture"
@@ -115,20 +115,20 @@ export default function CatalogueShowcaseSection() {
                   unoptimized
                   className="object-cover group-hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <div className="absolute bottom-3 left-3 text-[11px] font-mono text-white/80">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                <div className="absolute bottom-3 left-3 text-[11px] font-mono text-white/95 font-medium drop-shadow-xs">
                   Cocody • Zone 4 • Assinie
                 </div>
               </div>
 
               {/* Bas de Couverture */}
-              <div className="flex items-center justify-between pt-4 border-t border-white/10 pl-4 relative z-10">
-                <div className="flex items-center gap-2 text-xs font-mono text-white/60">
-                  <Hand className="w-3.5 h-3.5 text-[#C8A97E]" />
+              <div className="flex items-center justify-between pt-4 border-t border-[#E0DCD3] pl-4 relative z-10">
+                <div className="flex items-center gap-2 text-xs font-mono text-[#6E665B]">
+                  <Hand className="w-3.5 h-3.5 text-[#9E7431]" />
                   <span>Feuilleter en ligne</span>
                 </div>
 
-                <span className="text-xs font-mono text-[#C8A97E] group-hover:translate-x-1 transition-transform flex items-center gap-1 font-bold">
+                <span className="text-xs font-mono text-[#9E7431] group-hover:translate-x-1 transition-transform flex items-center gap-1 font-bold">
                   <span>Explorer</span>
                   <ArrowRight className="w-3 h-3" />
                 </span>

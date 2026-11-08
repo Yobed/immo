@@ -508,7 +508,7 @@ export default function LuxuryVilla3D() {
         {/* Titre & Statut */}
         <div className="bg-black/60 backdrop-blur-2xl border border-white/10 px-4 py-2.5 rounded-2xl pointer-events-auto shadow-2xl">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#C8A97E] animate-ping" />
+            <span className="w-2 h-2 rounded-full bg-[#C8A97E]" />
             <span className="text-[11px] font-mono tracking-widest uppercase text-[#C8A97E] font-medium">
               Maquette Spatiale 3D WebGL
             </span>

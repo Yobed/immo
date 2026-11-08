@@ -79,38 +79,39 @@ export default function StandaloneMobileFlipbookPage() {
   const renderLiveBadge = (property: Property) => {
     if (property.status === 'cleaning' || property.concierge_status === 'cleaning') {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-950/90 text-amber-300 border border-amber-500/50 text-[8px] font-mono shadow">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200/90 text-[9px] font-medium shadow-xs">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
           <span>Préparation Hôtelière</span>
         </span>
       );
     }
     if (property.status === 'reserved' || property.concierge_status === 'reserved') {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-950/90 text-purple-300 border border-purple-500/50 text-[8px] font-mono shadow">
-          <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
-          <span>Réservé • Visite en cours</span>
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-purple-50 text-purple-800 border border-purple-200/90 text-[9px] font-medium shadow-xs">
+          <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+          <span>Réservé • Visite</span>
         </span>
       );
     }
     if (property.status === 'under_offer') {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-950/90 text-amber-200 border border-amber-400/50 text-[8px] font-mono shadow">
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200/90 text-[9px] font-medium shadow-xs">
           <span>Sous Offre</span>
         </span>
       );
     }
     if (property.status === 'rented' || property.concierge_status === 'occupied') {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-950/90 text-blue-300 border border-blue-500/50 text-[8px] font-mono shadow">
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200/90 text-[9px] font-medium shadow-xs">
+          <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
           <span>Occupé (Bail actif)</span>
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 text-[8px] font-mono shadow">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-        <span>Disponible Immédiatement</span>
+      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/90 text-[9px] font-medium shadow-xs">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+        <span>Disponible</span>
       </span>
     );
   };
@@ -212,40 +213,29 @@ export default function StandaloneMobileFlipbookPage() {
     }
   };
 
-  const isDark = theme === 'dark';
-
   return (
-    <div className={`fixed inset-0 w-full h-[100dvh] flex flex-col justify-between overflow-hidden select-none z-50 transition-colors duration-300 ${
-      isDark ? 'bg-[#0A0908] text-[#F5F2EB]' : 'bg-[#FAF8F5] text-[#141210]'
-    }`}>
+    <div className="fixed inset-0 w-full h-[100dvh] flex flex-col justify-between overflow-hidden select-none z-50 bg-[#FAF8F5] text-[#191715]">
       
       {/* ========================================================================= */}
       {/* 1. HEADER MINIMALISTE DE LA LISEUSE MOBILE                                */}
       {/* ========================================================================= */}
-      <header className={`h-14 px-3 sm:px-4 backdrop-blur-xl border-b flex items-center justify-between z-30 shrink-0 transition-colors ${
-        isDark ? 'bg-[#121110]/95 border-white/10 text-white' : 'bg-white/95 border-black/10 text-[#141210]'
-      }`}>
+      <header className="h-14 px-3 sm:px-4 bg-white/95 backdrop-blur-xl border-b border-[#EAE5DC] flex items-center justify-between z-30 shrink-0 text-[#191715]">
         
         {/* Identité Prestige */}
         <div className="flex items-center gap-2.5">
           <Link 
             href="/"
-            className={`w-8 h-8 rounded-xl flex items-center justify-center font-display font-bold text-sm shadow-md transition-colors ${
-              isDark ? 'bg-white text-[#0A0908]' : 'bg-[#141210] text-white'
-            }`}
+            className="w-8 h-8 rounded-xl flex items-center justify-center font-display font-bold text-sm bg-[#191715] text-white shadow-xs"
             title="Retour au site"
           >
             A
           </Link>
           <div className="flex flex-col">
-            <span className="text-xs font-display font-semibold tracking-tight leading-none">
+            <span className="text-xs font-display font-semibold tracking-tight leading-none text-[#191715]">
               Catalogue Prestige 2026
             </span>
-            <span className={`text-[10px] font-mono mt-0.5 flex items-center gap-1 ${
-              isDark ? 'text-[#C8A97E]' : 'text-[#947346]'
-            }`}>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>{viewMode === '3d' ? '3D Tactile' : 'Défilement HD'}</span>
+            <span className="text-[10px] font-mono mt-0.5 text-[#9E7431] font-semibold">
+              <span>{viewMode === '3d' ? 'Livre 3D Tactile' : 'Défilement HD'}</span>
             </span>
           </div>
         </div>
@@ -257,29 +247,11 @@ export default function StandaloneMobileFlipbookPage() {
           <button
             type="button"
             onClick={() => setViewMode(viewMode === '3d' ? 'scroll' : '3d')}
-            className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-medium border transition-colors flex items-center gap-1 ${
-              isDark 
-                ? 'bg-white/5 border-white/10 text-white/80 hover:bg-white/10' 
-                : 'bg-black/5 border-black/10 text-[#141210]/80 hover:bg-black/10'
-            }`}
+            className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-medium border border-[#DDD7CC] bg-[#FAF8F5] text-[#191715] hover:bg-[#F2EFE9] transition-colors flex items-center gap-1 cursor-pointer"
             title="Changer de vue"
           >
-            <BookOpen className="w-3 h-3 text-[#947346]" />
+            <BookOpen className="w-3 h-3 text-[#9E7431]" />
             <span className="hidden xs:inline">{viewMode === '3d' ? 'Vue 3D' : 'Défilement'}</span>
-          </button>
-
-          {/* Bascule Jour / Nuit */}
-          <button
-            type="button"
-            onClick={() => setTheme(isDark ? 'light' : 'dark')}
-            className={`p-2 rounded-xl border transition-colors ${
-              isDark 
-                ? 'bg-white/5 border-white/10 text-[#C8A97E] hover:bg-white/10' 
-                : 'bg-black/5 border-black/10 text-[#947346] hover:bg-black/10'
-            }`}
-            title={isDark ? 'Passer en Mode Jour (Ivoire)' : 'Passer en Mode Nuit (Obsidienne)'}
-          >
-            {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
           </button>
 
           {/* Son On/Off */}
@@ -287,10 +259,8 @@ export default function StandaloneMobileFlipbookPage() {
             <button
               type="button"
               onClick={() => setSoundEnabled(!soundEnabled)}
-              className={`p-2 rounded-xl border transition-colors ${
-                isDark 
-                  ? 'bg-white/5 border-white/10 text-white/60 hover:text-white' 
-                  : 'bg-black/5 border-black/10 text-black/60 hover:text-black'
+              className={`p-2 rounded-xl border border-[#DDD7CC] transition-colors cursor-pointer ${
+                soundEnabled ? 'bg-[#FBF8F1] text-[#9E7431]' : 'bg-[#FAF8F5] text-[#8C8275]'
               }`}
               title={soundEnabled ? 'Son activé' : 'Son coupé'}
             >
@@ -302,10 +272,10 @@ export default function StandaloneMobileFlipbookPage() {
           <button
             type="button"
             onClick={() => setIsShareModalOpen(true)}
-            className="px-3 py-1.5 rounded-full bg-[#25D366] text-white text-xs font-bold flex items-center gap-1.5 shadow-md hover:bg-[#20ba59] transition-colors cursor-pointer"
+            className="px-3 py-1.5 rounded-full bg-[#25D366] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs hover:bg-[#20ba59] transition-colors cursor-pointer"
             title="Partager le Flipbook 3D"
           >
-            <Share2 className="w-3.5 h-3.5" />
+            <Share2 className="w-3.5 h-3.5 fill-white" />
             <span className="hidden sm:inline">Partager</span>
           </button>
 
@@ -313,9 +283,7 @@ export default function StandaloneMobileFlipbookPage() {
           <button
             type="button"
             onClick={toggleFullscreen}
-            className={`p-2 rounded-xl border transition-colors hidden sm:flex ${
-              isDark ? 'bg-white/5 border-white/10 text-white' : 'bg-black/5 border-black/10 text-[#141210]'
-            }`}
+            className="p-2 rounded-xl border border-[#DDD7CC] bg-[#FAF8F5] text-[#191715] hover:bg-[#F2EFE9] transition-colors hidden sm:flex cursor-pointer"
             title="Plein écran"
           >
             {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
@@ -328,20 +296,16 @@ export default function StandaloneMobileFlipbookPage() {
       {/* ========================================================================= */}
       {/* 2. LE FLIPBOOK 3D INTERACTIF EN PLEIN ÉCRAN POUR SMARTPHONE                */}
       {/* ========================================================================= */}
-      <main className="flex-1 w-full h-full relative overflow-hidden flex items-center justify-center p-2 sm:p-4">
+      <main className="flex-1 w-full h-full relative overflow-hidden flex items-center justify-center p-2 sm:p-4 bg-[#F5F2EB]">
         
         {viewMode === '3d' ? (
           <div className="relative w-full h-full flex items-center justify-center">
             
             {/* Loader d'initialisation */}
             {!isReady && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center z-40 bg-inherit backdrop-blur-sm">
-                <div className={`w-10 h-10 rounded-full border-2 border-t-transparent animate-spin mb-3 ${
-                  isDark ? 'border-[#C8A97E]' : 'border-[#947346]'
-                }`} />
-                <span className={`text-xs font-mono uppercase tracking-widest font-semibold animate-pulse ${
-                  isDark ? 'text-[#C8A97E]' : 'text-[#947346]'
-                }`}>
+              <div className="absolute inset-0 flex flex-col items-center justify-center z-40 bg-[#FAF8F5]/90 backdrop-blur-xs">
+                <div className="w-10 h-10 rounded-full border-2 border-[#DDD7CC] border-t-[#9E7431] animate-spin mb-3" />
+                <span className="text-xs font-mono uppercase tracking-widest font-semibold text-[#9E7431]">
                   Chargement du Flipbook 3D...
                 </span>
               </div>
@@ -350,11 +314,7 @@ export default function StandaloneMobileFlipbookPage() {
             {/* Boutons de navigation latéraux pour pouces */}
             <button
               onClick={flipPrev}
-              className={`absolute left-2 z-30 w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-all hover:scale-110 shadow-lg cursor-pointer ${
-                isDark 
-                  ? 'bg-black/40 hover:bg-black/70 text-white border border-white/20' 
-                  : 'bg-white/70 hover:bg-white text-[#141210] border border-black/15'
-              }`}
+              className="absolute left-2 z-30 w-10 h-10 rounded-full bg-white/95 hover:bg-white text-[#191715] border border-[#DDD7CC] shadow-md flex items-center justify-center transition-all hover:scale-105 cursor-pointer"
               aria-label="Page précédente"
             >
               <ChevronLeft className="w-5 h-5" />
@@ -362,11 +322,7 @@ export default function StandaloneMobileFlipbookPage() {
 
             <button
               onClick={flipNext}
-              className={`absolute right-2 z-30 w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-all hover:scale-110 shadow-lg cursor-pointer ${
-                isDark 
-                  ? 'bg-black/40 hover:bg-black/70 text-white border border-white/20' 
-                  : 'bg-white/70 hover:bg-white text-[#141210] border border-black/15'
-              }`}
+              className="absolute right-2 z-30 w-10 h-10 rounded-full bg-white/95 hover:bg-white text-[#191715] border border-[#DDD7CC] shadow-md flex items-center justify-center transition-all hover:scale-105 cursor-pointer"
               aria-label="Page suivante"
             >
               <ChevronRight className="w-5 h-5" />
@@ -1010,16 +966,14 @@ export default function StandaloneMobileFlipbookPage() {
       {/* ========================================================================= */}
       {/* 3. DOCK VIP INFÉRIEUR : PRISE DE CONTACT RAPIDE SANS SORTIR DU FLIPBOOK    */}
       {/* ========================================================================= */}
-      <footer className={`h-16 px-3 sm:px-4 backdrop-blur-xl border-t flex items-center justify-between z-30 shrink-0 transition-colors ${
-        isDark ? 'bg-[#121110]/95 border-white/10' : 'bg-white/95 border-black/10'
-      }`}>
+      <footer className="h-16 px-3 sm:px-4 bg-white/95 backdrop-blur-xl border-t border-[#EAE5DC] flex items-center justify-between z-30 shrink-0">
         
         {/* Contact WhatsApp Direction 1-Clic */}
         <a
           href={whatsappGeneralUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 mr-2 py-2.5 px-3.5 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-[0_10px_25px_rgba(37,211,102,0.35)] transition-all cursor-pointer truncate"
+          className="flex-1 mr-2 py-2.5 px-3.5 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer truncate"
         >
           <MessageCircle className="w-4 h-4 fill-white shrink-0" />
           <span className="truncate">Visiter une Demeure (WhatsApp)</span>
@@ -1028,12 +982,10 @@ export default function StandaloneMobileFlipbookPage() {
         {/* Appel Téléphonique */}
         <a
           href="tel:+2250788421920"
-          className={`p-2.5 rounded-full transition-colors shrink-0 ${
-            isDark ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-black/5 hover:bg-black/10 text-[#141210]'
-          }`}
+          className="p-2.5 rounded-full bg-[#FAF8F5] hover:bg-[#F2EFE9] text-[#191715] border border-[#DDD7CC] transition-colors shrink-0 shadow-xs"
           title="Appeler la direction"
         >
-          <Phone className="w-4 h-4 text-[#947346]" />
+          <Phone className="w-4 h-4 text-[#9E7431]" />
         </a>
 
       </footer>

@@ -64,7 +64,7 @@ export default function InteractiveVilla3D({ className = '' }: InteractiveVilla3
       <div className="relative z-20 p-6 sm:p-8 flex items-start justify-between gap-4 pointer-events-auto">
         <div className="space-y-1 max-w-md">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-2xl border border-white/15 text-xs text-white shadow-lg">
-            <Sparkles className="w-3.5 h-3.5 text-[#C8A97E] animate-pulse" />
+            <Sparkles className="w-3.5 h-3.5 text-[#C8A97E]" />
             <span className="font-mono text-[10px] uppercase tracking-widest text-[#C8A97E]">Maquette 3D Spatiale</span>
           </div>
           <h3 className="text-xl sm:text-2xl font-light text-white tracking-tight drop-shadow-md">

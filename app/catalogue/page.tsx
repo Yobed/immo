@@ -80,37 +80,38 @@ export default function CatalogueFlipbookPage() {
   const renderLiveBadge = (property: Property) => {
     if (property.status === 'cleaning' || property.concierge_status === 'cleaning') {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-950/90 text-amber-300 border border-amber-500/50 text-[9px] font-mono shadow">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200/90 text-[10px] font-medium shadow-xs">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
           <span>Préparation Hôtelière</span>
         </span>
       );
     }
     if (property.status === 'reserved' || property.concierge_status === 'reserved') {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-purple-950/90 text-purple-300 border border-purple-500/50 text-[9px] font-mono shadow">
-          <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-800 border border-purple-200/90 text-[10px] font-medium shadow-xs">
+          <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
           <span>Réservé • Visite en cours</span>
         </span>
       );
     }
     if (property.status === 'under_offer') {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-950/90 text-amber-200 border border-amber-400/50 text-[9px] font-mono shadow">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200/90 text-[10px] font-medium shadow-xs">
           <span>Sous Offre</span>
         </span>
       );
     }
     if (property.status === 'rented' || property.concierge_status === 'occupied') {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-950/90 text-blue-300 border border-blue-500/50 text-[9px] font-mono shadow">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200/90 text-[10px] font-medium shadow-xs">
+          <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
           <span>Occupé (Bail actif)</span>
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 text-[9px] font-mono shadow">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/90 text-[10px] font-medium shadow-xs">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
         <span>Disponible Immédiatement</span>
       </span>
     );
@@ -208,35 +209,35 @@ export default function CatalogueFlipbookPage() {
   );
 
   return (
-    <div className="min-h-screen dark:bg-[#0A0908] bg-[#FAF8F5] dark:text-[#F5F2EB] text-[#141210] flex flex-col font-sans antialiased selection:bg-[#C8A97E] selection:text-[#0A0908] transition-colors duration-300">
+    <div className="min-h-screen bg-[#FAF8F5] text-[#191715] flex flex-col font-sans antialiased selection:bg-[#C8A97E] selection:text-white transition-colors duration-300">
       <Navbar />
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-8 pt-24 pb-16 w-full flex flex-col space-y-6">
         
         {/* BARRE D'OUTILS SUPÉRIEURE DU CATALOGUE */}
-        <div className="dark:bg-[#121110] bg-white rounded-2xl dark:border-white/10 border-black/10 px-6 py-4 dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)] shadow-[0_10px_30px_rgba(0,0,0,0.06)] flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="bg-white rounded-2xl border border-[#EAE5DC] px-6 py-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl dark:bg-white dark:text-[#0A0908] bg-[#141210] text-white flex items-center justify-center font-display font-bold text-sm shadow-md">
+            <div className="w-9 h-9 rounded-xl bg-[#191715] text-white flex items-center justify-center font-display font-bold text-sm shadow-xs">
               A
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-mono uppercase tracking-widest dark:text-[#C8A97E] text-[#947346] font-medium">
+                <span className="text-[11px] font-mono uppercase tracking-widest text-[#9E7431] font-semibold">
                   Édition Annuelle 2026
                 </span>
-                <span className="text-[10px] bg-emerald-950/70 text-emerald-300 px-2 py-0.5 rounded-full font-mono border border-emerald-500/30 flex items-center gap-1">
-                  <Hand className="w-3 h-3 text-emerald-400" />
+                <span className="text-[10px] bg-emerald-50 text-emerald-800 px-2.5 py-0.5 rounded-full font-mono border border-emerald-200 flex items-center gap-1 font-medium">
+                  <Hand className="w-3 h-3 text-emerald-700" />
                   Feuilletage 3D &amp; Vidéos Intégrées
                 </span>
               </div>
-              <h1 className="text-base sm:text-lg font-display font-medium dark:text-white text-[#141210]">
+              <h1 className="text-base sm:text-lg font-display font-medium text-[#191715]">
                 Catalogue Numérique d&apos;Exception &amp; Foncier Sécurisé
               </h1>
             </div>
           </div>
 
           <div className="flex items-center gap-2.5">
-            <span className="text-xs dark:text-white/50 text-[#6B655D] hidden md:inline-block font-mono mr-2">
+            <span className="text-xs text-[#7A746B] hidden md:inline-block font-mono mr-2">
               Page {currentPage + 1} / {totalPages}
             </span>
 
@@ -245,8 +246,8 @@ export default function CatalogueFlipbookPage() {
               onClick={() => setSoundEnabled(!soundEnabled)}
               className={`p-2 rounded-xl border transition-colors cursor-pointer ${
                 soundEnabled 
-                  ? 'dark:bg-white/10 bg-black/5 dark:text-[#C8A97E] text-[#947346] dark:border-[#C8A97E]/30 border-[#947346]/30' 
-                  : 'dark:bg-white/5 bg-black/5 dark:text-white/40 text-black/40 dark:border-white/10 border-black/10'
+                  ? 'bg-[#FBF8F1] text-[#9E7431] border-[#E8DFD1]' 
+                  : 'bg-white text-[#8C8275] border-[#EAE5DC] hover:bg-[#FAF8F5]'
               }`}
               title={soundEnabled ? 'Son de papier activé' : 'Son désactivé'}
             >
@@ -257,10 +258,10 @@ export default function CatalogueFlipbookPage() {
             <a
               href="/brochures/CATALOGUE-PRESTIGE-ABIDJAN-2026.pdf"
               download="Catalogue-Prestige-Abidjan-2026.pdf"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl dark:bg-white/5 dark:hover:bg-white/10 dark:text-white dark:border-white/10 bg-black/5 hover:bg-black/10 text-[#141210] border-black/10 text-xs font-mono transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-[#FAF8F5] text-[#191715] border border-[#DDD7CC] text-xs font-mono transition-colors shadow-xs"
               title="Télécharger la version PDF haute définition"
             >
-              <Download className="w-3.5 h-3.5 dark:text-[#C8A97E] text-[#947346]" />
+              <Download className="w-3.5 h-3.5 text-[#9E7431]" />
               <span className="hidden sm:inline">Télécharger PDF</span>
             </a>
 
@@ -268,7 +269,7 @@ export default function CatalogueFlipbookPage() {
             <button
               type="button"
               onClick={() => setIsShareModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold transition-all shadow-md cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
               title="Partager le catalogue (QR Code, WhatsApp, Lien Mobile)"
             >
               <Share2 className="w-3.5 h-3.5 fill-white" />
@@ -278,7 +279,7 @@ export default function CatalogueFlipbookPage() {
             {/* Plein écran */}
             <button
               onClick={toggleFullscreen}
-              className="p-2 rounded-xl dark:bg-white/5 dark:hover:bg-white/10 dark:text-white dark:border-white/10 bg-black/5 hover:bg-black/10 text-[#141210] border-black/10 transition-colors cursor-pointer"
+              className="p-2 rounded-xl bg-white hover:bg-[#FAF8F5] text-[#191715] border border-[#DDD7CC] transition-colors cursor-pointer shadow-xs"
               title="Plein écran"
             >
               {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -287,37 +288,37 @@ export default function CatalogueFlipbookPage() {
         </div>
 
         {/* GUIDE INTERACTIF DES LIENS */}
-        <div className="dark:bg-[#121110] bg-white rounded-xl dark:border-white/10 border-black/10 px-4 py-2.5 flex flex-wrap items-center justify-between text-xs dark:text-white/60 text-[#141210]/70 gap-2">
+        <div className="bg-white rounded-xl border border-[#EAE5DC] px-4 py-2.5 flex flex-wrap items-center justify-between text-xs text-[#6E665B] gap-2 shadow-xs">
           <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1 font-medium dark:text-white text-[#141210]">
-              <span className="w-2 h-2 rounded-full dark:bg-[#C8A97E] bg-[#947346]" />
+            <span className="flex items-center gap-1 font-semibold text-[#191715]">
+              <span className="w-2 h-2 rounded-full bg-[#9E7431]" />
               Hotspots interactifs dans les pages :
             </span>
-            <span className="inline-flex items-center gap-1 dark:text-[#C8A97E] text-[#947346]">
+            <span className="inline-flex items-center gap-1 text-[#9E7431]">
               <MapPin className="w-3 h-3" /> Localisation GPS
             </span>
-            <span className="inline-flex items-center gap-1 dark:text-[#C8A97E] text-[#947346]">
+            <span className="inline-flex items-center gap-1 text-[#9E7431]">
               <Video className="w-3 h-3" /> Visite Vidéo &amp; Drone 4K
             </span>
-            <span className="inline-flex items-center gap-1 text-emerald-400">
+            <span className="inline-flex items-center gap-1 text-emerald-700 font-medium">
               <ShieldCheck className="w-3 h-3" /> Certificat Foncier ACD
             </span>
           </div>
-          <span className="hidden md:inline font-mono text-[11px] dark:text-white/40 text-[#6B655D]">
+          <span className="hidden md:inline font-mono text-[11px] text-[#8C8275]">
             Coin de page tactile • ◀ Flèche Gauche / Droite ▶
           </span>
         </div>
 
         {/* THÉÂTRE DE LECTURE 3D RÉALISTE */}
-        <div className="relative dark:bg-[#0E0D0C] bg-[#ECE7DE] rounded-3xl p-4 sm:p-8 lg:p-12 dark:shadow-[0_30px_90px_rgba(0,0,0,0.95)] shadow-[0_20px_60px_rgba(0,0,0,0.10)] dark:border-white/10 border-black/10 overflow-hidden flex items-center justify-center min-h-[660px] lg:min-h-[780px]">
+        <div className="relative bg-[#F4F1EA] rounded-3xl p-4 sm:p-8 lg:p-12 shadow-[0_15px_40px_rgba(0,0,0,0.05)] border border-[#E5E0D6] overflow-hidden flex items-center justify-center min-h-[660px] lg:min-h-[780px]">
           
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.06)_0%,_transparent_75%)] pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.6)_0%,_transparent_75%)] pointer-events-none" />
 
           {/* Indicateur de chargement du Flipbook 3D */}
           {!isReady && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center z-40 dark:bg-[#0E0D0C]/80 bg-[#ECE7DE]/80 backdrop-blur-sm transition-opacity">
-              <div className="w-12 h-12 rounded-full border-2 dark:border-[#C8A97E]/30 border-[#947346]/30 border-t-[#C8A97E] dark:border-t-[#C8A97E] animate-spin mb-4" />
-              <span className="text-xs font-mono dark:text-[#C8A97E] text-[#947346] tracking-widest uppercase font-semibold animate-pulse">
+            <div className="absolute inset-0 flex flex-col items-center justify-center z-40 bg-[#FAF8F5]/90 backdrop-blur-xs transition-opacity">
+              <div className="w-10 h-10 rounded-full border-2 border-[#DDD7CC] border-t-[#9E7431] animate-spin mb-3" />
+              <span className="text-xs font-mono text-[#9E7431] tracking-widest uppercase font-semibold">
                 Ouverture du Catalogue 3D Prestige...
               </span>
             </div>
@@ -326,7 +327,7 @@ export default function CatalogueFlipbookPage() {
           {/* Bouton Précédent */}
           <button
             onClick={flipPrev}
-            className="absolute left-3 sm:left-6 z-30 w-11 h-11 rounded-full dark:bg-white/10 dark:hover:bg-white/25 dark:text-white dark:border-white/20 bg-black/10 hover:bg-black/25 text-[#141210] border-black/20 backdrop-blur-md flex items-center justify-center transition-all hover:scale-110 shadow-lg cursor-pointer"
+            className="absolute left-3 sm:left-6 z-30 w-11 h-11 rounded-full bg-white/95 hover:bg-white text-[#191715] border border-[#DDD7CC] shadow-md flex items-center justify-center transition-all hover:scale-105 cursor-pointer"
             aria-label="Page précédente"
           >
             <ChevronLeft className="w-6 h-6" />
@@ -335,7 +336,7 @@ export default function CatalogueFlipbookPage() {
           {/* Bouton Suivant */}
           <button
             onClick={flipNext}
-            className="absolute right-3 sm:right-6 z-30 w-11 h-11 rounded-full dark:bg-white/10 dark:hover:bg-white/25 dark:text-white dark:border-white/20 bg-black/10 hover:bg-black/25 text-[#141210] border-black/20 backdrop-blur-md flex items-center justify-center transition-all hover:scale-110 shadow-lg cursor-pointer"
+            className="absolute right-3 sm:right-6 z-30 w-11 h-11 rounded-full bg-white/95 hover:bg-white text-[#191715] border border-[#DDD7CC] shadow-md flex items-center justify-center transition-all hover:scale-105 cursor-pointer"
             aria-label="Page suivante"
           >
             <ChevronRight className="w-6 h-6" />
@@ -1248,7 +1249,7 @@ export default function CatalogueFlipbookPage() {
 
               {/* Effet Scanner & Repères Cadastraux Vidéo */}
               <div className="absolute top-4 left-4 font-mono text-[10px] text-[#25d366] bg-black/60 px-2.5 py-1 rounded border border-[#25d366]/40 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#25d366] animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-[#25d366]" />
                 VUE DRONE 4K CADASTRE • ABIDJAN
               </div>
 

@@ -63,7 +63,7 @@ export default function HomePage() {
               </div>
 
               <div className="text-xs font-mono dark:text-[#C8A97E] text-[#947346] flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full dark:bg-[#C8A97E] bg-[#947346] animate-ping" />
+                <span className="w-2 h-2 rounded-full dark:bg-[#C8A97E] bg-[#947346]" />
                 <span>Moteur 3D WebGL Actif</span>
               </div>
             </div>

@@ -129,12 +129,12 @@ export default function PropertyDetailPage() {
               </span>
               <span className={`px-3 py-1 rounded-full border text-xs font-mono flex items-center gap-1.5 ${
                 property.status === 'cleaning' || property.concierge_status === 'cleaning'
-                  ? 'bg-amber-950/70 border-amber-500/40 text-amber-300'
+                  ? 'bg-amber-50 border-amber-200 text-amber-800'
                   : property.status === 'reserved' || property.concierge_status === 'reserved'
-                  ? 'bg-purple-950/70 border-purple-500/40 text-purple-300'
-                  : 'bg-emerald-950/70 border-emerald-500/30 text-emerald-300'
+                  ? 'bg-purple-50 border-purple-200 text-purple-800'
+                  : 'bg-emerald-50 border-emerald-200 text-emerald-800'
               }`}>
-                <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-current" />
                 <span>
                   {property.status === 'cleaning' ? 'Nettoyage Conciergerie en cours' :
                    property.status === 'reserved' ? 'Réservé VIP' :
