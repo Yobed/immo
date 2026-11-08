@@ -4,8 +4,8 @@
   "private": true,
   "description": "Plateforme Immobilière Complète : Site Vitrine Prestige, CRM Métier et Agent IA WhatsApp pour la Côte d'Ivoire",
   "scripts": {
-    "dev": "next dev",
-    "dev:3001": "next dev -p 3001",
+    "dev": "node --max-old-space-size=4096 node_modules/next/dist/bin/next dev",
+    "dev:3001": "node --max-old-space-size=4096 node_modules/next/dist/bin/next dev -p 3001",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
