@@ -39,8 +39,8 @@ export default function CatalogueShareModal({
     flipbookMobileUrl
   )}&color=16-20-18&bgcolor=250-248-245&margin=10`;
 
-  // Message WhatsApp 100% axé sur le FLIPBOOK 3D INTERACTIF (zéro PDF)
-  const whatsappShareText = `*📖 Catalogue Virtuel 3D • Agence Immo Abidjan*\n\nFeuilletez notre livre d'art immobilier en 3D directement sur votre smartphone (tournez les pages au doigt comme un livre physique) :\n\n👉 ${flipbookMobileUrl}\n\n✨ Villas d'architecte Riviera Golf • Penthouses Zone 4 • Domaines Assinie`;
+  // Message WhatsApp axé sur le FLIPBOOK 3D INTERACTIF
+  const whatsappShareText = `*Catalogue Virtuel 3D | Agence Immo Abidjan*\n\nFeuilletez notre sélection confidentielle en 3D directement sur votre smartphone (tournez les pages au doigt comme un livre physique) :\n\n${flipbookMobileUrl}\n\nVillas d'architecte Riviera Golf • Penthouses Zone 4 • Domaines Assinie`;
 
   const whatsappDirectShareUrl = getWhatsAppLink('', whatsappShareText);
 

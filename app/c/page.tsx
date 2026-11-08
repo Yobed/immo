@@ -363,7 +363,7 @@ export default function StandaloneMobileFlipbookPage() {
                   {/* Bouton Vidéo Hotspot */}
                   <button
                     onClick={() => setActiveVideoProperty({
-                      title: "L'Immobilier d'Exception à Abidjan — Film Institutionnel 2026",
+                      title: "L'Immobilier d'Exception à Abidjan : Film Institutionnel 2026",
                       district: "Abidjan Prestige",
                       reference: "CAT-PRESTIGE",
                       price: 450000000,
@@ -803,7 +803,7 @@ export default function StandaloneMobileFlipbookPage() {
                         A
                       </div>
                       <div>
-                        <span className="font-semibold text-xs text-[#161412] block">Aya — Conseillère IA 24/7</span>
+                        <span className="font-semibold text-xs text-[#161412] block">Aya : Conseillère Immobilière 24/7</span>
                         <span className="text-[9px] text-[#7a736a]">WhatsApp Direct Direction</span>
                       </div>
                     </div>
