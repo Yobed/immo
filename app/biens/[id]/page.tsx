@@ -14,7 +14,7 @@ import { formatFCFA, getWhatsAppLink } from '@/lib/utils';
 import { 
   ShieldCheck, Bed, Maximize2, Zap, Waves, MessageCircle, 
   X, ChevronLeft, ChevronRight, Grid, Download, BookOpen, 
-  Sparkles, Check, ArrowLeft, ArrowRight, Lock, Scale, Key
+  Check, ArrowLeft, ArrowRight, Lock, Scale, Key
 } from 'lucide-react';
 
 export default function PropertyDetailPage() {
@@ -45,10 +45,10 @@ export default function PropertyDetailPage() {
     return (
       <>
         <Navbar />
-        <div className="min-h-[70vh] flex flex-col items-center justify-center text-center p-6 space-y-4 bg-[#0A0908] text-white">
-          <h2 className="text-3xl font-display font-medium text-white">Mandat Introuvable</h2>
-          <p className="text-white/60 text-xs">Cette demeure n&apos;est plus en portefeuille ou la référence est archivée.</p>
-          <Link href="/biens" className="px-6 py-3 rounded-full bg-white text-[#0A0908] font-semibold text-xs">
+        <div className="min-h-[70vh] flex flex-col items-center justify-center text-center p-6 space-y-4 bg-[#FAF8F5] text-[#191715]">
+          <h2 className="text-3xl font-display font-medium text-[#191715]">Mandat Introuvable</h2>
+          <p className="text-[#6E665B] text-xs">Cette demeure n&apos;est plus en portefeuille ou la référence est archivée.</p>
+          <Link href="/biens" className="px-6 py-3 rounded-full bg-[#191715] text-white font-semibold text-xs hover:bg-[#9E7431] transition-colors">
             Retour aux résidences
           </Link>
         </div>
@@ -101,18 +101,18 @@ export default function PropertyDetailPage() {
     <>
       <Navbar />
 
-      <main className="min-h-screen dark:bg-[#0A0908] bg-[#FAF8F5] dark:text-[#F5F2EB] text-[#141210] font-sans selection:bg-[#C8A97E] selection:text-[#0A0908] pt-24 pb-28 transition-colors duration-300">
+      <main className="min-h-screen bg-[#FAF8F5] text-[#191715] font-sans selection:bg-[#9E7431] selection:text-white pt-24 pb-28">
         
         <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 space-y-10">
           
           {/* Fil d'Ariane & Retour */}
-          <div className="flex items-center justify-between text-xs font-mono dark:text-white/50 text-[#6B655D]">
-            <Link href="/biens" className="inline-flex items-center gap-2 dark:hover:text-[#C8A97E] hover:text-[#947346] transition-colors">
+          <div className="flex items-center justify-between text-xs font-mono text-[#6E665B]">
+            <Link href="/biens" className="inline-flex items-center gap-2 hover:text-[#9E7431] transition-colors">
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Retour à la Sélection</span>
             </Link>
 
-            <span className="dark:text-[#C8A97E] text-[#947346] uppercase font-semibold">
+            <span className="text-[#9E7431] uppercase font-semibold">
               RÉF. {property.reference}
             </span>
           </div>
@@ -120,14 +120,14 @@ export default function PropertyDetailPage() {
           {/* En-tête Monographique */}
           <div className="space-y-4 max-w-4xl">
             <div className="flex flex-wrap items-center gap-3">
-              <span className="px-3 py-1 rounded-full dark:bg-white/10 dark:border-white/15 bg-black/5 border-black/10 text-xs font-mono uppercase dark:text-[#C8A97E] text-[#947346]">
+              <span className="px-3 py-1 rounded-full bg-white border border-[#EAE5DC] text-xs font-mono uppercase text-[#9E7431] shadow-xs">
                 {property.district}
               </span>
-              <span className="px-3 py-1 rounded-full bg-emerald-950/70 border border-emerald-500/30 text-xs font-mono text-emerald-300 flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-mono text-emerald-800 flex items-center gap-1.5 shadow-xs">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Titre {property.legal_status} Audité</span>
               </span>
-              <span className={`px-3 py-1 rounded-full border text-xs font-mono flex items-center gap-1.5 ${
+              <span className={`px-3 py-1 rounded-full border text-xs font-mono flex items-center gap-1.5 shadow-xs ${
                 property.status === 'cleaning' || property.concierge_status === 'cleaning'
                   ? 'bg-amber-50 border-amber-200 text-amber-800'
                   : property.status === 'reserved' || property.concierge_status === 'reserved'
@@ -143,13 +143,13 @@ export default function PropertyDetailPage() {
               </span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-display font-medium dark:text-white text-[#141210] tracking-tight leading-[1.08]">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-display font-medium text-[#191715] tracking-tight leading-[1.08]">
               {property.title}
             </h1>
           </div>
 
           {/* Galerie Photo Bento Monumentale */}
-          <div className="relative rounded-3xl overflow-hidden dark:bg-[#121110] bg-white border dark:border-white/10 border-black/10 dark:shadow-[0_30px_90px_rgba(0,0,0,0.85)] shadow-[0_15px_50px_rgba(0,0,0,0.08)]">
+          <div className="relative rounded-3xl overflow-hidden bg-white border border-[#EAE5DC] shadow-[0_15px_50px_rgba(25,23,21,0.06)]">
             <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-2 h-[380px] sm:h-[480px] lg:h-[560px]">
               
               {/* Photo Principale Widescreen */}
@@ -203,22 +203,22 @@ export default function PropertyDetailPage() {
             <div className="lg:col-span-8 space-y-12">
               
               {/* Spécifications Minimalistes */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6 rounded-3xl dark:bg-[#121110] bg-white border dark:border-white/[0.08] border-black/[0.08] dark:shadow-none shadow-[0_4px_20px_rgba(0,0,0,0.04)]">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6 rounded-3xl bg-white border border-[#EAE5DC] shadow-[0_4px_20px_rgba(25,23,21,0.04)]">
                 <div className="space-y-1">
-                  <span className="text-[11px] font-mono uppercase dark:text-white/50 text-[#6B655D]">Surface Habitable</span>
-                  <p className="text-xl sm:text-2xl font-display font-medium dark:text-white text-[#141210]">{property.surface} m²</p>
+                  <span className="text-[11px] font-mono uppercase text-[#6E665B]">Surface Habitable</span>
+                  <p className="text-xl sm:text-2xl font-display font-medium text-[#191715]">{property.surface} m²</p>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[11px] font-mono uppercase dark:text-white/50 text-[#6B655D]">Suites Privatives</span>
-                  <p className="text-xl sm:text-2xl font-display font-medium dark:text-white text-[#141210]">{property.bedrooms}</p>
+                  <span className="text-[11px] font-mono uppercase text-[#6E665B]">Suites Privatives</span>
+                  <p className="text-xl sm:text-2xl font-display font-medium text-[#191715]">{property.bedrooms}</p>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[11px] font-mono uppercase dark:text-white/50 text-[#6B655D]">Salles de Bains</span>
-                  <p className="text-xl sm:text-2xl font-display font-medium dark:text-white text-[#141210]">{property.bathrooms}</p>
+                  <span className="text-[11px] font-mono uppercase text-[#6E665B]">Salles de Bains</span>
+                  <p className="text-xl sm:text-2xl font-display font-medium text-[#191715]">{property.bathrooms}</p>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[11px] font-mono uppercase dark:text-white/50 text-[#6B655D]">Piscine</span>
-                  <p className="text-xl sm:text-2xl font-display font-medium dark:text-[#C8A97E] text-[#947346]">
+                  <span className="text-[11px] font-mono uppercase text-[#6E665B]">Piscine</span>
+                  <p className="text-xl sm:text-2xl font-display font-medium text-[#9E7431]">
                     {property.has_pool ? 'Miroir 14m' : 'Non'}
                   </p>
                 </div>
@@ -226,57 +226,57 @@ export default function PropertyDetailPage() {
 
               {/* Texte Monographique Épuré */}
               <div className="space-y-4">
-                <h3 className="text-2xl font-display font-medium dark:text-white text-[#141210]">
+                <h3 className="text-2xl font-display font-medium text-[#191715]">
                   L&apos;Esprit du Lieu
                 </h3>
-                <p className="text-sm sm:text-base dark:text-white/75 text-[#33302C] font-light leading-relaxed">
+                <p className="text-sm sm:text-base text-[#33302C] font-light leading-relaxed">
                   {property.description}
                 </p>
               </div>
 
-              {/* Les 3 Piliers Techniques d'Excellence */}
-              <div className="space-y-4 pt-4 border-t dark:border-white/[0.08] border-black/[0.08]">
-                <h3 className="text-2xl font-display font-medium dark:text-white text-[#141210]">
+              {/* Les 4 Piliers Techniques d'Excellence */}
+              <div className="space-y-4 pt-4 border-t border-[#EAE5DC]">
+                <h3 className="text-2xl font-display font-medium text-[#191715]">
                   Spécifications &amp; Autonomie
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="p-5 rounded-2xl dark:bg-[#121110] bg-white border dark:border-white/[0.06] border-black/[0.08] shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-2">
-                    <div className="flex items-center gap-2 dark:text-white text-[#141210] font-medium text-sm">
-                      <Zap className="w-4 h-4 dark:text-[#C8A97E] text-[#947346]" />
+                  <div className="p-5 rounded-2xl bg-white border border-[#EAE5DC] shadow-[0_4px_20px_rgba(25,23,21,0.03)] space-y-2">
+                    <div className="flex items-center gap-2 text-[#191715] font-medium text-sm">
+                      <Zap className="w-4 h-4 text-[#9E7431]" />
                       <span>Autonomie Énergétique</span>
                     </div>
-                    <p className="text-xs dark:text-white/60 text-[#6B655D] font-light leading-relaxed">
+                    <p className="text-xs text-[#6E665B] font-light leading-relaxed">
                       Groupe électrogène insonorisé automatique 40 kVA avec bascule instantanée en cas de coupure réseau.
                     </p>
                   </div>
 
-                  <div className="p-5 rounded-2xl dark:bg-[#121110] bg-white border dark:border-white/[0.06] border-black/[0.08] shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-2">
-                    <div className="flex items-center gap-2 dark:text-white text-[#141210] font-medium text-sm">
-                      <Waves className="w-4 h-4 dark:text-[#C8A97E] text-[#947346]" />
+                  <div className="p-5 rounded-2xl bg-white border border-[#EAE5DC] shadow-[0_4px_20px_rgba(25,23,21,0.03)] space-y-2">
+                    <div className="flex items-center gap-2 text-[#191715] font-medium text-sm">
+                      <Waves className="w-4 h-4 text-[#9E7431]" />
                       <span>Réserve d&apos;Eau SODECI</span>
                     </div>
-                    <p className="text-xs dark:text-white/60 text-[#6B655D] font-light leading-relaxed">
+                    <p className="text-xs text-[#6E665B] font-light leading-relaxed">
                       Cuve tampon de 5 000 litres avec surpresseur automatique garantissant une pression constante.
                     </p>
                   </div>
 
-                  <div className="p-5 rounded-2xl dark:bg-[#121110] bg-white border dark:border-white/[0.06] border-black/[0.08] shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-2">
-                    <div className="flex items-center gap-2 dark:text-white text-[#141210] font-medium text-sm">
-                      <Lock className="w-4 h-4 dark:text-[#C8A97E] text-[#947346]" />
+                  <div className="p-5 rounded-2xl bg-white border border-[#EAE5DC] shadow-[0_4px_20px_rgba(25,23,21,0.03)] space-y-2">
+                    <div className="flex items-center gap-2 text-[#191715] font-medium text-sm">
+                      <Lock className="w-4 h-4 text-[#9E7431]" />
                       <span>Séquestre Notarié Systématique</span>
                     </div>
-                    <p className="text-xs dark:text-white/60 text-[#6B655D] font-light leading-relaxed">
+                    <p className="text-xs text-[#6E665B] font-light leading-relaxed">
                       Dépôt de garantie consigné sous compte notarié. Restitution garantie sur constat d&apos;huissier.
                     </p>
                   </div>
 
-                  <div className="p-5 rounded-2xl dark:bg-[#121110] bg-white border dark:border-white/[0.06] border-black/[0.08] shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-2">
-                    <div className="flex items-center gap-2 dark:text-white text-[#141210] font-medium text-sm">
-                      <Scale className="w-4 h-4 dark:text-[#C8A97E] text-[#947346]" />
+                  <div className="p-5 rounded-2xl bg-white border border-[#EAE5DC] shadow-[0_4px_20px_rgba(25,23,21,0.03)] space-y-2">
+                    <div className="flex items-center gap-2 text-[#191715] font-medium text-sm">
+                      <Scale className="w-4 h-4 text-[#9E7431]" />
                       <span>Baux Diplomatiques &amp; OHADA</span>
                     </div>
-                    <p className="text-xs dark:text-white/60 text-[#6B655D] font-light leading-relaxed">
+                    <p className="text-xs text-[#6E665B] font-light leading-relaxed">
                       Conventions adaptées aux exigences des chancelleries, ambassades et groupes multinationaux.
                     </p>
                   </div>
@@ -287,14 +287,14 @@ export default function PropertyDetailPage() {
 
             {/* Colonne Droite : Dock Flottant VIP & Réservation (4 cols) */}
             <div className="lg:col-span-4 lg:sticky lg:top-28">
-              <div className="p-8 rounded-3xl dark:bg-[#121110] bg-white border dark:border-[#C8A97E]/30 border-black/10 dark:shadow-[0_30px_90px_rgba(0,0,0,0.95)] shadow-[0_20px_60px_rgba(0,0,0,0.08)] space-y-6">
+              <div className="p-8 rounded-3xl bg-white border border-[#EAE5DC] shadow-[0_20px_60px_rgba(25,23,21,0.08)] space-y-6">
                 
                 {/* Loyer */}
-                <div className="space-y-1 pb-4 border-b dark:border-white/10 border-black/10">
-                  <span className="text-[11px] font-mono uppercase dark:text-white/50 text-[#6B655D]">Loyer Mensuel</span>
-                  <div className="text-3xl sm:text-4xl font-display font-medium dark:text-[#C8A97E] text-[#947346]">
+                <div className="space-y-1 pb-4 border-b border-[#EAE5DC]">
+                  <span className="text-[11px] font-mono uppercase text-[#6E665B]">Loyer Mensuel</span>
+                  <div className="text-3xl sm:text-4xl font-display font-medium text-[#9E7431]">
                     {formatFCFA(property.price)}
-                    <span className="text-xs dark:text-white/60 text-[#6B655D] font-sans font-light"> / mois</span>
+                    <span className="text-xs text-[#6E665B] font-sans font-light"> / mois</span>
                   </div>
                 </div>
 
@@ -303,7 +303,7 @@ export default function PropertyDetailPage() {
                   href={whatsappDirectUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-4 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-[0_15px_35px_rgba(37,211,102,0.35)] transition-all transform hover:scale-102 cursor-pointer"
+                  className="w-full py-4 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-[0_15px_35px_rgba(37,211,102,0.25)] transition-all transform hover:scale-102 cursor-pointer"
                 >
                   <MessageCircle className="w-4 h-4 fill-white" />
                   <span>Planifier une Visite Privée</span>
@@ -315,9 +315,9 @@ export default function PropertyDetailPage() {
                     type="button"
                     onClick={handleDownloadPdf}
                     disabled={isGeneratingPdf}
-                    className="w-full py-3.5 rounded-full dark:bg-white/5 dark:hover:bg-white/10 dark:text-white dark:border-white/10 bg-black/5 hover:bg-black/10 text-[#141210] border-black/10 text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
+                    className="w-full py-3.5 rounded-full bg-[#F5F2EB] hover:bg-[#EAE5DC] text-[#191715] border border-[#EAE5DC] text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
                   >
-                    <Download className="w-4 h-4 dark:text-[#C8A97E] text-[#947346]" />
+                    <Download className="w-4 h-4 text-[#9E7431]" />
                     <span>{isGeneratingPdf ? 'Génération...' : 'Télécharger le Dossier PDF'}</span>
                   </button>
 
@@ -325,7 +325,7 @@ export default function PropertyDetailPage() {
                     <button
                       type="button"
                       onClick={() => setIsFlipbookOpen(true)}
-                      className="w-full py-3 rounded-full text-xs font-mono dark:text-[#C8A97E] text-[#947346] dark:hover:text-white hover:text-black flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                      className="w-full py-3 rounded-full text-xs font-mono text-[#9E7431] hover:text-[#191715] flex items-center justify-center gap-2 transition-colors cursor-pointer"
                     >
                       <BookOpen className="w-3.5 h-3.5" />
                       <span>Feuilleter la Brochure Virtuelle</span>
@@ -334,9 +334,9 @@ export default function PropertyDetailPage() {
                 </div>
 
                 {/* Ligne Directe Direction */}
-                <div className="pt-4 border-t dark:border-white/10 border-black/10 text-center space-y-1">
-                  <p className="text-[11px] dark:text-white/50 text-[#6B655D] font-mono">Direction &amp; Clientèle Privée</p>
-                  <p className="text-xs font-mono dark:text-white text-[#141210] font-medium">+225 07 88 42 19 20</p>
+                <div className="pt-4 border-t border-[#EAE5DC] text-center space-y-1">
+                  <p className="text-[11px] text-[#6E665B] font-mono">Direction &amp; Clientèle Privée</p>
+                  <p className="text-xs font-mono text-[#191715] font-medium">+225 07 88 42 19 20</p>
                 </div>
 
               </div>
@@ -346,22 +346,22 @@ export default function PropertyDetailPage() {
 
           {/* Résidences Similaires */}
           {similarProperties.length > 0 && (
-            <div className="pt-16 border-t dark:border-white/[0.08] border-black/[0.08] space-y-8">
-              <h3 className="text-3xl font-display font-medium dark:text-white text-[#141210]">
+            <div className="pt-16 border-t border-[#EAE5DC] space-y-8">
+              <h3 className="text-3xl font-display font-medium text-[#191715]">
                 Autres Demeures du Portefeuille
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {similarProperties.map((prop) => (
                   <TiltCard key={prop.id} tiltStrength={4} className="rounded-3xl">
-                    <article className="group rounded-3xl overflow-hidden dark:bg-[#121110] bg-white border dark:border-white/[0.08] border-black/[0.08] dark:shadow-[0_25px_60px_rgba(0,0,0,0.85)] shadow-[0_15px_40px_rgba(0,0,0,0.06)] flex flex-col justify-between h-full">
+                    <article className="group rounded-3xl overflow-hidden bg-white border border-[#EAE5DC] shadow-[0_15px_40px_rgba(25,23,21,0.06)] flex flex-col justify-between h-full">
                       <Link href={`/biens/${prop.id}`} className="block relative aspect-[16/10] overflow-hidden bg-black">
                         <Image
                           src={prop.images[0]}
                           alt={prop.title}
                           fill
                           unoptimized
-                          className="object-cover group-hover:scale-105 transition-transform duration-700 brightness-90 group-hover:brightness-100"
+                          className="object-cover group-hover:scale-105 transition-transform duration-700 brightness-95 group-hover:brightness-100"
                         />
                         <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-black/60 backdrop-blur-xl border border-white/20 text-xs font-mono uppercase text-[#C8A97E]">
                           {prop.district}
@@ -373,11 +373,11 @@ export default function PropertyDetailPage() {
                       </Link>
                       <div className="p-6 space-y-3">
                         <Link href={`/biens/${prop.id}`}>
-                          <h4 className="text-lg font-display font-medium dark:text-white text-[#141210] group-hover:text-[#C8A97E] transition-colors">
+                          <h4 className="text-lg font-display font-medium text-[#191715] group-hover:text-[#9E7431] transition-colors">
                             {prop.title}
                           </h4>
                         </Link>
-                        <div className="flex items-center gap-4 text-xs font-mono dark:text-white/70 text-[#6B655D]">
+                        <div className="flex items-center gap-4 text-xs font-mono text-[#6E665B]">
                           <span>{prop.surface} m²</span>
                           <span>•</span>
                           <span>{prop.bedrooms} suites</span>

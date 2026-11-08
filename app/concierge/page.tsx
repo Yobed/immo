@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { 
-  Camera, Check, Send, Clock, Sparkles, AlertTriangle, 
+  Camera, Check, Send, Clock, AlertTriangle, 
   ChevronRight, ChevronLeft, Building2, MessageCircle, X, Plus, RefreshCw, 
   CheckCircle2, ArrowLeft, ExternalLink, Bed, Droplet, Flame, Home, Zap,
   MessageSquare
@@ -357,10 +357,10 @@ export default function PhasedConciergeCheckPage() {
     const allPhotos: string[] = [];
 
     paliers.forEach((palier) => {
-      pointsSummaryLines.push(`📋 [Palier ${palier.number} : ${palier.title}]`);
+      pointsSummaryLines.push(`[Palier ${palier.number} : ${palier.title}]`);
       palier.points.forEach((pt) => {
-        const statusIcon = pt.status === 'ok' ? '✅' : '⚠️';
-        pointsSummaryLines.push(`  ${statusIcon} ${pt.label} : ${pt.comment || 'Vérifié conforme'}`);
+        const statusText = pt.status === 'ok' ? '[CONFORME]' : '[À REVOIR]';
+        pointsSummaryLines.push(`  ${statusText} ${pt.label} : ${pt.comment || 'Vérifié conforme'}`);
         if (pt.photoUrl) allPhotos.push(pt.photoUrl);
       });
       pointsSummaryLines.push('');
@@ -443,7 +443,7 @@ export default function PhasedConciergeCheckPage() {
 
           {/* Horodatage & Chronomètre */}
           <div className="flex items-center gap-2 bg-[#F5F2EB] px-3 py-1.5 rounded-full border border-[#E5DFD3] text-xs font-mono">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-emerald-600 ring-2 ring-emerald-100" />
             <span className="text-[#6E665B]">Début: <strong>{startedAt}</strong></span>
             <span className="text-[#B3ABA0]">|</span>
             <span className="font-bold text-[#191715]">{formatTimer(seconds)}</span>
@@ -773,8 +773,9 @@ export default function PhasedConciergeCheckPage() {
                           </span>
                         </div>
                         {pt.photoUrl && (
-                          <span className="text-[10px] font-mono text-[#9E7431] bg-[#F5F0E6] px-1.5 py-0.5 rounded shrink-0">
-                            📷 Photo
+                          <span className="text-[10px] font-mono text-[#9E7431] bg-[#F5F0E6] px-1.5 py-0.5 rounded shrink-0 inline-flex items-center gap-1">
+                            <Camera className="w-2.5 h-2.5" />
+                            <span>Photo</span>
                           </span>
                         )}
                       </div>
@@ -794,39 +795,39 @@ export default function PhasedConciergeCheckPage() {
                 <button
                   type="button"
                   onClick={() => setFinalStatusChoice('ready')}
-                  className={`py-3 px-2 rounded-2xl border text-center transition-all ${
+                  className={`py-3 px-2 rounded-2xl border text-center transition-all cursor-pointer ${
                     finalStatusChoice === 'ready'
                       ? 'bg-emerald-50 border-emerald-500 text-emerald-950 font-bold ring-2 ring-emerald-500/20'
                       : 'bg-[#FAF8F5] border-[#EAE5DC] text-[#6E665B]'
                   }`}
                 >
-                  <span className="block text-base">🟢</span>
+                  <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 mx-auto block mb-1" />
                   <strong className="text-xs block mt-0.5">Disponible</strong>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setFinalStatusChoice('cleaning')}
-                  className={`py-3 px-2 rounded-2xl border text-center transition-all ${
+                  className={`py-3 px-2 rounded-2xl border text-center transition-all cursor-pointer ${
                     finalStatusChoice === 'cleaning'
                       ? 'bg-amber-50 border-amber-500 text-amber-950 font-bold ring-2 ring-amber-500/20'
                       : 'bg-[#FAF8F5] border-[#EAE5DC] text-[#6E665B]'
                   }`}
                 >
-                  <span className="block text-base">🟡</span>
+                  <span className="w-3.5 h-3.5 rounded-full bg-amber-500 mx-auto block mb-1" />
                   <strong className="text-xs block mt-0.5">Nettoyage</strong>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setFinalStatusChoice('maintenance')}
-                  className={`py-3 px-2 rounded-2xl border text-center transition-all ${
+                  className={`py-3 px-2 rounded-2xl border text-center transition-all cursor-pointer ${
                     finalStatusChoice === 'maintenance'
                       ? 'bg-rose-50 border-rose-500 text-rose-950 font-bold ring-2 ring-rose-500/20'
                       : 'bg-[#FAF8F5] border-[#EAE5DC] text-[#6E665B]'
                   }`}
                 >
-                  <span className="block text-base">🔴</span>
+                  <span className="w-3.5 h-3.5 rounded-full bg-rose-500 mx-auto block mb-1" />
                   <strong className="text-xs block mt-0.5">Maintenance</strong>
                 </button>
               </div>
@@ -922,13 +923,13 @@ export default function PhasedConciergeCheckPage() {
               <a
                 href={getWhatsAppLink(
                   '2250788421920',
-                  `✅ *Rapport d'Audit Contrôle Point par Point*\n\nBien : *${currentProperty?.title}* (${currentProperty?.reference})\nInspecteur : ${inspectorName}\n\n⏱️ Début : ${startedAt} • Durée : ${formatTimer(seconds)}\n\n📋 *Remarques par Point de Contrôle :*\n${paliers.map((p) => p.points.map((pt) => `• ${pt.label} (${pt.status === 'ok' ? 'OK' : 'À revoir'}) : ${pt.comment}`).join('\n')).join('\n')}\n\nStatut commercial : ${finalStatusChoice === 'ready' ? '100% Prêt & Disponible' : finalStatusChoice === 'cleaning' ? 'En cours de nettoyage' : 'Maintenance'}\n\n👉 Le CRM et le Flipbook sont à jour en direct.`
+                  `*Rapport d'Audit Contrôle Point par Point*\n\nBien : *${currentProperty?.title}* (${currentProperty?.reference})\nInspecteur : ${inspectorName}\n\nDébut : ${startedAt} • Durée : ${formatTimer(seconds)}\n\n*Remarques par Point de Contrôle :*\n${paliers.map((p) => p.points.map((pt) => `• [${pt.status === 'ok' ? 'CONFORME' : 'À REVOIR'}] ${pt.label} : ${pt.comment}`).join('\n')).join('\n')}\n\nStatut commercial : ${finalStatusChoice === 'ready' ? '100% Prêt & Disponible' : finalStatusChoice === 'cleaning' ? 'En cours de nettoyage' : 'Maintenance'}\n\nLe CRM et le Flipbook sont synchronisés en direct.`
                 )}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full py-3.5 rounded-xl bg-[#25D366] hover:bg-[#20BA59] text-black font-bold text-xs flex items-center justify-center gap-2 shadow"
+                className="w-full py-3.5 rounded-xl bg-[#25D366] hover:bg-[#20BA59] text-white font-bold text-xs flex items-center justify-center gap-2 shadow cursor-pointer"
               >
-                <MessageCircle className="w-4 h-4" />
+                <MessageCircle className="w-4 h-4 fill-white" />
                 <span>Transmettre le Rapport Détaillé (WhatsApp)</span>
               </a>
 

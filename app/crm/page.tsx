@@ -140,7 +140,7 @@ export default function CrmDashboardPage() {
               <span>Mis à jour en direct</span>
               <span>·</span>
               <span className="inline-flex items-center gap-1 text-[#0F5E3E] bg-[#D7F4E8] px-2 py-0.2 rounded-full text-[10px] font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#17915F] animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#17915F] ring-2 ring-emerald-200" />
                 Actions WhatsApp &amp; Séquestre actives
               </span>
             </p>
@@ -425,7 +425,7 @@ export default function CrmDashboardPage() {
                   <span className="text-[11px] uppercase tracking-wider font-bold text-white/70">
                     La Machine &amp; IA
                   </span>
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#17915F] animate-pulse" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#17915F] ring-2 ring-emerald-900/60" />
                 </div>
 
                 <div className="space-y-2 text-xs">
@@ -1107,7 +1107,7 @@ export default function CrmDashboardPage() {
               </p>
             </div>
             <div className="flex items-center gap-3 bg-white/10 px-5 py-3 rounded-2xl border border-white/10">
-              <span className="w-3 h-3 rounded-full bg-[#17915F] animate-ping" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#17915F] ring-2 ring-emerald-300" />
               <div>
                 <span className="text-xs text-white/70 block">Statut Serveur</span>
                 <span className="text-sm font-bold text-white">100% En Ligne</span>

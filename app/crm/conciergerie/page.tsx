@@ -65,7 +65,7 @@ export default function CrmConciergeriePage() {
               Supervision Opérationnelle Terrain
             </span>
             <span className="text-[10px] bg-[#d2e3d8] text-[#1d382b] px-2 py-0.5 rounded-full font-mono flex items-center gap-1 font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] ring-2 ring-emerald-200" />
               Sync Écosystème
             </span>
           </div>
@@ -112,7 +112,7 @@ export default function CrmConciergeriePage() {
         >
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold text-emerald-800">Prêts &amp; Disponibles</span>
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-200" />
           </div>
           <span className="text-2xl font-display font-bold text-[#161412] block">
             {readyCount}

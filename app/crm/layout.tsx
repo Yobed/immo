@@ -52,7 +52,7 @@ export default function CrmLayout({ children }: { children: React.ReactNode }) {
 
         <div className="flex items-center gap-2">
           <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#f0f5f2] text-[#1d382b] font-medium border border-[#d2e3d8] flex items-center gap-1 font-sans">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] ring-2 ring-emerald-100" />
             <span>Aya IA</span>
           </span>
 
@@ -230,7 +230,7 @@ export default function CrmLayout({ children }: { children: React.ReactNode }) {
               <Bot className="w-3.5 h-3.5 text-[#1d382b] shrink-0" />
               {!isCollapsed && <span className="text-[11px] font-semibold text-[#161412]">Aya IA</span>}
             </div>
-            <span className="w-2 h-2 rounded-full bg-[#25D366] animate-pulse" title="Agent IA en ligne" />
+            <span className="w-2 h-2 rounded-full bg-[#25D366] ring-2 ring-emerald-100" title="Agent IA en ligne" />
           </div>
           {!isCollapsed && (
             <span className="text-[9px] text-[#7a736a] block leading-tight">

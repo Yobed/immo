@@ -166,7 +166,7 @@ export default function ProspectsDataTable({
         </style>
       </head>
       <body>
-        <h2>Cabinet Immobilier Abidjan — Base Complète Historique des Prospects & Clients</h2>
+        <h2>Cabinet Immobilier Abidjan : Base Complète Historique des Prospects &amp; Clients</h2>
         <p>Généré le ${new Date().toLocaleDateString('fr-FR')} • ${sortedContacts.length} enregistrements</p>
         <table border="1">
           <thead>

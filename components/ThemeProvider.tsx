@@ -17,9 +17,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Read saved theme from localStorage, default to light
+    // Enforce luminous white luxury monograph theme as canonical default
     const saved = localStorage.getItem('agency_theme') as Theme | null;
-    const initial = saved === 'light' || saved === 'dark' ? saved : 'light';
+    const initial = saved === 'dark' ? 'light' : (saved || 'light');
     setThemeState(initial);
     applyTheme(initial);
     setMounted(true);

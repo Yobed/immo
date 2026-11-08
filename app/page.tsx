@@ -28,7 +28,7 @@ export default function HomePage() {
     <>
       <Navbar />
 
-      <main className="min-h-screen dark:bg-[#0A0908] bg-[#FAF8F5] dark:text-[#F5F2EB] text-[#141210] font-sans selection:bg-[#C8A97E] selection:text-[#0A0908] overflow-x-hidden transition-colors duration-300">
+      <main className="min-h-screen bg-[#FAF8F5] text-[#191715] font-sans selection:bg-[#9E7431] selection:text-white overflow-x-hidden">
         
         {/* ========================================================================= */}
         {/* 1. HERO CINÉMATIQUE 100VH : PLEIN ÉCRAN, PARALLAXE 3D & IMMERSION TOTALE */}

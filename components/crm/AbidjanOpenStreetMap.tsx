@@ -348,7 +348,7 @@ export default function AbidjanOpenStreetMap({ visits, properties, onSelectVisit
         {/* Top-Left Floating Pills (Comme sur l'image de référence) */}
         <div className="absolute top-4 left-4 z-10 space-y-2 pointer-events-auto">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#15161A]/90 backdrop-blur-md border border-slate-700/80 text-xs font-semibold shadow-lg">
-            <span className="w-2 h-2 rounded-full bg-[#3B82F6] animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-[#3B82F6] ring-2 ring-blue-400/50" />
             <span className="text-white text-[11px]">MA POSITION · GPS Actif</span>
           </div>
 
@@ -465,7 +465,7 @@ export default function AbidjanOpenStreetMap({ visits, properties, onSelectVisit
             <div className="bg-[#15161A]/95 backdrop-blur-md rounded-2xl border border-slate-700 px-4 py-3 flex flex-wrap items-center justify-between gap-3 shadow-2xl">
               
               <div className="flex items-center gap-3 min-w-0">
-                <span className="w-3 h-3 rounded-full bg-[#3B82F6] animate-pulse shrink-0" />
+                <span className="w-3 h-3 rounded-full bg-[#3B82F6] ring-2 ring-blue-400/50 shrink-0" />
                 <div className="truncate">
                   <span className="text-xs font-extrabold uppercase tracking-wider text-[#FFD84D] block truncate">
                     Itinéraire vers : {selectedProperty.title}

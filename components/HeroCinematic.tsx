@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'motion/react';
 import { Property } from '@/lib/types';
 import { formatFCFA, getWhatsAppLink } from '@/lib/utils';
-import { ArrowRight, MessageCircle, ChevronLeft, ChevronRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowRight, MessageCircle, ChevronLeft, ChevronRight, ShieldCheck, MapPin } from 'lucide-react';
 
 interface HeroCinematicProps {
   properties: Property[];
@@ -102,7 +102,7 @@ export default function HeroCinematic({ properties, onOpenVisitModal }: HeroCine
           {/* Badge Quartier & Titre Foncier */}
           <div className="flex items-center gap-3">
             <span className="px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-xl border border-white/15 text-xs font-mono uppercase tracking-wider text-[#C8A97E] flex items-center gap-2 shadow-lg">
-              <Sparkles className="w-3.5 h-3.5 text-[#C8A97E]" />
+              <MapPin className="w-3.5 h-3.5 text-[#C8A97E]" />
               <span>{activeProp.district}</span>
             </span>
 

@@ -1225,7 +1225,7 @@ export default function CrmVisitesPage() {
                     <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="px-3 py-1 rounded-full text-xs font-black bg-[#FFD84D] text-[#15161A] shadow-xs flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-[#15161A] animate-pulse" />
+                          <span className="w-2 h-2 rounded-full bg-[#15161A]" />
                           <span>{activeModalVisit.status === 'completed' ? 'VISITE EFFECTUÉE' : isPastVisit ? 'VISITE PASSÉE' : 'VISITE CONFIRMÉE'}</span>
                         </span>
 

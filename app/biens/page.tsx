@@ -13,7 +13,7 @@ import { PropertyOperation, PropertyType } from '@/lib/types';
 import { formatFCFA, getWhatsAppLink } from '@/lib/utils';
 import { 
   Search, RotateCcw, MessageCircle, ShieldCheck, 
-  Maximize2, Bed, Waves, ArrowRight, Sparkles 
+  Maximize2, Bed, Waves, ArrowRight 
 } from 'lucide-react';
 
 function CatalogContent() {
@@ -48,25 +48,25 @@ function CatalogContent() {
     <>
       <Navbar />
 
-      <main className="min-h-screen dark:bg-[#0A0908] bg-[#FAF8F5] dark:text-[#F5F2EB] text-[#141210] font-sans selection:bg-[#C8A97E] selection:text-[#0A0908] pt-24 pb-28 transition-colors duration-300">
+      <main className="min-h-screen bg-[#FAF8F5] text-[#191715] font-sans selection:bg-[#9E7431] selection:text-white pt-24 pb-28">
         
         <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 space-y-12">
           
           {/* En-tête Monographique */}
           <div className="space-y-4 max-w-3xl pt-4">
-            <span className="text-[11px] font-mono tracking-widest uppercase dark:text-[#C8A97E] text-[#947346]">
+            <span className="text-[11px] font-mono tracking-widest uppercase text-[#9E7431]">
               Portefeuille Immobilier • Abidjan
             </span>
-            <h1 className="text-4xl sm:text-6xl font-display font-medium dark:text-white text-[#141210] tracking-tight leading-tight">
+            <h1 className="text-4xl sm:text-6xl font-display font-medium text-[#191715] tracking-tight leading-tight">
               Résidences d&apos;Exception
             </h1>
-            <p className="text-sm sm:text-base dark:text-[#A39C92] text-[#6B655D] font-light leading-relaxed">
+            <p className="text-sm sm:text-base text-[#6E665B] font-light leading-relaxed">
               Villas contemporaines, penthouses panoramiques et domaines balnéaires vérifiés au Livre Foncier.
             </p>
           </div>
 
-          {/* Barre de Filtres Flottante en Verre Fumé */}
-          <div className="p-4 sm:p-5 rounded-3xl dark:bg-[#121110] bg-white border dark:border-white/[0.08] border-black/[0.08] dark:shadow-[0_20px_60px_rgba(0,0,0,0.85)] shadow-[0_10px_30px_rgba(0,0,0,0.06)] flex flex-wrap items-center justify-between gap-4">
+          {/* Barre de Filtres Flottante */}
+          <div className="p-4 sm:p-5 rounded-3xl bg-white border border-[#EAE5DC] shadow-[0_10px_30px_rgba(25,23,21,0.04)] flex flex-wrap items-center justify-between gap-4">
             
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               {/* Filtres de Type */}
@@ -75,8 +75,8 @@ function CatalogContent() {
                 onClick={() => setType('all')}
                 className={`px-4 py-2 rounded-full text-xs font-mono transition-all cursor-pointer ${
                   type === 'all'
-                    ? 'dark:bg-[#C8A97E] dark:text-[#0A0908] bg-[#141210] text-white font-bold shadow-md'
-                    : 'dark:bg-white/5 dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white bg-black/5 text-black/70 hover:bg-black/10 hover:text-black'
+                    ? 'bg-[#191715] text-white font-bold shadow-md'
+                    : 'bg-[#F5F2EB] text-[#6E665B] hover:bg-[#EAE5DC] hover:text-[#191715]'
                 }`}
               >
                 Toutes ({INITIAL_PROPERTIES.length})
@@ -87,8 +87,8 @@ function CatalogContent() {
                 onClick={() => setType('villa')}
                 className={`px-4 py-2 rounded-full text-xs font-mono transition-all cursor-pointer ${
                   type === 'villa'
-                    ? 'dark:bg-[#C8A97E] dark:text-[#0A0908] bg-[#141210] text-white font-bold shadow-md'
-                    : 'dark:bg-white/5 dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white bg-black/5 text-black/70 hover:bg-black/10 hover:text-black'
+                    ? 'bg-[#191715] text-white font-bold shadow-md'
+                    : 'bg-[#F5F2EB] text-[#6E665B] hover:bg-[#EAE5DC] hover:text-[#191715]'
                 }`}
               >
                 Villas
@@ -99,8 +99,8 @@ function CatalogContent() {
                 onClick={() => setType('penthouse')}
                 className={`px-4 py-2 rounded-full text-xs font-mono transition-all cursor-pointer ${
                   type === 'penthouse'
-                    ? 'dark:bg-[#C8A97E] dark:text-[#0A0908] bg-[#141210] text-white font-bold shadow-md'
-                    : 'dark:bg-white/5 dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white bg-black/5 text-black/70 hover:bg-black/10 hover:text-black'
+                    ? 'bg-[#191715] text-white font-bold shadow-md'
+                    : 'bg-[#F5F2EB] text-[#6E665B] hover:bg-[#EAE5DC] hover:text-[#191715]'
                 }`}
               >
                 Penthouses
@@ -112,8 +112,8 @@ function CatalogContent() {
                 onClick={() => setFilterPool(!filterPool)}
                 className={`px-4 py-2 rounded-full text-xs font-mono transition-all cursor-pointer flex items-center gap-1.5 ${
                   filterPool
-                    ? 'dark:bg-cyan-500/20 dark:text-cyan-300 dark:border-cyan-400/40 bg-cyan-100 text-cyan-900 border border-cyan-300 shadow-sm'
-                    : 'dark:bg-white/5 dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white bg-black/5 text-black/70 hover:bg-black/10 hover:text-black'
+                    ? 'bg-cyan-100 text-cyan-900 border border-cyan-300 shadow-sm font-semibold'
+                    : 'bg-[#F5F2EB] text-[#6E665B] hover:bg-[#EAE5DC] hover:text-[#191715]'
                 }`}
               >
                 <Waves className="w-3 h-3" />
@@ -123,7 +123,7 @@ function CatalogContent() {
 
             {/* Compteur & Réinitialisation */}
             <div className="flex items-center gap-3">
-              <span className="text-xs font-mono dark:text-white/50 text-[#6B655D]">
+              <span className="text-xs font-mono text-[#6E665B]">
                 {filteredProperties.length} bien(s) disponible(s)
               </span>
 
@@ -131,7 +131,7 @@ function CatalogContent() {
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="p-2 rounded-full dark:hover:bg-white/10 dark:text-white/50 dark:hover:text-white hover:bg-black/10 text-black/50 hover:text-black transition-colors"
+                  className="p-2 rounded-full hover:bg-[#F5F2EB] text-[#6E665B] hover:text-[#191715] transition-colors"
                   title="Réinitialiser"
                 >
                   <RotateCcw className="w-4 h-4" />
@@ -145,7 +145,7 @@ function CatalogContent() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
             {filteredProperties.map((prop) => (
               <TiltCard key={prop.id} tiltStrength={5} className="rounded-3xl">
-                <article className="group relative rounded-3xl overflow-hidden dark:bg-[#121110] bg-white border dark:border-white/[0.08] border-black/[0.08] dark:shadow-[0_25px_70px_rgba(0,0,0,0.85)] shadow-[0_15px_40px_rgba(0,0,0,0.06)] flex flex-col justify-between h-full">
+                <article className="group relative rounded-3xl overflow-hidden bg-white border border-[#EAE5DC] shadow-[0_15px_40px_rgba(25,23,21,0.06)] flex flex-col justify-between h-full">
                   
                   {/* Photo Widescreen */}
                   <Link href={`/biens/${prop.id}`} className="block relative aspect-[16/10] overflow-hidden bg-black">
@@ -155,11 +155,11 @@ function CatalogContent() {
                       fill
                       unoptimized
                       sizes="(max-width: 768px) 100vw, 50vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out brightness-90 group-hover:brightness-100"
+                      className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out brightness-95 group-hover:brightness-100"
                     />
 
                     {/* Gradient doux */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent opacity-85" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-85" />
 
                     {/* Badges Flottants */}
                     <div className="absolute top-5 left-5 flex items-center gap-2">
@@ -183,25 +183,25 @@ function CatalogContent() {
                   {/* Détails Épurés */}
                   <div className="p-6 space-y-4">
                     <Link href={`/biens/${prop.id}`} className="block">
-                      <h3 className="text-xl font-display font-medium dark:text-white text-[#141210] group-hover:text-[#C8A97E] transition-colors leading-snug">
+                      <h3 className="text-xl font-display font-medium text-[#191715] group-hover:text-[#9E7431] transition-colors leading-snug">
                         {prop.title}
                       </h3>
                     </Link>
 
-                    <div className="flex items-center gap-6 py-2.5 border-y dark:border-white/[0.08] border-black/[0.08] text-xs dark:text-white/80 text-[#141210]/80 font-mono">
+                    <div className="flex items-center gap-6 py-2.5 border-y border-[#EAE5DC] text-xs text-[#6E665B] font-mono">
                       <div className="flex items-center gap-1.5">
-                        <Maximize2 className="w-3.5 h-3.5 text-[#C8A97E]" />
+                        <Maximize2 className="w-3.5 h-3.5 text-[#9E7431]" />
                         <span>{prop.surface} m²</span>
                       </div>
                       {prop.bedrooms > 0 && (
                         <div className="flex items-center gap-1.5">
-                          <Bed className="w-3.5 h-3.5 text-[#C8A97E]" />
+                          <Bed className="w-3.5 h-3.5 text-[#9E7431]" />
                           <span>{prop.bedrooms} suites</span>
                         </div>
                       )}
                       {prop.has_pool && (
                         <div className="flex items-center gap-1.5">
-                          <Waves className="w-3.5 h-3.5 text-[#C8A97E]" />
+                          <Waves className="w-3.5 h-3.5 text-[#9E7431]" />
                           <span>Piscine</span>
                         </div>
                       )}
@@ -216,7 +216,7 @@ function CatalogContent() {
                         )}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-xs font-bold text-white transition-all shadow-md"
+                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-xs font-bold text-white transition-all shadow-md"
                       >
                         <MessageCircle className="w-3.5 h-3.5 fill-white" />
                         <span>Visiter sur WhatsApp</span>
@@ -224,7 +224,7 @@ function CatalogContent() {
 
                       <Link
                         href={`/biens/${prop.id}`}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full dark:bg-white/10 dark:hover:bg-white dark:hover:text-[#0A0908] dark:text-white bg-black/5 hover:bg-black hover:text-white text-[#141210] text-xs font-semibold transition-all duration-300"
+                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-[#F5F2EB] hover:bg-[#191715] hover:text-white text-[#191715] text-xs font-semibold border border-[#EAE5DC] transition-all duration-300"
                       >
                         <span>Détails</span>
                         <ArrowRight className="w-3 h-3" />
@@ -249,7 +249,7 @@ function CatalogContent() {
 
 export default function CatalogPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#0A0908] flex items-center justify-center text-white font-mono text-xs">Chargement...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#FAF8F5] flex items-center justify-center text-[#6E665B] font-mono text-xs">Chargement...</div>}>
       <CatalogContent />
     </Suspense>
   );

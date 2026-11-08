@@ -171,11 +171,11 @@ export default function BrochurePrintPage() {
                 </div>
                 <div>
                   <span className="text-[#a39c92] block text-[10px]">Chambres / Suites</span>
-                  <span className="font-semibold text-sm text-[#161412]">{property.bedrooms || '—'}</span>
+                  <span className="font-semibold text-sm text-[#161412]">{property.bedrooms || 'NC'}</span>
                 </div>
                 <div>
                   <span className="text-[#a39c92] block text-[10px]">Salles d&apos;eau</span>
-                  <span className="font-semibold text-sm text-[#161412]">{property.bathrooms || '—'}</span>
+                  <span className="font-semibold text-sm text-[#161412]">{property.bathrooms || 'NC'}</span>
                 </div>
                 <div>
                   <span className="text-[#a39c92] block text-[10px]">Emplacement</span>
