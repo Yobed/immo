@@ -33,7 +33,12 @@ export default function TodayPage() {
   const { contacts } = useCrmContacts();
   const [doneIds, setDoneIds] = useState<string[]>([]);
 
-  const visits = INITIAL_VISITS.filter((v) => v.status === 'scheduled').sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at));
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  // seules les visites à venir (à partir d'aujourd'hui) sont à confirmer
+  const visits = INITIAL_VISITS
+    .filter((v) => v.status === 'scheduled' && new Date(v.scheduled_at) >= startOfToday)
+    .sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at));
   const hotLeads = contacts.filter((c) => c.lead_score === 'hot').slice(0, 3);
   const signing = INITIAL_DEALS.filter((d) => SIGNING_STAGES.includes(d.stage));
 
