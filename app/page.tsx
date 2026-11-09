@@ -1,113 +1,138 @@
 'use client';
 
-import React, { useState } from 'react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import HeroCinematic from '@/components/HeroCinematic';
-import PanoramicGallery from '@/components/PanoramicGallery';
-import LuxuryVilla3D from '@/components/LuxuryVilla3D';
-import CatalogueShowcaseSection from '@/components/CatalogueShowcaseSection';
-import CinematicVideoSection from '@/components/CinematicVideoSection';
-import PrivateConcierge from '@/components/PrivateConcierge';
-import DossierRequestModal from '@/components/DossierRequestModal';
-import { INITIAL_PROPERTIES } from '@/lib/mock-data';
+import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { ArrowRight } from 'lucide-react';
+import SiteHeader from '@/components/site/SiteHeader';
+import SiteFooter from '@/components/site/SiteFooter';
+import PropertyCard from '@/components/site/PropertyCard';
+import SearchForm from '@/components/site/SearchForm';
 import { Reveal } from '@/components/Motion';
+import { useLiveProperties } from '@/lib/useLiveProperties';
+import { EMPTY_FILTERS, listDistricts, listTypes } from '@/lib/property-search';
+
+const PROMISES = [
+  { title: 'Titre foncier affiché', text: 'Chaque annonce indique la nature du titre (ACD, TF, CMP) avant même la visite.' },
+  { title: 'Visites accompagnées', text: 'Un conseiller vous reçoit sur place et répond à vos questions sur le bail.' },
+  { title: 'Un seul interlocuteur', text: 'Demande, visite et signature suivies par la même personne, sur WhatsApp ou par téléphone.' },
+];
 
 export default function HomePage() {
-  const [isDossierModalOpen, setIsDossierModalOpen] = useState(false);
-  const [activeDossierProp, setActiveDossierProp] = useState<{ reference: string; title: string }>({
-    reference: 'VIL-RG-2026',
-    title: 'Villa Duplex Contemporaine Cocody Riviera Golf',
-  });
-
-  const handleOpenDossier = (ref: string, title: string) => {
-    setActiveDossierProp({ reference: ref, title });
-    setIsDossierModalOpen(true);
-  };
+  const { properties } = useLiveProperties();
+  const districts = listDistricts(properties);
+  const types = listTypes(properties);
+  const cover = properties[0];
+  const countByDistrict = (d: string) => properties.filter((p) => p.district === d).length;
 
   return (
     <>
-      <Navbar />
+      <SiteHeader />
 
-      <main className="min-h-screen bg-[#FAF8F5] text-[#191715] font-sans selection:bg-[#9E7431] selection:text-white overflow-x-hidden">
-        
-        {/* ========================================================================= */}
-        {/* 1. HERO CINÉMATIQUE 100VH : PLEIN ÉCRAN, PARALLAXE 3D & IMMERSION TOTALE */}
-        {/* ========================================================================= */}
-        <HeroCinematic 
-          properties={INITIAL_PROPERTIES} 
-          onOpenVisitModal={(prop) => handleOpenDossier(prop.reference, prop.title)} 
-        />
+      <main className="bg-white text-ink">
+        {/* Accroche + recherche */}
+        <section className="site-container pt-10 sm:pt-16 pb-12">
+          <div className="grid gap-10 lg:grid-cols-[1.05fr_1fr] lg:items-center">
+            <div className="space-y-5">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.05]">
+                Trouvez votre bien
+                <br />
+                à Abidjan.
+              </h1>
+              <p className="text-lg text-ink-muted max-w-md">
+                Villas, appartements et bureaux à louer, de Cocody à Assinie. Titre foncier indiqué sur chaque annonce.
+              </p>
+              <dl className="flex gap-8 pt-2">
+                <div>
+                  <dt className="text-sm text-ink-muted">Biens disponibles</dt>
+                  <dd className="text-2xl font-semibold tabular-nums">{properties.length}</dd>
+                </div>
+                <div>
+                  <dt className="text-sm text-ink-muted">Quartiers</dt>
+                  <dd className="text-2xl font-semibold tabular-nums">{districts.length}</dd>
+                </div>
+              </dl>
+            </div>
 
-        {/* ========================================================================= */}
-        {/* 2. LA SÉLECTION PRIVÉE : GALERIE PANORAMIQUE & PERSPECTIVE 3D             */}
-        {/* ========================================================================= */}
-        <PanoramicGallery 
-          properties={INITIAL_PROPERTIES}
-          onOpenDossier={handleOpenDossier}
-        />
+            {cover && (
+              <Link href={`/biens/${cover.id}`} className="group relative block aspect-[4/3] lg:aspect-[5/4] overflow-hidden rounded-2xl bg-paper">
+                <Image
+                  src={cover.images[0]}
+                  alt={cover.title}
+                  fill
+                  priority
+                  unoptimized
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                />
+                <span className="absolute bottom-4 left-4 rounded-md bg-white px-3 py-1.5 text-sm font-medium">
+                  {cover.district}
+                </span>
+              </Link>
+            )}
+          </div>
 
-        {/* ========================================================================= */}
-        {/* 3. L'ÉLÉVATION 3D SPATIALE : MAQUETTE THREE.JS WEBGL EN TEMPS RÉEL        */}
-        {/* ========================================================================= */}
-        <section id="maquette3d" className="py-24 sm:py-32 px-6 sm:px-10 lg:px-14 max-w-[1440px] mx-auto border-t dark:border-white/[0.08] border-black/[0.08] select-none">
-          <div className="space-y-10">
-            
-            <Reveal className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-6 border-b dark:border-white/[0.08] border-black/[0.08]">
-              <div className="space-y-2">
-                <h2 className="text-4xl sm:text-6xl font-display font-medium dark:text-white text-[#141210] tracking-tight">
-                  La Villa sous Toutes ses Ombres
-                </h2>
-                <p className="text-sm sm:text-base dark:text-[#A39C92] text-[#6B655D] font-light max-w-xl">
-                  Faites pivoter la maquette en 3D temps réel, explorez les volumes suspendus et observez les ombres équatoriales de 12h à la nuit.
-                </p>
-              </div>
-
-              <span className="text-xs font-mono uppercase tracking-wider dark:text-[#C8A97E] text-[#947346]">
-                Glisser pour pivoter
-              </span>
-            </Reveal>
-
-            {/* Maquette 3D WebGL */}
-            <Reveal delay={0.1}>
-              <LuxuryVilla3D />
-            </Reveal>
-
+          <div className="mt-10">
+            <SearchForm districts={districts} types={types} value={EMPTY_FILTERS} />
           </div>
         </section>
 
-        {/* ========================================================================= */}
-        {/* 4. LE CATALOGUE NUMÉRIQUE 3D : LE FLIPBOOK D'EXCEPTION 2026              */}
-        {/* ========================================================================= */}
-        <Reveal>
-          <CatalogueShowcaseSection />
-        </Reveal>
+        {/* Sélection */}
+        <section className="site-container py-12 sm:py-16 border-t border-line">
+          <Reveal className="flex items-end justify-between gap-4 mb-8">
+            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">Biens disponibles</h2>
+            <Link href="/biens" className="text-sm font-medium text-ink hover:text-accent inline-flex items-center gap-1.5 shrink-0">
+              Tout voir <ArrowRight className="w-4 h-4" />
+            </Link>
+          </Reveal>
+          <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+            {properties.slice(0, 6).map((p, idx) => (
+              <Reveal key={p.id} delay={(idx % 3) * 0.06}>
+                <PropertyCard property={p} />
+              </Reveal>
+            ))}
+          </div>
+        </section>
 
-        {/* ========================================================================= */}
-        {/* 5. LE FILM CINÉMATIQUE : SURVOL DRONE 4K & VISITES EN MOUVEMENT           */}
-        {/* ========================================================================= */}
-        <div id="cinema">
-          <CinematicVideoSection />
-        </div>
+        {/* Quartiers */}
+        <section className="site-container py-12 sm:py-16 border-t border-line">
+          <Reveal>
+            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight mb-8">Chercher par quartier</h2>
+          </Reveal>
+          <ul className="grid sm:grid-cols-2 lg:grid-cols-3 border-t border-line">
+            {districts.map((d) => (
+              <li key={d} className="border-b border-line">
+                <Link
+                  href={`/biens?quartier=${encodeURIComponent(d)}`}
+                  className="group flex items-center justify-between py-4 pr-2 hover:bg-paper transition-colors sm:px-2"
+                >
+                  <span className="font-medium">{d}</span>
+                  <span className="flex items-center gap-3 text-sm text-ink-muted">
+                    <span className="tabular-nums">{countByDistrict(d)} bien{countByDistrict(d) > 1 ? 's' : ''}</span>
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
 
-        {/* ========================================================================= */}
-        {/* 6. CONCIERGERIE PRIVÉE & LIGNE DIRECTE AVEC LA DIRECTION (ZÉRO FRICTION)  */}
-        {/* ========================================================================= */}
-        <Reveal>
-          <PrivateConcierge />
-        </Reveal>
+        {/* Engagements */}
+        <section className="bg-paper border-t border-line">
+          <div className="site-container py-12 sm:py-16 grid gap-8 sm:grid-cols-3">
+            {PROMISES.map((item, idx) => (
+              <Reveal key={item.title} delay={idx * 0.06} className="space-y-2">
+                <p className="text-sm font-medium text-accent tabular-nums">0{idx + 1}</p>
+                <h3 className="text-lg font-semibold">{item.title}</h3>
+                <p className="text-ink-muted">{item.text}</p>
+              </Reveal>
+            ))}
+          </div>
+        </section>
 
       </main>
 
-      {/* MODAL DE DEMANDE DE DOSSIER FONCIER AUDITÉ */}
-      <DossierRequestModal
-        isOpen={isDossierModalOpen}
-        onClose={() => setIsDossierModalOpen(false)}
-        propertyReference={activeDossierProp.reference}
-        propertyTitle={activeDossierProp.title}
-      />
-
-      <Footer />
+      <SiteFooter />
     </>
   );
 }
