@@ -11,6 +11,7 @@ import CinematicVideoSection from '@/components/CinematicVideoSection';
 import PrivateConcierge from '@/components/PrivateConcierge';
 import DossierRequestModal from '@/components/DossierRequestModal';
 import { INITIAL_PROPERTIES } from '@/lib/mock-data';
+import { Reveal } from '@/components/Motion';
 
 export default function HomePage() {
   const [isDossierModalOpen, setIsDossierModalOpen] = useState(false);
@@ -52,7 +53,7 @@ export default function HomePage() {
         <section id="maquette3d" className="py-24 sm:py-32 px-6 sm:px-10 lg:px-14 max-w-[1440px] mx-auto border-t dark:border-white/[0.08] border-black/[0.08] select-none">
           <div className="space-y-10">
             
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-6 border-b dark:border-white/[0.08] border-black/[0.08]">
+            <Reveal className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-6 border-b dark:border-white/[0.08] border-black/[0.08]">
               <div className="space-y-2">
                 <h2 className="text-4xl sm:text-6xl font-display font-medium dark:text-white text-[#141210] tracking-tight">
                   La Villa sous Toutes ses Ombres
@@ -62,14 +63,15 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <div className="text-xs font-mono dark:text-[#C8A97E] text-[#947346] flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full dark:bg-[#C8A97E] bg-[#947346]" />
-                <span>Moteur 3D WebGL Actif</span>
-              </div>
-            </div>
+              <span className="text-xs font-mono uppercase tracking-wider dark:text-[#C8A97E] text-[#947346]">
+                Glisser pour pivoter
+              </span>
+            </Reveal>
 
             {/* Maquette 3D WebGL */}
-            <LuxuryVilla3D />
+            <Reveal delay={0.1}>
+              <LuxuryVilla3D />
+            </Reveal>
 
           </div>
         </section>
@@ -77,7 +79,9 @@ export default function HomePage() {
         {/* ========================================================================= */}
         {/* 4. LE CATALOGUE NUMÉRIQUE 3D : LE FLIPBOOK D'EXCEPTION 2026              */}
         {/* ========================================================================= */}
-        <CatalogueShowcaseSection />
+        <Reveal>
+          <CatalogueShowcaseSection />
+        </Reveal>
 
         {/* ========================================================================= */}
         {/* 5. LE FILM CINÉMATIQUE : SURVOL DRONE 4K & VISITES EN MOUVEMENT           */}
@@ -89,7 +93,9 @@ export default function HomePage() {
         {/* ========================================================================= */}
         {/* 6. CONCIERGERIE PRIVÉE & LIGNE DIRECTE AVEC LA DIRECTION (ZÉRO FRICTION)  */}
         {/* ========================================================================= */}
-        <PrivateConcierge />
+        <Reveal>
+          <PrivateConcierge />
+        </Reveal>
 
       </main>
 

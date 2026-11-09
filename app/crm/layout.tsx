@@ -3,12 +3,30 @@
 import React, { useState, useEffect } from 'react';
 import NextLink from 'next/link';
 import { usePathname } from 'next/navigation';
+import CommandPalette from '@/components/crm/CommandPalette';
 import { 
   LayoutDashboard, Building2, Users, CalendarDays, 
-  GitPullRequest, ArrowLeft, Bot, ShieldCheck, CheckCircle, 
+  GitPullRequest, ArrowLeft, Bot,
   Lightbulb, ChevronLeft, ChevronRight, Menu, X, ExternalLink,
-  MessageCircle, Sparkles, Target
+  ClipboardCheck, Target, Search
 } from 'lucide-react';
+
+const COLLAPSE_KEY = 'crm:sidebar-collapsed';
+
+const CRM_NAV = [
+  { name: 'Tableau de bord', href: '/crm', icon: LayoutDashboard },
+  { name: 'Contacts & WhatsApp', href: '/crm/contacts', icon: Users },
+  { name: 'Ciblage & Réseaux Sociaux', href: '/crm/ciblage', icon: Target },
+  { name: 'Intelligence & Objections', href: '/crm/intelligence', icon: Lightbulb },
+  { name: 'Portefeuille Biens', href: '/crm/biens', icon: Building2 },
+  { name: 'Conciergerie & Checks', href: '/crm/conciergerie', icon: ClipboardCheck },
+  { name: 'Planning Visites', href: '/crm/visites', icon: CalendarDays },
+  { name: 'Pipeline Kanban', href: '/crm/pipeline', icon: GitPullRequest },
+];
+
+function isActiveRoute(pathname: string, href: string): boolean {
+  return href === '/crm' ? pathname === '/crm' : pathname.startsWith(href);
+}
 
 export default function CrmLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -20,18 +38,30 @@ export default function CrmLayout({ children }: { children: React.ReactNode }) {
     setMobileMenuOpen(false);
   }, [pathname]);
 
-  const navItems = [
-    { name: 'Tableau de bord', href: '/crm', icon: LayoutDashboard, badge: null, color: '#161412' },
-    { name: 'Contacts & WhatsApp', href: '/crm/contacts', icon: Users, badge: '8', color: '#9E7431' },
-    { name: 'Ciblage & Réseaux Sociaux', href: '/crm/ciblage', icon: Target, badge: 'ADS', color: '#9E7431' },
-    { name: 'Intelligence & Objections', href: '/crm/intelligence', icon: Lightbulb, badge: 'IA', color: '#9E7431' },
-    { name: 'Portefeuille Biens', href: '/crm/biens', icon: Building2, badge: '6', color: '#161412' },
-    { name: 'Conciergerie & Checks', href: '/crm/conciergerie', icon: Sparkles, badge: 'LIVE', color: '#9E7431' },
-    { name: 'Planning Visites', href: '/crm/visites', icon: CalendarDays, badge: '3', color: '#161412' },
-    { name: 'Pipeline Kanban', href: '/crm/pipeline', icon: GitPullRequest, badge: null, color: '#9E7431' },
-  ];
+  const navItems = CRM_NAV;
+  const currentNav = navItems.find((item) => isActiveRoute(pathname, item.href)) || navItems[0];
+  const [paletteOpen, setPaletteOpen] = useState(false);
 
-  const currentNav = navItems.find((item) => item.href === pathname) || navItems[0];
+  // Mémorise l'état replié du menu entre les sessions
+  useEffect(() => {
+    try { setIsCollapsed(localStorage.getItem(COLLAPSE_KEY) === '1'); } catch { /* stockage indisponible */ }
+  }, []);
+  const toggleCollapsed = (value: boolean) => {
+    setIsCollapsed(value);
+    try { localStorage.setItem(COLLAPSE_KEY, value ? '1' : '0'); } catch { /* stockage indisponible */ }
+  };
+
+  // Ctrl/⌘ + K : palette de navigation
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setPaletteOpen((open) => !open);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#fcfbf9] text-[#161412] flex flex-col md:flex-row antialiased selection:bg-[#947346]/20">
@@ -52,15 +82,19 @@ export default function CrmLayout({ children }: { children: React.ReactNode }) {
         </NextLink>
 
         <div className="flex items-center gap-2">
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#FAF8F5] text-[#161412] font-medium border border-[#EAE5DC] flex items-center gap-1 font-sans">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#9E7431] ring-2 ring-[#9E7431]/20" />
-            <span>Aya IA</span>
-          </span>
+          <button
+            type="button"
+            onClick={() => setPaletteOpen(true)}
+            className="w-11 h-11 rounded-lg hover:bg-[#f5f2eb] flex items-center justify-center text-[#161412]"
+            aria-label="Rechercher une page"
+          >
+            <Search className="w-4 h-4" />
+          </button>
 
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="w-8 h-8 rounded-lg bg-[#f5f2eb] hover:bg-[#eae5da] flex items-center justify-center text-[#161412] transition-colors"
+            className="w-11 h-11 rounded-lg bg-[#f5f2eb] hover:bg-[#eae5da] flex items-center justify-center text-[#161412] transition-colors"
             aria-label="Menu CRM"
           >
             {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -91,11 +125,12 @@ export default function CrmLayout({ children }: { children: React.ReactNode }) {
             <nav className="space-y-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = pathname === item.href;
+                const isActive = isActiveRoute(pathname, item.href);
                 return (
                   <NextLink
                     key={item.href}
                     href={item.href}
+                    aria-current={isActive ? 'page' : undefined}
                     className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all ${
                       isActive
                         ? 'bg-[#161412] text-white font-semibold shadow-xs'
@@ -106,13 +141,6 @@ export default function CrmLayout({ children }: { children: React.ReactNode }) {
                       <Icon className={`w-4 h-4 ${isActive ? 'text-[#947346]' : 'text-[#7a736a]'}`} />
                       <span>{item.name}</span>
                     </div>
-                    {item.badge && (
-                      <span className={`text-[10px] px-2 py-0.2 rounded-full font-sans font-semibold ${
-                        isActive ? 'bg-white/20 text-white' : 'bg-[#f5f2eb] text-[#7a736a]'
-                      }`}>
-                        {item.badge}
-                      </span>
-                    )}
                   </NextLink>
                 );
               })}
@@ -126,10 +154,6 @@ export default function CrmLayout({ children }: { children: React.ReactNode }) {
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Retour au site public</span>
               </NextLink>
-              <span className="text-[10px] text-[#6E665B] font-medium flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#9E7431]" />
-                Serveur Synchro
-              </span>
             </div>
           </div>
         </div>
@@ -165,7 +189,7 @@ export default function CrmLayout({ children }: { children: React.ReactNode }) {
           {!isCollapsed && (
             <button
               type="button"
-              onClick={() => setIsCollapsed(true)}
+              onClick={() => toggleCollapsed(true)}
               className="w-6 h-6 rounded-lg hover:bg-[#f5f2eb] text-[#7a736a] hover:text-[#161412] flex items-center justify-center transition-colors"
               title="Réduire le menu"
             >
@@ -179,7 +203,7 @@ export default function CrmLayout({ children }: { children: React.ReactNode }) {
           <div className="py-2 flex justify-center border-b border-[#f0ede6]">
             <button
               type="button"
-              onClick={() => setIsCollapsed(false)}
+              onClick={() => toggleCollapsed(false)}
               className="w-7 h-7 rounded-lg hover:bg-[#f5f2eb] text-[#7a736a] hover:text-[#161412] flex items-center justify-center transition-colors"
               title="Agrandir le menu"
             >
@@ -192,12 +216,13 @@ export default function CrmLayout({ children }: { children: React.ReactNode }) {
         <nav className="p-2 space-y-1 flex-1 overflow-y-auto font-sans">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href;
+            const isActive = isActiveRoute(pathname, item.href);
             return (
               <NextLink
                 key={item.href}
                 href={item.href}
                 title={isCollapsed ? item.name : undefined}
+                aria-current={isActive ? 'page' : undefined}
                 className={`group flex items-center ${isCollapsed ? 'justify-center px-2' : 'justify-between px-2.5'} py-2 rounded-xl text-xs transition-all ${
                   isActive
                     ? 'bg-[#161412] text-white font-semibold shadow-xs'
@@ -207,18 +232,10 @@ export default function CrmLayout({ children }: { children: React.ReactNode }) {
                 <div className="flex items-center gap-2.5 truncate">
                   <Icon 
                     className="w-4 h-4 shrink-0 transition-transform group-hover:scale-105" 
-                    style={{ color: isActive ? item.color : '#7a736a' }}
+                    style={{ color: isActive ? '#C8A97E' : '#7a736a' }}
                   />
                   {!isCollapsed && <span className="truncate">{item.name}</span>}
                 </div>
-
-                {!isCollapsed && item.badge && (
-                  <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-sans font-semibold shrink-0 ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-[#f0ede6] text-[#7a736a]'
-                  }`}>
-                    {item.badge}
-                  </span>
-                )}
               </NextLink>
             );
           })}
@@ -231,7 +248,6 @@ export default function CrmLayout({ children }: { children: React.ReactNode }) {
               <Bot className="w-3.5 h-3.5 text-[#9E7431] shrink-0" />
               {!isCollapsed && <span className="text-[11px] font-semibold text-[#161412]">Aya IA</span>}
             </div>
-            <span className="w-2 h-2 rounded-full bg-[#9E7431] ring-2 ring-[#9E7431]/20" title="Agent IA en ligne" />
           </div>
           {!isCollapsed && (
             <span className="text-[9px] text-[#7a736a] block leading-tight">
@@ -266,16 +282,20 @@ export default function CrmLayout({ children }: { children: React.ReactNode }) {
             <span className="text-[#a39c92]">Cabinet Immo</span>
             <span>/</span>
             <span className="flex items-center gap-1.5 font-bold text-[#161412]">
-              <span className="w-2.5 h-2.5 rounded-full shadow-2xs" style={{ backgroundColor: currentNav.color }} />
               <span>{currentNav.name}</span>
             </span>
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1.5 text-[11px] text-[#161412] bg-[#FAF8F5] px-2.5 py-1 rounded-full border border-[#EAE5DC]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#9E7431]" />
-              <span className="font-medium">Aya IA Active</span>
-            </div>
+            <button
+              type="button"
+              onClick={() => setPaletteOpen(true)}
+              className="flex items-center gap-2 text-[11px] text-[#7a736a] hover:text-[#161412] bg-[#FAF8F5] px-3 py-1.5 rounded-lg border border-[#EAE5DC] transition-colors"
+            >
+              <Search className="w-3.5 h-3.5" />
+              <span>Aller à…</span>
+              <kbd className="font-mono text-[10px] text-[#a39c92]">Ctrl K</kbd>
+            </button>
 
             <NextLink
               href="/"
@@ -293,6 +313,8 @@ export default function CrmLayout({ children }: { children: React.ReactNode }) {
         <main className="flex-1 min-w-0">
           {children}
         </main>
+
+        <CommandPalette items={navItems} isOpen={paletteOpen} onClose={() => setPaletteOpen(false)} />
 
       </div>
 

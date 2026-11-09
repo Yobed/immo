@@ -7,6 +7,7 @@ import { Property } from '@/lib/types';
 import { formatFCFA, getWhatsAppLink } from '@/lib/utils';
 import { ArrowRight, MessageCircle, FileText, Maximize2, Bed, Waves, ShieldCheck } from 'lucide-react';
 import TiltCard from '@/components/TiltCard';
+import { Parallax, Reveal } from '@/components/Motion';
 
 interface PanoramicGalleryProps {
   properties: Property[];
@@ -85,14 +86,16 @@ export default function PanoramicGallery({ properties, onOpenDossier }: Panorami
             <article className="group relative rounded-3xl overflow-hidden dark:bg-[#121110] bg-white border dark:border-white/[0.08] border-black/[0.08] dark:shadow-[0_30px_90px_rgba(0,0,0,0.85)] shadow-[0_20px_50px_rgba(0,0,0,0.06)]">
               
               <Link href={`/biens/${spotlight.id}`} className="block relative aspect-[16/9] lg:aspect-[21/9] overflow-hidden bg-black">
-                <Image
-                  src={spotlight.images[0]}
-                  alt={spotlight.title}
-                  fill
-                  unoptimized
-                  priority
-                  className="object-cover group-hover:scale-104 transition-transform duration-1000 ease-out brightness-90 group-hover:brightness-100"
-                />
+                <Parallax strength={12}>
+                  <Image
+                    src={spotlight.images[0]}
+                    alt={spotlight.title}
+                    fill
+                    unoptimized
+                    priority
+                    className="object-cover group-hover:scale-104 transition-transform duration-1000 ease-out brightness-90 group-hover:brightness-100"
+                  />
+                </Parallax>
 
                 {/* Dégradés d'ambiance */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent opacity-90" />
@@ -178,20 +181,23 @@ export default function PanoramicGallery({ properties, onOpenDossier }: Panorami
 
         {/* 2. LES AUTRES DEMEURES (2 Colonnes Aérées) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
-          {others.map((prop) => (
-            <TiltCard key={prop.id} tiltStrength={5} className="rounded-3xl">
+          {others.map((prop, idx) => (
+            <Reveal key={prop.id} delay={(idx % 2) * 0.12}>
+            <TiltCard tiltStrength={5} className="rounded-3xl">
               <article className="group relative rounded-3xl overflow-hidden dark:bg-[#121110] bg-white border dark:border-white/[0.08] border-black/[0.08] dark:shadow-[0_25px_70px_rgba(0,0,0,0.85)] shadow-[0_15px_40px_rgba(0,0,0,0.06)] flex flex-col justify-between h-full">
                 
                 {/* Photographie Panoramique */}
                 <Link href={`/biens/${prop.id}`} className="block relative aspect-[16/10] overflow-hidden bg-black">
-                  <Image
-                    src={prop.images[0]}
-                    alt={prop.title}
-                    fill
-                    unoptimized
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out brightness-90 group-hover:brightness-100"
-                  />
+                  <Parallax strength={8}>
+                    <Image
+                      src={prop.images[0]}
+                      alt={prop.title}
+                      fill
+                      unoptimized
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out brightness-90 group-hover:brightness-100"
+                    />
+                  </Parallax>
 
                   {/* Gradient en pied d'image */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent opacity-85" />
@@ -270,6 +276,7 @@ export default function PanoramicGallery({ properties, onOpenDossier }: Panorami
 
               </article>
             </TiltCard>
+            </Reveal>
           ))}
         </div>
 

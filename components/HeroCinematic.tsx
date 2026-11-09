@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'motion/react';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useScroll, useReducedMotion } from 'motion/react';
 import { Property } from '@/lib/types';
 import { formatFCFA, getWhatsAppLink } from '@/lib/utils';
 import { ArrowRight, MessageCircle, ChevronLeft, ChevronRight, ShieldCheck, MapPin } from 'lucide-react';
@@ -30,7 +30,17 @@ export default function HeroCinematic({ properties, onOpenVisitModal }: HeroCine
   const textX = useTransform(springX, [-0.5, 0.5], [8, -8]);
   const textY = useTransform(springY, [-0.5, 0.5], [6, -6]);
 
+  // Parallaxe de défilement : l'image descend plus lentement, le texte s'efface
+  const sectionRef = useRef<HTMLElement>(null);
+  const isReduced = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end start'] });
+  const scrollImgY = useTransform(scrollYProgress, [0, 1], ['0%', '22%']);
+  const scrollImgScale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
+  const scrollTextY = useTransform(scrollYProgress, [0, 1], ['0%', '-30%']);
+  const scrollFade = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+
   const handleMouseMove = (e: React.MouseEvent) => {
+    if (isReduced) return;
     const { clientWidth, clientHeight } = document.documentElement;
     mouseX.set(e.clientX / clientWidth - 0.5);
     mouseY.set(e.clientY / clientHeight - 0.5);
@@ -51,6 +61,7 @@ export default function HeroCinematic({ properties, onOpenVisitModal }: HeroCine
 
   return (
     <section 
+      ref={sectionRef}
       onMouseMove={handleMouseMove}
       className="relative w-full h-[96vh] min-h-[680px] max-h-[1100px] bg-[#0A0908] text-[#F5F2EB] overflow-hidden flex flex-col justify-between select-none pt-20"
     >
@@ -68,6 +79,10 @@ export default function HeroCinematic({ properties, onOpenVisitModal }: HeroCine
           className="absolute inset-0 z-0 overflow-hidden"
         >
           <motion.div
+            style={isReduced ? undefined : { y: scrollImgY, scale: scrollImgScale }}
+            className="w-full h-full relative"
+          >
+          <motion.div
             style={{ x: bgX, y: bgY }}
             className="w-full h-full relative scale-105"
           >
@@ -79,6 +94,7 @@ export default function HeroCinematic({ properties, onOpenVisitModal }: HeroCine
               unoptimized
               className="object-cover brightness-[0.70] contrast-[1.08]"
             />
+          </motion.div>
           </motion.div>
 
           {/* Dégradés cinématiques veloutés */}
@@ -93,7 +109,10 @@ export default function HeroCinematic({ properties, onOpenVisitModal }: HeroCine
       {/* ========================================================================= */}
       {/* 2. CENTRE DU VIEWPORT : ACCROCHE MAJESTUEUSE & MICRO-DONNÉES               */}
       {/* ========================================================================= */}
-      <div className="relative z-20 max-w-[1440px] w-full mx-auto px-6 sm:px-10 lg:px-14 my-auto">
+      <motion.div
+        style={isReduced ? undefined : { y: scrollTextY, opacity: scrollFade }}
+        className="relative z-20 max-w-[1440px] w-full mx-auto px-6 sm:px-10 lg:px-14 my-auto"
+      >
         <motion.div 
           style={{ x: textX, y: textY }}
           className="max-w-4xl space-y-6"
@@ -161,7 +180,7 @@ export default function HeroCinematic({ properties, onOpenVisitModal }: HeroCine
           </div>
 
         </motion.div>
-      </div>
+      </motion.div>
 
       {/* ========================================================================= */}
       {/* 3. BARRE INFÉRIEURE : VIGNETTES INTERACTIVES AVEC TIMELINE GOLD           */}
@@ -176,6 +195,7 @@ export default function HeroCinematic({ properties, onOpenVisitModal }: HeroCine
               onClick={() => setActiveIndex((prev) => (prev - 1 + featured.length) % featured.length)}
               className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-white transition-all cursor-pointer"
               title="Demeure précédente"
+              aria-label="Demeure précédente"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -184,6 +204,7 @@ export default function HeroCinematic({ properties, onOpenVisitModal }: HeroCine
               onClick={() => setActiveIndex((prev) => (prev + 1) % featured.length)}
               className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-white transition-all cursor-pointer"
               title="Demeure suivante"
+              aria-label="Demeure suivante"
             >
               <ChevronRight className="w-5 h-5" />
             </button>

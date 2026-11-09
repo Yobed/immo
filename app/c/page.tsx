@@ -63,7 +63,7 @@ export default function StandaloneMobileFlipbookPage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(8);
   const [isReady, setIsReady] = useState(false);
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(false); // son sur demande, jamais imposé
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'3d' | 'scroll'>('3d');
@@ -196,6 +196,18 @@ export default function StandaloneMobileFlipbookPage() {
       pageFlipInstance.current.flipPrev();
     }
   };
+
+  // Navigation clavier : flèches gauche/droite (ignorée pendant la saisie)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.key === 'ArrowRight') pageFlipInstance.current?.flipNext();
+      if (e.key === 'ArrowLeft') pageFlipInstance.current?.flipPrev();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   const jumpToPage = (pageNum: number) => {
     if (pageFlipInstance.current) {
