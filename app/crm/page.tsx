@@ -202,6 +202,18 @@ export default function CrmDashboardPage() {
             <Bot className="w-3.5 h-3.5 text-[#9E7431]" />
             <span>Aya IA &amp; Automations</span>
           </button>
+
+          <Link
+            href="/crm/ciblage"
+            className="px-3.5 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 bg-[#FAF8F5] text-[#161412] hover:bg-[#F2ECE1] border border-[#EAE5DC]"
+            title="Accéder au moteur de ciblage et d'acquisition réseaux sociaux"
+          >
+            <Target className="w-3.5 h-3.5 text-[#9E7431]" />
+            <span>Ciblage &amp; Ads</span>
+            <span className="px-1.5 py-0.2 text-[9px] rounded-full bg-[#161412] text-white font-bold">
+              ROAS 6.4x
+            </span>
+          </Link>
         </nav>
 
       </header>
@@ -528,6 +540,13 @@ export default function CrmDashboardPage() {
                   className="text-xs font-bold text-[#15161A] hover:underline"
                 >
                   Voir tous ({INITIAL_CONTACTS.length})
+                </Link>
+
+                <Link
+                  href="/crm/ciblage"
+                  className="text-xs font-bold text-[#9E7431] hover:underline inline-flex items-center gap-1"
+                >
+                  <span>Cibler de nouveaux leads →</span>
                 </Link>
               </div>
             </div>

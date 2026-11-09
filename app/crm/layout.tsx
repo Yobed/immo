@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Building2, Users, CalendarDays, 
   GitPullRequest, ArrowLeft, Bot, ShieldCheck, CheckCircle, 
   Lightbulb, ChevronLeft, ChevronRight, Menu, X, ExternalLink,
-  MessageCircle, Sparkles
+  MessageCircle, Sparkles, Target
 } from 'lucide-react';
 
 export default function CrmLayout({ children }: { children: React.ReactNode }) {
@@ -23,6 +23,7 @@ export default function CrmLayout({ children }: { children: React.ReactNode }) {
   const navItems = [
     { name: 'Tableau de bord', href: '/crm', icon: LayoutDashboard, badge: null, color: '#161412' },
     { name: 'Contacts & WhatsApp', href: '/crm/contacts', icon: Users, badge: '8', color: '#9E7431' },
+    { name: 'Ciblage & Réseaux Sociaux', href: '/crm/ciblage', icon: Target, badge: 'ADS', color: '#9E7431' },
     { name: 'Intelligence & Objections', href: '/crm/intelligence', icon: Lightbulb, badge: 'IA', color: '#9E7431' },
     { name: 'Portefeuille Biens', href: '/crm/biens', icon: Building2, badge: '6', color: '#161412' },
     { name: 'Conciergerie & Checks', href: '/crm/conciergerie', icon: Sparkles, badge: 'LIVE', color: '#9E7431' },
