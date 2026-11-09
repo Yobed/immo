@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import Script from 'next/script';
 import { Plus_Jakarta_Sans, Cormorant_Garamond } from 'next/font/google';
 import ScrollCraftProvider from '@/components/ScrollCraftProvider';
-import AmbientSpotlight from '@/components/AmbientSpotlight';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import './globals.css';
 
@@ -36,7 +35,6 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col font-sans antialiased selection:bg-[#C8A97E] selection:text-white">
         <ThemeProvider>
-          <AmbientSpotlight />
           <ScrollCraftProvider>
             {children}
           </ScrollCraftProvider>

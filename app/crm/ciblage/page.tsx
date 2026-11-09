@@ -426,44 +426,42 @@ export default function CrmCiblagePage() {
       {/* ========================================================================= */}
       {/* 1. HEADER EXÉCUTIF ARCHITECTURAL (Charbon #191715 & Or Champagne #C8A97E) */}
       {/* ========================================================================= */}
-      <header className="relative bg-[#191715] text-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-[#2D2926] shadow-warm-md overflow-hidden">
-        
-        {/* Voile décoratif subtil */}
-        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-gradient-to-l from-[#C8A97E]/15 to-transparent pointer-events-none" />
+      <header className="relative pb-6 border-b border-line">
+
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-2 max-w-3xl">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-[#C8A97E] bg-[#C8A97E]/10 border border-[#C8A97E]/30 px-2.5 py-0.5 rounded-full font-bold">
+              <span className="text-xs font-medium text-accent">
                 Moteur d&apos;Acquisition &amp; Ciblage Réseaux Sociaux
               </span>
-              <span className="text-white/40 text-xs">•</span>
-              <span className="text-[11px] font-mono text-white/70">
+              <span className="text-ink-light text-xs">•</span>
+              <span className="text-[11px] font-mono text-ink-muted">
                 Meta · LinkedIn · TikTok · Google Ads
               </span>
             </div>
 
-            <h1 className="text-xl sm:text-3xl font-bold tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-ink">
               Ciblage Haute Précision &amp; Conversion de Prospects
             </h1>
 
-            <p className="text-xs sm:text-sm text-[#FAF8F5]/80 font-normal leading-relaxed">
+            <p className="text-xs sm:text-sm text-ink-muted font-normal leading-relaxed">
               Attirez et convertissez les profils à fort patrimoine (Expatriés, Corps Diplomatique, Diaspora d&apos;Europe et Dirigeants locaux) grâce à des audiences qualifiées, des ripostes psychologiques éprouvées et des liens WhatsApp trackés.
             </p>
           </div>
 
           {/* Quick Metrics Bar */}
           <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <div className="bg-white/10 backdrop-blur-xs border border-white/15 px-4 py-3 rounded-2xl text-left">
+            <div className="bg-paper ring-1 ring-line px-4 py-3 rounded-2xl text-left">
               <span className="text-[10px] uppercase font-bold text-[#C8A97E] block">ROAS Moyen Prévu</span>
-              <span className="text-xl font-bold text-white">{roasMultiplier}x</span>
-              <span className="text-[10px] text-white/60 block mt-0.5">Sur baux corporate</span>
+              <span className="text-xl font-bold text-ink">{roasMultiplier}x</span>
+              <span className="text-[10px] text-ink-muted block mt-0.5">Sur baux corporate</span>
             </div>
 
             <button
               type="button"
               onClick={handleExportMetaCsv}
-              className="px-4 py-3 rounded-2xl bg-white hover:bg-[#FAF8F5] text-[#161412] font-bold text-xs flex items-center gap-2 transition-transform hover:-translate-y-0.5 shadow-warm-xs cursor-pointer"
+              className="px-4 py-3 rounded-2xl bg-white hover:bg-[#FAF8F5] text-[#161412] font-bold text-xs flex items-center gap-2 ring-1 ring-line transition-colors cursor-pointer"
               title="Télécharger le fichier CSV prêt pour Meta Ads Manager (Lookalike)"
             >
               <Download className="w-4 h-4 text-[#9E7431]" />

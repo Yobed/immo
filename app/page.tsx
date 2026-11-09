@@ -1,107 +1,148 @@
 'use client';
 
 import React, { useState } from 'react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import HeroCinematic from '@/components/HeroCinematic';
-import PanoramicGallery from '@/components/PanoramicGallery';
-import LuxuryVilla3D from '@/components/LuxuryVilla3D';
-import CatalogueShowcaseSection from '@/components/CatalogueShowcaseSection';
-import CinematicVideoSection from '@/components/CinematicVideoSection';
-import PrivateConcierge from '@/components/PrivateConcierge';
-import DossierRequestModal from '@/components/DossierRequestModal';
-import { INITIAL_PROPERTIES } from '@/lib/mock-data';
+import Link from 'next/link';
+import { ArrowRight, MessageCircle, MoveHorizontal } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import SiteHeader from '@/components/site/SiteHeader';
+import SiteFooter from '@/components/site/SiteFooter';
+import SearchForm from '@/components/site/SearchForm';
+import HeroGallery3D from '@/components/site/HeroGallery3D';
+import HorizontalGallery from '@/components/site/HorizontalGallery';
+import DistrictList from '@/components/site/DistrictList';
+import { Reveal, ScrollHighlight, TextReveal } from '@/components/Motion';
+import { useLiveProperties } from '@/lib/useLiveProperties';
+import { formatFCFA, getWhatsAppLink } from '@/lib/utils';
+import type { Property } from '@/lib/types';
+import { AGENCY_PHONE, EMPTY_FILTERS, listDistricts, listTypes, priceSuffix } from '@/lib/property-search';
+
+const PROMISES = [
+  { title: 'Titre foncier affiché', text: 'Chaque annonce indique la nature du titre (ACD, TF, CMP) avant même la visite.' },
+  { title: 'Visites accompagnées', text: 'Un conseiller vous reçoit sur place et répond à vos questions sur le bail.' },
+  { title: 'Un seul interlocuteur', text: 'Demande, visite et signature suivies par la même personne, sur WhatsApp ou par téléphone.' },
+];
 
 export default function HomePage() {
-  const [isDossierModalOpen, setIsDossierModalOpen] = useState(false);
-  const [activeDossierProp, setActiveDossierProp] = useState<{ reference: string; title: string }>({
-    reference: 'VIL-RG-2026',
-    title: 'Villa Duplex Contemporaine Cocody Riviera Golf',
-  });
-
-  const handleOpenDossier = (ref: string, title: string) => {
-    setActiveDossierProp({ reference: ref, title });
-    setIsDossierModalOpen(true);
-  };
+  const { properties } = useLiveProperties();
+  const districts = listDistricts(properties);
+  const types = listTypes(properties);
+  const [front, setFront] = useState<Property | null>(properties[0] ?? null);
 
   return (
     <>
-      <Navbar />
+      <SiteHeader />
 
-      <main className="min-h-screen bg-[#FAF8F5] text-[#191715] font-sans selection:bg-[#9E7431] selection:text-white overflow-x-hidden">
-        
-        {/* ========================================================================= */}
-        {/* 1. HERO CINÉMATIQUE 100VH : PLEIN ÉCRAN, PARALLAXE 3D & IMMERSION TOTALE */}
-        {/* ========================================================================= */}
-        <HeroCinematic 
-          properties={INITIAL_PROPERTIES} 
-          onOpenVisitModal={(prop) => handleOpenDossier(prop.reference, prop.title)} 
-        />
+      <main className="text-ink">
+        {/* ---------- Hero 3D ---------- */}
+        <section className="relative h-[calc(100svh-4rem)] min-h-[560px] overflow-hidden bg-ink text-white">
+          <HeroGallery3D properties={properties} onFrontChange={setFront} />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/40" />
 
-        {/* ========================================================================= */}
-        {/* 2. LA SÉLECTION PRIVÉE : GALERIE PANORAMIQUE & PERSPECTIVE 3D             */}
-        {/* ========================================================================= */}
-        <PanoramicGallery 
-          properties={INITIAL_PROPERTIES}
-          onOpenDossier={handleOpenDossier}
-        />
+          <div className="pointer-events-none relative h-full site-container flex flex-col justify-end pb-24 sm:pb-28">
+            <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+              <h1 className="text-5xl sm:text-7xl lg:text-8xl font-semibold tracking-tight leading-[0.95]">
+                <TextReveal text={'Vivre Abidjan,\nen grand.'} trigger="animate" delay={0.2} />
+              </h1>
 
-        {/* ========================================================================= */}
-        {/* 3. L'ÉLÉVATION 3D SPATIALE : MAQUETTE THREE.JS WEBGL EN TEMPS RÉEL        */}
-        {/* ========================================================================= */}
-        <section id="maquette3d" className="py-24 sm:py-32 px-6 sm:px-10 lg:px-14 max-w-[1440px] mx-auto border-t dark:border-white/[0.08] border-black/[0.08] select-none">
-          <div className="space-y-10">
-            
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-6 border-b dark:border-white/[0.08] border-black/[0.08]">
-              <div className="space-y-2">
-                <h2 className="text-4xl sm:text-6xl font-display font-medium dark:text-white text-[#141210] tracking-tight">
-                  La Villa sous Toutes ses Ombres
-                </h2>
-                <p className="text-sm sm:text-base dark:text-[#A39C92] text-[#6B655D] font-light max-w-xl">
-                  Faites pivoter la maquette en 3D temps réel, explorez les volumes suspendus et observez les ombres équatoriales de 12h à la nuit.
-                </p>
-              </div>
-
-              <div className="text-xs font-mono dark:text-[#C8A97E] text-[#947346] flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full dark:bg-[#C8A97E] bg-[#947346]" />
-                <span>Moteur 3D WebGL Actif</span>
-              </div>
+              <AnimatePresence mode="wait">
+                {front && (
+                  <motion.div
+                    key={front.id}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -16 }}
+                    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                    className="lg:text-right max-w-sm lg:ml-auto"
+                  >
+                    <p className="text-sm text-white/60">{front.district}</p>
+                    <p className="text-lg font-medium leading-snug line-clamp-2">{front.title}</p>
+                    <p className="text-lg font-semibold tabular-nums">
+                      {formatFCFA(front.price)} <span className="text-sm font-normal text-white/60">{priceSuffix(front)}</span>
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
-            {/* Maquette 3D WebGL */}
-            <LuxuryVilla3D />
-
+            <motion.p
+              className="mt-8 flex items-center gap-2 text-sm text-white/60"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.2, duration: 0.8 }}
+            >
+              <MoveHorizontal className="w-4 h-4" /> Glissez ou défilez pour tourner, cliquez sur une photo pour l&apos;ouvrir
+            </motion.p>
           </div>
         </section>
 
-        {/* ========================================================================= */}
-        {/* 4. LE CATALOGUE NUMÉRIQUE 3D : LE FLIPBOOK D'EXCEPTION 2026              */}
-        {/* ========================================================================= */}
-        <CatalogueShowcaseSection />
-
-        {/* ========================================================================= */}
-        {/* 5. LE FILM CINÉMATIQUE : SURVOL DRONE 4K & VISITES EN MOUVEMENT           */}
-        {/* ========================================================================= */}
-        <div id="cinema">
-          <CinematicVideoSection />
+        {/* ---------- Recherche, à cheval sur le hero ---------- */}
+        <div className="relative z-10 site-container -mt-12">
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}>
+            <SearchForm districts={districts} types={types} value={EMPTY_FILTERS} />
+          </motion.div>
         </div>
 
-        {/* ========================================================================= */}
-        {/* 6. CONCIERGERIE PRIVÉE & LIGNE DIRECTE AVEC LA DIRECTION (ZÉRO FRICTION)  */}
-        {/* ========================================================================= */}
-        <PrivateConcierge />
+        {/* ---------- Manifeste ---------- */}
+        <section className="site-container py-28 sm:py-40">
+          <ScrollHighlight
+            className="text-3xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] max-w-5xl"
+            text={`${properties.length} adresses choisies une à une, de Cocody à Assinie. Titre foncier vérifié, visite accompagnée, un seul interlocuteur du premier message à la remise des clés.`}
+          />
+        </section>
 
+        {/* ---------- Sélection (défilement horizontal épinglé) ---------- */}
+        <HorizontalGallery properties={properties} />
+
+        {/* ---------- Quartiers ---------- */}
+        <section className="site-container py-24 sm:py-32">
+          <div className="flex items-end justify-between gap-6 mb-10">
+            <h2 className="text-4xl sm:text-5xl font-semibold tracking-tight">
+              <TextReveal text="Par quartier" />
+            </h2>
+            <Link href="/biens" className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium hover:text-accent">
+              Tous les biens <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          <DistrictList properties={properties} districts={districts} />
+        </section>
+
+        {/* ---------- Engagements ---------- */}
+        <section className="bg-paper border-t border-line">
+          <div className="site-container py-20 sm:py-24 grid gap-12 sm:grid-cols-3">
+            {PROMISES.map((item, idx) => (
+              <Reveal key={item.title} delay={idx * 0.1} className="space-y-3">
+                <p className="text-5xl font-semibold text-accent/80 tabular-nums">0{idx + 1}</p>
+                <h3 className="text-xl font-semibold">{item.title}</h3>
+                <p className="text-ink-muted leading-relaxed">{item.text}</p>
+              </Reveal>
+            ))}
+          </div>
+        </section>
+
+        {/* ---------- Appel final ---------- */}
+        <section className="bg-ink text-white">
+          <div className="site-container py-24 sm:py-32 flex flex-col items-start gap-10">
+            <h2 className="text-5xl sm:text-7xl font-semibold tracking-tight leading-[0.95]">
+              <TextReveal text={'Une visite ?\nOn s’en occupe.'} />
+            </h2>
+            <Reveal delay={0.3} className="flex flex-wrap gap-3">
+              <a
+                href={getWhatsAppLink(AGENCY_PHONE, 'Bonjour, je souhaite organiser une visite.')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 h-12 px-6 rounded-lg bg-white text-ink text-sm font-medium hover:bg-paper transition-colors"
+              >
+                <MessageCircle className="w-4 h-4" /> Écrire sur WhatsApp
+              </a>
+              <Link href="/biens" className="inline-flex items-center gap-2 h-12 px-6 rounded-lg ring-1 ring-white/25 text-sm font-medium hover:bg-white/10 transition-colors">
+                Voir tous les biens <ArrowRight className="w-4 h-4" />
+              </Link>
+            </Reveal>
+          </div>
+        </section>
       </main>
 
-      {/* MODAL DE DEMANDE DE DOSSIER FONCIER AUDITÉ */}
-      <DossierRequestModal
-        isOpen={isDossierModalOpen}
-        onClose={() => setIsDossierModalOpen(false)}
-        propertyReference={activeDossierProp.reference}
-        propertyTitle={activeDossierProp.title}
-      />
-
-      <Footer />
+      <SiteFooter />
     </>
   );
 }

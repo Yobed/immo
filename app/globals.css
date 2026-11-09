@@ -139,3 +139,29 @@ html.dark .stf__item.--left {
 html.dark .stf__item.--right {
   border-left: 1px solid rgba(255, 255, 255, 0.08);
 }
+
+/* Accessibilité : coupe les animations décoratives si l'utilisateur le demande */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---- Site vitrine : primitives de la refonte ---- */
+@layer components {
+  .site-container {
+    @apply w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  .btn-primary {
+    @apply inline-flex items-center gap-2 h-11 px-5 rounded-lg bg-ink text-white text-sm font-medium transition-colors hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 h-11 px-5 rounded-lg bg-white text-ink text-sm font-medium ring-1 ring-line transition-colors hover:bg-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent;
+  }
+  .field-select {
+    @apply w-full bg-transparent text-sm font-medium text-ink outline-none cursor-pointer appearance-none;
+  }
+}

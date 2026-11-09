@@ -10,6 +10,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // Refonte site vitrine (moderne épuré)
+        line: '#EAE5DC',
+        paper: '#FAF8F5',
+        accent: '#9E7431',
         // Palette architecturale : Travertin, Albâtre, Encre Chaude, Bronze Vieilli & Vert Forêt
         canvas: '#fbfaf7',       // Fond lin / albâtre respirant
         canvasSoft: '#f5f2eb',   // Travertin doux pour zones d'accent
@@ -50,6 +54,12 @@ module.exports = {
         'warm-sm': '0 2px 8px -2px rgba(22, 20, 18, 0.04), 0 1px 4px -1px rgba(22, 20, 18, 0.02)',
         'warm-md': '0 12px 24px -6px rgba(22, 20, 18, 0.05), 0 4px 12px -2px rgba(22, 20, 18, 0.03)',
         'warm-lg': '0 24px 48px -12px rgba(22, 20, 18, 0.08), 0 8px 24px -4px rgba(22, 20, 18, 0.04)',
+      },
+      keyframes: {
+        'fade-in': { from: { opacity: '0' }, to: { opacity: '1' } },
+      },
+      animation: {
+        'fade-in': 'fade-in .35s ease-out',
       },
       borderRadius: {
         'arch': '1.25rem',
