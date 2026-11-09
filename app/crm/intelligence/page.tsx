@@ -126,15 +126,13 @@ export default function CrmIntelligencePage() {
   };
 
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6 font-sans text-neutral-900">
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6 font-sans text-ink">
       
       {/* ========================================================================= */}
       {/* 1. HEADER EXÉCUTIF ARCHITECTURAL (CHARBON ARCHITECTURAL & OR CHAMPAGNE)    */}
       {/* ========================================================================= */}
-      <header className="relative bg-[#191715] text-white rounded-lg p-6 sm:p-8 border border-[#2D2926] shadow-sm overflow-hidden">
-        
-        {/* Accent géométrique d'arrière-plan */}
-        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-gradient-to-l from-[#C8A97E]/15 to-transparent pointer-events-none" />
+      <header className="relative pb-6 border-b border-line">
+
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-2 max-w-3xl">
@@ -142,17 +140,17 @@ export default function CrmIntelligencePage() {
               <span className="text-[11px] font-mono uppercase tracking-widest text-[#C8A97E] font-semibold">
                 Intelligence Commerciale &amp; Closing Notarié
               </span>
-              <span className="text-neutral-500 text-xs">•</span>
-              <span className="text-[11px] font-mono text-neutral-400">
+              <span className="text-ink-muted text-xs">•</span>
+              <span className="text-[11px] font-mono text-ink-light">
                 Aya IA Copilote v2.4
               </span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-ink">
               Banque des Objections, Parades Juridiques &amp; Argus
             </h1>
 
-            <p className="text-xs sm:text-sm text-neutral-300 font-normal leading-relaxed">
+            <p className="text-xs sm:text-sm text-line font-normal leading-relaxed">
               Le moteur d&apos;aide à la décision pour débloquer les signatures de baux de prestige à Abidjan : réquisitions foncières du Guichet Unique MCLU, conventions de séquestre Me Traoré et baromètre des loyers par secteur.
             </p>
           </div>
@@ -184,54 +182,54 @@ export default function CrmIntelligencePage() {
       {/* ========================================================================= */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
-        <div className="bg-white border border-neutral-200 rounded-lg p-5 shadow-2xs space-y-2">
-          <div className="flex items-center justify-between text-neutral-500">
+        <div className="bg-white border border-line rounded-lg p-5 shadow-2xs space-y-2">
+          <div className="flex items-center justify-between text-ink-muted">
             <span className="text-[11px] font-mono uppercase tracking-wider font-medium">Loyer Mensuel Sécurisé</span>
-            <Lock className="w-4 h-4 text-neutral-700" />
+            <Lock className="w-4 h-4 text-ink-soft" />
           </div>
-          <div className="text-2xl sm:text-3xl font-mono font-bold text-neutral-900">
+          <div className="text-2xl sm:text-3xl font-mono font-bold text-ink">
             {formatFCFA(CRM_ANALYTICS.kpis.total_pipeline_volume)}
           </div>
-          <p className="text-xs text-neutral-600 font-normal">
+          <p className="text-xs text-ink-soft font-normal">
             Baux corporate en instruction sous séquestre notarié.
           </p>
         </div>
 
-        <div className="bg-white border border-neutral-200 rounded-lg p-5 shadow-2xs space-y-2">
-          <div className="flex items-center justify-between text-neutral-500">
+        <div className="bg-white border border-line rounded-lg p-5 shadow-2xs space-y-2">
+          <div className="flex items-center justify-between text-ink-muted">
             <span className="text-[11px] font-mono uppercase tracking-wider font-medium">Taux de Levée d&apos;Objection</span>
-            <Scale className="w-4 h-4 text-neutral-700" />
+            <Scale className="w-4 h-4 text-ink-soft" />
           </div>
-          <div className="text-2xl sm:text-3xl font-mono font-bold text-neutral-900">
+          <div className="text-2xl sm:text-3xl font-mono font-bold text-ink">
             88.5%
           </div>
-          <p className="text-xs text-neutral-600 font-normal">
+          <p className="text-xs text-ink-soft font-normal">
             +14% de conversion grâce aux pièces juridiques directes.
           </p>
         </div>
 
-        <div className="bg-white border border-neutral-200 rounded-lg p-5 shadow-2xs space-y-2">
-          <div className="flex items-center justify-between text-neutral-500">
+        <div className="bg-white border border-line rounded-lg p-5 shadow-2xs space-y-2">
+          <div className="flex items-center justify-between text-ink-muted">
             <span className="text-[11px] font-mono uppercase tracking-wider font-medium">Délai d&apos;Audit Foncier</span>
-            <FileCheck className="w-4 h-4 text-neutral-700" />
+            <FileCheck className="w-4 h-4 text-ink-soft" />
           </div>
-          <div className="text-2xl sm:text-3xl font-mono font-bold text-neutral-900">
+          <div className="text-2xl sm:text-3xl font-mono font-bold text-ink">
             24h ouvrées
           </div>
-          <p className="text-xs text-neutral-600 font-normal">
+          <p className="text-xs text-ink-soft font-normal">
             Réquisition trentenaire certifiée au Livre Foncier.
           </p>
         </div>
 
-        <div className="bg-white border border-neutral-200 rounded-lg p-5 shadow-2xs space-y-2">
-          <div className="flex items-center justify-between text-neutral-500">
+        <div className="bg-white border border-line rounded-lg p-5 shadow-2xs space-y-2">
+          <div className="flex items-center justify-between text-ink-muted">
             <span className="text-[11px] font-mono uppercase tracking-wider font-medium">Résolution Aya WhatsApp</span>
-            <MessageCircle className="w-4 h-4 text-neutral-700" />
+            <MessageCircle className="w-4 h-4 text-ink-soft" />
           </div>
-          <div className="text-2xl sm:text-3xl font-mono font-bold text-neutral-900">
+          <div className="text-2xl sm:text-3xl font-mono font-bold text-ink">
             94.6%
           </div>
-          <p className="text-xs text-neutral-600 font-normal">
+          <p className="text-xs text-ink-soft font-normal">
             Réponses aux objections transmises sous 15 secondes.
           </p>
         </div>
@@ -241,14 +239,14 @@ export default function CrmIntelligencePage() {
       {/* ========================================================================= */}
       {/* 3. NAVIGATION PAR ONGLETS ARCHITECTURAUX                                  */}
       {/* ========================================================================= */}
-      <nav className="flex items-center gap-1 border-b border-neutral-200 text-xs" aria-label="Sous-sections Intelligence">
+      <nav className="flex items-center gap-1 border-b border-line text-xs" aria-label="Sous-sections Intelligence">
         <button
           type="button"
           onClick={() => setActiveTab('battlecards')}
           className={`py-2.5 px-3.5 font-medium border-b-2 transition-colors flex items-center gap-2 cursor-pointer ${
             activeTab === 'battlecards'
-              ? 'border-neutral-900 text-neutral-900 font-semibold'
-              : 'border-transparent text-neutral-500 hover:text-neutral-900'
+              ? 'border-ink text-ink font-semibold'
+              : 'border-transparent text-ink-muted hover:text-ink'
           }`}
         >
           <ShieldCheck className="w-3.5 h-3.5" />
@@ -260,8 +258,8 @@ export default function CrmIntelligencePage() {
           onClick={() => setActiveTab('simulator')}
           className={`py-2.5 px-3.5 font-medium border-b-2 transition-colors flex items-center gap-2 cursor-pointer ${
             activeTab === 'simulator'
-              ? 'border-neutral-900 text-neutral-900 font-semibold'
-              : 'border-transparent text-neutral-500 hover:text-neutral-900'
+              ? 'border-ink text-ink font-semibold'
+              : 'border-transparent text-ink-muted hover:text-ink'
           }`}
         >
           <Zap className="w-3.5 h-3.5" />
@@ -273,8 +271,8 @@ export default function CrmIntelligencePage() {
           onClick={() => setActiveTab('market')}
           className={`py-2.5 px-3.5 font-medium border-b-2 transition-colors flex items-center gap-2 cursor-pointer ${
             activeTab === 'market'
-              ? 'border-neutral-900 text-neutral-900 font-semibold'
-              : 'border-transparent text-neutral-500 hover:text-neutral-900'
+              ? 'border-ink text-ink font-semibold'
+              : 'border-transparent text-ink-muted hover:text-ink'
           }`}
         >
           <BarChart3 className="w-3.5 h-3.5" />
@@ -305,8 +303,8 @@ export default function CrmIntelligencePage() {
                   onClick={() => setSelectedCategory(cat.id)}
                   className={`px-3 py-1.5 rounded-md border text-xs font-medium transition-colors cursor-pointer ${
                     selectedCategory === cat.id
-                      ? 'bg-neutral-900 text-white border-neutral-900'
-                      : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-900'
+                      ? 'bg-ink text-white border-ink'
+                      : 'bg-white text-ink-soft border-line hover:border-ink'
                   }`}
                 >
                   {cat.label}
@@ -315,13 +313,13 @@ export default function CrmIntelligencePage() {
             </div>
 
             <div className="relative w-full sm:w-64">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-ink-light" />
               <input
                 type="text"
                 placeholder="Rechercher une objection..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white border border-neutral-200 rounded-md pl-9 pr-3 py-1.5 text-xs focus:outline-none focus:border-neutral-900 text-neutral-900 placeholder-neutral-400"
+                className="w-full bg-white border border-line rounded-md pl-9 pr-3 py-1.5 text-xs focus:outline-none focus:border-ink text-ink placeholder-ink-light"
               />
             </div>
           </div>
@@ -333,68 +331,68 @@ export default function CrmIntelligencePage() {
               return (
                 <article
                   key={item.id}
-                  className="bg-white border border-neutral-200 rounded-lg p-6 space-y-4 hover:border-neutral-900 transition-colors shadow-2xs flex flex-col justify-between"
+                  className="bg-white border border-line rounded-lg p-6 space-y-4 hover:border-ink transition-colors shadow-2xs flex flex-col justify-between"
                 >
                   <div className="space-y-3">
                     {/* Header Card */}
-                    <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
+                    <div className="flex items-center justify-between border-b border-paper pb-3">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-[11px] uppercase tracking-wider px-2 py-0.5 rounded bg-neutral-100 text-neutral-800 border border-neutral-200 font-semibold">
+                        <span className="font-mono text-[11px] uppercase tracking-wider px-2 py-0.5 rounded bg-paper text-ink border border-line font-semibold">
                           {item.category}
                         </span>
-                        <span className="font-mono text-[11px] px-2 py-0.5 rounded border border-neutral-200 text-neutral-600">
+                        <span className="font-mono text-[11px] px-2 py-0.5 rounded border border-line text-ink-soft">
                           Fréquence : {item.frequency}%
                         </span>
                       </div>
 
-                      <span className="font-mono text-[10px] uppercase font-semibold text-neutral-500">
+                      <span className="font-mono text-[10px] uppercase font-semibold text-ink-muted">
                         Niveau : {item.impact_level}
                       </span>
                     </div>
 
                     {/* Intitulé & Verbatim Client */}
                     <div>
-                      <h2 className="text-sm font-semibold text-neutral-900">
+                      <h2 className="text-sm font-semibold text-ink">
                         {item.title}
                       </h2>
 
-                      <blockquote className="mt-2 p-3 rounded-md bg-neutral-50 border border-neutral-200 text-xs text-neutral-700 italic leading-relaxed">
+                      <blockquote className="mt-2 p-3 rounded-md bg-paper border border-line text-xs text-ink-soft italic leading-relaxed">
                         {item.client_verbatim}
                       </blockquote>
                     </div>
 
                     {/* Riposte Déontologique Validée */}
                     <div className="space-y-1 pt-1">
-                      <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-500 font-semibold block">
+                      <span className="text-[11px] font-mono uppercase tracking-wider text-ink-muted font-semibold block">
                         Riposte Déontologique Notariée :
                       </span>
-                      <p className="text-xs text-neutral-800 leading-relaxed font-normal">
+                      <p className="text-xs text-ink leading-relaxed font-normal">
                         {item.counter_argument}
                       </p>
                     </div>
 
                     {/* Pièce Justificative & Action */}
-                    <div className="p-2.5 rounded-md bg-neutral-50 border border-neutral-200 space-y-1">
-                      <div className="flex items-center gap-2 text-xs font-medium text-neutral-900">
-                        <FileText className="w-3.5 h-3.5 text-neutral-600 shrink-0" />
+                    <div className="p-2.5 rounded-md bg-paper border border-line space-y-1">
+                      <div className="flex items-center gap-2 text-xs font-medium text-ink">
+                        <FileText className="w-3.5 h-3.5 text-ink-soft shrink-0" />
                         <span className="truncate">{item.deliverable_proof}</span>
                       </div>
-                      <p className="text-[11px] text-neutral-500">
+                      <p className="text-[11px] text-ink-muted">
                         Consigne : {item.suggested_action}
                       </p>
                     </div>
                   </div>
 
                   {/* Actions de Bas de Carte */}
-                  <div className="pt-3 border-t border-neutral-100 flex items-center justify-between gap-3">
-                    <span className="text-[11px] font-mono text-neutral-400">
+                  <div className="pt-3 border-t border-paper flex items-center justify-between gap-3">
+                    <span className="text-[11px] font-mono text-ink-light">
                       Réf. {item.id}
                     </span>
 
                     <button
                       type="button"
                       onClick={() => handleCopy(item.counter_argument, item.id)}
-                      className="px-3.5 py-1.5 rounded-md bg-neutral-900 hover:bg-black text-white text-xs font-medium inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                      className="px-3.5 py-1.5 rounded-md bg-ink hover:bg-black text-white text-xs font-medium inline-flex items-center gap-1.5 transition-colors cursor-pointer"
                     >
                       {isCopied ? (
                         <>
@@ -403,7 +401,7 @@ export default function CrmIntelligencePage() {
                         </>
                       ) : (
                         <>
-                          <Copy className="w-3.5 h-3.5 text-neutral-300" />
+                          <Copy className="w-3.5 h-3.5 text-line" />
                           <span>Copier pour WhatsApp</span>
                         </>
                       )}
@@ -424,15 +422,15 @@ export default function CrmIntelligencePage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
           {/* Colonne Gauche : Sélecteur de Cas d'Urgence & Saisie (5 cols) */}
-          <div className="lg:col-span-5 bg-white border border-neutral-200 rounded-lg p-5 sm:p-6 space-y-4 shadow-2xs">
-            <div className="border-b border-neutral-100 pb-3">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-500 font-semibold block">
+          <div className="lg:col-span-5 bg-white border border-line rounded-lg p-5 sm:p-6 space-y-4 shadow-2xs">
+            <div className="border-b border-paper pb-3">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-ink-muted font-semibold block">
                 Cas Pratiques Immédiats
               </span>
-              <h2 className="text-base font-semibold text-neutral-900 mt-0.5">
+              <h2 className="text-base font-semibold text-ink mt-0.5">
                 Sélectionnez l&apos;objection du prospect
               </h2>
-              <p className="text-xs text-neutral-500 mt-0.5">
+              <p className="text-xs text-ink-muted mt-0.5">
                 Choisissez un scénario de blocage pour générer l&apos;argumentaire adapté.
               </p>
             </div>
@@ -451,12 +449,12 @@ export default function CrmIntelligencePage() {
                     }}
                     className={`w-full text-left p-3 rounded-md border text-xs transition-colors cursor-pointer flex flex-col gap-1 ${
                       isSelected
-                        ? 'border-neutral-900 bg-neutral-900 text-white'
-                        : 'border-neutral-200 bg-white text-neutral-700 hover:border-neutral-400'
+                        ? 'border-ink bg-ink text-white'
+                        : 'border-line bg-white text-ink-soft hover:border-ink-light'
                     }`}
                   >
                     <span className="font-semibold block">{preset.label}</span>
-                    <span className={`line-clamp-1 italic text-[11px] ${isSelected ? 'text-neutral-300' : 'text-neutral-500'}`}>
+                    <span className={`line-clamp-1 italic text-[11px] ${isSelected ? 'text-line' : 'text-ink-muted'}`}>
                       {preset.clientQuery}
                     </span>
                   </button>
@@ -465,8 +463,8 @@ export default function CrmIntelligencePage() {
             </div>
 
             {/* Saisie Libre Personnalisée */}
-            <div className="pt-3 border-t border-neutral-100 space-y-2">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-500 font-semibold block">
+            <div className="pt-3 border-t border-paper space-y-2">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-ink-muted font-semibold block">
                 Ou collez une objection personnalisée :
               </span>
               <textarea
@@ -474,44 +472,44 @@ export default function CrmIntelligencePage() {
                 placeholder="Ex : « Le prospect exige de ne payer le premier loyer qu'après le passage de son huissier... »"
                 value={simulatorInput}
                 onChange={(e) => setSimulatorInput(e.target.value)}
-                className="w-full bg-neutral-50 border border-neutral-200 rounded-md p-2.5 text-xs focus:outline-none focus:border-neutral-900 text-neutral-900 placeholder-neutral-400 resize-none"
+                className="w-full bg-paper border border-line rounded-md p-2.5 text-xs focus:outline-none focus:border-ink text-ink placeholder-ink-light resize-none"
               />
             </div>
           </div>
 
           {/* Colonne Droite : Riposte Générée par Aya IA (7 cols) */}
-          <div className="lg:col-span-7 bg-white border border-neutral-200 rounded-lg p-5 sm:p-6 space-y-5 shadow-2xs">
+          <div className="lg:col-span-7 bg-white border border-line rounded-lg p-5 sm:p-6 space-y-5 shadow-2xs">
             
-            <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
+            <div className="flex items-center justify-between border-b border-paper pb-3">
               <div>
-                <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-500 font-semibold block">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-ink-muted font-semibold block">
                   Recommandation Aya IA
                 </span>
-                <h3 className="text-base font-semibold text-neutral-900 mt-0.5">
+                <h3 className="text-base font-semibold text-ink mt-0.5">
                   Parade Juridique &amp; Cadrage Commercial
                 </h3>
               </div>
-              <span className="px-2.5 py-1 rounded bg-neutral-100 border border-neutral-200 text-xs font-mono text-neutral-700 font-medium">
+              <span className="px-2.5 py-1 rounded bg-paper border border-line text-xs font-mono text-ink-soft font-medium">
                 Conforme Décret 2026/Baux
               </span>
             </div>
 
             {/* Objection Analysée */}
             <div className="space-y-1">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-500 font-semibold">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-ink-muted font-semibold">
                 Objection Soulevée :
               </span>
-              <div className="p-3 rounded-md bg-neutral-50 border border-neutral-200 text-xs text-neutral-800 italic">
+              <div className="p-3 rounded-md bg-paper border border-line text-xs text-ink italic">
                 {simulatorInput.trim() ? simulatorInput : activePreset.clientQuery}
               </div>
             </div>
 
             {/* Diagnostic Psychologique */}
             <div className="space-y-1">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-500 font-semibold">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-ink-muted font-semibold">
                 Analyse Psychologique du Risque :
               </span>
-              <p className="text-xs text-neutral-700 leading-relaxed font-normal">
+              <p className="text-xs text-ink-soft leading-relaxed font-normal">
                 {activePreset.diagnosis}
               </p>
             </div>
@@ -519,11 +517,11 @@ export default function CrmIntelligencePage() {
             {/* Script WhatsApp Prêt à Envoyer */}
             <div className="space-y-2 pt-1">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-900 font-semibold flex items-center gap-1.5">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-ink font-semibold flex items-center gap-1.5">
                   <MessageCircle className="w-3.5 h-3.5 text-[#9E7431]" />
                   <span>Script WhatsApp Recommandé (Mot-à-Mot) :</span>
                 </span>
-                <span className="text-[10px] text-neutral-400 font-mono">Prêt à copier</span>
+                <span className="text-[10px] text-ink-light font-mono">Prêt à copier</span>
               </div>
 
               <div className="p-3.5 rounded-md bg-[#FAF8F5] border border-[#EAE5DC] text-xs text-[#161412] leading-relaxed shadow-2xs select-text">
@@ -532,20 +530,20 @@ export default function CrmIntelligencePage() {
             </div>
 
             {/* Pièce Justificative à Joindre */}
-            <div className="p-3 rounded-md bg-neutral-50 border border-neutral-200 flex items-center justify-between gap-3 text-xs">
+            <div className="p-3 rounded-md bg-paper border border-line flex items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2">
-                <FileCheck className="w-4 h-4 text-neutral-700 shrink-0" />
+                <FileCheck className="w-4 h-4 text-ink-soft shrink-0" />
                 <div>
-                  <span className="font-semibold text-neutral-900 block text-[11px]">
+                  <span className="font-semibold text-ink block text-[11px]">
                     {activePreset.proofDocument}
                   </span>
-                  <span className="text-[10px] text-neutral-500">
+                  <span className="text-[10px] text-ink-muted">
                     Annexe certifiée sous séquestre notarié Me Traoré
                   </span>
                 </div>
               </div>
 
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-neutral-300 bg-white text-neutral-700">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-line bg-white text-ink-soft">
                 PDF 100% Conforme
               </span>
             </div>
@@ -555,7 +553,7 @@ export default function CrmIntelligencePage() {
               <button
                 type="button"
                 onClick={() => handleCopySimulator(activePreset.responseScript)}
-                className="px-4 py-2.5 rounded-md bg-neutral-900 hover:bg-black text-white text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
+                className="px-4 py-2.5 rounded-md bg-ink hover:bg-black text-white text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
               >
                 {isCopiedSimulator ? (
                   <>
@@ -564,7 +562,7 @@ export default function CrmIntelligencePage() {
                   </>
                 ) : (
                   <>
-                    <Copy className="w-4 h-4 text-neutral-300" />
+                    <Copy className="w-4 h-4 text-line" />
                     <span>Copier la Réponse pour WhatsApp</span>
                   </>
                 )}
@@ -583,17 +581,17 @@ export default function CrmIntelligencePage() {
         <div className="space-y-6">
           
           {/* Tableau Benchmark des Loyers de Prestige */}
-          <section className="bg-white border border-neutral-200 rounded-lg p-5 sm:p-6 shadow-2xs space-y-4">
-            <div className="border-b border-neutral-100 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <section className="bg-white border border-line rounded-lg p-5 sm:p-6 shadow-2xs space-y-4">
+            <div className="border-b border-paper pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-500 font-semibold block">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-ink-muted font-semibold block">
                   Baromètre des Secteurs Exclusifs
                 </span>
-                <h2 className="text-base font-semibold text-neutral-900 mt-0.5">
+                <h2 className="text-base font-semibold text-ink mt-0.5">
                   Argus des Loyers &amp; Taux de Tension Locative Abidjan
                 </h2>
               </div>
-              <span className="text-xs font-mono text-neutral-500">
+              <span className="text-xs font-mono text-ink-muted">
                 Source : Livre Foncier &amp; Baux Me Traoré 2026
               </span>
             </div>
@@ -601,7 +599,7 @@ export default function CrmIntelligencePage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-neutral-200 font-mono text-[11px] text-neutral-500 uppercase tracking-wider">
+                  <tr className="border-b border-line font-mono text-[11px] text-ink-muted uppercase tracking-wider">
                     <th className="py-2.5 pr-4 font-semibold">Secteur Cible</th>
                     <th className="py-2.5 px-4 font-semibold">Loyer Mensuel Médian</th>
                     <th className="py-2.5 px-4 font-semibold">Tension Locative</th>
@@ -609,24 +607,24 @@ export default function CrmIntelligencePage() {
                     <th className="py-2.5 pl-4 font-semibold">Argument de Clôture Clé</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-neutral-100">
+                <tbody className="divide-y divide-paper">
                   {ABIDJAN_DISTRICT_BENCHMARK.map((b, idx) => (
-                    <tr key={idx} className="hover:bg-neutral-50/80 transition-colors">
-                      <td className="py-3.5 pr-4 font-medium text-neutral-900">
+                    <tr key={idx} className="hover:bg-paper/80 transition-colors">
+                      <td className="py-3.5 pr-4 font-medium text-ink">
                         <div className="font-semibold text-xs">{b.district}</div>
-                        <div className="text-[11px] text-neutral-500 font-normal">{b.type}</div>
+                        <div className="text-[11px] text-ink-muted font-normal">{b.type}</div>
                       </td>
-                      <td className="py-3.5 px-4 font-mono font-semibold text-neutral-900">
+                      <td className="py-3.5 px-4 font-mono font-semibold text-ink">
                         {b.rentRange}
                       </td>
                       <td className="py-3.5 px-4 font-mono">
-                        <span className="font-semibold text-neutral-900">{b.tension}%</span>
-                        <span className="text-[10px] text-neutral-500 block">Demande &gt; Offre</span>
+                        <span className="font-semibold text-ink">{b.tension}%</span>
+                        <span className="text-[10px] text-ink-muted block">Demande &gt; Offre</span>
                       </td>
-                      <td className="py-3.5 px-4 font-mono text-neutral-700">
+                      <td className="py-3.5 px-4 font-mono text-ink-soft">
                         {b.avgDaysToLease} jours
                       </td>
-                      <td className="py-3.5 pl-4 text-neutral-600 max-w-xs text-[11px] leading-relaxed">
+                      <td className="py-3.5 pl-4 text-ink-soft max-w-xs text-[11px] leading-relaxed">
                         {b.coreLever}
                       </td>
                     </tr>
@@ -637,41 +635,41 @@ export default function CrmIntelligencePage() {
           </section>
 
           {/* Radar NLP des Mots-Clés et Expressions Clés */}
-          <section className="bg-white border border-neutral-200 rounded-lg p-5 sm:p-6 shadow-2xs space-y-4">
-            <div className="border-b border-neutral-100 pb-3 flex items-center justify-between">
+          <section className="bg-white border border-line rounded-lg p-5 sm:p-6 shadow-2xs space-y-4">
+            <div className="border-b border-paper pb-3 flex items-center justify-between">
               <div>
-                <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-500 font-semibold block">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-ink-muted font-semibold block">
                   Analyse Sémantique des Échanges WhatsApp
                 </span>
-                <h3 className="text-base font-semibold text-neutral-900 mt-0.5">
+                <h3 className="text-base font-semibold text-ink mt-0.5">
                   Radar des 10 Requêtes &amp; Mots-Clés Prioritaires
                 </h3>
               </div>
-              <span className="text-xs font-mono text-neutral-500">
+              <span className="text-xs font-mono text-ink-muted">
                 124 conversations analysées
               </span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {KEYWORD_RADAR.map((kw, i) => (
-                <div key={i} className="p-3.5 rounded-md bg-neutral-50 border border-neutral-200 space-y-2">
+                <div key={i} className="p-3.5 rounded-md bg-paper border border-line space-y-2">
                   <div className="flex justify-between items-baseline text-xs">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-neutral-900 text-xs">{kw.keyword}</span>
-                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded border border-neutral-200 bg-white text-neutral-600 uppercase">
+                      <span className="font-semibold text-ink text-xs">{kw.keyword}</span>
+                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded border border-line bg-white text-ink-soft uppercase">
                         {kw.category}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 font-mono text-xs">
-                      <span className="text-neutral-500 font-normal">{kw.monthly_growth}</span>
-                      <span className="text-neutral-900 font-semibold">{kw.inquiry_percentage}%</span>
+                      <span className="text-ink-muted font-normal">{kw.monthly_growth}</span>
+                      <span className="text-ink font-semibold">{kw.inquiry_percentage}%</span>
                     </div>
                   </div>
 
                   {/* Progress Bar Monochrome Nette */}
-                  <div className="w-full h-1.5 rounded bg-neutral-200 overflow-hidden">
+                  <div className="w-full h-1.5 rounded bg-line overflow-hidden">
                     <div
-                      className="h-full bg-neutral-900 transition-all duration-500"
+                      className="h-full bg-ink transition-all duration-500"
                       style={{ width: `${kw.inquiry_percentage}%` }}
                     />
                   </div>
