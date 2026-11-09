@@ -4,6 +4,7 @@ import Image from 'next/image';
 import type { Property } from '@/lib/types';
 import { formatFCFA } from '@/lib/utils';
 import { STATUS_LABELS, TYPE_LABELS, priceSuffix } from '@/lib/property-search';
+import { ImageReveal, Tilt } from '@/components/Motion';
 
 type Props = {
   property: Property;
@@ -20,22 +21,24 @@ export default function PropertyCard({ property, isPriority = false }: Props) {
 
   return (
     <Link href={`/biens/${property.id}`} className="group block focus-visible:outline-none">
-      <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-paper ring-1 ring-line group-focus-visible:ring-2 group-focus-visible:ring-accent">
-        <Image
-          src={property.images[0]}
-          alt={property.title}
-          fill
-          unoptimized
-          priority={isPriority}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-        />
-        {status && (
-          <span className="absolute top-3 left-3 rounded-md bg-white px-2 py-1 text-xs font-medium text-ink">
-            {status}
-          </span>
-        )}
-      </div>
+      <Tilt className="rounded-xl" max={5}>
+        <ImageReveal className="relative aspect-[4/3] rounded-xl bg-paper ring-1 ring-line group-focus-visible:ring-2 group-focus-visible:ring-accent">
+          <Image
+            src={property.images[0]}
+            alt={property.title}
+            fill
+            unoptimized
+            priority={isPriority}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          />
+          {status && (
+            <span className="absolute top-3 left-3 rounded-md bg-white px-2 py-1 text-xs font-medium text-ink">
+              {status}
+            </span>
+          )}
+        </ImageReveal>
+      </Tilt>
 
       <div className="pt-3 space-y-1">
         <div className="flex items-baseline justify-between gap-3">

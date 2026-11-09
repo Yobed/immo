@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
+import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
+import { CountUp, Reveal, TextReveal } from '@/components/Motion';
 import { ArrowLeft, Check, MessageCircle, Phone } from 'lucide-react';
 import SiteHeader from '@/components/site/SiteHeader';
 import SiteFooter from '@/components/site/SiteFooter';
@@ -34,6 +36,11 @@ export default function PropertyDetailPage() {
   const { properties } = useLiveProperties();
   const property = properties.find((p) => p.id === params.id);
   const [photoIndex, setPhotoIndex] = useState(0);
+  const galleryRef = useRef<HTMLDivElement>(null);
+  const isReduced = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: galleryRef, offset: ['start start', 'end start'] });
+  const photoY = useTransform(scrollYProgress, [0, 1], ['0%', '18%']);
+  const photoScale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
 
   if (!property) {
     return (
@@ -62,6 +69,8 @@ export default function PropertyDetailPage() {
   const features = amenities(property);
   const similar = similarProperties(properties, property);
   const photos = property.images;
+  // l'index survit à la navigation vers un bien similaire : on le borne
+  const index = Math.min(photoIndex, photos.length - 1);
 
   return (
     <>
@@ -76,21 +85,40 @@ export default function PropertyDetailPage() {
 
         {/* Galerie */}
         <section className="site-container pt-4">
-          <div className="relative aspect-[16/10] sm:aspect-[16/8] overflow-hidden rounded-2xl bg-paper">
-            <Image
-              key={photos[photoIndex]}
-              src={photos[photoIndex]}
-              alt={`${property.title}, photo ${photoIndex + 1} sur ${photos.length}`}
-              fill
-              priority
-              unoptimized
-              sizes="(max-width: 1152px) 100vw, 1152px"
-              className="object-cover animate-fade-in"
-            />
+          <motion.div
+            ref={galleryRef}
+            className="relative aspect-[16/10] sm:aspect-[16/8] overflow-hidden rounded-2xl bg-ink"
+            initial={isReduced ? false : { clipPath: 'inset(12% 8% 12% 8% round 16px)' }}
+            animate={{ clipPath: 'inset(0% 0% 0% 0% round 16px)' }}
+            transition={{ duration: 1.3, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {/* parallaxe : la photo descend plus lentement que la page */}
+            <motion.div className="absolute inset-x-0 -top-[10%] -bottom-[10%]" style={isReduced ? undefined : { y: photoY, scale: photoScale }}>
+              <AnimatePresence initial={false}>
+                <motion.div
+                  key={photos[index]}
+                  className="absolute inset-0"
+                  initial={{ opacity: 0, scale: 1.08 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <Image
+                    src={photos[index]}
+                    alt={`${property.title}, photo ${index + 1} sur ${photos.length}`}
+                    fill
+                    priority
+                    unoptimized
+                    sizes="(max-width: 1152px) 100vw, 1152px"
+                    className="object-cover"
+                  />
+                </motion.div>
+              </AnimatePresence>
+            </motion.div>
             <span className="absolute bottom-3 right-3 rounded-md bg-white/90 px-2 py-1 text-xs font-medium tabular-nums">
-              {photoIndex + 1} / {photos.length}
+              {index + 1} / {photos.length}
             </span>
-          </div>
+          </motion.div>
           {photos.length > 1 && (
             <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
               {photos.map((src, idx) => (
@@ -99,9 +127,9 @@ export default function PropertyDetailPage() {
                   type="button"
                   onClick={() => setPhotoIndex(idx)}
                   aria-label={`Afficher la photo ${idx + 1}`}
-                  aria-current={idx === photoIndex}
+                  aria-current={idx === index}
                   className={`relative w-24 h-16 shrink-0 overflow-hidden rounded-lg transition-opacity ${
-                    idx === photoIndex ? 'ring-2 ring-ink' : 'opacity-60 hover:opacity-100'
+                    idx === index ? 'ring-2 ring-ink' : 'opacity-60 hover:opacity-100'
                   }`}
                 >
                   <Image src={src} alt="" fill unoptimized sizes="96px" className="object-cover" />
@@ -119,39 +147,55 @@ export default function PropertyDetailPage() {
                 {TYPE_LABELS[property.property_type]} · {property.district}, {property.city}
                 {status && <span className="ml-2 rounded-md bg-paper px-2 py-0.5 text-ink font-medium">{status}</span>}
               </p>
-              <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight leading-tight">{property.title}</h1>
+              <h1 className="text-3xl sm:text-5xl font-semibold tracking-tight leading-[1.05]">
+                <TextReveal text={property.title} trigger="animate" delay={0.4} />
+              </h1>
             </header>
 
             <dl className="grid grid-cols-2 sm:grid-cols-4 gap-px rounded-xl bg-line ring-1 ring-line overflow-hidden">
               {specs.map((s) => (
                 <div key={s.label} className="bg-white p-4">
                   <dt className="text-xs text-ink-muted">{s.label}</dt>
-                  <dd className="mt-1 text-lg font-semibold tabular-nums">{s.value}</dd>
+                  <dd className="mt-1 text-2xl font-semibold tabular-nums">
+                    <CountUp value={s.value} />
+                  </dd>
                 </div>
               ))}
             </dl>
 
-            <div className="space-y-3">
+            <Reveal className="space-y-3">
               <h2 className="text-xl font-semibold">Description</h2>
               <p className="text-ink-muted leading-relaxed max-w-prose">{property.description}</p>
-            </div>
+            </Reveal>
 
             {features.length > 0 && (
-              <div className="space-y-3">
+              <Reveal className="space-y-3">
                 <h2 className="text-xl font-semibold">Équipements</h2>
                 <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
-                  {features.map((a) => (
-                    <li key={a} className="flex items-center gap-2.5">
+                  {features.map((a, i) => (
+                    <motion.li
+                      key={a}
+                      className="flex items-center gap-2.5"
+                      initial={isReduced ? false : { opacity: 0, x: -12 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.15 + i * 0.08, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                    >
                       <Check className="w-4 h-4 text-accent shrink-0" />
                       {a}
-                    </li>
+                    </motion.li>
                   ))}
                 </ul>
-              </div>
+              </Reveal>
             )}
           </div>
 
-          <aside className="lg:sticky lg:top-24 self-start rounded-2xl ring-1 ring-line p-6 space-y-5 shadow-sm">
+          <motion.aside
+            className="lg:sticky lg:top-24 self-start rounded-2xl ring-1 ring-line p-6 space-y-5 shadow-sm bg-white"
+            initial={isReduced ? false : { opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          >
             <div>
               <p className="text-3xl font-semibold tabular-nums">{formatFCFA(property.price)}</p>
               <p className="text-sm text-ink-muted">{priceSuffix(property) ? 'par mois' : 'prix de vente'}</p>
@@ -167,12 +211,14 @@ export default function PropertyDetailPage() {
             <p className="text-xs text-ink-muted border-t border-line pt-4">
               Référence <span className="font-mono text-ink">{property.reference}</span>
             </p>
-          </aside>
+          </motion.aside>
         </section>
 
         {similar.length > 0 && (
           <section className="site-container py-12 border-t border-line">
-            <h2 className="text-2xl font-semibold tracking-tight mb-8">Biens similaires</h2>
+            <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-8">
+              <TextReveal text="Biens similaires" />
+            </h2>
             <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
               {similar.map((p) => <PropertyCard key={p.id} property={p} />)}
             </div>

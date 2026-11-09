@@ -6,6 +6,7 @@ import SiteHeader from '@/components/site/SiteHeader';
 import SiteFooter from '@/components/site/SiteFooter';
 import PropertyCard from '@/components/site/PropertyCard';
 import SearchForm from '@/components/site/SearchForm';
+import { Reveal, TextReveal } from '@/components/Motion';
 import { useLiveProperties } from '@/lib/useLiveProperties';
 import {
   EMPTY_FILTERS,
@@ -42,7 +43,9 @@ function PropertyList() {
   return (
     <main className="bg-white text-ink">
       <section className="site-container pt-10 pb-6 space-y-6">
-        <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">Biens à louer</h1>
+        <h1 className="text-4xl sm:text-6xl font-semibold tracking-tight">
+          <TextReveal text="Biens à louer" trigger="animate" />
+        </h1>
         <SearchForm
           districts={listDistricts(properties)}
           types={listTypes(properties)}
@@ -82,7 +85,9 @@ function PropertyList() {
         {results.length > 0 ? (
           <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
             {results.map((p, idx) => (
-              <PropertyCard key={p.id} property={p} isPriority={idx < 3} />
+              <Reveal key={p.id} delay={(idx % 3) * 0.08}>
+                <PropertyCard property={p} isPriority={idx < 3} />
+              </Reveal>
             ))}
           </div>
         ) : (

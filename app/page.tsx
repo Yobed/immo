@@ -1,16 +1,20 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, MessageCircle, MoveHorizontal } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import SiteHeader from '@/components/site/SiteHeader';
 import SiteFooter from '@/components/site/SiteFooter';
-import PropertyCard from '@/components/site/PropertyCard';
 import SearchForm from '@/components/site/SearchForm';
-import { Reveal } from '@/components/Motion';
+import HeroGallery3D from '@/components/site/HeroGallery3D';
+import HorizontalGallery from '@/components/site/HorizontalGallery';
+import DistrictList from '@/components/site/DistrictList';
+import { Reveal, ScrollHighlight, TextReveal } from '@/components/Motion';
 import { useLiveProperties } from '@/lib/useLiveProperties';
-import { EMPTY_FILTERS, listDistricts, listTypes } from '@/lib/property-search';
+import { formatFCFA, getWhatsAppLink } from '@/lib/utils';
+import type { Property } from '@/lib/types';
+import { AGENCY_PHONE, EMPTY_FILTERS, listDistricts, listTypes, priceSuffix } from '@/lib/property-search';
 
 const PROMISES = [
   { title: 'Titre foncier affiché', text: 'Chaque annonce indique la nature du titre (ACD, TF, CMP) avant même la visite.' },
@@ -22,114 +26,120 @@ export default function HomePage() {
   const { properties } = useLiveProperties();
   const districts = listDistricts(properties);
   const types = listTypes(properties);
-  const cover = properties[0];
-  const countByDistrict = (d: string) => properties.filter((p) => p.district === d).length;
+  const [front, setFront] = useState<Property | null>(properties[0] ?? null);
 
   return (
     <>
       <SiteHeader />
 
-      <main className="bg-white text-ink">
-        {/* Accroche + recherche */}
-        <section className="site-container pt-10 sm:pt-16 pb-12">
-          <div className="grid gap-10 lg:grid-cols-[1.05fr_1fr] lg:items-center">
-            <div className="space-y-5">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.05]">
-                Trouvez votre bien
-                <br />
-                à Abidjan.
+      <main className="text-ink">
+        {/* ---------- Hero 3D ---------- */}
+        <section className="relative h-[calc(100svh-4rem)] min-h-[560px] overflow-hidden bg-ink text-white">
+          <HeroGallery3D properties={properties} onFrontChange={setFront} />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/40" />
+
+          <div className="pointer-events-none relative h-full site-container flex flex-col justify-end pb-24 sm:pb-28">
+            <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+              <h1 className="text-5xl sm:text-7xl lg:text-8xl font-semibold tracking-tight leading-[0.95]">
+                <TextReveal text={'Vivre Abidjan,\nen grand.'} trigger="animate" delay={0.2} />
               </h1>
-              <p className="text-lg text-ink-muted max-w-md">
-                Villas, appartements et bureaux à louer, de Cocody à Assinie. Titre foncier indiqué sur chaque annonce.
-              </p>
-              <dl className="flex gap-8 pt-2">
-                <div>
-                  <dt className="text-sm text-ink-muted">Biens disponibles</dt>
-                  <dd className="text-2xl font-semibold tabular-nums">{properties.length}</dd>
-                </div>
-                <div>
-                  <dt className="text-sm text-ink-muted">Quartiers</dt>
-                  <dd className="text-2xl font-semibold tabular-nums">{districts.length}</dd>
-                </div>
-              </dl>
+
+              <AnimatePresence mode="wait">
+                {front && (
+                  <motion.div
+                    key={front.id}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -16 }}
+                    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                    className="lg:text-right max-w-sm lg:ml-auto"
+                  >
+                    <p className="text-sm text-white/60">{front.district}</p>
+                    <p className="text-lg font-medium leading-snug line-clamp-2">{front.title}</p>
+                    <p className="text-lg font-semibold tabular-nums">
+                      {formatFCFA(front.price)} <span className="text-sm font-normal text-white/60">{priceSuffix(front)}</span>
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
-            {cover && (
-              <Link href={`/biens/${cover.id}`} className="group relative block aspect-[4/3] lg:aspect-[5/4] overflow-hidden rounded-2xl bg-paper">
-                <Image
-                  src={cover.images[0]}
-                  alt={cover.title}
-                  fill
-                  priority
-                  unoptimized
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
-                />
-                <span className="absolute bottom-4 left-4 rounded-md bg-white px-3 py-1.5 text-sm font-medium">
-                  {cover.district}
-                </span>
-              </Link>
-            )}
+            <motion.p
+              className="mt-8 flex items-center gap-2 text-sm text-white/60"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.2, duration: 0.8 }}
+            >
+              <MoveHorizontal className="w-4 h-4" /> Glissez ou défilez pour tourner, cliquez sur une photo pour l&apos;ouvrir
+            </motion.p>
           </div>
+        </section>
 
-          <div className="mt-10">
+        {/* ---------- Recherche, à cheval sur le hero ---------- */}
+        <div className="relative z-10 site-container -mt-12">
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}>
             <SearchForm districts={districts} types={types} value={EMPTY_FILTERS} />
-          </div>
+          </motion.div>
+        </div>
+
+        {/* ---------- Manifeste ---------- */}
+        <section className="site-container py-28 sm:py-40">
+          <ScrollHighlight
+            className="text-3xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] max-w-5xl"
+            text={`${properties.length} adresses choisies une à une, de Cocody à Assinie. Titre foncier vérifié, visite accompagnée, un seul interlocuteur du premier message à la remise des clés.`}
+          />
         </section>
 
-        {/* Sélection */}
-        <section className="site-container py-12 sm:py-16 border-t border-line">
-          <Reveal className="flex items-end justify-between gap-4 mb-8">
-            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">Biens disponibles</h2>
-            <Link href="/biens" className="text-sm font-medium text-ink hover:text-accent inline-flex items-center gap-1.5 shrink-0">
-              Tout voir <ArrowRight className="w-4 h-4" />
+        {/* ---------- Sélection (défilement horizontal épinglé) ---------- */}
+        <HorizontalGallery properties={properties} />
+
+        {/* ---------- Quartiers ---------- */}
+        <section className="site-container py-24 sm:py-32">
+          <div className="flex items-end justify-between gap-6 mb-10">
+            <h2 className="text-4xl sm:text-5xl font-semibold tracking-tight">
+              <TextReveal text="Par quartier" />
+            </h2>
+            <Link href="/biens" className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium hover:text-accent">
+              Tous les biens <ArrowRight className="w-4 h-4" />
             </Link>
-          </Reveal>
-          <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-            {properties.slice(0, 6).map((p, idx) => (
-              <Reveal key={p.id} delay={(idx % 3) * 0.06}>
-                <PropertyCard property={p} />
-              </Reveal>
-            ))}
           </div>
+          <DistrictList properties={properties} districts={districts} />
         </section>
 
-        {/* Quartiers */}
-        <section className="site-container py-12 sm:py-16 border-t border-line">
-          <Reveal>
-            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight mb-8">Chercher par quartier</h2>
-          </Reveal>
-          <ul className="grid sm:grid-cols-2 lg:grid-cols-3 border-t border-line">
-            {districts.map((d) => (
-              <li key={d} className="border-b border-line">
-                <Link
-                  href={`/biens?quartier=${encodeURIComponent(d)}`}
-                  className="group flex items-center justify-between py-4 pr-2 hover:bg-paper transition-colors sm:px-2"
-                >
-                  <span className="font-medium">{d}</span>
-                  <span className="flex items-center gap-3 text-sm text-ink-muted">
-                    <span className="tabular-nums">{countByDistrict(d)} bien{countByDistrict(d) > 1 ? 's' : ''}</span>
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {/* Engagements */}
+        {/* ---------- Engagements ---------- */}
         <section className="bg-paper border-t border-line">
-          <div className="site-container py-12 sm:py-16 grid gap-8 sm:grid-cols-3">
+          <div className="site-container py-20 sm:py-24 grid gap-12 sm:grid-cols-3">
             {PROMISES.map((item, idx) => (
-              <Reveal key={item.title} delay={idx * 0.06} className="space-y-2">
-                <p className="text-sm font-medium text-accent tabular-nums">0{idx + 1}</p>
-                <h3 className="text-lg font-semibold">{item.title}</h3>
-                <p className="text-ink-muted">{item.text}</p>
+              <Reveal key={item.title} delay={idx * 0.1} className="space-y-3">
+                <p className="text-5xl font-semibold text-accent/80 tabular-nums">0{idx + 1}</p>
+                <h3 className="text-xl font-semibold">{item.title}</h3>
+                <p className="text-ink-muted leading-relaxed">{item.text}</p>
               </Reveal>
             ))}
           </div>
         </section>
 
+        {/* ---------- Appel final ---------- */}
+        <section className="bg-ink text-white">
+          <div className="site-container py-24 sm:py-32 flex flex-col items-start gap-10">
+            <h2 className="text-5xl sm:text-7xl font-semibold tracking-tight leading-[0.95]">
+              <TextReveal text={'Une visite ?\nOn s’en occupe.'} />
+            </h2>
+            <Reveal delay={0.3} className="flex flex-wrap gap-3">
+              <a
+                href={getWhatsAppLink(AGENCY_PHONE, 'Bonjour, je souhaite organiser une visite.')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 h-12 px-6 rounded-lg bg-white text-ink text-sm font-medium hover:bg-paper transition-colors"
+              >
+                <MessageCircle className="w-4 h-4" /> Écrire sur WhatsApp
+              </a>
+              <Link href="/biens" className="inline-flex items-center gap-2 h-12 px-6 rounded-lg ring-1 ring-white/25 text-sm font-medium hover:bg-white/10 transition-colors">
+                Voir tous les biens <ArrowRight className="w-4 h-4" />
+              </Link>
+            </Reveal>
+          </div>
+        </section>
       </main>
 
       <SiteFooter />
