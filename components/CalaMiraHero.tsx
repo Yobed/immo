@@ -129,8 +129,8 @@ export default function CalaMiraHero({ properties, onOpenVisitModal }: CalaMiraH
                 <span>{activeProp.district}</span>
               </span>
 
-              <span className="px-3 py-1 rounded-full bg-emerald-950/60 backdrop-blur-xl border border-emerald-500/30 text-[11px] font-mono text-emerald-300 flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-[11px] font-mono text-white/90 flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#C8A97E]" />
                 <span>Titre {activeProp.legal_status} Audité</span>
               </span>
             </div>
@@ -157,7 +157,7 @@ export default function CalaMiraHero({ properties, onOpenVisitModal }: CalaMiraH
               {activeProp.has_pool && (
                 <>
                   <span className="text-white/30">•</span>
-                  <span className="font-mono text-xs sm:text-sm text-cyan-300">Piscine Miroir</span>
+                  <span className="font-mono text-xs sm:text-sm text-[#C8A97E]">Piscine Miroir</span>
                 </>
               )}
             </div>
@@ -168,9 +168,9 @@ export default function CalaMiraHero({ properties, onOpenVisitModal }: CalaMiraH
                 href={whatsappDirectUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-7 py-3.5 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold flex items-center gap-2 shadow-[0_15px_30px_rgba(37,211,102,0.35)] transition-all transform hover:scale-102 cursor-pointer"
+                className="px-7 py-3.5 rounded-full bg-[#191715] hover:bg-[#9E7431] text-white text-xs font-bold flex items-center gap-2 border border-white/20 transition-all transform hover:scale-102 cursor-pointer shadow-xl"
               >
-                <MessageCircle className="w-4 h-4 fill-white" />
+                <MessageCircle className="w-4 h-4 text-[#C8A97E]" />
                 <span>Réserver une Visite Privée</span>
               </a>
 

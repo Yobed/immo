@@ -280,25 +280,25 @@ export default function CrmContactsPage() {
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8 py-5 space-y-4 font-sans text-[#0f172a]">
       
-      {/* 1. TOP HEADER & VIEW SWITCHER (Harmonisé Menthe #86E0BC - Tuile Candidats & Contacts) */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#86E0BC] text-[#15161A] p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-[#6fcca8] shadow-warm-xs relative overflow-hidden">
+      {/* 1. TOP HEADER & VIEW SWITCHER (Charbon Architectural #191715 & Or Champagne #C8A97E) */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#191715] text-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-[#2D2926] shadow-warm-xs relative overflow-hidden">
         
         {/* Voile décoratif subtil */}
-        <div className="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-white/20 to-transparent pointer-events-none" />
+        <div className="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-[#C8A97E]/10 to-transparent pointer-events-none" />
 
         <div className="space-y-1 z-10">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-wider font-extrabold text-[#15161A]/80 bg-white/40 px-2.5 py-0.5 rounded-full">
+            <span className="text-[10px] uppercase tracking-wider font-bold text-[#C8A97E] bg-[#C8A97E]/10 border border-[#C8A97E]/30 px-2.5 py-0.5 rounded-full">
               Base Prospects &amp; Candidats Chauds
             </span>
-            <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-[#15161A] text-white shadow-xs">
+            <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-white text-[#161412] shadow-xs">
               {contacts.length} qualifiés
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-black text-[#15161A] tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
             Base Historique Prospects, Candidats &amp; Échanges WhatsApp
           </h1>
-          <p className="text-xs text-[#15161A]/85 font-medium max-w-2xl">
+          <p className="text-xs text-[#FAF8F5]/70 font-normal max-w-2xl">
             Historique exhaustif des interactions WhatsApp, solvabilité bancaire certifiée et réquisitions foncières à Abidjan.
           </p>
         </div>
@@ -308,22 +308,22 @@ export default function CrmContactsPage() {
           <button
             type="button"
             onClick={() => setIsSimulatorOpen(true)}
-            className="px-3.5 py-2 rounded-xl bg-[#17181D] hover:bg-black text-white text-xs font-bold flex items-center gap-2 shadow-xs transition-transform hover:-translate-y-0.5 cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-white hover:bg-[#FAF8F5] text-[#161412] text-xs font-bold flex items-center gap-2 shadow-xs transition-transform hover:-translate-y-0.5 cursor-pointer"
             title="Tester l'injection d'un message WhatsApp et son extraction IA"
           >
-            <span className="w-2.5 h-2.5 rounded-full bg-[#25D366] ring-2 ring-emerald-900/60" />
-            <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#9E7431] ring-2 ring-[#9E7431]/20" />
+            <MessageCircle className="w-3.5 h-3.5 text-[#9E7431]" />
             <span>Simuler Remontée WhatsApp</span>
           </button>
 
-          <div className="flex items-center p-1 bg-white/85 backdrop-blur-xs rounded-xl shadow-2xs border border-white/40 text-xs font-semibold">
+          <div className="flex items-center p-1 bg-[#24211E] rounded-xl shadow-2xs border border-[#38332E] text-xs font-semibold">
             <button
               type="button"
               onClick={() => setViewMode('table')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                 viewMode === 'table'
-                  ? 'bg-[#15161A] text-white shadow-xs'
-                  : 'text-slate-700 hover:text-black'
+                  ? 'bg-white text-[#161412] shadow-xs'
+                  : 'text-white/70 hover:text-white'
               }`}
             >
               <TableProperties className="w-3.5 h-3.5" />
@@ -335,11 +335,11 @@ export default function CrmContactsPage() {
               onClick={() => setViewMode('cards')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                 viewMode === 'cards'
-                  ? 'bg-[#15161A] text-white shadow-xs'
-                  : 'text-slate-700 hover:text-black'
+                  ? 'bg-white text-[#161412] shadow-xs'
+                  : 'text-white/70 hover:text-white'
               }`}
             >
-              <MessageCircle className="w-3.5 h-3.5 text-[#17915F]" />
+              <MessageCircle className="w-3.5 h-3.5 text-[#9E7431]" />
               <span>Fiches &amp; Chat</span>
             </button>
           </div>
@@ -348,15 +348,15 @@ export default function CrmContactsPage() {
 
       {/* Bannière de notification temps réel lors d'une remontée WhatsApp */}
       {syncNotice && (
-        <div className="p-3.5 bg-emerald-50 border-2 border-emerald-400 rounded-2xl flex items-center justify-between text-xs text-emerald-950 shadow-xs animate-in fade-in slide-in-from-top duration-300">
+        <div className="p-3.5 bg-[#FAF8F5] border border-[#9E7431] rounded-2xl flex items-center justify-between text-xs text-[#161412] shadow-xs animate-in fade-in slide-in-from-top duration-300">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-600 ring-2 ring-emerald-200" />
-            <span className="font-extrabold text-emerald-900">Remontée WhatsApp &amp; Aya IA :</span>
-            <span className="font-medium">{syncNotice}</span>
+            <span className="w-2 h-2 rounded-full bg-[#9E7431] ring-2 ring-[#9E7431]/20" />
+            <span className="font-extrabold text-[#161412]">Remontée WhatsApp &amp; Aya IA :</span>
+            <span className="font-medium text-[#6E665B]">{syncNotice}</span>
           </div>
           <button
             onClick={() => setSyncNotice(null)}
-            className="text-emerald-700 hover:text-emerald-950 font-bold px-2 py-0.5 text-xs cursor-pointer"
+            className="text-[#6E665B] hover:text-[#161412] font-bold px-2 py-0.5 text-xs cursor-pointer"
           >
             Fermer
           </button>
@@ -403,13 +403,13 @@ export default function CrmContactsPage() {
             <div className="flex flex-wrap gap-1 p-1 bg-white rounded-xl border border-slate-200 text-[11px] shadow-2xs">
               {[
                 { id: 'all', label: `Tous (${contacts.length})`, activeCls: 'bg-[#15161A] text-white font-bold' },
-                { id: 'hot', label: `Chauds (${contacts.filter(c => c.lead_score === 'hot').length})`, activeCls: 'bg-[#FF7633] text-white font-bold' },
-                { id: 'warm', label: `Tièdes (${contacts.filter(c => c.lead_score === 'warm').length})`, activeCls: 'bg-[#FFD84D] text-[#15161A] font-bold' },
-                { id: 'cold', label: `Froids (${contacts.filter(c => c.lead_score === 'cold').length})`, activeCls: 'bg-sky-600 text-white font-bold' },
-                { id: 'tenant', label: 'Locataires', activeCls: 'bg-[#2E5BFF] text-white font-bold' },
-                { id: 'owner', label: 'Bailleurs', activeCls: 'bg-purple-700 text-white font-bold' },
-                { id: 'active_tenant', label: 'Baux actifs', activeCls: 'bg-[#0F5E3E] text-white font-bold' },
-                { id: 'former_tenant', label: 'Baux clos', activeCls: 'bg-rose-700 text-white font-bold' },
+                { id: 'hot', label: `Chauds (${contacts.filter(c => c.lead_score === 'hot').length})`, activeCls: 'bg-[#15161A] text-white font-bold' },
+                { id: 'warm', label: `Tièdes (${contacts.filter(c => c.lead_score === 'warm').length})`, activeCls: 'bg-[#9E7431] text-white font-bold' },
+                { id: 'cold', label: `Froids (${contacts.filter(c => c.lead_score === 'cold').length})`, activeCls: 'bg-[#6E665B] text-white font-bold' },
+                { id: 'tenant', label: 'Locataires', activeCls: 'bg-[#15161A] text-white font-bold' },
+                { id: 'owner', label: 'Bailleurs', activeCls: 'bg-[#9E7431] text-white font-bold' },
+                { id: 'active_tenant', label: 'Baux actifs', activeCls: 'bg-[#15161A] text-white font-bold' },
+                { id: 'former_tenant', label: 'Baux clos', activeCls: 'bg-[#6E665B] text-white font-bold' },
               ].map((f) => (
                 <button
                   key={f.id}
@@ -439,7 +439,7 @@ export default function CrmContactsPage() {
                     onClick={() => setSelectedContact(contact)}
                     className={`p-3 rounded-2xl border cursor-pointer transition-all ${
                       isSelected
-                        ? 'bg-white border-2 border-[#17915F] ring-2 ring-[#86E0BC]/30 shadow-warm-xs'
+                        ? 'bg-white border-2 border-[#161412] ring-2 ring-[#9E7431]/20 shadow-warm-xs'
                         : 'bg-white border-slate-200/90 hover:border-slate-300'
                     }`}
                   >
@@ -449,7 +449,7 @@ export default function CrmContactsPage() {
                           <span className="truncate">{contact.full_name}</span>
                           {contact.kyc_status === 'valid' && (
                             <span title="Dossier vérifié" className="shrink-0">
-                              <ShieldCheck className="w-3.5 h-3.5 text-[#17915F]" />
+                              <ShieldCheck className="w-3.5 h-3.5 text-[#9E7431]" />
                             </span>
                           )}
                         </div>
@@ -463,21 +463,21 @@ export default function CrmContactsPage() {
                       <div className="flex flex-col items-end gap-1 shrink-0">
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                           qualScore >= 95 
-                            ? 'bg-[#D7F4E8] text-[#0F5E3E]' 
+                            ? 'bg-[#FAF8F5] text-[#161412] border border-[#EAE5DC]' 
                             : qualScore >= 85 
-                            ? 'bg-[#FEF3C7] text-[#92400E]' 
+                            ? 'bg-[#FAF8F5] text-[#9E7431] border border-[#9E7431]/30' 
                             : 'bg-slate-100 text-slate-700'
                         }`}>
                           {qualScore}%
                         </span>
 
                         {contact.lease_status === 'former_tenant' && (
-                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-rose-100 text-rose-800 border border-rose-200">
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-[#FAF8F5] text-[#6E665B] border border-[#EAE5DC]">
                             Bail clos
                           </span>
                         )}
                         {contact.lease_status === 'active_tenant' && (
-                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-[#15161A] text-[#FFD84D]">
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-[#15161A] text-white">
                             Bail actif
                           </span>
                         )}
@@ -495,8 +495,8 @@ export default function CrmContactsPage() {
 
                       <div className="flex items-center gap-2 text-[11px]">
                         {hasHistory && (
-                          <span className="flex items-center gap-1 text-emerald-700 font-medium">
-                            <MessageCircle className="w-3 h-3 text-[#008069]" />
+                          <span className="flex items-center gap-1 text-[#161412] font-medium">
+                            <MessageCircle className="w-3 h-3 text-[#9E7431]" />
                             {contact.whatsapp_history?.length}
                           </span>
                         )}
@@ -523,15 +523,11 @@ export default function CrmContactsPage() {
                     <h2 className="text-lg font-extrabold text-slate-900">
                       {selectedContact.full_name}
                     </h2>
-                    <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
-                      selectedContact.type === 'owner' 
-                        ? 'bg-purple-100 text-purple-900 border border-purple-200' 
-                        : 'bg-blue-100 text-blue-900 border border-blue-200'
-                    }`}>
+                    <span className="text-[11px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider bg-[#FAF8F5] text-[#161412] border border-[#EAE5DC]">
                       {selectedContact.type === 'tenant' ? 'Locataire' : selectedContact.type === 'owner' ? 'Bailleur' : selectedContact.type}
                     </span>
                     {selectedContact.qualification_score && (
-                      <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#D7F4E8] text-[#0F5E3E] font-bold border border-[#A7F3D0] shadow-2xs">
+                      <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#FAF8F5] text-[#9E7431] font-bold border border-[#EAE5DC] shadow-2xs">
                         Score {selectedContact.qualification_score}%
                       </span>
                     )}
@@ -539,7 +535,7 @@ export default function CrmContactsPage() {
                   
                   <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-1.5 font-normal">
                     <span className="flex items-center gap-1 font-bold text-slate-900 font-mono">
-                      <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                      <Phone className="w-3.5 h-3.5 text-[#9E7431]" />
                       {selectedContact.phone}
                     </span>
                     {selectedContact.email && (
@@ -562,9 +558,9 @@ export default function CrmContactsPage() {
                     href={getWhatsAppLink(selectedContact.phone, `Bonjour M./Mme ${selectedContact.full_name}, suite à votre échange avec notre cabinet immobilier, voici les précisions relatives à votre dossier.`)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-4 py-2 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs flex items-center gap-2 transition-transform hover:-translate-y-0.5 shadow-xs"
+                    className="px-4 py-2 rounded-xl bg-[#191715] hover:bg-[#9E7431] text-white font-bold text-xs flex items-center gap-2 transition-colors shadow-xs"
                   >
-                    <MessageCircle className="w-4 h-4 text-white" />
+                    <MessageCircle className="w-4 h-4 text-[#9E7431]" />
                     <span>Lancer WhatsApp</span>
                   </a>
                 </div>
@@ -579,9 +575,9 @@ export default function CrmContactsPage() {
                   </span>
                   <div className="inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1 gap-1">
                     {[
-                      { key: 'hot', label: 'Chaud (Prioritaire)', activeCls: 'bg-[#FF7633] text-white font-bold' },
-                      { key: 'warm', label: 'Tiède (Standard)', activeCls: 'bg-[#FFD84D] text-[#15161A] font-bold' },
-                      { key: 'cold', label: 'Froid (Veille)', activeCls: 'bg-sky-600 text-white font-bold' }
+                      { key: 'hot', label: 'Chaud (Prioritaire)', activeCls: 'bg-[#15161A] text-white font-bold' },
+                      { key: 'warm', label: 'Tiède (Standard)', activeCls: 'bg-[#9E7431] text-white font-bold' },
+                      { key: 'cold', label: 'Froid (Veille)', activeCls: 'bg-[#6E665B] text-white font-bold' }
                     ].map(({ key, label, activeCls }) => (
                       <button
                         key={key}
@@ -609,19 +605,19 @@ export default function CrmContactsPage() {
                     onChange={(e) => handleUpdateLeaseStatus(selectedContact.id, e.target.value as LeaseStatus)}
                     className="px-3 py-1.5 rounded-xl text-xs font-bold bg-[#fbfaf7] text-slate-900 border border-slate-300 cursor-pointer focus:outline-none focus:border-[#15161A] shadow-2xs"
                   >
-                    <option value="candidate">🟡 Candidat en recherche</option>
-                    <option value="active_tenant">🟢 Locataire en place (Bail actif)</option>
-                    <option value="former_tenant">🔴 A quitté les lieux (Bail résilié)</option>
-                    <option value="archived">⚪ Dossier archivé</option>
+                    <option value="candidate">Candidat en recherche</option>
+                    <option value="active_tenant">Locataire en place (Bail actif)</option>
+                    <option value="former_tenant">A quitté les lieux (Bail résilié)</option>
+                    <option value="archived">Dossier archivé</option>
                   </select>
                 </div>
               </div>
 
               {/* Profile Metrics Strip avec Accents de Couleur */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
-                <div className="p-3 bg-[#FFFBEB] rounded-xl border border-amber-200 shadow-2xs">
-                  <span className="text-[10px] text-amber-800 uppercase font-bold block">Budget / Loyer</span>
-                  <span className="font-bold text-amber-950 text-xs font-mono mt-0.5 block">
+                <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#EAE5DC] shadow-2xs">
+                  <span className="text-[10px] text-[#6E665B] uppercase font-bold block">Budget / Loyer</span>
+                  <span className="font-bold text-[#161412] text-xs font-mono mt-0.5 block">
                     {selectedContact.budget_max 
                       ? (selectedContact.type === 'tenant' || selectedContact.type === 'owner' || selectedContact.budget_max <= 20000000
                           ? `${formatFCFA(selectedContact.budget_max)} / mois` 
@@ -629,24 +625,24 @@ export default function CrmContactsPage() {
                       : 'Non plafonné'}
                   </span>
                 </div>
-                <div className="p-3 bg-[#F0FDF4] rounded-xl border border-emerald-200 shadow-2xs">
-                  <span className="text-[10px] text-emerald-800 uppercase font-bold block">Secteurs cibles</span>
-                  <span className="font-bold text-emerald-950 text-xs truncate mt-0.5 block">
+                <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#EAE5DC] shadow-2xs">
+                  <span className="text-[10px] text-[#6E665B] uppercase font-bold block">Secteurs cibles</span>
+                  <span className="font-bold text-[#161412] text-xs truncate mt-0.5 block">
                     {selectedContact.preferred_districts.join(', ') || 'Tout Abidjan'}
                   </span>
                 </div>
-                <div className="p-3 bg-[#EFF6FF] rounded-xl border border-blue-200 shadow-2xs">
-                  <span className="text-[10px] text-blue-800 uppercase font-bold block">Garantie financière</span>
-                  <span className="font-semibold text-blue-950 text-xs truncate mt-0.5 block">
+                <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#EAE5DC] shadow-2xs">
+                  <span className="text-[10px] text-[#6E665B] uppercase font-bold block">Garantie financière</span>
+                  <span className="font-semibold text-[#161412] text-xs truncate mt-0.5 block">
                     {selectedContact.financial_readiness || 'En attente attestation'}
                   </span>
                 </div>
-                <div className="p-3 bg-[#FAF5FF] rounded-xl border border-purple-200 shadow-2xs">
-                  <span className="text-[10px] text-purple-800 uppercase font-bold block">
+                <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#EAE5DC] shadow-2xs">
+                  <span className="text-[10px] text-[#6E665B] uppercase font-bold block">
                     {selectedContact.contract_signature_date ? 'Signature contrat' : selectedContact.lease_end_date ? 'Bail résilié' : 'Délai projet'}
                   </span>
-                  <span className="font-bold text-purple-950 text-xs truncate mt-0.5 flex items-center gap-1 font-mono">
-                    <Calendar className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                  <span className="font-bold text-[#161412] text-xs truncate mt-0.5 flex items-center gap-1 font-mono">
+                    <Calendar className="w-3.5 h-3.5 text-[#9E7431] shrink-0" />
                     <span className="truncate">
                       {selectedContact.contract_signature_date 
                         ? selectedContact.contract_signature_date 
@@ -672,16 +668,16 @@ export default function CrmContactsPage() {
             </div>
 
             {/* PANNEAU REMONTÉES WHATSAPP & EXTRACTION SÉMANTIQUE IA */}
-            <div className="bg-gradient-to-r from-emerald-50/90 via-white to-amber-50/60 rounded-2xl p-4 border border-emerald-200/90 shadow-2xs space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-emerald-100 pb-2.5">
+            <div className="bg-[#FAF8F5] rounded-2xl p-4 border border-[#EAE5DC] shadow-2xs space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#EAE5DC] pb-2.5">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs shrink-0">
+                  <div className="w-8 h-8 rounded-xl bg-[#15161A] text-[#9E7431] flex items-center justify-center shadow-xs shrink-0">
                     <Bot className="w-4 h-4" />
                   </div>
                   <div>
                     <h3 className="text-xs font-bold text-slate-900 flex items-center gap-1.5 flex-wrap">
                       <span>Remontée WhatsApp &amp; Analyse Sémantique Aya IA</span>
-                      <span className="text-[10px] bg-emerald-100 text-emerald-800 font-black px-2 py-0.2 rounded-full uppercase">
+                      <span className="text-[10px] bg-white text-[#161412] border border-[#EAE5DC] font-bold px-2 py-0.2 rounded-full uppercase">
                         Sync Directe
                       </span>
                     </h3>
@@ -692,16 +688,10 @@ export default function CrmContactsPage() {
                 </div>
 
                 <div className="flex items-center gap-2 self-start sm:self-auto">
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                    selectedContact.lead_score === 'hot'
-                      ? 'bg-rose-100 text-rose-800 border border-rose-300'
-                      : selectedContact.lead_score === 'warm'
-                      ? 'bg-amber-100 text-amber-800 border border-amber-300'
-                      : 'bg-slate-100 text-slate-700 border border-slate-300'
-                  }`}>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-white text-[#161412] border border-[#EAE5DC]">
                     Lead {selectedContact.lead_score || 'hot'}
                   </span>
-                  <span className="text-xs font-black text-slate-900 bg-white px-2 py-0.5 rounded-md border border-slate-200 shadow-2xs">
+                  <span className="text-xs font-black text-[#161412] bg-white px-2 py-0.5 rounded-md border border-[#EAE5DC] shadow-2xs">
                     {selectedContact.qualification_score || 95}% score
                   </span>
                 </div>
@@ -709,51 +699,51 @@ export default function CrmContactsPage() {
 
               {/* Grille des critères clés remontés */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
-                <div className="bg-white/80 p-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
+                <div className="bg-white p-2.5 rounded-xl border border-[#EAE5DC] shadow-2xs">
                   <span className="text-[10px] uppercase font-bold text-slate-500 block">Budget Détecté</span>
-                  <span className="font-extrabold text-slate-900 text-xs mt-0.5 block text-emerald-700">
+                  <span className="font-extrabold text-[#161412] text-xs mt-0.5 block">
                     {formatFCFA(selectedContact.budget_max || 0)} / mois
                   </span>
                 </div>
 
-                <div className="bg-white/80 p-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
+                <div className="bg-white p-2.5 rounded-xl border border-[#EAE5DC] shadow-2xs">
                   <span className="text-[10px] uppercase font-bold text-slate-500 block">Secteur Cible</span>
                   <span className="font-bold text-slate-900 text-xs mt-0.5 block truncate">
                     {selectedContact.preferred_districts?.[0] || 'Riviera Golf / Cocody'}
                   </span>
                 </div>
 
-                <div className="bg-white/80 p-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
+                <div className="bg-white p-2.5 rounded-xl border border-[#EAE5DC] shadow-2xs">
                   <span className="text-[10px] uppercase font-bold text-slate-500 block">Profil du Bail</span>
                   <span className="font-bold text-slate-900 text-xs mt-0.5 block truncate">
                     {selectedContact.profession?.includes('Directeur') || selectedContact.profession?.includes('Ambassade') ? 'Bail Corporate / Diplomatique' : 'Location Meublée Standing'}
                   </span>
                 </div>
 
-                <div className="bg-white/80 p-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
+                <div className="bg-white p-2.5 rounded-xl border border-[#EAE5DC] shadow-2xs">
                   <span className="text-[10px] uppercase font-bold text-slate-500 block">Séquestre Notarié</span>
-                  <span className="font-bold text-emerald-800 text-xs mt-0.5 flex items-center gap-1">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span className="font-bold text-[#161412] text-xs mt-0.5 flex items-center gap-1">
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#9E7431]" />
                     <span>Conforme CMP/ACD</span>
                   </span>
                 </div>
               </div>
 
               {/* Raccourci vers l'agenda pour toute visite demandée */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-amber-50/90 p-2.5 px-3 rounded-xl border border-amber-200 text-xs shadow-2xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white p-2.5 px-3 rounded-xl border border-[#9E7431]/40 text-xs shadow-2xs">
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-amber-700 shrink-0" />
+                  <Calendar className="w-4 h-4 text-[#9E7431] shrink-0" />
                   <div>
-                    <span className="font-extrabold text-amber-950">Demande de visite formulée : </span>
-                    <span className="text-amber-900 font-medium">Créneau détecté dans l&apos;échange WhatsApp</span>
+                    <span className="font-extrabold text-[#161412]">Demande de visite formulée : </span>
+                    <span className="text-[#6E665B] font-medium">Créneau détecté dans l&apos;échange WhatsApp</span>
                   </div>
                 </div>
 
                 <Link
                   href={`/crm/visites?contact=${selectedContact.id}`}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#15161A] text-white font-bold text-[11px] hover:bg-black transition-colors shrink-0 shadow-xs"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#15161A] text-white font-bold text-[11px] hover:bg-[#9E7431] transition-colors shrink-0 shadow-xs"
                 >
-                  <Clock className="w-3.5 h-3.5 text-amber-400" />
+                  <Clock className="w-3.5 h-3.5 text-[#9E7431]" />
                   <span>Programmer sur l&apos;agenda des visites</span>
                   <ArrowRight className="w-3 h-3" />
                 </Link>
@@ -767,11 +757,11 @@ export default function CrmContactsPage() {
                 onClick={() => setActiveTab('whatsapp')}
                 className={`py-2 px-4 rounded-xl font-bold transition-all flex items-center gap-2 cursor-pointer shadow-2xs group ${
                   activeTab === 'whatsapp'
-                    ? 'bg-[#15161A] text-white ring-2 ring-emerald-500/40'
+                    ? 'bg-[#15161A] text-white ring-2 ring-[#9E7431]/40'
                     : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
                 }`}
               >
-                <MessageCircle className="w-3.5 h-3.5 text-[#25D366] transition-transform group-hover:scale-110" />
+                <MessageCircle className="w-3.5 h-3.5 text-[#9E7431] transition-transform group-hover:scale-110" />
                 <span>WhatsApp ({selectedContact.whatsapp_history?.length || 0})</span>
               </button>
 
@@ -780,11 +770,11 @@ export default function CrmContactsPage() {
                 onClick={() => setActiveTab('matching')}
                 className={`py-2 px-4 rounded-xl font-bold transition-all flex items-center gap-2 cursor-pointer shadow-2xs group ${
                   activeTab === 'matching'
-                    ? 'bg-[#15161A] text-white ring-2 ring-amber-500/40'
+                    ? 'bg-[#15161A] text-white ring-2 ring-[#9E7431]/40'
                     : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
                 }`}
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#FF7633] transition-transform group-hover:scale-110" />
+                <Sparkles className="w-3.5 h-3.5 text-[#9E7431] transition-transform group-hover:scale-110" />
                 <span>Biens ({matchedProperties.length})</span>
               </button>
 
@@ -793,11 +783,11 @@ export default function CrmContactsPage() {
                 onClick={() => setActiveTab('objections')}
                 className={`py-2 px-4 rounded-xl font-bold transition-all flex items-center gap-2 cursor-pointer shadow-2xs group ${
                   activeTab === 'objections'
-                    ? 'bg-[#15161A] text-white ring-2 ring-emerald-600/40'
+                    ? 'bg-[#15161A] text-white ring-2 ring-[#9E7431]/40'
                     : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
                 }`}
               >
-                <ShieldCheck className="w-3.5 h-3.5 text-[#0F5E3E] transition-transform group-hover:scale-110" />
+                <ShieldCheck className="w-3.5 h-3.5 text-[#9E7431] transition-transform group-hover:scale-110" />
                 <span>Objections ({selectedContact.objections?.length || 0})</span>
               </button>
             </div>
@@ -894,10 +884,10 @@ export default function CrmContactsPage() {
                 <div className="relative z-10 bg-[#f0f2f5] px-4 py-2.5 border-b border-[#d1d7db] flex items-center justify-between">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="relative shrink-0">
-                      <div className="w-9 h-9 rounded-full bg-[#00a884] text-white flex items-center justify-center font-bold text-xs uppercase shadow-2xs">
+                      <div className="w-9 h-9 rounded-full bg-[#191715] text-white flex items-center justify-center font-bold text-xs uppercase shadow-2xs">
                         {selectedContact.full_name.substring(0, 2)}
                       </div>
-                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#25d366] border-2 border-[#f0f2f5]" />
+                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#9E7431] border-2 border-[#f0f2f5]" />
                     </div>
 
                     <div className="min-w-0">
@@ -905,13 +895,13 @@ export default function CrmContactsPage() {
                         <span className="font-semibold text-xs sm:text-sm text-[#111b21] truncate">
                           {selectedContact.full_name}
                         </span>
-                        <span className="text-[11px] text-[#00a884] font-medium hidden sm:inline-flex items-center gap-0.5">
-                          <CheckCheck className="w-3 h-3 text-[#00a884]" />
+                        <span className="text-[11px] text-[#9E7431] font-medium hidden sm:inline-flex items-center gap-0.5">
+                          <CheckCheck className="w-3 h-3 text-[#9E7431]" />
                           Vérifié
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5 text-[11px] text-[#667781] truncate">
-                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#25d366]" />
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#9E7431]" />
                         <span>En ligne · {selectedContact.phone}</span>
                       </div>
                     </div>
@@ -936,10 +926,10 @@ export default function CrmContactsPage() {
                       href={getWhatsAppLink(selectedContact.phone, `Bonjour M./Mme ${selectedContact.full_name}, suite à votre échange avec notre cabinet immobilier, voici les précisions relatives à votre dossier.`)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-3 py-1.5 rounded-lg bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs flex items-center gap-1.5 transition-transform hover:-translate-y-0.5 shadow-2xs ml-1"
+                      className="px-3 py-1.5 rounded-lg bg-[#191715] hover:bg-[#9E7431] text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-2xs ml-1"
                       title="Ouvrir dans l'application WhatsApp"
                     >
-                      <MessageCircle className="w-3.5 h-3.5 text-white" />
+                      <MessageCircle className="w-3.5 h-3.5 text-[#9E7431]" />
                       <span>Ouvrir WhatsApp</span>
                     </a>
                   </div>
@@ -950,8 +940,8 @@ export default function CrmContactsPage() {
                   
                   {/* Subtle WhatsApp security notice pill */}
                   <div className="flex justify-center my-2">
-                    <div className="bg-[#ffeecd] text-[#54656f] border border-[#ffecb3] text-[11px] rounded-md px-3 py-1 flex items-center gap-1.5 shadow-2xs max-w-[85%] text-center">
-                      <ShieldCheck className="w-3.5 h-3.5 text-[#54656f] shrink-0" />
+                    <div className="bg-[#FAF8F5] text-[#6E665B] border border-[#EAE5DC] text-[11px] rounded-md px-3 py-1 flex items-center gap-1.5 shadow-2xs max-w-[85%] text-center">
+                      <ShieldCheck className="w-3.5 h-3.5 text-[#9E7431] shrink-0" />
                       <span>Les messages sont chiffrés de bout en bout · Cabinet Notarial Agréé</span>
                     </div>
                   </div>
@@ -1079,11 +1069,11 @@ export default function CrmContactsPage() {
                   <button
                     type="submit"
                     disabled={!newMessageText.trim()}
-                    className="px-3.5 py-2 rounded-lg bg-[#00a884] hover:bg-[#008069] disabled:opacity-40 text-white font-medium text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                    className="px-3.5 py-2 rounded-lg bg-[#161412] hover:bg-[#9E7431] disabled:opacity-40 text-white font-medium text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
                     title="Envoyer"
                   >
                     <span>Envoyer</span>
-                    <Send className="w-3.5 h-3.5" />
+                    <Send className="w-3.5 h-3.5 text-[#C8A97E]" />
                   </button>
                 </form>
 
@@ -1274,7 +1264,7 @@ Réf. ${property.reference}. Titre ACD vérifié. Souhaitez-vous que nous organi
             {/* Header Modal */}
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#25D366] text-white flex items-center justify-center shadow-md shadow-emerald-500/20">
+                <div className="w-10 h-10 rounded-2xl bg-[#161412] text-[#9E7431] flex items-center justify-center shadow-md">
                   <MessageCircle className="w-5 h-5" />
                 </div>
                 <div>
@@ -1307,13 +1297,13 @@ Réf. ${property.reference}. Titre ACD vérifié. Souhaitez-vous que nous organi
                     key={p.id}
                     type="button"
                     onClick={() => handleApplyPreset(p)}
-                    className="p-2.5 rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 text-left transition-all group cursor-pointer"
+                    className="p-2.5 rounded-xl border border-slate-200 hover:border-[#9E7431] hover:bg-[#FAF8F5] text-left transition-all group cursor-pointer"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-xs text-slate-900 group-hover:text-emerald-900">
+                      <span className="font-bold text-xs text-slate-900 group-hover:text-[#161412]">
                         {p.title}
                       </span>
-                      <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded">
+                      <span className="text-[10px] font-semibold text-[#161412] bg-[#FAF8F5] border border-[#EAE5DC] px-1.5 py-0.2 rounded">
                         {p.badge}
                       </span>
                     </div>
@@ -1335,7 +1325,7 @@ Réf. ${property.reference}. Titre ACD vérifié. Souhaitez-vous que nous organi
                     value={simulatorPhone}
                     onChange={(e) => setSimulatorPhone(e.target.value)}
                     required
-                    className="w-full text-xs font-mono p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full text-xs font-mono p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#9E7431]"
                     placeholder="+225 07 00 00 00 00"
                   />
                 </div>
@@ -1347,7 +1337,7 @@ Réf. ${property.reference}. Titre ACD vérifié. Souhaitez-vous que nous organi
                     value={simulatorName}
                     onChange={(e) => setSimulatorName(e.target.value)}
                     required
-                    className="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#9E7431]"
                     placeholder="Nom complet ou Titre"
                   />
                 </div>
@@ -1360,7 +1350,7 @@ Réf. ${property.reference}. Titre ACD vérifié. Souhaitez-vous que nous organi
                   value={simulatorMessage}
                   onChange={(e) => setSimulatorMessage(e.target.value)}
                   required
-                  className="w-full text-xs p-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full text-xs p-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#9E7431]"
                   placeholder="Ex: Bonjour, je recherche une villa à Riviera Golf avec piscine..."
                 />
               </div>
@@ -1378,13 +1368,13 @@ Réf. ${property.reference}. Titre ACD vérifié. Souhaitez-vous que nous organi
                 <button
                   type="submit"
                   disabled={isSubmittingSimulator}
-                  className="px-6 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20ba5a] text-white text-xs font-extrabold flex items-center gap-2 shadow-md shadow-emerald-500/25 transition-transform hover:-translate-y-0.5 cursor-pointer disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-xl bg-[#161412] hover:bg-[#9E7431] text-white text-xs font-extrabold flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
                 >
                   {isSubmittingSimulator ? (
                     <span>Traitement IA en cours...</span>
                   ) : (
                     <>
-                      <Send className="w-3.5 h-3.5" />
+                      <Send className="w-3.5 h-3.5 text-[#9E7431]" />
                       <span>Transmettre &amp; Parser dans le CRM</span>
                     </>
                   )}

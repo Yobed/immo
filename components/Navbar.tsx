@@ -141,7 +141,7 @@ export default function Navbar() {
                 : 'bg-[#141210] hover:bg-[#947346] text-white'
             }`}
           >
-            <MessageCircle className="w-4 h-4 fill-[#25D366] text-[#25D366]" />
+            <MessageCircle className="w-4 h-4 text-[#9E7431]" />
             <span>Conciergerie WhatsApp</span>
           </a>
 
@@ -219,9 +219,9 @@ export default function Navbar() {
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-2.5 px-4 rounded-full bg-[#25D366] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg"
+              className="py-2.5 px-4 rounded-full bg-[#191715] hover:bg-[#9E7431] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg transition-colors"
             >
-              <MessageCircle className="w-4 h-4 fill-white" />
+              <MessageCircle className="w-4 h-4 text-[#9E7431]" />
               <span>Conciergerie</span>
             </a>
           </div>

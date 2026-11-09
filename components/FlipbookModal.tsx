@@ -69,7 +69,7 @@ export default function FlipbookModal({
         {/* Barre d'outils inférieure */}
         <div className="p-4 dark:bg-[#161412] bg-white border-t dark:border-white/10 border-[#e8e4dc] flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="dark:text-[#A39C92] text-[#68625c] flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <span className="w-2 h-2 rounded-full bg-[#9E7431]" />
             <span className="hidden sm:inline">Tournez les pages avec les flèches ou la souris. Effet papier et son interactif.</span>
           </div>
 
@@ -80,7 +80,7 @@ export default function FlipbookModal({
               rel="noopener noreferrer"
               className="px-4 py-2 rounded-full dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10 dark:text-white bg-[#fbfaf7] hover:bg-[#f5f2eb] border border-[#e8e4dc] text-[#161412] font-semibold flex items-center gap-2 transition-colors"
             >
-              <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
+              <MessageCircle className="w-3.5 h-3.5 text-[#9E7431]" />
               <span>Transmettre par WhatsApp</span>
             </a>
 

@@ -80,38 +80,38 @@ export default function CatalogueFlipbookPage() {
   const renderLiveBadge = (property: Property) => {
     if (property.status === 'cleaning' || property.concierge_status === 'cleaning') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200/90 text-[10px] font-medium shadow-xs">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white text-[#6E665B] border border-[#EAE5DC] text-[10px] font-medium shadow-2xs">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#9E7431]" />
           <span>Préparation Hôtelière</span>
         </span>
       );
     }
     if (property.status === 'reserved' || property.concierge_status === 'reserved') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-800 border border-purple-200/90 text-[10px] font-medium shadow-xs">
-          <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white text-[#6E665B] border border-[#EAE5DC] text-[10px] font-medium shadow-2xs">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#191715]" />
           <span>Réservé • Visite en cours</span>
         </span>
       );
     }
     if (property.status === 'under_offer') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200/90 text-[10px] font-medium shadow-xs">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white text-[#6E665B] border border-[#EAE5DC] text-[10px] font-medium shadow-2xs">
           <span>Sous Offre</span>
         </span>
       );
     }
     if (property.status === 'rented' || property.concierge_status === 'occupied') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200/90 text-[10px] font-medium shadow-xs">
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white text-[#6E665B] border border-[#EAE5DC] text-[10px] font-medium shadow-2xs">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#191715]" />
           <span>Occupé (Bail actif)</span>
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/90 text-[10px] font-medium shadow-xs">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white text-[#191715] border border-[#EAE5DC] text-[10px] font-medium shadow-2xs">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#9E7431]" />
         <span>Disponible Immédiatement</span>
       </span>
     );
@@ -225,8 +225,8 @@ export default function CatalogueFlipbookPage() {
                 <span className="text-[11px] font-mono uppercase tracking-widest text-[#9E7431] font-semibold">
                   Édition Annuelle 2026
                 </span>
-                <span className="text-[10px] bg-emerald-50 text-emerald-800 px-2.5 py-0.5 rounded-full font-mono border border-emerald-200 flex items-center gap-1 font-medium">
-                  <Hand className="w-3 h-3 text-emerald-700" />
+                <span className="text-[10px] bg-white text-[#191715] px-2.5 py-0.5 rounded-full font-mono border border-[#EAE5DC] flex items-center gap-1 font-medium shadow-2xs">
+                  <Hand className="w-3 h-3 text-[#9E7431]" />
                   Feuilletage 3D &amp; Vidéos Intégrées
                 </span>
               </div>
@@ -269,10 +269,10 @@ export default function CatalogueFlipbookPage() {
             <button
               type="button"
               onClick={() => setIsShareModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#191715] hover:bg-[#9E7431] text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
               title="Partager le catalogue (QR Code, WhatsApp, Lien Mobile)"
             >
-              <Share2 className="w-3.5 h-3.5 fill-white" />
+              <Share2 className="w-3.5 h-3.5 text-[#9E7431]" />
               <span className="hidden sm:inline">Partager</span>
             </button>
 
@@ -300,8 +300,8 @@ export default function CatalogueFlipbookPage() {
             <span className="inline-flex items-center gap-1 text-[#9E7431]">
               <Video className="w-3 h-3" /> Visite Vidéo &amp; Drone 4K
             </span>
-            <span className="inline-flex items-center gap-1 text-emerald-700 font-medium">
-              <ShieldCheck className="w-3 h-3" /> Certificat Foncier ACD
+            <span className="inline-flex items-center gap-1 text-[#9E7431] font-medium">
+              <ShieldCheck className="w-3 h-3 text-[#9E7431]" /> Certificat Foncier ACD
             </span>
           </div>
           <span className="hidden md:inline font-mono text-[11px] text-[#8C8275]">
@@ -1138,7 +1138,7 @@ export default function CatalogueFlipbookPage() {
                     href={whatsappShareUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-full mt-1.5 py-2 rounded-xl bg-[#25d366] hover:bg-[#20ba59] text-black font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors shadow"
+                    className="w-full mt-1.5 py-2 rounded-xl bg-[#191715] hover:bg-[#9E7431] text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors shadow"
                   >
                     <span>Lancer la conversation WhatsApp</span>
                     <ArrowUpRight className="w-3.5 h-3.5" />
@@ -1248,8 +1248,8 @@ export default function CatalogueFlipbookPage() {
               <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40" />
 
               {/* Effet Scanner & Repères Cadastraux Vidéo */}
-              <div className="absolute top-4 left-4 font-mono text-[10px] text-[#25d366] bg-black/60 px-2.5 py-1 rounded border border-[#25d366]/40 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#25d366]" />
+              <div className="absolute top-4 left-4 font-mono text-[10px] text-[#C8A97E] bg-black/60 px-2.5 py-1 rounded border border-[#C8A97E]/40 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-[#C8A97E]" />
                 VUE DRONE 4K CADASTRE • ABIDJAN
               </div>
 
@@ -1292,7 +1292,7 @@ export default function CatalogueFlipbookPage() {
                 href={getWhatsAppLink('2250788421920', `Bonjour Cabinet Immobilier Abidjan, je viens de regarder la vidéo de ${activeVideoProperty.title} (Réf: ${activeVideoProperty.reference}). Je souhaite convenir d'une visite privée sur place.`)}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full sm:w-auto px-5 py-2 rounded-xl bg-[#25d366] hover:bg-[#20ba59] text-black font-semibold text-xs flex items-center justify-center gap-2 transition-colors shadow"
+                className="w-full sm:w-auto px-5 py-2 rounded-xl bg-[#191715] hover:bg-[#9E7431] text-white font-semibold text-xs flex items-center justify-center gap-2 transition-colors shadow"
               >
                 <MessageCircle className="w-3.5 h-3.5" />
                 <span>Réserver une visite privée sur place</span>

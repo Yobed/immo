@@ -38,18 +38,18 @@ export default function CrmConciergeriePage() {
 
   const getStatusBadge = (status?: ConciergeCheckStatus, propStatus?: PropertyStatus) => {
     if (propStatus === 'cleaning' || status === 'cleaning') {
-      return { label: 'Nettoyage en cours', color: 'bg-amber-100 text-amber-800 border-amber-300' };
+      return { label: 'Nettoyage en cours', color: 'bg-[#FAF8F5] text-[#161412] border-[#9E7431]/40' };
     }
     if (propStatus === 'reserved' || status === 'reserved') {
-      return { label: 'Réservé VIP', color: 'bg-purple-100 text-purple-800 border-purple-300' };
+      return { label: 'Réservé VIP', color: 'bg-[#FAF8F5] text-[#161412] border-[#EAE5DC]' };
     }
     if (propStatus === 'maintenance' || status === 'maintenance') {
-      return { label: 'Maintenance requise', color: 'bg-rose-100 text-rose-800 border-rose-300' };
+      return { label: 'Maintenance requise', color: 'bg-[#FAF8F5] text-[#161412] border-[#9E7431]/40' };
     }
     if (propStatus === 'rented' || status === 'occupied') {
-      return { label: 'Occupé / Bail actif', color: 'bg-blue-100 text-blue-800 border-blue-300' };
+      return { label: 'Occupé / Bail actif', color: 'bg-[#FAF8F5] text-[#6E665B] border-[#EAE5DC]' };
     }
-    return { label: 'Prêt & Disponible', color: 'bg-emerald-100 text-emerald-800 border-emerald-300' };
+    return { label: 'Prêt & Disponible', color: 'bg-[#FAF8F5] text-[#161412] border-[#EAE5DC]' };
   };
 
   return (
@@ -64,8 +64,8 @@ export default function CrmConciergeriePage() {
             <span className="text-[11px] font-mono tracking-widest uppercase text-[#947346] font-semibold">
               Supervision Opérationnelle Terrain
             </span>
-            <span className="text-[10px] bg-[#d2e3d8] text-[#1d382b] px-2 py-0.5 rounded-full font-mono flex items-center gap-1 font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] ring-2 ring-emerald-200" />
+            <span className="text-[10px] bg-[#FAF8F5] text-[#161412] px-2 py-0.5 rounded-full font-mono flex items-center gap-1 font-bold border border-[#EAE5DC]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#9E7431] ring-2 ring-[#9E7431]/20" />
               Sync Écosystème
             </span>
           </div>
@@ -107,12 +107,12 @@ export default function CrmConciergeriePage() {
         <div 
           onClick={() => setFilterStatus(filterStatus === 'ready' ? 'all' : 'ready')}
           className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-            filterStatus === 'ready' ? 'bg-[#f0f9f4] border-emerald-500 shadow-sm' : 'bg-white border-[#e8e4dc] hover:border-emerald-300'
+            filterStatus === 'ready' ? 'bg-[#FAF8F5] border-[#161412] shadow-sm ring-1 ring-[#161412]/10' : 'bg-white border-[#e8e4dc] hover:border-[#161412]/40'
           }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-emerald-800">Prêts &amp; Disponibles</span>
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-200" />
+            <span className="text-xs font-semibold text-[#161412]">Prêts &amp; Disponibles</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#161412] ring-2 ring-[#161412]/10" />
           </div>
           <span className="text-2xl font-display font-bold text-[#161412] block">
             {readyCount}
@@ -126,12 +126,12 @@ export default function CrmConciergeriePage() {
         <div 
           onClick={() => setFilterStatus(filterStatus === 'cleaning' ? 'all' : 'cleaning')}
           className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-            filterStatus === 'cleaning' ? 'bg-[#fffaf0] border-amber-500 shadow-sm' : 'bg-white border-[#e8e4dc] hover:border-amber-300'
+            filterStatus === 'cleaning' ? 'bg-[#FAF8F5] border-[#9E7431] shadow-sm ring-1 ring-[#9E7431]/20' : 'bg-white border-[#e8e4dc] hover:border-[#9E7431]/40'
           }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-amber-800">En Nettoyage</span>
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+            <span className="text-xs font-semibold text-[#161412]">En Nettoyage</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#9E7431]" />
           </div>
           <span className="text-2xl font-display font-bold text-[#161412] block">
             {cleaningCount}
@@ -145,12 +145,12 @@ export default function CrmConciergeriePage() {
         <div 
           onClick={() => setFilterStatus(filterStatus === 'reserved' ? 'all' : 'reserved')}
           className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-            filterStatus === 'reserved' ? 'bg-[#f8f5fd] border-purple-500 shadow-sm' : 'bg-white border-[#e8e4dc] hover:border-purple-300'
+            filterStatus === 'reserved' ? 'bg-[#FAF8F5] border-[#161412] shadow-sm ring-1 ring-[#161412]/10' : 'bg-white border-[#e8e4dc] hover:border-[#161412]/40'
           }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-purple-800">Réservés VIP</span>
-            <span className="w-2.5 h-2.5 rounded-full bg-purple-500" />
+            <span className="text-xs font-semibold text-[#161412]">Réservés VIP</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#9E7431]" />
           </div>
           <span className="text-2xl font-display font-bold text-[#161412] block">
             {reservedCount}
@@ -164,12 +164,12 @@ export default function CrmConciergeriePage() {
         <div 
           onClick={() => setFilterStatus(filterStatus === 'maintenance' ? 'all' : 'maintenance')}
           className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-            filterStatus === 'maintenance' ? 'bg-[#fdf2f2] border-rose-500 shadow-sm' : 'bg-white border-[#e8e4dc] hover:border-rose-300'
+            filterStatus === 'maintenance' ? 'bg-[#FAF8F5] border-[#161412] shadow-sm ring-1 ring-[#161412]/10' : 'bg-white border-[#e8e4dc] hover:border-[#161412]/40'
           }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-rose-800">Maintenance Requise</span>
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+            <span className="text-xs font-semibold text-[#161412]">Maintenance Requise</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#6E665B]" />
           </div>
           <span className="text-2xl font-display font-bold text-[#161412] block">
             {maintenanceCount}
@@ -211,7 +211,7 @@ export default function CrmConciergeriePage() {
             <button
               onClick={() => setFilterStatus('ready')}
               className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
-                filterStatus === 'ready' ? 'bg-emerald-700 text-white font-bold' : 'bg-[#f5f2eb] text-emerald-800'
+                filterStatus === 'ready' ? 'bg-[#161412] text-white font-bold' : 'bg-[#f5f2eb] text-[#161412]'
               }`}
             >
               Prêts ({readyCount})
@@ -219,7 +219,7 @@ export default function CrmConciergeriePage() {
             <button
               onClick={() => setFilterStatus('cleaning')}
               className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
-                filterStatus === 'cleaning' ? 'bg-amber-700 text-white font-bold' : 'bg-[#f5f2eb] text-amber-800'
+                filterStatus === 'cleaning' ? 'bg-[#9E7431] text-white font-bold' : 'bg-[#f5f2eb] text-[#161412]'
               }`}
             >
               En cours ({cleaningCount})
@@ -341,7 +341,7 @@ export default function CrmConciergeriePage() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <strong className="text-sm text-[#161412]">{insp.property_title}</strong>
                     <span className="text-[10px] font-mono font-bold text-[#947346]">({insp.property_reference})</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-emerald-100 text-emerald-800">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-bold bg-[#FAF8F5] text-[#9E7431] border border-[#EAE5DC]">
                       {insp.cleaning_grade === 'impeccable' ? '5/5 Impeccable' : insp.cleaning_grade}
                     </span>
                   </div>
@@ -355,7 +355,7 @@ export default function CrmConciergeriePage() {
 
                 <div className="flex items-center gap-2">
                   <span className={`px-3 py-1 rounded-full font-mono font-bold text-[10px] border ${
-                    insp.check_status === 'ready' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-amber-100 text-amber-800 border-amber-300'
+                    insp.check_status === 'ready' ? 'bg-[#FAF8F5] text-[#161412] border-[#EAE5DC]' : 'bg-[#FAF8F5] text-[#9E7431] border-[#9E7431]/40'
                   }`}>
                     {insp.check_status === 'ready' ? '100% Prêt & Conforme' : insp.check_status}
                   </span>
@@ -378,7 +378,7 @@ export default function CrmConciergeriePage() {
                 </div>
                 <div>
                   <span className="text-[#7a736a] block text-[9px] uppercase">Durée Totale</span>
-                  <span className="font-bold text-emerald-700">
+                  <span className="font-bold text-[#161412]">
                     {insp.duration_minutes ? `${insp.duration_minutes} min` : '15 min'}
                   </span>
                 </div>

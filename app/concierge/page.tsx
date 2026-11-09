@@ -443,7 +443,7 @@ export default function PhasedConciergeCheckPage() {
 
           {/* Horodatage & Chronomètre */}
           <div className="flex items-center gap-2 bg-[#F5F2EB] px-3 py-1.5 rounded-full border border-[#E5DFD3] text-xs font-mono">
-            <span className="w-2 h-2 rounded-full bg-emerald-600 ring-2 ring-emerald-100" />
+            <span className="w-2 h-2 rounded-full bg-[#9E7431] ring-2 ring-[#9E7431]/20" />
             <span className="text-[#6E665B]">Début: <strong>{startedAt}</strong></span>
             <span className="text-[#B3ABA0]">|</span>
             <span className="font-bold text-[#191715]">{formatTimer(seconds)}</span>
@@ -534,7 +534,7 @@ export default function PhasedConciergeCheckPage() {
                     isCurrent
                       ? 'bg-[#191715] text-white font-bold ring-2 ring-[#9E7431]'
                       : isDone
-                        ? 'bg-emerald-100 text-emerald-800 font-bold'
+                        ? 'bg-[#FAF8F5] text-[#191715] font-bold border border-[#EAE5DC]'
                         : 'bg-[#F5F2EB] text-[#7A746B] hover:bg-[#EAE5DC]'
                   }`}
                   title={p.title}
@@ -552,7 +552,7 @@ export default function PhasedConciergeCheckPage() {
               onClick={() => setCurrentStepIndex(5)}
               className={`py-2 rounded-xl text-center transition-all ${
                 isLastReviewStep
-                  ? 'bg-emerald-600 text-white font-bold ring-2 ring-emerald-400'
+                  ? 'bg-[#191715] text-white font-bold ring-2 ring-[#9E7431]'
                   : 'bg-[#F5F2EB] text-[#7A746B] hover:bg-[#EAE5DC]'
               }`}
               title="Bilan"
@@ -590,7 +590,7 @@ export default function PhasedConciergeCheckPage() {
                   className={`p-3.5 rounded-2xl border transition-all space-y-2.5 ${
                     pt.status === 'ok'
                       ? 'bg-[#FAF8F5] border-[#E8E4DC]'
-                      : 'bg-amber-50/70 border-amber-300 ring-1 ring-amber-300'
+                      : 'bg-[#FAF8F5] border-[#9E7431] ring-1 ring-[#9E7431]/30'
                   }`}
                 >
                   
@@ -614,7 +614,7 @@ export default function PhasedConciergeCheckPage() {
                         onClick={() => updatePointStatus(pt.id, 'ok')}
                         className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${
                           pt.status === 'ok'
-                            ? 'bg-emerald-600 text-white shadow-xs'
+                            ? 'bg-[#191715] text-white shadow-xs'
                             : 'bg-white border border-[#DDD7CC] text-[#6E665B] hover:bg-[#F2EFE9]'
                         }`}
                       >
@@ -627,7 +627,7 @@ export default function PhasedConciergeCheckPage() {
                         onClick={() => updatePointStatus(pt.id, 'issue')}
                         className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${
                           pt.status === 'issue'
-                            ? 'bg-amber-500 text-black shadow-xs font-black'
+                            ? 'bg-[#9E7431] text-white shadow-xs font-bold'
                             : 'bg-white border border-[#DDD7CC] text-[#6E665B] hover:bg-[#F2EFE9]'
                         }`}
                       >
@@ -686,7 +686,7 @@ export default function PhasedConciergeCheckPage() {
                         <button
                           type="button"
                           onClick={() => removePhotoFromPoint(pt.id)}
-                          className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/75 hover:bg-rose-600 text-white flex items-center justify-center text-xs"
+                          className="absolute top-1 right-1 w-5 h-5 rounded-full bg-[#191715]/80 hover:bg-[#191715] text-white flex items-center justify-center text-xs"
                           title="Supprimer la photo"
                         >
                           ×
@@ -730,7 +730,7 @@ export default function PhasedConciergeCheckPage() {
         {isLastReviewStep && (
           <section className="bg-white rounded-3xl p-5 border border-[#EAE5DC] shadow-xs space-y-4 animate-in fade-in duration-150">
             <div className="text-center border-b border-[#F0EBE1] pb-3">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full font-bold">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-[#9E7431] bg-[#FAF8F5] border border-[#EAE5DC] px-2.5 py-1 rounded-full font-bold">
                 ✓ Tous les points de contrôle ont été commentés
               </span>
               <h3 className="text-base font-bold text-[#191715] mt-1.5">
@@ -762,7 +762,7 @@ export default function PhasedConciergeCheckPage() {
                     {palier.points.map((pt) => (
                       <div key={pt.id} className="text-xs flex items-start gap-2 bg-white p-2 rounded-xl border border-[#F0EBE1]">
                         <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 mt-0.5 ${
-                          pt.status === 'ok' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'
+                          pt.status === 'ok' ? 'bg-[#191715] text-white' : 'bg-[#9E7431] text-white'
                         }`}>
                           {pt.status === 'ok' ? '✓' : '!'}
                         </span>
@@ -797,11 +797,11 @@ export default function PhasedConciergeCheckPage() {
                   onClick={() => setFinalStatusChoice('ready')}
                   className={`py-3 px-2 rounded-2xl border text-center transition-all cursor-pointer ${
                     finalStatusChoice === 'ready'
-                      ? 'bg-emerald-50 border-emerald-500 text-emerald-950 font-bold ring-2 ring-emerald-500/20'
+                      ? 'bg-white border-[#191715] text-[#191715] font-bold ring-2 ring-[#191715]/15'
                       : 'bg-[#FAF8F5] border-[#EAE5DC] text-[#6E665B]'
                   }`}
                 >
-                  <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 mx-auto block mb-1" />
+                  <span className="w-3.5 h-3.5 rounded-full bg-[#191715] mx-auto block mb-1" />
                   <strong className="text-xs block mt-0.5">Disponible</strong>
                 </button>
 
@@ -810,11 +810,11 @@ export default function PhasedConciergeCheckPage() {
                   onClick={() => setFinalStatusChoice('cleaning')}
                   className={`py-3 px-2 rounded-2xl border text-center transition-all cursor-pointer ${
                     finalStatusChoice === 'cleaning'
-                      ? 'bg-amber-50 border-amber-500 text-amber-950 font-bold ring-2 ring-amber-500/20'
+                      ? 'bg-[#FAF8F5] border-[#9E7431] text-[#191715] font-bold ring-2 ring-[#9E7431]/20'
                       : 'bg-[#FAF8F5] border-[#EAE5DC] text-[#6E665B]'
                   }`}
                 >
-                  <span className="w-3.5 h-3.5 rounded-full bg-amber-500 mx-auto block mb-1" />
+                  <span className="w-3.5 h-3.5 rounded-full bg-[#9E7431] mx-auto block mb-1" />
                   <strong className="text-xs block mt-0.5">Nettoyage</strong>
                 </button>
 
@@ -823,11 +823,11 @@ export default function PhasedConciergeCheckPage() {
                   onClick={() => setFinalStatusChoice('maintenance')}
                   className={`py-3 px-2 rounded-2xl border text-center transition-all cursor-pointer ${
                     finalStatusChoice === 'maintenance'
-                      ? 'bg-rose-50 border-rose-500 text-rose-950 font-bold ring-2 ring-rose-500/20'
+                      ? 'bg-[#FAF8F5] border-[#191715] text-[#191715] font-bold ring-2 ring-[#191715]/20'
                       : 'bg-[#FAF8F5] border-[#EAE5DC] text-[#6E665B]'
                   }`}
                 >
-                  <span className="w-3.5 h-3.5 rounded-full bg-rose-500 mx-auto block mb-1" />
+                  <span className="w-3.5 h-3.5 rounded-full bg-[#6E665B] mx-auto block mb-1" />
                   <strong className="text-xs block mt-0.5">Maintenance</strong>
                 </button>
               </div>
@@ -858,7 +858,7 @@ export default function PhasedConciergeCheckPage() {
               type="button"
               onClick={handleFinalSubmit}
               disabled={isSending}
-              className="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg transition-all disabled:opacity-50 cursor-pointer"
+              className="w-full py-4 rounded-2xl bg-[#191715] hover:bg-[#9E7431] active:scale-[0.99] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg transition-all disabled:opacity-50 cursor-pointer"
             >
               {isSending ? (
                 <>
@@ -891,7 +891,7 @@ export default function PhasedConciergeCheckPage() {
       {isSuccess && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
-            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-3xl font-bold">
+            <div className="w-16 h-16 rounded-full bg-[#FAF8F5] border border-[#EAE5DC] text-[#9E7431] flex items-center justify-center mx-auto text-3xl font-bold">
               ✓
             </div>
 
@@ -909,7 +909,7 @@ export default function PhasedConciergeCheckPage() {
               </div>
               <div className="flex justify-between">
                 <span>Durée d&apos;intervention :</span>
-                <strong className="text-emerald-700">{formatTimer(seconds)}</strong>
+                <strong className="text-[#191715]">{formatTimer(seconds)}</strong>
               </div>
               <div className="flex justify-between">
                 <span>Statut diffusé :</span>
@@ -927,9 +927,9 @@ export default function PhasedConciergeCheckPage() {
                 )}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full py-3.5 rounded-xl bg-[#25D366] hover:bg-[#20BA59] text-white font-bold text-xs flex items-center justify-center gap-2 shadow cursor-pointer"
+                className="w-full py-3.5 rounded-xl bg-[#191715] hover:bg-[#9E7431] text-white font-bold text-xs flex items-center justify-center gap-2 shadow cursor-pointer transition-colors"
               >
-                <MessageCircle className="w-4 h-4 fill-white" />
+                <MessageCircle className="w-4 h-4 text-[#9E7431]" />
                 <span>Transmettre le Rapport Détaillé (WhatsApp)</span>
               </a>
 

@@ -525,12 +525,12 @@ export default function LuxuryVilla3D() {
             onClick={() => setLighting('day')}
             className={`px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
               lighting === 'day' 
-                ? 'bg-amber-400/20 text-amber-200 border border-amber-400/40 shadow-sm' 
+                ? 'bg-[#C8A97E]/30 text-[#F5F2EB] border border-[#C8A97E]/50 shadow-sm' 
                 : 'text-white/60 hover:text-white'
             }`}
             title="Lumière du jour équatoriale"
           >
-            <Sun className="w-3.5 h-3.5 text-amber-400" />
+            <Sun className="w-3.5 h-3.5 text-[#C8A97E]" />
             <span className="hidden sm:inline text-[11px]">Midi</span>
           </button>
 
@@ -553,12 +553,12 @@ export default function LuxuryVilla3D() {
             onClick={() => setLighting('night')}
             className={`px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
               lighting === 'night' 
-                ? 'bg-indigo-950/70 text-indigo-200 border border-indigo-400/40 shadow-sm' 
+                ? 'bg-[#191715] text-[#C8A97E] border border-[#C8A97E]/40 shadow-sm' 
                 : 'text-white/60 hover:text-white'
             }`}
             title="Éclairage architectural nocturne"
           >
-            <Moon className="w-3.5 h-3.5 text-indigo-300" />
+            <Moon className="w-3.5 h-3.5 text-[#C8A97E]" />
             <span className="hidden sm:inline text-[11px]">Nocturne</span>
           </button>
         </div>

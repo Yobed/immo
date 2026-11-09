@@ -79,38 +79,38 @@ export default function StandaloneMobileFlipbookPage() {
   const renderLiveBadge = (property: Property) => {
     if (property.status === 'cleaning' || property.concierge_status === 'cleaning') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200/90 text-[9px] font-medium shadow-xs">
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white text-[#6E665B] border border-[#EAE5DC] text-[9px] font-medium shadow-2xs">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#9E7431]" />
           <span>Préparation Hôtelière</span>
         </span>
       );
     }
     if (property.status === 'reserved' || property.concierge_status === 'reserved') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-purple-50 text-purple-800 border border-purple-200/90 text-[9px] font-medium shadow-xs">
-          <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
-          <span>Réservé • Visite</span>
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white text-[#6E665B] border border-[#EAE5DC] text-[9px] font-medium shadow-2xs">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#191715]" />
+          <span>Réservé : Visite</span>
         </span>
       );
     }
     if (property.status === 'under_offer') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200/90 text-[9px] font-medium shadow-xs">
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white text-[#6E665B] border border-[#EAE5DC] text-[9px] font-medium shadow-2xs">
           <span>Sous Offre</span>
         </span>
       );
     }
     if (property.status === 'rented' || property.concierge_status === 'occupied') {
       return (
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200/90 text-[9px] font-medium shadow-xs">
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white text-[#6E665B] border border-[#EAE5DC] text-[9px] font-medium shadow-2xs">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#191715]" />
           <span>Occupé (Bail actif)</span>
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/90 text-[9px] font-medium shadow-xs">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white text-[#191715] border border-[#EAE5DC] text-[9px] font-medium shadow-2xs">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#9E7431]" />
         <span>Disponible</span>
       </span>
     );
@@ -272,10 +272,10 @@ export default function StandaloneMobileFlipbookPage() {
           <button
             type="button"
             onClick={() => setIsShareModalOpen(true)}
-            className="px-3 py-1.5 rounded-full bg-[#25D366] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs hover:bg-[#20ba59] transition-colors cursor-pointer"
+            className="px-3 py-1.5 rounded-full bg-[#191715] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs hover:bg-[#9E7431] transition-colors cursor-pointer"
             title="Partager le Flipbook 3D"
           >
-            <Share2 className="w-3.5 h-3.5 fill-white" />
+            <Share2 className="w-3.5 h-3.5 text-[#9E7431]" />
             <span className="hidden sm:inline">Partager</span>
           </button>
 
@@ -572,7 +572,7 @@ export default function StandaloneMobileFlipbookPage() {
                     href={getWhatsAppLink('2250788421920', `Bonjour Cabinet Immobilier Abidjan, je souhaite visiter la Villa Riviera Golf (Réf: ${villa.reference}).`)}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-2.5 py-1 rounded-full bg-[#25d366] text-black text-[10px] font-semibold flex items-center gap-1 shadow"
+                    className="px-2.5 py-1 rounded-full bg-[#191715] hover:bg-[#9E7431] text-white text-[10px] font-semibold flex items-center gap-1 shadow transition-colors"
                   >
                     <MessageCircle className="w-3 h-3" />
                     <span>Visite WhatsApp</span>
@@ -642,7 +642,7 @@ export default function StandaloneMobileFlipbookPage() {
                     href={getWhatsAppLink('2250788421920', `Bonjour Cabinet Immobilier Abidjan, je souhaite louer le Penthouse Marcory Zone 4 (Réf: ${penthouse.reference}).`)}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-2.5 py-1 rounded-full bg-[#25d366] text-black text-[10px] font-semibold flex items-center gap-1 shadow"
+                    className="px-2.5 py-1 rounded-full bg-[#191715] hover:bg-[#9E7431] text-white text-[10px] font-semibold flex items-center gap-1 shadow transition-colors"
                   >
                     <MessageCircle className="w-3 h-3" />
                     <span>Visite WhatsApp</span>
@@ -708,7 +708,7 @@ export default function StandaloneMobileFlipbookPage() {
                     href={getWhatsAppLink('2250788421920', `Bonjour Cabinet Immobilier Abidjan, je souhaite visiter le Terrain Bingerville (Réf: ${terrain.reference}).`)}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-2.5 py-1 rounded-full bg-[#25d366] text-black text-[10px] font-semibold flex items-center gap-1 shadow"
+                    className="px-2.5 py-1 rounded-full bg-[#191715] hover:bg-[#9E7431] text-white text-[10px] font-semibold flex items-center gap-1 shadow transition-colors"
                   >
                     <MessageCircle className="w-3 h-3" />
                     <span>Visite Terrain</span>
@@ -769,7 +769,7 @@ export default function StandaloneMobileFlipbookPage() {
                     href={getWhatsAppLink('2250788421920', `Bonjour Cabinet Immobilier Abidjan, je souhaite louer les Bureaux Plateau (Réf: ${appart.reference}).`)}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-2.5 py-1 rounded-full bg-[#25d366] text-black text-[10px] font-semibold flex items-center gap-1 shadow"
+                    className="px-2.5 py-1 rounded-full bg-[#191715] hover:bg-[#9E7431] text-white text-[10px] font-semibold flex items-center gap-1 shadow transition-colors"
                   >
                     <MessageCircle className="w-3 h-3" />
                     <span>Réserver Visite</span>
@@ -811,7 +811,7 @@ export default function StandaloneMobileFlipbookPage() {
                       href={whatsappGeneralUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="w-full py-2 rounded-xl bg-[#25d366] hover:bg-[#20ba59] text-black font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors shadow"
+                      className="w-full py-2 rounded-xl bg-[#191715] hover:bg-[#9E7431] text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors shadow"
                     >
                       <MessageCircle className="w-3.5 h-3.5" />
                       <span>Échanger sur WhatsApp</span>
@@ -855,7 +855,7 @@ export default function StandaloneMobileFlipbookPage() {
             <div className="rounded-2xl p-5 border shadow-sm bg-white border-black/10 text-[#141210] space-y-3">
               <div className="flex justify-between items-center border-b pb-2 border-black/10">
                 <span className="text-[10px] font-mono text-[#947346] uppercase tracking-wider font-semibold">Page 2 / 8 • Éditorial & Sécurité</span>
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <ShieldCheck className="w-4 h-4 text-[#9E7431]" />
               </div>
               <h4 className="font-display font-medium text-sm">Rigueur Juridique Notariée & Titres ACD</h4>
               <p className="text-xs text-[#4a453e] leading-relaxed">
@@ -890,7 +890,7 @@ export default function StandaloneMobileFlipbookPage() {
                 href={getWhatsAppLink('2250788421920', `Bonjour, je souhaite visiter la Villa Riviera Golf (Réf: ${villa.reference}).`)}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full py-2.5 rounded-full bg-[#25d366] text-black text-xs font-bold flex items-center justify-center gap-1.5 shadow"
+                className="w-full py-2.5 rounded-full bg-[#191715] hover:bg-[#9E7431] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow transition-colors"
               >
                 <MessageCircle className="w-4 h-4" />
                 <span>Demander Visite WhatsApp</span>
@@ -924,7 +924,7 @@ export default function StandaloneMobileFlipbookPage() {
                 href={getWhatsAppLink('2250788421920', `Bonjour, je souhaite louer le Penthouse Marcory Zone 4 (Réf: ${penthouse.reference}).`)}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full py-2.5 rounded-full bg-[#25d366] text-black text-xs font-bold flex items-center justify-center gap-1.5 shadow"
+                className="w-full py-2.5 rounded-full bg-[#191715] hover:bg-[#9E7431] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow transition-colors"
               >
                 <MessageCircle className="w-4 h-4" />
                 <span>Demander Visite WhatsApp</span>
@@ -951,7 +951,7 @@ export default function StandaloneMobileFlipbookPage() {
                 href={getWhatsAppLink('2250788421920', `Bonjour, je souhaite visiter le Terrain Bingerville (Réf: ${terrain.reference}).`)}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full py-2.5 rounded-full bg-[#25d366] text-black text-xs font-bold flex items-center justify-center gap-1.5 shadow"
+                className="w-full py-2.5 rounded-full bg-[#191715] hover:bg-[#9E7431] text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow transition-colors"
               >
                 <MessageCircle className="w-4 h-4" />
                 <span>Réserver Visite Terrain</span>
@@ -973,9 +973,9 @@ export default function StandaloneMobileFlipbookPage() {
           href={whatsappGeneralUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex-1 mr-2 py-2.5 px-3.5 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer truncate"
+          className="flex-1 mr-2 py-2.5 px-3.5 rounded-full bg-[#191715] hover:bg-[#9E7431] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer truncate"
         >
-          <MessageCircle className="w-4 h-4 fill-white shrink-0" />
+          <MessageCircle className="w-4 h-4 text-[#9E7431] shrink-0" />
           <span className="truncate">Visiter une Demeure (WhatsApp)</span>
         </a>
 
@@ -1028,7 +1028,7 @@ export default function StandaloneMobileFlipbookPage() {
                 href={getWhatsAppLink('2250788421920', `Bonjour Cabinet Immobilier Abidjan, je viens de voir la vidéo 4K de ${activeVideoProperty.title}. Je souhaite visiter.`)}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full py-2.5 rounded-xl bg-[#25d366] text-black font-semibold text-xs flex items-center justify-center gap-1.5 shadow"
+                className="w-full py-2.5 rounded-xl bg-[#191715] hover:bg-[#9E7431] text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow transition-colors"
               >
                 <MessageCircle className="w-4 h-4" />
                 <span>Contacter la direction sur WhatsApp</span>

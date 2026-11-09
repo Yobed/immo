@@ -75,8 +75,8 @@ export default function DossierRequestModal({
         {!isSent ? (
           <>
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full dark:bg-emerald-950/70 bg-[#f0f5f2] text-xs font-semibold dark:text-emerald-300 text-[#1d382b] border dark:border-emerald-500/30 border-[#d2e3d8]">
-                <ShieldCheck className="w-3.5 h-3.5" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF8F5] text-xs font-semibold text-[#191715] border border-[#EAE5DC]">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#9E7431]" />
                 <span>Dossier Technique & Foncier Confidentiel</span>
               </div>
               <h3 className="text-xl font-display font-medium dark:text-white text-[#161412]">
@@ -182,7 +182,7 @@ export default function DossierRequestModal({
           </>
         ) : (
           <div className="py-6 text-center space-y-4">
-            <div className="w-12 h-12 rounded-full dark:bg-emerald-950/70 bg-[#f0f5f2] border dark:border-emerald-500/30 border-[#d2e3d8] flex items-center justify-center dark:text-emerald-400 text-[#1d382b] mx-auto">
+            <div className="w-12 h-12 rounded-full bg-[#FAF8F5] border border-[#EAE5DC] flex items-center justify-center text-[#9E7431] mx-auto">
               <CheckCircle2 className="w-6 h-6" />
             </div>
             <h3 className="text-xl font-display font-medium dark:text-white text-[#161412]">

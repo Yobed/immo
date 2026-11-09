@@ -22,7 +22,7 @@ const AbidjanOpenStreetMap = dynamic(
     ssr: false,
     loading: () => (
       <div className="w-full h-[580px] bg-[#0F172A] rounded-3xl flex items-center justify-center text-slate-400 gap-2.5 border border-slate-800">
-        <RefreshCw className="w-5 h-5 animate-spin text-[#FFD84D]" />
+        <RefreshCw className="w-5 h-5 animate-spin text-[#C8A97E]" />
         <span className="text-xs font-semibold">Chargement de la carte OpenStreetMap &amp; Satellite d&apos;Abidjan...</span>
       </div>
     )
@@ -170,32 +170,32 @@ export default function CrmVisitesPage() {
     <div className="w-full px-4 sm:px-6 lg:px-8 py-5 space-y-5 font-sans bg-[#fbfaf7] text-[#161412] min-h-screen">
       
       {/* ========================================================================= */}
-      {/* 1. HEADER & KPI STATS STRIP (Harmonisé Bleu Cobalt #2E5BFF - Tuile Hero Agenda) */}
+      {/* 1. HEADER & KPI STATS STRIP (Charbon Architectural #191715 & Or Champagne #C8A97E) */}
       {/* ========================================================================= */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#2E5BFF] text-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-[#244bd9] shadow-warm-md relative overflow-hidden">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#191715] text-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-[#2D2926] shadow-warm-md relative overflow-hidden">
         
         {/* Voile décoratif subtil */}
-        <div className="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-white/15 to-transparent pointer-events-none" />
+        <div className="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-[#C8A97E]/10 to-transparent pointer-events-none" />
 
         <div className="space-y-1 z-10">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-wider font-extrabold text-white/90 bg-white/20 px-2.5 py-0.5 rounded-full">
+            <span className="text-[10px] uppercase tracking-wider font-bold text-[#C8A97E] bg-[#C8A97E]/10 border border-[#C8A97E]/30 px-2.5 py-0.5 rounded-full">
               Agenda Terrain &amp; Prise de Bail
             </span>
-            <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-[#FFD84D] text-[#15161A] shadow-xs">
+            <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-white text-[#161412] shadow-xs">
               Direct Négociateurs
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
             Planning des Visites Locatives &amp; États des Lieux
           </h1>
-          <p className="text-xs text-white/85 font-medium max-w-2xl">
+          <p className="text-xs text-[#FAF8F5]/70 font-normal max-w-2xl">
             Gestion du planning terrain, visites privées diplomatiques, états des lieux et remises de clés à Abidjan.
           </p>
         </div>
 
-        {/* Quick Stats Pill (Blanc pur sur fond bleu cobalt) */}
-        <div className="flex items-center gap-4 bg-white text-slate-900 border border-white/60 px-5 py-3 rounded-2xl shadow-warm-xs text-xs z-10 self-start md:self-auto">
+        {/* Quick Stats Pill (Blanc minéral contrasté) */}
+        <div className="flex items-center gap-4 bg-white text-[#161412] border border-[#EAE5DC] px-5 py-3 rounded-2xl shadow-warm-xs text-xs z-10 self-start md:self-auto">
           <div>
             <span className="text-[10px] text-slate-500 uppercase font-bold block">Programmées</span>
             <span className="text-sm font-black text-slate-900">{scheduledCount} rendez-vous</span>
@@ -203,12 +203,12 @@ export default function CrmVisitesPage() {
           <div className="h-7 w-px bg-slate-200" />
           <div>
             <span className="text-[10px] text-slate-500 uppercase font-bold block">Effectuées</span>
-            <span className="text-sm font-black text-emerald-700">{completedCount} validées</span>
+            <span className="text-sm font-black text-[#161412]">{completedCount} validées</span>
           </div>
           <div className="h-7 w-px bg-slate-200" />
           <div>
             <span className="text-[10px] text-slate-500 uppercase font-bold block">Cadence</span>
-            <span className="text-sm font-black text-[#2E5BFF]">&lt; 48h / bail</span>
+            <span className="text-sm font-black text-[#9E7431]">&lt; 48h / bail</span>
           </div>
         </div>
 
@@ -287,7 +287,7 @@ export default function CrmVisitesPage() {
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <List className="w-3.5 h-3.5 text-[#2E5BFF]" />
+            <List className="w-3.5 h-3.5 text-[#9E7431]" />
             <span>Vue Liste</span>
           </button>
 
@@ -315,7 +315,7 @@ export default function CrmVisitesPage() {
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <Map className="w-3.5 h-3.5 text-emerald-700" />
+            <Map className="w-3.5 h-3.5 text-[#9E7431]" />
             <span>Carte Abidjan</span>
           </button>
 
@@ -459,13 +459,13 @@ export default function CrmVisitesPage() {
                           onClick={() => setSelectedDay(dayNum)}
                           className={`min-h-[115px] sm:min-h-[125px] rounded-xl p-2.5 border-2 transition-all cursor-pointer flex flex-col justify-between ${
                             isSelected
-                              ? 'ring-4 ring-[#2E5BFF]/50 border-[#2E5BFF] shadow-warm-xs ' + (hasVisits ? 'bg-[#FFF2CC]' : isToday ? 'bg-[#E6F9F0]' : isPast ? 'bg-[#E2E5E9]' : 'bg-white')
+                              ? 'ring-4 ring-[#161412]/20 border-[#161412] shadow-warm-xs ' + (hasVisits ? 'bg-[#FAF8F5]' : isToday ? 'bg-[#FAF8F5]' : isPast ? 'bg-[#F5F2EB]' : 'bg-white')
                               : isPast
                               ? 'bg-[#E2E5E9] border-slate-300/80 text-slate-500 hover:bg-[#D9DDE2]'
                               : isToday
-                              ? 'bg-[#E6F9F0] border-emerald-500 text-emerald-950 shadow-xs ring-2 ring-emerald-400/40'
+                              ? 'bg-[#FAF8F5] border-[#161412] text-[#161412] shadow-xs ring-2 ring-[#9E7431]/30'
                               : hasVisits
-                              ? 'bg-[#FFF2CC] border-[#F59E0B] text-amber-950 shadow-2xs hover:bg-[#FFE8A3] hover:border-amber-600'
+                              ? 'bg-[#FAF8F5] border-[#9E7431] text-[#161412] shadow-2xs hover:bg-[#FAF8F5] hover:border-[#161412]'
                               : 'bg-white border-slate-300/90 hover:border-slate-400 hover:bg-slate-50 shadow-2xs'
                           }`}
                         >
@@ -475,18 +475,18 @@ export default function CrmVisitesPage() {
                               isSelected
                                 ? 'text-neutral-900 font-black'
                                 : isToday
-                                ? 'text-emerald-900 font-black text-sm'
+                                ? 'text-[#161412] font-black text-sm'
                                 : isPast
                                 ? 'text-slate-400'
                                 : hasVisits
-                                ? 'text-[#92400E] font-black text-sm'
+                                ? 'text-[#161412] font-black text-sm'
                                 : 'text-slate-700'
                             }`}>
                               {dayNum}
                             </span>
 
                             {isToday ? (
-                              <span className="text-[10px] font-bold text-[#0F5E3E] bg-[#D7F4E8] px-2 py-0.5 rounded-full">
+                              <span className="text-[10px] font-bold text-[#161412] bg-[#FAF8F5] border border-[#EAE5DC] px-2 py-0.5 rounded-full">
                                 Aujourd&apos;hui
                               </span>
                             ) : hasVisits ? (
@@ -517,15 +517,15 @@ export default function CrmVisitesPage() {
                                     isPast
                                       ? 'bg-slate-200/90 border-slate-300 text-slate-600'
                                       : isCorporate
-                                      ? 'bg-white border-amber-300/80 text-[#92400E]'
-                                      : 'bg-white border-indigo-200 text-[#3730A3]'
+                                      ? 'bg-white border-[#9E7431]/60 text-[#161412]'
+                                      : 'bg-white border-[#EAE5DC] text-[#161412]'
                                   }`}
                                   title={`${timeStr} - ${cont?.full_name}`}
                                 >
                                   <div className="flex items-center justify-between">
                                     <span className="font-mono font-bold text-[11px]">{timeStr}</span>
                                     <span className={`text-[9px] font-black px-1.5 py-0.2 rounded-full uppercase ${
-                                      isCorporate ? 'bg-[#92400E] text-white' : 'bg-[#3730A3] text-white'
+                                      isCorporate ? 'bg-[#9E7431] text-white' : 'bg-[#15161A] text-white'
                                     }`}>
                                       {v.visit_type === 'first' ? 'VIP' : 'CORP'}
                                     </span>
@@ -538,7 +538,7 @@ export default function CrmVisitesPage() {
                             })}
 
                             {dayVisits.length > 2 && (
-                              <span className="text-[10px] text-amber-800 font-bold block text-center">
+                              <span className="text-[10px] text-[#9E7431] font-bold block text-center">
                                 +{dayVisits.length - 2} autre
                               </span>
                             )}
@@ -574,7 +574,7 @@ export default function CrmVisitesPage() {
                           className={`p-3.5 rounded-2xl border-2 shadow-2xs space-y-2.5 transition-all ${
                             isPastVisit
                               ? 'bg-[#ECEEF2] border-slate-300 opacity-80'
-                              : 'bg-[#FFF8E7] border-amber-300 hover:border-[#947346] hover:shadow-xs'
+                              : 'bg-[#FAF8F5] border-[#EAE5DC] hover:border-[#9E7431] hover:shadow-xs'
                           }`}
                         >
                           <div className="flex items-center justify-between border-b border-slate-200/70 pb-2">
@@ -586,8 +586,8 @@ export default function CrmVisitesPage() {
                               isPastVisit
                                 ? 'bg-slate-200 text-slate-600 border border-slate-300'
                                 : v.status === 'scheduled' 
-                                ? 'bg-amber-100 text-amber-900 border border-amber-300' 
-                                : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                ? 'bg-[#FAF8F5] text-[#9E7431] border border-[#9E7431]/40' 
+                                : 'bg-[#FAF8F5] text-[#161412] border border-[#EAE5DC]'
                             }`}>
                               {isPastVisit ? 'Effectuée (Passée)' : v.status === 'scheduled' ? 'Confirmée' : 'Effectuée'}
                             </span>
@@ -596,7 +596,7 @@ export default function CrmVisitesPage() {
                           <div>
                             <span className="text-[10px] font-semibold text-slate-500 block">Réf. {prop?.reference} • {prop?.district}</span>
                             <h4 className="font-bold text-xs text-slate-900 line-clamp-1">{prop?.title}</h4>
-                            <div className="text-xs font-bold text-emerald-800 mt-0.5">
+                            <div className="text-xs font-bold text-[#161412] mt-0.5">
                               {prop ? formatFCFA(prop.price) : ''} <span className="text-[10px] font-normal text-slate-500">/ mois</span>
                             </div>
                           </div>
@@ -610,9 +610,9 @@ export default function CrmVisitesPage() {
                               href={getWhatsAppLink(cont?.phone || '', `Bonjour ${cont?.full_name}, nous confirmons votre visite prévue ${dateStr} à ${timeStr}.`)}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="px-2.5 py-1 rounded-lg bg-[#25D366]/10 text-emerald-800 font-bold text-[11px] flex items-center gap-1"
+                              className="px-2.5 py-1 rounded-lg bg-[#FAF8F5] border border-[#EAE5DC] text-[#161412] font-bold text-[11px] flex items-center gap-1 hover:border-[#9E7431]"
                             >
-                              <MessageCircle className="w-3 h-3 text-[#25D366]" />
+                              <MessageCircle className="w-3 h-3 text-[#9E7431]" />
                               <span>WhatsApp</span>
                             </a>
                           </div>
@@ -688,7 +688,7 @@ export default function CrmVisitesPage() {
                           <h4 className="text-xs font-bold text-slate-900 line-clamp-1 mt-0.5">
                             {prop?.title}
                           </h4>
-                          <div className="text-xs font-bold text-emerald-800 mt-1">
+                          <div className="text-xs font-bold text-[#161412] mt-1">
                             {prop ? formatFCFA(prop.price) : ''} <span className="text-[10px] font-normal text-slate-500">/ mois</span>
                           </div>
                         </div>
@@ -701,9 +701,9 @@ export default function CrmVisitesPage() {
                               href={getWhatsAppLink(cont?.phone || '', `Bonjour ${cont?.full_name}, nous confirmons notre visite locative prévue à ${formattedTime}.`)}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-[#1d382b] hover:text-[#947346] font-bold flex items-center gap-1 text-[11px]"
+                              className="text-[#161412] hover:text-[#9E7431] font-bold flex items-center gap-1 text-[11px]"
                             >
-                              <MessageCircle className="w-3 h-3 text-[#25D366]" />
+                              <MessageCircle className="w-3 h-3 text-[#9E7431]" />
                               <span>WhatsApp</span>
                             </a>
                           </div>
@@ -842,15 +842,15 @@ export default function CrmVisitesPage() {
                       <td className="py-3.5 px-3 whitespace-nowrap">
                         <div className="space-y-1">
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full inline-block ${
-                            visit.status === 'scheduled' ? 'bg-amber-50 text-amber-800 border border-amber-200' :
-                            visit.status === 'completed' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' :
+                            visit.status === 'scheduled' ? 'bg-[#FAF8F5] text-[#9E7431] border border-[#9E7431]/30' :
+                            visit.status === 'completed' ? 'bg-[#FAF8F5] text-[#161412] border border-[#EAE5DC]' :
                             'bg-slate-100 text-slate-600'
                           }`}>
                             {visit.status === 'scheduled' ? 'Confirmée' : 'Effectuée'}
                           </span>
                           <div>
-                            {isDiplomatic && <span className="text-[10px] font-semibold text-blue-700 block">Diplomatique</span>}
-                            {isCorporate && !isDiplomatic && <span className="text-[10px] font-semibold text-amber-800 block">Bail Corporate</span>}
+                            {isDiplomatic && <span className="text-[10px] font-semibold text-[#161412] block">Diplomatique</span>}
+                            {isCorporate && !isDiplomatic && <span className="text-[10px] font-semibold text-[#6E665B] block">Bail Corporate</span>}
                             {!isDiplomatic && !isCorporate && <span className="text-[10px] font-semibold text-slate-500 block">Visite Locative</span>}
                           </div>
                         </div>
@@ -862,7 +862,7 @@ export default function CrmVisitesPage() {
                         <div className="text-[11px] text-slate-500 font-medium">
                           Réf. {prop?.reference} • {prop?.district}
                         </div>
-                        <div className="text-xs font-black text-emerald-800 mt-0.5">
+                        <div className="text-xs font-black text-[#161412] mt-0.5">
                           {prop ? formatFCFA(prop.price) : ''} <span className="text-[10px] font-normal text-slate-500">/ mois</span>
                         </div>
                       </td>
@@ -895,16 +895,16 @@ export default function CrmVisitesPage() {
                             href={getWhatsAppLink(cont?.phone || '', `Bonjour ${cont?.full_name}, nous confirmons notre visite locative prévue le ${dateStr} à ${timeStr}.`)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-1.5 rounded-lg bg-[#25D366]/10 text-emerald-800 hover:bg-[#25D366]/20 transition-colors"
+                            className="p-1.5 rounded-lg bg-[#FAF8F5] text-[#161412] hover:bg-[#EAE5DC] border border-[#EAE5DC] transition-colors"
                             title="Ouvrir WhatsApp"
                           >
-                            <MessageCircle className="w-4 h-4 text-[#25D366]" />
+                            <MessageCircle className="w-4 h-4 text-[#9E7431]" />
                           </a>
 
                           {visit.status === 'scheduled' ? (
                             <button
                               onClick={() => updateStatus(visit.id, 'completed')}
-                              className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-[11px] border border-emerald-200 transition-colors cursor-pointer"
+                              className="px-2.5 py-1 rounded-lg bg-[#15161A] hover:bg-[#9E7431] text-white font-bold text-[11px] transition-colors cursor-pointer"
                               title="Marquer comme effectuée"
                             >
                               Valider
@@ -986,19 +986,19 @@ export default function CrmVisitesPage() {
                   {/* Visit Type Badge */}
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {isDiplomatic && (
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-semibold border border-blue-200 flex items-center gap-1">
-                        <ShieldCheck className="w-3 h-3 text-blue-600" />
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-[#FAF8F5] text-[#161412] font-semibold border border-[#EAE5DC] flex items-center gap-1">
+                        <ShieldCheck className="w-3.5 h-3.5 text-[#9E7431]" />
                         Visite Diplomatique
                       </span>
                     )}
                     {isCorporate && !isDiplomatic && (
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-amber-50 text-amber-800 font-semibold border border-amber-200 flex items-center gap-1">
-                        <UserCheck className="w-3 h-3 text-amber-700" />
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-[#FAF8F5] text-[#161412] font-semibold border border-[#EAE5DC] flex items-center gap-1">
+                        <UserCheck className="w-3.5 h-3.5 text-[#9E7431]" />
                         Bail Corporate
                       </span>
                     )}
                     {!isDiplomatic && !isCorporate && (
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold">
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-[#FAF8F5] text-[#6E665B] font-semibold border border-[#EAE5DC]">
                         Visite Locative
                       </span>
                     )}
@@ -1012,7 +1012,7 @@ export default function CrmVisitesPage() {
                     <h3 className="text-xs font-bold text-[#161412] leading-snug line-clamp-2 mt-0.5">
                       {prop?.title}
                     </h3>
-                    <div className="text-xs font-sans font-bold text-emerald-800 mt-1">
+                    <div className="text-xs font-sans font-bold text-[#161412] mt-1">
                       {prop ? formatFCFA(prop.price) : ''} <span className="font-sans font-normal text-[11px] text-[#7a736a]">/ mois</span>
                     </div>
                   </div>
@@ -1025,9 +1025,9 @@ export default function CrmVisitesPage() {
                         href={getWhatsAppLink(cont?.phone || '', `Bonjour ${cont?.full_name}, nous confirmons notre visite.`)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[#1d382b] hover:text-[#947346] font-semibold flex items-center gap-1 text-[11px]"
+                        className="text-[#161412] hover:text-[#9E7431] font-semibold flex items-center gap-1 text-[11px]"
                       >
-                        <MessageCircle className="w-3 h-3 text-[#25D366]" />
+                        <MessageCircle className="w-3 h-3 text-[#9E7431]" />
                         <span>Rappeler</span>
                       </a>
                     </div>
@@ -1137,7 +1137,7 @@ export default function CrmVisitesPage() {
                           </span>
                           <span className="capitalize">{formattedDay} à {formattedTime}</span>
                         </span>
-                        <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md">
+                        <span className="text-[10px] font-semibold text-[#161412] bg-[#FAF8F5] border border-[#EAE5DC] px-2 py-0.5 rounded-md">
                           {prop?.district}
                         </span>
                       </div>
@@ -1151,7 +1151,7 @@ export default function CrmVisitesPage() {
                         href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((prop?.address || '') + ', ' + (prop?.city || 'Abidjan'))}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[#2E5BFF] hover:underline font-semibold flex items-center gap-1 text-[11px]"
+                        className="text-[#161412] hover:text-[#9E7431] hover:underline font-semibold flex items-center gap-1 text-[11px]"
                       >
                         <Route className="w-3 h-3" />
                         <span>Itinéraire GPS</span>
@@ -1161,9 +1161,9 @@ export default function CrmVisitesPage() {
                         href={getWhatsAppLink(cont?.phone || '', `Bonjour ${cont?.full_name}, notre négociateur arrive dans 10 minutes pour la visite.`)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-2 py-1 rounded-md bg-[#25D366]/10 text-emerald-800 font-bold text-[10px] flex items-center gap-1 hover:bg-[#25D366]/20 transition-colors"
+                        className="px-2 py-1 rounded-md bg-[#FAF8F5] border border-[#EAE5DC] text-[#161412] font-bold text-[10px] flex items-center gap-1 hover:border-[#9E7431] transition-colors"
                       >
-                        <MessageCircle className="w-3 h-3 text-[#25D366]" />
+                        <MessageCircle className="w-3 h-3 text-[#9E7431]" />
                         <span>WhatsApp</span>
                       </a>
                     </div>
@@ -1224,8 +1224,8 @@ export default function CrmVisitesPage() {
                     {/* Floating Top Actions */}
                     <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="px-3 py-1 rounded-full text-xs font-black bg-[#FFD84D] text-[#15161A] shadow-xs flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-[#15161A]" />
+                        <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#161412] text-white shadow-xs flex items-center gap-1.5 border border-[#38332E]">
+                          <span className="w-2 h-2 rounded-full bg-[#C8A97E]" />
                           <span>{activeModalVisit.status === 'completed' ? 'VISITE EFFECTUÉE' : isPastVisit ? 'VISITE PASSÉE' : 'VISITE CONFIRMÉE'}</span>
                         </span>
 
@@ -1234,7 +1234,7 @@ export default function CrmVisitesPage() {
                         </span>
 
                         <span className="px-3 py-1 rounded-full bg-black/60 text-white text-[11px] font-mono border border-white/20 flex items-center gap-1.5">
-                          <CalendarDays className="w-3.5 h-3.5 text-[#FFD84D]" />
+                          <CalendarDays className="w-3.5 h-3.5 text-[#C8A97E]" />
                           <span>{visitsOnActiveDay.length} au calendrier</span>
                         </span>
                       </div>
@@ -1251,7 +1251,7 @@ export default function CrmVisitesPage() {
                     {/* Titre & Prix au bas de la photo */}
                     <div className="absolute bottom-4 left-5 right-5 z-10 space-y-1">
                       <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-white/80">
-                        <span className="text-[#FFD84D]">{prop?.district}</span>
+                        <span className="text-[#C8A97E]">{prop?.district}</span>
                         <span>•</span>
                         <span>Réf. {prop?.reference}</span>
                       </div>
@@ -1261,7 +1261,7 @@ export default function CrmVisitesPage() {
                       </h3>
 
                       <div className="flex items-baseline gap-2 pt-1">
-                        <span className="text-2xl sm:text-3xl font-black text-[#FFD84D]">
+                        <span className="text-2xl sm:text-3xl font-black text-[#C8A97E]">
                           {prop ? formatFCFA(prop.price) : ''}
                         </span>
                         <span className="text-xs text-white/80 font-medium">/ mois (charges &amp; groupe inclus)</span>
@@ -1277,12 +1277,12 @@ export default function CrmVisitesPage() {
                       
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-slate-100">
                         <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-900">
-                          <div className="flex items-center gap-1.5 bg-[#2E5BFF]/10 text-[#2E5BFF] px-2.5 py-1 rounded-lg">
-                            <Calendar className="w-4 h-4 text-[#2E5BFF]" />
+                          <div className="flex items-center gap-1.5 bg-[#FAF8F5] text-[#161412] border border-[#EAE5DC] px-2.5 py-1 rounded-lg">
+                            <Calendar className="w-4 h-4 text-[#9E7431]" />
                             <span className="capitalize">{dateStr}</span>
                           </div>
                           <span className="text-slate-400">à</span>
-                          <span className="px-2.5 py-1 rounded-lg bg-[#2E5BFF] text-white font-black">{timeStr}</span>
+                          <span className="px-2.5 py-1 rounded-lg bg-[#161412] text-white font-bold">{timeStr}</span>
 
                           <span className="px-2.5 py-0.5 rounded-full bg-[#15161A] text-white text-[11px] font-bold shadow-2xs">
                             {visitsOnActiveDay.length} rdv ce jour
@@ -1297,12 +1297,12 @@ export default function CrmVisitesPage() {
 
                       {/* SÉLECTEUR RAPIDE ENTRE LES VISITES PROGRAMMÉES CE JOUR */}
                       {visitsOnActiveDay.length > 1 && (
-                        <div className="p-3 bg-[#FFF9EA] rounded-xl border border-[#F0DCB0] space-y-2">
+                        <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#EAE5DC] space-y-2">
                           <div className="flex items-center justify-between text-xs">
-                            <span className="font-bold text-amber-950">
+                            <span className="font-bold text-[#161412]">
                               Programme du {activeDayNumber} {monthNames[currentMonth]} ({visitsOnActiveDay.length} visites) :
                             </span>
-                            <span className="text-[11px] text-amber-800 font-semibold">Basculer :</span>
+                            <span className="text-[11px] text-[#6E665B] font-semibold">Basculer :</span>
                           </div>
 
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -1319,16 +1319,16 @@ export default function CrmVisitesPage() {
                                   className={`p-2.5 rounded-lg text-left text-xs transition-colors cursor-pointer border ${
                                     isCurrent
                                       ? 'bg-[#15161A] text-white border-black shadow-xs'
-                                      : 'bg-white hover:bg-amber-100/60 border-amber-200 text-amber-950'
+                                      : 'bg-white hover:bg-[#FAF8F5] border-[#EAE5DC] text-[#161412]'
                                   }`}
                                 >
                                   <div className="flex items-center justify-between">
-                                    <span className={`font-mono font-black text-[11px] flex items-center gap-1 ${isCurrent ? 'text-[#FFD84D]' : 'text-amber-900'}`}>
+                                    <span className={`font-mono font-black text-[11px] flex items-center gap-1 ${isCurrent ? 'text-[#9E7431]' : 'text-[#161412]'}`}>
                                       <Clock className="w-3.5 h-3.5" />
                                       {vTime}
                                     </span>
                                     {isCurrent ? (
-                                      <span className="text-[10px] font-bold text-[#FFD84D]">
+                                      <span className="text-[10px] font-bold text-[#9E7431]">
                                         Actif
                                       </span>
                                     ) : null}
@@ -1356,9 +1356,9 @@ export default function CrmVisitesPage() {
                           href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((prop?.address || '') + ', ' + (prop?.city || 'Abidjan'))}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-3 py-1.5 rounded-xl bg-[#E0F2FE] hover:bg-[#BAE6FD] text-[#0369A1] font-bold text-xs inline-flex items-center gap-1.5 transition-colors border border-[#BAE6FD]"
+                          className="px-3 py-1.5 rounded-xl bg-[#FAF8F5] hover:bg-[#EAE5DC] text-[#161412] font-bold text-xs inline-flex items-center gap-1.5 transition-colors border border-[#EAE5DC]"
                         >
-                          <Navigation className="w-3.5 h-3.5" />
+                          <Navigation className="w-3.5 h-3.5 text-[#9E7431]" />
                           <span>Démarrer GPS Waze / Maps</span>
                         </a>
                       </div>
@@ -1368,11 +1368,11 @@ export default function CrmVisitesPage() {
                     <div className="p-4 rounded-2xl bg-white border border-[#e8e4dc] shadow-warm-xs space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                          <ShieldCheck className="w-4 h-4 text-emerald-700" />
+                          <ShieldCheck className="w-4 h-4 text-[#9E7431]" />
                           <span>Dossier candidat locataire</span>
                         </span>
 
-                        <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                        <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#FAF8F5] text-[#9E7431] border border-[#EAE5DC]">
                           Solvabilité auditée BOA
                         </span>
                       </div>
@@ -1396,22 +1396,22 @@ export default function CrmVisitesPage() {
                           href={getWhatsAppLink(cont?.phone || '', `Bonjour ${cont?.full_name}, nous confirmons la visite de ${prop?.title} prévue le ${dateStr} à ${timeStr}.`)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-3.5 py-2 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs inline-flex items-center gap-1.5 transition-colors shrink-0 shadow-xs"
+                          className="px-3.5 py-2 rounded-xl bg-[#191715] hover:bg-[#9E7431] text-white font-bold text-xs inline-flex items-center gap-1.5 transition-colors shrink-0 shadow-xs"
                         >
-                          <MessageCircle className="w-3.5 h-3.5" />
+                          <MessageCircle className="w-3.5 h-3.5 text-[#9E7431]" />
                           <span>Ouvrir WhatsApp ({cont?.phone})</span>
                         </a>
                       </div>
 
                       {/* Données financières */}
                       <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs">
-                        <div className="p-2.5 rounded-xl bg-[#FFFBEB] border border-amber-200">
-                          <span className="text-[10px] text-amber-800 font-bold uppercase block">Budget confirmé</span>
-                          <span className="font-mono font-bold text-amber-950 text-xs">{formatFCFA(cont?.budget_max || 0)} / mois</span>
+                        <div className="p-2.5 rounded-xl bg-[#FAF8F5] border border-[#EAE5DC]">
+                          <span className="text-[10px] text-[#6E665B] font-bold uppercase block">Budget confirmé</span>
+                          <span className="font-mono font-bold text-[#161412] text-xs">{formatFCFA(cont?.budget_max || 0)} / mois</span>
                         </div>
-                        <div className="p-2.5 rounded-xl bg-[#F0FDF4] border border-emerald-200">
-                          <span className="text-[10px] text-emerald-800 font-bold uppercase block">Garantie financière</span>
-                          <span className="font-semibold text-emerald-950 text-xs truncate block">{cont?.financial_readiness}</span>
+                        <div className="p-2.5 rounded-xl bg-[#FAF8F5] border border-[#EAE5DC]">
+                          <span className="text-[10px] text-[#6E665B] font-bold uppercase block">Garantie financière</span>
+                          <span className="font-semibold text-[#161412] text-xs truncate block">{cont?.financial_readiness}</span>
                         </div>
                       </div>
                     </div>
@@ -1529,7 +1529,7 @@ export default function CrmVisitesPage() {
                       {activeModalVisit.status === 'scheduled' ? (
                         <button
                           onClick={() => updateStatus(activeModalVisit.id, 'completed')}
-                          className="px-5 py-2.5 rounded-xl bg-[#0F5E3E] hover:bg-[#0c4b31] text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-transform hover:-translate-y-0.5 cursor-pointer"
+                          className="px-5 py-2.5 rounded-xl bg-[#15161A] hover:bg-[#9E7431] text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
                         >
                           <Check className="w-4 h-4" />
                           <span>Valider la Visite</span>

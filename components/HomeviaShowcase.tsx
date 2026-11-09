@@ -132,10 +132,11 @@ export default function HomeviaShowcase({ property }: HomeviaShowcaseProps) {
             {/* Titre & Adresse */}
             <div className="space-y-0.5">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-[#947346] font-bold">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[#9E7431] font-bold">
                   {property.reference}
                 </span>
-                <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.2 rounded-full border border-emerald-200">
+                <span className="text-[10px] font-bold text-[#161412] bg-[#FAF8F5] px-2 py-0.5 rounded-full border border-[#EAE5DC] flex items-center gap-1">
+                  <span className="w-1 h-1 rounded-full bg-[#9E7431]" />
                   Titre {property.legal_status}
                 </span>
               </div>
@@ -143,7 +144,7 @@ export default function HomeviaShowcase({ property }: HomeviaShowcaseProps) {
                 {property.title}
               </h3>
               <p className="text-[11px] text-slate-500 flex items-center gap-1">
-                <MapPin className="w-3 h-3 text-[#947346]" />
+                <MapPin className="w-3 h-3 text-[#9E7431]" />
                 <span className="truncate">{property.address}, {property.district}</span>
               </p>
             </div>
@@ -151,7 +152,7 @@ export default function HomeviaShowcase({ property }: HomeviaShowcaseProps) {
             {/* Bouton Noir Pill "Explore Property" */}
             <Link
               href={`/biens/${property.id}`}
-              className="w-full py-2.5 rounded-xl bg-[#161412] hover:bg-[#947346] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-xs"
+              className="w-full py-2.5 rounded-xl bg-[#161412] hover:bg-[#9E7431] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-xs"
             >
               <span>Explorer la Résidence</span>
               <ArrowUpRight className="w-3.5 h-3.5" />

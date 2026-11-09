@@ -129,17 +129,17 @@ export default function CrmIntelligencePage() {
     <div className="w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6 font-sans text-neutral-900">
       
       {/* ========================================================================= */}
-      {/* 1. HEADER EXÉCUTIF ARCHITECTURAL (BLEU NUIT & OR NOTARIAL)                 */}
+      {/* 1. HEADER EXÉCUTIF ARCHITECTURAL (CHARBON ARCHITECTURAL & OR CHAMPAGNE)    */}
       {/* ========================================================================= */}
-      <header className="relative bg-[#0F172A] text-white rounded-lg p-6 sm:p-8 border border-neutral-800 shadow-sm overflow-hidden">
+      <header className="relative bg-[#191715] text-white rounded-lg p-6 sm:p-8 border border-[#2D2926] shadow-sm overflow-hidden">
         
         {/* Accent géométrique d'arrière-plan */}
-        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-gradient-to-l from-[#D4AF37]/10 to-transparent pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-gradient-to-l from-[#C8A97E]/15 to-transparent pointer-events-none" />
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-2 max-w-3xl">
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-mono uppercase tracking-widest text-[#D4AF37] font-semibold">
+              <span className="text-[11px] font-mono uppercase tracking-widest text-[#C8A97E] font-semibold">
                 Intelligence Commerciale &amp; Closing Notarié
               </span>
               <span className="text-neutral-500 text-xs">•</span>
@@ -160,18 +160,18 @@ export default function CrmIntelligencePage() {
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <Link
               href="/crm/contacts"
-              className="px-4 py-2.5 rounded-md bg-white hover:bg-neutral-100 text-neutral-900 font-medium text-xs flex items-center gap-2 transition-colors shadow-xs"
+              className="px-4 py-2.5 rounded-md bg-white hover:bg-[#FAF8F5] text-[#161412] font-medium text-xs flex items-center gap-2 transition-colors shadow-xs"
             >
-              <Users className="w-3.5 h-3.5 text-neutral-900" />
+              <Users className="w-3.5 h-3.5 text-[#161412]" />
               <span>Prospects Actifs ({INITIAL_CONTACTS.length})</span>
             </Link>
 
             <button
               type="button"
               onClick={() => setActiveTab('simulator')}
-              className="px-4 py-2.5 rounded-md bg-[#D4AF37] hover:bg-[#c59b27] text-neutral-950 font-semibold text-xs flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+              className="px-4 py-2.5 rounded-md bg-[#9E7431] hover:bg-[#866226] text-white font-semibold text-xs flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
             >
-              <Zap className="w-3.5 h-3.5 text-neutral-950" />
+              <Zap className="w-3.5 h-3.5 text-white" />
               <span>Simulateur de Riposte</span>
             </button>
           </div>
@@ -398,7 +398,7 @@ export default function CrmIntelligencePage() {
                     >
                       {isCopied ? (
                         <>
-                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                          <Check className="w-3.5 h-3.5 text-[#C8A97E]" />
                           <span>Script Copié !</span>
                         </>
                       ) : (
@@ -520,13 +520,13 @@ export default function CrmIntelligencePage() {
             <div className="space-y-2 pt-1">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-900 font-semibold flex items-center gap-1.5">
-                  <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+                  <MessageCircle className="w-3.5 h-3.5 text-[#9E7431]" />
                   <span>Script WhatsApp Recommandé (Mot-à-Mot) :</span>
                 </span>
                 <span className="text-[10px] text-neutral-400 font-mono">Prêt à copier</span>
               </div>
 
-              <div className="p-3.5 rounded-md bg-[#efeae2] border border-[#d1d7db] text-xs text-[#111b21] leading-relaxed shadow-2xs select-text">
+              <div className="p-3.5 rounded-md bg-[#FAF8F5] border border-[#EAE5DC] text-xs text-[#161412] leading-relaxed shadow-2xs select-text">
                 {activePreset.responseScript}
               </div>
             </div>
@@ -559,7 +559,7 @@ export default function CrmIntelligencePage() {
               >
                 {isCopiedSimulator ? (
                   <>
-                    <Check className="w-4 h-4 text-emerald-400" />
+                    <Check className="w-4 h-4 text-[#C8A97E]" />
                     <span>Script Copié dans le Presse-Papier !</span>
                   </>
                 ) : (

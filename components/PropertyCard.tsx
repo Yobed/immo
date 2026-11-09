@@ -84,23 +84,23 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-white/95 backdrop-blur-md text-slate-900 shadow-2xs">
               {property.operation === 'rent' ? 'Location' : 'Vente'}
             </span>
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50/95 backdrop-blur-md text-emerald-800 border border-emerald-200/60 shadow-2xs flex items-center gap-1">
-              <ShieldCheck className="w-3 h-3 text-emerald-600" />
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/95 backdrop-blur-md text-[#191715] border border-[#EAE5DC] shadow-2xs flex items-center gap-1">
+              <ShieldCheck className="w-3 h-3 text-[#9E7431]" />
               <span>{property.legal_status}</span>
             </span>
             {property.status === 'cleaning' || property.concierge_status === 'cleaning' ? (
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/90 backdrop-blur-md text-white border border-amber-300 shadow-2xs flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-white" />
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/95 backdrop-blur-md text-[#6E665B] border border-[#EAE5DC] shadow-2xs flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#9E7431]" />
                 <span>Nettoyage</span>
               </span>
             ) : property.status === 'reserved' || property.concierge_status === 'reserved' ? (
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-700/90 backdrop-blur-md text-white border border-purple-300 shadow-2xs flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-white" />
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/95 backdrop-blur-md text-[#6E665B] border border-[#EAE5DC] shadow-2xs flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#191715]" />
                 <span>Réservé</span>
               </span>
             ) : (
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-700/90 backdrop-blur-md text-white border border-emerald-300 shadow-2xs flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-white" />
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/95 backdrop-blur-md text-[#191715] border border-[#EAE5DC] shadow-2xs flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#9E7431]" />
                 <span>Disponible</span>
               </span>
             )}
@@ -112,7 +112,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-md flex items-center justify-center text-white transition-all z-10 cursor-pointer"
             aria-label="Enregistrer dans les favoris"
           >
-            <Heart className={`w-4 h-4 transition-transform ${isLiked ? 'fill-rose-500 text-rose-500 scale-110' : 'text-white'}`} />
+            <Heart className={`w-4 h-4 transition-transform ${isLiked ? 'fill-[#9E7431] text-[#9E7431] scale-110' : 'text-white'}`} />
           </button>
 
           {/* Slider Dots */}
@@ -140,7 +140,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                 {property.district}, Abidjan
               </span>
               <div className="flex items-center gap-1 shrink-0 font-bold text-slate-900">
-                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                <Star className="w-3.5 h-3.5 fill-[#9E7431] text-[#9E7431]" />
                 <span>4.98</span>
               </div>
             </div>
@@ -171,7 +171,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
 
           {/* Footer Card Actions */}
           <div className="pt-3 border-t border-[#f0ede6] flex items-center justify-between text-xs">
-            <span className="text-[10px] text-emerald-800 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md">
+            <span className="text-[10px] text-[#6E665B] font-medium bg-[#FAF8F5] border border-[#EAE5DC] px-2 py-0.5 rounded-md">
               Visite possible cette semaine
             </span>
 

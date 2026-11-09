@@ -90,9 +90,9 @@ export default function Footer() {
                   href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full dark:bg-white/10 dark:text-white bg-black/5 text-[#141210] hover:bg-[#25D366] hover:text-white text-xs font-semibold transition-all shadow-sm"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FAF8F5] text-[#191715] hover:bg-[#191715] hover:text-white border border-[#EAE5DC] text-xs font-semibold transition-all shadow-sm"
                 >
-                  <MessageCircle className="w-3.5 h-3.5" />
+                  <MessageCircle className="w-3.5 h-3.5 text-[#9E7431]" />
                   <span>Direction sur WhatsApp</span>
                 </a>
               </div>

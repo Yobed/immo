@@ -103,8 +103,8 @@ export default function PanoramicGallery({ properties, onOpenDossier }: Panorami
                   <span className="px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-xl border border-white/20 text-xs font-mono uppercase text-[#C8A97E]">
                     {spotlight.district}
                   </span>
-                  <span className="px-3 py-1.5 rounded-full bg-emerald-950/70 border border-emerald-500/30 text-xs font-mono text-emerald-300 flex items-center gap-1.5 backdrop-blur-xl">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="px-3 py-1.5 rounded-full bg-black/60 border border-white/20 text-xs font-mono text-white/90 flex items-center gap-1.5 backdrop-blur-xl">
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#C8A97E]" />
                     <span>Titre {spotlight.legal_status}</span>
                   </span>
                 </div>
@@ -122,7 +122,7 @@ export default function PanoramicGallery({ properties, onOpenDossier }: Panorami
                       {spotlight.has_pool && (
                         <>
                           <span>•</span>
-                          <span className="text-cyan-300">Piscine Débordement</span>
+                          <span className="text-[#C8A97E]">Piscine Débordement</span>
                         </>
                       )}
                     </div>
@@ -156,9 +156,9 @@ export default function PanoramicGallery({ properties, onOpenDossier }: Panorami
                     )}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-5 py-2.5 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold flex items-center gap-2 transition-all shadow-md transform hover:scale-102"
+                    className="px-5 py-2.5 rounded-full bg-[#191715] hover:bg-[#9E7431] text-white text-xs font-bold flex items-center gap-2 transition-all shadow-md transform hover:scale-102"
                   >
-                    <MessageCircle className="w-3.5 h-3.5 fill-white" />
+                    <MessageCircle className="w-3.5 h-3.5 text-[#9E7431]" />
                     <span>Visiter</span>
                   </a>
 
@@ -201,7 +201,7 @@ export default function PanoramicGallery({ properties, onOpenDossier }: Panorami
                     <span className="px-3 py-1 rounded-full bg-black/60 backdrop-blur-xl border border-white/20 text-[11px] font-mono uppercase text-[#C8A97E]">
                       {prop.district}
                     </span>
-                    <span className="px-2.5 py-1 rounded-full bg-emerald-950/70 border border-emerald-500/30 text-[10px] font-mono text-emerald-300 backdrop-blur-xl">
+                    <span className="px-2.5 py-1 rounded-full bg-black/60 border border-white/20 text-[10px] font-mono text-white/90 backdrop-blur-xl">
                       Titre {prop.legal_status}
                     </span>
                   </div>
@@ -260,7 +260,7 @@ export default function PanoramicGallery({ properties, onOpenDossier }: Panorami
                       )}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full dark:bg-white/10 dark:hover:bg-[#25D366] bg-black/5 hover:bg-[#25D366] hover:text-white dark:text-white text-black text-xs font-semibold transition-all duration-300"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#FAF8F5] hover:bg-[#191715] hover:text-white text-[#191715] border border-[#EAE5DC] text-xs font-semibold transition-all duration-300"
                     >
                       <MessageCircle className="w-3.5 h-3.5" />
                       <span>Visiter</span>

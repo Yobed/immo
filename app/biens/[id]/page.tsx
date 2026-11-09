@@ -123,18 +123,18 @@ export default function PropertyDetailPage() {
               <span className="px-3 py-1 rounded-full bg-white border border-[#EAE5DC] text-xs font-mono uppercase text-[#9E7431] shadow-xs">
                 {property.district}
               </span>
-              <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-mono text-emerald-800 flex items-center gap-1.5 shadow-xs">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="px-3 py-1 rounded-full bg-white border border-[#EAE5DC] text-xs font-mono text-[#191715] flex items-center gap-1.5 shadow-xs">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#9E7431]" />
                 <span>Titre {property.legal_status} Audité</span>
               </span>
-              <span className={`px-3 py-1 rounded-full border text-xs font-mono flex items-center gap-1.5 shadow-xs ${
-                property.status === 'cleaning' || property.concierge_status === 'cleaning'
-                  ? 'bg-amber-50 border-amber-200 text-amber-800'
-                  : property.status === 'reserved' || property.concierge_status === 'reserved'
-                  ? 'bg-purple-50 border-purple-200 text-purple-800'
-                  : 'bg-emerald-50 border-emerald-200 text-emerald-800'
-              }`}>
-                <span className="w-1.5 h-1.5 rounded-full bg-current" />
+              <span className="px-3 py-1 rounded-full bg-white border border-[#EAE5DC] text-xs font-mono text-[#191715] flex items-center gap-1.5 shadow-xs">
+                <span className={`w-1.5 h-1.5 rounded-full ${
+                  property.status === 'cleaning' || property.concierge_status === 'cleaning'
+                    ? 'bg-[#9E7431]'
+                    : property.status === 'reserved' || property.concierge_status === 'reserved'
+                    ? 'bg-[#191715]'
+                    : 'bg-[#9E7431]'
+                }`} />
                 <span>
                   {property.status === 'cleaning' ? 'Nettoyage Conciergerie en cours' :
                    property.status === 'reserved' ? 'Réservé VIP' :
@@ -303,9 +303,9 @@ export default function PropertyDetailPage() {
                   href={whatsappDirectUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-4 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-[0_15px_35px_rgba(37,211,102,0.25)] transition-all transform hover:scale-102 cursor-pointer"
+                  className="w-full py-4 rounded-full bg-[#191715] hover:bg-[#9E7431] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-[0_15px_35px_rgba(25,23,21,0.15)] transition-all transform hover:scale-102 cursor-pointer"
                 >
-                  <MessageCircle className="w-4 h-4 fill-white" />
+                  <MessageCircle className="w-4 h-4 text-[#9E7431]" />
                   <span>Planifier une Visite Privée</span>
                 </a>
 

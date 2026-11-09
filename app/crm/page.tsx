@@ -125,22 +125,22 @@ export default function CrmDashboardPage() {
         <div className="flex items-center gap-3">
           <Link href="/crm" className="w-9 h-9 rounded-xl bg-[#17181D] flex items-center justify-center text-white font-bold text-sm shadow-xs shrink-0 transition-transform hover:scale-105">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <rect x="2" y="2" width="7" height="7" rx="2" fill="#FFD84D" />
-              <rect x="11" y="2" width="7" height="7" rx="3.5" fill="#86E0BC" />
-              <rect x="2" y="11" width="7" height="7" rx="3.5" fill="#FF7633" />
-              <rect x="11" y="11" width="7" height="7" rx="2" fill="#2E5BFF" />
+              <rect x="2" y="2" width="7" height="7" rx="2" fill="#C8A97E" />
+              <rect x="11" y="2" width="7" height="7" rx="3.5" fill="#FAF8F5" />
+              <rect x="2" y="11" width="7" height="7" rx="3.5" fill="#FAF8F5" fillOpacity="0.4" />
+              <rect x="11" y="11" width="7" height="7" rx="2" fill="#9E7431" />
             </svg>
           </Link>
           <div>
             <h1 className="text-sm font-bold tracking-tight text-[#15161A] flex items-center gap-2">
-              <Link href="/crm" className="hover:text-[#2E5BFF] transition-colors">Cabinet Immo</Link>
+              <Link href="/crm" className="hover:text-[#9E7431] transition-colors">Cabinet Immo</Link>
               <span className="text-[#5C606B] font-medium">· Pilotage Locatif 360°</span>
             </h1>
             <p className="text-[11px] text-[#5C606B] font-medium flex items-center gap-1.5">
               <span>Mis à jour en direct</span>
               <span>·</span>
-              <span className="inline-flex items-center gap-1 text-[#0F5E3E] bg-[#D7F4E8] px-2 py-0.2 rounded-full text-[10px] font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#17915F] ring-2 ring-emerald-200" />
+              <span className="inline-flex items-center gap-1 text-[#161412] bg-[#FAF8F5] border border-[#EAE5DC] px-2 py-0.2 rounded-full text-[10px] font-bold">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#9E7431] ring-2 ring-[#9E7431]/20" />
                 Actions WhatsApp &amp; Séquestre actives
               </span>
             </p>
@@ -158,7 +158,7 @@ export default function CrmDashboardPage() {
                 : 'bg-white text-[#15161A] hover:bg-slate-200/70 border border-slate-200/80'
             }`}
           >
-            <Sparkles className={`w-3.5 h-3.5 ${activeTab === 'aujourdhui' ? 'text-[#FFD84D]' : 'text-slate-400'}`} />
+            <Sparkles className={`w-3.5 h-3.5 ${activeTab === 'aujourdhui' ? 'text-[#9E7431]' : 'text-slate-400'}`} />
             <span>Aujourd&apos;hui</span>
           </button>
 
@@ -168,7 +168,7 @@ export default function CrmDashboardPage() {
             className={`px-3.5 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'valider'
                 ? 'bg-[#17181D] text-white shadow-xs'
-                : 'bg-[#FFD84D] text-[#15161A] hover:bg-[#ffe066] border border-amber-300'
+                : 'bg-[#FAF8F5] text-[#15161A] hover:bg-[#EAE5DC] border border-[#EAE5DC]'
             }`}
           >
             <span>À valider</span>
@@ -199,7 +199,7 @@ export default function CrmDashboardPage() {
                 : 'bg-white text-[#15161A] hover:bg-slate-200/70 border border-slate-200/80'
             }`}
           >
-            <Bot className="w-3.5 h-3.5 text-emerald-600" />
+            <Bot className="w-3.5 h-3.5 text-[#9E7431]" />
             <span>Aya IA &amp; Automations</span>
           </button>
         </nav>
@@ -216,11 +216,9 @@ export default function CrmDashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
             
             {/* --------------------------------------------------------------------- */}
-            {/* TILE 1 : HERO AUJOURD'HUI (COBALT #2E5BFF - 2 COLS, 2 ROWS)            */}
+            {/* TILE 1 : HERO AUJOURD'HUI (CHARBON ARCHITECTURAL #191715 - 2 COLS, 2 ROWS) */}
             {/* --------------------------------------------------------------------- */}
-            {/* TILE 1 : HERO AUJOURD'HUI (COBALT #2E5BFF - 2 COLS, 2 ROWS)            */}
-            {/* --------------------------------------------------------------------- */}
-            <div className="group md:col-span-2 md:row-span-2 bg-[#2E5BFF] text-white rounded-[26px] p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden shadow-warm-md hover:shadow-warm-xl transition-all duration-300 min-h-[420px]">
+            <div className="group md:col-span-2 md:row-span-2 bg-[#191715] text-white rounded-[26px] p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden shadow-warm-md hover:shadow-warm-xl border border-white/10 transition-all duration-300 min-h-[420px]">
               
               {/* OBJET 3D SVG ANIMÉ AU HOVER (Smartphone 3D pleine hauteur centré verticalement sur la moitié droite) */}
               <svg 
@@ -239,9 +237,9 @@ export default function CrmDashboardPage() {
                     <stop offset="1" stopColor="#0B0C0E" />
                   </linearGradient>
                   <linearGradient id="b-sc" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" stopColor="#FF9A62" />
-                    <stop offset=".5" stopColor="#FF7633" />
-                    <stop offset="1" stopColor="#E2531A" />
+                    <stop offset="0" stopColor="#302C26" />
+                    <stop offset=".5" stopColor="#1E1B17" />
+                    <stop offset="1" stopColor="#151412" />
                   </linearGradient>
                   <radialGradient id="b-pl" cx=".35" cy=".3" r=".8">
                     <stop offset="0" stopColor="#FFFFFF" />
@@ -251,7 +249,7 @@ export default function CrmDashboardPage() {
                     <feGaussianBlur stdDeviation="12" />
                   </filter>
                 </defs>
-                <ellipse cx="150" cy="335" rx="100" ry="16" fill="#0A1F80" opacity=".5" filter="url(#b-so)" />
+                <ellipse cx="150" cy="335" rx="100" ry="16" fill="#000000" opacity=".5" filter="url(#b-so)" />
                 <g transform="rotate(-4 160 180)">
                   <rect x="72" y="22" width="165" height="315" rx="32" fill="url(#b-ed)" />
                   <rect x="66" y="16" width="165" height="315" rx="32" fill="url(#b-ph)" />
@@ -260,8 +258,8 @@ export default function CrmDashboardPage() {
                   <rect x="92" y="66" width="100" height="12" rx="6" fill="#fff" opacity=".95" />
                   <rect x="92" y="84" width="72" height="12" rx="6" fill="#fff" opacity=".95" />
                   <circle cx="150" cy="178" r="28" fill="url(#b-pl)" />
-                  <path d="M142 165 L164 178 L142 191 Z" fill="#FF7633" />
-                  <rect x="90" y="254" width="116" height="28" rx="14" fill="#FFD84D" />
+                  <path d="M142 165 L164 178 L142 191 Z" fill="#9E7431" />
+                  <rect x="90" y="254" width="116" height="28" rx="14" fill="#9E7431" />
                   <rect x="106" y="264" width="84" height="8" rx="4" fill="#15161A" opacity=".8" />
                   <rect x="90" y="294" width="116" height="5" rx="2.5" fill="#fff" opacity=".35" />
                   <rect x="90" y="294" width="52" height="5" rx="2.5" fill="#fff" />
@@ -272,7 +270,7 @@ export default function CrmDashboardPage() {
               {/* Contenu Hero - Largeur contrainte stricte (50%) pour garantir 0 chevauchement avec le téléphone */}
               <div className="space-y-3 z-10 max-w-[52%] sm:max-w-[50%] lg:max-w-[48%]">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs uppercase tracking-widest text-white/80 font-bold">
+                  <span className="text-xs uppercase tracking-widest text-[#C8A97E] font-bold">
                     Dimanche 8 Novembre 2026
                   </span>
                 </div>
@@ -289,59 +287,59 @@ export default function CrmDashboardPage() {
                 <div className="space-y-2 pt-2">
                   <Link
                     href="/crm/visites"
-                    className="flex items-center justify-between gap-2 bg-white/15 hover:bg-white/25 rounded-2xl p-2 px-3 transition-all text-xs font-semibold text-white group/step shadow-2xs backdrop-blur-xs"
+                    className="flex items-center justify-between gap-2 bg-white/10 hover:bg-white/20 rounded-2xl p-2 px-3 transition-all text-xs font-semibold text-white group/step shadow-2xs backdrop-blur-xs"
                     title="Confirmer la visite locative sur l'agenda"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="w-5 h-5 rounded-full bg-white text-[#2E5BFF] font-black text-xs flex items-center justify-center shrink-0 shadow-xs transition-transform group-hover/step:scale-110">
+                      <span className="w-5 h-5 rounded-full bg-[#9E7431] text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs transition-transform group-hover/step:scale-110">
                         1
                       </span>
                       <span className="truncate text-[11px] sm:text-xs">Confirmer visite 15:30 (Riviera)</span>
                     </div>
-                    <span className="px-2 py-0.5 rounded-full bg-white/25 text-[10px] font-bold text-white shrink-0">
+                    <span className="px-2 py-0.5 rounded-full bg-white/20 text-[10px] font-bold text-white shrink-0">
                       10 min
                     </span>
                   </Link>
 
                   <Link
                     href="/crm/pipeline"
-                    className="flex items-center justify-between gap-2 bg-white/15 hover:bg-white/25 rounded-2xl p-2 px-3 transition-all text-xs font-semibold text-white group/step shadow-2xs backdrop-blur-xs"
+                    className="flex items-center justify-between gap-2 bg-white/10 hover:bg-white/20 rounded-2xl p-2 px-3 transition-all text-xs font-semibold text-white group/step shadow-2xs backdrop-blur-xs"
                     title="Transmettre le bail sous séquestre"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="w-5 h-5 rounded-full bg-white text-[#2E5BFF] font-black text-xs flex items-center justify-center shrink-0 shadow-xs transition-transform group-hover/step:scale-110">
+                      <span className="w-5 h-5 rounded-full bg-[#9E7431] text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs transition-transform group-hover/step:scale-110">
                         2
                       </span>
                       <span className="truncate text-[11px] sm:text-xs">Bail sous séquestre Mme Doumbia</span>
                     </div>
-                    <span className="px-2 py-0.5 rounded-full bg-white/25 text-[10px] font-bold text-white shrink-0">
+                    <span className="px-2 py-0.5 rounded-full bg-white/20 text-[10px] font-bold text-white shrink-0">
                       15 min
                     </span>
                   </Link>
 
                   <Link
                     href="/crm/visites"
-                    className="flex items-center justify-between gap-2 bg-white/15 hover:bg-white/25 rounded-2xl p-2 px-3 transition-all text-xs font-semibold text-white group/step shadow-2xs backdrop-blur-xs"
+                    className="flex items-center justify-between gap-2 bg-white/10 hover:bg-white/20 rounded-2xl p-2 px-3 transition-all text-xs font-semibold text-white group/step shadow-2xs backdrop-blur-xs"
                     title="Vérifier l'inventaire huissier"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="w-5 h-5 rounded-full bg-white text-[#2E5BFF] font-black text-xs flex items-center justify-center shrink-0 shadow-xs transition-transform group-hover/step:scale-110">
+                      <span className="w-5 h-5 rounded-full bg-[#9E7431] text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs transition-transform group-hover/step:scale-110">
                         3
                       </span>
                       <span className="truncate text-[11px] sm:text-xs">Inventaire huissier Beverly Hills</span>
                     </div>
-                    <span className="px-2 py-0.5 rounded-full bg-white/25 text-[10px] font-bold text-white shrink-0">
+                    <span className="px-2 py-0.5 rounded-full bg-white/20 text-[10px] font-bold text-white shrink-0">
                       20 min
                     </span>
                   </Link>
                 </div>
               </div>
 
-              {/* Bouton Pill Butter Jaune Or & Triage */}
+              {/* Bouton Pill Or Champagne & Triage */}
               <div className="pt-6 z-10 flex flex-wrap items-center gap-3">
                 <Link
                   href="/crm/visites"
-                  className="inline-flex items-center gap-2 bg-[#FFD84D] hover:bg-[#ffe066] text-[#15161A] font-bold text-xs sm:text-sm px-6 py-3 rounded-full transition-transform hover:-translate-y-0.5 shadow-xs"
+                  className="inline-flex items-center gap-2 bg-[#9E7431] hover:bg-[#C8A97E] text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-full transition-transform hover:-translate-y-0.5 shadow-xs"
                 >
                   <span>Ouvrir l&apos;agenda des visites</span>
                   <ArrowRight className="w-4 h-4" />
@@ -360,11 +358,11 @@ export default function CrmDashboardPage() {
             </div>
 
             {/* --------------------------------------------------------------------- */}
-            {/* TILE 2 : PROCHAIN DÉPART (MANDARINE / TANG #FF7633)                    */}
+            {/* TILE 2 : PROCHAIN DÉPART (ALBÂTRE MINÉRAL #FAF8F5 - 2 COLS)           */}
             {/* --------------------------------------------------------------------- */}
             <Link
               href="/crm/visites"
-              className="group bg-[#FF7633] text-[#15161A] rounded-[26px] p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden shadow-warm-xs hover:shadow-warm-md hover:-translate-y-0.5 transition-all duration-300 min-h-[190px] block cursor-pointer"
+              className="group bg-[#FAF8F5] text-[#15161A] border-2 border-[#9E7431]/40 rounded-[26px] p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden shadow-warm-xs hover:shadow-warm-md hover:border-[#9E7431] hover:-translate-y-0.5 transition-all duration-300 min-h-[190px] block cursor-pointer"
               title="Voir les détails de la visite sur l'agenda des visites"
             >
               {/* OBJET 3D SVG ANIMÉ AU HOVER (Horloge 3D compacte dans le coin inférieur droit - 0 chevauchement avec 15:30) */}
@@ -384,14 +382,14 @@ export default function CrmDashboardPage() {
                     <stop offset="1" stopColor="#0D0E11" />
                   </radialGradient>
                 </defs>
-                <circle cx="74" cy="74" r="56" fill="#B84A12" opacity=".35" />
+                <circle cx="74" cy="74" r="56" fill="#9E7431" opacity=".2" />
                 <circle cx="70" cy="68" r="56" fill="url(#b-rm)" />
                 <circle cx="70" cy="68" r="45" fill="url(#b-ck)" />
                 <g stroke="#15161A" strokeLinecap="round">
                   <line x1="70" y1="68" x2="70" y2="38" strokeWidth="6" />
                   <line x1="70" y1="68" x2="49" y2="80" strokeWidth="7" />
                 </g>
-                <circle cx="70" cy="68" r="6" fill="#FF7633" />
+                <circle cx="70" cy="68" r="6" fill="#9E7431" />
               </svg>
 
               <div className="space-y-0.5 z-10">
@@ -410,7 +408,7 @@ export default function CrmDashboardPage() {
                 <p className="text-[11px] text-[#15161A]/85 line-clamp-1 font-medium">
                   {nextVisitContact?.full_name} ({nextVisitContact?.profession?.split('(')[0] || 'Directeur'})
                 </p>
-                <div className="text-[10px] sm:text-[11px] font-bold text-white bg-[#15161A] px-2.5 py-1 rounded-full inline-block mt-2 shadow-2xs">
+                <div className="text-[10px] sm:text-[11px] font-bold text-[#C8A97E] bg-[#15161A] px-2.5 py-1 rounded-full inline-block mt-2 shadow-2xs">
                   Bail Corporate · 3,8M FCFA/m
                 </div>
               </div>
@@ -425,25 +423,25 @@ export default function CrmDashboardPage() {
                   <span className="text-[11px] uppercase tracking-wider font-bold text-white/70">
                     La Machine &amp; IA
                   </span>
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#17915F] ring-2 ring-emerald-900/60" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#9E7431] ring-2 ring-[#9E7431]/20" />
                 </div>
 
                 <div className="space-y-2 text-xs">
                   <div className="flex items-center justify-between py-1 border-b border-white/10">
                     <span className="text-white/80">Aya IA WhatsApp</span>
-                    <span className="font-bold text-[#86E0BC]">Répond &lt; 15s</span>
+                    <span className="font-bold text-[#C8A97E]">Répond &lt; 15s</span>
                   </div>
                   <div className="flex items-center justify-between py-1 border-b border-white/10">
                     <span className="text-white/80">Solvabilité audités</span>
-                    <span className="font-bold text-[#86E0BC]">8/8 valides</span>
+                    <span className="font-bold text-[#C8A97E]">8/8 valides</span>
                   </div>
                   <div className="flex items-center justify-between py-1 border-b border-white/10">
                     <span className="text-white/80">Séquestres Notariés</span>
-                    <span className="font-bold text-[#FFD84D]">100% sécurisés</span>
+                    <span className="font-bold text-[#C8A97E]">100% sécurisés</span>
                   </div>
                   <div className="flex items-center justify-between py-1">
                     <span className="text-white/80">Remontées WhatsApp</span>
-                    <span className="font-bold text-[#86E0BC]">Sync en direct</span>
+                    <span className="font-bold text-[#C8A97E]">Sync en direct</span>
                   </div>
                 </div>
               </div>
@@ -451,14 +449,14 @@ export default function CrmDashboardPage() {
               <div className="flex items-center justify-between pt-2">
                 <Link
                   href="/crm/contacts"
-                  className="text-[11px] text-[#86E0BC] hover:text-white font-bold inline-flex items-center gap-1 transition-colors"
+                  className="text-[11px] text-[#C8A97E] hover:text-white font-bold inline-flex items-center gap-1 transition-colors"
                 >
-                  <MessageCircle className="w-3 h-3 text-[#25D366]" />
+                  <MessageCircle className="w-3 h-3 text-[#C8A97E]" />
                   <span>Remontées WhatsApp</span>
                 </Link>
                 <Link
                   href="/crm/intelligence"
-                  className="text-[11px] text-[#FFD84D] hover:text-white font-bold inline-flex items-center gap-1 transition-colors"
+                  className="text-[11px] text-[#C8A97E] hover:text-white font-bold inline-flex items-center gap-1 transition-colors"
                 >
                   <span>Supervision</span>
                   <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
@@ -467,9 +465,9 @@ export default function CrmDashboardPage() {
             </div>
 
             {/* --------------------------------------------------------------------- */}
-            {/* TILE 4 : OPPORTUNITÉS & CANDIDATS (MINT #86E0BC)                       */}
+            {/* TILE 4 : OPPORTUNITÉS & CANDIDATS (ALBÂTRE #FAF8F5 & CHARBON)         */}
             {/* --------------------------------------------------------------------- */}
-            <div className="group bg-[#86E0BC] text-[#15161A] rounded-[26px] p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden shadow-warm-xs hover:shadow-warm-md hover:-translate-y-0.5 transition-all duration-300 min-h-[190px]">
+            <div className="group bg-[#FAF8F5] text-[#15161A] border-2 border-[#EAE5DC] rounded-[26px] p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden shadow-warm-xs hover:shadow-warm-md hover:-translate-y-0.5 transition-all duration-300 min-h-[190px]">
               
               {/* OBJET 3D SVG ANIMÉ AU HOVER (Cartes prospects compactes) */}
               <svg 
@@ -480,18 +478,18 @@ export default function CrmDashboardPage() {
                 <defs>
                   <linearGradient id="b-cd" x1="0" y1="0" x2="1" y2="1">
                     <stop offset="0" stopColor="#FFFFFF" />
-                    <stop offset="1" stopColor="#DDE1E8" />
+                    <stop offset="1" stopColor="#EAE5DC" />
                   </linearGradient>
                 </defs>
                 <g transform="rotate(10 60 60)">
-                  <rect x="25" y="30" width="70" height="80" rx="14" fill="#3E9A77" />
+                  <rect x="25" y="30" width="70" height="80" rx="14" fill="#161412" />
                 </g>
                 <g transform="rotate(3 60 60)">
-                  <rect x="23" y="24" width="70" height="80" rx="14" fill="#FFD84D" />
+                  <rect x="23" y="24" width="70" height="80" rx="14" fill="#9E7431" />
                 </g>
                 <g transform="rotate(-3 60 60)">
                   <rect x="20" y="18" width="70" height="80" rx="14" fill="url(#b-cd)" />
-                  <circle cx="42" cy="38" r="9" fill="#2E5BFF" />
+                  <circle cx="42" cy="38" r="9" fill="#161412" />
                   <rect x="34" y="58" width="44" height="6.5" rx="3" fill="#15161A" opacity=".75" />
                   <rect x="34" y="70" width="30" height="6.5" rx="3" fill="#15161A" opacity=".3" />
                 </g>
@@ -535,11 +533,11 @@ export default function CrmDashboardPage() {
             </div>
 
             {/* --------------------------------------------------------------------- */}
-            {/* TILE 5 : SCORE D'AUDIT & QUALITÉ (BUTTER #FFD84D)                     */}
+            {/* TILE 5 : SCORE D'AUDIT & QUALITÉ (ALBÂTRE & ANNEAU OR)                */}
             {/* --------------------------------------------------------------------- */}
             <Link
               href="/crm/pipeline"
-              className="group bg-[#FFD84D] text-[#15161A] rounded-[26px] p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden shadow-warm-xs hover:shadow-warm-md hover:-translate-y-0.5 transition-all duration-300 min-h-[190px] block"
+              className="group bg-[#FAF8F5] text-[#15161A] border-2 border-[#EAE5DC] rounded-[26px] p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden shadow-warm-xs hover:shadow-warm-md hover:-translate-y-0.5 transition-all duration-300 min-h-[190px] block"
               title="Voir la conformité des baux sur le Kanban"
             >
               {/* OBJET 3D SVG ANIMÉ AU HOVER (Jauge Donut 3D dynamique total/100 - centré verticalement sur la moitié droite) */}
@@ -550,18 +548,18 @@ export default function CrmDashboardPage() {
               >
                 <defs>
                   <linearGradient id="b-rg" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#4A75FF" />
-                    <stop offset="100%" stopColor="#1B3FD6" />
+                    <stop offset="0%" stopColor="#C8A97E" />
+                    <stop offset="100%" stopColor="#9E7431" />
                   </linearGradient>
                   <filter id="b-donut-depth" x="-20%" y="-20%" width="140%" height="140%">
-                    <feDropShadow dx="1" dy="4" stdDeviation="3" floodColor="#B8920E" floodOpacity="0.4" />
+                    <feDropShadow dx="1" dy="4" stdDeviation="3" floodColor="#9E7431" floodOpacity="0.2" />
                   </filter>
                 </defs>
                 {/* 3D Base Torus Shadow */}
-                <circle cx="65" cy="69" r="40" fill="none" stroke="#C9A214" strokeWidth="18" />
+                <circle cx="65" cy="69" r="40" fill="none" stroke="#EAE5DC" strokeWidth="18" />
                 {/* Background Ring (100% Base Torus) */}
-                <circle cx="65" cy="65" r="40" fill="none" stroke="#FFF3BF" strokeWidth="18" filter="url(#b-donut-depth)" />
-                {/* Dynamic Blue Arc Filling Function of total/100 (Score 96% -> offset = 251.33 * (1 - 0.96) = 10.05) */}
+                <circle cx="65" cy="65" r="40" fill="none" stroke="#F0EBE1" strokeWidth="18" filter="url(#b-donut-depth)" />
+                {/* Dynamic Gold Arc Filling Function of total/100 */}
                 <circle 
                   cx="65" 
                   cy="65" 
@@ -612,7 +610,7 @@ export default function CrmDashboardPage() {
                 </div>
                 <Link
                   href="/crm/visites"
-                  className="text-xs font-bold text-[#2E5BFF] hover:underline flex items-center gap-1 group-hover:translate-x-0.5 transition-transform"
+                  className="text-xs font-bold text-[#9E7431] hover:underline flex items-center gap-1 group-hover:translate-x-0.5 transition-transform"
                 >
                   <span>Vue Calendrier</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -635,7 +633,7 @@ export default function CrmDashboardPage() {
                     href="/crm/visites"
                     className={`rounded-2xl p-2 sm:p-2.5 text-center flex flex-col items-center justify-between min-h-[75px] transition-transform hover:-translate-y-1 shadow-2xs ${
                       d.type === 'today'
-                        ? 'bg-[#17181D] text-white ring-2 ring-[#FFD84D]/40'
+                        ? 'bg-[#17181D] text-white ring-2 ring-[#C8A97E]/40'
                         : 'bg-[#F3F4F7] text-[#5C606B] hover:bg-slate-200/80'
                     }`}
                   >
@@ -644,10 +642,10 @@ export default function CrmDashboardPage() {
                       {d.num}
                     </span>
                     <span className={`text-[8px] font-bold px-1 rounded-sm truncate w-full ${
-                      d.type === 'today' ? 'bg-[#FFD84D] text-[#15161A]' :
-                      d.type === 'done' ? 'bg-[#D7F4E8] text-[#0F5E3E]' :
-                      d.type === 'accent' ? 'bg-[#2E5BFF]/10 text-[#2E5BFF]' :
-                      'bg-amber-100 text-amber-900'
+                      d.type === 'today' ? 'bg-[#9E7431] text-white' :
+                      d.type === 'done' ? 'bg-[#FAF8F5] text-[#161412] border border-[#EAE5DC]' :
+                      d.type === 'accent' ? 'bg-[#FAF8F5] text-[#9E7431] border border-[#9E7431]/30' :
+                      'bg-[#FAF8F5] text-[#6E665B] border border-[#EAE5DC]'
                     }`}>
                       {d.status}
                     </span>
@@ -658,9 +656,9 @@ export default function CrmDashboardPage() {
             </div>
 
             {/* --------------------------------------------------------------------- */}
-            {/* TILE 7 : CE QUI FREINE (ROSE CORAIL #FFA8CB - 2 COLS)                 */}
+            {/* TILE 7 : CE QUI FREINE (ALBÂTRE AVEC LISERÉ OR #9E7431 - 2 COLS)      */}
             {/* --------------------------------------------------------------------- */}
-            <div className="group md:col-span-2 bg-[#FFA8CB] text-[#15161A] rounded-[26px] p-5 sm:p-6 flex flex-col justify-between shadow-warm-xs hover:shadow-warm-md hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden">
+            <div className="group md:col-span-2 bg-[#FAF8F5] text-[#15161A] border-2 border-[#9E7431]/40 rounded-[26px] p-5 sm:p-6 flex flex-col justify-between shadow-warm-xs hover:shadow-warm-md hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden">
               
               {/* OBJET 3D SVG ANIMÉ AU HOVER (Règle graduée / Goulot 3D redimensionnée) */}
               <svg 
@@ -670,12 +668,12 @@ export default function CrmDashboardPage() {
               >
                 <defs>
                   <linearGradient id="b-ru" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" stopColor="#FFE68A" />
-                    <stop offset="1" stopColor="#F5BE1A" />
+                    <stop offset="0" stopColor="#C8A97E" />
+                    <stop offset="1" stopColor="#9E7431" />
                   </linearGradient>
                 </defs>
                 <g transform="rotate(-12 125 60)">
-                  <rect x="14" y="44" width="226" height="52" rx="12" fill="#B9861A" />
+                  <rect x="14" y="44" width="226" height="52" rx="12" fill="#9E7431" />
                   <rect x="10" y="36" width="226" height="52" rx="12" fill="url(#b-ru)" />
                   <g stroke="#15161A" strokeWidth="3" strokeLinecap="round">
                     <line x1="30" y1="36" x2="30" y2="58" />
@@ -748,7 +746,7 @@ export default function CrmDashboardPage() {
                 </div>
                 <div className="h-2.5 rounded-full bg-[#E4E6EB] overflow-hidden">
                   <div 
-                    className="h-full bg-[#2E5BFF] transition-all duration-300 rounded-full"
+                    className="h-full bg-[#9E7431] transition-all duration-300 rounded-full"
                     style={{ width: `${Math.max(10, Math.min(100, 100 - (remainingMinutes / 55) * 100))}%` }}
                   />
                 </div>
@@ -756,51 +754,51 @@ export default function CrmDashboardPage() {
             </div>
 
             {/* Ruban Mise en Route (Setup 4 sur 5 validés avec liens directs) */}
-            <div className="p-3.5 sm:p-4 rounded-2xl bg-[#F3F4F7] border border-[#E1E3E8] flex flex-wrap items-center gap-2 text-xs">
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-[#FAF8F5] border border-[#EAE5DC] flex flex-wrap items-center gap-2 text-xs">
               <span className="font-bold text-[#15161A] mr-2">Mise en route · 4 sur 5 validés</span>
               
               <Link 
                 href="/crm/intelligence"
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#D7F4E8] hover:bg-[#c2edd9] text-[#0F5E3E] font-semibold text-[11px] transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white hover:bg-[#F2ECE1] text-[#161412] border border-[#EAE5DC] font-semibold text-[11px] transition-colors"
                 title="Superviser Aya IA"
               >
-                <Check className="w-3.5 h-3.5" />
+                <Check className="w-3.5 h-3.5 text-[#9E7431]" />
                 <span>Aya IA WhatsApp connectée</span>
               </Link>
 
               <Link
                 href="/crm/biens"
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#D7F4E8] hover:bg-[#c2edd9] text-[#0F5E3E] font-semibold text-[11px] transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white hover:bg-[#F2ECE1] text-[#161412] border border-[#EAE5DC] font-semibold text-[11px] transition-colors"
                 title="Voir le portefeuille biens"
               >
-                <Check className="w-3.5 h-3.5" />
+                <Check className="w-3.5 h-3.5 text-[#9E7431]" />
                 <span>6 Mandats exclusifs vérifiés</span>
               </Link>
 
               <Link
                 href="/crm/pipeline"
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#D7F4E8] hover:bg-[#c2edd9] text-[#0F5E3E] font-semibold text-[11px] transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white hover:bg-[#F2ECE1] text-[#161412] border border-[#EAE5DC] font-semibold text-[11px] transition-colors"
                 title="Voir le séquestre notarié"
               >
-                <Check className="w-3.5 h-3.5" />
+                <Check className="w-3.5 h-3.5 text-[#9E7431]" />
                 <span>100% Cautions sous séquestre</span>
               </Link>
 
               <Link
                 href="/crm/visites"
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#D7F4E8] hover:bg-[#c2edd9] text-[#0F5E3E] font-semibold text-[11px] transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white hover:bg-[#F2ECE1] text-[#161412] border border-[#EAE5DC] font-semibold text-[11px] transition-colors"
                 title="Voir le planning visites"
               >
-                <Check className="w-3.5 h-3.5" />
+                <Check className="w-3.5 h-3.5 text-[#9E7431]" />
                 <span>Clés des villas en agence</span>
               </Link>
 
               <Link
                 href="/crm/contacts"
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFE1DD] hover:bg-[#ffd0c9] text-[#9E2219] font-semibold text-[11px] transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white hover:bg-[#F2ECE1] text-[#6E665B] border border-[#EAE5DC] font-semibold text-[11px] transition-colors"
                 title="Relancer les candidats pour pièces"
               >
-                <AlertTriangle className="w-3.5 h-3.5" />
+                <AlertTriangle className="w-3.5 h-3.5 text-[#9E7431]" />
                 <span>2 Attestations employeur manquantes</span>
               </Link>
             </div>
@@ -824,10 +822,10 @@ export default function CrmDashboardPage() {
                         onClick={() => toggleTodo(item.id)}
                         className={`w-7 h-7 rounded-full font-bold text-xs flex items-center justify-center shrink-0 transition-colors cursor-pointer mt-0.5 ${
                           isDone 
-                            ? 'bg-[#17915F] text-white' 
+                            ? 'bg-[#161412] text-white' 
                             : idx === 0 
-                            ? 'bg-[#FFD84D] text-[#15161A]' 
-                            : 'bg-[#F3F4F7] text-[#5C606B] hover:bg-slate-300'
+                            ? 'bg-[#9E7431] text-white' 
+                            : 'bg-[#FAF8F5] text-[#5C606B] hover:bg-[#F2ECE1]'
                         }`}
                         title={isDone ? 'Marquer comme non fait' : 'Marquer comme terminé'}
                       >
@@ -860,10 +858,10 @@ export default function CrmDashboardPage() {
                         href={getWhatsAppLink(item.contactPhone, item.whatsappText)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-1.5 rounded-xl bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#1d382b] font-bold text-xs flex items-center gap-1.5 transition-colors"
+                        className="px-3 py-1.5 rounded-xl bg-[#FAF8F5] hover:bg-[#EAE5DC] text-[#161412] font-bold text-xs flex items-center gap-1.5 border border-[#EAE5DC] transition-colors"
                         title="Ouvrir WhatsApp avec message personnalisé"
                       >
-                        <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
+                        <MessageCircle className="w-3.5 h-3.5 text-[#9E7431]" />
                         <span>WhatsApp direct</span>
                       </a>
 
@@ -890,20 +888,20 @@ export default function CrmDashboardPage() {
       {/* ========================================================================= */}
       {activeTab === 'valider' && (
         <div className="space-y-5">
-          <div className="bg-[#FFD84D] rounded-[26px] p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-warm-xs">
+          <div className="bg-[#191715] text-white rounded-[26px] p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-warm-xs">
             <div>
-              <span className="text-xs uppercase font-bold tracking-wider text-[#15161A]/80 block">
+              <span className="text-xs uppercase font-bold tracking-wider text-[#C8A97E] block">
                 Salle d&apos;arbitrage
               </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#15161A] mt-1">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white mt-1">
                 3 dossiers de bail prêts pour ta signature
               </h2>
-              <p className="text-xs sm:text-sm text-[#15161A]/85 mt-1 max-w-xl">
+              <p className="text-xs sm:text-sm text-white/80 mt-1 max-w-xl">
                 Ces dossiers ont franchi l&apos;audit de solvabilité à 100% et la caution est déjà séquestrée chez le notaire.
               </p>
             </div>
-            <span className="text-3xl sm:text-4xl font-black text-[#15161A] bg-white/40 px-5 py-3 rounded-2xl">
-              10 800 000 FCFA <span className="text-xs font-normal block text-center">loyers mensuels cumulés</span>
+            <span className="text-3xl sm:text-4xl font-black text-[#C8A97E] bg-white/10 px-5 py-3 rounded-2xl border border-white/10">
+              10 800 000 FCFA <span className="text-xs font-normal block text-center text-white/70">loyers mensuels cumulés</span>
             </span>
           </div>
 
@@ -939,14 +937,14 @@ export default function CrmDashboardPage() {
             ].map((deal) => (
               <div key={deal.id} className="bg-white rounded-3xl p-5 border border-[#E1E3E8] space-y-3 shadow-warm-xs flex flex-col justify-between">
                 <div className="space-y-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#FAF8F5] text-[#9E7431] border border-[#EAE5DC]">
                     {deal.status}
                   </span>
                   <h3 className="font-bold text-sm text-[#15161A]">{deal.title}</h3>
                   <p className="text-xs text-slate-600 font-medium">{deal.tenant}</p>
                   
                   <div className="p-3 rounded-xl bg-[#F3F4F7] space-y-1 text-xs">
-                    <div className="flex justify-between font-bold text-emerald-800">
+                    <div className="flex justify-between font-bold text-[#161412]">
                       <span>Loyer mensuel :</span>
                       <span>{deal.rent}</span>
                     </div>
@@ -989,40 +987,40 @@ export default function CrmDashboardPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Link 
               href="/crm/biens"
-              className="bg-white rounded-2xl p-5 border border-[#E1E3E8] shadow-warm-xs hover:border-[#2E5BFF] transition-all block space-y-1"
+              className="bg-white rounded-2xl p-5 border border-[#E1E3E8] shadow-warm-xs hover:border-[#9E7431] transition-all block space-y-1"
             >
               <span className="text-[10px] uppercase font-bold text-[#5C606B]">Volume Loyers sous Mandat</span>
               <div className="text-2xl font-black text-[#15161A]">
                 {formatFCFA(totalMonthlyRentPortfolio)} <span className="text-xs font-normal text-slate-500">/ mois</span>
               </div>
-              <span className="text-[11px] text-emerald-700 font-semibold block">6 résidences de standing →</span>
+              <span className="text-[11px] text-[#9E7431] font-semibold block">6 résidences de standing →</span>
             </Link>
 
             <Link 
               href="/crm/contacts"
-              className="bg-white rounded-2xl p-5 border border-[#E1E3E8] shadow-warm-xs hover:border-[#2E5BFF] transition-all block space-y-1"
+              className="bg-white rounded-2xl p-5 border border-[#E1E3E8] shadow-warm-xs hover:border-[#9E7431] transition-all block space-y-1"
             >
               <span className="text-[10px] uppercase font-bold text-[#5C606B]">Candidats Qualifiés Actifs</span>
               <div className="text-2xl font-black text-[#15161A]">{INITIAL_CONTACTS.length} dossiers</div>
-              <span className="text-[11px] text-emerald-700 font-semibold block">87,5% conformité bancaire →</span>
+              <span className="text-[11px] text-[#9E7431] font-semibold block">87,5% conformité bancaire →</span>
             </Link>
 
             <Link 
               href="/crm/visites"
-              className="bg-white rounded-2xl p-5 border border-[#E1E3E8] shadow-warm-xs hover:border-[#2E5BFF] transition-all block space-y-1"
+              className="bg-white rounded-2xl p-5 border border-[#E1E3E8] shadow-warm-xs hover:border-[#9E7431] transition-all block space-y-1"
             >
               <span className="text-[10px] uppercase font-bold text-[#5C606B]">Visites cette semaine</span>
               <div className="text-2xl font-black text-[#15161A]">{scheduledVisits.length} programmées</div>
-              <span className="text-[11px] text-blue-700 font-semibold block">Délai moyen &lt; 48h →</span>
+              <span className="text-[11px] text-[#9E7431] font-semibold block">Délai moyen &lt; 48h →</span>
             </Link>
 
             <Link 
               href="/crm/pipeline"
-              className="bg-white rounded-2xl p-5 border border-[#E1E3E8] shadow-warm-xs hover:border-[#2E5BFF] transition-all block space-y-1"
+              className="bg-white rounded-2xl p-5 border border-[#E1E3E8] shadow-warm-xs hover:border-[#9E7431] transition-all block space-y-1"
             >
               <span className="text-[10px] uppercase font-bold text-[#5C606B]">Honoraires Agence Prévus</span>
               <div className="text-2xl font-black text-[#15161A]">{formatFCFA(potentialPlacementFees)}</div>
-              <span className="text-[11px] text-emerald-700 font-semibold block">100% séquestre notarié →</span>
+              <span className="text-[11px] text-[#9E7431] font-semibold block">100% séquestre notarié →</span>
             </Link>
           </div>
 
@@ -1033,7 +1031,7 @@ export default function CrmDashboardPage() {
                 <h3 className="font-bold text-base text-[#15161A]">Parc Résidentiel &amp; Baux Disponibles</h3>
                 <p className="text-xs text-[#5C606B]">Villas et appartements certifiés avec groupe électrogène et cuve d&apos;eau.</p>
               </div>
-              <Link href="/crm/biens" className="text-xs font-bold text-[#2E5BFF] hover:underline">
+              <Link href="/crm/biens" className="text-xs font-bold text-[#161412] hover:text-[#9E7431] hover:underline">
                 Gérer les fiches biens →
               </Link>
             </div>
@@ -1057,7 +1055,7 @@ export default function CrmDashboardPage() {
                       <td className="py-3 font-bold text-slate-500">{prop.reference}</td>
                       <td className="py-3 font-semibold text-[#15161A]">{prop.title}</td>
                       <td className="py-3 text-slate-600">{prop.district}</td>
-                      <td className="py-3 font-bold text-emerald-800">{formatFCFA(prop.price)} / mois</td>
+                      <td className="py-3 font-bold text-[#161412]">{formatFCFA(prop.price)} / mois</td>
                       <td className="py-3">
                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold">
                           Groupe + Cuve
@@ -1065,7 +1063,7 @@ export default function CrmDashboardPage() {
                       </td>
                       <td className="py-3">
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          prop.status === 'available' ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-800'
+                          prop.status === 'available' ? 'bg-[#FAF8F5] text-[#161412] border border-[#EAE5DC]' : 'bg-[#FAF8F5] text-[#9E7431] border border-[#9E7431]/30'
                         }`}>
                           {prop.status === 'available' ? 'Disponible' : 'Sous offre'}
                         </span>
@@ -1096,7 +1094,7 @@ export default function CrmDashboardPage() {
         <div className="space-y-6">
           <div className="bg-[#17181D] text-white rounded-[26px] p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-warm-xs">
             <div className="space-y-1">
-              <span className="text-xs uppercase font-bold tracking-wider text-[#86E0BC]">
+              <span className="text-xs uppercase font-bold tracking-wider text-[#C8A97E]">
                 Supervision Automations &amp; IA Aya
               </span>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
@@ -1107,7 +1105,7 @@ export default function CrmDashboardPage() {
               </p>
             </div>
             <div className="flex items-center gap-3 bg-white/10 px-5 py-3 rounded-2xl border border-white/10">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#17915F] ring-2 ring-emerald-300" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#9E7431] ring-2 ring-[#9E7431]/20" />
               <div>
                 <span className="text-xs text-white/70 block">Statut Serveur</span>
                 <span className="text-sm font-bold text-white">100% En Ligne</span>
@@ -1118,20 +1116,20 @@ export default function CrmDashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-white rounded-3xl p-6 border border-[#E1E3E8] space-y-4 shadow-warm-xs">
               <h3 className="font-bold text-base text-[#15161A] flex items-center gap-2">
-                <Bot className="w-4 h-4 text-[#2E5BFF]" />
+                <Bot className="w-4 h-4 text-[#9E7431]" />
                 <span>Règles d&apos;arbitrage de l&apos;Agent Aya</span>
               </h3>
               <ul className="space-y-2.5 text-xs text-slate-600">
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <CheckCircle className="w-4 h-4 text-[#9E7431] shrink-0 mt-0.5" />
                   <span><strong>Solvabilité 3x le loyer</strong> : vérification préalable des garanties corporate ou caution bancaire.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <CheckCircle className="w-4 h-4 text-[#9E7431] shrink-0 mt-0.5" />
                   <span><strong>Séquestre Notarié obligatoire</strong> : rejet immédiat des propositions d&apos;arrangement informel.</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <CheckCircle className="w-4 h-4 text-[#9E7431] shrink-0 mt-0.5" />
                   <span><strong>Prise de rendez-vous sous 48h</strong> : synchronisation directe avec le calendrier de Fabrice et Aya.</span>
                 </li>
               </ul>
@@ -1139,7 +1137,7 @@ export default function CrmDashboardPage() {
 
             <div className="bg-white rounded-3xl p-6 border border-[#E1E3E8] space-y-4 shadow-warm-xs">
               <h3 className="font-bold text-base text-[#15161A] flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <ShieldCheck className="w-4 h-4 text-[#9E7431]" />
                 <span>Sécurité &amp; Traçabilité Notariée</span>
               </h3>
               <p className="text-xs text-slate-600 leading-relaxed">
@@ -1180,14 +1178,14 @@ export default function CrmDashboardPage() {
               </div>
               <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
                 <div 
-                  className="h-full bg-[#FFD84D] transition-all"
+                  className="h-full bg-[#9E7431] transition-all"
                   style={{ width: `${((triageIndex + 1) / triageCandidates.length) * 100}%` }}
                 />
               </div>
             </div>
 
             {/* Carte du candidat */}
-            <div className="p-5 rounded-2xl bg-[#86E0BC]/20 border border-[#86E0BC] space-y-3">
+            <div className="p-5 rounded-2xl bg-[#FAF8F5] border border-[#EAE5DC] space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-3xl font-black text-[#15161A]">
                   {currentTriageCandidate.qualification_score}<small className="text-sm font-normal">/100</small>
@@ -1200,7 +1198,7 @@ export default function CrmDashboardPage() {
               <div>
                 <h4 className="text-base font-extrabold text-[#15161A]">{currentTriageCandidate.full_name}</h4>
                 <p className="text-xs text-slate-600 font-medium">{currentTriageCandidate.profession}</p>
-                <div className="text-xs font-bold text-emerald-800 mt-1">
+                <div className="text-xs font-bold text-[#161412] mt-1">
                   Budget : {formatFCFA(currentTriageCandidate.budget_max || 0)} / mois
                 </div>
               </div>
@@ -1215,7 +1213,7 @@ export default function CrmDashboardPage() {
               <Link
                 href="/crm/visites"
                 onClick={handleNextTriage}
-                className="p-3 rounded-2xl bg-[#2E5BFF] hover:bg-blue-700 text-white font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 shadow-xs"
+                className="p-3 rounded-2xl bg-[#15161A] hover:bg-[#9E7431] text-white font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 shadow-xs"
               >
                 <span>Prioritaire</span>
                 <span className="text-[10px] font-normal opacity-80">Planifier visite</span>
@@ -1226,10 +1224,10 @@ export default function CrmDashboardPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={handleNextTriage}
-                className="p-3 rounded-2xl bg-[#25D366] hover:bg-emerald-600 text-white font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 shadow-xs"
+                className="p-3 rounded-2xl bg-[#FAF8F5] hover:bg-[#EAE5DC] text-[#161412] border border-[#EAE5DC] font-bold transition-all cursor-pointer flex flex-col items-center justify-center gap-1 shadow-xs"
               >
-                <span>WhatsApp</span>
-                <span className="text-[10px] font-normal opacity-80">Lancer échange</span>
+                <span className="text-[#9E7431]">WhatsApp</span>
+                <span className="text-[10px] font-normal text-[#6E665B]">Lancer échange</span>
               </a>
 
               <button

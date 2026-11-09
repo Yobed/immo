@@ -106,8 +106,8 @@ export default function HeroCinematic({ properties, onOpenVisitModal }: HeroCine
               <span>{activeProp.district}</span>
             </span>
 
-            <span className="px-3.5 py-1.5 rounded-full bg-emerald-950/70 backdrop-blur-xl border border-emerald-500/30 text-xs font-mono text-emerald-300 flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-xl border border-white/15 text-xs font-mono uppercase tracking-wider text-white/90 flex items-center gap-2 shadow-lg">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#C8A97E]" />
               <span>Titre {activeProp.legal_status} Audité</span>
             </span>
           </div>
@@ -134,7 +134,7 @@ export default function HeroCinematic({ properties, onOpenVisitModal }: HeroCine
             {activeProp.has_pool && (
               <>
                 <span className="text-white/30">•</span>
-                <span className="font-mono text-sm text-cyan-300">Piscine Miroir</span>
+                <span className="font-mono text-sm text-[#C8A97E]">Piscine Miroir</span>
               </>
             )}
           </div>
@@ -145,9 +145,9 @@ export default function HeroCinematic({ properties, onOpenVisitModal }: HeroCine
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-8 py-4 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold flex items-center gap-2.5 shadow-[0_20px_40px_rgba(37,211,102,0.35)] transition-all transform hover:scale-102 cursor-pointer"
+              className="px-8 py-4 rounded-full bg-white hover:bg-[#C8A97E] text-[#191715] hover:text-white text-xs font-bold flex items-center gap-2.5 shadow-2xl transition-all transform hover:scale-102 cursor-pointer"
             >
-              <MessageCircle className="w-4 h-4 fill-white" />
+              <MessageCircle className="w-4 h-4" />
               <span>Organiser une Visite Privée</span>
             </a>
 

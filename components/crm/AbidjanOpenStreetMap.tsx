@@ -154,8 +154,7 @@ export default function AbidjanOpenStreetMap({ visits, properties, onSelectVisit
           className: 'custom-user-marker',
           html: `
             <div style="position:relative; width:22px; height:22px;">
-              <div style="position:absolute; inset:-8px; border-radius:50%; background:rgba(59,130,246,0.3); animation:ping 2s cubic-bezier(0,0,0.2,1) infinite;"></div>
-              <div style="width:20px; height:20px; border-radius:50%; background:#2563EB; border:3px solid #FFFFFF; box-shadow:0 0 10px rgba(0,0,0,0.5);"></div>
+              <div style="width:20px; height:20px; border-radius:50%; background:#191715; border:3px solid #C8A97E; box-shadow:0 0 10px rgba(0,0,0,0.5);"></div>
             </div>
           `,
           iconSize: [22, 22],
@@ -178,17 +177,17 @@ export default function AbidjanOpenStreetMap({ visits, properties, onSelectVisit
           html: `
             <div style="display:flex; flex-direction:column; align-items:center; cursor:pointer; transform:translateY(${isSelected ? '-6px' : '0'}); transition:all 0.2s;">
               
-              <!-- Price Pill Badge (Exactement comme le screenshot de référence) -->
+              <!-- Price Pill Badge (Architecture 3 Couleurs) -->
               <div style="
-                background: ${isSelected ? '#FFD84D' : 'rgba(23, 24, 29, 0.88)'}; 
-                color: ${isSelected ? '#15161A' : '#FFFFFF'}; 
-                border: 1.5px solid ${isSelected ? '#FFFFFF' : 'rgba(255, 216, 77, 0.6)'}; 
+                background: ${isSelected ? '#191715' : '#FFFFFF'}; 
+                color: ${isSelected ? '#C8A97E' : '#191715'}; 
+                border: 1.5px solid ${isSelected ? '#C8A97E' : '#EAE5DC'}; 
                 padding: 4px 10px; 
                 border-radius: 9999px; 
                 font-family: ui-sans-serif, system-ui, sans-serif;
                 font-size: 11px; 
                 font-weight: 800; 
-                box-shadow: 0 4px 15px rgba(0,0,0,0.4); 
+                box-shadow: 0 4px 15px rgba(0,0,0,0.25); 
                 backdrop-filter: blur(8px);
                 white-space: nowrap;
                 margin-bottom: 4px;
@@ -196,20 +195,13 @@ export default function AbidjanOpenStreetMap({ visits, properties, onSelectVisit
                 ${coords.priceLabel}
               </div>
 
-              <!-- Center Dot with Pulse -->
+              <!-- Center Dot -->
               <div style="position:relative; width:16px; height:16px;">
-                <div style="
-                  position: absolute; 
-                  inset: -6px; 
-                  border-radius: 50%; 
-                  background: ${isSelected ? 'rgba(255, 216, 77, 0.4)' : 'rgba(46, 91, 255, 0.3)'}; 
-                  animation: ping 2.5s cubic-bezier(0,0,0.2,1) infinite;
-                "></div>
                 <div style="
                   width: 16px; 
                   height: 16px; 
                   border-radius: 50%; 
-                  background: ${isSelected ? '#FFD84D' : '#2E5BFF'}; 
+                  background: ${isSelected ? '#9E7431' : '#191715'}; 
                   border: 2.5px solid #FFFFFF; 
                   box-shadow: 0 2px 8px rgba(0,0,0,0.6);
                 "></div>
@@ -242,7 +234,7 @@ export default function AbidjanOpenStreetMap({ visits, properties, onSelectVisit
           [(userPos.lat + dest.lat) / 2 + 0.005, (userPos.lng + dest.lng) / 2], // Slight bend over Boulevard
           [dest.lat, dest.lng]
         ], {
-          color: '#3B82F6',
+          color: '#9E7431',
           weight: 5,
           opacity: 0.85,
           dashArray: '8, 8',
@@ -318,7 +310,7 @@ export default function AbidjanOpenStreetMap({ visits, properties, onSelectVisit
               type="button"
               onClick={() => setMapLayerType('satellite')}
               className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                mapLayerType === 'satellite' ? 'bg-[#FFD84D] text-[#15161A] font-bold' : 'text-slate-400 hover:text-white'
+                mapLayerType === 'satellite' ? 'bg-[#9E7431] text-white font-bold' : 'text-slate-400 hover:text-white'
               }`}
             >
               Satellite HD
@@ -345,16 +337,16 @@ export default function AbidjanOpenStreetMap({ visits, properties, onSelectVisit
         {/* Carte Leaflet */}
         <div ref={mapContainerRef} className="w-full h-full z-0" />
 
-        {/* Top-Left Floating Pills (Comme sur l'image de référence) */}
+        {/* Top-Left Floating Pills */}
         <div className="absolute top-4 left-4 z-10 space-y-2 pointer-events-auto">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#15161A]/90 backdrop-blur-md border border-slate-700/80 text-xs font-semibold shadow-lg">
-            <span className="w-2 h-2 rounded-full bg-[#3B82F6] ring-2 ring-blue-400/50" />
+            <span className="w-2 h-2 rounded-full bg-[#C8A97E]" />
             <span className="text-white text-[11px]">MA POSITION · GPS Actif</span>
           </div>
 
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#15161A]/90 backdrop-blur-md border border-slate-700/80 text-xs font-semibold shadow-lg">
-            <span className="w-2 h-2 rounded-full bg-[#FFD84D]" />
-            <span className="text-[#FFD84D] text-[11px] font-bold">
+            <span className="w-2 h-2 rounded-full bg-[#C8A97E]" />
+            <span className="text-[#C8A97E] text-[11px] font-bold">
               {properties.length} RÉSIDENCES &amp; BAUX
             </span>
           </div>
@@ -384,16 +376,16 @@ export default function AbidjanOpenStreetMap({ visits, properties, onSelectVisit
             className="w-9 h-9 rounded-xl bg-[#15161A]/90 hover:bg-black text-white border border-slate-700 flex items-center justify-center shadow-lg transition-colors cursor-pointer"
             title="Centrer sur ma position"
           >
-            <Navigation className="w-4 h-4 text-[#3B82F6]" />
+            <Navigation className="w-4 h-4 text-[#C8A97E]" />
           </button>
         </div>
 
-        {/* POPUP FLOTTANTE À DROITE (STYLE DU SCREENSHOT DE RÉFÉRENCE) */}
+        {/* POPUP FLOTTANTE À DROITE */}
         {selectedProperty && (
           <div className="absolute top-4 right-16 sm:right-16 z-10 w-72 sm:w-80 bg-[#161D2B]/95 backdrop-blur-xl rounded-2xl border border-slate-700/80 p-4 shadow-2xl pointer-events-auto text-white space-y-3 animate-in fade-in slide-in-from-right-4 duration-200">
             
             <div className="flex items-center justify-between border-b border-slate-700/60 pb-2">
-              <span className="text-[10px] uppercase font-bold tracking-wider text-[#FFD84D]">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-[#C8A97E]">
                 ABIDJAN · {selectedProperty.district}
               </span>
               <button
@@ -425,7 +417,7 @@ export default function AbidjanOpenStreetMap({ visits, properties, onSelectVisit
                 {selectedProperty.title}
               </h4>
 
-              <div className="text-base font-extrabold text-[#FFD84D]">
+              <div className="text-base font-extrabold text-[#C8A97E]">
                 {formatFCFA(selectedProperty.price)} <span className="text-xs font-normal text-slate-400">/ mois</span>
               </div>
             </div>
@@ -435,7 +427,7 @@ export default function AbidjanOpenStreetMap({ visits, properties, onSelectVisit
               <div className="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs space-y-1">
                 <div className="flex items-center justify-between text-slate-300">
                   <span className="font-semibold">Visite Terrain :</span>
-                  <span className="text-amber-400 font-bold">
+                  <span className="text-[#C8A97E] font-bold">
                     {new Date(selectedVisit.scheduled_at).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })} à {new Date(selectedVisit.scheduled_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
@@ -445,12 +437,12 @@ export default function AbidjanOpenStreetMap({ visits, properties, onSelectVisit
               </div>
             )}
 
-            {/* Bouton Consulter les Détails (Doré comme sur l'image) */}
+            {/* Bouton Consulter les Détails */}
             <div className="pt-1 flex gap-2">
               <Link
                 href={`/biens/${selectedProperty.id}`}
                 target="_blank"
-                className="flex-1 py-2.5 rounded-xl bg-[#D9A05B] hover:bg-[#c9904b] text-[#15161A] font-bold text-xs text-center uppercase tracking-wider transition-all shadow-md active:scale-98"
+                className="flex-1 py-2.5 rounded-xl bg-[#9E7431] hover:bg-[#866226] text-white font-bold text-xs text-center uppercase tracking-wider transition-all shadow-md active:scale-98"
               >
                 Consulter les détails
               </Link>
@@ -459,15 +451,15 @@ export default function AbidjanOpenStreetMap({ visits, properties, onSelectVisit
           </div>
         )}
 
-        {/* BOTTOM FLOATING ITINERARY STRIP (STYLE DU SCREENSHOT DE RÉFÉRENCE) */}
+        {/* BOTTOM FLOATING ITINERARY STRIP */}
         {selectedProperty && itineraryActive && (
           <div className="absolute bottom-4 left-4 right-4 sm:left-6 sm:right-6 z-10 pointer-events-auto">
             <div className="bg-[#15161A]/95 backdrop-blur-md rounded-2xl border border-slate-700 px-4 py-3 flex flex-wrap items-center justify-between gap-3 shadow-2xl">
               
               <div className="flex items-center gap-3 min-w-0">
-                <span className="w-3 h-3 rounded-full bg-[#3B82F6] ring-2 ring-blue-400/50 shrink-0" />
+                <span className="w-3 h-3 rounded-full bg-[#C8A97E] shrink-0" />
                 <div className="truncate">
-                  <span className="text-xs font-extrabold uppercase tracking-wider text-[#FFD84D] block truncate">
+                  <span className="text-xs font-extrabold uppercase tracking-wider text-[#C8A97E] block truncate">
                     Itinéraire vers : {selectedProperty.title}
                   </span>
                   <span className="text-[11px] text-slate-400 font-medium block truncate">
@@ -481,7 +473,7 @@ export default function AbidjanOpenStreetMap({ visits, properties, onSelectVisit
                   href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(selectedProperty.address + ', ' + selectedProperty.city)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3.5 py-1.5 rounded-xl bg-[#2563EB] hover:bg-blue-600 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs"
+                  className="px-3.5 py-1.5 rounded-xl bg-[#9E7431] hover:bg-[#866226] text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs"
                 >
                   <Navigation className="w-3.5 h-3.5" />
                   <span>Démarrer GPS</span>
@@ -513,7 +505,7 @@ export default function AbidjanOpenStreetMap({ visits, properties, onSelectVisit
             onClick={() => handleFlyTo(p.id)}
             className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
               selectedPropId === p.id 
-                ? 'bg-[#FFD84D] text-[#15161A] font-bold' 
+                ? 'bg-[#9E7431] text-white font-bold' 
                 : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >

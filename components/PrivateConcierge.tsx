@@ -29,9 +29,9 @@ export default function PrivateConcierge() {
           href={directContactUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2.5 px-8 py-4 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold shadow-[0_20px_45px_rgba(37,211,102,0.35)] transition-all transform hover:scale-102 cursor-pointer"
+          className="inline-flex items-center gap-2.5 px-8 py-4 rounded-full bg-[#191715] hover:bg-[#9E7431] text-white text-xs font-bold shadow-[0_20px_45px_rgba(25,23,21,0.15)] transition-all transform hover:scale-102 cursor-pointer"
         >
-          <MessageCircle className="w-4 h-4 fill-white" />
+          <MessageCircle className="w-4 h-4 text-[#9E7431]" />
           <span>Contacter la Direction via WhatsApp</span>
         </a>
 
@@ -47,7 +47,7 @@ export default function PrivateConcierge() {
       {/* 3 Garanties Discrètes */}
       <div className="pt-8 border-t dark:border-white/[0.08] border-black/[0.08] flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs dark:text-white/70 text-[#141210]/70 font-mono">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          <ShieldCheck className="w-4 h-4 text-[#9E7431]" />
           <span>100% Titres ACD Vérifiés</span>
         </div>
         <div className="flex items-center gap-2">

@@ -98,7 +98,7 @@ export default function BrochurePrintPage() {
               <span>•</span>
               <span>{property.district}</span>
               <span>•</span>
-              <span className="text-emerald-300">{property.legal_status} Certifié</span>
+              <span className="text-[#C8A97E]">{property.legal_status} Certifié</span>
             </div>
 
             <h1 className="text-4xl sm:text-6xl font-display font-medium text-white tracking-tight leading-[1.05]">

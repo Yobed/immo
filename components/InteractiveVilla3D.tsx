@@ -81,18 +81,18 @@ export default function InteractiveVilla3D({ className = '' }: InteractiveVilla3
             type="button"
             onClick={() => setIsNightMode(!isNightMode)}
             className={`px-3.5 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
-              isNightMode ? 'bg-indigo-950 text-indigo-200 border border-indigo-500/40 shadow-inner' : 'bg-amber-500/20 text-amber-200 border border-amber-500/40'
+              isNightMode ? 'bg-[#191715] text-[#C8A97E] border border-[#C8A97E]/40 shadow-inner' : 'bg-white/10 text-white border border-white/20'
             }`}
             title="Basculer entre éclairage crépuscule et nocturne"
           >
             {isNightMode ? (
               <>
-                <Moon className="w-3.5 h-3.5 text-indigo-300" />
-                <span className="text-[11px]">Nuit 3000K</span>
+                <Moon className="w-3.5 h-3.5 text-[#C8A97E]" />
+                <span className="text-[11px]">Nuit</span>
               </>
             ) : (
               <>
-                <Sun className="w-3.5 h-3.5 text-amber-400" />
+                <Sun className="w-3.5 h-3.5 text-[#C8A97E]" />
                 <span className="text-[11px]">Crépuscule</span>
               </>
             )}
@@ -173,7 +173,7 @@ export default function InteractiveVilla3D({ className = '' }: InteractiveVilla3
             />
             
             {/* Lueur d'eau subaquatique */}
-            <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/40 backdrop-blur-md text-[9px] font-mono text-cyan-200">
+            <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/40 backdrop-blur-md text-[9px] font-mono text-[#C8A97E]">
               14m • Miroir
             </div>
           </div>
@@ -193,7 +193,7 @@ export default function InteractiveVilla3D({ className = '' }: InteractiveVilla3
             {/* Baies Vitrées Illuminées */}
             <div 
               className={`absolute inset-3 rounded-xl border border-white/20 transition-all duration-700 ${
-                isNightMode ? 'bg-amber-400/20 shadow-[0_0_35px_rgba(251,191,36,0.35)]' : 'bg-white/10'
+                isNightMode ? 'bg-[#C8A97E]/20 shadow-[0_0_35px_rgba(200,169,126,0.35)]' : 'bg-white/10'
               }`}
             >
               {/* Montants Aluminium Noir Minimaliste */}
@@ -230,7 +230,7 @@ export default function InteractiveVilla3D({ className = '' }: InteractiveVilla3
             {/* Baie vitrée panoramique de la Suite */}
             <div 
               className={`absolute top-3 left-3 bottom-3 right-18 rounded-lg border border-black/10 transition-all duration-700 ${
-                isNightMode ? 'bg-amber-300/25 shadow-[0_0_20px_rgba(251,191,36,0.3)]' : 'bg-black/15'
+                isNightMode ? 'bg-[#C8A97E]/25 shadow-[0_0_20px_rgba(200,169,126,0.3)]' : 'bg-black/15'
               }`}
             />
 
@@ -273,7 +273,7 @@ export default function InteractiveVilla3D({ className = '' }: InteractiveVilla3
             onClick={() => setActivePin('pool')}
           >
             <div className="relative group">
-              <span className="w-4 h-4 rounded-full bg-cyan-400 flex items-center justify-center text-[10px] font-black text-black shadow-lg animate-bounce" style={{ animationDelay: '0.4s' }}>
+              <span className="w-4 h-4 rounded-full bg-[#C8A97E] flex items-center justify-center text-[10px] font-black text-black shadow-lg" style={{ animationDelay: '0.4s' }}>
                 2
               </span>
               <span className="absolute -bottom-7 -left-12 px-2.5 py-1 rounded-md bg-black/85 backdrop-blur-md border border-white/20 text-[10px] text-white whitespace-nowrap shadow-xl">

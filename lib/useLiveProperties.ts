@@ -148,6 +148,7 @@ export function useLiveProperties() {
 
   return {
     properties,
+    setProperties,
     inspections,
     isLoading,
     lastSyncTime,

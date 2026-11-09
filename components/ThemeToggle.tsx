@@ -32,7 +32,7 @@ export default function ThemeToggle({ className = '' }: ThemeToggleProps) {
         transition={{ duration: 0.25, ease: 'easeOut' }}
       >
         {theme === 'dark' ? (
-          <Sun className="w-4 h-4 text-amber-300 group-hover:rotate-45 transition-transform" />
+          <Sun className="w-4 h-4 text-[#C8A97E] group-hover:rotate-45 transition-transform" />
         ) : (
           <Moon className="w-4 h-4 text-[#947346] group-hover:-rotate-12 transition-transform" />
         )}

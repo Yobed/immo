@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export default function TopAnnouncementBar() {
   const scrollToSelection = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -22,7 +22,7 @@ export default function TopAnnouncementBar() {
         {/* Pulsation en direct & Message d'urgence déontologique */}
         <div className="flex items-center gap-2.5 text-center sm:text-left">
           <span className="relative flex h-2 w-2 shrink-0">
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#9E7431]" />
           </span>
           <p className="text-[11px] sm:text-xs font-light text-[#dcd6cb]">
             <strong className="font-semibold text-white">Direct Cabinet :</strong> 3 nouveaux mandats audités cette semaine (Cocody Riviera Golf, Bingerville, Assinie PK 9) • <span className="text-[#947346] font-medium">8 visites privées qualifiées</span>

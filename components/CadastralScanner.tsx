@@ -66,56 +66,56 @@ export default function CadastralScanner() {
           className="relative aspect-[16/10] sm:aspect-[21/10] w-full rounded-3xl overflow-hidden border border-[#e8e4dc] bg-[#161412] select-none cursor-ew-resize shadow-warm-lg"
         >
           {/* COUCHE 1 : PLAN CADASTRAL & RELEVÉ GÉOMÈTRE (FOND) */}
-          <div className="absolute inset-0 bg-[#0d1612] flex items-center justify-center p-8 sm:p-14">
+          <div className="absolute inset-0 bg-[#191715] flex items-center justify-center p-8 sm:p-14">
             
             {/* Grille millimétrée géométrique */}
             <div 
               className="absolute inset-0 opacity-20"
               style={{
-                backgroundImage: 'radial-gradient(circle, #34d399 1px, transparent 1px)',
+                backgroundImage: 'radial-gradient(circle, #C8A97E 1px, transparent 1px)',
                 backgroundSize: '24px 24px',
               }}
             />
 
             {/* Tracé vectoriel du plan architectural et bornage */}
-            <div className="relative w-full h-full max-w-4xl border border-emerald-500/40 rounded-2xl p-6 sm:p-8 flex flex-col justify-between font-mono text-[11px] text-emerald-400">
+            <div className="relative w-full h-full max-w-4xl border border-[#C8A97E]/40 rounded-2xl p-6 sm:p-8 flex flex-col justify-between font-mono text-[11px] text-[#C8A97E]">
               
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
-                  <span className="text-[10px] uppercase tracking-wider text-emerald-300 font-bold block">
+                  <span className="text-[10px] uppercase tracking-wider text-[#C8A97E] font-bold block">
                     PLAN DE MASSE CADASTRAL • PARCELLE ILOT 48 LOT 12
                   </span>
                   <div className="text-xs text-white">RÉQUISITION N° 2024-0891/MCLU • LIVRE FONCIER BINGERVILLE</div>
-                  <div className="text-[10px] text-emerald-500">COUPLE DE BORNES UTM : B1 (5°20&apos;42.1&quot;N) • B2 (3°58&apos;12.4&quot;W)</div>
+                  <div className="text-[10px] text-white/60">COUPLE DE BORNES UTM : B1 (5°20&apos;42.1&quot;N) • B2 (3°58&apos;12.4&quot;W)</div>
                 </div>
 
-                <div className="px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/60 text-[10px] text-emerald-300 font-semibold">
+                <div className="px-3 py-1 rounded-full bg-[#191715] border border-[#C8A97E]/50 text-[10px] text-[#C8A97E] font-semibold">
                   SURFACE CERTIFIÉE : 650,40 M²
                 </div>
               </div>
 
               {/* Représentation schématique des volumes bâtis */}
-              <div className="my-auto grid grid-cols-3 gap-4 border border-dashed border-emerald-500/30 p-6 rounded-xl bg-emerald-950/20">
-                <div className="border border-emerald-500/40 p-4 rounded-lg space-y-1">
-                  <div className="text-[10px] text-emerald-300">RDC : GRAND SÉJOUR</div>
+              <div className="my-auto grid grid-cols-3 gap-4 border border-dashed border-[#C8A97E]/30 p-6 rounded-xl bg-black/30">
+                <div className="border border-[#C8A97E]/40 p-4 rounded-lg space-y-1">
+                  <div className="text-[10px] text-[#C8A97E]">RDC : GRAND SÉJOUR</div>
                   <div className="text-sm font-semibold text-white">142 m² net</div>
-                  <div className="text-[9px] text-emerald-500">Hauteur ss plafond : 4,20 m</div>
+                  <div className="text-[9px] text-white/60">Hauteur ss plafond : 4,20 m</div>
                 </div>
-                <div className="border border-emerald-500/40 p-4 rounded-lg space-y-1">
-                  <div className="text-[10px] text-emerald-300">AILE SUITES PARENTALES</div>
+                <div className="border border-[#C8A97E]/40 p-4 rounded-lg space-y-1">
+                  <div className="text-[10px] text-[#C8A97E]">AILE SUITES PARENTALES</div>
                   <div className="text-sm font-semibold text-white">4 Master Suites</div>
-                  <div className="text-[9px] text-emerald-500">Sanitaires privatifs intégrés</div>
+                  <div className="text-[9px] text-white/60">Sanitaires privatifs intégrés</div>
                 </div>
-                <div className="border border-emerald-500/40 p-4 rounded-lg space-y-1">
-                  <div className="text-[10px] text-emerald-300">EMPRISE PISCINE</div>
+                <div className="border border-[#C8A97E]/40 p-4 rounded-lg space-y-1">
+                  <div className="text-[10px] text-[#C8A97E]">EMPRISE PISCINE</div>
                   <div className="text-sm font-semibold text-white">14 x 5 m</div>
-                  <div className="text-[9px] text-emerald-500">Débordement miroir lagunaire</div>
+                  <div className="text-[9px] text-white/60">Débordement miroir lagunaire</div>
                 </div>
               </div>
 
-              <div className="flex justify-between items-end text-[10px] text-emerald-500">
+              <div className="flex justify-between items-end text-[10px] text-white/60">
                 <span>CONTRÔLEUR : CABINET GÉOMÈTRE OGE-CI N° 112</span>
-                <span className="text-emerald-300">AUCUN EMPIÈTEMENT CONSTATÉ • BORNE CONTRADICTOIRE VÉRIFIÉE</span>
+                <span className="text-[#C8A97E]">AUCUN EMPIÈTEMENT CONSTATÉ • BORNE CONTRADICTOIRE VÉRIFIÉE</span>
               </div>
 
             </div>
@@ -146,7 +146,7 @@ export default function CadastralScanner() {
               {/* Badge Couche Réalité */}
               <div className="absolute top-6 left-6 z-10">
                 <span className="px-3.5 py-1.5 rounded-full bg-white/95 backdrop-blur-md text-xs font-semibold text-[#161412] shadow-sm flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#1d382b]" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#9E7431]" />
                   <span>Réalité Construite (Finitions 2026)</span>
                 </span>
               </div>

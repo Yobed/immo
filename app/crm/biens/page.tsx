@@ -11,7 +11,7 @@ import { Building2, Plus, Search, Filter, ShieldCheck, CheckCircle2, X, BookOpen
 import LocalFlipbookModal from '@/components/LocalFlipbookModal';
 
 export default function CrmBiensPage() {
-  const { properties, isLoading } = useLiveProperties();
+  const { properties, setProperties, isLoading } = useLiveProperties();
   const [filterOp, setFilterOp] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [search, setSearch] = useState<string>('');
@@ -92,34 +92,34 @@ export default function CrmBiensPage() {
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8 py-5 space-y-5 font-sans bg-[#fbfaf7] text-[#161412]">
       
-      {/* Top Header (Harmonisé Mandarine #FF7633 - Tuile Mandats & Biens de Prestige) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#FF7633] text-[#15161A] p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-[#e66324] shadow-warm-xs relative overflow-hidden">
+      {/* Top Header (Charbon Architectural #191715 & Or Champagne #C8A97E) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#191715] text-white p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-[#2D2926] shadow-warm-xs relative overflow-hidden">
         
         {/* Voile décoratif subtil */}
-        <div className="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-white/25 to-transparent pointer-events-none" />
+        <div className="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-[#C8A97E]/10 to-transparent pointer-events-none" />
 
         <div className="space-y-1 z-10">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-wider font-extrabold text-[#15161A]/80 bg-white/40 px-2.5 py-0.5 rounded-full">
+            <span className="text-[10px] uppercase tracking-wider font-bold text-[#C8A97E] bg-[#C8A97E]/10 border border-[#C8A97E]/30 px-2.5 py-0.5 rounded-full">
               Inventaire Foncier &amp; Bâti Prestige
             </span>
-            <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-[#15161A] text-white shadow-xs">
+            <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-white text-[#161412] shadow-xs">
               {properties.length} mandats actifs
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-black text-[#15161A] tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
             Portefeuille de Biens &amp; Résidences de Luxe
           </h1>
-          <p className="text-xs text-[#15161A]/85 font-medium max-w-2xl">
+          <p className="text-xs text-[#FAF8F5]/70 font-normal max-w-2xl">
             Gestion des mandats de location meublée, villas diplomatiques et parcelles foncières titrées à Abidjan.
           </p>
         </div>
 
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="px-5 py-2.5 rounded-full bg-[#15161A] hover:bg-black text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-transform hover:-translate-y-0.5 cursor-pointer z-10 shrink-0"
+          className="px-5 py-2.5 rounded-full bg-[#9E7431] hover:bg-[#866226] text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-transform hover:-translate-y-0.5 cursor-pointer z-10 shrink-0"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 text-white" />
           <span>Ajouter un Mandat</span>
         </button>
 
@@ -224,13 +224,13 @@ export default function CrmBiensPage() {
                     <div className="space-y-1">
                       <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${
                         prop.status === 'cleaning' || prop.concierge_status === 'cleaning'
-                          ? 'bg-amber-100 text-amber-800 border-amber-300'
+                          ? 'bg-[#FAF8F5] text-[#161412] border-[#9E7431]/40'
                           : prop.status === 'reserved' || prop.concierge_status === 'reserved'
-                          ? 'bg-purple-100 text-purple-800 border-purple-300'
+                          ? 'bg-[#FAF8F5] text-[#161412] border-[#EAE5DC]'
                           : prop.status === 'available'
-                          ? 'bg-[#f0f5f2] text-[#1d382b] border-[#d2e3d8]'
+                          ? 'bg-[#FAF8F5] text-[#161412] border-[#EAE5DC]'
                           : prop.status === 'under_offer'
-                          ? 'bg-[#fdf8f0] text-[#947346] border-amber-200'
+                          ? 'bg-[#FAF8F5] text-[#9E7431] border-[#9E7431]/30'
                           : 'bg-[#f5f2eb] text-[#7a736a] border-[#e8e4dc]'
                       }`}>
                         <span className="w-1.5 h-1.5 rounded-full bg-current" />

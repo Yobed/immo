@@ -21,13 +21,13 @@ export default function CrmLayout({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   const navItems = [
-    { name: 'Tableau de bord', href: '/crm', icon: LayoutDashboard, badge: null, color: '#17181D' },
-    { name: 'Contacts & WhatsApp', href: '/crm/contacts', icon: Users, badge: '8', color: '#86E0BC' },
-    { name: 'Intelligence & Objections', href: '/crm/intelligence', icon: Lightbulb, badge: 'IA', color: '#86E0BC' },
-    { name: 'Portefeuille Biens', href: '/crm/biens', icon: Building2, badge: '6', color: '#FF7633' },
-    { name: 'Conciergerie & Checks', href: '/crm/conciergerie', icon: Sparkles, badge: 'LIVE', color: '#25D366' },
-    { name: 'Planning Visites', href: '/crm/visites', icon: CalendarDays, badge: '3', color: '#2E5BFF' },
-    { name: 'Pipeline Kanban', href: '/crm/pipeline', icon: GitPullRequest, badge: null, color: '#FFD84D' },
+    { name: 'Tableau de bord', href: '/crm', icon: LayoutDashboard, badge: null, color: '#161412' },
+    { name: 'Contacts & WhatsApp', href: '/crm/contacts', icon: Users, badge: '8', color: '#9E7431' },
+    { name: 'Intelligence & Objections', href: '/crm/intelligence', icon: Lightbulb, badge: 'IA', color: '#9E7431' },
+    { name: 'Portefeuille Biens', href: '/crm/biens', icon: Building2, badge: '6', color: '#161412' },
+    { name: 'Conciergerie & Checks', href: '/crm/conciergerie', icon: Sparkles, badge: 'LIVE', color: '#9E7431' },
+    { name: 'Planning Visites', href: '/crm/visites', icon: CalendarDays, badge: '3', color: '#161412' },
+    { name: 'Pipeline Kanban', href: '/crm/pipeline', icon: GitPullRequest, badge: null, color: '#9E7431' },
   ];
 
   const currentNav = navItems.find((item) => item.href === pathname) || navItems[0];
@@ -51,8 +51,8 @@ export default function CrmLayout({ children }: { children: React.ReactNode }) {
         </NextLink>
 
         <div className="flex items-center gap-2">
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#f0f5f2] text-[#1d382b] font-medium border border-[#d2e3d8] flex items-center gap-1 font-sans">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] ring-2 ring-emerald-100" />
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#FAF8F5] text-[#161412] font-medium border border-[#EAE5DC] flex items-center gap-1 font-sans">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#9E7431] ring-2 ring-[#9E7431]/20" />
             <span>Aya IA</span>
           </span>
 
@@ -125,8 +125,8 @@ export default function CrmLayout({ children }: { children: React.ReactNode }) {
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Retour au site public</span>
               </NextLink>
-              <span className="text-[10px] text-[#1d382b] font-medium flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#25D366]" />
+              <span className="text-[10px] text-[#6E665B] font-medium flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#9E7431]" />
                 Serveur Synchro
               </span>
             </div>
@@ -227,10 +227,10 @@ export default function CrmLayout({ children }: { children: React.ReactNode }) {
         <div className={`p-2.5 m-2 rounded-xl bg-[#fbfaf7] border border-[#e8e4dc] ${isCollapsed ? 'text-center' : 'space-y-1'}`}>
           <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
             <div className="flex items-center gap-1.5">
-              <Bot className="w-3.5 h-3.5 text-[#1d382b] shrink-0" />
+              <Bot className="w-3.5 h-3.5 text-[#9E7431] shrink-0" />
               {!isCollapsed && <span className="text-[11px] font-semibold text-[#161412]">Aya IA</span>}
             </div>
-            <span className="w-2 h-2 rounded-full bg-[#25D366] ring-2 ring-emerald-100" title="Agent IA en ligne" />
+            <span className="w-2 h-2 rounded-full bg-[#9E7431] ring-2 ring-[#9E7431]/20" title="Agent IA en ligne" />
           </div>
           {!isCollapsed && (
             <span className="text-[9px] text-[#7a736a] block leading-tight">
@@ -271,8 +271,8 @@ export default function CrmLayout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1.5 text-[11px] text-[#1d382b] bg-[#f0f5f2] px-2.5 py-1 rounded-full border border-[#d2e3d8]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#25D366]" />
+            <div className="flex items-center gap-1.5 text-[11px] text-[#161412] bg-[#FAF8F5] px-2.5 py-1 rounded-full border border-[#EAE5DC]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#9E7431]" />
               <span className="font-medium">Aya IA Active</span>
             </div>
 

@@ -132,9 +132,9 @@ export default function CatalogueShareModal({
             href={whatsappDirectShareUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full py-3.5 px-5 rounded-full bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-bold flex items-center justify-center gap-2.5 shadow-[0_10px_25px_rgba(37,211,102,0.35)] transition-all transform hover:scale-102 cursor-pointer"
+            className="w-full py-3.5 px-5 rounded-full bg-[#191715] hover:bg-[#9E7431] text-white text-xs font-bold flex items-center justify-center gap-2.5 shadow-[0_10px_25px_rgba(25,23,21,0.15)] transition-all transform hover:scale-102 cursor-pointer"
           >
-            <MessageCircle className="w-4 h-4 fill-white" />
+            <MessageCircle className="w-4 h-4 text-[#9E7431]" />
             <span>Envoyer le Flipbook par WhatsApp à un Client</span>
           </a>
 
@@ -161,7 +161,7 @@ export default function CatalogueShareModal({
               onClick={handleCopyLink}
               className={`px-4 py-2.5 rounded-xl text-xs font-mono flex items-center gap-1.5 transition-all cursor-pointer shrink-0 font-semibold ${
                 copied
-                  ? 'bg-emerald-600 text-white'
+                  ? 'bg-[#9E7431] text-white'
                   : 'bg-[#191715] text-white hover:bg-[#9E7431]'
               }`}
             >

@@ -104,7 +104,7 @@ export default function ProvestElevation({ properties }: ProvestElevationProps) 
               {/* Tag Flottant Haut Droite */}
               <div className="absolute top-4 right-4 z-10">
                 <span className="px-3 py-1 rounded-full bg-white/95 backdrop-blur-md text-xs font-bold text-[#161412] shadow-sm flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#9E7431]" />
                   <span>Mandat Exclusif {activeProp.legal_status}</span>
                 </span>
               </div>
