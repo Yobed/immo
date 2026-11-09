@@ -418,17 +418,17 @@ export default function StandaloneMobileFlipbookPage() {
                     Chaque bien présenté au sein de ce catalogue fait l&apos;objet d&apos;un audit préalable rigoureux auprès de la Conservation Foncière et du Ministère de la Construction. Nous ne négocions que des actifs dotés de l&apos;Arrêté de Concession Définitive (ACD).
                   </p>
 
-                  <div className="p-3 rounded-xl bg-[#f5f2eb] border border-[#e8e4dc] space-y-1.5">
+                  <div className="p-3 rounded-xl bg-white border border-[#EAE5DC] space-y-1.5 shadow-2xs">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 text-xs font-semibold text-[#1d382b]">
-                        <ShieldCheck className="w-3.5 h-3.5 text-[#1d382b]" />
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-[#161412]">
+                        <ShieldCheck className="w-3.5 h-3.5 text-[#9E7431]" />
                         <span>Sécurité Notariée</span>
                       </div>
-                      <span className="text-[9px] bg-[#d2e3d8] text-[#1d382b] px-1.5 py-0.5 rounded-full font-bold">
+                      <span className="text-[9px] bg-[#FAF8F5] text-[#9E7431] border border-[#EAE5DC] px-1.5 py-0.5 rounded-full font-bold">
                         100% ACD
                       </span>
                     </div>
-                    <p className="text-[10px] text-[#68625c]">
+                    <p className="text-[10px] text-[#6E665B]">
                       Transactions scellées par acte authentique avec comptes séquestres notariés agréés.
                     </p>
                   </div>
@@ -522,8 +522,8 @@ export default function StandaloneMobileFlipbookPage() {
 
                   <div className="relative h-36 rounded-xl overflow-hidden shadow-sm group">
                     <Image src={villa.images[0]} alt={villa.title} fill className="object-cover" />
-                    <div className="absolute top-2 left-2 bg-[#1d382b] text-white text-[8px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 shadow">
-                      <ShieldCheck className="w-2.5 h-2.5" />
+                    <div className="absolute top-2 left-2 bg-[#191715] text-white text-[8px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 shadow border border-white/20">
+                      <ShieldCheck className="w-2.5 h-2.5 text-[#9E7431]" />
                       ACD Vérifié
                     </div>
                     <button
@@ -653,31 +653,31 @@ export default function StandaloneMobileFlipbookPage() {
               {/* PAGE 6 : TERRAIN BINGERVILLE ACD */}
               <div className="mobile-book-page book-page bg-[#fbfaf7] text-[#161412] p-6 sm:p-8 flex flex-col justify-between border-r border-[#e8e4dc] shadow-inner overflow-hidden">
                 <div className="space-y-2.5">
-                  <div className="flex items-center justify-between border-b border-[#e8e4dc] pb-2">
-                    <span className="text-[9px] uppercase tracking-widest text-[#1d382b] font-semibold">
+                  <div className="flex items-center justify-between border-b border-[#EAE5DC] pb-2">
+                    <span className="text-[9px] uppercase tracking-widest text-[#9E7431] font-semibold">
                       Foncier Titré • ACD
                     </span>
-                    <span className="text-xs font-mono text-[#7a736a]">p. 06</span>
+                    <span className="text-xs font-mono text-[#8C8275]">p. 06</span>
                   </div>
 
                   <div className="relative h-36 rounded-xl overflow-hidden shadow-sm group">
                     <Image src={terrain.images[0]} alt={terrain.title} fill className="object-cover" />
-                    <div className="absolute top-2 left-2 bg-[#1d382b] text-white text-[8px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 shadow">
-                      <ShieldCheck className="w-2.5 h-2.5" />
+                    <div className="absolute top-2 left-2 bg-[#191715] text-white text-[8px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 shadow border border-white/20">
+                      <ShieldCheck className="w-2.5 h-2.5 text-[#9E7431]" />
                       ACD Ministère
                     </div>
                     <button
                       onClick={() => setActiveVideoProperty(terrain)}
                       className="absolute inset-0 bg-black/30 flex items-center justify-center gap-1.5 text-white text-[10px] font-semibold"
                     >
-                      <Video className="w-3.5 h-3.5 fill-[#947346] text-[#947346]" />
+                      <Video className="w-3.5 h-3.5 fill-[#9E7431] text-[#9E7431]" />
                       <span>Vue Aérienne Drone</span>
                     </button>
                   </div>
 
                   <div>
                     <div className="flex items-center justify-between gap-1 mb-1">
-                      <span className="text-[10px] text-[#7a736a] block">Bingerville • Réf: {terrain.reference}</span>
+                      <span className="text-[10px] text-[#8C8275] block">Bingerville • Réf: {terrain.reference}</span>
                       {renderLiveBadge(terrain)}
                     </div>
                     <h4 className="text-base font-display font-medium text-[#161412] leading-tight">
@@ -685,21 +685,21 @@ export default function StandaloneMobileFlipbookPage() {
                     </h4>
                   </div>
 
-                  <div className="p-2 bg-white rounded-xl border border-[#e8e4dc] space-y-1 text-xs">
+                  <div className="p-2 bg-white rounded-xl border border-[#EAE5DC] space-y-1 text-xs">
                     <div className="flex justify-between text-[#161412]">
-                      <span className="text-[#7a736a] text-[10px]">Superficie</span>
+                      <span className="text-[#8C8275] text-[10px]">Superficie</span>
                       <strong className="font-semibold text-[11px]">{terrain.surface} m²</strong>
                     </div>
                     <div className="flex justify-between text-[#161412]">
-                      <span className="text-[#7a736a] text-[10px]">Statut</span>
-                      <strong className="text-[#1d382b] font-semibold text-[11px]">ACD Délivré</strong>
+                      <span className="text-[#8C8275] text-[10px]">Statut</span>
+                      <strong className="text-[#9E7431] font-semibold text-[11px]">ACD Délivré</strong>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-[#e8e4dc] flex items-center justify-between">
+                <div className="pt-2 border-t border-[#EAE5DC] flex items-center justify-between">
                   <div>
-                    <span className="text-[8px] text-[#7a736a] block uppercase">Prix Foncier</span>
+                    <span className="text-[8px] text-[#8C8275] block uppercase">Prix Foncier</span>
                     <span className="text-xs font-semibold text-[#161412] font-display">
                       {formatFCFA(terrain.price)}
                     </span>
@@ -717,13 +717,13 @@ export default function StandaloneMobileFlipbookPage() {
               </div>
 
               {/* PAGE 7 : BUREAUX PLATEAU */}
-              <div className="mobile-book-page book-page bg-white text-[#161412] p-6 sm:p-8 flex flex-col justify-between border-l border-[#e8e4dc] shadow-inner overflow-hidden">
+              <div className="mobile-book-page book-page bg-white text-[#161412] p-6 sm:p-8 flex flex-col justify-between border-l border-[#EAE5DC] shadow-inner overflow-hidden">
                 <div className="space-y-2.5">
-                  <div className="flex items-center justify-between border-b border-[#e8e4dc] pb-2">
-                    <span className="text-[9px] uppercase tracking-widest text-[#947346] font-semibold">
+                  <div className="flex items-center justify-between border-b border-[#EAE5DC] pb-2">
+                    <span className="text-[9px] uppercase tracking-widest text-[#9E7431] font-semibold">
                       Immobilier d&apos;Affaires • Plateau
                     </span>
-                    <span className="text-xs font-mono text-[#7a736a]">p. 07</span>
+                    <span className="text-xs font-mono text-[#8C8275]">p. 07</span>
                   </div>
 
                   <div className="relative h-36 rounded-xl overflow-hidden shadow-sm group">
@@ -732,14 +732,14 @@ export default function StandaloneMobileFlipbookPage() {
                       onClick={() => setActiveVideoProperty(appart)}
                       className="absolute inset-0 bg-black/30 flex items-center justify-center gap-1.5 text-white text-[10px] font-semibold"
                     >
-                      <Play className="w-3.5 h-3.5 fill-[#947346] text-[#947346]" />
+                      <Play className="w-3.5 h-3.5 fill-[#9E7431] text-[#9E7431]" />
                       <span>Visite Vidéo Bureaux</span>
                     </button>
                   </div>
 
                   <div>
                     <div className="flex items-center justify-between gap-1 mb-1">
-                      <span className="text-[10px] text-[#7a736a] block">Le Plateau • Réf: {appart.reference}</span>
+                      <span className="text-[10px] text-[#8C8275] block">Le Plateau • Réf: {appart.reference}</span>
                       {renderLiveBadge(appart)}
                     </div>
                     <h4 className="text-base font-display font-medium text-[#161412] leading-tight">
@@ -747,20 +747,20 @@ export default function StandaloneMobileFlipbookPage() {
                     </h4>
                   </div>
 
-                  <div className="p-2.5 bg-[#fbfaf7] rounded-xl border border-[#e8e4dc] space-y-1 text-xs">
-                    <span className="text-[9px] uppercase tracking-wider text-[#947346] font-bold block">
+                  <div className="p-2.5 bg-[#FAF8F5] rounded-xl border border-[#EAE5DC] space-y-1 text-xs">
+                    <span className="text-[9px] uppercase tracking-wider text-[#9E7431] font-bold block">
                       Rendement Locatif Brut
                     </span>
                     <div className="flex justify-between items-center text-[#161412]">
-                      <span className="text-[#7a736a] text-[10px]">Bail commercial multinationale</span>
-                      <strong className="text-[#1d382b] font-semibold text-xs">11.4% / an</strong>
+                      <span className="text-[#8C8275] text-[10px]">Bail commercial multinationale</span>
+                      <strong className="text-[#9E7431] font-semibold text-xs">11.4% / an</strong>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-[#e8e4dc] flex items-center justify-between">
+                <div className="pt-2 border-t border-[#EAE5DC] flex items-center justify-between">
                   <div>
-                    <span className="text-[8px] text-[#7a736a] block uppercase">Loyer Mensuel</span>
+                    <span className="text-[8px] text-[#8C8275] block uppercase">Loyer Mensuel</span>
                     <span className="text-xs font-semibold text-[#161412] font-display">
                       {formatFCFA(appart.price)} <span className="text-[9px] font-normal">/ mois</span>
                     </span>
@@ -778,13 +778,13 @@ export default function StandaloneMobileFlipbookPage() {
               </div>
 
               {/* PAGE 8 : DOS DE COUVERTURE RIGIDE */}
-              <div className="mobile-book-page book-page bg-[#fbfaf7] text-[#161412] p-6 sm:p-8 flex flex-col justify-between border-l border-[#e8e4dc] shadow-2xl overflow-hidden" data-density="hard">
+              <div className="mobile-book-page book-page bg-[#FAF8F5] text-[#161412] p-6 sm:p-8 flex flex-col justify-between border-l border-[#EAE5DC] shadow-2xl overflow-hidden" data-density="hard">
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-[#e8e4dc] pb-2">
-                    <div className="w-7 h-7 rounded-full bg-[#947346] flex items-center justify-center font-display font-bold text-white text-xs">
+                  <div className="flex items-center justify-between border-b border-[#EAE5DC] pb-2">
+                    <div className="w-7 h-7 rounded-full bg-[#9E7431] flex items-center justify-center font-display font-bold text-white text-xs">
                       A
                     </div>
-                    <span className="text-[9px] tracking-widest uppercase text-[#947346] font-semibold">
+                    <span className="text-[9px] tracking-widest uppercase text-[#9E7431] font-semibold">
                       Conciergerie Privée
                     </span>
                   </div>
@@ -793,18 +793,18 @@ export default function StandaloneMobileFlipbookPage() {
                     Un accompagnement d&apos;exception pour vos acquisitions à Abidjan.
                   </h3>
 
-                  <p className="text-[11px] text-[#68625c] font-light leading-relaxed">
+                  <p className="text-[11px] text-[#6E665B] font-light leading-relaxed">
                     Nos conseillers et juristes spécialisés sont à votre disposition pour organiser vos visites privées et vos audits cadastraux.
                   </p>
 
-                  <div className="p-3 rounded-xl bg-[#f5f2eb] border border-[#e8e4dc] space-y-2">
+                  <div className="p-3 rounded-xl bg-white border border-[#EAE5DC] space-y-2 shadow-2xs">
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-[#1d382b] flex items-center justify-center text-white font-bold text-xs">
+                      <div className="w-7 h-7 rounded-full bg-[#191715] flex items-center justify-center text-white font-bold text-xs">
                         A
                       </div>
                       <div>
                         <span className="font-semibold text-xs text-[#161412] block">Aya : Conseillère Immobilière 24/7</span>
-                        <span className="text-[9px] text-[#7a736a]">WhatsApp Direct Direction</span>
+                        <span className="text-[9px] text-[#8C8275]">WhatsApp Direct Direction</span>
                       </div>
                     </div>
                     <a
@@ -866,8 +866,8 @@ export default function StandaloneMobileFlipbookPage() {
             {/* Page 4 : Villa */}
             <div className="rounded-2xl p-5 border shadow-sm bg-white border-black/10 text-[#141210] space-y-3">
               <div className="flex justify-between items-center border-b pb-2 border-black/10">
-                <span className="text-[10px] font-mono text-[#947346] uppercase tracking-wider font-semibold">Page 4 / 8 • Vente</span>
-                <span className="text-xs font-mono font-bold text-[#1d382b]">ACD Vérifié</span>
+                <span className="text-[10px] font-mono text-[#9E7431] uppercase tracking-wider font-semibold">Page 4 / 8 • Vente</span>
+                <span className="text-xs font-mono font-bold text-[#9E7431]">ACD Vérifié</span>
               </div>
               <div className="relative aspect-[16/9] rounded-xl overflow-hidden">
                 <Image src={villa.images[0]} alt={villa.title} fill className="object-cover" />
@@ -934,8 +934,8 @@ export default function StandaloneMobileFlipbookPage() {
             {/* Page 6 : Terrain Bingerville */}
             <div className="rounded-2xl p-5 border shadow-sm bg-white border-black/10 text-[#141210] space-y-3">
               <div className="flex justify-between items-center border-b pb-2 border-black/10">
-                <span className="text-[10px] font-mono text-[#947346] uppercase tracking-wider font-semibold">Page 6 / 8 • Foncier</span>
-                <span className="text-xs font-mono font-bold text-[#1d382b]">ACD Délivré</span>
+                <span className="text-[10px] font-mono text-[#9E7431] uppercase tracking-wider font-semibold">Page 6 / 8 • Foncier</span>
+                <span className="text-xs font-mono font-bold text-[#9E7431]">ACD Délivré</span>
               </div>
               <div className="relative aspect-[16/9] rounded-xl overflow-hidden">
                 <Image src={terrain.images[0]} alt={terrain.title} fill className="object-cover" />

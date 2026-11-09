@@ -28,8 +28,8 @@ export default function ProtocolePage() {
         {/* 1. EN-TÊTE INSTITUTIONNEL : POSITIONNEMENT & LIMITES LÉGALES               */}
         {/* ========================================================================= */}
         <section className="max-w-5xl mx-auto px-6 sm:px-10 space-y-6 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#e8e4dc] text-xs font-semibold text-[#1d382b] shadow-warm-sm">
-            <Scale className="w-3.5 h-3.5 text-[#1d382b]" />
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#EAE5DC] text-xs font-semibold text-[#161412] shadow-warm-xs">
+            <Scale className="w-3.5 h-3.5 text-[#9E7431]" />
             <span>Cadre Déontologique & Délimitation des Responsabilités</span>
           </div>
 
@@ -81,7 +81,7 @@ export default function ProtocolePage() {
                 <div className="text-xs text-[#68625c]">Écartés pour insuffisance de titre, indivision conflictuelle ou bornage imprécis (87,5%)</div>
               </div>
               <div className="space-y-1">
-                <div className="text-3xl font-display font-semibold text-[#1d382b]">6 Retenus</div>
+                <div className="text-3xl font-display font-semibold text-[#161412]">6 Retenus</div>
                 <div className="text-xs text-[#68625c]">Mandats exclusifs conformes, audités et prêts pour signature notariée</div>
               </div>
             </div>
@@ -121,60 +121,60 @@ export default function ProtocolePage() {
 
               <ul className="space-y-3 text-xs text-[#4a453e]">
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-[#1d382b] shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-[#9E7431] shrink-0 mt-0.5" />
                   <span><strong>Réquisition au Livre Foncier :</strong> Vérification de l&apos;authenticité de l&apos;arrêté ministériel ACD ou du Titre Foncier (TF) au Guichet Unique MCLU.</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-[#1d382b] shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-[#9E7431] shrink-0 mt-0.5" />
                   <span><strong>Contrôle physique des limites :</strong> Missionnement d&apos;un géomètre-expert agréé (OGE-CI) pour validation des coordonnées géodésiques UTM.</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-[#1d382b] shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-[#9E7431] shrink-0 mt-0.5" />
                   <span><strong>Vérification des antécédents :</strong> Contrôle des charges, inscriptions hypothécaires apparentes et filiation successorale déclarée.</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-[#1d382b] shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-[#9E7431] shrink-0 mt-0.5" />
                   <span><strong>Mandat exclusif formalisé :</strong> Vérification de la pleine capacité juridique du propriétaire à céder le bien.</span>
                 </li>
               </ul>
 
-              <div className="p-3.5 rounded-2xl bg-[#fbfaf7] border border-[#e8e4dc] text-[11px] text-[#68625c]">
+              <div className="p-3.5 rounded-2xl bg-[#FAF8F5] border border-[#EAE5DC] text-[11px] text-[#6E665B]">
                 <strong>Engagement :</strong> Si un doute subsiste sur un document cadastral, le bien est immédiatement refusé ou suspendu.
               </div>
             </div>
 
             {/* Colonne 2 : Ce que fait le Notaire Instrumentaire */}
-            <div className="bg-white rounded-3xl p-8 border border-[#e8e4dc] shadow-warm-sm space-y-6">
+            <div className="bg-white rounded-3xl p-8 border border-[#EAE5DC] shadow-warm-sm space-y-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#f0f5f2] border border-[#d2e3d8] flex items-center justify-center text-[#1d382b]">
-                  <Scale className="w-5 h-5 text-[#1d382b]" />
+                <div className="w-10 h-10 rounded-2xl bg-[#FAF8F5] border border-[#EAE5DC] flex items-center justify-center text-[#9E7431]">
+                  <Scale className="w-5 h-5 text-[#9E7431]" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-base text-[#161412]">2. Les Diligences du Notaire</h3>
-                  <span className="text-[11px] text-[#7a736a]">Officier ministériel assermenté</span>
+                  <span className="text-[11px] text-[#8C8275]">Officier ministériel assermenté</span>
                 </div>
               </div>
 
-              <ul className="space-y-3 text-xs text-[#4a453e]">
+              <ul className="space-y-3 text-xs text-[#524B43]">
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-[#1d382b] shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-[#9E7431] shrink-0 mt-0.5" />
                   <span><strong>Rédaction de l&apos;avant-contrat :</strong> Compromis ou promesse synallagmatique de vente sous conditions suspensives d&apos;usage.</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-[#1d382b] shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-[#9E7431] shrink-0 mt-0.5" />
                   <span><strong>Ouverture du compte séquestre :</strong> Consignation obligatoire de l&apos;acompte et du solde de prix sur compte officiel CARPA / notarié.</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-[#1d382b] shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-[#9E7431] shrink-0 mt-0.5" />
                   <span><strong>Purge des droits de préemption :</strong> Formalités légales auprès des administrations compétentes.</span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-[#1d382b] shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-[#9E7431] shrink-0 mt-0.5" />
                   <span><strong>Mutation & Acte Authentique :</strong> Publication de la mutation au Journal Officiel et remise du titre définitif au nom de l&apos;acquéreur.</span>
                 </li>
               </ul>
 
-              <div className="p-3.5 rounded-2xl bg-[#f0f5f2] border border-[#d2e3d8] text-[11px] text-[#1d382b]">
+              <div className="p-3.5 rounded-2xl bg-[#FAF8F5] border border-[#EAE5DC] text-[11px] text-[#6E665B]">
                 <strong>Principe fondamental :</strong> Vous conservez la liberté totale de désigner votre propre notaire instrumentaire. Les émoluments sont partagés entre confrères sans surcoût.
               </div>
             </div>
@@ -243,8 +243,8 @@ export default function ProtocolePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
             {/* Cas 1 : Villa Riviera Golf (Succès) */}
-            <div className="bg-white rounded-2xl p-6 border border-[#e8e4dc] space-y-3">
-              <span className="px-2.5 py-0.5 rounded-full bg-[#f0f5f2] text-[10px] font-semibold text-[#1d382b] inline-block">
+            <div className="bg-white rounded-2xl p-6 border border-[#EAE5DC] space-y-3">
+              <span className="px-2.5 py-0.5 rounded-full bg-[#FAF8F5] text-[10px] font-semibold text-[#9E7431] border border-[#EAE5DC] inline-block">
                 Mandat Validé • VIL-RG-2026
               </span>
               <h3 className="font-semibold text-sm text-[#161412]">Villa Duplex Cocody Riviera Golf 4</h3>
@@ -254,7 +254,7 @@ export default function ProtocolePage() {
             </div>
 
             {/* Cas 2 : Parcelle Recalée (Risque évité pour l'acheteur !) */}
-            <div className="bg-white rounded-2xl p-6 border border-[#e8e4dc] space-y-3">
+            <div className="bg-white rounded-2xl p-6 border border-[#EAE5DC] space-y-3">
               <span className="px-2.5 py-0.5 rounded-full bg-red-50 text-[10px] font-semibold text-red-700 inline-block border border-red-200">
                 Dossier Rejeté • Cocody Riviera 3
               </span>
@@ -265,8 +265,8 @@ export default function ProtocolePage() {
             </div>
 
             {/* Cas 3 : Terrain Bingerville (Succès) */}
-            <div className="bg-white rounded-2xl p-6 border border-[#e8e4dc] space-y-3">
-              <span className="px-2.5 py-0.5 rounded-full bg-[#f0f5f2] text-[10px] font-semibold text-[#1d382b] inline-block">
+            <div className="bg-white rounded-2xl p-6 border border-[#EAE5DC] space-y-3">
+              <span className="px-2.5 py-0.5 rounded-full bg-[#FAF8F5] text-[10px] font-semibold text-[#9E7431] border border-[#EAE5DC] inline-block">
                 Mandat Validé • TER-BG-600
               </span>
               <h3 className="font-semibold text-sm text-[#161412]">Parcelle d&apos;Angle 600 m² Bingerville</h3>

@@ -308,12 +308,12 @@ export default function ProspectsDataTable({
       
       {/* SUCCESS NOTIFICATION */}
       {exportSuccess && (
-        <div className="p-3 bg-[#f0f5f2] border border-[#d2e3d8] text-[#1d382b] rounded-xl text-xs font-semibold flex items-center justify-between shadow-2xs">
+        <div className="p-3 bg-[#FAF8F5] border border-[#EAE5DC] text-[#161412] rounded-xl text-xs font-semibold flex items-center justify-between shadow-2xs">
           <div className="flex items-center gap-2">
-            <Check className="w-4 h-4 text-[#1d382b]" />
+            <Check className="w-4 h-4 text-[#9E7431]" />
             <span>{exportSuccess}</span>
           </div>
-          <span className="text-[10px] opacity-75">Ouverture immédiate dans Excel</span>
+          <span className="text-[10px] text-[#6E665B]">Ouverture immédiate dans Excel</span>
         </div>
       )}
 

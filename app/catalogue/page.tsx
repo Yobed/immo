@@ -352,23 +352,23 @@ export default function CatalogueFlipbookPage() {
             {/* ======================================================== */}
             {/* PAGE 1 : COUVERTURE RIGIDE DU LIVRE                      */}
             {/* ======================================================== */}
-            <div className="book-page bg-[#fbfaf7] p-8 sm:p-10 flex flex-col justify-between border-r border-[#e8e4dc] shadow-2xl overflow-hidden" data-density="hard">
-              <div className="flex items-center justify-between border-b border-[#e8e4dc] pb-4">
+            <div className="book-page bg-[#FAF8F5] p-6 sm:p-7 flex flex-col justify-between border-r border-[#EAE5DC] shadow-2xl overflow-hidden" data-density="hard">
+              <div className="flex items-center justify-between border-b border-[#EAE5DC] pb-3">
                 <div>
-                  <span className="text-[10px] tracking-[0.25em] uppercase text-[#947346] font-semibold block">
+                  <span className="text-[10px] tracking-[0.25em] uppercase text-[#9E7431] font-semibold block">
                     Édition Annuelle de Référence
                   </span>
                   <span className="font-display text-lg text-[#161412] font-semibold">
                     Agence Immo • Abidjan
                   </span>
                 </div>
-                <div className="w-9 h-9 rounded-full border border-[#947346]/40 flex items-center justify-center font-display font-bold text-xs text-[#947346]">
+                <div className="w-9 h-9 rounded-full border border-[#9E7431]/40 flex items-center justify-center font-display font-bold text-xs text-[#9E7431]">
                   2026
                 </div>
               </div>
 
               {/* Photo avec Bouton Hotspot Visite Vidéo Intro */}
-              <div className="relative flex-1 my-5 rounded-xl overflow-hidden shadow-inner group">
+              <div className="relative flex-1 my-4 rounded-xl overflow-hidden shadow-inner group">
                 <Image
                   src={villa.images[0]}
                   alt="Catalogue de Prestige Immobilier Abidjan"
@@ -391,12 +391,12 @@ export default function CatalogueFlipbookPage() {
                   })}
                   className="absolute top-4 right-4 z-20 px-3 py-1.5 rounded-full bg-white/90 hover:bg-white text-[#161412] text-[10px] font-semibold flex items-center gap-1.5 backdrop-blur-md shadow-lg transition-transform hover:scale-105"
                 >
-                  <Play className="w-3 h-3 fill-[#947346] text-[#947346]" />
+                  <Play className="w-3 h-3 fill-[#9E7431] text-[#9E7431]" />
                   <span>Vidéo d&apos;ambiance 4K</span>
                 </button>
 
                 <div className="absolute bottom-5 left-5 right-5 text-white space-y-1.5">
-                  <span className="text-[10px] uppercase tracking-widest text-[#d8c29d] font-semibold block">
+                  <span className="text-[10px] uppercase tracking-widest text-[#C8A97E] font-semibold block">
                     Portefeuille Exclusif
                   </span>
                   <h2 className="text-xl sm:text-2xl font-display font-medium leading-tight">
@@ -414,7 +414,7 @@ export default function CatalogueFlipbookPage() {
                       rel="noreferrer"
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-black/50 hover:bg-black/80 text-white text-[9px] font-medium backdrop-blur-sm border border-white/20 transition-colors"
                     >
-                      <MapPin className="w-2.5 h-2.5 text-[#d8c29d]" />
+                      <MapPin className="w-2.5 h-2.5 text-[#C8A97E]" />
                       <span>Carte Abidjan</span>
                       <ExternalLink className="w-2 h-2 opacity-70" />
                     </a>
@@ -430,16 +430,16 @@ export default function CatalogueFlipbookPage() {
                 </div>
               </div>
 
-              <div className="flex items-end justify-between pt-3 border-t border-[#e8e4dc]">
+              <div className="flex items-end justify-between pt-2.5 border-t border-[#EAE5DC]">
                 <div>
-                  <span className="text-[9px] text-[#7a736a] block uppercase tracking-wider">
+                  <span className="text-[9px] text-[#8C8275] block uppercase tracking-wider">
                     Certifié 100% Notarié
                   </span>
                   <span className="text-[11px] font-semibold text-[#161412]">
                     Sécurité Juridique ACD Vérifiée
                   </span>
                 </div>
-                <span className="text-[10px] font-semibold text-[#947346] bg-[#f5f2eb] px-2.5 py-1 rounded-full border border-[#e8e4dc]">
+                <span className="text-[10px] font-semibold text-[#9E7431] bg-[#FAF8F5] px-2.5 py-1 rounded-full border border-[#EAE5DC]">
                   Tourner la page ➔
                 </span>
               </div>
@@ -448,55 +448,55 @@ export default function CatalogueFlipbookPage() {
             {/* ======================================================== */}
             {/* PAGE 2 : ÉDITORIAL & LIENS JURIDIQUES                    */}
             {/* ======================================================== */}
-            <div className="book-page bg-[#fbfaf7] p-8 sm:p-10 flex flex-col justify-between border-r border-[#e8e4dc] shadow-inner overflow-hidden">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-[#e8e4dc] pb-3">
-                  <span className="text-[10px] uppercase tracking-widest text-[#947346] font-semibold">
+            <div className="book-page bg-[#FAF8F5] p-6 sm:p-7 flex flex-col justify-between border-r border-[#EAE5DC] shadow-inner overflow-hidden">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between border-b border-[#EAE5DC] pb-2">
+                  <span className="text-[10px] uppercase tracking-widest text-[#9E7431] font-semibold">
                     Éditorial
                   </span>
-                  <span className="text-xs font-mono text-[#7a736a]">p. 02</span>
+                  <span className="text-xs font-mono text-[#8C8275]">p. 02</span>
                 </div>
 
-                <h3 className="text-xl sm:text-2xl font-display font-medium text-[#161412] leading-tight">
+                <h3 className="text-base sm:text-lg font-display font-medium text-[#161412] leading-snug">
                   « Redéfinir l&apos;investissement immobilier ivoirien par la transparence absolue. »
                 </h3>
 
-                <div className="space-y-2.5 text-xs text-[#4a453e] font-light leading-relaxed">
+                <div className="space-y-2 text-xs text-[#524B43] font-light leading-relaxed">
                   <p>
-                    Dans un marché abidjanais en pleine effervescence économique, la sécurité juridique n&apos;est pas une option : c&apos;est le fondement même de la pérennité patrimoniale.
+                    Dans un marché abidjanais en pleine effervescence, la sécurité juridique n&apos;est pas une option : c&apos;est le fondement de la pérennité patrimoniale.
                   </p>
                   <p>
-                    Chaque bien présenté au sein de ce catalogue fait l&apos;objet d&apos;un audit préalable rigoureux auprès de la Conservation Foncière et du Ministère de la Construction. Nous ne négocions que des actifs dotés de l&apos;Arrêté de Concession Définitive (ACD) ou d&apos;un Titre Foncier inattaquable.
+                    Chaque bien fait l&apos;objet d&apos;un audit préalable rigoureux auprès de la Conservation Foncière et du Ministère de la Construction. Nous ne négocions que des actifs dotés de l&apos;Arrêté de Concession Définitive (ACD) ou d&apos;un Titre Foncier inattaquable.
                   </p>
                 </div>
 
-                {/* Hotspot Rigueur Notariée Cliquable */}
-                <div className="p-3.5 rounded-xl bg-[#f5f2eb] border border-[#e8e4dc] space-y-2">
+                {/* Hotspot Rigueur Notariée Cliquable (Palette 3 Couleurs Pure) */}
+                <div className="p-3 rounded-xl bg-white border border-[#EAE5DC] space-y-1.5 shadow-2xs">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs font-semibold text-[#1d382b]">
-                      <ShieldCheck className="w-3.5 h-3.5 text-[#1d382b]" />
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-[#161412]">
+                      <ShieldCheck className="w-3.5 h-3.5 text-[#9E7431]" />
                       <span>Rigueur Juridique Notariée</span>
                     </div>
-                    <span className="text-[9px] bg-[#d2e3d8] text-[#1d382b] px-2 py-0.5 rounded-full font-bold">
-                      100% SÉCURISÉ
+                    <span className="text-[9px] bg-[#FAF8F5] text-[#9E7431] border border-[#EAE5DC] px-2 py-0.5 rounded-full font-bold tracking-wider">
+                      100% ACD VÉRIFIÉ
                     </span>
                   </div>
-                  <p className="text-[10px] text-[#68625c]">
+                  <p className="text-[10px] text-[#6E665B] leading-normal">
                     Transactions scellées par acte authentique avec comptes séquestres notariés agréés.
                   </p>
-                  <div className="pt-1">
+                  <div className="pt-0.5">
                     <Link
                       href="/estimer"
-                      className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#947346] hover:underline"
+                      className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#9E7431] hover:underline"
                     >
                       <span>Faire auditer la régularité d&apos;un titre foncier</span>
-                      <ArrowUpRight className="w-3 h-3" />
+                      <ArrowUpRight className="w-3 h-3 text-[#9E7431]" />
                     </Link>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-[#e8e4dc] flex items-center justify-between text-xs text-[#7a736a]">
+              <div className="pt-2.5 border-t border-[#EAE5DC] flex items-center justify-between text-xs text-[#8C8275]">
                 <span>Cabinet de Conseil Immobilier</span>
                 <span className="font-display italic text-[#161412] font-medium">La Direction</span>
               </div>
@@ -505,138 +505,142 @@ export default function CatalogueFlipbookPage() {
             {/* ======================================================== */}
             {/* PAGE 3 : CARTOGRAPHIE AVEC LIENS GOOGLE MAPS             */}
             {/* ======================================================== */}
-            <div className="book-page bg-white p-8 sm:p-10 flex flex-col justify-between border-l border-[#e8e4dc] shadow-inner overflow-hidden">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-[#e8e4dc] pb-3">
-                  <span className="text-[10px] uppercase tracking-widest text-[#947346] font-semibold">
+            <div className="book-page bg-white p-6 sm:p-7 flex flex-col justify-between border-l border-[#EAE5DC] shadow-inner overflow-hidden">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between border-b border-[#EAE5DC] pb-2">
+                  <span className="text-[10px] uppercase tracking-widest text-[#9E7431] font-semibold">
                     Cartographie des Quartiers Clés
                   </span>
-                  <span className="text-xs font-mono text-[#7a736a]">p. 03</span>
+                  <span className="text-xs font-mono text-[#8C8275]">p. 03</span>
                 </div>
 
-                <div className="space-y-2.5">
+                <div className="space-y-2">
                   {/* Cocody */}
-                  <div className="p-3 rounded-xl border border-[#e8e4dc] bg-[#fbfaf7] hover:border-[#947346] transition-colors">
+                  <div className="p-2.5 rounded-xl border border-[#EAE5DC] bg-[#FAF8F5] hover:border-[#9E7431] transition-colors">
                     <div className="flex justify-between items-center mb-0.5">
                       <span className="font-semibold text-xs text-[#161412]">Cocody (Ambassades, Riviera)</span>
-                      <span className="text-xs font-mono font-semibold text-[#947346]">8.5% / an</span>
+                      <span className="text-[11px] font-mono font-semibold text-[#9E7431]">8.5% / an</span>
                     </div>
-                    <p className="text-[10px] text-[#68625c]">
+                    <p className="text-[10px] text-[#6E665B] leading-tight line-clamp-1">
                       Résidences de diplomates, cadres dirigeants et ambassades.
                     </p>
-                    <div className="flex items-center gap-2 mt-1.5 pt-1.5 border-t border-[#e8e4dc]/70">
+                    <div className="flex items-center gap-2 mt-1 pt-1 border-t border-[#EAE5DC]/80 text-[9px]">
                       <a
                         href="https://www.google.com/maps/search/?api=1&query=Riviera+Golf+Cocody+Abidjan"
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1 text-[9px] font-semibold text-[#947346] hover:underline"
+                        className="inline-flex items-center gap-1 font-semibold text-[#9E7431] hover:underline"
                       >
-                        <MapPin className="w-2.5 h-2.5" />
+                        <MapPin className="w-2.5 h-2.5 text-[#9E7431]" />
                         <span>Google Maps</span>
-                        <ExternalLink className="w-2 h-2" />
+                        <ExternalLink className="w-2 h-2 text-[#9E7431]" />
                       </a>
-                      <span className="text-[#d0c9bd]">•</span>
-                      <Link href="/biens?district=Cocody" className="text-[9px] text-[#161412] hover:text-[#947346]">
+                      <span className="text-[#DDD7CC]">•</span>
+                      <Link href="/biens?district=Cocody" className="text-[#161412] hover:text-[#9E7431]">
                         Voir biens Cocody (1)
                       </Link>
                     </div>
                   </div>
 
                   {/* Marcory Zone 4 */}
-                  <div className="p-3 rounded-xl border border-[#e8e4dc] bg-[#fbfaf7] hover:border-[#947346] transition-colors">
+                  <div className="p-2.5 rounded-xl border border-[#EAE5DC] bg-[#FAF8F5] hover:border-[#9E7431] transition-colors">
                     <div className="flex justify-between items-center mb-0.5">
                       <span className="font-semibold text-xs text-[#161412]">Marcory Zone 4 / Biétry</span>
-                      <span className="text-xs font-mono font-semibold text-[#947346]">10.2% / an</span>
+                      <span className="text-[11px] font-mono font-semibold text-[#9E7431]">10.2% / an</span>
                     </div>
-                    <p className="text-[10px] text-[#68625c]">
+                    <p className="text-[10px] text-[#6E665B] leading-tight line-clamp-1">
                       Penthouses recherchés par les expatriés et banques d&apos;affaires.
                     </p>
-                    <div className="flex items-center gap-2 mt-1.5 pt-1.5 border-t border-[#e8e4dc]/70">
+                    <div className="flex items-center gap-2 mt-1 pt-1 border-t border-[#EAE5DC]/80 text-[9px]">
                       <a
                         href="https://www.google.com/maps/search/?api=1&query=Zone+4+Marcory+Abidjan"
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1 text-[9px] font-semibold text-[#947346] hover:underline"
+                        className="inline-flex items-center gap-1 font-semibold text-[#9E7431] hover:underline"
                       >
-                        <MapPin className="w-2.5 h-2.5" />
+                        <MapPin className="w-2.5 h-2.5 text-[#9E7431]" />
                         <span>Google Maps</span>
-                        <ExternalLink className="w-2 h-2" />
+                        <ExternalLink className="w-2 h-2 text-[#9E7431]" />
                       </a>
-                      <span className="text-[#d0c9bd]">•</span>
-                      <Link href="/biens?district=Marcory" className="text-[9px] text-[#161412] hover:text-[#947346]">
+                      <span className="text-[#DDD7CC]">•</span>
+                      <Link href="/biens?district=Marcory" className="text-[#161412] hover:text-[#9E7431]">
                         Voir biens Zone 4 (1)
                       </Link>
                     </div>
                   </div>
 
                   {/* Bingerville */}
-                  <div className="p-3 rounded-xl border border-[#e8e4dc] bg-[#fbfaf7] hover:border-[#947346] transition-colors">
+                  <div className="p-2.5 rounded-xl border border-[#EAE5DC] bg-[#FAF8F5] hover:border-[#9E7431] transition-colors">
                     <div className="flex justify-between items-center mb-0.5">
                       <span className="font-semibold text-xs text-[#161412]">Bingerville (Nouveau Goudron)</span>
-                      <span className="text-xs font-mono font-semibold text-[#947346]">+18% plus-value</span>
+                      <span className="text-[11px] font-mono font-semibold text-[#9E7431]">+18% plus-value</span>
                     </div>
-                    <p className="text-[10px] text-[#68625c]">
+                    <p className="text-[10px] text-[#6E665B] leading-tight line-clamp-1">
                       Parcelles foncières titrées en plein essor urbain.
                     </p>
-                    <div className="flex items-center gap-2 mt-1.5 pt-1.5 border-t border-[#e8e4dc]/70">
+                    <div className="flex items-center gap-2 mt-1 pt-1 border-t border-[#EAE5DC]/80 text-[9px]">
                       <a
                         href="https://www.google.com/maps/search/?api=1&query=Bingerville+Nouveau+Goudron+Abidjan"
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1 text-[9px] font-semibold text-[#947346] hover:underline"
+                        className="inline-flex items-center gap-1 font-semibold text-[#9E7431] hover:underline"
                       >
-                        <MapPin className="w-2.5 h-2.5" />
+                        <MapPin className="w-2.5 h-2.5 text-[#9E7431]" />
                         <span>Google Maps</span>
-                        <ExternalLink className="w-2 h-2" />
+                        <ExternalLink className="w-2 h-2 text-[#9E7431]" />
                       </a>
-                      <span className="text-[#d0c9bd]">•</span>
-                      <Link href="/biens?district=Bingerville" className="text-[9px] text-[#161412] hover:text-[#947346]">
+                      <span className="text-[#DDD7CC]">•</span>
+                      <Link href="/biens?district=Bingerville" className="text-[#161412] hover:text-[#9E7431]">
                         Voir terrains Bingerville (1)
                       </Link>
                     </div>
                   </div>
 
                   {/* Assinie */}
-                  <div className="p-3 rounded-xl border border-[#e8e4dc] bg-[#fbfaf7] hover:border-[#947346] transition-colors">
+                  <div className="p-2.5 rounded-xl border border-[#EAE5DC] bg-[#FAF8F5] hover:border-[#9E7431] transition-colors">
                     <div className="flex justify-between items-center mb-0.5">
                       <span className="font-semibold text-xs text-[#161412]">Assinie-Mafia (Bord Lagune)</span>
-                      <span className="text-xs font-mono font-semibold text-[#947346]">12.8% / an</span>
+                      <span className="text-[11px] font-mono font-semibold text-[#9E7431]">12.8% / an</span>
                     </div>
-                    <p className="text-[10px] text-[#68625c]">
+                    <p className="text-[10px] text-[#6E665B] leading-tight line-clamp-1">
                       Villas balnéaires de villégiature et rendements week-end.
                     </p>
-                    <div className="flex items-center gap-2 mt-1.5 pt-1.5 border-t border-[#e8e4dc]/70">
+                    <div className="flex items-center gap-2 mt-1 pt-1 border-t border-[#EAE5DC]/80 text-[9px]">
                       <a
                         href="https://www.google.com/maps/search/?api=1&query=Assinie-Mafia+Cote+d'Ivoire"
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1 text-[9px] font-semibold text-[#947346] hover:underline"
+                        className="inline-flex items-center gap-1 font-semibold text-[#9E7431] hover:underline"
                       >
-                        <MapPin className="w-2.5 h-2.5" />
+                        <MapPin className="w-2.5 h-2.5 text-[#9E7431]" />
                         <span>Google Maps</span>
-                        <ExternalLink className="w-2 h-2" />
+                        <ExternalLink className="w-2 h-2 text-[#9E7431]" />
                       </a>
+                      <span className="text-[#DDD7CC]">•</span>
+                      <Link href="/biens?district=Assinie" className="text-[#161412] hover:text-[#9E7431]">
+                        Voir biens Assinie (1)
+                      </Link>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-[#e8e4dc] flex items-center justify-between text-[11px] text-[#7a736a]">
+              <div className="pt-2 border-t border-[#EAE5DC] flex items-center justify-between text-[11px] text-[#8C8275]">
                 <span>Baromètre Foncier 2026</span>
-                <span className="font-mono text-[#947346]">Chambre Notariale</span>
+                <span className="font-mono text-[#9E7431] font-semibold">Chambre Notariale</span>
               </div>
             </div>
 
             {/* ======================================================== */}
             {/* PAGE 4 : VILLA RIVIERA GOLF (MAP + VIDÉO + ACD)          */}
             {/* ======================================================== */}
-            <div className="book-page bg-[#fbfaf7] p-8 sm:p-10 flex flex-col justify-between border-r border-[#e8e4dc] shadow-inner overflow-hidden">
+            <div className="book-page bg-[#FAF8F5] p-6 sm:p-7 flex flex-col justify-between border-r border-[#EAE5DC] shadow-inner overflow-hidden">
               <div className="space-y-3">
-                <div className="flex items-center justify-between border-b border-[#e8e4dc] pb-2.5">
-                  <span className="text-[10px] uppercase tracking-widest text-[#947346] font-semibold">
+                <div className="flex items-center justify-between border-b border-[#EAE5DC] pb-2">
+                  <span className="text-[10px] uppercase tracking-widest text-[#9E7431] font-semibold">
                     Villa Contemporaine • Vente
                   </span>
-                  <span className="text-xs font-mono text-[#7a736a]">p. 04</span>
+                  <span className="text-xs font-mono text-[#8C8275]">p. 04</span>
                 </div>
 
                 {/* Photo avec HOTSPOTS VIDÉO & MAP CLIQUABLES */}
@@ -644,9 +648,9 @@ export default function CatalogueFlipbookPage() {
                   <Image src={villa.images[0]} alt={villa.title} fill className="object-cover" />
                   
                   {/* Badge ACD */}
-                  <div className="absolute top-2.5 left-2.5 bg-[#1d382b] text-white text-[9px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow">
-                    <ShieldCheck className="w-3 h-3" />
-                    ACD Ministère Vérifié
+                  <div className="absolute top-2.5 left-2.5 bg-[#191715] text-white text-[9px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow border border-white/20">
+                    <ShieldCheck className="w-3 h-3 text-[#9E7431]" />
+                    <span>ACD Ministère Vérifié</span>
                   </div>
 
                   {/* Hotspots interactifs sur la photo */}
@@ -655,7 +659,7 @@ export default function CatalogueFlipbookPage() {
                       onClick={() => setActiveVideoProperty(villa)}
                       className="px-3 py-1.5 rounded-full bg-white text-[#161412] text-[10px] font-semibold flex items-center gap-1.5 shadow-lg hover:scale-105 transition-transform"
                     >
-                      <Play className="w-3 h-3 fill-[#947346] text-[#947346]" />
+                      <Play className="w-3 h-3 fill-[#9E7431] text-[#9E7431]" />
                       <span>Visite Vidéo 4K</span>
                     </button>
 
@@ -665,7 +669,7 @@ export default function CatalogueFlipbookPage() {
                       rel="noreferrer"
                       className="px-3 py-1.5 rounded-full bg-black/70 text-white text-[10px] font-medium flex items-center gap-1.5 backdrop-blur-sm border border-white/30 hover:bg-black/90 transition-colors"
                     >
-                      <MapPin className="w-3 h-3 text-[#d8c29d]" />
+                      <MapPin className="w-3 h-3 text-[#C8A97E]" />
                       <span>Map GPS</span>
                     </a>
                   </div>
@@ -674,12 +678,12 @@ export default function CatalogueFlipbookPage() {
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-[#7a736a]">Cocody Riviera Golf • Réf: {villa.reference}</span>
+                      <span className="text-[11px] text-[#8C8275]">Cocody Riviera Golf • Réf: {villa.reference}</span>
                       <a
                         href="https://www.google.com/maps/search/?api=1&query=Riviera+Golf+Cocody+Abidjan"
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center text-[10px] text-[#947346] hover:underline"
+                        className="inline-flex items-center text-[10px] text-[#9E7431] hover:underline"
                       >
                         <MapPin className="w-2.5 h-2.5 mr-0.5" />
                         <span>Localisation</span>
@@ -692,22 +696,22 @@ export default function CatalogueFlipbookPage() {
                   </h4>
                 </div>
 
-                <p className="text-xs text-[#4a453e] font-light leading-relaxed line-clamp-2">
+                <p className="text-xs text-[#524B43] font-light leading-relaxed line-clamp-2">
                   {villa.description}
                 </p>
 
                 {/* Spécifications & Actions Rapides */}
-                <div className="grid grid-cols-3 gap-1.5 p-2 bg-white rounded-xl border border-[#e8e4dc] text-center text-xs">
+                <div className="grid grid-cols-3 gap-1.5 p-2 bg-white rounded-xl border border-[#EAE5DC] text-center text-xs">
                   <div>
-                    <span className="text-[9px] text-[#7a736a] block">Surface</span>
+                    <span className="text-[9px] text-[#8C8275] block">Surface</span>
                     <strong className="text-[#161412] font-semibold">{villa.surface} m²</strong>
                   </div>
                   <div>
-                    <span className="text-[9px] text-[#7a736a] block">Chambres</span>
+                    <span className="text-[9px] text-[#8C8275] block">Chambres</span>
                     <strong className="text-[#161412] font-semibold">{villa.bedrooms} suites</strong>
                   </div>
                   <div>
-                    <span className="text-[9px] text-[#7a736a] block">Piscine</span>
+                    <span className="text-[9px] text-[#8C8275] block">Piscine</span>
                     <strong className="text-[#161412] font-semibold">Débordement</strong>
                   </div>
                 </div>
@@ -716,17 +720,17 @@ export default function CatalogueFlipbookPage() {
                 <div className="flex items-center gap-2 text-[10px]">
                   <button
                     onClick={() => setActiveVideoProperty(villa)}
-                    className="inline-flex items-center gap-1 text-[#947346] font-semibold hover:underline"
+                    className="inline-flex items-center gap-1 text-[#9E7431] font-semibold hover:underline"
                   >
                     <Video className="w-3 h-3" />
                     <span>Lancer la vidéo</span>
                   </button>
-                  <span className="text-[#d0c9bd]">•</span>
+                  <span className="text-[#DDD7CC]">•</span>
                   <a
                     href={getWhatsAppLink('2250788421920', `Bonjour Cabinet Immobilier Abidjan, je souhaite visiter la Villa Riviera Golf (Réf: ${villa.reference}).`)}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-[#1d382b] font-semibold hover:underline"
+                    className="inline-flex items-center gap-1 text-[#9E7431] font-semibold hover:underline"
                   >
                     <MessageCircle className="w-3 h-3" />
                     <span>Réserver visite WhatsApp</span>
@@ -734,16 +738,16 @@ export default function CatalogueFlipbookPage() {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-[#e8e4dc] flex items-center justify-between">
+              <div className="pt-2.5 border-t border-[#EAE5DC] flex items-center justify-between">
                 <div>
-                  <span className="text-[9px] text-[#7a736a] block uppercase">Prix de Vente</span>
+                  <span className="text-[9px] text-[#8C8275] block uppercase">Prix de Vente</span>
                   <span className="text-sm font-semibold text-[#161412] font-display">
                     {formatFCFA(villa.price)}
                   </span>
                 </div>
                 <Link
                   href={`/biens/${villa.id}`}
-                  className="px-3 py-1 rounded-full bg-[#161412] hover:bg-[#947346] text-white text-[11px] font-semibold transition-colors flex items-center gap-1"
+                  className="px-3 py-1 rounded-full bg-[#161412] hover:bg-[#9E7431] text-white text-[11px] font-semibold transition-colors flex items-center gap-1"
                 >
                   <span>Dossier Complet</span>
                   <ArrowUpRight className="w-3 h-3" />
@@ -754,19 +758,19 @@ export default function CatalogueFlipbookPage() {
             {/* ======================================================== */}
             {/* PAGE 5 : PENTHOUSE LAGUNA (MAP + VIDÉO + ACD)            */}
             {/* ======================================================== */}
-            <div className="book-page bg-white p-8 sm:p-10 flex flex-col justify-between border-l border-[#e8e4dc] shadow-inner overflow-hidden">
+            <div className="book-page bg-white p-6 sm:p-7 flex flex-col justify-between border-l border-[#EAE5DC] shadow-inner overflow-hidden">
               <div className="space-y-3">
-                <div className="flex items-center justify-between border-b border-[#e8e4dc] pb-2.5">
-                  <span className="text-[10px] uppercase tracking-widest text-[#947346] font-semibold">
+                <div className="flex items-center justify-between border-b border-[#EAE5DC] pb-2">
+                  <span className="text-[10px] uppercase tracking-widest text-[#9E7431] font-semibold">
                     Penthouse de Prestige • Location
                   </span>
-                  <span className="text-xs font-mono text-[#7a736a]">p. 05</span>
+                  <span className="text-xs font-mono text-[#8C8275]">p. 05</span>
                 </div>
 
                 <div className="relative h-44 rounded-xl overflow-hidden shadow-sm group">
                   <Image src={penthouse.images[0]} alt={penthouse.title} fill className="object-cover" />
                   
-                  <div className="absolute top-2.5 left-2.5 bg-[#947346] text-white text-[9px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow">
+                  <div className="absolute top-2.5 left-2.5 bg-[#9E7431] text-white text-[9px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow">
                     <Award className="w-3 h-3" />
                     Rooftop Privatif
                   </div>
@@ -776,7 +780,7 @@ export default function CatalogueFlipbookPage() {
                       onClick={() => setActiveVideoProperty(penthouse)}
                       className="px-3 py-1.5 rounded-full bg-white text-[#161412] text-[10px] font-semibold flex items-center gap-1.5 shadow-lg hover:scale-105 transition-transform"
                     >
-                      <Play className="w-3 h-3 fill-[#947346] text-[#947346]" />
+                      <Play className="w-3 h-3 fill-[#9E7431] text-[#9E7431]" />
                       <span>Visite Vidéo 4K</span>
                     </button>
 
@@ -786,7 +790,7 @@ export default function CatalogueFlipbookPage() {
                       rel="noreferrer"
                       className="px-3 py-1.5 rounded-full bg-black/70 text-white text-[10px] font-medium flex items-center gap-1.5 backdrop-blur-sm border border-white/30 hover:bg-black/90 transition-colors"
                     >
-                      <MapPin className="w-3 h-3 text-[#d8c29d]" />
+                      <MapPin className="w-3 h-3 text-[#C8A97E]" />
                       <span>Map GPS</span>
                     </a>
                   </div>
@@ -795,12 +799,12 @@ export default function CatalogueFlipbookPage() {
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-[#7a736a]">Marcory Zone 4 • Réf: {penthouse.reference}</span>
+                      <span className="text-[11px] text-[#8C8275]">Marcory Zone 4 • Réf: {penthouse.reference}</span>
                       <a
                         href="https://www.google.com/maps/search/?api=1&query=Zone+4+Marcory+Abidjan"
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center text-[10px] text-[#947346] hover:underline"
+                        className="inline-flex items-center text-[10px] text-[#9E7431] hover:underline"
                       >
                         <MapPin className="w-2.5 h-2.5 mr-0.5" />
                         <span>Localisation</span>
@@ -813,21 +817,21 @@ export default function CatalogueFlipbookPage() {
                   </h4>
                 </div>
 
-                <p className="text-xs text-[#4a453e] font-light leading-relaxed line-clamp-2">
+                <p className="text-xs text-[#524B43] font-light leading-relaxed line-clamp-2">
                   {penthouse.description}
                 </p>
 
-                <div className="grid grid-cols-3 gap-1.5 p-2 bg-[#fbfaf7] rounded-xl border border-[#e8e4dc] text-center text-xs">
+                <div className="grid grid-cols-3 gap-1.5 p-2 bg-[#FAF8F5] rounded-xl border border-[#EAE5DC] text-center text-xs">
                   <div>
-                    <span className="text-[9px] text-[#7a736a] block">Surface</span>
+                    <span className="text-[9px] text-[#8C8275] block">Surface</span>
                     <strong className="text-[#161412] font-semibold">{penthouse.surface} m²</strong>
                   </div>
                   <div>
-                    <span className="text-[9px] text-[#7a736a] block">Chambres</span>
+                    <span className="text-[9px] text-[#8C8275] block">Chambres</span>
                     <strong className="text-[#161412] font-semibold">{penthouse.bedrooms} pièces</strong>
                   </div>
                   <div>
-                    <span className="text-[9px] text-[#7a736a] block">Vue</span>
+                    <span className="text-[9px] text-[#8C8275] block">Vue</span>
                     <strong className="text-[#161412] font-semibold">Lagune Ébrié</strong>
                   </div>
                 </div>
@@ -835,17 +839,17 @@ export default function CatalogueFlipbookPage() {
                 <div className="flex items-center gap-2 text-[10px]">
                   <button
                     onClick={() => setActiveVideoProperty(penthouse)}
-                    className="inline-flex items-center gap-1 text-[#947346] font-semibold hover:underline"
+                    className="inline-flex items-center gap-1 text-[#9E7431] font-semibold hover:underline"
                   >
                     <Video className="w-3 h-3" />
                     <span>Lancer la vidéo</span>
                   </button>
-                  <span className="text-[#d0c9bd]">•</span>
+                  <span className="text-[#DDD7CC]">•</span>
                   <a
                     href={getWhatsAppLink('2250788421920', `Bonjour Cabinet Immobilier Abidjan, je souhaite visiter le Penthouse Zone 4 (Réf: ${penthouse.reference}).`)}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-[#1d382b] font-semibold hover:underline"
+                    className="inline-flex items-center gap-1 text-[#9E7431] font-semibold hover:underline"
                   >
                     <MessageCircle className="w-3 h-3" />
                     <span>Réserver visite WhatsApp</span>
@@ -853,16 +857,16 @@ export default function CatalogueFlipbookPage() {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-[#e8e4dc] flex items-center justify-between">
+              <div className="pt-2.5 border-t border-[#EAE5DC] flex items-center justify-between">
                 <div>
-                  <span className="text-[9px] text-[#7a736a] block uppercase">Loyer Mensuel</span>
+                  <span className="text-[9px] text-[#8C8275] block uppercase">Loyer Mensuel</span>
                   <span className="text-sm font-semibold text-[#161412] font-display">
-                    {formatFCFA(penthouse.price)} <span className="text-[10px] text-[#7a736a] font-normal">/ mois</span>
+                    {formatFCFA(penthouse.price)} <span className="text-[10px] text-[#8C8275] font-normal">/ mois</span>
                   </span>
                 </div>
                 <Link
                   href={`/biens/${penthouse.id}`}
-                  className="px-3 py-1 rounded-full bg-[#161412] hover:bg-[#947346] text-white text-[11px] font-semibold transition-colors flex items-center gap-1"
+                  className="px-3 py-1 rounded-full bg-[#161412] hover:bg-[#9E7431] text-white text-[11px] font-semibold transition-colors flex items-center gap-1"
                 >
                   <span>Dossier Complet</span>
                   <ArrowUpRight className="w-3 h-3" />
@@ -873,21 +877,21 @@ export default function CatalogueFlipbookPage() {
             {/* ======================================================== */}
             {/* PAGE 6 : TERRAIN BINGERVILLE (MAP + CADASTRE + ACD)      */}
             {/* ======================================================== */}
-            <div className="book-page bg-[#fbfaf7] p-8 sm:p-10 flex flex-col justify-between border-r border-[#e8e4dc] shadow-inner overflow-hidden">
+            <div className="book-page bg-[#FAF8F5] p-6 sm:p-7 flex flex-col justify-between border-r border-[#EAE5DC] shadow-inner overflow-hidden">
               <div className="space-y-3">
-                <div className="flex items-center justify-between border-b border-[#e8e4dc] pb-2.5">
-                  <span className="text-[10px] uppercase tracking-widest text-[#1d382b] font-semibold">
+                <div className="flex items-center justify-between border-b border-[#EAE5DC] pb-2">
+                  <span className="text-[10px] uppercase tracking-widest text-[#9E7431] font-semibold">
                     Foncier Titré Sécurisé • ACD
                   </span>
-                  <span className="text-xs font-mono text-[#7a736a]">p. 06</span>
+                  <span className="text-xs font-mono text-[#8C8275]">p. 06</span>
                 </div>
 
                 <div className="relative h-44 rounded-xl overflow-hidden shadow-sm group">
                   <Image src={terrain.images[0]} alt={terrain.title} fill className="object-cover" />
                   
-                  <div className="absolute top-2.5 left-2.5 bg-[#1d382b] text-white text-[9px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow">
-                    <ShieldCheck className="w-3 h-3" />
-                    Borné & ACD Ministère
+                  <div className="absolute top-2.5 left-2.5 bg-[#191715] text-white text-[9px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow border border-white/20">
+                    <ShieldCheck className="w-3 h-3 text-[#9E7431]" />
+                    <span>Borné & ACD Ministère</span>
                   </div>
 
                   <div className="absolute inset-0 bg-black/30 opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
@@ -897,7 +901,7 @@ export default function CatalogueFlipbookPage() {
                       rel="noreferrer"
                       className="px-3 py-1.5 rounded-full bg-white text-[#161412] text-[10px] font-semibold flex items-center gap-1.5 shadow-lg hover:scale-105 transition-transform"
                     >
-                      <MapPin className="w-3 h-3 text-[#947346]" />
+                      <MapPin className="w-3 h-3 text-[#9E7431]" />
                       <span>Localisation Satellite</span>
                     </a>
 
@@ -905,7 +909,7 @@ export default function CatalogueFlipbookPage() {
                       onClick={() => setActiveVideoProperty(terrain)}
                       className="px-3 py-1.5 rounded-full bg-black/70 text-white text-[10px] font-medium flex items-center gap-1.5 backdrop-blur-sm border border-white/30 hover:bg-black/90 transition-colors"
                     >
-                      <Video className="w-3 h-3 text-[#d8c29d]" />
+                      <Video className="w-3 h-3 text-[#C8A97E]" />
                       <span>Vue Aérienne</span>
                     </button>
                   </div>
@@ -914,12 +918,12 @@ export default function CatalogueFlipbookPage() {
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-[#7a736a]">Bingerville Nouveau Goudron • Réf: {terrain.reference}</span>
+                      <span className="text-[11px] text-[#8C8275]">Bingerville Nouveau Goudron • Réf: {terrain.reference}</span>
                       <a
                         href="https://www.google.com/maps/search/?api=1&query=Bingerville+Nouveau+Goudron+Abidjan"
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center text-[10px] text-[#947346] hover:underline"
+                        className="inline-flex items-center text-[10px] text-[#9E7431] hover:underline"
                       >
                         <MapPin className="w-2.5 h-2.5 mr-0.5" />
                         <span>Voir sur la carte</span>
@@ -932,17 +936,17 @@ export default function CatalogueFlipbookPage() {
                   </h4>
                 </div>
 
-                <div className="p-2.5 bg-white rounded-xl border border-[#e8e4dc] space-y-1 text-xs">
+                <div className="p-2.5 bg-white rounded-xl border border-[#EAE5DC] space-y-1 text-xs">
                   <div className="flex justify-between text-[#161412]">
-                    <span className="text-[#7a736a]">Superficie totale</span>
+                    <span className="text-[#8C8275]">Superficie totale</span>
                     <strong className="font-semibold">{terrain.surface} m²</strong>
                   </div>
                   <div className="flex justify-between text-[#161412]">
-                    <span className="text-[#7a736a]">Statut légal</span>
-                    <strong className="text-[#1d382b] font-semibold">ACD délivré (Arrêté Ministériel)</strong>
+                    <span className="text-[#8C8275]">Statut légal</span>
+                    <strong className="text-[#9E7431] font-semibold">ACD délivré (Arrêté Ministériel)</strong>
                   </div>
                   <div className="flex justify-between text-[#161412]">
-                    <span className="text-[#7a736a]">Prix au m²</span>
+                    <span className="text-[#8C8275]">Prix au m²</span>
                     <strong className="font-semibold">{formatFCFA(Math.round(terrain.price / terrain.surface))} / m²</strong>
                   </div>
                 </div>
@@ -952,17 +956,17 @@ export default function CatalogueFlipbookPage() {
                     href="https://www.google.com/maps/search/?api=1&query=Bingerville+Nouveau+Goudron+Abidjan"
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-[#947346] font-semibold hover:underline"
+                    className="inline-flex items-center gap-1 text-[#9E7431] font-semibold hover:underline"
                   >
                     <Compass className="w-3 h-3" />
                     <span>Itinéraire Google Maps</span>
                   </a>
-                  <span className="text-[#d0c9bd]">•</span>
+                  <span className="text-[#DDD7CC]">•</span>
                   <a
                     href={getWhatsAppLink('2250788421920', `Bonjour Cabinet Immobilier Abidjan, je souhaite visiter le Terrain Bingerville ACD (Réf: ${terrain.reference}).`)}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-[#1d382b] font-semibold hover:underline"
+                    className="inline-flex items-center gap-1 text-[#9E7431] font-semibold hover:underline"
                   >
                     <MessageCircle className="w-3 h-3" />
                     <span>Visite terrain</span>
@@ -970,16 +974,16 @@ export default function CatalogueFlipbookPage() {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-[#e8e4dc] flex items-center justify-between">
+              <div className="pt-2.5 border-t border-[#EAE5DC] flex items-center justify-between">
                 <div>
-                  <span className="text-[9px] text-[#7a736a] block uppercase">Prix du Terrain</span>
+                  <span className="text-[9px] text-[#8C8275] block uppercase">Prix du Terrain</span>
                   <span className="text-sm font-semibold text-[#161412] font-display">
                     {formatFCFA(terrain.price)}
                   </span>
                 </div>
                 <Link
                   href={`/biens/${terrain.id}`}
-                  className="px-3 py-1 rounded-full bg-[#161412] hover:bg-[#947346] text-white text-[11px] font-semibold transition-colors flex items-center gap-1"
+                  className="px-3 py-1 rounded-full bg-[#161412] hover:bg-[#9E7431] text-white text-[11px] font-semibold transition-colors flex items-center gap-1"
                 >
                   <span>Dossier Foncier</span>
                   <ArrowUpRight className="w-3 h-3" />
@@ -990,13 +994,13 @@ export default function CatalogueFlipbookPage() {
             {/* ======================================================== */}
             {/* PAGE 7 : IMMOBILIER D'AFFAIRES (MAP + VIDÉO + RENDEMENT)  */}
             {/* ======================================================== */}
-            <div className="book-page bg-white p-8 sm:p-10 flex flex-col justify-between border-l border-[#e8e4dc] shadow-inner overflow-hidden">
+            <div className="book-page bg-white p-6 sm:p-7 flex flex-col justify-between border-l border-[#EAE5DC] shadow-inner overflow-hidden">
               <div className="space-y-3">
-                <div className="flex items-center justify-between border-b border-[#e8e4dc] pb-2.5">
-                  <span className="text-[10px] uppercase tracking-widest text-[#947346] font-semibold">
+                <div className="flex items-center justify-between border-b border-[#EAE5DC] pb-2">
+                  <span className="text-[10px] uppercase tracking-widest text-[#9E7431] font-semibold">
                     Immobilier d&apos;Affaires • Le Plateau
                   </span>
-                  <span className="text-xs font-mono text-[#7a736a]">p. 07</span>
+                  <span className="text-xs font-mono text-[#8C8275]">p. 07</span>
                 </div>
 
                 <div className="relative h-44 rounded-xl overflow-hidden shadow-sm group">
@@ -1011,7 +1015,7 @@ export default function CatalogueFlipbookPage() {
                       onClick={() => setActiveVideoProperty(appart)}
                       className="px-3 py-1.5 rounded-full bg-white text-[#161412] text-[10px] font-semibold flex items-center gap-1.5 shadow-lg hover:scale-105 transition-transform"
                     >
-                      <Play className="w-3 h-3 fill-[#947346] text-[#947346]" />
+                      <Play className="w-3 h-3 fill-[#9E7431] text-[#9E7431]" />
                       <span>Visite Vidéo</span>
                     </button>
 
@@ -1021,7 +1025,7 @@ export default function CatalogueFlipbookPage() {
                       rel="noreferrer"
                       className="px-3 py-1.5 rounded-full bg-black/70 text-white text-[10px] font-medium flex items-center gap-1.5 backdrop-blur-sm border border-white/30 hover:bg-black/90 transition-colors"
                     >
-                      <MapPin className="w-3 h-3 text-[#d8c29d]" />
+                      <MapPin className="w-3 h-3 text-[#C8A97E]" />
                       <span>Map Plateau</span>
                     </a>
                   </div>
@@ -1030,12 +1034,12 @@ export default function CatalogueFlipbookPage() {
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-[#7a736a]">Plateau Centre des Affaires • Réf: {appart.reference}</span>
+                      <span className="text-[11px] text-[#8C8275]">Plateau Centre des Affaires • Réf: {appart.reference}</span>
                       <a
                         href="https://www.google.com/maps/search/?api=1&query=Le+Plateau+Abidjan"
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center text-[10px] text-[#947346] hover:underline"
+                        className="inline-flex items-center text-[10px] text-[#9E7431] hover:underline"
                       >
                         <MapPin className="w-2.5 h-2.5 mr-0.5" />
                         <span>Plan d&apos;accès</span>
@@ -1048,33 +1052,33 @@ export default function CatalogueFlipbookPage() {
                   </h4>
                 </div>
 
-                <div className="p-3 bg-[#fbfaf7] rounded-xl border border-[#e8e4dc] space-y-1.5 text-xs">
-                  <span className="text-[10px] uppercase tracking-widest text-[#947346] font-bold block">
+                <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#EAE5DC] space-y-1.5 text-xs">
+                  <span className="text-[10px] uppercase tracking-widest text-[#9E7431] font-bold block">
                     Synthèse de Rendement Locatif
                   </span>
-                  <p className="text-[10px] text-[#4a453e] font-light leading-relaxed">
+                  <p className="text-[10px] text-[#524B43] font-light leading-relaxed">
                     Idéal pour siège social avec bail commercial sécurisé auprès de multinationales.
                   </p>
-                  <div className="flex justify-between items-center pt-1 border-t border-[#e8e4dc]">
-                    <span className="text-[#7a736a]">Rendement brut</span>
-                    <strong className="text-[#1d382b] font-semibold">11.4% / an</strong>
+                  <div className="flex justify-between items-center pt-1 border-t border-[#EAE5DC]">
+                    <span className="text-[#8C8275]">Rendement brut</span>
+                    <strong className="text-[#9E7431] font-semibold">11.4% / an</strong>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 text-[10px]">
                   <button
                     onClick={() => setActiveVideoProperty(appart)}
-                    className="inline-flex items-center gap-1 text-[#947346] font-semibold hover:underline"
+                    className="inline-flex items-center gap-1 text-[#9E7431] font-semibold hover:underline"
                   >
                     <Video className="w-3 h-3" />
                     <span>Vidéo des espaces</span>
                   </button>
-                  <span className="text-[#d0c9bd]">•</span>
+                  <span className="text-[#DDD7CC]">•</span>
                   <a
                     href={getWhatsAppLink('2250788421920', `Bonjour Cabinet Immobilier Abidjan, je souhaite visiter les Bureaux Plateau (Réf: ${appart.reference}).`)}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-[#1d382b] font-semibold hover:underline"
+                    className="inline-flex items-center gap-1 text-[#9E7431] font-semibold hover:underline"
                   >
                     <MessageCircle className="w-3 h-3" />
                     <span>Réserver visite</span>
@@ -1082,16 +1086,16 @@ export default function CatalogueFlipbookPage() {
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-[#e8e4dc] flex items-center justify-between">
+              <div className="pt-2.5 border-t border-[#EAE5DC] flex items-center justify-between">
                 <div>
-                  <span className="text-[9px] text-[#7a736a] block uppercase">Loyer Mensuel</span>
+                  <span className="text-[9px] text-[#8C8275] block uppercase">Loyer Mensuel</span>
                   <span className="text-sm font-semibold text-[#161412] font-display">
-                    {formatFCFA(appart.price)} <span className="text-[10px] text-[#7a736a] font-normal">/ mois</span>
+                    {formatFCFA(appart.price)} <span className="text-[10px] text-[#8C8275] font-normal">/ mois</span>
                   </span>
                 </div>
                 <Link
                   href={`/biens/${appart.id}`}
-                  className="px-3 py-1 rounded-full bg-[#161412] hover:bg-[#947346] text-white text-[11px] font-semibold transition-colors flex items-center gap-1"
+                  className="px-3 py-1 rounded-full bg-[#161412] hover:bg-[#9E7431] text-white text-[11px] font-semibold transition-colors flex items-center gap-1"
                 >
                   <span>Dossier Complet</span>
                   <ArrowUpRight className="w-3 h-3" />
@@ -1102,43 +1106,43 @@ export default function CatalogueFlipbookPage() {
             {/* ======================================================== */}
             {/* PAGE 8 : DOS DE COUVERTURE RIGIDE (HARD BACK COVER)     */}
             {/* ======================================================== */}
-            <div className="book-page dark:bg-[#161412] bg-[#FAF8F5] dark:text-white text-[#161412] p-8 sm:p-10 flex flex-col justify-between border-l dark:border-[#302a24] border-[#e8e4dc] shadow-2xl overflow-hidden" data-density="hard">
+            <div className="book-page bg-[#FAF8F5] text-[#161412] p-6 sm:p-7 flex flex-col justify-between border-l border-[#EAE5DC] shadow-2xl overflow-hidden" data-density="hard">
               <div className="space-y-4">
-                <div className="flex items-center justify-between border-b dark:border-[#302a24] border-[#e8e4dc] pb-3">
-                  <div className="w-8 h-8 rounded-full bg-[#947346] flex items-center justify-center font-display font-bold text-white text-xs">
+                <div className="flex items-center justify-between border-b border-[#EAE5DC] pb-3">
+                  <div className="w-8 h-8 rounded-full bg-[#9E7431] flex items-center justify-center font-display font-bold text-white text-xs">
                     A
                   </div>
-                  <span className="text-[10px] tracking-widest uppercase text-[#947346] font-semibold">
+                  <span className="text-[10px] tracking-widest uppercase text-[#9E7431] font-semibold">
                     Conciergerie Privée
                   </span>
                 </div>
 
-                <h3 className="text-2xl font-display font-medium dark:text-white text-[#161412] leading-tight">
+                <h3 className="text-xl sm:text-2xl font-display font-medium text-[#161412] leading-tight">
                   Un accompagnement d&apos;exception pour vos acquisitions à Abidjan.
                 </h3>
 
-                <p className="text-xs dark:text-[#a09a90] text-[#68625c] font-light leading-relaxed">
+                <p className="text-xs text-[#6E665B] font-light leading-relaxed">
                   Notre équipe de conseillers et juristes spécialisés se tient à votre entière disposition pour organiser vos visites privées et vos audits cadastraux.
                 </p>
 
-                <div className="p-4 rounded-xl dark:bg-[#221e1a] bg-[#f5f2eb] border dark:border-[#302a24] border-[#e8e4dc] space-y-2.5">
-                  <span className="text-[10px] uppercase tracking-wider text-[#947346] font-semibold block">
+                <div className="p-3.5 rounded-xl bg-white border border-[#EAE5DC] space-y-2.5 shadow-2xs">
+                  <span className="text-[10px] uppercase tracking-wider text-[#9E7431] font-semibold block">
                     Contactez Notre Conseillère IA & Concierge :
                   </span>
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-[#1d382b] flex items-center justify-center text-white font-bold text-xs">
+                    <div className="w-8 h-8 rounded-full bg-[#191715] flex items-center justify-center text-white font-bold text-xs">
                       A
                     </div>
                     <div>
                       <span className="font-semibold text-xs text-[#191715] block">Aya : Conseillère Immobilière 24/7</span>
-                      <span className="text-[10px] dark:text-[#a09a90] text-[#7a736a]">Disponible immédiatement sur WhatsApp</span>
+                      <span className="text-[10px] text-[#8C8275]">Disponible immédiatement sur WhatsApp</span>
                     </div>
                   </div>
                   <a
                     href={whatsappShareUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-full mt-1.5 py-2 rounded-xl bg-[#191715] hover:bg-[#9E7431] text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors shadow"
+                    className="w-full mt-1 py-2 rounded-xl bg-[#191715] hover:bg-[#9E7431] text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-xs"
                   >
                     <span>Lancer la conversation WhatsApp</span>
                     <ArrowUpRight className="w-3.5 h-3.5" />
@@ -1146,12 +1150,12 @@ export default function CatalogueFlipbookPage() {
                 </div>
 
                 {/* Liens rapides du dos de couverture */}
-                <div className="flex flex-wrap gap-2 pt-2">
+                <div className="flex flex-wrap gap-2 pt-1">
                   <a
                     href="https://www.google.com/maps/search/?api=1&query=Cocody+Ambassades+Abidjan"
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg dark:bg-[#2a241e] dark:hover:bg-[#383129] dark:text-[#d8c29d] bg-white hover:bg-[#f0ede6] text-[#947346] border dark:border-[#40382e] border-[#e8e4dc] text-[10px] transition-colors"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white hover:bg-[#FAF8F5] text-[#9E7431] border border-[#EAE5DC] text-[10px] transition-colors"
                   >
                     <MapPin className="w-3 h-3" />
                     <span>Nos bureaux Cocody Ambassades (GPS)</span>
@@ -1159,15 +1163,15 @@ export default function CatalogueFlipbookPage() {
 
                   <Link
                     href="/biens"
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg dark:bg-[#2a241e] dark:hover:bg-[#383129] dark:text-white bg-white hover:bg-[#f0ede6] text-[#161412] border dark:border-[#40382e] border-[#e8e4dc] text-[10px] transition-colors"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white hover:bg-[#FAF8F5] text-[#161412] border border-[#EAE5DC] text-[10px] transition-colors"
                   >
-                    <FileText className="w-3 h-3 text-[#947346]" />
+                    <FileText className="w-3 h-3 text-[#9E7431]" />
                     <span>Tous les mandats disponibles</span>
                   </Link>
                 </div>
               </div>
 
-              <div className="pt-3 border-t dark:border-[#302a24] border-[#e8e4dc] flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] dark:text-[#7a736a] text-[#8a8378]">
+              <div className="pt-2.5 border-t border-[#EAE5DC] flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] text-[#8C8275]">
                 <span>Cocody Ambassades • Abidjan, Côte d&apos;Ivoire</span>
                 <span>© 2026 Agence Immo</span>
               </div>
@@ -1177,7 +1181,7 @@ export default function CatalogueFlipbookPage() {
         </div>
 
         {/* CAROUSEL DE MINIATURES DES PAGES EN BAS */}
-        <div className="dark:bg-[#121110] bg-white rounded-2xl dark:border-white/10 border-black/10 p-4 dark:shadow-[0_15px_40px_rgba(0,0,0,0.8)] shadow-warm-sm flex items-center justify-center gap-3 overflow-x-auto">
+        <div className="bg-white rounded-2xl border border-[#EAE5DC] p-3 shadow-warm-xs flex items-center justify-center gap-2.5 overflow-x-auto">
           {[
             { page: 0, label: 'Couverture', desc: 'p. 1' },
             { page: 1, label: 'Éditorial', desc: 'p. 2' },
@@ -1193,8 +1197,8 @@ export default function CatalogueFlipbookPage() {
               onClick={() => jumpToPage(item.page)}
               className={`px-3 py-1.5 rounded-xl text-left transition-all shrink-0 cursor-pointer ${
                 currentPage === item.page
-                  ? 'dark:bg-white dark:text-[#0A0908] bg-[#161412] text-white shadow-sm font-semibold'
-                  : 'dark:bg-white/5 dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white dark:border-white/10 bg-[#f5f2eb] hover:bg-[#eae5da] text-[#161412] border border-[#e8e4dc]'
+                  ? 'bg-[#161412] text-white shadow-xs font-semibold'
+                  : 'bg-[#FAF8F5] hover:bg-[#F2ECE1] text-[#161412] border border-[#EAE5DC]'
               }`}
             >
               <span className="text-[9px] opacity-70 block font-mono">{item.desc}</span>

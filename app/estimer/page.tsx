@@ -58,14 +58,14 @@ export default function EstimerPage() {
         </div>
 
         {submitted ? (
-          <div className="bg-[#f0f5f2] rounded-3xl border border-[#d2e3d8] p-8 sm:p-12 text-center space-y-6 shadow-warm-md">
-            <div className="w-14 h-14 rounded-full bg-white border border-[#d2e3d8] flex items-center justify-center text-[#1d382b] mx-auto">
+          <div className="bg-[#FAF8F5] rounded-3xl border border-[#EAE5DC] p-8 sm:p-12 text-center space-y-6 shadow-warm-md">
+            <div className="w-14 h-14 rounded-full bg-white border border-[#EAE5DC] flex items-center justify-center text-[#9E7431] mx-auto shadow-xs">
               <CheckCircle2 className="w-7 h-7" />
             </div>
             <h2 className="text-2xl sm:text-3xl font-display font-medium text-[#161412]">
               Demande de valorisation transmise
             </h2>
-            <p className="text-[#2a503e] text-sm max-w-md mx-auto font-light leading-relaxed">
+            <p className="text-[#6E665B] text-sm max-w-md mx-auto font-light leading-relaxed">
               Merci M./Mme <strong className="font-semibold text-[#161412]">{formData.ownerName}</strong>. Notre directeur des transactions vous contactera au <strong className="font-semibold text-[#161412]">{formData.ownerPhone}</strong> sous 24h ouvrées.
             </p>
             <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
@@ -246,8 +246,8 @@ export default function EstimerPage() {
             </div>
 
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-2 text-xs text-[#1d382b]">
-                <ShieldCheck className="w-4 h-4 text-[#1d382b]" />
+              <div className="flex items-center gap-2 text-xs text-[#161412]">
+                <ShieldCheck className="w-4 h-4 text-[#9E7431]" />
                 <span>Engagement de confidentialité et discrétion absolue</span>
               </div>
 
